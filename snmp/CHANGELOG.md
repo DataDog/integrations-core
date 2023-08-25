@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* dell-os10 : Comment unsupported tags ([#15694](https://github.com/DataDog/integrations-core/pull/15694))
+
 ## 6.2.0 / 2023-08-18
 
 ***Added***:
