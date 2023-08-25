@@ -110,8 +110,8 @@ def test_e2e_profile_barracuda_cloudgen(dd_agent_check):
         aggregator.assert_metric('snmp.phion.vpnTunnels', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['bgp_neighbor_address:Jaded driving oxen oxen kept Jaded kept'],
-        ['bgp_neighbor_address:zombies driving quaintly but forward kept zombies'],
+        ['bgp_neighbor_address:Jaded driving oxen oxen kept Jaded kept', 'bgp_neighbor_state:26'],
+        ['bgp_neighbor_address:zombies driving quaintly but forward kept zombies','bgp_neighbor_state:0'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.phion.bgpNeighbors', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
