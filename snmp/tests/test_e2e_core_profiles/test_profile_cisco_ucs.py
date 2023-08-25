@@ -425,7 +425,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
             'cucs_storage_flex_flash_card_presence:equipped_slave',
             'cucs_storage_flex_flash_card_revision:forward kept acted acted Jaded oxen oxen forward',
             'cucs_storage_flex_flash_card_serial:their their their acted but but',
-            'cucs_storage_flex_flash_card_type:their',
+            'cucs_storage_flex_flash_card_card_type:their',
         ],
         [
             'cucs_storage_flex_flash_card_card_health:ff_phy_health_na',
@@ -439,7 +439,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
             'cucs_storage_flex_flash_card_presence:mismatch_slave',
             'cucs_storage_flex_flash_card_revision:driving Jaded zombies their quaintly their their',
             'cucs_storage_flex_flash_card_serial:Jaded driving oxen quaintly zombies but',
-            'cucs_storage_flex_flash_card_type:oxen zombies acted zombies kept',
+            'cucs_storage_flex_flash_card_card_type:oxen zombies acted zombies kept',
         ],
         [
             'cucs_storage_flex_flash_card_card_health:ff_phy_health_na',
@@ -453,7 +453,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
             'cucs_storage_flex_flash_card_presence:equipped_identity_unestablishable',
             'cucs_storage_flex_flash_card_revision:acted their zombies quaintly but',
             'cucs_storage_flex_flash_card_serial:Jaded zombies Jaded zombies but their Jaded quaintly',
-            'cucs_storage_flex_flash_card_type:driving quaintly forward zombies but',
+            'cucs_storage_flex_flash_card_card_type:driving quaintly forward zombies but',
         ],
         [
             'cucs_storage_flex_flash_card_card_health:ff_phy_health_ok',
@@ -467,7 +467,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
             'cucs_storage_flex_flash_card_presence:equipped_not_primary',
             'cucs_storage_flex_flash_card_revision:quaintly Jaded their forward quaintly but oxen',
             'cucs_storage_flex_flash_card_serial:their',
-            'cucs_storage_flex_flash_card_type:oxen their',
+            'cucs_storage_flex_flash_card_card_type:oxen their',
         ],
         [
             'cucs_storage_flex_flash_card_card_health:ff_phy_health_ok',
@@ -481,7 +481,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
             'cucs_storage_flex_flash_card_presence:missing_slave',
             'cucs_storage_flex_flash_card_revision:oxen their acted zombies acted oxen their',
             'cucs_storage_flex_flash_card_serial:quaintly',
-            'cucs_storage_flex_flash_card_type:forward forward forward their but',
+            'cucs_storage_flex_flash_card_card_type:forward forward forward their but',
         ],
         [
             'cucs_storage_flex_flash_card_card_health:ff_phy_raid_sync_in_progress',
@@ -495,7 +495,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
             'cucs_storage_flex_flash_card_presence:empty',
             'cucs_storage_flex_flash_card_revision:Jaded zombies but but but their acted quaintly',
             'cucs_storage_flex_flash_card_serial:acted',
-            'cucs_storage_flex_flash_card_type:oxen zombies',
+            'cucs_storage_flex_flash_card_card_type:oxen zombies',
         ],
         [
             'cucs_storage_flex_flash_card_card_health:ff_phy_unhealthy_other',
@@ -509,7 +509,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
             'cucs_storage_flex_flash_card_presence:equipped_identity_unestablishable',
             'cucs_storage_flex_flash_card_revision:quaintly quaintly kept forward kept their',
             'cucs_storage_flex_flash_card_serial:oxen',
-            'cucs_storage_flex_flash_card_type:driving but acted driving acted driving',
+            'cucs_storage_flex_flash_card_card_type:driving but acted driving acted driving',
         ],
         [
             'cucs_storage_flex_flash_card_card_health:ff_phy_unhealthy_raid',
@@ -523,7 +523,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
             'cucs_storage_flex_flash_card_presence:mismatch',
             'cucs_storage_flex_flash_card_revision:quaintly but Jaded their zombies but',
             'cucs_storage_flex_flash_card_serial:their their kept forward acted quaintly',
-            'cucs_storage_flex_flash_card_type:their acted quaintly quaintly oxen quaintly but kept',
+            'cucs_storage_flex_flash_card_card_type:their acted quaintly quaintly oxen quaintly but kept',
         ],
         [
             'cucs_storage_flex_flash_card_card_health:ff_phy_unhealthy_raid',
@@ -537,7 +537,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
             'cucs_storage_flex_flash_card_presence:mismatch',
             'cucs_storage_flex_flash_card_revision:Jaded',
             'cucs_storage_flex_flash_card_serial:forward their their driving zombies driving forward',
-            'cucs_storage_flex_flash_card_type:quaintly',
+            'cucs_storage_flex_flash_card_card_type:quaintly',
         ],
         [
             'cucs_storage_flex_flash_card_card_health:ff_phy_unhealthy_raid',
@@ -551,7 +551,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
             'cucs_storage_flex_flash_card_presence:equipped',
             'cucs_storage_flex_flash_card_revision:acted acted but zombies Jaded quaintly',
             'cucs_storage_flex_flash_card_serial:acted driving',
-            'cucs_storage_flex_flash_card_type:zombies zombies',
+            'cucs_storage_flex_flash_card_card_type:zombies zombies',
         ],
     ]
     for tag_row in tag_rows:

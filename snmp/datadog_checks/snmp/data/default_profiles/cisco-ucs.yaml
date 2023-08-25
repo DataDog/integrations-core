@@ -1224,9 +1224,9 @@ metrics:
           2: ff_phy_drive_secondary_act
           3: ff_phy_drive_secondary_unhealthy
       - column:
-          name: cucsStorageFlexFlashCardType
+          name: cucsStorageFlexFlashCardCardType
           OID: 1.3.6.1.4.1.9.9.719.1.45.34.1.7
-        tag: cucs_storage_flex_flash_card_type
+        tag: cucs_storage_flex_flash_card_card_type
       - column:
           name: cucsStorageFlexFlashCardConnectionProtocol
           OID: 1.3.6.1.4.1.9.9.719.1.45.34.1.8

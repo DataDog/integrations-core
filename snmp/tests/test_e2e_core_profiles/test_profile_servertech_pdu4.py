@@ -42,6 +42,7 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
             'servertech_sentry4_st4_unit_name:acted forward Jaded kept',
             'servertech_sentry4_st4_unit_product_mfr_date:driving',
             'servertech_sentry4_st4_unit_product_sn:zombies oxen their',
+            'servertech_sentry4_st4_unit_status:low_warning',
             'servertech_sentry4_st4_unit_type:link',
         ],
         [

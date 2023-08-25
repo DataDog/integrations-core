@@ -180,7 +180,7 @@ metrics:
           16: dns
           25: l2vpn
       - column:
-          name: netscaler.sdx.nsIPAddress
+          name: netscaler.sdx.nsIpAddress
           OID: 1.3.6.1.4.1.5951.6.3.2.1.2
           format: ip_address
         tag: netscaler_sdx_ns_ip_address
