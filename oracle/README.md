@@ -184,10 +184,10 @@ instances:
     #
     service_name: "<SERVICE_NAME>"
 
-    ## @param user - string - required
+    ## @param username - string - required
     ## The username for the user account.
     #
-    user: <USER>
+    username: <USER>
 
     ## @param password - string - required
     ## The password for the user account.
@@ -221,10 +221,10 @@ instances:
         #
         service_name: "<SERVICE_NAME>"
     
-        ## @param user - string - required
+        ## @param username - string - required
         ## The username for the user account.
         #
-        user: <USER>
+        username: <USER>
     
         ## @param password - string - required
         ## The password for the user account.
@@ -357,7 +357,7 @@ Create a query configuration to help identify database locks:
   instances:
       - server: localhost:1521
         service_name: orcl11g.us.oracle.com
-        user: datadog
+        username: datadog
         password: xxxxxxx
         jdbc_driver_path: /u01/app/oracle/product/11.2/dbhome_1/jdbc/lib/ojdbc6.jar
         tags:

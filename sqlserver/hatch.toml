@@ -32,7 +32,7 @@ COMPOSE_FOLDER = "compose"
 PIP_EXTRA_INDEX_URL = "https://datadoghq.dev/ci-wheels/bin"
 
 [envs.default.overrides]
-platform.windows.e2e-env = { value = false }
+env.GITHUB_ACTIONS.e2e-env = { value = false, if = ["true"], platform = ["windows"] }
 platform.windows.env-vars = [
   "COMPOSE_FOLDER=compose-windows",
   # we need SETUPTOOLS_USE_DISTUTILS=stdlib for setuptools versions 60+ in order for adodbapi to be able to install

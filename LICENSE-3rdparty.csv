@@ -8,6 +8,7 @@ PyYAML,PyPI,MIT,Copyright (c) 2017-2021 Ingy döt Net
 Pyro4,PyPI,MIT,Copyright (c) 2016 Irmen de Jong
 aerospike,PyPI,Apache-2.0,"Copyright Aerospike, Inc."
 aws-requests-auth,PyPI,BSD-3-Clause,Copyright (c) David Muller.
+azure-identity,PyPI,MIT,Copyright (c) Microsoft Corporation.
 beautifulsoup4,PyPI,MIT,Copyright (c) 2004-2017 Leonard Richardson
 beautifulsoup4,PyPI,MIT,Copyright (c) Leonard Richardson
 binary,PyPI,Apache-2.0,Copyright 2018 Ofek Lev
@@ -37,11 +38,11 @@ flup-py3,Vendor,BSD-3-Clause,"Copyright (c) 2005, 2006 Allan Saddi <allan@saddi.
 foundationdb,PyPI,Apache-2.0,Copyright 2017 FoundationDB
 futures,PyPI,PSF,Copyright (c) 2015 Brian Quinlan
 gearman,PyPI,Apache-2.0,Copyright 2010 Yelp
-immutables,PyPI,Apache-2.0,Copyright 2018-present Contributors to the immutables project.
 importlib-metadata,PyPI,Apache-2.0,"Copyright 2017-2019 Jason R. Coombs, Barry Warsaw"
 in-toto,PyPI,Apache-2.0,Copyright 2018 New York University
 ipaddress,PyPI,PSF,Copyright (c) 2013 Philipp Hagemeister
 jellyfish,PyPI,MIT,Copyright (c) 2015 James Turk
+kentik-snmp-profiles,"https://github.com/kentik/snmp-profiles",Apache-2.0,
 kubernetes,PyPI,Apache-2.0,Copyright 2014 The Kubernetes Authors.
 ldap3,PyPI,LGPL-3.0-only,Copyright 2013 - 2020 Giovanni Cannata
 lxml,PyPI,BSD-3-Clause,Copyright (c) 2004 Infrae. All rights reserved.
@@ -62,12 +63,14 @@ prometheus-client,PyPI,Apache-2.0,Copyright 2015 The Prometheus Authors
 protobuf,PyPI,BSD-3-Clause,Copyright 2008 Google Inc.
 protobuf,PyPI,BSD-3-Clause,Copyright 2008 Google Inc.  All rights reserved.
 psutil,PyPI,BSD-3-Clause,"Copyright (c) 2009, Jay Loden, Dave Daeschler, Giampaolo Rodola'"
+psycopg,PyPI,LGPL-3.0-only,Copyright (C) 2020 The Psycopg Team
+psycopg-pool,PyPI,LGPL-3.0-only,Copyright (C) 2020 The Psycopg Team
 psycopg2-binary,PyPI,BSD-3-Clause,Copyright 2013 Federico Di Gregorio
 psycopg2-binary,PyPI,LGPL-3.0-only,Copyright (C) 2013 Federico Di Gregorio
 pyasn1,PyPI,BSD-3-Clause,"Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>"
 pycryptodomex,PyPI,BSD-2-Clause,Copyright 2014 Helder Eijs
 pycryptodomex,PyPI,Unlicense,Helder Eijs. pycryptodomex is dedicated to the public domain under Unlicense.
-pydantic,PyPI,MIT,"Copyright (c) 2017, 2018, 2019, 2020, 2021 Samuel Colvin and other contributors"
+pydantic,PyPI,MIT,Copyright (c) 2017 to present Pydantic Services Inc. and individual contributors.
 pymongo,PyPI,Apache-2.0,Copyright 2009 The MongoDB Python Team
 pymqi,PyPI,PSF,Copyright (c) Zato Source s.r.o.
 pymysql,PyPI,MIT,"Copyright (c) 2010, 2013 PyMySQL contributors"
@@ -82,7 +85,7 @@ python-dateutil,PyPI,BSD-3-Clause,Copyright 2017- Paul Ganssle <paul@ganssle.io>
 python3-gearman,PyPI,Apache-2.0,
 pyvmomi,PyPI,Apache-2.0,"Copyright (c) 2005-2021 VMware, Inc. All Rights Reserved."
 pywin32,PyPI,PSF,Copyright 2002-2003 by Blackdog Software Pty Ltd.
-redis,PyPI,MIT,"Copyright (c) 2022, Redis, inc."
+redis,PyPI,MIT,"Copyright (c) 2022-2023, Redis, inc."
 redis,PyPI,MIT,Copyright (c) 2012 Andy McCurdy
 requests,PyPI,Apache-2.0,Copyright 2019 Kenneth Reitz
 requests-kerberos,PyPI,ISC,Copyright (c) 2012 Kenneth Reitz
@@ -94,7 +97,6 @@ requests-unixsocket,PyPI,Apache-2.0,Copyright 2014 Marc Abramowitz
 rethinkdb,PyPI,Apache-2.0,Copyright 2018 RethinkDB.
 scandir,PyPI,BSD-3-Clause,"Copyright (c) 2012, Ben Hoyt"
 securesystemslib,PyPI,MIT,Copyright (c) 2016 Santiago Torres
-selectors34,PyPI,PSF,Copyright (c) 2015 Berker Peksag
 semver,PyPI,BSD-3-Clause,"Copyright (c) 2013, Konstantine Rybnikov"
 serpent,PyPI,MIT,Copyright (c) by Irmen de Jong
 service-identity,PyPI,MIT,Copyright (c) 2014 Hynek Schlawack
@@ -108,4 +110,4 @@ typing,PyPI,PSF,"Copyright (c) 1991 - 1995, Stichting Mathematisch Centrum Amste
 uptime,PyPI,BSD-2-Clause,"Copyright (c) 2012, Koen Crolla"
 vertica-python,PyPI,Apache-2.0,"Copyright 2013 Justin Berka, Alex Kim, Siting Ren"
 win-inet-pton,PyPI,Unlicense,Ryan Vennell. win-inet-pton is dedicated to the public domain under Unlicense.
-wrapt,PyPI,BSD-3-Clause,"Copyright (c) 2013-2022, Graham Dumpleton"
+wrapt,PyPI,BSD-3-Clause,"Copyright (c) 2013-2023, Graham Dumpleton"

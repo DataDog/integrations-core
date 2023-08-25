@@ -1,8 +1,6 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools>=66; python_version > '3.0'",
-    "setuptools; python_version < '3.0'",
 ]
 build-backend = "hatchling.build"
 
@@ -30,20 +28,21 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=32.1.0",
+    "datadog-checks-base>=32.6.0",
 ]
 dynamic = [
     "version",
 ]
-
 license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "boto3==1.26.138; python_version > '3.0'",
-    "cachetools==5.3.0; python_version > '3.0'",
-    "psycopg2-binary==2.8.6; sys_platform != 'darwin' or platform_machine != 'arm64'",
-    "semver==2.13.0",
+    "boto3==1.28.27; python_version > '3.0'",
+    "azure-identity==1.14.0; python_version > '3.0'",
+    "cachetools==5.3.1; python_version > '3.0'",
+    "psycopg[binary]==3.1.10; python_version > '3.0'",
+    "psycopg-pool==3.1.7; python_version > '3.0'",
+    "semver==3.0.1; python_version > '3.0'",
 ]
 
 [project.urls]

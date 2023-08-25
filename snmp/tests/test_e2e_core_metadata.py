@@ -558,19 +558,19 @@ def test_e2e_core_metadata_aruba_switch(dd_agent_check):
         ],
         'ip_address': device_ip,
         'model': 'A7210',
-        'name': 'aruba-device-name',
+        'name': 'aruba-switch.device.name',
         'os_name': 'ArubaOS',
         'os_version': '8.6.0.4',
         'product_name': 'Aruba7210',
         'profile': 'aruba-switch',
         'serial_number': 'CV0009200',
         'status': 1,
-        'sys_object_id': '1.3.6.1.4.1.14823.1.1.32',
+        'sys_object_id': '1.3.6.1.4.1.14823.1.1.36',
         'tags': [
             'device_namespace:default',
             'device_vendor:aruba',
             'snmp_device:' + device_ip,
-            'snmp_host:aruba-device-name',
+            'snmp_host:aruba-switch.device.name',
             'snmp_profile:aruba-switch',
         ],
         'vendor': 'aruba',
@@ -750,13 +750,56 @@ def test_e2e_core_metadata_netapp(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
 
+def test_e2e_core_metadata_checkpoint(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'checkpoint',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        'description': 'Linux host1 3.10.0-957.21.3cpx86_64 #1 SMP Tue Jan 28 17:26:12 IST 2020 x86_64',
+        'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'model': 'Check Point 3200',
+        'os_name': 'Gaia',
+        'os_version': '3.10.0',
+        'product_name': 'SVN Foundation',
+        'profile': 'checkpoint',
+        'serial_number': '1711BA4008',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.2620.1.1',
+        'tags': [
+            'device_namespace:default',
+            'device_vendor:checkpoint',
+            'snmp_device:' + device_ip,
+            'snmp_profile:checkpoint',
+        ],
+        'vendor': 'checkpoint',
+        'version': 'R80.10',
+    }
+    assert_device_metadata(aggregator, device)
+
+
 def test_e2e_core_metadata_checkpoint_firewall(dd_agent_check):
     config = common.generate_container_instance_config([])
     instance = config['instances'][0]
     instance.update(
         {
-            'community_string': 'checkpoint-firewall',
+            'community_string': 'checkpoint',
             'loader': 'core',
+            'profile': 'checkpoint-firewall',
         }
     )
 
@@ -814,6 +857,7 @@ def test_e2e_core_metadata_fortinet_fortigate(dd_agent_check):
         ],
         'ip_address': device_ip,
         'model': 'FGT_501E',
+        'name': 'fortinet-fortigate.device.name',
         'os_name': 'FortiOS',
         'os_version': '5.6.4',
         'product_name': 'FortiGate-501E',
@@ -825,6 +869,7 @@ def test_e2e_core_metadata_fortinet_fortigate(dd_agent_check):
             'device_namespace:default',
             'device_vendor:fortinet',
             'snmp_device:' + device_ip,
+            'snmp_host:fortinet-fortigate.device.name',
             'snmp_profile:fortinet-fortigate',
         ],
         'vendor': 'fortinet',

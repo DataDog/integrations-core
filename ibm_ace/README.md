@@ -12,6 +12,10 @@ Follow the instructions below to install and configure this check for an Agent r
 
 An [IBM MQ][10] server is required for consuming metric messages from IBM ACE.
 
+<div class="alert alert-warning">
+For Linux, make sure to set the LD_LIBRARY_PATH environment variable as described in the <a href="https://docs.datadoghq.com/integrations/ibm_mq/">IBM MQ setup</a> before continuing.
+</div>
+
 ### IBM ACE
 
 1. Ensure at least version 12.0.2.0 is installed.
@@ -91,13 +95,32 @@ The IBM ACE integration does not include any events.
 
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
+### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+2. To start collecting your IBM ACE logs, add this configuration block to your `ibm_ace.d/conf.yaml` file:
+
+    ```yaml
+    logs:
+      - type: file
+        path: /home/aceuser/ace-server/log/integration_server.txt
+        source: ibm_ace
+    ```
+
+    Change the `path` parameter value based on your environment. See the [sample `ibm_ace.d/conf.yaml` file][4] for all available configuration options.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][9].
 
 
 [1]: https://www.ibm.com/docs/en/app-connect/12.0?topic=overview-app-connect-enterprise-introduction
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/ibm_ace/datadog_checks/ibm_ace/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

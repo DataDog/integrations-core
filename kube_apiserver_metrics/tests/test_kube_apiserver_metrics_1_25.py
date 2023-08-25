@@ -41,6 +41,7 @@ class TestKubeAPIServerMetrics:
     CHECK_NAME = 'kube_apiserver_metrics'
     NAMESPACE = 'kube_apiserver'
     METRICS = [
+        NAMESPACE + '.longrunning_gauge',
         NAMESPACE + '.current_inflight_requests',
         NAMESPACE + '.audit_event',
         NAMESPACE + '.go_threads',
