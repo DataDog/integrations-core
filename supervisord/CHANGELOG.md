@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 2.5.2 / 2023-08-24
+
 ***Fixed***:
 
 * Update the description of the `status_mapping_override` option ([#15631](https://github.com/DataDog/integrations-core/pull/15631))

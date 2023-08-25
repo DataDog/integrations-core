@@ -32,12 +32,17 @@ jobs:
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
 
-    - name: Fetch PR data
+    - name: Fetch diff
       env:
-        GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-      run: |-
-        diff_url=$(cat "$GITHUB_EVENT_PATH" | jq -r '.pull_request.diff_url')
-        curl --header "Authorization: Bearer $GITHUB_TOKEN" -sLo /tmp/diff "$diff_url"
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      # https://github.com/cli/cli/blob/v2.33.0/pkg/cmd/pr/diff/diff.go#L167
+      # https://docs.github.com/en/rest/overview/media-types?apiVersion=2022-11-28#diff-media-type-for-commits-commit-comparison-and-pull-requests
+      run: >-
+        curl
+        --header "Authorization: Bearer $GITHUB_TOKEN"
+        --header "Accept: application/vnd.github.diff"
+        -Lo /tmp/diff
+        "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}"
 
     - name: Fetch script
       # Uncomment for testing purposes
@@ -46,6 +51,9 @@ jobs:
         mkdir -p $(dirname ${{ env.CHECK_SCRIPT }})
         curl -sLo ${{ env.CHECK_SCRIPT }} https://raw.githubusercontent.com/DataDog/integrations-core/master/${{ env.CHECK_SCRIPT }}
 
-    - name: Check
-      run: |-
-        python ${{ env.CHECK_SCRIPT }} changelog --diff-file /tmp/diff --pr-file "$GITHUB_EVENT_PATH"
+    - name: Check changelog
+      run: >-
+        python ${{ env.CHECK_SCRIPT }} changelog
+        --diff-file /tmp/diff
+        --pr-file "$GITHUB_EVENT_PATH"
+        ${{ github.event.pull_request.base.repo.private && '--private' || '' }}
