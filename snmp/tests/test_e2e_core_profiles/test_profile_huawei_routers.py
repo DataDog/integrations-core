@@ -187,10 +187,12 @@ def test_e2e_profile_huawei_routers(dd_agent_check):
 
     tag_rows = [
         [
+            'huawei_hw_nat_addr_pool_ref_type:easy_ip',
             'huawei_hw_nat_addr_pool_end_addr:190.109.146.4',
             'huawei_hw_nat_addr_pool_start_addr:95.201.113.165',
         ],
         [
+            'huawei_hw_nat_addr_pool_ref_type:pat',
             'huawei_hw_nat_addr_pool_end_addr:174.219.250.193',
             'huawei_hw_nat_addr_pool_start_addr:163.37.155.112',
         ],
