@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.3.0 / 2023-08-25
+
 ***Security***:
 
 * Update security dependencies ([#15667](https://github.com/DataDog/integrations-core/pull/15667))
