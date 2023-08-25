@@ -31,7 +31,7 @@ def test_e2e_profile_zyxel_switch(dd_agent_check):
     ] + [
         'zyxel_sys_product_model:but Jaded acted but acted Jaded zombies',
         'zyxel_sys_product_serial_number:oxen quaintly Jaded their oxen',
-        'zyxel_sys_sw_platform:2',
+        'zyxel_sys_sw_platform:zynos',
         'zyxel_sys_sw_version_string:Jaded Jaded quaintly acted',
     ]
 
