@@ -374,6 +374,29 @@ def pytest_addoption(parser):
         )
 
 
+def py2_check_item_type(item, ttype):
+    if item.fspath is None:
+        return False
+
+    while item is not None:
+        if ttype.filepath_match in item.fspath:
+            return True
+        item = item.parent
+    return False
+
+
+def py3_check_item_type(item, ttype):
+    return item.path is not None and (
+        ttype.filepath_match in item.path.name or ttype.filepath_match in item.path.parent.parts
+    )
+
+
+if PY2:
+    item_is_of_this_type = py2_check_item_type
+else:
+    item_is_of_this_type = py3_check_item_type
+
+
 def pytest_collection_modifyitems(config, items):
     # at test collection time, this function gets called by pytest, see:
     # https://docs.pytest.org/en/latest/example/simple.html#control-skipping-of-tests-according-to-command-line-option
@@ -395,7 +418,5 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(skip_latest_metrics)
 
         for ttype in TEST_TYPES:
-            if item.path is not None and (
-                ttype.filepath_match in item.path.name or ttype.filepath_match in item.path.parent.parts
-            ):
+            if item_is_of_this_type(item, ttype):
                 item.add_marker(getattr(pytest.mark, ttype.name))
