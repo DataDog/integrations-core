@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Support private repositories for changelog errors ([#15685](https://github.com/DataDog/integrations-core/pull/15685))
+
 ## 4.0.0 / 2023-08-18
 
 ***Added***:

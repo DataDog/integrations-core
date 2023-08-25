@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 2.5.2 / 2023-08-24
+
+***Fixed***:
+
+* Update the description of the `status_mapping_override` option ([#15631](https://github.com/DataDog/integrations-core/pull/15631))
+* Stop raising `TypeError`s when `status_mapping_override` contains unknown Datadog statuses ([#15632](https://github.com/DataDog/integrations-core/pull/15632))
+
 ## 2.5.1 / 2023-08-18
 
 ***Fixed***:

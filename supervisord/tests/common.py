@@ -373,4 +373,21 @@ TEST_CASES = [
             ]
         },
     },
+    # Unknown ddstatus in the override, so we do not get any metrics but the server is up.
+    {
+        'instances': [
+            {'name': 'server0', 'host': 'localhost', 'port': 9001, 'status_mapping_override': {'STOPPED': 'unknown'}}
+        ],
+        'expected_metrics': {'server0': []},
+        'expected_service_checks': {
+            'server0': [
+                {'status': ServiceCheck.OK, 'tags': ['supervisord_server:server0'], 'check': 'supervisord.can_connect'},
+                {
+                    'status': ServiceCheck.OK,
+                    'tags': ['supervisord_server:server0', 'supervisord_process:mysql'],
+                    'check': 'supervisord.process.status',
+                },
+            ]
+        },
+    },
 ]
