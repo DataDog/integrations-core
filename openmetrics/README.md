@@ -64,7 +64,7 @@ Datadog recommends that you use specific metric names or partial metric name mat
 
 ### Missing untyped metrics
 
-By default, the integration will skip metrics that come without a type on a Prometheus exposition. If you want to collect untyped metrics, you must explicitly specify their type in the `metrics` mapping, for example:
+By default, the integration skips metrics that come without a type on a Prometheus exposition. If you want to collect untyped metrics, you must explicitly specify their type in the `metrics` mapping, for example:
 
 ```yaml
   metrics:
@@ -72,7 +72,7 @@ By default, the integration will skip metrics that come without a type on a Prom
         "type": "gauge"
 ```
 
-Remember that metric names can be specified as regular expressions, making it possible to easily specify the type for a set of metrics without listing all of them individually.
+Remember that metric names can be specified as regular expressions, making it possible to specify the type for a set of metrics without listing all of them individually.
 
 ### Errors parsing the OpenMetrics payload with Agent 7.46 and above
 
