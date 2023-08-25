@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Tag tlUpsOutputCircuitTable in tripplite-ups.yaml by index to avoid metrics collision ([#15692](https://github.com/DataDog/integrations-core/pull/15692))
+
 ## 6.2.0 / 2023-08-18
 
 ***Added***:
