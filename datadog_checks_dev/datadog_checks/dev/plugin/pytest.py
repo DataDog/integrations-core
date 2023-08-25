@@ -375,14 +375,7 @@ def pytest_addoption(parser):
 
 
 def py2_check_item_type(item, ttype):
-    if item.fspath is None:
-        return False
-
-    while item is not None:
-        if ttype.filepath_match in item.fspath:
-            return True
-        item = item.parent
-    return False
+    return item.fspath is not None and ttype.filepath_match in str(item.fspath)
 
 
 def py3_check_item_type(item, ttype):
