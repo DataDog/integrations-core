@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add scheduler_goroutines metric to kube_scheduler check ([#15697](https://github.com/DataDog/integrations-core/pull/15697))
+
 ## 4.6.1 / 2023-08-18
 
 ***Fixed***:
