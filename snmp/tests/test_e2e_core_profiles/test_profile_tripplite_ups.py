@@ -86,9 +86,9 @@ def test_e2e_profile_tripplite_ups(dd_agent_check):
         [
             'tl_ups_outlet_group_desc:but their forward zombies Jaded kept their driving zombies',
             'tl_ups_outlet_group_name:quaintly but Jaded driving oxen zombies their',
-            'ups_outlet_group_status_group_state:ups_outlet_group_status_off',
+            'tl_ups_outlet_group_state:on',
         ],
-        ['tl_ups_outlet_group_desc:oxen Jaded oxen their kept', 'tl_ups_outlet_group_name:oxen oxen kept'],
+        ['tl_ups_outlet_group_desc:oxen Jaded oxen their kept', 'tl_ups_outlet_group_name:oxen oxen kept', 'tl_ups_outlet_group_state:unknown',],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.tlUpsOutlet', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
