@@ -4,7 +4,7 @@
 
 ***Fixed***:
 
-* Fix metrics mappings ([#15668](https://github.com/DataDog/integrations-core/pull/15668))
+* Fix SNMP profiles metric tags mappings using MIBs ([#15668](https://github.com/DataDog/integrations-core/pull/15668))
 
 ## 6.2.0 / 2023-08-18
 
