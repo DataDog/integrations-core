@@ -44,10 +44,15 @@ def test_tls_config_legacy(legacy_config, kafka_client_config, value, check):
         pytest.param(False, "false", False, id='tls_validate_hostname false as string'),
     ],
 )
-def test_tls_validate_hostname_conflict(ssl_check_hostname_value, tls_validate_hostname_value, expected_value, check, kafka_instance):
-    kafka_instance.update({"ssl_check_hostname": ssl_check_hostname_value, "tls_validate_hostname": tls_validate_hostname_value})
+def test_tls_validate_hostname_conflict(
+    ssl_check_hostname_value, tls_validate_hostname_value, expected_value, check, kafka_instance
+):
+    kafka_instance.update(
+        {"ssl_check_hostname": ssl_check_hostname_value, "tls_validate_hostname": tls_validate_hostname_value}
+    )
     kafka_consumer_check = check(kafka_instance)
-    assert getattr(kafka_consumer_check.config, "_tls_validate_hostname") == expected_value
+    assert kafka_consumer_check.config._tls_validate_hostname == expected_value
+
 
 
 @pytest.mark.parametrize(
