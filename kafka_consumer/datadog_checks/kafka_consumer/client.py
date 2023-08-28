@@ -232,7 +232,8 @@ class KafkaClient:
                     self.log.debug("Discovered consumer group: %s", valid_consumer_group.group_id)
 
                 consumer_groups.extend(
-                    valid_consumer_group.group_id for valid_consumer_group in list_consumer_groups_result.valid
+                    valid_consumer_group.group_id
+                    for valid_consumer_group in list_consumer_groups_result.valid
                     if valid_consumer_group.group_id != ""
                 )
             except Exception as e:
