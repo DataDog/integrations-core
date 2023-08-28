@@ -28,11 +28,26 @@ pytestmark = [pytest.mark.unit]
         ),
     ],
 )
-def test_tls_config_legacy(legacy_config, kafka_client_config, value, check, kafka_instance):
-    kafka_instance.update({legacy_config: value})
-    kafka_consumer_check = check(kafka_instance)
+def test_tls_config_legacy(legacy_config, kafka_client_config, value, check):
+    kafka_consumer_check = check({legacy_config: value})
     assert getattr(kafka_consumer_check.config, kafka_client_config) == value
 
+
+@pytest.mark.parametrize(
+    'ssl_check_hostname_value, tls_validate_hostname_value, expected_value',
+    [
+        pytest.param(True, True, True, id='Both true'),
+        pytest.param(False, False, False, id='Both false'),
+        pytest.param(False, True, True, id='only tls_validate_hostname_value true'),
+        pytest.param(True, False, False, id='only tls_validate_hostname_value false'),
+        pytest.param(False, "true", True, id='tls_validate_hostname true as string'),
+        pytest.param(False, "false", False, id='tls_validate_hostname false as string'),
+    ],
+)
+def test_tls_validate_hostname_conflict(ssl_check_hostname_value, tls_validate_hostname_value, expected_value, check, kafka_instance):
+    kafka_instance.update({"ssl_check_hostname": ssl_check_hostname_value, "tls_validate_hostname": tls_validate_hostname_value})
+    kafka_consumer_check = check(kafka_instance)
+    assert getattr(kafka_consumer_check.config, "_tls_validate_hostname") == expected_value
 
 @pytest.mark.parametrize(
     'sasl_oauth_token_provider, expected_exception, mocked_admin_client',
