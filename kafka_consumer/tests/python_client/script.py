@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2023-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 from confluent_kafka.admin import AdminClient
 
 '''
@@ -25,6 +29,7 @@ sasl_kerberos_principal = ""
 sasl_kerberos_service_name = ""
 security_protocol = ""
 
+
 def __get_authentication_config():
     config = {
         "security.protocol": security_protocol.lower(),
@@ -46,22 +51,23 @@ def __get_authentication_config():
         "sasl.kerberos.service.name": sasl_kerberos_service_name,
     }
 
-
     for key, value in extras_parameters.items():
         if value:
             config[key] = value
 
     return config
-    
+
+
 def create_client():
     config = {
-                "bootstrap.servers": kafka_connect_str,
-                "socket.timeout.ms": request_timeout_ms,
-                "client.id": "dd-agent",
-            }
+        "bootstrap.servers": kafka_connect_str,
+        "socket.timeout.ms": request_timeout_ms,
+        "client.id": "dd-agent",
+    }
     config.update(__get_authentication_config())
 
     return AdminClient(config)
+
 
 def main():
     admin_client = create_client()
@@ -70,6 +76,7 @@ def main():
     results = future.result()
     for valid_consumer_group in results.valid:
         print("Found consumer group: %s" % valid_consumer_group.group_id)
+
 
 if __name__ == "__main__":
     main()

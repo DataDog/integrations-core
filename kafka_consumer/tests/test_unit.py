@@ -54,21 +54,26 @@ def test_tls_validate_hostname_conflict(
     assert kafka_consumer_check.config._tls_validate_hostname == expected_value
 
 
-
 @pytest.mark.parametrize(
     'tls_verify, expected',
     [
+        pytest.param({}, "true", id='given empty tls_verify, expect default string true'),
+        pytest.param({'tls_verify': True}, "true", id='given True tls_verify, expect string true'),
         pytest.param(
-            {}, "true", id='given empty tls_verify, expect default string true'
+            {
+                'tls_verify': False,
+                "tls_cert": None,
+                "tls_ca_cert": None,
+                "tls_private_key": None,
+                "tls_private_key_password": None,
+            },
+            "false",
+            id='given False tls_verify and other TLS options none, expect string false',
         ),
         pytest.param(
-            {'tls_verify': True}, "true", id='given True tls_verify, expect string true'
-        ),
-        pytest.param(
-            {'tls_verify': False, "tls_cert": None, "tls_ca_cert": None, "tls_private_key": None, "tls_private_key_password": None}, "false", id='given False tls_verify and other TLS options none, expect string false'
-        ),
-        pytest.param(
-            {'tls_verify': False, "tls_private_key_password": "password"}, "true", id='given False tls_verify but TLS password, expect string true'
+            {'tls_verify': False, "tls_private_key_password": "password"},
+            "true",
+            id='given False tls_verify but TLS password, expect string true',
         ),
     ],
 )
@@ -76,7 +81,7 @@ def test_tls_verify_is_string(tls_verify, expected, check, kafka_instance):
     kafka_instance.update(tls_verify)
     kafka_consumer_check = check(kafka_instance)
     config = kafka_consumer_check.config
-    
+
     assert config._tls_verify == expected
 
 
