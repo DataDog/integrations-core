@@ -17,15 +17,12 @@
 ***Added***:
 
 * Migrate `ddev release agent integrations` to `ddev` ([#15569](https://github.com/DataDog/integrations-core/pull/15569))
+* Migrate documentation commands to ddev ([#15582](https://github.com/DataDog/integrations-core/pull/15582))
+* Migrate `ddev release agent integrations-changelog` to `ddev` ([#15598](https://github.com/DataDog/integrations-core/pull/15598))
 
 ***Removed***:
 
 * Remove the `ddev validate recommended-monitors` command ([#15563](https://github.com/DataDog/integrations-core/pull/15563))
-
-***Added***:
-
-* Migrate documentation commands to ddev ([#15582](https://github.com/DataDog/integrations-core/pull/15582))
-* Migrate `ddev release agent integrations` to `ddev` ([#15598](https://github.com/DataDog/integrations-core/pull/15598))
 
 ## 3.5.0 / 2023-08-11
 
