@@ -14,7 +14,6 @@ INSTANCE = {
 HERE = get_here()
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
-# Please keep this list in alphabetic order!
 EXPECTED_METRICS = [
     'clock_throttle_reasons',
     'correctable_remapped_rows.count',
@@ -56,3 +55,4 @@ EXPECTED_METRICS = [
     'xid_errors',
 ]
 EXPECTED_METRICS = [f'dcgm.{m}' for m in EXPECTED_METRICS]
+assert sorted(EXPECTED_METRICS) == EXPECTED_METRICS, 'Please keep this list in alphabetic order!'
