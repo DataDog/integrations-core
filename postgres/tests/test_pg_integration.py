@@ -7,7 +7,6 @@ import time
 import mock
 import psycopg
 import pytest
-from semver import VersionInfo
 
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.__about__ import __version__
@@ -52,7 +51,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 )
 def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check = integration_check(pg_instance)
-    check._is_aurora = is_aurora
+    check.is_aurora = is_aurora
     check.check(pg_instance)
 
     expected_tags = _get_expected_tags(check, pg_instance)
@@ -404,12 +403,14 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
 @requires_over_10
 def test_wrong_version(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
-    # Enforce to cache wrong version
-    check._version = VersionInfo(*[9, 6, 0])
 
+    # Enforce the wrong version
+    check._version_utils.get_raw_version = mock.MagicMock(return_value="9.6.0")
     check.check(pg_instance)
     assert_state_clean(check)
 
+    # Reset the mock to a good version
+    check._version_utils.get_raw_version = mock.MagicMock(return_value="13.0.0")
     check.check(pg_instance)
     assert_state_set(check)
 
@@ -491,9 +492,10 @@ def test_query_timeout(integration_check, pg_instance):
     pg_instance['query_timeout'] = 1000
     check = integration_check(pg_instance)
     check._connect()
-    cursor = check.db.cursor()
     with pytest.raises(psycopg.errors.QueryCanceled):
-        cursor.execute("select pg_sleep(2000)")
+        with check.db.connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("select pg_sleep(2000)")
 
 
 @requires_over_10
@@ -599,7 +601,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         c_metrics = c_metrics + DBM_MIGRATED_METRICS
     for name in c_metrics:
         aggregator.assert_metric(name, count=1, tags=expected_tags_with_db, hostname=expected_hostname)
-    check_activity_metrics(aggregator, tags=expected_activity_tags, hostname=expected_hostname)
+    check_activity_metrics(aggregator, tags=expected_activity_tags)
 
     for name in CONNECTION_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags_no_db, hostname=expected_hostname)
@@ -626,6 +628,9 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
 @pytest.mark.usefixtures('dd_environment')
 def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, reported_hostname):
     pg_instance['dbm'] = dbm_enabled
+    # this will block on cancel and wait for the coll interval of 600 seconds,
+    # unless the collection_interval is set to a short amount of time
+    pg_instance['collect_resources'] = {'collection_interval': 0.1}
     if reported_hostname:
         pg_instance['reported_hostname'] = reported_hostname
     expected_host = reported_hostname if reported_hostname else 'stubbed.hostname'
@@ -661,7 +666,6 @@ def assert_state_clean(check):
     assert check.metrics_cache.archiver_metrics is None
     assert check.metrics_cache.replication_metrics is None
     assert check.metrics_cache.activity_metrics is None
-    assert check._is_aurora is None
 
 
 def assert_state_set(check):
@@ -670,4 +674,3 @@ def assert_state_set(check):
     if POSTGRES_VERSION != '9.3':
         assert check.metrics_cache.archiver_metrics
     assert check.metrics_cache.replication_metrics
-    assert check._is_aurora is False

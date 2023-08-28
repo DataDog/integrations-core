@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Fix sqlserver file stats metrics for Azure SQL DB ([#15695](https://github.com/DataDog/integrations-core/pull/15695))
+
+## 14.0.0 / 2023-08-18
+
 ***Changed***:
 
 * Collect both DBM active sessions and blocking sessions which are sleeping. See ([#14054](https://github.com/DataDog/integrations-core/pull/14054))

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 14.2.0 / 2023-08-18
+
 ***Added***:
 
 * Add schema collection to Postgres integration ([#15484](https://github.com/DataDog/integrations-core/pull/15484))
@@ -12,6 +14,11 @@
 ***Fixed***:
 
 * Update datadog-checks-base dependency version to 32.6.0 ([#15604](https://github.com/DataDog/integrations-core/pull/15604))
+* Prevent `command already in progress` errors in the Postgres integration ([#15489](https://github.com/DataDog/integrations-core/pull/15489))
+
+***Fixed***:
+
+* Fix InstanceConfig loading error for `ssl` config ([#15611](https://github.com/DataDog/integrations-core/pull/15611))
 
 ## 14.1.0 / 2023-08-10
 
