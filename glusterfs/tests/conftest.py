@@ -27,7 +27,11 @@ E2E_METADATA = {
 @pytest.fixture(scope='session')
 def dd_environment():
     compose_file = os.path.join(HERE, 'docker', 'docker-compose.yaml')
-    with docker_run(compose_file=compose_file, conditions=[WaitFor(create_volume)]):
+    with docker_run(
+        compose_file=compose_file,
+        conditions=[WaitFor(create_volume)],
+        down=delete_volume,
+    ):
         yield CONFIG, E2E_METADATA
 
 
@@ -61,3 +65,7 @@ def create_volume():
     ):
         run_command("docker exec gluster-node-1 {}".format(command), capture=True, check=True)
         time.sleep(10)
+
+
+def delete_volume():
+    run_command("docker exec gluster-node-1 gluster volume delete gv0", capture=True, check=True)
