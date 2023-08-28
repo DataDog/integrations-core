@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 4.0.1 / 2023-08-25
+
+***Fixed***:
+
+* Fix ECS Fargate memory task limit units ([#15656](https://github.com/DataDog/integrations-core/pull/15656))
+
 ## 4.0.0 / 2023-08-10
 
 ***Changed***:

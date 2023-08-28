@@ -1,29 +1,36 @@
 {
-  "name": "[RabbitMQ] Level of disk usage is too high for host: {{host.name}} ",
-  "type": "query alert",
-  "query": "avg(last_5m):avg:rabbitmq.node.mem_used{*} by {host} / avg:system.mem.total{*} by {host} * 100 > 35",
-  "message": "RabbitMQ is using too many resources on host: {{host.name}}.  It may block connections and won't be able to perform many internal operations.",
+  "version": 2,
+  "created_at": "2021-03-26",
+  "last_updated_at": "2021-03-26",
+  "title": "Level of disk usage is too high for host: {{host.name}}",
   "tags": [
     "integration:rabbitmq"
   ],
-  "options": {
-    "notify_audit": false,
-    "locked": false,
-    "timeout_h": 0,
-    "new_host_delay": 300,
-    "require_full_window": true,
-    "notify_no_data": false,
-    "renotify_interval": "0",
-    "escalation_message": "",
-    "no_data_timeframe": null,
-    "include_tags": true,
-    "thresholds": {
-      "critical": 35,
-      "warning": 30
-    }
-  },
-  "priority": null,
-  "recommended_monitor_metadata": {
-    "description": "Notify your team when a host's disk usage reaches critical levels."
+  "description": "Notify your team when a host's disk usage reaches critical levels.",
+  "definition": {
+    "message": "RabbitMQ is using too many resources on host: {{host.name}}.  It may block connections and won't be able to perform many internal operations.",
+    "name": "[RabbitMQ] Level of disk usage is too high for host: {{host.name}} ",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 35,
+        "warning": 30
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_5m):avg:rabbitmq.node.mem_used{*} by {host} / avg:system.mem.total{*} by {host} * 100 > 35",
+    "tags": [
+      "integration:rabbitmq"
+    ],
+    "type": "query alert"
   }
 }

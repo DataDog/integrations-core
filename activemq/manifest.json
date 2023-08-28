@@ -55,8 +55,8 @@
       "artemis": "assets/dashboards/artemis_dashboard.json"
     },
     "monitors": {
-      "[ActiveMQ Artemis] High unrouted messages": "assets/recommended_monitors/activemq_artemis_unrouted_messages.json",
-      "[ActiveMQ Artemis] High disk store usage": "assets/recommended_monitors/activemq_artemis_high_disk_store.json"
+      "[ActiveMQ Artemis] High unrouted messages": "assets/monitors/activemq_artemis_unrouted_messages.json",
+      "[ActiveMQ Artemis] High disk store usage": "assets/monitors/activemq_artemis_high_disk_store.json"
     },
     "saved_views": {
       "activemq_processes": "assets/saved_views/activemq_processes.json"

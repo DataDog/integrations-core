@@ -12,6 +12,7 @@
     "title": "DCGM Exporter",
     "media": [],
     "classifier_tags": [
+      "Category::Machine Learning & LLM",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS"
