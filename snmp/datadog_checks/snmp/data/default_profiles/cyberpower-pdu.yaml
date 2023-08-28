@@ -355,6 +355,10 @@ metrics:
       name: cyberpower.envirTemperature
   - MIB: CPS-MIB
     symbol:
+      OID: 1.3.6.1.4.1.3808.1.1.4.2.6.0
+      name: cyberpower.envirTemperatureCelsius
+  - MIB: CPS-MIB
+    symbol:
       OID: 1.3.6.1.4.1.3808.1.1.4.3.1.0
       name: cyberpower.envirHumidity
 metric_tags:

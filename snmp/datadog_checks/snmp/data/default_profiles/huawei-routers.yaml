@@ -157,14 +157,14 @@ metrics:
           name: huawei.hwServerAddr
           OID: 1.3.6.1.4.1.2011.5.25.194.1.4.1.1
         tag: huawei_hw_server_addr
-      - column:
-          OID: 1.3.6.1.4.1.2011.5.25.194.1.4.1.2
-          name: huawei.hwServerStatus
-        tag: huawei_hw_server_status
-        # mapping:
-        #   1: static
-        #   2: dynamic
-        # mapping absent in MIB
+      # - column:
+      #     OID: 1.3.6.1.4.1.2011.5.25.194.1.4.1.2
+      #     name: huawei.hwServerStatus
+      #   tag: huawei_hw_server_status
+      #   mapping:
+      #     1: static
+      #     2: dynamic
+      #   mapping absent in MIB
   - MIB: HUAWEI-FIREWALL-MIB
     table:
       name: hwFwNetEventsTable

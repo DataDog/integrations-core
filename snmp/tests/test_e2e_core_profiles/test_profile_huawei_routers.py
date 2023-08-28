@@ -145,8 +145,8 @@ def test_e2e_profile_huawei_routers(dd_agent_check):
         aggregator.assert_metric('snmp.huawei.hwDnsTtl', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['huawei_hw_server_status:2', 'huawei_hw_server_addr:90.96.69.163'],
-        ['huawei_hw_server_status:1', 'huawei_hw_server_addr:89.239.196.92'],
+        ['huawei_hw_server_addr:90.96.69.163'],
+        ['huawei_hw_server_addr:89.239.196.92'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
