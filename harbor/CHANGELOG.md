@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Removed***:
+
+* Remove support for harbor < 1.10 ([#15634](https://github.com/DataDog/integrations-core/pull/15634))
+
 ## 2.3.1 / 2023-08-18
 
 ***Fixed***:
