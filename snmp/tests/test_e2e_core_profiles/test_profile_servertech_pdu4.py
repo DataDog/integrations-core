@@ -83,7 +83,9 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
             'snmp.servertech.sentry4.st4InputCordActivePower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4InputCordApparentPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4InputCordApparentPower',
+            metric_type=aggregator.GAUGE,
+            tags=common_tags + tag_row,
         )
         aggregator.assert_metric(
             'snmp.servertech.sentry4.st4InputCordEnergy', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
@@ -98,7 +100,9 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
             'snmp.servertech.sentry4.st4InputCordPowerFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4InputCordPowerUtilized', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4InputCordPowerUtilized',
+            metric_type=aggregator.GAUGE,
+            tags=common_tags + tag_row,
         )
 
     tag_rows = [
@@ -148,7 +152,9 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
             'snmp.servertech.sentry4.st4PhaseCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.servertech.sentry4.st4PhaseCurrentCrestFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry4.st4PhaseCurrentCrestFactor',
+            metric_type=aggregator.GAUGE,
+            tags=common_tags + tag_row,
         )
         aggregator.assert_metric(
             'snmp.servertech.sentry4.st4PhaseEnergy', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
