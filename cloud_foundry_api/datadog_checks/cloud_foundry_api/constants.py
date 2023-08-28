@@ -4,7 +4,7 @@
 import semver
 
 SOURCE_TYPE_NAME = "Cloud Foundry"
-MAX_LOOKBACK_SECONDS = 600
+MAX_LOOKBACK_SECONDS = 60
 TOCKEN_EXPIRATION_BUFFER = 300
 UAA_SERVICE_CHECK_NAME = "uaa.can_authenticate"
 API_SERVICE_CHECK_NAME = "api.can_connect"
