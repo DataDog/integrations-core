@@ -48,8 +48,8 @@ class KafkaConfig:
         self._tls_cert = instance.get("tls_cert") or instance.get("ssl_certfile")
         self._tls_private_key = instance.get("tls_private_key") or instance.get("ssl_keyfile")
         self._tls_private_key_password = instance.get("tls_private_key_password") or instance.get("ssl_password")
-        self._tls_validate_hostname = is_affirmative(instance.get("tls_validate_hostname", True)) or is_affirmative(
-            instance.get("ssl_check_hostname", True)
+        self._tls_validate_hostname = is_affirmative(
+            instance.get("tls_validate_hostname", instance.get("ssl_check_hostname", True))
         )
 
         if self._tls_cert or self._tls_ca_cert or self._tls_private_key or self._tls_private_key_password:
