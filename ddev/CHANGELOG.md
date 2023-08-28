@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Removed***:
+
+* Remove `release agent requirements` subcommand ([#15621](https://github.com/DataDog/integrations-core/pull/15621))
+
 ## 4.0.1 / 2023-08-25
 
 ***Fixed***:
