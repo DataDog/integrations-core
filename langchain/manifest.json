@@ -12,6 +12,7 @@
     "title": "LangChain",
     "media": [],
     "classifier_tags": [
+      "Category::Machine Learning & LLM",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs",
       "Submitted Data Type::Traces",
