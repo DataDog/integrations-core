@@ -287,7 +287,7 @@ def test_when_empty_string_consumer_group_then_skip(kafka_instance):
             ConsumerGroupListing(group_id="my_consumer", is_simple_consumer_group=True),
         ]
     )
-    kafka_instance.update({'monitor_unlisted_consumer_groups': True})
+    kafka_instance['monitor_unlisted_consumer_groups'] = True
     future = concurrent.futures.Future()
     future.set_result(consumer_groups_result)
 
