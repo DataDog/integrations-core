@@ -1552,7 +1552,7 @@ def test_sanitize_url_label():
     assert KubeletCheck._sanitize_url_label(input) == expected
 
 
-def test_kubelet_unavailable_check_can_init(monkeypatch, aggregator):
+def test_kubelet_unavailable_check_can_init(monkeypatch):
     instance = {
         'kubelet_metrics_endpoint': 'http://10.8.0.1:10255/metrics',
         'cadvisor_metrics_endpoint': 'http://10.8.0.1:10255/metrics/cadvisor',
