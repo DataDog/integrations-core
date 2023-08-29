@@ -2,10 +2,7 @@ extends:
   - _generic-ucd.yaml
   - netgear.yaml
 sysobjectid:
-  - 1.3.6.1.4.1.4526.100.12.*
-  - 1.3.6.1.4.1.4526.100.15.*
   - 1.3.6.1.4.1.4526.100.16.*
-  - 1.3.6.1.4.1.4526.22.*
 metrics:
   # scalar string metric is not supported yet
   # - MIB: READYNASOS-MIB
