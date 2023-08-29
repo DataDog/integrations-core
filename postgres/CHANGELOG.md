@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 14.2.1 / 2023-08-29
+
 ***Fixed***:
 
 * Return Azure AD auth token in correct format ([#15701](https://github.com/DataDog/integrations-core/pull/15701))
