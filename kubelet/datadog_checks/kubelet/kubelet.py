@@ -24,6 +24,7 @@ from .common import (
     CADVISOR_DEFAULT_PORT,
     PodListUtils,
     get_container_label,
+    get_prometheus_url,
     replace_container_rt_prefix,
     tags_for_docker,
 )
@@ -238,18 +239,9 @@ class KubeletCheck(
         Create a copy of the instance and set default values.
         This is so the base class can create a scraper_config with the proper values.
         """
-        kubelet_conn_info = get_connection_info()
-
-        # dummy needed in case get_connection_info isn't running when the check is first accessed
-        endpoint = "dummy_url/kubelet"
-        # Check if kubelet_conn_info is available
-        if kubelet_conn_info is not None:
-            error_message = kubelet_conn_info.get('err')
-            # Log error message if available
-            if error_message:
-                self.log.warning(error_message)
-            # Set endpoint if available
-            endpoint = kubelet_conn_info.get('url', endpoint)
+        endpoint, err = get_prometheus_url("dummy_url/kubelet")
+        if err:
+            self.log.warning(err)
 
         kubelet_instance = deepcopy(instance)
         kubelet_instance.update(

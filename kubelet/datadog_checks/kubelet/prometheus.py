@@ -5,14 +5,19 @@ from __future__ import division
 
 from copy import deepcopy
 
-from kubeutil import get_connection_info
 from six import iteritems
 
 from datadog_checks.base.checks.kubelet_base.base import urljoin
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.utils.tagging import tagger
 
-from .common import get_container_label, get_pod_by_uid, is_static_pending_pod, replace_container_rt_prefix
+from .common import (
+    get_container_label,
+    get_pod_by_uid,
+    get_prometheus_url,
+    is_static_pending_pod,
+    replace_container_rt_prefix,
+)
 
 METRIC_TYPES = ['counter', 'gauge', 'summary']
 
@@ -73,18 +78,9 @@ class CadvisorPrometheusScraperMixin(object):
         Create a copy of the instance and set default values.
         This is so the base class can create a scraper_config with the proper values.
         """
-        kubelet_conn_info = get_connection_info()
-
-        # dummy needed in case get_connection_info isn't running when the check is first accessed
-        endpoint = "dummy_url/cadvisor"
-        # Check if kubelet_conn_info is available
-        if kubelet_conn_info is not None:
-            error_message = kubelet_conn_info.get('err')
-            # Log error message if available
-            if error_message:
-                self.log.warning(error_message)
-            # Set endpoint if available
-            endpoint = kubelet_conn_info.get('url', endpoint)
+        endpoint, err = get_prometheus_url("dummy_url/cadvisor")
+        if err:
+            self.log.warning(err)
 
         cadvisor_instance = deepcopy(instance)
         cadvisor_instance.update(
