@@ -382,7 +382,7 @@ envoy.tcp.max_downstream_connection_duration.count,count,,connection,,[OpenMetri
 envoy.tcp.max_downstream_connection_duration,count,,connection,,[Legacy] Total number of connections closed due to max_downstream_connection_duration timeout,0,envoy,,
 envoy.tcp.upstream_flush.count,count,,connection,,[OpenMetrics V2] Total number of connections that continued to flush upstream data after the downstream connection was closed,0,envoy,,
 envoy.tcp.upstream_flush_total,count,,connection,,[Legacy] Total number of connections that continued to flush upstream data after the downstream connection was closed,0,envoy,,
-envoy.tcp.upstream_flush_active,gauge,,connection,,[OpenMetrics V2 Legacy] Total connections currently continuing to flush upstream data after the downstream connection was closed,0,envoy,,
+envoy.tcp.upstream_flush_active,gauge,,connection,,[OpenMetrics and V2 Legacy] Total connections currently continuing to flush upstream data after the downstream connection was closed,0,envoy,,
 envoy.auth.clientssl.update_success,count,,success,,[Legacy] Total principal update successes,1,envoy,,
 envoy.auth.clientssl.update_failure,count,,error,,[Legacy] Total principal update failures,-1,envoy,,
 envoy.auth.clientssl.auth_no_ssl,count,,connection,,[Legacy] Total connections ignored due to no TLS,-1,envoy,,
