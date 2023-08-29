@@ -54,4 +54,6 @@ OPTIONAL_METRICS = {
     'calico.felix.ipset.errors.count',
     'calico.felix.iptables.restore_calls.count',
     'calico.felix.iptables.restore_errors.count',
+    'calico.felix.iptables.save_calls.count',
+    'calico.felix.iptables.save_errors.count',
 }
