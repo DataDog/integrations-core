@@ -77,6 +77,13 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
 
 
 def test_snapshot_xmin(aggregator, integration_check, pg_instance):
+    # In the test we are going to first run the check to collect xmin & xmax
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+    check.cancel()
+
+    # Once we have the metrics, we will run a simple query to collect the xmin
+    # The xmin we collect should be the same as the one collected by the check
     with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         with conn.cursor() as cur:
             if float(POSTGRES_VERSION) >= 13.0:
@@ -85,13 +92,12 @@ def test_snapshot_xmin(aggregator, integration_check, pg_instance):
                 query = 'select txid_snapshot_xmin(txid_current_snapshot());'
             cur.execute(query)
             xmin = float(cur.fetchall()[0][0])
-    check = integration_check(pg_instance)
-    check.check(pg_instance)
 
     expected_tags = _get_expected_tags(check, pg_instance)
     aggregator.assert_metric('postgresql.snapshot.xmin', value=xmin, count=1, tags=expected_tags)
     aggregator.assert_metric('postgresql.snapshot.xmax', value=xmin, count=1, tags=expected_tags)
 
+    # We then force the increase of the txid by 2
     with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", autocommit=True) as conn:
         with conn.cursor() as cur:
             # Force increases of txid
@@ -102,8 +108,9 @@ def test_snapshot_xmin(aggregator, integration_check, pg_instance):
             cur.execute(query)
             cur.execute(query)
 
-    check = integration_check(pg_instance)
+    # Recollect the metrics
     check.check(pg_instance)
+    check.cancel()
     aggregator.assert_metric('postgresql.snapshot.xmin', value=xmin + 2, count=1, tags=expected_tags)
     aggregator.assert_metric('postgresql.snapshot.xmax', value=xmin + 2, count=1, tags=expected_tags)
 
