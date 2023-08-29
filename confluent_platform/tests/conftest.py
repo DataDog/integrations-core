@@ -53,7 +53,7 @@ def dd_environment():
         compose_file,
         conditions=[
             # Kafka Broker
-            CheckDockerLogs('broker', 'Created log for partition _confluent'),
+            CheckDockerLogs('broker', 'Created log for partition _confluent', wait=2),
             # Kafka Schema Registry
             CheckDockerLogs('schema-registry', 'Server started, listening for requests...', attempts=45, wait=2),
             # Kafka Connect
@@ -61,7 +61,7 @@ def dd_environment():
                 'connect',
                 [' Started KafkaBasedLog', 'INFO REST resources initialized', 'Kafka Connect started'],
                 matches='all',
-                attempts=60,
+                attempts=120,
                 wait=3,
             ),
             # Create connectors
