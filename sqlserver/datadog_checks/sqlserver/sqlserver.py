@@ -616,7 +616,11 @@ class SQLServer(AgentCheck):
 
                 metrics_to_collect.append(
                     self.typed_metric(
-                        cfg_inst=cfg, table=db_table, base_name=base_name, user_type=user_type, sql_counter_type=sql_counter_type
+                        cfg_inst=cfg,
+                        table=db_table,
+                        base_name=base_name,
+                        user_type=user_type,
+                        sql_counter_type=sql_counter_type,
                     )
                 )
 
@@ -624,7 +628,11 @@ class SQLServer(AgentCheck):
                 for column in cfg['columns']:
                     metrics_to_collect.append(
                         self.typed_metric(
-                            cfg_inst=cfg, table=db_table, base_name=base_name, sql_counter_type=sql_counter_type, column=column
+                            cfg_inst=cfg,
+                            table=db_table,
+                            base_name=base_name,
+                            sql_counter_type=sql_counter_type,
+                            column=column,
                         )
                     )
 
@@ -657,7 +665,10 @@ class SQLServer(AgentCheck):
 
                 metrics_to_collect.append(
                     self.typed_metric(
-                        cfg_inst=cfg, table=DEFAULT_PERFORMANCE_TABLE, base_name=base_name, sql_counter_type=sql_counter_type
+                        cfg_inst=cfg,
+                        table=DEFAULT_PERFORMANCE_TABLE,
+                        base_name=base_name,
+                        sql_counter_type=sql_counter_type,
                     )
                 )
             except SQLConnectionError:
