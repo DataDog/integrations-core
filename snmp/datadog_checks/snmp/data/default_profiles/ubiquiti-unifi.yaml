@@ -1,5 +1,4 @@
 extends:
-  - _base.yaml
   - _generic-if.yaml
   - _ubiquiti.yaml
 
