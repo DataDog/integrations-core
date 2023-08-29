@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add Envoy TCP proxy metrics ([#15704](https://github.com/DataDog/integrations-core/pull/15704))
+
 ## 3.0.0 / 2023-08-10
 
 ***Changed***:
