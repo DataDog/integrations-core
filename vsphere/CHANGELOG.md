@@ -1,5 +1,29 @@
 # CHANGELOG - vsphere
 
+## Unreleased
+
+***Fixed***:
+
+* Add ability to filter property metrics ([#15474](https://github.com/DataDog/integrations-core/pull/15474))
+
+## 7.0.0 / 2023-08-10
+
+***Changed***:
+
+* Bump the minimum base check version ([#15427](https://github.com/DataDog/integrations-core/pull/15427))
+
+***Added***:
+
+* Add support for datastore property metrics ([#15389](https://github.com/DataDog/integrations-core/pull/15389))
+* Add cluster property metrics ([#15361](https://github.com/DataDog/integrations-core/pull/15361))
+* Add support for host property metrics  ([#15347](https://github.com/DataDog/integrations-core/pull/15347))
+* Add support for VM property metrics ([#14787](https://github.com/DataDog/integrations-core/pull/14787))
+* Update generated config models ([#15212](https://github.com/DataDog/integrations-core/pull/15212))
+
+***Fixed***:
+
+* Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
+
 ## 6.3.0 / 2023-07-10
 
 ***Added***:
