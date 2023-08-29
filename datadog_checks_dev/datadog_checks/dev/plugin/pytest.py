@@ -398,7 +398,6 @@ def pytest_collection_modifyitems(config, items):
         item_path = item.fspath if PY2 else item.path
         if item_path is None:
             continue
-        item_path_str = str(item_path)
         for ttype in TEST_TYPES:
-            if ttype.filepath_match in item_path_str:
+            if ttype.filepath_match in str(item_path):
                 item.add_marker(getattr(pytest.mark, ttype.name))
