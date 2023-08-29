@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Return Azure AD auth token in correct format ([#15701](https://github.com/DataDog/integrations-core/pull/15701))
+
+## 14.2.0 / 2023-08-18
+
 ***Added***:
 
 * Add support for sending `database_instance` metadata ([#15559](https://github.com/DataDog/integrations-core/pull/15559))
