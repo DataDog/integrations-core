@@ -4,10 +4,8 @@
 from __future__ import division
 
 import re
-from copy import deepcopy
 
 import requests
-from kubeutil import get_connection_info
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.kube_leader import KubeLeaderElectionMixin
@@ -16,8 +14,6 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.http import RequestsWrapper
 
 from .sli_metrics import SliMetricsScraperMixin
-
-METRICS_SLI_PATH = '/metrics/slis'
 
 DEFAULT_COUNTERS = {
     # Number of HTTP requests, partitioned by status code, method, and host.
@@ -190,8 +186,8 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck, SliMetri
                 instance['health_url'] = url
 
         inst = instances[0] if instances else None
-        kubelet_instance = self._create_sli_prometheus_instance(inst)
-        self.slis_scraper_config = self.get_scraper_config(kubelet_instance)
+        slis_instance = self._create_sli_prometheus_instance(inst)
+        self.slis_scraper_config = self.get_scraper_config(slis_instance)
 
     def check(self, instance):
         # Get the configuration for this specific instance
@@ -215,7 +211,7 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck, SliMetri
 
         if self.slis_scraper_config['prometheus_url']:  # Prometheus
             self.log.debug('processing kube scheduler sli metrics')
-            self.process(self.slis_scraper_config, metric_transformers=self.transformers)
+            self.process(self.slis_scraper_config)
 
     def _perform_service_check(self, instance):
         url = instance.get('health_url')

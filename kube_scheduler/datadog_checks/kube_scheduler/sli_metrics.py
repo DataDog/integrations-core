@@ -1,22 +1,19 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
 from copy import deepcopy
 
-from kubeutil import get_connection_info
+SLI_METRICS_PATH = '/slis'
 
-METRIC_TYPES = ['counter', 'gauge', 'summary']
+SLI_GAUGES = {
+    'kubernetes_healthcheck': 'kubernetes_healthcheck',
+}
 
-# container-specific metrics should have all these labels
-PRE_1_16_CONTAINER_LABELS = {'namespace', 'name', 'image', 'id', 'container_name', 'pod_name'}
-POST_1_16_CONTAINER_LABELS = {'namespace', 'name', 'image', 'id', 'container', 'pod'}
-
-# Value above which the figure can be discarded because it's an aberrant transient value
-MAX_MEMORY_RSS = 2**63
-
-SLI_METRICS_PATH = '/metrics/slis'
+SLI_COUNTERS = {
+    'kubernetes_healthchecks_total': 'kubernetes_healthchecks_total',
+}
 
 
 class SliMetricsScraperMixin(object):
@@ -27,42 +24,40 @@ class SliMetricsScraperMixin(object):
 
     def __init__(self, *args, **kwargs):
         super(SliMetricsScraperMixin, self).__init__(*args, **kwargs)
-
-        # these are filled by container_<metric-name>_usage_<metric-unit>
-        # and container_<metric-name>_limit_<metric-unit> reads it to compute <metric-name>usage_pct
-        self.fs_usage_bytes = {}
-        self.mem_usage_bytes = {}
-        self.swap_usage_bytes = {}
-
-        self.SLI_METRIC_TRANSFORMERS = {
-            # 'container_cpu_usage_seconds_total': self.container_cpu_usage_seconds_total,
-        }
+        self._slis_available = None
 
     def _create_sli_prometheus_instance(self, instance):
         """
         Create a copy of the instance and set default values.
         This is so the base class can create a scraper_config with the proper values.
         """
-        kube_scheduler_conn_info = get_connection_info()
-
-        # dummy needed in case kube scheduler isn't running when the check is first
-        endpoint = kube_scheduler_conn_info.get('url') if kube_scheduler_conn_info is not None else "dummy_url/cadvisor"
+        KUBE_SCHEDULER_SLI_NAMESPACE = "kube_scheduler.slis"
 
         sli_instance = deepcopy(instance)
         sli_instance.update(
             {
-                'namespace': self.NAMESPACE,
-                'prometheus_url': instance.get('sli_metrics_endpoint', self.urljoin(endpoint, SLI_METRICS_PATH)),
-                'ignore_metrics': [
-                    # 'container_fs_inodes_free',
-                ],
-                # # Defaults that were set when CadvisorPrometheusScraper was based on PrometheusScraper
-                # 'send_monotonic_counter': instance.get('send_monotonic_counter', False),
-                # 'health_service_check': instance.get('health_service_check', False),
+                'namespace': KUBE_SCHEDULER_SLI_NAMESPACE,
+                'prometheus_url': instance.get('prometheus_url') + SLI_METRICS_PATH,
+                'metrics': [SLI_GAUGES, SLI_COUNTERS],
             }
         )
         return sli_instance
-    
+
+    def detect_sli_endpoint(self, http_handler, url):
+        """
+        Whether the sli metrics endpoint is available (k8s 1.26+).
+        :return: false if the endpoint throws a 404 or 403, true otherwise.
+        """
+        if self._slis_available is not None:
+            return self._slis_available
+        try:
+            r = http_handler.head(url)
+        except Exception as e:
+            self.log.debug("Unable to collect query slis endpoint: %s", e)
+            return False
+        self._slis_available = r.status_code != 404 and r.status_code != 403
+        return self._slis_available
+
     def urljoin(*args):
         """
         Joins given arguments into an url. Trailing but not leading slashes are
@@ -70,4 +65,3 @@ class SliMetricsScraperMixin(object):
         :return: string
         """
         return '/'.join(arg.strip('/') for arg in args)
-
