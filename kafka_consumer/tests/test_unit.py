@@ -1,11 +1,13 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import concurrent.futures
 import logging
 from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
+from confluent_kafka.admin._group import ConsumerGroupListing, ListConsumerGroupsResult
 
 from datadog_checks.kafka_consumer import KafkaCheck
 
@@ -331,3 +333,19 @@ def test_when_consumer_metric_count_hit_context_limit_then_no_more_consumer_metr
 
     expected_debug = "Reported contexts number 1 greater than or equal to contexts limit of 1"
     assert expected_debug in caplog.text
+
+
+def test_when_empty_string_consumer_group_then_skip(kafka_instance):
+    consumer_groups_result = ListConsumerGroupsResult(
+        valid=[
+            ConsumerGroupListing(group_id="", is_simple_consumer_group=True),  # Should be filtered out
+            ConsumerGroupListing(group_id="my_consumer", is_simple_consumer_group=True),
+        ]
+    )
+    kafka_instance['monitor_unlisted_consumer_groups'] = True
+    future = concurrent.futures.Future()
+    future.set_result(consumer_groups_result)
+
+    with mock.patch("datadog_checks.kafka_consumer.client.AdminClient.list_consumer_groups", return_value=future):
+        kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
+        assert kafka_consumer_check.client._get_consumer_groups() == ["my_consumer"]

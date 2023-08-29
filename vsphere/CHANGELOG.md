@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Add ability to filter property metrics ([#15474](https://github.com/DataDog/integrations-core/pull/15474))
+
 ## 7.0.0 / 2023-08-10
 
 ***Changed***:

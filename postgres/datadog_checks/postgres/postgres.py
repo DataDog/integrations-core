@@ -665,7 +665,7 @@ class PostgreSql(AgentCheck):
             client_id = self._config.managed_identity.get('client_id', None)
             scope = self._config.managed_identity.get('identity_scope', None)
             if client_id is not None:
-                password = azure.generate_managed_identity_token(client_id=client_id, scope=scope)
+                password = azure.generate_managed_identity_token(client_id=client_id, identity_scope=scope)
 
             conn_args = {
                 'host': self._config.host,
