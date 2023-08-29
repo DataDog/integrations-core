@@ -108,7 +108,7 @@ NEW_1_15_GAUGES = {
 }
 
 NEW_1_26_GAUGES = {
-    'scheduler_goroutines': 'scheduler_goroutines',
+    'scheduler_goroutines': 'goroutine_by_scheduling_operation',
 }
 
 DEFAULT_GO_METRICS = {

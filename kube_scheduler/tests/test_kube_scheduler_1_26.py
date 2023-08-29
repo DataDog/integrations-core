@@ -126,7 +126,7 @@ def test_check_metrics_1_26(aggregator, mock_metrics, mock_leader):
     assert_metric('.leader_election.lease_duration', value=15, tags=expected_le_tags)
     aggregator.assert_service_check(NAMESPACE + ".leader_election.status", tags=expected_le_tags)
 
-    assert_metric('.scheduler_goroutines', value=0, tags=['operation:Filter'])
-    assert_metric('.scheduler_goroutines', value=0, tags=['operation:binding'])
+    assert_metric('.goroutine_by_scheduling_operation', value=0, tags=['operation:Filter'])
+    assert_metric('.goroutine_by_scheduling_operation', value=0, tags=['operation:binding'])
 
     aggregator.assert_all_metrics_covered()
