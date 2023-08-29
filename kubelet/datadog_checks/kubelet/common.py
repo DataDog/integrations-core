@@ -106,10 +106,13 @@ def get_container_label(labels, l_name):
         return labels[l_name]
 
 
-def get_prometheus_url(default_url):
+def get_prometheus_url(default_url, logger):
     kubelet_conn_info = get_connection_info()
     kubelet_conn_info = {} if kubelet_conn_info is None else kubelet_conn_info
-    return kubelet_conn_info.get("url", default_url), kubelet_conn_info.get("err")
+    error = kubelet_conn_info.get("err")
+    if error:
+        logger.warning(error)
+    return kubelet_conn_info.get("url", default_url)
 
 
 class PodListUtils(object):
