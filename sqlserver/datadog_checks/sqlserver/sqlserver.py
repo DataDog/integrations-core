@@ -686,7 +686,7 @@ class SQLServer(AgentCheck):
         """
         cached = self._sql_counter_types.get(counter_name)
         if cached:
-            cached
+            return cached
         with self.connection.get_managed_cursor() as cursor:
             cursor.execute(COUNTER_TYPE_QUERY, (counter_name,))
             (sql_counter_type,) = cursor.fetchone()
