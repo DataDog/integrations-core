@@ -26,7 +26,8 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
 ]
 dependencies = [
-    "datadog-checks-dev[cli]~=22.0",
+    "click~=8.1.6",
+    "datadog-checks-dev[cli]~=24.0",
     "hatch>=1.6.3",
     "httpx",
     "jsonpointer",
@@ -35,6 +36,7 @@ dependencies = [
     "tomli; python_version < '3.11'",
     "tomli-w",
     "tomlkit",
+    "tqdm",
 ]
 dynamic = ["version"]
 
@@ -102,7 +104,7 @@ unfixable = [
 ]
 
 [tool.ruff.isort]
-known-first-party = ["{template_config['package_name']}"]
+known-first-party = ["ddev"]
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"

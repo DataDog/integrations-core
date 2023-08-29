@@ -1,0 +1,11 @@
+extends:
+  - _base.yaml
+  - _cisco-generic.yaml
+
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "cisco"
+
+sysobjectid: 1.2.3.1005

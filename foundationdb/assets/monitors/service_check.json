@@ -1,26 +1,33 @@
 {
-	"name": "FoundationDB Status Check",
-	"type": "service check",
-	"query": "\"foundationdb.can_connect\".over(\"*\").last(6).count_by_status()",
-	"message": "{{#is_alert}}\nCould not connect to the FoundationDB cluster or otherwise failed to obtain status information.\n{{/is_alert}} \n{{^is_warning}}\nA connection to the fhe FoundationDB cluster could be established and status information retrieved. However, there are degraded processes.\n{{/is_warning}} ",
-	"tags": [
-		"integration:fdb"
-	],
-	"options": {
-		"renotify_interval": 0,
-		"timeout_h": 4,
-		"thresholds": {
-			"ok": 2,
-			"warning": 5,
-			"critical": 2
-		},
-		"notify_no_data": false,
-		"no_data_timeframe": 2,
-		"notify_audit": false,
-		"new_host_delay": 300,
-		"escalation_message": ""
-	},
-	"recommended_monitor_metadata": {
-		"description": "Get notified when the agent could not connect to the FoundationDB cluster or otherwise failed to obtain status."
-	}
+  "version": 2,
+  "created_at": "2022-03-14",
+  "last_updated_at": "2023-07-24",
+  "title": "FoundationDB Status Check",
+  "tags": [
+    "integration:foundationdb"
+  ],
+  "description": "Get notified when the agent could not connect to the FoundationDB cluster or otherwise failed to obtain status.",
+  "definition": {
+    "message": "{{#is_alert}}\nCould not connect to the FoundationDB cluster or otherwise failed to obtain status information.\n{{/is_alert}} \n{{^is_warning}}\nA connection to the fhe FoundationDB cluster could be established and status information retrieved. However, there are degraded processes.\n{{/is_warning}} ",
+    "name": "FoundationDB Status Check",
+    "options": {
+      "escalation_message": "",
+      "new_host_delay": 300,
+      "no_data_timeframe": 2,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "thresholds": {
+        "critical": 2,
+        "ok": 2,
+        "warning": 5
+      },
+      "timeout_h": 4
+    },
+    "query": "\"foundationdb.can_connect\".over(\"*\").by(\"*\").last(6).count_by_status()",
+    "tags": [
+      "integration:fdb"
+    ],
+    "type": "service check"
+  }
 }

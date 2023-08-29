@@ -59,7 +59,7 @@ class KafkaConfig:
         if not self._kafka_connect_str:
             raise ConfigurationError('`kafka_connect_str` is required')
 
-        if not isinstance(self._kafka_connect_str, (str, list)):
+        if self._kafka_connect_str is not None and not isinstance(self._kafka_connect_str, (str, list)):
             raise ConfigurationError('`kafka_connect_str` should be string or list of strings')
 
         if isinstance(self._kafka_connect_str, list):

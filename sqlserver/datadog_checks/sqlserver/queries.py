@@ -240,7 +240,7 @@ def get_query_file_stats(sqlserver_major_version, sqlserver_engine_edition):
             df.name,
             df.physical_name,
             {sql_columns}
-        FROM sys.dm_io_virtual_file_stats(NULL, NULL) fs
+        FROM sys.dm_io_virtual_file_stats(DB_ID(), NULL) fs
             LEFT JOIN sys.database_files df
                 ON df.file_id = fs.file_id;
         """
