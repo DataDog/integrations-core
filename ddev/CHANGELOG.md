@@ -6,6 +6,10 @@
 
 * Remove `release agent requirements` subcommand ([#15621](https://github.com/DataDog/integrations-core/pull/15621))
 
+***Fixed***:
+
+* Bump datadog-checks-dev version to ~=24.0 ([#15683](https://github.com/DataDog/integrations-core/pull/15683))
+
 ## 4.0.1 / 2023-08-25
 
 ***Fixed***:
