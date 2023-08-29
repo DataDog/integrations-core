@@ -30,6 +30,11 @@ def test_e2e_profile_tripplite_ups(dd_agent_check):
         'snmp_host:tripplite-ups.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+    ] + [
+        'tl_ups_ident_id:2',
+        'tl_ups_ident_serial_num:zombies acted',
+        'tl_ups_location:forward zombies oxen their driving acted Jaded zombies',
+        'tl_ups_snmp_card_serial_num:Jaded kept zombies forward',
     ]
 
     # --- TEST EXTENDED METRICS ---
