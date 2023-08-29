@@ -80,7 +80,6 @@ def test_snapshot_xmin(aggregator, integration_check, pg_instance):
     # In the test we are going to first run the check to collect xmin & xmax
     check = integration_check(pg_instance)
     check.check(pg_instance)
-    check.cancel()
 
     # Once we have the metrics, we will run a simple query to collect the xmin
     # The xmin we collect should be the same as the one collected by the check
@@ -110,7 +109,6 @@ def test_snapshot_xmin(aggregator, integration_check, pg_instance):
 
     # Recollect the metrics
     check.check(pg_instance)
-    check.cancel()
     aggregator.assert_metric('postgresql.snapshot.xmin', value=xmin + 2, count=1, tags=expected_tags)
     aggregator.assert_metric('postgresql.snapshot.xmax', value=xmin + 2, count=1, tags=expected_tags)
 
