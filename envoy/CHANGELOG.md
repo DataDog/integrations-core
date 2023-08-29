@@ -4,7 +4,7 @@
 
 ***Added***:
 
-* Add Envoy TCP proxy metrics ([#15704](https://github.com/DataDog/integrations-core/pull/15704))
+* Add [TCP proxy statistics](https://www.envoyproxy.io/docs/envoy/latest/configuration/listeners/network_filters/tcp_proxy_filter#statistics) ([#15704](https://github.com/DataDog/integrations-core/pull/15704))
 
 ## 3.0.0 / 2023-08-10
 
