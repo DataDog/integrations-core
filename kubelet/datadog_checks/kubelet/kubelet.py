@@ -241,7 +241,15 @@ class KubeletCheck(
         kubelet_conn_info = get_connection_info()
 
         # dummy needed in case get_connection_info isn't running when the check is first accessed
-        endpoint = kubelet_conn_info.get('url') if kubelet_conn_info is not None else "dummy_url/kubelet"
+        endpoint = "dummy_url/kubelet"
+        # Check if kubelet_conn_info is available
+        if kubelet_conn_info is not None:
+            error_message = kubelet_conn_info.get('err')
+            # Log error message if available
+            if error_message:
+                self.log.warning(error_message)
+            # Set endpoint if available
+            endpoint = kubelet_conn_info.get('url', endpoint)
 
         kubelet_instance = deepcopy(instance)
         kubelet_instance.update(

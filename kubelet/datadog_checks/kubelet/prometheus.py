@@ -75,8 +75,16 @@ class CadvisorPrometheusScraperMixin(object):
         """
         kubelet_conn_info = get_connection_info()
 
-        # dummy needed in case kubelet isn't running when the check is first
-        endpoint = kubelet_conn_info.get('url') if kubelet_conn_info is not None else "dummy_url/cadvisor"
+        # dummy needed in case get_connection_info isn't running when the check is first accessed
+        endpoint = "dummy_url/cadvisor"
+        # Check if kubelet_conn_info is available
+        if kubelet_conn_info is not None:
+            error_message = kubelet_conn_info.get('err')
+            # Log error message if available
+            if error_message:
+                self.log.warning(error_message)
+            # Set endpoint if available
+            endpoint = kubelet_conn_info.get('url', endpoint)
 
         cadvisor_instance = deepcopy(instance)
         cadvisor_instance.update(
