@@ -1349,6 +1349,7 @@ def test_statement_samples_dbstrict(aggregator, integration_check, dbm_instance,
 def test_async_job_enabled(
     integration_check, dbm_instance, statement_activity_enabled, statement_samples_enabled, statement_metrics_enabled
 ):
+    dbm_instance['min_collection_interval'] = 1
     dbm_instance['query_activity'] = {'enabled': statement_activity_enabled, 'run_sync': False}
     dbm_instance['query_samples'] = {'enabled': statement_samples_enabled, 'run_sync': False}
     dbm_instance['query_metrics'] = {'enabled': statement_metrics_enabled, 'run_sync': False}
@@ -1357,15 +1358,17 @@ def test_async_job_enabled(
     run_one_check(check, dbm_instance)
     # check should be cancelled & all db connections should be shutdown
     assert check._check_cancelled
-    assert check.db_pool._conns.get(dbm_instance['dbname']) is None, "db connection should be gone"
     if statement_samples_enabled or statement_activity_enabled:
         assert check.statement_samples._job_loop_future is not None
+        assert not check.statement_samples._job_loop_future.running(), "samples thread should be stopped"
     else:
         assert check.statement_samples._job_loop_future is None
     if statement_metrics_enabled:
         assert check.statement_metrics._job_loop_future is not None
+        assert not check.statement_metrics._job_loop_future.running(), "metrics thread should be stopped"
     else:
         assert check.statement_metrics._job_loop_future is None
+    assert check.db_pool._conns.get(dbm_instance['dbname']) is None, "db connection should be gone"
 
 
 @pytest.mark.parametrize("db_user", ["datadog", "datadog_no_catalog"])
@@ -1583,6 +1586,7 @@ def test_async_job_inactive_stop(aggregator, integration_check, dbm_instance):
 
 
 def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
+    dbm_instance['min_collection_interval'] = 1
     dbm_instance['query_samples']['run_sync'] = False
     dbm_instance['query_metrics']['run_sync'] = False
     check = integration_check(dbm_instance)
