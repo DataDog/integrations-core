@@ -93,6 +93,12 @@ def create_integration(root, name, dependencies):
     with open(integration_dir / 'pyproject.toml', 'wb') as f:
         tomli_w.dump({'project': {'optional-dependencies': {'deps': dependencies}}}, f)
 
-    # We need the version file for it to be recognized as an integration by the old code
+    # Fill stuff needed for it to be recognized as an agent check
     (integration_dir / 'datadog_checks' / name).mkdir(parents=True)
     (integration_dir / 'datadog_checks' / name / '__about__.py').touch()
+    (integration_dir / 'datadog_checks' / name / '__init__.py').write_text(
+        """
+import a
+import b
+"""
+    )

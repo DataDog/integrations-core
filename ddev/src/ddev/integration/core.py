@@ -140,6 +140,13 @@ class Integration:
         return None
 
     @cached_property
+    def project_metadata(self) -> dict:
+        import tomli
+
+        with open(self.path / 'pyproject.toml', 'rb') as f:
+            return tomli.load(f)
+
+    @cached_property
     def is_valid(self) -> bool:
         return self.is_integration or self.is_package
 

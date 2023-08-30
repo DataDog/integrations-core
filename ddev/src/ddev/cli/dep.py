@@ -9,19 +9,8 @@ import click
 import orjson
 from aiohttp import request
 from aiomultiprocess import Pool
-from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
-from datadog_checks.dev.tooling.constants import get_agent_requirements
-from datadog_checks.dev.tooling.dependencies import (
-    get_dependency_set,
-    read_agent_dependencies,
-    read_check_dependencies,
-    update_agent_dependencies,
-    update_check_dependencies,
-    update_project_dependency,
-)
-from datadog_checks.dev.tooling.utils import get_normalized_dependency, normalize_project_name
 from packaging.markers import Marker
-from packaging.requirements import Requirement
+from packaging.requirements import InvalidRequirement, Requirement
 from packaging.specifiers import InvalidSpecifier, SpecifierSet
 from packaging.version import InvalidVersion, Version
 
@@ -56,75 +45,75 @@ SECURITY_DEPS = {'in-toto', 'tuf', 'securesystemslib'}
 SUPPORTED_PYTHON_MINOR_VERSIONS = {'2': '2.7', '3': '3.9'}
 
 
-@click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage dependencies')
+@click.group(short_help='Manage dependencies')
 def dep():
     pass
 
 
-@dep.command(context_settings=CONTEXT_SETTINGS, short_help='Pin a dependency for all checks that require it')
+@dep.command(short_help='Pin a dependency for all checks that require it')
 @click.argument('definition')
-def pin(definition):
+@click.pass_obj
+def pin(app, definition):
     """Pin a dependency for all checks that require it."""
-    dependencies, errors = read_check_dependencies()
+    dependencies, errors = read_check_dependencies(app.repo)
 
     if errors:
         for error in errors:
-            echo_failure(error)
+            app.display_error(error)
 
-        abort()
+        app.abort()
 
     requirement = Requirement(definition)
     package = normalize_project_name(requirement.name)
     if package not in dependencies:
-        abort(f'Unknown package: {package}')
+        app.abort(f'Unknown package: {package}')
 
     new_dependencies = copy.deepcopy(dependencies)
     python_versions = new_dependencies[package]
     checks = update_project_dependency(python_versions, definition)
     if new_dependencies == dependencies:
-        abort('No dependency definitions to update')
+        app.abort('No dependency definitions to update')
 
     for check_name in sorted(checks):
-        update_check_dependencies(check_name, new_dependencies)
+        update_check_dependencies(app.repo.integrations.get(check_name), new_dependencies)
 
-    echo_info(f'Files updated: {len(checks)}')
+    app.display_info(f'Files updated: {len(checks)}')
 
 
-@dep.command(
-    context_settings=CONTEXT_SETTINGS, short_help="Combine all dependencies for the Agent's static environment"
-)
-def freeze():
+@dep.command(short_help="Combine all dependencies for the Agent's static environment")
+@click.pass_obj
+def freeze(app):
     """Combine all dependencies for the Agent's static environment."""
-    dependencies, errors = read_check_dependencies()
+    dependencies, errors = read_check_dependencies(app.repo)
 
     if errors:
         for error in errors:
-            echo_failure(error)
+            app.display_error(error)
 
-        abort()
+        app.abort()
 
-    echo_info(f'Static file: {get_agent_requirements()}')
-    update_agent_dependencies(dependencies)
+    app.display_info(f'Static file: {app.repo.agent_requirements}')
+    update_agent_dependencies(app.repo, dependencies)
 
 
 @dep.command(
-    context_settings=CONTEXT_SETTINGS,
     short_help="Update integrations' dependencies so that they match the Agent's static environment",
 )
-def sync():
-    agent_dependencies, errors = read_agent_dependencies()
+@click.pass_obj
+def sync(app):
+    agent_dependencies, errors = read_agent_dependencies(app.repo)
 
     if errors:
         for error in errors:
-            echo_failure(error)
-        abort()
+            app.display_error(error)
+        app.abort()
 
-    check_dependencies, check_errors = read_check_dependencies()
+    check_dependencies, check_errors = read_check_dependencies(app.repo)
 
     if check_errors:
         for error in check_errors:
-            echo_failure(error)
-        abort()
+            app.display_error(error)
+        app.abort()
 
     updated_checks = set()
     for name, python_versions in check_dependencies.items():
@@ -136,13 +125,13 @@ def sync():
                 updated_checks.update(update_project_dependency(python_versions, dependency_definition))
 
     if not updated_checks:
-        echo_info('All dependencies synced.')
+        app.display_info('All dependencies synced.')
         return
 
     for check_name in sorted(updated_checks):
-        update_check_dependencies(check_name, check_dependencies)
+        update_check_dependencies(app.repo.integrations.get(check_name), check_dependencies)
 
-    echo_info(f'Files updated: {len(updated_checks)}')
+    app.display_info(f'Files updated: {len(updated_checks)}')
 
 
 def filter_releases(releases):
@@ -217,23 +206,24 @@ async def scrape_version_data(urls):
     return package_data
 
 
-@dep.command(context_settings=CONTEXT_SETTINGS, short_help='Automatically check for dependency updates')
+@dep.command(short_help='Automatically check for dependency updates')
 @click.option('--sync', '-s', 'sync_dependencies', is_flag=True, help='Update the dependency definitions')
 @click.option('--include-security-deps', '-i', is_flag=True, help="Attempt to update security dependencies")
 @click.option('--batch-size', '-b', type=int, help='The maximum number of dependencies to upgrade if syncing')
 @click.pass_context
-def updates(ctx, sync_dependencies, include_security_deps, batch_size):
+@click.pass_obj
+def updates(app, ctx, sync_dependencies, include_security_deps, batch_size):
     ignore_deps = set(IGNORED_DEPS)
     if not include_security_deps:
         ignore_deps.update(SECURITY_DEPS)
     ignore_deps = {normalize_project_name(d) for d in ignore_deps}
 
-    dependencies, errors = read_agent_dependencies()
+    dependencies, errors = read_agent_dependencies(app.repo)
 
     if errors:
         for error in errors:
-            echo_failure(error)
-        abort()
+            app.display_error(error)
+        app.abort()
 
     api_urls = [f'https://pypi.org/pypi/{package}/json' for package in dependencies]
     package_data = asyncio.run(scrape_version_data(api_urls))
@@ -274,18 +264,192 @@ def updates(ctx, sync_dependencies, include_security_deps, batch_size):
 
     if sync_dependencies:
         if updated_packages:
-            update_agent_dependencies(new_dependencies)
+            update_agent_dependencies(app.repo, new_dependencies)
             ctx.invoke(sync)
-            echo_info(f'Updated {len(updated_packages)} dependencies')
+            app.display_info(f'Updated {len(updated_packages)} dependencies')
     else:
         if updated_packages:
-            echo_failure(f"{len(updated_packages)} dependencies are out of sync:")
+            app.display_error(f"{len(updated_packages)} dependencies are out of sync:")
             for name, versions in version_updates.items():
                 for package_version, python_versions in versions.items():
-                    echo_failure(
+                    app.display_error(
                         f'{name} can be updated to version {package_version} '
                         f'on {" and ".join(sorted(python_versions))}'
                     )
-            abort()
+            app.abort()
         else:
-            echo_info('All dependencies are up to date')
+            app.display_info('All dependencies are up to date')
+
+
+def get_dependency_set(python_versions):
+    return {
+        dependency_definition
+        for dependency_definitions in python_versions.values()
+        for dependency_definition in dependency_definitions
+    }
+
+
+def read_agent_dependencies(repo):
+    dependencies = create_dependency_data()
+    errors = []
+
+    load_dependency_data_from_requirements(repo.agent_requirements, dependencies, errors)
+
+    return dependencies, errors
+
+
+def read_check_dependencies(repo, integrations=None):
+    dependencies = create_dependency_data()
+    errors = []
+
+    if isinstance(integrations, list):
+        integrations = [repo.integrations.get(integration) for integration in integrations]
+    elif integrations is None:
+        integrations = list(repo.integrations.iter_agent_checks('all'))
+    else:
+        integrations = [repo.integrations.get(integrations)]
+
+    for integration in sorted(integrations, key=lambda x: x.name):
+        if integration.name in {'datadog_checks_dev', 'datadog_checks_tests_helper', 'ddev'}:
+            continue
+
+        if integration.is_package:
+            load_dependency_data_from_metadata(integration, dependencies, errors)
+
+    return dependencies, errors
+
+
+def update_agent_dependencies(repo, dependencies):
+    lines = sorted(
+        f'{dependency_definition}\n'
+        for python_versions in dependencies.values()
+        for dependency_definition in get_dependency_set(python_versions)
+    )
+
+    repo.agent_requirements.write_text(''.join(lines))
+
+
+def update_check_dependencies(integration, dependencies):
+    project_data = integration.project_metadata
+    optional_dependencies = project_data['project'].get('optional-dependencies', {})
+
+    updated = False
+    for old_dependencies in optional_dependencies.values():
+        new_dependencies = defaultdict(set)
+
+        for old_dependency in old_dependencies:
+            old_requirement = Requirement(old_dependency)
+            name = normalize_project_name(old_requirement.name)
+            if name not in dependencies:
+                new_dependencies[name].add(old_dependency)
+                continue
+
+            for dependency_set in dependencies[name].values():
+                for dep in dependency_set:
+                    new_dependencies[name].add(dep)
+
+        new_dependencies = sorted(d for dep_set in new_dependencies.values() for d in dep_set)
+        if new_dependencies != old_dependencies:
+            updated = True
+            old_dependencies[:] = new_dependencies
+
+    if updated:
+        import tomli_w
+
+        (integration.path / 'pyproject.toml').write_text(tomli_w.dumps(project_data))
+
+    return updated
+
+
+def create_dependency_data():
+    # Structure:
+    # dependency name ->
+    #   Python major version ->
+    #     dependency definition -> set of checks with definition
+    return defaultdict(lambda: {'py2': defaultdict(set), 'py3': defaultdict(set)})
+
+
+def load_dependency_data_from_requirements(req_file, dependencies, errors, check_name=None):
+    for line in req_file.stream_lines():
+        line = line.strip()
+        if not line or line.startswith('#'):
+            continue
+
+        try:
+            req = Requirement(line)
+        except InvalidRequirement as e:
+            import os
+
+            errors.append(f'File `{os.path.basename(req_file)}` has an invalid dependency: `{line}`\n{e}')
+            continue
+
+        project = dependencies[normalize_project_name(req.name)]
+        dependency = get_normalized_dependency(req)
+        set_project_dependency(project, dependency, check_name)
+
+
+def load_dependency_data_from_metadata(integration, dependencies, errors):
+    project_data = integration.project_metadata
+
+    optional_dependencies = project_data['project'].get('optional-dependencies', {})
+
+    for check_dependencies in optional_dependencies.values():
+        for check_dependency in check_dependencies:
+            try:
+                req = Requirement(check_dependency)
+            except InvalidRequirement as e:
+                errors.append(
+                    f'File `{integration.name}/pyproject.toml` has an invalid dependency: `{check_dependency}`\n{e}'
+                )
+                continue
+
+            project = dependencies[normalize_project_name(req.name)]
+            dependency = get_normalized_dependency(req)
+            set_project_dependency(project, dependency, integration.name)
+
+
+def set_project_dependency(project, dependency, check_name):
+    if 'python_version <' in dependency:
+        project['py2'][dependency].add(check_name)
+    elif 'python_version >' in dependency:
+        project['py3'][dependency].add(check_name)
+    else:
+        project['py2'][dependency].add(check_name)
+        project['py3'][dependency].add(check_name)
+
+
+def update_project_dependency(project, dependency):
+    if 'python_version <' in dependency:
+        project['py2'][dependency] = project['py2'].popitem()[1]
+        return project['py2'][dependency]
+    elif 'python_version >' in dependency:
+        project['py3'][dependency] = project['py3'].popitem()[1]
+        return project['py3'][dependency]
+    else:
+        project['py2'][dependency] = project['py2'].popitem()[1]
+        project['py3'][dependency] = project['py3'].popitem()[1]
+        return project['py2'][dependency] | project['py3'][dependency]
+
+
+def get_normalized_dependency(requirement):
+    requirement.name = normalize_project_name(requirement.name)
+
+    if requirement.specifier:
+        requirement.specifier = SpecifierSet(str(requirement.specifier).lower())
+
+    if requirement.extras:
+        requirement.extras = {normalize_project_name(extra) for extra in requirement.extras}
+
+    # All TOML writers use double quotes, so allow direct writing or copy/pasting to avoid escaping
+    return str(requirement).replace('"', "'")
+
+
+def normalize_project_name(project_name):
+    import re
+
+    # https://www.python.org/dev/peps/pep-0508/#names
+    if not re.search('^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$', project_name, re.IGNORECASE):
+        raise ValueError('Project name must only contain ASCII letters/digits, underscores, hyphens, and periods.')
+
+    # https://www.python.org/dev/peps/pep-0503/#normalized-names
+    return re.sub(r'[-_.]+', '-', project_name).lower()
