@@ -8,7 +8,7 @@
 
 ***Fixed***:
 
-* Merge branch 'master' into nouha/fix-mappings ([#15719](https://github.com/DataDog/integrations-core/pull/15719))
+* Fix SNMP profiles metric tags mappings using MIBs ([#15719](https://github.com/DataDog/integrations-core/pull/15719))
 
 ## 6.2.0 / 2023-08-18
 
