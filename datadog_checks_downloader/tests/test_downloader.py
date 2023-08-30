@@ -51,6 +51,7 @@ EXCLUDED_INTEGRATIONS = [
     "datadog-docker-daemon",
     "datadog-dd-cluster-agent",  # excluding this since actual integration is called `datadog-cluster-agent`
     "datadog-kubernetes",  # excluding this since `kubernetes` check is Agent v5 only
+    "datadog-go-metro",  # excluding this since `go-metro` check is Agent v5 only
 ]
 
 # Specific integration versions released for the last time by a revoked developer but not shipped anymore.

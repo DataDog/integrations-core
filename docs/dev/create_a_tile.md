@@ -48,7 +48,8 @@ To build a tile on the [**Integrations** page][103]:
    
    The Datadog Development Toolkit expects you to be working in the `$HOME/dd/` directory. This is not mandatory, but working in a different directory requires additional configuration steps.
 
-2. Clone the `integrations-extras` repository:
+2. Fork the [`integrations-extras` repository][102].
+3. Clone the `integrations-extras` repository:
 
    ```shell
    git clone git@github.com:DataDog/integrations-extras.git

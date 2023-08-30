@@ -47,8 +47,8 @@
       "Teradata Overview": "assets/dashboards/teradata_overview.json"
     },
     "monitors": {
-      "High disk space": "assets/recommended_monitors/high_disk_space.json",
-      "Low ready threads": "assets/recommended_monitors/low_ready_threads.json"
+      "High disk space": "assets/monitors/high_disk_space.json",
+      "Low ready threads": "assets/monitors/low_ready_threads.json"
     }
   }
 }

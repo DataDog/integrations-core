@@ -73,7 +73,6 @@ class MultiDatabaseConnectionPool(object):
         self.max_conns: int = max_conns
         self._stats = self.Stats()
         self._mu = threading.RLock()
-        self._query_lock = threading.Lock()
         self._conns: Dict[str, ConnectionInfo] = {}
 
         if hasattr(inspect, 'signature'):
