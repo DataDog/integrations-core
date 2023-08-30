@@ -391,8 +391,8 @@ def collect_profile_metrics_and_tags(profile):
     global_tags = []
     for global_tag in profile_obj.get("metric_tags", []):
         tag = global_tag.get('tag')
-        assert tag is not None, f'invalid tag field in {global_tag}'
-        assert tag != '', f'invalid tag field in {global_tag}'
+        assert tag is not None, 'invalid tag field in {}'.format(global_tag)
+        assert tag != '', 'invalid tag field in {}'.format(global_tag)
         global_tags.append(tag)
     table_metrics = {}
     scalar_metrics = {}
@@ -401,7 +401,7 @@ def collect_profile_metrics_and_tags(profile):
         symbols = global_tag.get('symbols')
         if symbols:
             metric_tags = global_tag.get('metric_tags', [])
-            assert len(metric_tags) > 0, f"table metrics must have at least one tag (table: {table})"
+            assert len(metric_tags) > 0, "table metrics must have at least one tag (table: {})".format(table)
 
             tags = []
             for metric_tag in metric_tags:
