@@ -76,26 +76,39 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
 
 
 def test_snapshot_xmin(aggregator, integration_check, pg_instance):
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
-        with conn.cursor() as cur:
-            cur.execute('select txid_snapshot_xmin(txid_current_snapshot());')
-            xmin = float(cur.fetchall()[0][0])
+    # In the test we are going to first run the check to collect xmin & xmax
     check = integration_check(pg_instance)
     check.check(pg_instance)
+
+    # Once we have the metrics, we will run a simple query to collect the xmin
+    # The xmin we collect should be the same as the one collected by the check
+    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+        with conn.cursor() as cur:
+            if float(POSTGRES_VERSION) >= 13.0:
+                query = 'select pg_snapshot_xmin(pg_current_snapshot());'
+            else:
+                query = 'select txid_snapshot_xmin(txid_current_snapshot());'
+            cur.execute(query)
+            xmin = float(cur.fetchall()[0][0])
 
     expected_tags = _get_expected_tags(check, pg_instance)
     aggregator.assert_metric('postgresql.snapshot.xmin', value=xmin, count=1, tags=expected_tags)
     aggregator.assert_metric('postgresql.snapshot.xmax', value=xmin, count=1, tags=expected_tags)
 
+    # We then force the increase of the txid by 2
     with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         # Force autocommit
         conn.set_session(autocommit=True)
         with conn.cursor() as cur:
             # Force increases of txid
-            cur.execute('select txid_current();')
-            cur.execute('select txid_current();')
+            if float(POSTGRES_VERSION) >= 13.0:
+                query = 'select pg_current_xact_id();'
+            else:
+                query = 'select txid_current();'
+            cur.execute(query)
+            cur.execute(query)
 
-    check = integration_check(pg_instance)
+    # Recollect the metrics
     check.check(pg_instance)
     aggregator.assert_metric('postgresql.snapshot.xmin', value=xmin + 2, count=1, tags=expected_tags)
     aggregator.assert_metric('postgresql.snapshot.xmax', value=xmin + 2, count=1, tags=expected_tags)
