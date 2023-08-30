@@ -52,7 +52,9 @@ class Path(_PathBase):
         return super().write_text(*args, **kwargs)
 
     def open(self, **kwargs):
-        kwargs.setdefault('encoding', 'utf-8')
+        if not kwargs.get('mode', 'r')[1:].startswith('b'):
+            kwargs.setdefault('encoding', 'utf-8')
+
         return super().open(**kwargs)
 
     def remove(self):

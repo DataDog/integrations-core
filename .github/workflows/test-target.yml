@@ -164,6 +164,10 @@ jobs:
         ddev config set repos.${{ inputs.repo }} .
         ddev config set repo ${{ inputs.repo }}
 
+    - name: Lint
+      # TODO: use the more descriptive `--lint` variant when ddev is released
+      run: ddev test -s ${{ inputs.target }}
+
     - name: Prepare for testing
       env: >-
         ${{ fromJson(inputs.setup-env-vars || format(
