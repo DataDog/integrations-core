@@ -12,7 +12,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 The Cilium check is included in the [Datadog Agent][3] package, but it requires additional setup steps to expose Prometheus metrics.
 
-This OpenMetrics-based integration has a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see the [Latest and Legacy Versioning For OpenMetrics-based Integrations][13].
+Starting with version 1.10.0, this OpenMetrics-based integration has a latest mode (`use_openmetrics`: true) and a legacy mode (`use_openmetrics`: false). To get all the most up-to-date features, Datadog recommends enabling the latest mode. For more information, see the [Latest and Legacy Versioning For OpenMetrics-based Integrations][13].
 
 1. In order to enable Prometheus metrics in both the `cilium-agent` and `cilium-operator`, deploy Cilium with the following Helm values set according to your version of Cilium:
    * Cilium < v1.8.x:
@@ -67,7 +67,7 @@ To configure this check for an Agent running on a host:
             ## Note: To see the configuration options for the legacy OpenMetrics implementation (Agent 7.33 or older),
             ## see https://github.com/DataDog/integrations-core/blob/7.33.x/cilium/datadog_checks/cilium/data/conf.yaml.example
             #
-          - use_openmetrics: true # Enables the latest mode of OpenMetrics
+          - use_openmetrics: true # Enables OpenMetrics latest mode
         
             ## @param agent_endpoint - string - optional
             ## The URL where your application metrics are exposed by Prometheus.
