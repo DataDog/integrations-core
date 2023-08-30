@@ -180,10 +180,7 @@ class MultiDatabaseConnectionPool(object):
         """
         success = True
         with self._mu:
-            for dbname in self._conns:
-                # if we can't close the connection within the timeout,
-                # we will still evict dbname from the _conns dict.
-                # this is because psycopy3 pool is closed anyway if timeout expires
+            for dbname in list(self._conns):
                 if not self._terminate_connection_unsafe(dbname, timeout):
                     success = False
         return success
@@ -205,15 +202,20 @@ class MultiDatabaseConnectionPool(object):
 
     def _terminate_connection_unsafe(self, dbname: str, timeout: float = None) -> bool:
         db = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None)).connection
-        if db is not None:
-            try:
-                if not db.closed:
-                    db.close(timeout=timeout)
-                self._stats.connection_closed += 1
-            except Exception:
-                self._stats.connection_closed_failed += 1
-                self._log.exception("failed to close DB connection for db=%s", dbname)
-                return False
+        if db is None:
+            return True
+
+        try:
+            # pyscopg3 will IMMEDIATELY close the connection when calling close().
+            # if timeout is not specified, psycopg will wait for the default 5s to stop the thread in the pool
+            # if timeout is 0 or negative, psycopg will not wait for worker threads to terminate
+            db.close() if timeout is None else db.close(timeout=timeout)
+            self._stats.connection_closed += 1
+        except Exception:
+            self._stats.connection_closed_failed += 1
+            self._log.exception("failed to close DB connection for db=%s", dbname)
+            return False
+
         return True
 
     def get_main_db_pool(self, max_pool_conn_size: int = 3):
