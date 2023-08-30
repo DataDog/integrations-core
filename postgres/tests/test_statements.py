@@ -1358,15 +1358,17 @@ def test_async_job_enabled(
     run_one_check(check, dbm_instance)
     # check should be cancelled & all db connections should be shutdown
     assert check._check_cancelled
-    assert check.db_pool._conns.get(dbm_instance['dbname']) is None, "db connection should be gone"
     if statement_samples_enabled or statement_activity_enabled:
         assert check.statement_samples._job_loop_future is not None
+        assert not check.statement_samples._job_loop_future.running(), "samples thread should be stopped"
     else:
         assert check.statement_samples._job_loop_future is None
     if statement_metrics_enabled:
         assert check.statement_metrics._job_loop_future is not None
+        assert not check.statement_metrics._job_loop_future.running(), "metrics thread should be stopped"
     else:
         assert check.statement_metrics._job_loop_future is None
+    assert check.db_pool._conns.get(dbm_instance['dbname']) is None, "db connection should be gone"
 
 
 @pytest.mark.parametrize("db_user", ["datadog", "datadog_no_catalog"])
