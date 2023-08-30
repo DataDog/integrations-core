@@ -646,21 +646,27 @@ class PostgresStatementSamples(DBMAsyncJob):
             return cached_error_response
 
         try:
+            # if the statement is a parameteredzied query, then we can't explain it directly
+            # we should directly jump into self._explain_parameterized_queries.explain_statement
+            # instead of trying to explain it then failing
+            if self._explain_parameterized_queries._is_parameterized_query(statement):
+                if is_affirmative(self._config.statement_samples_config.get('explain_parameterized_queries', True)):
+                    plan = self._explain_parameterized_queries.explain_statement(
+                        dbname, statement, obfuscated_statement
+                    )
+                    if plan:
+                        return plan, DBExplainError.explained_with_prepared_statement, None
+                e = psycopg2.errors.UndefinedParameter("Unable to explain parameterized query")
+                self._log.debug(
+                    "Unable to collect execution plan, clients using the extended query protocol or prepared statements"
+                    " can't be explained due to the separation of the parsed query and raw bind parameters: %s",
+                    repr(e),
+                )
+                error_response = None, DBExplainError.parameterized_query, '{}'.format(type(e))
+                self._explain_errors_cache[query_signature] = error_response
+                self._emit_run_explain_error(dbname, DBExplainError.parameterized_query, e)
+                return error_response
             return self._run_explain(dbname, statement, obfuscated_statement), None, None
-        except psycopg2.errors.UndefinedParameter as e:
-            self._log.debug(
-                "Unable to collect execution plan, clients using the extended query protocol or prepared statements"
-                " can't be explained due to the separation of the parsed query and raw bind parameters: %s",
-                repr(e),
-            )
-            if is_affirmative(self._config.statement_samples_config.get('explain_parameterized_queries', True)):
-                plan = self._explain_parameterized_queries.explain_statement(dbname, statement, obfuscated_statement)
-                if plan:
-                    return plan, DBExplainError.explained_with_prepared_statement, None
-            error_response = None, DBExplainError.parameterized_query, '{}'.format(type(e))
-            self._explain_errors_cache[query_signature] = error_response
-            self._emit_run_explain_error(dbname, DBExplainError.parameterized_query, e)
-            return error_response
         except psycopg2.errors.UndefinedTable as e:
             self._log.debug("Failed to collect execution plan: %s", repr(e))
             error_response = None, DBExplainError.undefined_table, '{}'.format(type(e))
