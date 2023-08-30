@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 14.2.1 / 2023-08-29
+
 ***Fixed***:
 
 * Revise postgresql.replication_delay to Function with Archive WAL-driven PostgreSQL Replica ([#15629](https://github.com/DataDog/integrations-core/pull/15629))
