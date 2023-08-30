@@ -8,6 +8,10 @@
     * `ddev create` produces initial test file named `test_unit.py` instead of `test_<integration>.py`.
     * Our pytest collection plugin attaches labels to tests based on their location. E.g. all tests in `test_unit.py` get the `unit` label.
 
+***Added***:
+
+* Add short hand for force-env-rebuild ([#15716](https://github.com/DataDog/integrations-core/pull/15716))
+
 ## 24.1.0 / 2023-08-25
 
 ***Security***:

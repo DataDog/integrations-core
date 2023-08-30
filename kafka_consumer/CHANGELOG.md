@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Filter out empty consumer groups ([#15657](https://github.com/DataDog/integrations-core/pull/15657))
+
 ## 4.1.1 / 2023-08-24
 
 ***Fixed***:
