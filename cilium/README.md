@@ -62,12 +62,12 @@ To configure this check for an Agent running on a host:
         instances:
         
             ## @param use_openmetrics - boolean - optional - default: false
-            ## Use the latest OpenMetrics V2 implementation for more features and better performance.
+            ## Use the latest OpenMetrics implementation for more features and better performance.
             ##
             ## Note: To see the configuration options for the legacy OpenMetrics implementation (Agent 7.33 or older),
-            ## https://github.com/DataDog/integrations-core/blob/7.33.x/cilium/datadog_checks/cilium/data/conf.yaml.example
+            ## see https://github.com/DataDog/integrations-core/blob/7.33.x/cilium/datadog_checks/cilium/data/conf.yaml.example
             #
-          - use_openmetrics: true # Enables OpenMetrics V2
+          - use_openmetrics: true # Enables the latest mode of OpenMetrics
         
             ## @param agent_endpoint - string - optional
             ## The URL where your application metrics are exposed by Prometheus.
@@ -82,8 +82,6 @@ To configure this check for an Agent running on a host:
             #
             operator_endpoint: http://localhost:6942/metrics
    ```
-   
-    **Note:** By default, the `use_openmetrics` option is enabled for the latest version of the integration in the `conf.yaml.example` file. Set the `use_openmetrics` configuration option to `false` to use the legacy version of the integration.
     
 2. [Restart the Agent][5].
 
