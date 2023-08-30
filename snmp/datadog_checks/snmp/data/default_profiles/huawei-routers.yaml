@@ -229,14 +229,16 @@ metrics:
           name: huawei.hwNatAddrPoolEndAddr
           OID: 1.3.6.1.4.1.2011.5.25.226.2.3.2.1.3
         tag: huawei_hw_nat_addr_pool_end_addr
-      - column:
-          name: huawei.hwNatAddrPoolRefType
-          OID: 1.3.6.1.4.1.2011.5.25.226.2.3.2.1.5
-        tag: huawei_hw_nat_addr_pool_ref_type
-        mapping:
-          0: nopat
-          1: pat
-          2: easy_ip
+      # the mapping value is ambiguous, difference between the type definition and the metric description
+      # keep this commented until further investigated
+      # - column:
+      #     name: huawei.hwNatAddrPoolRefType
+      #     OID: 1.3.6.1.4.1.2011.5.25.226.2.3.2.1.5
+      #   tag: huawei_hw_nat_addr_pool_ref_type
+      #   mapping:
+      #     0: nopat
+      #     1: pat
+      #     2: easy_ip
   - MIB: HUAWEI-NAT-EXT-MIB
     table:
       name: hwNatSessionTable
