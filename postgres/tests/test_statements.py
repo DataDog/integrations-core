@@ -1349,6 +1349,7 @@ def test_statement_samples_dbstrict(aggregator, integration_check, dbm_instance,
 def test_async_job_enabled(
     integration_check, dbm_instance, statement_activity_enabled, statement_samples_enabled, statement_metrics_enabled
 ):
+    dbm_instance['min_collection_interval'] = 1
     dbm_instance['query_activity'] = {'enabled': statement_activity_enabled, 'run_sync': False}
     dbm_instance['query_samples'] = {'enabled': statement_samples_enabled, 'run_sync': False}
     dbm_instance['query_metrics'] = {'enabled': statement_metrics_enabled, 'run_sync': False}
@@ -1583,6 +1584,7 @@ def test_async_job_inactive_stop(aggregator, integration_check, dbm_instance):
 
 
 def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
+    dbm_instance['min_collection_interval'] = 1
     dbm_instance['query_samples']['run_sync'] = False
     dbm_instance['query_metrics']['run_sync'] = False
     check = integration_check(dbm_instance)
