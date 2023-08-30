@@ -919,6 +919,6 @@ class PostgreSql(AgentCheck):
             if self._check_cancelled and self.db:
                 try:
                     # once check finishes on a cancel, shut down main connection gracefully
-                    self.db.close()
+                    self.db.close(timeout=self._config.min_collection_interval)
                 except Exception:
                     self.log.exception("failed to close DB connection for db=%s", self._config.dbname)
