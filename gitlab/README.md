@@ -16,7 +16,7 @@ For more in-depth monitoring of your GitLab pipelines, check out [CI Pipeline Vi
 
 This OpenMetrics-based integration has a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][18].
 
-Metrics marked as `[Legacy]`, `[OpenMetricsV1]`, or `[OpenMetricsV2]` are only available using the corresponding version of the GitLab integration. Metrics not marked are collected by all three versions.
+Metrics marked as `[OpenMetricsV1]` or `[OpenMetricsV2]` are only available using the corresponding version of the GitLab integration. All other metrics are collected by both versions.
 
 ### Installation
 
