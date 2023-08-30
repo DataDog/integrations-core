@@ -181,9 +181,8 @@ class MultiDatabaseConnectionPool(object):
         success = True
         start_time = time.time()
         with self._mu:
-            while self._conns and (timeout is None or time.time() - start_time < timeout):
-                dbname = next(iter(self._conns))
-                if not self._terminate_connection_unsafe(dbname):
+            for dbname in self._conns:
+                if not self._terminate_connection_unsafe(dbname, timeout):
                     success = False
         return success
 
@@ -202,12 +201,12 @@ class MultiDatabaseConnectionPool(object):
             # Could not evict a candidate; return None
             return None
 
-    def _terminate_connection_unsafe(self, dbname: str):
+    def _terminate_connection_unsafe(self, dbname: str, timeout: int = None) -> bool:
         db = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None)).connection
         if db is not None:
             try:
                 if not db.closed:
-                    db.close()
+                    db.close(timeout=timeout)
                 self._stats.connection_closed += 1
             except Exception:
                 self._stats.connection_closed_failed += 1
