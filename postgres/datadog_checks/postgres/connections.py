@@ -203,7 +203,7 @@ class MultiDatabaseConnectionPool(object):
             # Could not evict a candidate; return None
             return None
 
-    def _terminate_connection_unsafe(self, dbname: str, timeout: int = None) -> bool:
+    def _terminate_connection_unsafe(self, dbname: str, timeout: float = None) -> bool:
         db = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None)).connection
         if db is not None:
             try:
