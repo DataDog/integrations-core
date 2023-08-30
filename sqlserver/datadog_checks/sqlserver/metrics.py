@@ -676,10 +676,13 @@ class SqlDbFragmentation(BaseSqlServerMetric):
         logger.debug("%s: gathering fragmentation metrics for these databases: %s", cls.__name__, databases)
 
         for db in databases:
+            ctx = construct_use_statement(db)
             query = cls.QUERY_BASE.format(db=db)
-            logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
             start = get_precise_time()
             try:
+                logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
+                cursor.execute(ctx)
+                logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
                 cursor.execute(query)
                 data = cursor.fetchall()
             except Exception as e:
