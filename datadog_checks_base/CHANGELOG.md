@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Bump oracledb version ([#15595](https://github.com/DataDog/integrations-core/pull/15595))
+
 ## 33.1.0 / 2023-08-25
 
 ***Security***:
