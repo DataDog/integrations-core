@@ -179,9 +179,11 @@ class MultiDatabaseConnectionPool(object):
         :return:
         """
         success = True
-        start_time = time.time()
         with self._mu:
             for dbname in self._conns:
+                # if we can't close the connection within the timeout,
+                # we will still evict dbname from the _conns dict.
+                # this is because psycopy3 pool is closed anyway if timeout expires
                 if not self._terminate_connection_unsafe(dbname, timeout):
                     success = False
         return success
