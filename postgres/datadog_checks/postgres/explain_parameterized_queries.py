@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
+import re
 
 from psycopg.rows import dict_row
 
@@ -166,3 +167,11 @@ class ExplainParameterizedQueries:
             logger.debug('Executing query=[%s]', query)
             cursor.execute(query)
             return cursor.fetchall()
+
+    def _is_parameterized_query(self, statement: str) -> bool:
+        # Use regex to match $1 to determine if a query is parameterized
+        # BUT single quoted string '$1' should not be considered as a parameter
+        # e.g. SELECT * FROM products WHERE id = $1; -- $1 is a parameter
+        # e.g. SELECT * FROM products WHERE id = '$1'; -- '$1' is not a parameter
+        parameterized_query_pattern = r"(?<!')\$(?!'\$')[\d]+(?!')"
+        return re.search(parameterized_query_pattern, statement) is not None
