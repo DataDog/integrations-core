@@ -658,7 +658,7 @@ class SqlDbFragmentation(BaseSqlServerMetric):
         "SELECT DB_NAME(DDIPS.database_id) as database_name, OBJECT_NAME(DDIPS.object_id, DDIPS.database_id) as object_name, "
         "index_id, fragment_count, avg_fragment_size_in_pages, page_count, "
         "avg_fragmentation_in_percent, I.name as index_name"
-        "FROM {table} as DDIPS (DB_ID('{{db}}'),null,null,null,null) INNER JOIN sys.indexes I ON I.object_id = DDIPS.object_id AND DDIPS.index_id = I.index_id"
+        "FROM {table} as DDIPS (DB_ID('{{db}}'),null,null,null,null) INNER JOIN sys.indexes as I ON I.object_id = DDIPS.object_id AND DDIPS.index_id = I.index_id"
         "WHERE fragment_count is not null and avg_fragmentation_in_percent > 0".format(table=TABLE)
     )
 
