@@ -1,6 +1,9 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
+import yaml
 
 from .. import common
 
@@ -345,3 +348,73 @@ def assert_extend_juniper_virtualchassis(aggregator, common_tags):
     # fmt: on
     tags = ['port_name:port111'] + common_tags
     aggregator.assert_metric('snmp.jnxVirtualChassisPortInPkts', metric_type=aggregator.COUNT, tags=tags)
+
+
+def assert_all_profile_metrics_and_tags_covered(profile, aggregator):
+    metric_and_tags = collect_profile_metrics_and_tags(profile)
+    global_tags = set(metric_and_tags["global_tags"] + ['device_namespace', 'snmp_device', 'snmp_host', 'snmp_profile'])
+
+    for metric, metric_info in metric_and_tags["table_metrics"].items():
+        collected_metric_tag_keys = get_collected_metric_tag_keys(aggregator, metric)
+        expected_metric_tag_keys = global_tags | set(metric_info.get('tags'))
+        assert (
+            collected_metric_tag_keys == expected_metric_tag_keys
+        ), f"{collected_metric_tag_keys} || {expected_metric_tag_keys}"
+
+    for metric in metric_and_tags["scalar_metrics"]:
+        assert aggregator.metrics('snmp.' + metric) > 0
+
+
+def get_collected_metric_tag_keys(aggregator, metric):
+    collected_metrics = aggregator.metrics('snmp.' + metric)
+    collected_metric_tags = set()
+    for collected_metric in collected_metrics:
+        collected_metric_tags |= set(collected_metric.tags)
+    collected_metric_tag_keys = set()
+    for tag in collected_metric_tags:
+        tag_key = tag.split(':', maxsplit=1)[0]
+        collected_metric_tag_keys.add(tag_key)
+    return collected_metric_tag_keys
+
+
+def collect_profile_metrics_and_tags(profile):
+    profile_path = os.path.join(
+        common.HERE, "..", "datadog_checks", "snmp", "data", "default_profiles", profile + ".yaml"
+    )
+    with open(profile_path, 'r') as profile_file:
+        profile_obj = yaml.safe_load(profile_file)
+    global_tags = []
+    for global_tag in profile_obj.get("metric_tags", []):
+        tag = global_tag.get('tag')
+        assert tag is not None, f'invalid tag field in {global_tag}'
+        assert tag != '', f'invalid tag field in {global_tag}'
+        global_tags.append(tag)
+    table_metrics = {}
+    scalar_metrics = {}
+    for global_tag in profile_obj.get("metrics", []):
+        table = global_tag.get('table')
+        symbols = global_tag.get('symbols')
+        if symbols:
+            metric_tags = global_tag.get('metric_tags', [])
+            assert len(metric_tags) > 0, f"table metrics must have at least one tag (table: {table})"
+
+            tags = []
+            for metric_tag in metric_tags:
+                tag = metric_tag.get('tag')
+                if tag:
+                    tags.append(tag)
+
+            for symbol in symbols:
+                name = symbol.get('name')
+                table_metrics[name] = {
+                    "tags": tags,
+                }
+        else:
+            symbol = global_tag.get('symbol', {}).get('name')
+            if symbol:
+                scalar_metrics[symbol] = {}
+    return {
+        "global_tags": global_tags,
+        "scalar_metrics": scalar_metrics,
+        "table_metrics": table_metrics,
+    }
