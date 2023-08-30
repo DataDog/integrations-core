@@ -359,7 +359,10 @@ def assert_all_profile_metrics_and_tags_covered(profile, aggregator):
         expected_metric_tag_keys = global_tags | set(metric_info.get('tags'))
         assert collected_metric_tag_keys == expected_metric_tag_keys, "collected and profile metric tags differ"
     for metric in metric_and_tags["scalar_metrics"]:
-        assert aggregator.metrics('snmp.' + metric) > 0
+        assert len(aggregator.metrics('snmp.' + metric)) > 0
+        for collected_metric in aggregator.metrics('snmp.' + metric):
+            tag_keys = tags_to_tag_keys(collected_metric.tags)
+            assert tag_keys == global_tags
 
 
 def get_collected_metric_tag_keys(aggregator, metric):
@@ -367,11 +370,14 @@ def get_collected_metric_tag_keys(aggregator, metric):
     collected_metric_tags = set()
     for collected_metric in collected_metrics:
         collected_metric_tags |= set(collected_metric.tags)
-    collected_metric_tag_keys = set()
-    for tag in collected_metric_tags:
-        tag_key = tag.split(':', maxsplit=1)[0]
-        collected_metric_tag_keys.add(tag_key)
-    return collected_metric_tag_keys
+    return tags_to_tag_keys(collected_metric_tags)
+
+
+def tags_to_tag_keys(tags):
+    tag_keys = set()
+    for tag in tags:
+        tag_keys.add(tag.split(':', maxsplit=1)[0])
+    return tag_keys
 
 
 def collect_profile_metrics_and_tags(profile):
