@@ -26,6 +26,7 @@ from datadog_checks.postgres.statement_samples import (
 )
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
 from datadog_checks.postgres.util import payload_pg_version
+from datadog_checks.postgres.version_utils import V12
 
 from .common import DB_NAME, HOST, PORT, PORT_REPLICA2, POSTGRES_VERSION
 from .utils import WaitGroup, _get_conn, _get_superconn, requires_over_10, run_one_check
@@ -946,7 +947,6 @@ def test_activity_snapshot_collection(
     expected_keys,
     expected_conn_out,
 ):
-
     if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
         # cannot catch any queries from other users
         # only can see own queries
@@ -1273,6 +1273,41 @@ def test_statement_run_explain_errors(
             tags=expected_tags,
             hostname='stubbed.hostname',
         )
+
+
+@pytest.mark.parametrize(
+    "query,expected_explain_err_code,expected_err",
+    [
+        (
+            "select * from pg_settings where name = $1",
+            DBExplainError.explained_with_prepared_statement,
+            None,
+        ),
+    ],
+)
+def test_statement_run_explain_parameterized_queries(
+    integration_check,
+    dbm_instance,
+    query,
+    expected_explain_err_code,
+    expected_err,
+):
+    dbm_instance['query_activity']['enabled'] = False
+    dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['query_samples']['explain_parameterized_queries'] = True
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    check.check(dbm_instance)
+    if check.version < V12:
+        return
+
+    run_one_check(check, dbm_instance)
+    _, explain_err_code, err = check.statement_samples._run_and_track_explain("datadog_test", query, query, query)
+    run_one_check(check, dbm_instance)
+
+    assert explain_err_code == expected_explain_err_code
+    assert err == expected_err
 
 
 @pytest.mark.parametrize("dbstrict", [True, False])
