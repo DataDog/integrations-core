@@ -655,11 +655,11 @@ class SqlDbFragmentation(BaseSqlServerMetric):
     DEFAULT_METRIC_TYPE = 'gauge'
 
     QUERY_BASE = (
-        "select DB_NAME(database_id) as database_name, OBJECT_NAME(object_id, database_id) as object_name, "
-        "index_id, partition_number, fragment_count, avg_fragment_size_in_pages, "
-        "avg_fragmentation_in_percent "
-        "from {table} (DB_ID('{{db}}'),null,null,null,null) "
-        "where fragment_count is not null".format(table=TABLE)
+        "SELECT DB_NAME(DDIPS.database_id) as database_name, OBJECT_NAME(DDIPS.object_id, DDIPS.database_id) as object_name, "
+        "index_id, fragment_count, avg_fragment_size_in_pages, page_count, "
+        "avg_fragmentation_in_percent, I.name as index_name"
+        "FROM {table} as DDIPS (DB_ID('{{db}}'),null,null,null,null) INNER JOIN sys.indexes I ON I.object_id = DDIPS.object_id AND DDIPS.index_id = I.index_id"
+        "WHERE fragment_count is not null and avg_fragmentation_in_percent > 0".format(table=TABLE)
     )
 
     def __init__(self, cfg_instance, base_name, report_function, column, logger):
@@ -704,6 +704,7 @@ class SqlDbFragmentation(BaseSqlServerMetric):
         database_name = columns.index("database_name")
         object_name_index = columns.index("object_name")
         index_id_index = columns.index("index_id")
+        index_name_index = columns.index("index_name")
 
         for row in rows:
             if row[database_name] != self.instance:
@@ -712,6 +713,7 @@ class SqlDbFragmentation(BaseSqlServerMetric):
             column_val = row[value_column_index]
             object_name = row[object_name_index]
             index_id = row[index_id_index]
+            index_name = row[index_name_index]
 
             object_list = self.cfg_instance.get('db_fragmentation_object_names')
 
@@ -722,6 +724,7 @@ class SqlDbFragmentation(BaseSqlServerMetric):
                 u'database_name:{}'.format(ensure_unicode(self.instance)),
                 u'object_name:{}'.format(ensure_unicode(object_name)),
                 u'index_id:{}'.format(ensure_unicode(index_id)),
+                u'index_name:{}'.format(ensure_unicode(index_name)),
             ]
 
             metric_tags.extend(self.tags)
