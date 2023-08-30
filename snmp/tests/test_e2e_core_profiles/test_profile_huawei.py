@@ -190,7 +190,6 @@ def test_e2e_profile_huawei(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
-
     assert_all_profile_metrics_and_tags_covered('huawei', aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
