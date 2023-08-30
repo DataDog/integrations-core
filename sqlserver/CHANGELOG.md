@@ -6,6 +6,10 @@
 
 * Fix sqlserver file stats metrics for Azure SQL DB ([#15695](https://github.com/DataDog/integrations-core/pull/15695))
 
+***Changed***:
+
+* Cache performance counter type to prevent querying for the same counter multiple times (especially for the per-db counters) ([#15714](https://github.com/DataDog/integrations-core/pull/15714))
+
 ## 14.0.0 / 2023-08-18
 
 ***Changed***:
