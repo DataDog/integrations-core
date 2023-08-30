@@ -659,7 +659,7 @@ class SqlDbFragmentation(BaseSqlServerMetric):
         "DDIPS.index_id as index_id, DDIPS.fragment_count as fragment_count, DDIPS.avg_fragment_size_in_pages as avg_fragment_size_in_pages, DDIPS.page_count as page_count, "
         "DDIPS.avg_fragmentation_in_percent as avg_fragmentation_in_percent, I.name as index_name "
         "FROM {table} (DB_ID('{{db}}'),null,null,null,null) as DDIPS INNER JOIN sys.indexes as I ON I.object_id = DDIPS.object_id AND DDIPS.index_id = I.index_id "
-        "WHERE DDIPS.fragment_count is not null and DDIPS.avg_fragmentation_in_percent > 0".format(table=TABLE)
+        "WHERE DDIPS.fragment_count is not null".format(table=TABLE)
     )
 
     def __init__(self, cfg_instance, base_name, report_function, column, logger):
