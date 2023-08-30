@@ -50,6 +50,7 @@ MOCK_CALICO_INSTANCE = {
 }
 
 OPTIONAL_METRICS = {
+    'calico.felix.int_dataplane_failures.count',
     'calico.felix.ipset.calls.count',
     'calico.felix.ipset.errors.count',
     'calico.felix.iptables.restore_calls.count',
