@@ -45,6 +45,10 @@ def test_e2e_profile_alcatel_lucent_ind(dd_agent_check):
     aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
         [
+            'ent_physical_class:battery',
+            'ent_physical_name:name1',
+            'ent_physical_serial_num:ALC12345XYZ67890',
+            'ent_physical_model_name:ALC-7504',
             'chas_ent_phys_admin_status:power_on',
             'chas_ent_phys_led_status_backup_ps:green_blink',
             'chas_ent_phys_led_status_control:green_blink',
@@ -63,6 +67,10 @@ def test_e2e_profile_alcatel_lucent_ind(dd_agent_check):
             'chas_ent_phys_oper_status:not_present',
         ],
         [
+            'ent_physical_class:backplane',
+            'ent_physical_name:name2',
+            'ent_physical_serial_num:ALC12345XYZ67891',
+            'ent_physical_model_name:ALC-7505',
             'chas_ent_phys_admin_status:reset_all',
             'chas_ent_phys_led_status_backup_ps:not_applicable',
             'chas_ent_phys_led_status_control:off',
