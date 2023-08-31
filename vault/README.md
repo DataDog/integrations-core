@@ -10,9 +10,8 @@ This check monitors [Vault][1] cluster health and leader changes.
 
 The Vault check is included in the [Datadog Agent][2] package.
 
-#### Prerequisites
 
-This OpenMetrics-based integration has a latest version (`use_openmetrics`: true) and a legacy version (`use_openmetrics`: false). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. Versions 3.4.0 and later of this check use [OpenMetrics][21] for metric collection, which requires Python 3. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][22].
+Starting with version 3.4.0, this OpenMetrics-based integration has a *latest* mode (`use_openmetrics`: true) and a *legacy* mode (`use_openmetrics`: false). To get all the most up-to-date features, Datadog recommends enabling the *latest* mode. Note that *latest* mode requires Python 3. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][22].
 
 1. Ensure you have enabled [Prometheus metrics in the Vault configuration][3].
 
