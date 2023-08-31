@@ -8,7 +8,6 @@ from collections import defaultdict
 import click
 import orjson
 from aiohttp import request
-from aiomultiprocess import Pool
 from packaging.markers import Marker
 from packaging.requirements import InvalidRequirement, Requirement
 from packaging.specifiers import InvalidSpecifier, SpecifierSet
@@ -173,36 +172,39 @@ async def get_version_data(url):
             return data['info']['name'], data['releases']
 
 
-async def scrape_version_data(urls):
+async def fetch_versions(urls):
+    return await asyncio.gather(*(get_version_data(url) for url in urls))
+
+
+def scrape_version_data(urls):
     package_data = {}
 
-    async with Pool() as pool:
-        async for package_name, releases in pool.map(get_version_data, urls):
-            latest_py2 = None
-            latest_py3 = None
+    for package_name, releases in asyncio.run(fetch_versions(urls)):
+        latest_py2 = None
+        latest_py3 = None
 
-            versions = []
-            for parsed_version, artifacts in sorted(filter_releases(releases), reverse=True):
-                version = str(parsed_version)
-                versions.append(version)
+        versions = []
+        for parsed_version, artifacts in sorted(filter_releases(releases), reverse=True):
+            version = str(parsed_version)
+            versions.append(version)
 
-                for artifact in artifacts:
-                    if artifact.get("yanked", False):
-                        continue
+            for artifact in artifacts:
+                if artifact.get("yanked", False):
+                    continue
 
-                    if latest_py2 is None and artifact_compatible_with_python(artifact, '2'):
-                        latest_py2 = version
-                    if latest_py3 is None and artifact_compatible_with_python(artifact, '3'):
-                        latest_py3 = version
+                if latest_py2 is None and artifact_compatible_with_python(artifact, '2'):
+                    latest_py2 = version
+                if latest_py3 is None and artifact_compatible_with_python(artifact, '3'):
+                    latest_py3 = version
 
-                if latest_py2 is not None and latest_py3 is not None:
-                    break
-            else:
-                # Package only released source distributions
-                if latest_py2 is None and latest_py3 is None:
-                    latest_py2 = latest_py3 = versions[0]
+            if latest_py2 is not None and latest_py3 is not None:
+                break
+        else:
+            # Package only released source distributions
+            if latest_py2 is None and latest_py3 is None:
+                latest_py2 = latest_py3 = versions[0]
 
-            package_data[package_name] = {'py2': latest_py2, 'py3': latest_py3}
+        package_data[package_name] = {'py2': latest_py2, 'py3': latest_py3}
 
     return package_data
 
@@ -227,7 +229,7 @@ def updates(app, ctx, sync_dependencies, include_security_deps, batch_size):
         app.abort()
 
     api_urls = [f'https://pypi.org/pypi/{package}/json' for package in dependencies]
-    package_data = asyncio.run(scrape_version_data(api_urls))
+    package_data = scrape_version_data(api_urls)
     package_data = {canonicalize_name(package_name): versions for package_name, versions in package_data.items()}
 
     new_dependencies = copy.deepcopy(dependencies)
