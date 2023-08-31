@@ -20,7 +20,7 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_anue(dd_agent_check):
-    profile = 'anue-packet-broker'
+    profile = 'anue'
     config = create_e2e_core_test_config(profile)
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
