@@ -44,7 +44,7 @@
 * Allow for collection of AO metrics for azure sql db ([#15508](https://github.com/DataDog/integrations-core/pull/15508))
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 12.0.0 / 2023-07-10
+## 12.0.0 / 2023-07-10 / Agent 7.47.0
 
 ***Changed***:
 

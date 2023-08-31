@@ -28,7 +28,7 @@
 * Lower logging level if there's an error scraping the template endpoint to DEBUG ([#15381](https://github.com/DataDog/integrations-core/pull/15381))
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 5.5.0 / 2023-07-10
+## 5.5.0 / 2023-07-10 / Agent 7.47.0
 
 ***Added***:
 
