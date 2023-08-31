@@ -7,6 +7,11 @@ import yaml
 
 from .. import common
 
+# We are excluding some tags like `device_vendor` since:
+# - it's not part of the main purpose of assert_all_profile_metrics_and_tags_covered
+# - and asserting `device_vendor` would require scanning recursively the profile (adds complexity to the assertion code)
+ASSERT_ALL_PROFILE_EXCLUDED_TAGS = {'device_vendor'}
+
 
 def create_e2e_core_test_config(community_string):
     """
@@ -355,7 +360,7 @@ def assert_all_profile_metrics_and_tags_covered(profile, aggregator):
     global_tags = set(metric_and_tags["global_tags"] + ['device_namespace', 'snmp_device', 'snmp_host', 'snmp_profile'])
 
     for metric, metric_info in metric_and_tags["table_metrics"].items():
-        collected_metric_tag_keys = get_collected_metric_tag_keys(aggregator, metric)
+        collected_metric_tag_keys = get_collected_metric_tag_keys(aggregator, metric) - ASSERT_ALL_PROFILE_EXCLUDED_TAGS
         expected_metric_tag_keys = global_tags | set(metric_info.get('tags'))
         assert (
             collected_metric_tag_keys == expected_metric_tag_keys
@@ -363,7 +368,7 @@ def assert_all_profile_metrics_and_tags_covered(profile, aggregator):
     for metric in metric_and_tags["scalar_metrics"]:
         assert len(aggregator.metrics('snmp.' + metric)) > 0
         for collected_metric in aggregator.metrics('snmp.' + metric):
-            tag_keys = tags_to_tag_keys(collected_metric.tags)
+            tag_keys = tags_to_tag_keys(collected_metric.tags) - ASSERT_ALL_PROFILE_EXCLUDED_TAGS
             assert tag_keys == global_tags
 
 
