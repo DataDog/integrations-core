@@ -682,14 +682,14 @@ def test_e2e_cisco_nexus(dd_agent_check):
         )
 
     tag_rows = [
-        ['fru:6', 'power_admin_status:powerCycle', 'power_oper_status:onButInlinePowerFail'],
-        ['fru:7', 'power_admin_status:inlineOn', 'power_oper_status:offDenied'],
-        ['fru:15', 'power_admin_status:inlineAuto', 'power_oper_status:offCooling'],
-        ['fru:16', 'power_admin_status:off', 'power_oper_status:offCooling'],
-        ['fru:19', 'power_admin_status:on', 'power_oper_status:offEnvFan'],
-        ['fru:27', 'power_admin_status:inlineOn', 'power_oper_status:failed'],
-        ['fru:30', 'power_admin_status:on', 'power_oper_status:offEnvFan'],
-        ['fru:31', 'power_admin_status:on', 'power_oper_status:offDenied'],
+        ['fru:6', 'power_admin_status:power_cycle', 'power_oper_status:on_but_inline_power_fail'],
+        ['fru:7', 'power_admin_status:inline_on', 'power_oper_status:off_denied'],
+        ['fru:15', 'power_admin_status:inline_auto', 'power_oper_status:off_cooling'],
+        ['fru:16', 'power_admin_status:off', 'power_oper_status:off_cooling'],
+        ['fru:19', 'power_admin_status:on', 'power_oper_status:off_env_fan'],
+        ['fru:27', 'power_admin_status:inline_on', 'power_oper_status:failed'],
+        ['fru:30', 'power_admin_status:on', 'power_oper_status:off_env_fan'],
+        ['fru:31', 'power_admin_status:on', 'power_oper_status:off_denied'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cefcFRUPowerStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -698,11 +698,11 @@ def test_e2e_cisco_nexus(dd_agent_check):
         ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_physical_name:name1', 'switch_state:progressing'],
         ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_physical_name:name2', 'switch_state:ready'],
         ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_physical_name:name3', 'switch_state:added'],
-        ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_physical_name:name4', 'switch_state:verMismatch'],
+        ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_physical_name:name4', 'switch_state:ver_mismatch'],
         ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_physical_name:name5', 'switch_state:progressing'],
-        ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_physical_name:name6', 'switch_state:sdmMismatch'],
+        ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_physical_name:name6', 'switch_state:sdm_mismatch'],
         ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_physical_name:name7', 'switch_state:provisioned'],
-        ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_physical_name:name8', 'switch_state:verMismatch'],
+        ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_physical_name:name8', 'switch_state:ver_mismatch'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cswSwitchInfo', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -720,9 +720,9 @@ def test_e2e_cisco_nexus(dd_agent_check):
 
     tag_rows = [
         ['fan_status_descr:fan_1', 'fan_state:critical', 'fan_status_index:4'],
-        ['fan_status_descr:fan_2', 'fan_state:notFunctioning', 'fan_status_index:6'],
+        ['fan_status_descr:fan_2', 'fan_state:not_functioning', 'fan_status_index:6'],
         ['fan_status_descr:fan_3', 'fan_state:critical', 'fan_status_index:7'],
-        ['fan_status_descr:fan_4', 'fan_state:notPresent', 'fan_status_index:16'],
+        ['fan_status_descr:fan_4', 'fan_state:not_present', 'fan_status_index:16'],
         ['fan_status_descr:fan_8', 'fan_state:normal', 'fan_status_index:30'],
     ]
     for tag_row in tag_rows:

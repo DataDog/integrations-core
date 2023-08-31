@@ -34,7 +34,7 @@ metrics:
           1: idle
           2: connect
           3: active
-          4: open_ssent
+          4: opensent
           5: openconfirm
           6: established
       - column:
@@ -49,6 +49,7 @@ metrics:
           5: remote_peer_not_reachable
           6: direct_connect_interface_down
           7: route_limit
+          # the mapping is defined in the metric description
   - MIB: HUAWEI-BGP-VPN-MIB
     table:
       name: hwBgpPeerRouteTable
@@ -156,13 +157,14 @@ metrics:
           name: huawei.hwServerAddr
           OID: 1.3.6.1.4.1.2011.5.25.194.1.4.1.1
         tag: huawei_hw_server_addr
-      - column:
-          OID: 1.3.6.1.4.1.2011.5.25.194.1.4.1.2
-          name: huawei.hwServerStatus
-        tag: huawei_hw_server_status
-        mapping:
-          1: static
-          2: dynamic
+      # - column:
+      #     OID: 1.3.6.1.4.1.2011.5.25.194.1.4.1.2
+      #     name: huawei.hwServerStatus
+      #   tag: huawei_hw_server_status
+      #   mapping:
+      #     1: static
+      #     2: dynamic
+      #   mapping absent in MIB
   - MIB: HUAWEI-FIREWALL-MIB
     table:
       name: hwFwNetEventsTable
@@ -227,14 +229,16 @@ metrics:
           name: huawei.hwNatAddrPoolEndAddr
           OID: 1.3.6.1.4.1.2011.5.25.226.2.3.2.1.3
         tag: huawei_hw_nat_addr_pool_end_addr
-      - column:
-          name: huawei.hwNatAddrPoolRefType
-          OID: 1.3.6.1.4.1.2011.5.25.226.2.3.2.1.5
-        tag: huawei_hw_nat_addr_pool_ref_type
-        mapping:
-          0: none
-          1: pat
-          2: no_pat
+      # the mapping value is ambiguous, difference between the type definition and the metric description
+      # keep this commented until further investigated
+      # - column:
+      #     name: huawei.hwNatAddrPoolRefType
+      #     OID: 1.3.6.1.4.1.2011.5.25.226.2.3.2.1.5
+      #   tag: huawei_hw_nat_addr_pool_ref_type
+      #   mapping:
+      #     0: nopat
+      #     1: pat
+      #     2: easy_ip
   - MIB: HUAWEI-NAT-EXT-MIB
     table:
       name: hwNatSessionTable
