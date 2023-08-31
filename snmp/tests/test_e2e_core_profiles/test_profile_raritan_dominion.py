@@ -49,11 +49,12 @@ def test_e2e_profile_raritan_dominion(dd_agent_check):
     tag_rows = [
         [
             'raritan_remotekvm_port_data_name:kept kept oxen acted Jaded but',
-            'raritan_remotekvm_port_data_status:available',
+            'raritan_remotekvm_port_data_status:inactive',
             'raritan_remotekvm_port_data_type:their oxen oxen acted',
         ],
         [
             'raritan_remotekvm_port_data_name:oxen oxen driving acted forward',
+            'raritan_remotekvm_port_data_status:busy',
             'raritan_remotekvm_port_data_type:but Jaded their quaintly quaintly',
         ],
     ]

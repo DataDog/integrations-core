@@ -55,12 +55,12 @@ def test_e2e_profile_dell_os10(dd_agent_check):
         [
             'dell_os10_card_description:quaintly their forward their driving Jaded acted driving',
             'dell_os10_card_service_tag:oxen',
-            'dell_os10_card_status:down',
+            'dell_os10_card_status:card_mis_match',
         ],
         [
             'dell_os10_card_description:quaintly zombies driving driving',
             'dell_os10_card_service_tag:but',
-            'dell_os10_card_status:down',
+            'dell_os10_card_status:card_mis_match',
         ],
     ]
     for tag_row in tag_rows:
