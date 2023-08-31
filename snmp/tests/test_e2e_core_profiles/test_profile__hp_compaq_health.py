@@ -92,8 +92,8 @@ def test_e2e_profile__hp_compaq_health(dd_agent_check):
         )
 
     tag_rows = [
-        ['chassis_num:22', 'power_supply_status:nvramInvalid'],
-        ['chassis_num:8', 'power_supply_status:generalFailure'],
+        ['chassis_num:22', 'power_supply_status:nvram_invalid'],
+        ['chassis_num:8', 'power_supply_status:general_failure'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(

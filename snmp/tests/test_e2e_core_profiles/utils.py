@@ -149,7 +149,7 @@ def assert_extend_cisco_generic(aggregator, common_tags):
     aggregator.assert_metric(
         'snmp.ciscoEnvMonFanStatus',
         metric_type=aggregator.GAUGE,
-        tags=common_tags + ['fan_state:notFunctioning', 'fan_status_index:11'],
+        tags=common_tags + ['fan_state:not_functioning', 'fan_status_index:11'],
     )
     aggregator.assert_metric(
         'snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=common_tags + ['fan_status_index:11']
