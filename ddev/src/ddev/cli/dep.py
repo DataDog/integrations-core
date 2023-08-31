@@ -12,6 +12,7 @@ from aiomultiprocess import Pool
 from packaging.markers import Marker
 from packaging.requirements import InvalidRequirement, Requirement
 from packaging.specifiers import InvalidSpecifier, SpecifierSet
+from packaging.utils import canonicalize_name
 from packaging.version import InvalidVersion, Version
 
 # Dependencies to ignore when update dependencies
@@ -64,7 +65,7 @@ def pin(app, definition):
         app.abort()
 
     requirement = Requirement(definition)
-    package = normalize_project_name(requirement.name)
+    package = canonicalize_name(requirement.name)
     if package not in dependencies:
         app.abort(f'Unknown package: {package}')
 
@@ -216,7 +217,7 @@ def updates(app, ctx, sync_dependencies, include_security_deps, batch_size):
     ignore_deps = set(IGNORED_DEPS)
     if not include_security_deps:
         ignore_deps.update(SECURITY_DEPS)
-    ignore_deps = {normalize_project_name(d) for d in ignore_deps}
+    ignore_deps = {canonicalize_name(d) for d in ignore_deps}
 
     dependencies, errors = read_agent_dependencies(app.repo)
 
@@ -227,7 +228,7 @@ def updates(app, ctx, sync_dependencies, include_security_deps, batch_size):
 
     api_urls = [f'https://pypi.org/pypi/{package}/json' for package in dependencies]
     package_data = asyncio.run(scrape_version_data(api_urls))
-    package_data = {normalize_project_name(package_name): versions for package_name, versions in package_data.items()}
+    package_data = {canonicalize_name(package_name): versions for package_name, versions in package_data.items()}
 
     new_dependencies = copy.deepcopy(dependencies)
     version_updates = defaultdict(lambda: defaultdict(set))
@@ -339,7 +340,7 @@ def update_check_dependencies(integration, dependencies):
 
         for old_dependency in old_dependencies:
             old_requirement = Requirement(old_dependency)
-            name = normalize_project_name(old_requirement.name)
+            name = canonicalize_name(old_requirement.name)
             if name not in dependencies:
                 new_dependencies[name].add(old_dependency)
                 continue
@@ -383,7 +384,7 @@ def load_dependency_data_from_requirements(req_file, dependencies, errors, check
             errors.append(f'File `{os.path.basename(req_file)}` has an invalid dependency: `{line}`\n{e}')
             continue
 
-        project = dependencies[normalize_project_name(req.name)]
+        project = dependencies[canonicalize_name(req.name)]
         dependency = get_normalized_dependency(req)
         set_project_dependency(project, dependency, check_name)
 
@@ -403,7 +404,7 @@ def load_dependency_data_from_metadata(integration, dependencies, errors):
                 )
                 continue
 
-            project = dependencies[normalize_project_name(req.name)]
+            project = dependencies[canonicalize_name(req.name)]
             dependency = get_normalized_dependency(req)
             set_project_dependency(project, dependency, integration.name)
 
@@ -432,24 +433,13 @@ def update_project_dependency(project, dependency):
 
 
 def get_normalized_dependency(requirement):
-    requirement.name = normalize_project_name(requirement.name)
+    requirement.name = canonicalize_name(requirement.name)
 
     if requirement.specifier:
         requirement.specifier = SpecifierSet(str(requirement.specifier).lower())
 
     if requirement.extras:
-        requirement.extras = {normalize_project_name(extra) for extra in requirement.extras}
+        requirement.extras = {canonicalize_name(extra) for extra in requirement.extras}
 
     # All TOML writers use double quotes, so allow direct writing or copy/pasting to avoid escaping
     return str(requirement).replace('"', "'")
-
-
-def normalize_project_name(project_name):
-    import re
-
-    # https://www.python.org/dev/peps/pep-0508/#names
-    if not re.search('^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$', project_name, re.IGNORECASE):
-        raise ValueError('Project name must only contain ASCII letters/digits, underscores, hyphens, and periods.')
-
-    # https://www.python.org/dev/peps/pep-0503/#normalized-names
-    return re.sub(r'[-_.]+', '-', project_name).lower()

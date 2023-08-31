@@ -20,6 +20,19 @@ def test_pin(ddev, fake_repo):
     assert_dependencies(fake_repo, 'bar', ['dep-a==1.2.3'])
 
 
+def test_pin_non_canonical_name(ddev, fake_repo):
+    create_integration(fake_repo, 'foo', ['non-canonical-dep==1.0.0'])
+
+    # We use a non-canonical name, to assert that it gets recognized as the same as the
+    # existing, canonical name
+    result = ddev('dep', 'pin', 'non.Canonical_dep==1.2.3')
+
+    assert result.exit_code == 0
+    assert result.output == 'Files updated: 1\n'
+
+    assert_dependencies(fake_repo, 'foo', ['non.Canonical_dep==1.2.3'])
+
+
 def test_freeze(ddev, fake_repo):
     create_integration(fake_repo, 'foo1', ['dep-a==1.0.0', 'dep-b==3.1.4'])
     create_integration(fake_repo, 'bar1', ['dep-a==1.0.0', 'dep-c==5.1.0'])
