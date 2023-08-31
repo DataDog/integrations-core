@@ -55,6 +55,7 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         ['fru:16'],
@@ -100,7 +101,11 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
             'snmp.cpmCPUTotalMonIntervalValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
-    aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.COUNT, tags=common_tags)
+    tag_rows = [
+        ['interface:le0'],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
 
     tag_rows = [
         ['temp_index:15', 'temp_state:6'],
@@ -206,8 +211,7 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         aggregator.assert_metric(
             'snmp.ciscoMemoryPoolLargestFree', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-
-    aggregator.assert_metric('snmp.ciscoMemoryPoolUsed', metric_type=aggregator.GAUGE, tags=common_tags)
+        aggregator.assert_metric('snmp.ciscoMemoryPoolUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         ['connection_type:5'],
@@ -237,8 +241,8 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         aggregator.assert_metric('snmp.cvsChassisUpTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['rtt_index:2'],
-        ['rtt_index:5'],
+        ['rtt_index:26', 'rtt_state:inactive', 'rtt_type:tcpConnect'],
+        ['rtt_index:30', 'rtt_state:orderlyStop', 'rtt_type:script'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -249,8 +253,8 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         )
 
     tag_rows = [
-        ['rtt_index:26', 'rtt_state:5'],
-        ['rtt_index:30', 'rtt_state:2', 'rtt_type:4'],
+        ['rtt_index:26', 'rtt_state:inactive', 'rtt_type:tcpConnect'],
+        ['rtt_index:30', 'rtt_state:orderlyStop', 'rtt_type:script'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
