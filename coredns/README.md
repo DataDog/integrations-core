@@ -6,13 +6,12 @@ Get metrics from CoreDNS in real time to visualize and monitor DNS failures and 
 
 ## Setup
 
-### Prerequisites
 
-Versions 1.11.0 and later of this OpenMetrics-based integration have a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][24].
+Starting with version 1.11.0, this OpenMetrics-based integration has a latest mode (`use_openmetrics`: true) and a legacy mode (`use_openmetrics`: false). To get all the most up-to-date features, Datadog recommends enabling the latest mode. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][24].
 
-The latest (V2) version of the CoreDNS check requires Python 3 and submits `.bucket` metrics and submits the `.sum` and `.count` histogram samples as monotonic count type. These metrics were previously submitted as `gauge` type in the legacy (V1) version. See the [`metadata.csv` file][14] for a list of metrics available in each version. 
+The latest mode of the CoreDNS check requires Python 3 and submits `.bucket` metrics and submits the `.sum` and `.count` histogram samples as monotonic count type. These metrics were previously submitted as `gauge` type in the legacy mode. See the [`metadata.csv` file][14] for a list of metrics available in each mode. 
 
-For hosts unable to use Python 3, or if you previously implemented this integration version, see the `legacy` version [configuration example][18]. For Autodiscovery users relying on the `coredns.d/auto_conf.yaml` file, this file enables the `prometheus_url` option for the `legacy` version of the check by default. See the sample [coredns.d/auto_conf.yaml][19] for the default configuration options and the sample [coredns.d/conf.yaml.example][20] for all available configuration options.
+For hosts unable to use Python 3, or if you previously implemented this integration mode, see the `legacy` mode [configuration example][18]. For Autodiscovery users relying on the `coredns.d/auto_conf.yaml` file, this file enables the `prometheus_url` option for the `legacy` mode of the check by default. See the sample [coredns.d/auto_conf.yaml][19] for the default configuration options and the sample [coredns.d/conf.yaml.example][20] for all available configuration options.
 
 ### Installation
 
@@ -43,7 +42,7 @@ LABEL "com.datadoghq.ad.instances"='[{"prometheus_url":"http://%%host%%:9153/met
 
 **Notes**:
 
-- The shipped `coredns.d/auto_conf.yaml` file enables the `prometheus_url` option by default for the [legacy version](#prerequisites). 
+- The shipped `coredns.d/auto_conf.yaml` file enables the `prometheus_url` option by default for legacy mode. 
 - The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the service discovery.
 - The service discovery annotations need to be done on the pod. In case of a deployment, add the annotations to the metadata of the template's specifications. Do not add it at the outer specification level.
 
@@ -146,7 +145,7 @@ To enable the legacy OpenMetricsBaseCheckV1 version of the check, replace `openm
 
 **Notes**:
 
-- The shipped `coredns.d/auto_conf.yaml` file enables the `prometheus_url` option by default for the [legacy version](#prerequisites). 
+- The shipped `coredns.d/auto_conf.yaml` file enables the `prometheus_url` option by default for legacy mode. 
 - The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the service discovery.
 - The service discovery annotations need to be done on the pod. In case of a deployment, add the annotations to the metadata of the template's specifications. Do not add it at the outer specification level.
 
@@ -202,7 +201,7 @@ To enable the legacy OpenMetricsBaseCheckV1 version of the check, replace `openm
 
 **Notes**:
 
-- The shipped `coredns.d/auto_conf.yaml` file enables the `prometheus_url` option by default for the [legacy version](#prerequisites). 
+- The shipped `coredns.d/auto_conf.yaml` file enables the `prometheus_url` option by default for legacy mode. 
 - The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the service discovery.
 - The service discovery annotations need to be done on the pod. In case of a deployment, add the annotations to the metadata of the template's specifications. Do not add it at the outer specification level.
 
