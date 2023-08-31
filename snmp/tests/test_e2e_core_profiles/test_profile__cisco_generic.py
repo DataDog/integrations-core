@@ -74,6 +74,19 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         )
 
     tag_rows = [
+        ['fru:4', 'power_admin_status:on', 'power_oper_status:offCooling'],
+        ['fru:5', 'power_admin_status:powerCycle', 'power_oper_status:offEnvOther'],
+        ['fru:6', 'power_admin_status:inlineAuto', 'power_oper_status:offEnvPower'],
+        ['fru:16', 'power_admin_status:powerCycle', 'power_oper_status:offCooling'],
+        ['fru:19', 'power_admin_status:off', 'power_oper_status:offDenied'],
+        ['fru:20', 'power_admin_status:inlineAuto', 'power_oper_status:offEnvFan'],
+        ['fru:23', 'power_admin_status:on', 'power_oper_status:onButFanFail'],
+        ['fru:30', 'power_admin_status:inlineOn', 'power_oper_status:offConnectorRating'],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.cefcFRUPowerStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+
+    tag_rows = [
         ['cpu:712'],
         ['cpu:25166'],
     ]
@@ -131,10 +144,30 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE, tags=common_tags)
 
     tag_rows = [
-        ['mac_addr:0x111111111111'],
+        ['mac_addr:11:11:11:11:11:11', 'entity_name:name1'],
+        ['mac_addr:11:11:11:11:11:11', 'entity_name:name2'],
+        ['mac_addr:11:11:11:11:11:11', 'entity_name:name3'],
+        ['mac_addr:11:11:11:11:11:11', 'entity_name:name4'],
+        ['mac_addr:11:11:11:11:11:11', 'entity_name:name5'],
+        ['mac_addr:11:11:11:11:11:11', 'entity_name:name6'],
+        ['mac_addr:11:11:11:11:11:11', 'entity_name:name7'],
+        ['mac_addr:11:11:11:11:11:11', 'entity_name:name8'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+
+    tag_rows = [
+        ['mac_addr:11:11:11:11:11:11', 'entity_physical_name:name1', 'switch_state:progressing'],
+        ['mac_addr:11:11:11:11:11:11', 'entity_physical_name:name2', 'switch_state:ready'],
+        ['mac_addr:11:11:11:11:11:11', 'entity_physical_name:name3', 'switch_state:added'],
+        ['mac_addr:11:11:11:11:11:11', 'entity_physical_name:name4', 'switch_state:verMismatch'],
+        ['mac_addr:11:11:11:11:11:11', 'entity_physical_name:name5', 'switch_state:progressing'],
+        ['mac_addr:11:11:11:11:11:11', 'entity_physical_name:name6', 'switch_state:sdmMismatch'],
+        ['mac_addr:11:11:11:11:11:11', 'entity_physical_name:name7', 'switch_state:provisioned'],
+        ['mac_addr:11:11:11:11:11:11', 'entity_physical_name:name8', 'switch_state:verMismatch'],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.cswSwitchInfo', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         ['fru:21'],

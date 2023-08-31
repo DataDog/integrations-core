@@ -357,6 +357,30 @@ instances:
         #
         # fully_qualified_domain_name: my-sqlserver-database.database.windows.net
 
+    ## Configuration section used for Azure AD Authentication.
+    ##
+    ## This supports using System or User assigned managed identities.
+    ## If this section is set, then the `username` and `password` fields will be ignored.
+    ##
+    ## For more information on Managed Identities, see the Azure docs
+    ## https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
+    #
+    # managed_identity:
+
+        ## @param client_id - string - optional
+        ## Client ID of the Managed Identity.
+        #
+        # client_id: <CLIENT_ID>
+
+        ## @param identity_scope - string - optional - default: https://database.windows.net/.default
+        ## The permission scope from where to access the identity token. This value is optional if using the default
+        ## identity scope for Azure managed databases.
+        ##
+        ## For more information on scopes, see the Azure docs
+        ## https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
+        #
+        # identity_scope: https://database.windows.net/.default
+
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
     #
@@ -526,12 +550,6 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
-
-    ## @param disable_generic_tags - boolean - optional - default: false
-    ## Generic tags such as `host` are replaced by `sqlserver_host` to avoid
-    ## getting mixed with other integration tags.
-    #
-    disable_generic_tags: true
 
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.

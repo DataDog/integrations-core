@@ -2,15 +2,45 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Bump oracledb version ([#15595](https://github.com/DataDog/integrations-core/pull/15595))
+
+## 33.1.0 / 2023-08-25
+
+***Security***:
+
+* Update security dependencies ([#15667](https://github.com/DataDog/integrations-core/pull/15667))
+  * in-toto: 2.0.0
+  * securesystemslib: 0.28.0
+
+## 33.0.1 / 2023-08-24
+
+***Fixed***:
+
+* Use `DD_TRACE_ENABLED` to disable ddtrace on Windows when using `process_isolation` ([#15635](https://github.com/DataDog/integrations-core/pull/15635))
+
+## 33.0.0 / 2023-08-18
+
+***Changed***:
+
+* Remove python 2 references from SQL Server integration ([#15606](https://github.com/DataDog/integrations-core/pull/15606))
+
 ***Added***:
 
 * Dependency update for 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
 * Improve documentation of APIs ([#15582](https://github.com/DataDog/integrations-core/pull/15582))
 
+***Added***:
+
+* Support Auth through Azure AD MI / Service Principal ([#15591](https://github.com/DataDog/integrations-core/pull/15591))
+
 ***Fixed***:
 
 * Downgrade pydantic to 2.0.2 ([#15596](https://github.com/DataDog/integrations-core/pull/15596))
 * Bump cryptography to 41.0.3 ([#15517](https://github.com/DataDog/integrations-core/pull/15517))
+* Prevent `command already in progress` errors in the Postgres integration ([#15489](https://github.com/DataDog/integrations-core/pull/15489))
+* Disable ddtrace when using process_isolation on Windows ([#15622](https://github.com/DataDog/integrations-core/pull/15622))
 
 ## 32.7.0 / 2023-08-10
 

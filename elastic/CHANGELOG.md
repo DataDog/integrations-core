@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 6.1.0 / 2023-08-18
+
 ***Added***:
 
 * Support inflight_requests stats since v8 ([#15259](https://github.com/DataDog/integrations-core/pull/15259))

@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Filter out empty consumer groups ([#15657](https://github.com/DataDog/integrations-core/pull/15657))
+
+## 4.1.1 / 2023-08-24
+
+***Fixed***:
+
+* Use `_request_timeout` config parameter when querying metadata with kafka client ([#15630](https://github.com/DataDog/integrations-core/pull/15630))
+
+## 4.1.0 / 2023-08-18
+
 ***Added***:
 
 * Update dependencies for Agent 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))

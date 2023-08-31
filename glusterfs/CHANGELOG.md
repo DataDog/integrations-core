@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.6.1 / 2023-08-18
+
+***Fixed***:
+
+* Update datadog-checks-base dependency version to 32.6.0 ([#15604](https://github.com/DataDog/integrations-core/pull/15604))
+
 ## 1.6.0 / 2023-08-10
 
 ***Added***:

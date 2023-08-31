@@ -269,11 +269,11 @@ class PostgresStatementSamples(DBMAsyncJob):
         query = PG_ACTIVE_CONNECTIONS_QUERY.format(
             pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
         )
-        with self._check.get_main_db().cursor(row_factory=dict_row) as cursor:
-            self._log.debug("Running query [%s] %s", query, params)
-            cursor.execute(query, params)
-            rows = cursor.fetchall()
-
+        with self.db_pool.get_main_db_pool().connection() as conn:
+            with conn.cursor(row_factory=dict_row) as cursor:
+                self._log.debug("Running query [%s] %s", query, params)
+                cursor.execute(query, params)
+                rows = cursor.fetchall()
         self._report_check_hist_metrics(start_time, len(rows), "get_active_connections")
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return [dict(row) for row in rows]
@@ -302,11 +302,11 @@ class PostgresStatementSamples(DBMAsyncJob):
             pg_stat_activity_view=self._config.pg_stat_activity_view,
             extra_filters=extra_filters,
         )
-        with self._check.get_main_db().cursor(row_factory=dict_row) as cursor:
-            self._log.debug("Running query [%s] %s", query, params)
-            cursor.execute(query, params)
-            rows = cursor.fetchall()
-
+        with self.db_pool.get_main_db_pool().connection() as conn:
+            with conn.cursor(row_factory=dict_row) as cursor:
+                self._log.debug("Running query [%s] %s", query, params)
+                cursor.execute(query, params)
+                rows = cursor.fetchall()
         self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return rows
@@ -320,18 +320,19 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_available_activity_columns(self, all_expected_columns):
-        with self._check.get_main_db().cursor(row_factory=dict_row) as cursor:
-            cursor.execute(
-                "select * from {pg_stat_activity_view} LIMIT 0".format(
-                    pg_stat_activity_view=self._config.pg_stat_activity_view
+        with self.db_pool.get_main_db_pool().connection() as conn:
+            with conn.cursor(row_factory=dict_row) as cursor:
+                cursor.execute(
+                    "select * from {pg_stat_activity_view} LIMIT 0".format(
+                        pg_stat_activity_view=self._config.pg_stat_activity_view
+                    )
                 )
-            )
-            all_columns = {i[0] for i in cursor.description}
-            available_columns = [c for c in all_expected_columns if c in all_columns]
-            missing_columns = set(all_expected_columns) - set(available_columns)
-            if missing_columns:
-                self._log.debug("missing the following expected columns from pg_stat_activity: %s", missing_columns)
-            self._log.debug("found available pg_stat_activity columns: %s", available_columns)
+                all_columns = {i[0] for i in cursor.description}
+                available_columns = [c for c in all_expected_columns if c in all_columns]
+                missing_columns = set(all_expected_columns) - set(available_columns)
+                if missing_columns:
+                    self._log.debug("missing the following expected columns from pg_stat_activity: %s", missing_columns)
+                self._log.debug("found available pg_stat_activity columns: %s", available_columns)
         return available_columns
 
     def _filter_and_normalize_statement_rows(self, rows):
@@ -646,22 +647,27 @@ class PostgresStatementSamples(DBMAsyncJob):
             return cached_error_response
 
         try:
-            return self._run_explain(dbname, statement, obfuscated_statement), None, None
-        except psycopg.errors.UndefinedParameter as e:
-            if is_affirmative(self._config.statement_samples_config.get('explain_parameterized_queries', True)):
-                plan = self._explain_parameterized_queries.explain_statement(dbname, statement, obfuscated_statement)
-                if plan:
-                    return plan, DBExplainError.explained_with_prepared_statement, None
-            else:
+            # if the statement is a parameteredzied query, then we can't explain it directly
+            # we should directly jump into self._explain_parameterized_queries.explain_statement
+            # instead of trying to explain it then failing
+            if self._explain_parameterized_queries._is_parameterized_query(statement):
+                if is_affirmative(self._config.statement_samples_config.get('explain_parameterized_queries', True)):
+                    plan = self._explain_parameterized_queries.explain_statement(
+                        dbname, statement, obfuscated_statement
+                    )
+                    if plan:
+                        return plan, DBExplainError.explained_with_prepared_statement, None
+                e = psycopg.errors.UndefinedParameter("Unable to explain parameterized query")
                 self._log.debug(
                     "Unable to collect execution plan, clients using the extended query protocol or prepared statements"
                     " can't be explained due to the separation of the parsed query and raw bind parameters: %s",
                     repr(e),
                 )
-            error_response = None, DBExplainError.parameterized_query, '{}'.format(type(e))
-            self._explain_errors_cache[query_signature] = error_response
-            self._emit_run_explain_error(dbname, DBExplainError.parameterized_query, e)
-            return error_response
+                error_response = None, DBExplainError.parameterized_query, '{}'.format(type(e))
+                self._explain_errors_cache[query_signature] = error_response
+                self._emit_run_explain_error(dbname, DBExplainError.parameterized_query, e)
+                return error_response
+            return self._run_explain(dbname, statement, obfuscated_statement), None, None
         except psycopg.errors.UndefinedTable as e:
             self._log.debug("Failed to collect execution plan: %s", repr(e))
             error_response = None, DBExplainError.undefined_table, '{}'.format(type(e))

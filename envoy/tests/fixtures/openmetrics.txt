@@ -1259,3 +1259,35 @@ envoy_listener_admin_downstream_cx_length_ms_count{} 4
 envoy_access_logs_grpc_access_log_logs_dropped 5
 # TYPE envoy_access_logs_grpc_access_log_logs_written counter
 envoy_access_logs_grpc_access_log_logs_written 6
+# TYPE envoy_tcp_downstream_cx_no_route counter
+envoy_tcp_downstream_cx_no_route{envoy_tcp_prefix="destination"} 0
+# TYPE envoy_tcp_downstream_cx_rx_bytes_total counter
+envoy_tcp_downstream_cx_rx_bytes_total{envoy_tcp_prefix="destination"} 82
+# TYPE envoy_tcp_downstream_cx_total counter
+envoy_tcp_downstream_cx_total{envoy_tcp_prefix="destination"} 1
+# TYPE envoy_tcp_downstream_cx_tx_bytes_total counter
+envoy_tcp_downstream_cx_tx_bytes_total{envoy_tcp_prefix="destination"} 480
+# TYPE envoy_tcp_downstream_flow_control_paused_reading_total counter
+envoy_tcp_downstream_flow_control_paused_reading_total{envoy_tcp_prefix="destination"} 0
+# TYPE envoy_tcp_downstream_flow_control_resumed_reading_total counter
+envoy_tcp_downstream_flow_control_resumed_reading_total{envoy_tcp_prefix="destination"} 0
+# TYPE envoy_tcp_idle_timeout counter
+envoy_tcp_idle_timeout{envoy_tcp_prefix="destination"} 0
+# TYPE envoy_tcp_max_downstream_connection_duration counter
+envoy_tcp_max_downstream_connection_duration{envoy_tcp_prefix="destination"} 0
+# TYPE envoy_tcp_upstream_flush_total counter
+envoy_tcp_upstream_flush_total{envoy_tcp_prefix="destination"} 0
+# TYPE envoy_tcp_upstream_flush_active gauge
+envoy_tcp_upstream_flush_active{envoy_tcp_prefix="destination"} 0
+# TYPE envoy_tcp_downstream_cx_tx_bytes_buffered gauge
+envoy_tcp_downstream_cx_tx_bytes_buffered{} 0
+# TYPE envoy_tcp_downstream_cx_rx_bytes_buffered gauge
+envoy_tcp_downstream_cx_rx_bytes_buffered{} 0
+# TYPE envoy_tcp_on_demand_cluster_attempt counter
+envoy_tcp_on_demand_cluster_attempt{} 0
+# TYPE envoy_tcp_on_demand_cluster_missing counter
+envoy_tcp_on_demand_cluster_missing{} 0
+# TYPE envoy_tcp_on_demand_cluster_success counter
+envoy_tcp_on_demand_cluster_success{} 0
+# TYPE envoy_tcp_on_demand_cluster_timeout counter
+envoy_tcp_on_demand_cluster_timeout{} 0

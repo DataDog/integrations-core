@@ -60,11 +60,9 @@ class PostgresConfig:
         self.max_connections = instance.get('max_connections', 30)
         self.tags = self._build_tags(instance.get('tags', []))
 
-        ssl = instance.get('ssl', "false")
+        ssl = instance.get('ssl', "disable")
         if ssl in SSL_MODES:
             self.ssl_mode = ssl
-        else:
-            self.ssl_mode = 'require' if ssl == "true" else 'disable'
 
         self.ssl_cert = instance.get('ssl_cert', None)
         self.ssl_root_cert = instance.get('ssl_root_cert', None)
@@ -109,6 +107,7 @@ class PostgresConfig:
         self.resources_metadata_config = instance.get('collect_resources', {}) or {}
         self.statement_activity_config = instance.get('query_activity', {}) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
+        self.managed_identity = instance.get('managed_identity', {})
         self.cloud_metadata = {}
         aws = instance.get('aws', {})
         gcp = instance.get('gcp', {})
