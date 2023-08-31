@@ -11,11 +11,9 @@ The CockroachDB check monitors the overall health and performance of a [Cockroac
 The CockroachDB check is included in the [Datadog Agent][2] package, so you do not
 need to install anything else on your server.
 
-### Prerequisities
+Starting with version 1.9.0, this OpenMetrics-based integration has a latest mode (`use_openmetrics`: true) and a legacy mode (`use_openmetrics`: false). To get all the most up-to-date features, Datadog recommends enabling the latest mode. Note that the latest mode requires Python 3. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][14].
 
-This OpenMetrics-based integration has a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][14].
-
-Version 1.9.0 and later of this check uses the [latest version][12] for metric collection, which requires Python 3. For hosts unable to use Python 3, or to use the legacy version of this check, see the following [configuration][13].
+For hosts unable to use Python 3, or to use legacy mode, see the following [configuration][13].
 
 ### Configuration
 
