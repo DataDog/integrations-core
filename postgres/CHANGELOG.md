@@ -6,6 +6,7 @@
 
 ***Fixed***:
 
+* Pass timeout when connection pool closes ([#15724](https://github.com/DataDog/integrations-core/pull/15724))
 * Revise postgresql.replication_delay to Function with Archive WAL-driven PostgreSQL Replica ([#15629](https://github.com/DataDog/integrations-core/pull/15629))
 * Return Azure AD auth token in correct format ([#15701](https://github.com/DataDog/integrations-core/pull/15701))
 

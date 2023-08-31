@@ -179,11 +179,9 @@ class MultiDatabaseConnectionPool(object):
         :return:
         """
         success = True
-        start_time = time.time()
         with self._mu:
-            while self._conns and (timeout is None or time.time() - start_time < timeout):
-                dbname = next(iter(self._conns))
-                if not self._terminate_connection_unsafe(dbname):
+            for dbname in list(self._conns):
+                if not self._terminate_connection_unsafe(dbname, timeout):
                     success = False
         return success
 
@@ -202,17 +200,22 @@ class MultiDatabaseConnectionPool(object):
             # Could not evict a candidate; return None
             return None
 
-    def _terminate_connection_unsafe(self, dbname: str):
-        db = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None)).connection
-        if db is not None:
-            try:
-                if not db.closed:
-                    db.close()
-                self._stats.connection_closed += 1
-            except Exception:
-                self._stats.connection_closed_failed += 1
-                self._log.exception("failed to close DB connection for db=%s", dbname)
-                return False
+    def _terminate_connection_unsafe(self, dbname: str, timeout: float = None) -> bool:
+        if dbname not in self._conns:
+            return True
+
+        db = self._conns.pop(dbname).connection
+        try:
+            # pyscopg3 will IMMEDIATELY close the connection when calling close().
+            # if timeout is not specified, psycopg will wait for the default 5s to stop the thread in the pool
+            # if timeout is 0 or negative, psycopg will not wait for worker threads to terminate
+            db.close() if timeout is None else db.close(timeout=timeout)
+            self._stats.connection_closed += 1
+        except Exception:
+            self._stats.connection_closed_failed += 1
+            self._log.exception("failed to close DB connection for db=%s", dbname)
+            return False
+
         return True
 
     def get_main_db_pool(self, max_pool_conn_size: int = 3):
