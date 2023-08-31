@@ -57,11 +57,3 @@ class SliMetricsScraperMixin(object):
             return False
         self._slis_available = r.status_code != 404 and r.status_code != 403
         return self._slis_available
-
-    def urljoin(*args):
-        """
-        Joins given arguments into an url. Trailing but not leading slashes are
-        stripped for each argument.
-        :return: string
-        """
-        return '/'.join(arg.strip('/') for arg in args)
