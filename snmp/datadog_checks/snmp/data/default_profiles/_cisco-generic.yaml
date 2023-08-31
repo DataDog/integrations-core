@@ -384,11 +384,46 @@ metrics:
           name: rttMonCtrlOperState
         table: rttMonCtrlOperTable
         tag: rtt_state
+        mapping:
+          1: reset
+          2: orderlyStop
+          3: immediateStop
+          4: pending
+          5: inactive
+          6: active
+          7: restart
       - column:
           OID: 1.3.6.1.4.1.9.9.42.1.2.1.1.4
           name: rttMonCtrlAdminRttType
         table: rttMonCtrlAdminTable
         tag: rtt_type
+        mapping:
+          1: echo
+          2: pathEcho
+          3: fileIO
+          4: script
+          5: udpEcho
+          6: tcpConnect
+          7: http
+          8: dns
+          9: jitter
+          10: dlsw
+          11: dhcp
+          12: ftp
+          13: voip
+          14: rtp
+          15: lspGroup
+          16: icmpjitter
+          17: lspPing
+          18: lspTrace
+          19: ethernetPing
+          20: ethernetJitter
+          21: lspPingPseudowire
+          22: video
+          23: y1731Delay
+          24: y1731Loss
+          25: mcastJitter
+          26: fabricPathEcho
       - index: 1
         tag: rtt_index
 
@@ -404,10 +439,45 @@ metrics:
           OID: 1.3.6.1.4.1.9.9.42.1.2.9.1.10
           name: rttMonCtrlOperState
         tag: rtt_state
+        mapping:
+          1: reset
+          2: orderlyStop
+          3: immediateStop
+          4: pending
+          5: inactive
+          6: active
+          7: restart
       - column:
           OID: 1.3.6.1.4.1.9.9.42.1.2.1.1.4
           name: rttMonCtrlAdminRttType
         table: rttMonCtrlAdminTable
         tag: rtt_type
+        mapping:
+          1: echo
+          2: pathEcho
+          3: fileIO
+          4: script
+          5: udpEcho
+          6: tcpConnect
+          7: http
+          8: dns
+          9: jitter
+          10: dlsw
+          11: dhcp
+          12: ftp
+          13: voip
+          14: rtp
+          15: lspGroup
+          16: icmpjitter
+          17: lspPing
+          18: lspTrace
+          19: ethernetPing
+          20: ethernetJitter
+          21: lspPingPseudowire
+          22: video
+          23: y1731Delay
+          24: y1731Loss
+          25: mcastJitter
+          26: fabricPathEcho
       - index: 1
         tag: rtt_index
