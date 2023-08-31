@@ -369,7 +369,7 @@ def assert_all_profile_metrics_and_tags_covered(profile, aggregator):
         assert len(aggregator.metrics('snmp.' + metric)) > 0
         for collected_metric in aggregator.metrics('snmp.' + metric):
             tag_keys = tags_to_tag_keys(collected_metric.tags) - ASSERT_ALL_PROFILE_EXCLUDED_TAGS
-            assert tag_keys == global_tags
+            assert tag_keys == global_tags, "collected and profile metric tags differ for metric `{}`".format(metric)
 
 
 def get_collected_metric_tag_keys(aggregator, metric):
