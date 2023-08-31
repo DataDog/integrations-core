@@ -608,8 +608,8 @@ metrics:
           name: sfosIPSecVpnConnType
         tag: sfos_ip_sec_vpn_conn_type
         mapping:
-          1: host_to_host
-          2: site_to_site
+          1: host-to-host
+          2: site-to-site
       - column:
           name: sfosIPSecVpnLocalgwPort
           OID: 1.3.6.1.4.1.2604.5.1.6.1.1.1.1.7
