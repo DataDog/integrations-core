@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Upgrade clickhouse-driver to 0.2.6 on Python 3 ([#15726](https://github.com/DataDog/integrations-core/pull/15726))
+
 ## 3.0.0 / 2023-08-10
 
 ***Changed***:
