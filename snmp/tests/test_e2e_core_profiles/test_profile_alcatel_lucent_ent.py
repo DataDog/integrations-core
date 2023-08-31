@@ -54,7 +54,12 @@ def test_e2e_profile_alcatel_lucent_ent(dd_agent_check):
 
     tag_rows = [
         [
+            'ent_physical_class:other',
+            'ent_physical_name:name1',
+            'ent_physical_serial_num:ALC12345XYZ67890',
+            'ent_physical_model_name:ALC-7504',
             'chas_ent_phys_admin_status:standby',
+            'chas_ent_phys_oper_status:unknown',
             'chas_ent_phys_led_status_backup_ps:green_on',
             'chas_ent_phys_led_status_control:amber_blink',
             'chas_ent_phys_led_status_fabric:amber_blink',
@@ -68,7 +73,12 @@ def test_e2e_profile_alcatel_lucent_ent(dd_agent_check):
             'chas_ent_phys_led_status_temperature:green_on',
         ],
         [
+            'ent_physical_class:storage_drive',
+            'ent_physical_name:name2',
+            'ent_physical_serial_num:ALC12345XYZ67891',
+            'ent_physical_model_name:ALC-7505',
             'chas_ent_phys_admin_status:unknown',
+            'chas_ent_phys_oper_status:idle',
             'chas_ent_phys_led_status_backup_ps:green_on',
             'chas_ent_phys_led_status_control:green_on',
             'chas_ent_phys_led_status_fabric:amber_blink',
@@ -88,8 +98,20 @@ def test_e2e_profile_alcatel_lucent_ent(dd_agent_check):
         )
 
     tag_rows = [
-        ['chas_ent_temp_status:not_present'],
-        ['chas_ent_temp_status:unknown'],
+        [
+            'chas_ent_temp_status:not_present',
+            'ent_physical_model_name:ALC-7504',
+            'ent_physical_name:name1',
+            'ent_physical_serial_num:ALC12345XYZ67890',
+            'ent_physical_class:unknown',
+        ],
+        [
+            'chas_ent_temp_status:unknown',
+            'ent_physical_model_name:ALC-7505',
+            'ent_physical_name:name2',
+            'ent_physical_serial_num:ALC12345XYZ67891',
+            'ent_physical_class:energy_object',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
