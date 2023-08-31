@@ -12,11 +12,9 @@ This integration sends your Linkerd metrics to Datadog, including application su
 
 ## Setup
 
-### Prerequisites
+This OpenMetrics-based integration has a latest mode (`use_openmetrics`: true) and a legacy mode (`use_openmetrics`: false). To get all the most up-to-date features, Datadog recommends enabling the latest mode. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][16].
 
-This OpenMetrics-based integration has a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][16].
-
-Metrics marked as `[OpenMetrics V1]` or `[OpenMetrics V2]` are only available using the corresponding version of the Linkerd integration. Metrics not marked are collected by all versions.
+Metrics marked as `[OpenMetrics V1]` or `[OpenMetrics V2]` are only available using the corresponding mode of the Linkerd integration. Metrics not marked are collected by all modes.
 
 ### Installation
 
