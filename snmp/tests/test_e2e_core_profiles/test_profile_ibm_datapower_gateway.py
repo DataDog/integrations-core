@@ -140,7 +140,7 @@ def test_e2e_profile_ibm_datapower_gateway(dd_agent_check):
             'ibm_dp_status_network_interface_status_admin_status:up',
             'ibm_dp_status_network_interface_status_interface_type:ethernet',
             'ibm_dp_status_network_interface_status_ip:93.22.18.75',
-            'ibm_dp_status_network_interface_status_ip_type:dna',
+            'ibm_dp_status_network_interface_status_ip_type:dns',
             'ibm_dp_status_network_interface_status_mac_address:11:11:11:11:11:11',
             'ibm_dp_status_network_interface_status_name:but quaintly kept oxen forward but',
             'ibm_dp_status_network_interface_status_oper_status:unknown',

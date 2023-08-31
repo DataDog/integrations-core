@@ -4,6 +4,20 @@
 
 ***Fixed***:
 
+* Bump oracledb version ([#15595](https://github.com/DataDog/integrations-core/pull/15595))
+
+## 33.1.0 / 2023-08-25
+
+***Security***:
+
+* Update security dependencies ([#15667](https://github.com/DataDog/integrations-core/pull/15667))
+  * in-toto: 2.0.0
+  * securesystemslib: 0.28.0
+
+## 33.0.1 / 2023-08-24
+
+***Fixed***:
+
 * Use `DD_TRACE_ENABLED` to disable ddtrace on Windows when using `process_isolation` ([#15635](https://github.com/DataDog/integrations-core/pull/15635))
 
 ## 33.0.0 / 2023-08-18

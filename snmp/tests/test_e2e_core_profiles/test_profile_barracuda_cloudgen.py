@@ -53,46 +53,46 @@ def test_e2e_profile_barracuda_cloudgen(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.phion.trafficShapeClass1Drop', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.phion.trafficShape.class1Drop', metric_type=aggregator.COUNT, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.phion.trafficShapeClass1Pakets', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.phion.trafficShape.class1Pakets', metric_type=aggregator.COUNT, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.phion.trafficShapeClass1Total', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.phion.trafficShape.class1Total', metric_type=aggregator.COUNT, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.phion.trafficShapeClass2Drop', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.phion.trafficShape.class2Drop', metric_type=aggregator.COUNT, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.phion.trafficShapeClass2Pakets', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.phion.trafficShape.class2Pakets', metric_type=aggregator.COUNT, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.phion.trafficShapeClass2Total', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.phion.trafficShape.class2Total', metric_type=aggregator.COUNT, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.phion.trafficShapeClass3Drop', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.phion.trafficShape.class3Drop', metric_type=aggregator.COUNT, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.phion.trafficShapeClass3Pakets', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.phion.trafficShape.class3Pakets', metric_type=aggregator.COUNT, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.phion.trafficShapeClass3Total', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.phion.trafficShape.class3Total', metric_type=aggregator.COUNT, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.phion.trafficShapeNoDelayDrop', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.phion.trafficShape.noDelayDrop', metric_type=aggregator.COUNT, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.phion.trafficShapeNoDelayPakets', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.phion.trafficShape.noDelayPakets', metric_type=aggregator.COUNT, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.phion.trafficShapeNoDelayTotal', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.phion.trafficShape.noDelayTotal', metric_type=aggregator.COUNT, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.phion.trafficShapeRate', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.phion.trafficShape.rate', metric_type=aggregator.COUNT, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.phion.trafficShapeSessions', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+            'snmp.phion.trafficShape.sessions', metric_type=aggregator.COUNT, tags=common_tags + tag_row
         )
 
     tag_rows = [

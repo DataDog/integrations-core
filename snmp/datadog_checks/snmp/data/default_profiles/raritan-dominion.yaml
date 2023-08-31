@@ -33,8 +33,8 @@ metrics:
           name: raritan.remotekvm.systemPowerSupplyPowerOn
         tag: raritan_remotekvm_system_power_supply_power_on
         mapping:
-          0: 'false'
           1: 'true'
+          2: 'false'
   - MIB: RemoteKVMDevice-MIB
     table:
       name: portDataTable
@@ -56,7 +56,7 @@ metrics:
           name: raritan.remotekvm.portDataStatus
         tag: raritan_remotekvm_port_data_status
         mapping:
-          0: inactive
-          1: available
-          2: connected
-          3: busy
+          1: inactive
+          2: available
+          3: connected
+          4: busy

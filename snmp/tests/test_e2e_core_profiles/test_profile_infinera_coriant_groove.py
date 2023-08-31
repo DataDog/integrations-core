@@ -44,6 +44,7 @@ def test_e2e_profile_infinera_coriant_groove(dd_agent_check):
             'coriant_groove_shelf_oper_status:down',
         ],
         [
+            'coriant_groove_shelf_admin_status:up_no_alm',
             'coriant_groove_shelf_alias_name:Jaded kept oxen driving',
             'coriant_groove_shelf_location:forward but zombies forward',
             'coriant_groove_shelf_oper_status:down',
@@ -67,6 +68,7 @@ def test_e2e_profile_infinera_coriant_groove(dd_agent_check):
             'coriant_groove_card_required_type:chm1lh',
         ],
         [
+            'coriant_groove_card_admin_status:up_no_alm',
             'coriant_groove_card_alias_name:Jaded kept quaintly forward Jaded',
             'coriant_groove_card_equipment_name:their',
             'coriant_groove_card_mode:not_applicable',
