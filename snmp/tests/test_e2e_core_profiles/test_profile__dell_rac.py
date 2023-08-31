@@ -526,14 +526,14 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         )
 
     tag_rows = [
-        ['chassis_index:1'],
+        ['chassis_index:1', 'drs_psu_index:3'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.drsAmpsReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.drsWattsReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['chassis_index:1'],
+        ['chassis_index:1', 'drs_psu_index:3'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.drsKWhCumulative', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
