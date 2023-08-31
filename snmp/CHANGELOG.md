@@ -125,7 +125,7 @@
 * Add abstract profile for cisco vendor to reduce duplication ([#15266](https://github.com/DataDog/integrations-core/pull/15266))
 * Fix cisco-ise profile ([#15283](https://github.com/DataDog/integrations-core/pull/15283))
 
-## 6.0.0 / 2023-07-10
+## 6.0.0 / 2023-07-10 / Agent 7.47.0
 
 ***Changed***:
 

@@ -44,7 +44,7 @@
 * Upgrade postgres check to psycopg3 ([#15411](https://github.com/DataDog/integrations-core/pull/15411))
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 14.0.1 / 2023-07-13
+## 14.0.1 / 2023-07-13 / Agent 7.47.0
 
 ***Fixed***:
 
