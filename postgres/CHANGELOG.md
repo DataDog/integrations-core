@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Pass timeout when connection pool closes ([#15724](https://github.com/DataDog/integrations-core/pull/15724))
+
 ## 14.2.1 / 2023-08-29
 
 ***Fixed***:
