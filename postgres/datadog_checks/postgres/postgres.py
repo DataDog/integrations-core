@@ -734,7 +734,7 @@ class PostgreSql(AgentCheck):
         return self.pg_settings
 
     def _close_db_pool(self):
-        self.db_pool.close_all_connections(timeout=self._config.min_collection_interval)
+        self.db_pool.close_all_connections(timeout=0)
 
     def _collect_custom_queries(self, tags):
         """
@@ -919,6 +919,6 @@ class PostgreSql(AgentCheck):
             if self._check_cancelled and self.db:
                 try:
                     # once check finishes on a cancel, shut down main connection gracefully
-                    self.db.close(timeout=self._config.min_collection_interval)
+                    self.db.close()
                 except Exception:
                     self.log.exception("failed to close DB connection for db=%s", self._config.dbname)
