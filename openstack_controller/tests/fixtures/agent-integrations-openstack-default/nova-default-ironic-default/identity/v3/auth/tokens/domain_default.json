@@ -79,7 +79,7 @@
       {
         "endpoints": [],
         "id": "55b21161725a461793a2222749229306",
-        "type": "block-storage",
+        "type": "block-storages",
         "name": "cinder"
       },
       {

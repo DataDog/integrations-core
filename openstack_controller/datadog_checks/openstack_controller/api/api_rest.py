@@ -12,13 +12,13 @@ from datadog_checks.openstack_controller.api.load_balancer_rest import LoadBalan
 from datadog_checks.openstack_controller.api.network_rest import NetworkRest
 
 
-class ComponentType(str, Enum):
-    IDENTITY = 'identity'
-    COMPUTE = 'compute'
-    NETWORK = 'network'
-    BLOCK_STORAGE = 'block-storage'
-    BAREMETAL = 'baremetal'
-    LOAD_BALANCER = 'load-balancer'
+class ComponentType(list, Enum):
+    IDENTITY = ['identity']
+    COMPUTE = ['compute']
+    NETWORK = ['network']
+    BLOCK_STORAGE = ['block-storage', 'volumev3']
+    BAREMETAL = ['baremetal']
+    LOAD_BALANCER = ['load-balancer']
 
 
 class ApiRest(Api):
@@ -37,10 +37,16 @@ class ApiRest(Api):
         if self.config.nova_microversion:
             self.log.debug("adding X-OpenStack-Nova-API-Version header to `%s`", self.config.nova_microversion)
             self.http.options['headers']['X-OpenStack-Nova-API-Version'] = self.config.nova_microversion
+            self._identity_component = IdentityRest(
+                self.log, self.http, '{}/v3'.format(self.config.keystone_server_url)
+            )
 
         if self.config.ironic_microversion:
             self.log.debug("adding X-OpenStack-Ironic-API-Version header to `%s`", self.config.ironic_microversion)
             self.http.options['headers']['X-OpenStack-Ironic-API-Version'] = self.config.ironic_microversion
+            self._identity_component = IdentityRest(
+                self.log, self.http, '{}/v3'.format(self.config.keystone_server_url)
+            )
 
     def get_identity_response_time(self):
         self.log.debug("getting identity response time")
@@ -337,6 +343,7 @@ class ApiRest(Api):
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         self.http.options['headers']['X-Auth-Token'] = response.headers['X-Subject-Token']
+        self._identity_component = IdentityRest(self.log, self.http, '{}/v3'.format(self.config.keystone_server_url))
 
     def post_auth_domain(self, domain_id):
         data = {
@@ -360,6 +367,7 @@ class ApiRest(Api):
         self.log.debug("response: %s", response.json())
         self._catalog = response.json()['token']['catalog']
         self.http.options['headers']['X-Auth-Token'] = response.headers['X-Subject-Token']
+        self._identity_component = IdentityRest(self.log, self.http, '{}/v3'.format(self.config.keystone_server_url))
 
     def post_auth_project(self, project_id):
         self._catalog = {}
@@ -386,15 +394,19 @@ class ApiRest(Api):
         self.log.debug("response: %s", response.json())
         self._catalog = response.json()['token']['catalog']
         self.http.options['headers']['X-Auth-Token'] = response.headers['X-Subject-Token']
+        self._identity_component = IdentityRest(self.log, self.http, '{}/v3'.format(self.config.keystone_server_url))
 
-    def _get_component(self, endpoint_type):
-        if endpoint_type in self._components:
-            self.log.debug("cached component of type %s", endpoint_type)
-            return self._components[endpoint_type]
-        endpoint = self._get_endpoint(endpoint_type)
-        if endpoint:
-            self._components[endpoint_type] = self._make_component(endpoint_type, endpoint)
-            return self._components[endpoint_type]
+    def _get_component(self, endpoint_types):
+        for endpoint_type in endpoint_types:
+            if endpoint_type in self._components:
+                self.log.debug("cached component of type %s", endpoint_type)
+                return self._components[endpoint_type]
+        for endpoint_type in endpoint_types:
+            endpoint = self._get_endpoint(endpoint_type)
+            if endpoint:
+                self.log.debug("Created component of type: %s, endpoint: %s ", endpoint_type, endpoint)
+                self._components[endpoint_type] = self._make_component(endpoint_type, endpoint)
+                return self._components[endpoint_type]
         return None
 
     def _get_endpoint(self, endpoint_type):
@@ -406,19 +418,21 @@ class ApiRest(Api):
             if item['type'] == endpoint_type:
                 for endpoint in item['endpoints']:
                     if endpoint['interface'] == endpoint_interface:
-                        self._endpoints[endpoint_type] = endpoint['url']
+                        endpoint_url = endpoint['url']
+                        self.log.debug("Storing endpoint of type: %s url: %s", endpoint_type, endpoint_url)
+                        self._endpoints[endpoint_type] = endpoint_url
                         return self._endpoints[endpoint_type]
         return None
 
     def _make_component(self, endpoint_type, endpoint):
-        if endpoint_type == ComponentType.COMPUTE:
+        if endpoint_type in ComponentType.COMPUTE:
             return ComputeRest(self.log, self.http, endpoint)
-        elif endpoint_type == ComponentType.NETWORK:
+        elif endpoint_type in ComponentType.NETWORK:
             return NetworkRest(self.log, self.http, endpoint)
-        elif endpoint_type == ComponentType.BLOCK_STORAGE:
+        elif endpoint_type in ComponentType.BLOCK_STORAGE:
             return BlockStorageRest(self.log, self.http, endpoint)
-        elif endpoint_type == ComponentType.BAREMETAL:
+        elif endpoint_type in ComponentType.BAREMETAL:
             return BaremetalRest(self.log, self.http, endpoint, self.config.ironic_microversion)
-        elif endpoint_type == ComponentType.LOAD_BALANCER:
+        elif endpoint_type in ComponentType.LOAD_BALANCER:
             return LoadBalancerRest(self.log, self.http, endpoint)
         return None
