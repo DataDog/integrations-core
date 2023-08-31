@@ -201,10 +201,10 @@ class MultiDatabaseConnectionPool(object):
             return None
 
     def _terminate_connection_unsafe(self, dbname: str, timeout: float = None) -> bool:
-        db = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None)).connection
-        if db is None:
+        if dbname not in self._conns:
             return True
 
+        db = self._conns.pop(dbname).connection
         try:
             # pyscopg3 will IMMEDIATELY close the connection when calling close().
             # if timeout is not specified, psycopg will wait for the default 5s to stop the thread in the pool
