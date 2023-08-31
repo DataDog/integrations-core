@@ -27,42 +27,42 @@ E2E_METADATA_JDBC_CLIENT = {
     'use_jmx': True,  # Using jmx to have a ready to use java runtime
     'docker_volumes': [
         '{}/scripts/install_jdbc_client.sh:/tmp/install_jdbc_client.sh'.format(HERE),
-        '{}/docker/client/client_wallet:/opt/oracle/instantclient_19_3/client_wallet'.format(HERE),
-        '{}/docker/client/sqlnet.ora:/opt/oracle/instantclient_19_3/sqlnet.ora'.format(HERE),
-        '{}/docker/client/tnsnames.ora:/opt/oracle/instantclient_19_3/tnsnames.ora'.format(HERE),
-        '{}/docker/client/listener.ora:/opt/oracle/instantclient_19_3/listener.ora'.format(HERE),
-        '{}/docker/client/oraclepki.jar:/opt/oracle/instantclient_19_3/oraclepki.jar'.format(HERE),
-        '{}/docker/client/osdt_cert.jar:/opt/oracle/instantclient_19_3/osdt_cert.jar'.format(HERE),
-        '{}/docker/client/osdt_core.jar:/opt/oracle/instantclient_19_3/osdt_core.jar'.format(HERE),
+        '{}/docker/client/client_wallet:/opt/oracle/instantclient_21_11/client_wallet'.format(HERE),
+        '{}/docker/client/sqlnet.ora:/opt/oracle/instantclient_21_11/sqlnet.ora'.format(HERE),
+        '{}/docker/client/tnsnames.ora:/opt/oracle/instantclient_21_11/tnsnames.ora'.format(HERE),
+        '{}/docker/client/listener.ora:/opt/oracle/instantclient_21_11/listener.ora'.format(HERE),
+        '{}/docker/client/oraclepki.jar:/opt/oracle/instantclient_21_11/oraclepki.jar'.format(HERE),
+        '{}/docker/client/osdt_cert.jar:/opt/oracle/instantclient_21_11/osdt_cert.jar'.format(HERE),
+        '{}/docker/client/osdt_core.jar:/opt/oracle/instantclient_21_11/osdt_core.jar'.format(HERE),
     ],
     'start_commands': [
         'bash /tmp/install_jdbc_client.sh',  # Still needed to set up the database
     ],
-    'env_vars': {'TNS_ADMIN': '/opt/oracle/instantclient_19_3'},
+    'env_vars': {'TNS_ADMIN': '/opt/oracle/instantclient_21_11'},
 }
 
 E2E_METADATA_ORACLE_CLIENT = {
     'use_jmx': True,  # update-ca-certificates fails without this
     'docker_volumes': [
         '{}/scripts/install_jdbc_client.sh:/tmp/install_jdbc_client.sh'.format(HERE),
-        '{}/docker/client/client_wallet:/opt/oracle/instantclient_19_3/client_wallet'.format(HERE),
-        '{}/docker/client/sqlnet.ora:/opt/oracle/instantclient_19_3/sqlnet.ora'.format(HERE),
-        '{}/docker/client/tnsnames.ora:/opt/oracle/instantclient_19_3/tnsnames.ora'.format(HERE),
-        '{}/docker/client/listener.ora:/opt/oracle/instantclient_19_3/listener.ora'.format(HERE),
-        '{}/docker/client/sqlnet.ora:/opt/oracle/instantclient_19_3/network/admin/sqlnet.ora'.format(HERE),
-        '{}/docker/client/tnsnames.ora:/opt/oracle/instantclient_19_3/network/admin/tnsnames.ora'.format(HERE),
-        '{}/docker/client/client_wallet/cwallet.sso:/opt/oracle/instantclient_19_3/network/admin/cwallet.sso'.format(
+        '{}/docker/client/client_wallet:/opt/oracle/instantclient_21_11/client_wallet'.format(HERE),
+        '{}/docker/client/sqlnet.ora:/opt/oracle/instantclient_21_11/sqlnet.ora'.format(HERE),
+        '{}/docker/client/tnsnames.ora:/opt/oracle/instantclient_21_11/tnsnames.ora'.format(HERE),
+        '{}/docker/client/listener.ora:/opt/oracle/instantclient_21_11/listener.ora'.format(HERE),
+        '{}/docker/client/sqlnet.ora:/opt/oracle/instantclient_21_11/network/admin/sqlnet.ora'.format(HERE),
+        '{}/docker/client/tnsnames.ora:/opt/oracle/instantclient_21_11/network/admin/tnsnames.ora'.format(HERE),
+        '{}/docker/client/client_wallet/cwallet.sso:/opt/oracle/instantclient_21_11/network/admin/cwallet.sso'.format(
             HERE
         ),
     ],
     'start_commands': [
         'bash /tmp/install_jdbc_client.sh',
         'mkdir -p /usr/local/share/ca-certificates',
-        'cp /opt/oracle/instantclient_19_3/client_wallet/cert.pem /usr/local/share/ca-certificates/ca-certificate.crt',
+        'cp /opt/oracle/instantclient_21_11/client_wallet/cert.pem /usr/local/share/ca-certificates/ca-certificate.crt',
         'update-ca-certificates --verbose --fresh',
     ],
     'env_vars': {
-        'LD_LIBRARY_PATH': '/opt/oracle/instantclient_19_3',
+        'LD_LIBRARY_PATH': '/opt/oracle/instantclient_21_11',
     },
 }
 
@@ -115,7 +115,7 @@ def dd_environment():
 
     if CLIENT_LIB == 'jdbc':
         e2e_metadata = E2E_METADATA_JDBC_CLIENT
-        instance['jdbc_driver_path'] = '/opt/oracle/instantclient_19_3/ojdbc8.jar'
+        instance['jdbc_driver_path'] = '/opt/oracle/instantclient_21_11/ojdbc8.jar'
     else:
         e2e_metadata = E2E_METADATA_ORACLE_CLIENT
         if CLIENT_LIB == 'oracle-instant-client':
@@ -127,7 +127,7 @@ def dd_environment():
         instance['protocol'] = 'TCPS'
 
         if CLIENT_LIB == 'jdbc':
-            instance['jdbc_truststore_path'] = '/opt/oracle/instantclient_19_3/client_wallet/cwallet.sso'
+            instance['jdbc_truststore_path'] = '/opt/oracle/instantclient_21_11/client_wallet/cwallet.sso'
             instance['jdbc_truststore_type'] = 'SSO'
 
     with docker_run(

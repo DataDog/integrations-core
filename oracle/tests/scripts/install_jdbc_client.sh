@@ -2,7 +2,7 @@
 
 set -x
 
-INSTANT_CLIENT_URL="https://ddintegrations.blob.core.windows.net/oracle/instantclient-basiclite-linux.x64-19.3.0.0.0dbru.zip"
+INSTANT_CLIENT_URL="https://download.oracle.com/otn_software/linux/instantclient/2111000/instantclient-basiclite-linux.x64-21.11.0.0.0dbru.zip"
 
 mkdir -p /opt/oracle
 apt-get update
