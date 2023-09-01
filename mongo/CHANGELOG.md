@@ -24,7 +24,7 @@
 * Submit critical service check whenever connection fails ([#15208](https://github.com/DataDog/integrations-core/pull/15208))
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 5.1.0 / 2023-07-10
+## 5.1.0 / 2023-07-10 / Agent 7.47.0
 
 ***Added***:
 

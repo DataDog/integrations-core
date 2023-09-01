@@ -192,7 +192,7 @@ class FargateCheck(AgentCheck):
             self.gauge('ecs.fargate.cpu.task.limit', metadata['Limits']['CPU'] * 10**9, task_tags)
 
         if metadata.get('Limits', {}).get('Memory', 0) > 0:
-            self.gauge('ecs.fargate.mem.task.limit', metadata['Limits']['Memory'], task_tags)
+            self.gauge('ecs.fargate.mem.task.limit', metadata['Limits']['Memory'] * 1024**2, task_tags)
 
         try:
             request = self.http.get(stats_endpoint)

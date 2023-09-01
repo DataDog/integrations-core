@@ -145,8 +145,8 @@ def test_e2e_profile_huawei_routers(dd_agent_check):
         aggregator.assert_metric('snmp.huawei.hwDnsTtl', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['huawei_hw_server_status:dynamic', 'huawei_hw_server_addr:90.96.69.163'],
-        ['huawei_hw_server_status:static', 'huawei_hw_server_addr:89.239.196.92'],
+        ['huawei_hw_server_addr:90.96.69.163'],
+        ['huawei_hw_server_addr:89.239.196.92'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -187,12 +187,10 @@ def test_e2e_profile_huawei_routers(dd_agent_check):
 
     tag_rows = [
         [
-            'huawei_hw_nat_addr_pool_ref_type:no_pat',
             'huawei_hw_nat_addr_pool_end_addr:190.109.146.4',
             'huawei_hw_nat_addr_pool_start_addr:95.201.113.165',
         ],
         [
-            'huawei_hw_nat_addr_pool_ref_type:pat',
             'huawei_hw_nat_addr_pool_end_addr:174.219.250.193',
             'huawei_hw_nat_addr_pool_start_addr:163.37.155.112',
         ],

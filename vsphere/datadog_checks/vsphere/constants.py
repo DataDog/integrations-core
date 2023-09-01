@@ -134,6 +134,25 @@ VM_PROPERTIES = VM_OBJECT_PROPERTIES + VM_SIMPLE_PROPERTIES
 
 ALL_PROPERTIES = VM_PROPERTIES + HOST_PROPERTIES + CLUSTER_PROPERTIES + DATASTORE_PROPERTIES
 
+
+OBJECT_PROPERTIES_TO_METRIC_NAME = {
+    "guest.net": ["guest.net.ipConfig.address", "guest.net"],
+    "guest.ipStack": ["guest.ipStack.ipRoute", "guest.ipStack"],
+    "guest.disk": ["guest.disk.freeSpace", "guest.disk.capacity"],
+}
+
+VM_OBJECT_PROPERTY_METRICS = [
+    "guest.net.ipConfig.address",
+    "guest.net",
+    "guest.ipStack.ipRoute",
+    "guest.ipStack",
+    "guest.disk.freeSpace",
+    "guest.disk.capacity",
+]
+OBJECT_PROPERTIES_BY_RESOURCE_TYPE = {
+    'vm': VM_OBJECT_PROPERTIES,
+}
+
 SIMPLE_PROPERTIES_BY_RESOURCE_TYPE = {
     'vm': VM_SIMPLE_PROPERTIES,
     'host': HOST_SIMPLE_PROPERTIES,
@@ -146,4 +165,11 @@ PROPERTIES_BY_RESOURCE_TYPE = {
     'host': HOST_PROPERTIES,
     'cluster': CLUSTER_PROPERTIES,
     'datastore': DATASTORE_PROPERTIES,
+}
+
+PROPERTY_METRICS_BY_RESOURCE_TYPE = {
+    'vm': VM_SIMPLE_PROPERTIES + VM_OBJECT_PROPERTY_METRICS,
+    'host': HOST_SIMPLE_PROPERTIES,
+    'cluster': CLUSTER_SIMPLE_PROPERTIES,
+    'datastore': DATASTORE_SIMPLE_PROPERTIES,
 }

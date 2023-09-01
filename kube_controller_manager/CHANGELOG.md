@@ -8,7 +8,7 @@
 
 * Add job_controller_terminated_pods_tracking_finalizer_total metric to kube controller manager check ([#15425](https://github.com/DataDog/integrations-core/pull/15425))
 
-## 4.3.1 / 2023-07-10
+## 4.3.1 / 2023-07-10 / Agent 7.47.0
 
 ***Fixed***:
 

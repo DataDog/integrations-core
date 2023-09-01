@@ -10,11 +10,10 @@ from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS, OFFSE
 
 
 class KafkaClient:
-    def __init__(self, config, tls_context, log) -> None:
+    def __init__(self, config, log) -> None:
         self.config = config
         self.log = log
         self._kafka_client = None
-        self._tls_context = tls_context
 
     @property
     def kafka_client(self):
@@ -228,9 +227,13 @@ class KafkaClient:
             consumer_groups_future = self.kafka_client.list_consumer_groups()
             try:
                 list_consumer_groups_result = consumer_groups_future.result()
+                for valid_consumer_group in list_consumer_groups_result.valid:
+                    self.log.debug("Discovered consumer group: %s", valid_consumer_group.group_id)
 
                 consumer_groups.extend(
-                    valid_consumer_group.group_id for valid_consumer_group in list_consumer_groups_result.valid
+                    valid_consumer_group.group_id
+                    for valid_consumer_group in list_consumer_groups_result.valid
+                    if valid_consumer_group.group_id != ""
                 )
             except Exception as e:
                 self.log.error("Failed to collect consumer groups: %s", e)

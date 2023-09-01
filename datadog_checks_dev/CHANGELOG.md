@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+***Changed***:
+
+* Adjust template and test collection based on new team guidelines ([#15078](https://github.com/DataDog/integrations-core/pull/15078))
+    * `ddev create` produces initial test file named `test_unit.py` instead of `test_<integration>.py`.
+    * Our pytest collection plugin attaches labels to tests based on their location. E.g. all tests in `test_unit.py` get the `unit` label.
+
+***Added***:
+
+* Add short hand for force-env-rebuild ([#15716](https://github.com/DataDog/integrations-core/pull/15716))
+
+## 24.1.0 / 2023-08-25
+
+***Security***:
+
+* Update security dependencies ([#15667](https://github.com/DataDog/integrations-core/pull/15667))
+  * in-toto: 2.0.0
+  * securesystemslib: 0.28.0
+
 ## 24.0.0 / 2023-08-18
 
 ***Removed***:

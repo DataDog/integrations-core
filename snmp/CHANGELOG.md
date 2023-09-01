@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+***Changed***:
+
+* Delete unnecessary extend for ubiquiti profiles ([#15643](https://github.com/DataDog/integrations-core/pull/15643))
+
+***Fixed***:
+
+* Fix SNMP profiles metric tags mappings using MIBs ([#15668](https://github.com/DataDog/integrations-core/pull/15668))
+* Remove unsupported metric in riverbed-interceptor.yaml ([#15678](https://github.com/DataDog/integrations-core/pull/15678))
+
 ## 6.2.0 / 2023-08-18
 
 ***Added***:
@@ -117,7 +126,7 @@
 * Add abstract profile for cisco vendor to reduce duplication ([#15266](https://github.com/DataDog/integrations-core/pull/15266))
 * Fix cisco-ise profile ([#15283](https://github.com/DataDog/integrations-core/pull/15283))
 
-## 6.0.0 / 2023-07-10
+## 6.0.0 / 2023-07-10 / Agent 7.47.0
 
 ***Changed***:
 

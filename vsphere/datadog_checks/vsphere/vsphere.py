@@ -26,6 +26,7 @@ from datadog_checks.vsphere.constants import (
     HOST_RESOURCES,
     MAX_QUERY_METRICS_OPTION,
     PROPERTY_COUNT_METRICS,
+    REALTIME_RESOURCES,
     REALTIME_METRICS_INTERVAL_ID,
     SIMPLE_PROPERTIES_BY_RESOURCE_TYPE,
 )
@@ -280,11 +281,16 @@ class VSphereCheck(AgentCheck):
             parent = properties.get('parent')
             runtime_host = properties.get('runtime.host')
             if parent is not None:
-                tags.extend(get_tags_recursively(parent, infrastructure_data, self._config))
+                tags.extend(
+                    get_tags_recursively(parent, infrastructure_data, self._config.include_datastore_cluster_folder_tag)
+                )
             if runtime_host is not None:
                 tags.extend(
                     get_tags_recursively(
-                        runtime_host, infrastructure_data, self._config, include_only=['vsphere_cluster']
+                        runtime_host,
+                        infrastructure_data,
+                        self._config.include_datastore_cluster_folder_tag,
+                        include_only=['vsphere_cluster'],
                     )
                 )
             tags.append('vsphere_type:{}'.format(mor_type_str))
@@ -411,9 +417,9 @@ class VSphereCheck(AgentCheck):
                     continue
 
                 tags = []
-                if should_collect_per_instance_values(self._config, metric_name, resource_type) and (
-                    metric_name in have_instance_value[resource_type]
-                ):
+                if should_collect_per_instance_values(
+                    self._config.collect_per_instance_filters, metric_name, resource_type
+                ) and (metric_name in have_instance_value[resource_type]):
                     instance_value = result.id.instance
                     # When collecting per instance values, it's possible that both aggregated metric and per instance
                     # metrics are received. In that case, the metric with no instance value is skipped.
@@ -677,6 +683,10 @@ class VSphereCheck(AgentCheck):
         Then combine all tags and submit the metric.
         """
         metric_full_name = "{}.{}".format(resource_metric_suffix, metric_name)
+
+        if metric_full_name not in self._config.property_metrics_to_collect_by_mor.get(resource_metric_suffix, []):
+            return
+
         is_count_metric = metric_name in PROPERTY_COUNT_METRICS
 
         if additional_tags is None:
@@ -760,7 +770,6 @@ class VSphereCheck(AgentCheck):
                 resource_metric_suffix,
                 additional_tags=disk_tags,
             )
-
             self.submit_property_metric(
                 'guest.disk.capacity',
                 capacity,
@@ -844,7 +853,7 @@ class VSphereCheck(AgentCheck):
         resource_metric_suffix,  # type: str
     ):
         # type: (...) -> None
-        simple_properties = SIMPLE_PROPERTIES_BY_RESOURCE_TYPE[resource_metric_suffix]
+        simple_properties = self._config.simple_properties_to_collect_by_mor.get(resource_metric_suffix, [])
         for property_name in simple_properties:
             property_val = all_properties.get(property_name, None)
 
@@ -875,14 +884,22 @@ class VSphereCheck(AgentCheck):
         base_tags = self._config.base_tags + resource_tags
 
         if resource_type == vim.VirtualMachine:
-            nics = all_properties.get('guest.net', [])
-            self.submit_nic_property_metrics(nics, base_tags, hostname, resource_metric_suffix)
+            object_properties = self._config.object_properties_to_collect_by_mor.get(resource_metric_suffix, [])
 
-            ip_stacks = all_properties.get('guest.ipStack', [])
-            self.submit_ip_stack_property_metrics(ip_stacks, base_tags, hostname, resource_metric_suffix)
+            net_property = 'guest.net'
+            if net_property in object_properties:
+                nics = all_properties.get('guest.net', [])
+                self.submit_nic_property_metrics(nics, base_tags, hostname, resource_metric_suffix)
 
-            disks = all_properties.get('guest.disk', [])
-            self.submit_disk_property_metrics(disks, base_tags, hostname, resource_metric_suffix)
+            ip_stack_property = 'guest.ipStack'
+            if net_property in object_properties:
+                ip_stacks = all_properties.get(ip_stack_property, [])
+                self.submit_ip_stack_property_metrics(ip_stacks, base_tags, hostname, resource_metric_suffix)
+
+            disk_property = 'guest.disk'
+            if disk_property in object_properties:
+                disks = all_properties.get(disk_property, [])
+                self.submit_disk_property_metrics(disks, base_tags, hostname, resource_metric_suffix)
 
         self.submit_simple_property_metrics(all_properties, base_tags, hostname, resource_metric_suffix)
 

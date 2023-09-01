@@ -341,6 +341,32 @@ metrics:
           2547: cajun_p330-ml-sfp-_not_present
           2548: cajun_p330-ml-sfp-_not_supported
           2549: cajun_p330-10or100_t_port_and_in_pwr
+          2550: cajun_p330-ml-1000_tx-sfp
+          2640: avaya_c360-lag
+          2641: avaya_c360-1000_sx-sfp
+          2642: avaya_c360-1000_lx-sfp
+          2643: avaya_c360-lag100
+          2644: avaya_c360-lag1000
+          2645: avaya_c360-100or1000_tport
+          2646: avaya_c360-10or100_tport
+          2647: avaya_c360-sfp-_not_present
+          2648: avaya_c360-sfp-_not_supported
+          2649: avaya_c360-10or100_t_port_and_in_pwr
+          2650: avaya_c360-1000_tx-sfp
+          2811: avaya_g250-10or100_t_port_and_in_pwr
+          2812: avaya_g250-10or100_t_port
+          2902: avaya_g350-lag
+          2903: avaya_g350-1000_sx-sfp
+          2904: avaya_g350-1000_lx-sfp
+          2905: avaya_g350-lag100
+          2906: avaya_g350-lag1000
+          2907: avaya_g350-100or1000_t_port
+          2908: avaya_g350-10or100_t_port
+          2909: avaya_g350-sfp-_not_present
+          2910: avaya_g350-sfp-_not_supported
+          2911: avaya_g350-10or100_t_port_and_in_pwr
+          2912: avaya_g350-1000_tx-sfp
+          2913: avaya_g350-10or100or1000_t_port
           3000: m15-155_f_port
           3001: m3-622_f_port
           3002: m3-622_sf_port
@@ -349,6 +375,45 @@ metrics:
           3005: m2-2400_i_port
           3009: m4-ds3_port
           3010: m4-e3_port
+          3500: avaya_c460-100_fport
+          3501: avaya_c460-1000_sx-sfp
+          3502: avaya_c460-1000_lx-sfp
+          3503: avaya_c460-lag100
+          3504: avaya_c460-lag1000
+          3505: avaya_c460-1000_t_port
+          3506: avaya_c460-10or100_tport
+          3507: avaya_c460-sfp-_not_present
+          3508: avaya_c460-sfp-_not_supported
+          3509: avaya_c460-10or100_t_port_and_in_pwr
+          3640: avaya_w310-lag
+          3641: avaya_w310-1000_sx-sfp
+          3642: avaya_w310-1000_lx-sfp
+          3643: avaya_w310-lag100
+          3644: avaya_w310-lag1000
+          3647: avaya_w310-sfp-_not_present
+          3648: avaya_w310-sfp-_not_supported
+          3649: avaya_w310-10or100_t_port_and_in_pwr
+          3650: avaya_w310-1000_tx-sfp
+          4000: avaya_communication_manager_branch_editioni40-10or100_t_port_and_in_pwr
+          4001: avaya_communication_manager_branch_editioni40-10or100_t_port
+          4002: avaya_communication_manager_branch_editioni120-lag
+          4003: avaya_communication_manager_branch_editioni120-1000_sx-sfp
+          4004: avaya_communication_manager_branch_editioni120-1000_lx-sfp
+          4005: avaya_communication_manager_branch_editioni120-lag100
+          4006: avaya_communication_manager_branch_editioni120-lag1000
+          4007: avaya_communication_manager_branch_editioni120-100or1000_t_port
+          4008: avaya_communication_manager_branch_editioni120-10or100_t_port
+          4009: avaya_communication_manager_branch_editioni120-sfp-_not_present
+          4010: avaya_communication_manager_branch_editioni120-sfp-_not_supported
+          4011: avaya_communication_manager_branch_editioni120-10or100_t_port_and_in_pwr
+          4012: avaya_communication_manager_branch_editioni120-1000_tx-sfp
+          4013: avaya_communication_manager_branch_editioni120-10or100or1000_t_port
+          4014: avaya_communication_manager_branch_edition_g450-10or100or1000_t_port
+          4015: avaya_communication_manager_branch_edition_g450-10or100_t_port
+          4017: avaya_communication_manager_branch_edition_g430-10or100_tport
+          4019: avaya_communication_manager_branch_edition_g430-10or100_t_port_and_in_pwr
+          4020: avaya_g430-10or100_tport
+          4021: avaya_g430-10or100_t_port_and_in_pwr
       - column:
           name: avaya.genPortDescr
           OID: 1.3.6.1.4.1.81.9.1.1.5
@@ -371,7 +436,7 @@ metrics:
         tag: avaya_sc_eth_port_mode
         mapping:
           1: half_duplex
-          2: full_duplux_no_pause
+          2: full_duplex_no_pause
           3: full_duplex_proprietary_fc
           4: full_duplex_isl
           5: full_duplex_flow_control_isl
@@ -409,8 +474,10 @@ metrics:
           10: remote_fault
           11: rsp_error
           255: not_supported
-
 metric_tags:
   - tag: avaya_gen_cpu_utilization_enable_monitoring
-    OID: 1.3.6.1.4.1.6889.2.1.11.1.1.1.1.2.1
+    OID: 1.3.6.1.4.1.6889.2.1.11.1.1.1.1.2
     symbol: genCpuUtilizationEnableMonitoring
+    mapping:
+      1: disabled
+      2: enabled
