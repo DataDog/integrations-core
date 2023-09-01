@@ -4,7 +4,6 @@
 from pyVmomi import vim
 
 from datadog_checks.vsphere.constants import (
-    BOTH,
     HISTORICAL,
     REALTIME,
 )
@@ -515,14 +514,3 @@ RESOURCES_WITH_HISTORICAL_METRICS = [
 RESOURCES_WITH_REALTIME_METRICS = [
     group for group, metrics in ALLOWED_METRICS_FOR_MOR.items() if len(metrics[REALTIME]) > 0
 ]
-
-
-def is_metric_allowed(mor_type, metric_name, collection_type):
-    allowed_metrics = ALLOWED_METRICS_FOR_MOR[mor_type]
-    if collection_type == BOTH:
-        metrics = allowed_metrics[HISTORICAL] + allowed_metrics[REALTIME]
-    elif collection_type == HISTORICAL:
-        metrics = allowed_metrics[HISTORICAL]
-    else:
-        metrics = allowed_metrics[REALTIME]
-    return metric_name in metrics

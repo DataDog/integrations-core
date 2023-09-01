@@ -8,7 +8,15 @@ from six import iteritems
 
 from datadog_checks.base import to_string
 from datadog_checks.vsphere.config import VSphereConfig  # noqa: F401
-from datadog_checks.vsphere.constants import MOR_TYPE_AS_STRING, REFERENCE_METRIC, SHORT_ROLLUP
+from datadog_checks.vsphere.constants import (
+    BOTH,
+    HISTORICAL,
+    MOR_TYPE_AS_STRING,
+    REALTIME,
+    REFERENCE_METRIC,
+    SHORT_ROLLUP,
+)
+from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR
 from datadog_checks.vsphere.resource_filters import ResourceFilter, match_any_regex  # noqa: F401
 from datadog_checks.vsphere.types import InfrastructureData, MetricFilters, MetricName  # noqa: F401
 
@@ -83,6 +91,17 @@ def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):
         return False
 
     return True
+
+
+def is_metric_allowed_for_collection_type(mor_type, metric_name, collection_type):
+    allowed_metrics = ALLOWED_METRICS_FOR_MOR[mor_type]
+    if collection_type == BOTH:
+        metrics = allowed_metrics[HISTORICAL] + allowed_metrics[REALTIME]
+    elif collection_type == HISTORICAL:
+        metrics = allowed_metrics[HISTORICAL]
+    else:
+        metrics = allowed_metrics[REALTIME]
+    return metric_name in metrics
 
 
 def get_tags_recursively(mor, infrastructure_data, config, include_only=None):

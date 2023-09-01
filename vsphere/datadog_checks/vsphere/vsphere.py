@@ -30,7 +30,7 @@ from datadog_checks.vsphere.constants import (
     SIMPLE_PROPERTIES_BY_RESOURCE_TYPE,
 )
 from datadog_checks.vsphere.event import VSphereEvent
-from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS, is_metric_allowed
+from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
 from datadog_checks.vsphere.resource_filters import TagFilter
 from datadog_checks.vsphere.types import (
     CounterId,  # noqa: F401
@@ -48,6 +48,7 @@ from datadog_checks.vsphere.utils import (
     format_metric_name,
     get_mapped_instance_tag,
     get_tags_recursively,
+    is_metric_allowed_for_collection_type,
     is_metric_excluded_by_filters,
     is_resource_collected_by_filters,
     should_collect_per_instance_values,
@@ -151,7 +152,7 @@ class VSphereCheck(AgentCheck):
             allowed_counters = []
             for c in counters:
                 metric_name = format_metric_name(c)
-                if is_metric_allowed(
+                if is_metric_allowed_for_collection_type(
                     mor_type, metric_name, self._config.collection_type
                 ) and not is_metric_excluded_by_filters(metric_name, mor_type, self._config.metric_filters):
                     allowed_counters.append(c)
