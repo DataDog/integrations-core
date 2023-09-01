@@ -479,7 +479,7 @@ class VSphereCheck(AgentCheck):
                 mors = self.infrastructure_cache.get_mors(resource_type)
                 counters = self.metrics_metadata_cache.get_metadata(resource_type)
                 metric_ids = []  # type: List[vim.PerformanceManager.MetricId]
-                is_historical = metric_type == HISTORICAL
+                is_historical_batch = metric_type == HISTORICAL
                 for counter_key, metric_name in iteritems(counters):
                     # PerformanceManager.MetricId `instance` kwarg:
                     # - An asterisk (*) to specify all instances of the metric for the specified counterId
@@ -493,13 +493,13 @@ class VSphereCheck(AgentCheck):
                     if metric_name in ALLOWED_METRICS_FOR_MOR[resource_type][metric_type]:
                         metric_ids.append(vim.PerformanceManager.MetricId(counterId=counter_key, instance=instance))
 
-                for batch in self.make_batch(mors, metric_ids, resource_type, is_historical=is_historical):
+                for batch in self.make_batch(mors, metric_ids, resource_type, is_historical_batch=is_historical_batch):
                     query_specs = []
                     for mor, metrics in iteritems(batch):
                         query_spec = vim.PerformanceManager.QuerySpec()  # type: vim.PerformanceManager.QuerySpec
                         query_spec.entity = mor
                         query_spec.metricId = metrics
-                        if is_historical:
+                        if is_historical_batch:
                             query_spec.startTime = server_current_time - dt.timedelta(hours=2)
                         else:
                             query_spec.intervalId = REALTIME_METRICS_INTERVAL_ID
@@ -548,7 +548,7 @@ class VSphereCheck(AgentCheck):
         mors,  # type: Iterable[vim.ManagedEntity]
         metric_ids,  # type: List[vim.PerformanceManager.MetricId]
         resource_type,  # type: Type[vim.ManagedEntity]
-        is_historical=False,  # type: bool
+        is_historical_batch=False,  # type: bool
     ):  # type: (...) -> Generator[MorBatch, None, None]
         """Iterates over mor and generate batches with a fixed number of metrics to query.
         Querying multiple resource types in the same call is error prone if we query a cluster metric. Indeed,
@@ -562,7 +562,7 @@ class VSphereCheck(AgentCheck):
         if resource_type == vim.ClusterComputeResource:
             # Cluster metrics are unpredictable and a single call can max out the limit. Always collect them one by one.
             max_batch_size = 1  # type: float
-        elif is_historical or self._config.max_historical_metrics < 0:
+        elif is_historical_batch or self._config.max_historical_metrics < 0:
             # Queries are not limited by vCenter
             max_batch_size = self._config.metrics_per_query
         else:

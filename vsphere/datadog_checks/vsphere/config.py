@@ -122,7 +122,7 @@ class VSphereConfig(object):
 
     def is_historical(self):
         # type: () -> bool
-        return self.collection_type in ('historical', 'both')
+        return self.collection_type in (HISTORICAL, BOTH)
 
     def validate_config(self):
         # type: () -> None
@@ -134,7 +134,7 @@ class VSphereConfig(object):
                 "disabling ssl verification."
             )
 
-        if self.collection_type not in ('realtime', 'historical', 'both'):
+        if self.collection_type not in (REALTIME, HISTORICAL, BOTH):
             raise ConfigurationError(
                 "Your configuration is incorrectly attempting to "
                 "set the `collection_type` to {}. It should be either "
