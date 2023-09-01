@@ -29,7 +29,6 @@ def test_e2e_profile_citrix_netscaler_sdx(dd_agent_check):
         'snmp_device:' + ip_address,
     ] + [
         'netscaler_sdx_system_bios_version:zombies',
-        'netscaler_sdx_system_dns:driving driving Jaded their oxen',
         'netscaler_sdx_system_gateway:acted quaintly oxen',
         'netscaler_sdx_system_gateway_type:ipv4',
         'netscaler_sdx_system_netmask:driving acted',
@@ -164,6 +163,7 @@ def test_e2e_profile_citrix_netscaler_sdx(dd_agent_check):
         [
             'netscaler_sdx_ns_description:Jaded forward quaintly oxen zombies',
             'netscaler_sdx_ns_gateway:?6b657074204a6164656420717561696e746c79206b65707420666f727761726420666f72776172642074686569722064726976696e67206f78656e',
+            'netscaler_sdx_ns_gateway_type:ipv6z',
             'netscaler_sdx_ns_ha_ip_address:?7a6f6d6269657320746865697220627574207a6f6d62696573204a61646564207a6f6d62696573206b657074',
             'netscaler_sdx_ns_ha_ip_address_type:ipv4',
             'netscaler_sdx_ns_ha_master_state:forward forward oxen driving their zombies kept zombies but',

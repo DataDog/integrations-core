@@ -4,6 +4,13 @@
 
 ***Fixed***:
 
+* Revise postgresql.replication_delay to Function with Archive WAL-driven PostgreSQL Replica ([#15629](https://github.com/DataDog/integrations-core/pull/15629))
+* Pass timeout when connection pool closes ([#15724](https://github.com/DataDog/integrations-core/pull/15724))
+
+## 14.2.1 / 2023-08-29
+
+***Fixed***:
+
 * Return Azure AD auth token in correct format ([#15701](https://github.com/DataDog/integrations-core/pull/15701))
 
 ## 14.2.0 / 2023-08-18
@@ -17,6 +24,7 @@
 
 ***Fixed***:
 
+* Fix explaining parameterized queries flood server logs ([#15612](https://github.com/DataDog/integrations-core/pull/15612))
 * Update datadog-checks-base dependency version to 32.6.0 ([#15604](https://github.com/DataDog/integrations-core/pull/15604))
 * Prevent `command already in progress` errors in the Postgres integration ([#15489](https://github.com/DataDog/integrations-core/pull/15489))
 
@@ -40,7 +48,7 @@
 * Upgrade postgres check to psycopg3 ([#15411](https://github.com/DataDog/integrations-core/pull/15411))
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 14.0.1 / 2023-07-13
+## 14.0.1 / 2023-07-13 / Agent 7.47.0
 
 ***Fixed***:
 

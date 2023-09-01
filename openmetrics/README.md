@@ -87,9 +87,9 @@ init_config:
   ...
 instances:
   - openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
-  ...
+    ...
     headers:
-      - Accept: text/plain
+      Accept: text/plain
 ```
 
 With this configuration, the endpoint returns the `Content-type` set to `text/plain`, causing the integration to use the previous scraper.

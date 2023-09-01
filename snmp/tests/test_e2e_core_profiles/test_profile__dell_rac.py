@@ -90,11 +90,11 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         [
             'chassis_index:24',
             'system_state_chassis_status:critical',
-            'system_state_power_unit_status_redundancy:notRedundant',
-            'system_state_power_supply_status_combined:nonRecoverable',
+            'system_state_power_unit_status_redundancy:not_redundant',
+            'system_state_power_supply_status_combined:non_recoverable',
             'system_state_amperage_status_combined:unknown',
             'system_state_cooling_unit_status_redundancy:full',
-            'system_state_cooling_device_status_combined:nonRecoverable',
+            'system_state_cooling_device_status_combined:non_recoverable',
             'system_state_temperature_status_combined:unknown',
             'system_state_memory_device_status_combined:critical',
             'system_state_chassis_intrusion_status_combined:other',
@@ -106,16 +106,16 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         [
             'chassis_index:27',
             'system_state_chassis_status:ok',
-            'system_state_power_unit_status_redundancy:notRedundant',
+            'system_state_power_unit_status_redundancy:not_redundant',
             'system_state_power_supply_status_combined:other',
             'system_state_amperage_status_combined:ok',
-            'system_state_cooling_unit_status_redundancy:redundancyOffline',
+            'system_state_cooling_unit_status_redundancy:redundancy_offline',
             'system_state_cooling_device_status_combined:unknown',
             'system_state_temperature_status_combined:other',
-            'system_state_memory_device_status_combined:noncritical',
+            'system_state_memory_device_status_combined:non_critical',
             'system_state_chassis_intrusion_status_combined:other',
             'system_state_power_unit_status_combined:unknown',
-            'system_state_cooling_unit_status_combined:noncritical',
+            'system_state_cooling_unit_status_combined:non_critical',
             'system_state_processor_device_status_combined:critical',
             'system_state_temperature_statistics_status_combined:unknown',
         ],
@@ -226,7 +226,7 @@ def test_e2e_profile__dell_rac(dd_agent_check):
             'controller_name:acted oxen',
             'controller_number:26',
             'controller_pci_slot:kept driving zombies acted driving',
-            'controller_roll_up_status:nonRecoverable',
+            'controller_roll_up_status:non_recoverable',
         ],
     ]
     for tag_row in tag_rows:
@@ -240,8 +240,8 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         aggregator.assert_metric('snmp.pCIDeviceStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['chassis_index:25', 'device_descr_name:driving their oxen forward', 'device_status:nonCritical'],
-        ['chassis_index:30', 'device_descr_name:driving', 'device_status:nonRecoverable'],
+        ['chassis_index:25', 'device_descr_name:driving their oxen forward', 'device_status:non_critical'],
+        ['chassis_index:30', 'device_descr_name:driving', 'device_status:non_recoverable'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.dell.pCIDevice', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -257,9 +257,9 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         [
             'chassis_index:25',
             'slot_name:zombies driving forward but Jaded acted kept acted',
-            'slot_status:nonRecoverable',
+            'slot_status:non_recoverable',
         ],
-        ['chassis_index:27', 'slot_name:Jaded oxen their acted Jaded kept quaintly', 'slot_status:nonRecoverable'],
+        ['chassis_index:27', 'slot_name:Jaded oxen their acted Jaded kept quaintly', 'slot_status:non_recoverable'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.dell.systemSlot', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -277,14 +277,14 @@ def test_e2e_profile__dell_rac(dd_agent_check):
             'device_index:15',
             'device_fqdd:quaintly',
             'mac_addr:aaaaaa',
-            'network_device_status:nonRecoverable',
+            'network_device_status:non_recoverable',
         ],
         [
             'chassis_index:24',
             'device_index:7',
             'device_fqdd:oxen acted zombies but Jaded',
             'mac_addr:aaaaaa',
-            'network_device_status:nonRecoverable',
+            'network_device_status:non_recoverable',
         ],
     ]
     for tag_row in tag_rows:
@@ -299,7 +299,7 @@ def test_e2e_profile__dell_rac(dd_agent_check):
 
     tag_rows = [
         ['chassis_index:28', 'system_bios_index:12', 'system_bios_status:other'],
-        ['chassis_index:29', 'system_bios_index:19', 'system_bios_status:nonRecoverable'],
+        ['chassis_index:29', 'system_bios_index:19', 'system_bios_status:non_recoverable'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.dell.systemBIOS', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -345,7 +345,7 @@ def test_e2e_profile__dell_rac(dd_agent_check):
 
     tag_rows = [
         ['amperage_probe_index:12', 'chassis_index:13', 'probe_type:8', 'amperage_probe_status:other'],
-        ['amperage_probe_index:16', 'chassis_index:3', 'probe_type:3', 'amperage_probe_status:criticalLower'],
+        ['amperage_probe_index:16', 'chassis_index:3', 'probe_type:3', 'amperage_probe_status:critical_lower'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.dell.amperageProbe', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -367,7 +367,7 @@ def test_e2e_profile__dell_rac(dd_agent_check):
 
     tag_rows = [
         ['chassis_index:14', 'probe_type:19', 'voltage_probe_index:21', 'voltage_probe_status:failed'],
-        ['chassis_index:29', 'probe_type:3', 'voltage_probe_index:25', 'voltage_probe_status:criticalLower'],
+        ['chassis_index:29', 'probe_type:3', 'voltage_probe_index:25', 'voltage_probe_status:critical_lower'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.dell.voltageProbe', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
