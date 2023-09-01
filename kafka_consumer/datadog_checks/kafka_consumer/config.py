@@ -55,10 +55,11 @@ class KafkaConfig:
             else is_affirmative(instance.get("ssl_check_hostname", True))
         )
 
+        # tls_verify/enable.ssl.certificate.verification is required to be a string when passed into
         if self._tls_cert or self._tls_ca_cert or self._tls_private_key or self._tls_private_key_password:
-            self._tls_verify = True
+            self._tls_verify = "true"
         else:
-            self._tls_verify = is_affirmative(instance.get("tls_verify", True))
+            self._tls_verify = "true" if is_affirmative(instance.get("tls_verify", True)) else "false"
 
     def validate_config(self):
         if not self._kafka_connect_str:
