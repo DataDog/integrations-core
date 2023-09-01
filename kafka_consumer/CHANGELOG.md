@@ -4,6 +4,7 @@
 
 ***Fixed***:
 
+* Set tls_verify to string rather than boolean ([#15699](https://github.com/DataDog/integrations-core/pull/15699))
 * Filter out empty consumer groups ([#15657](https://github.com/DataDog/integrations-core/pull/15657))
 
 ## 4.1.1 / 2023-08-24
