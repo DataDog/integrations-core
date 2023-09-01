@@ -807,85 +807,85 @@
                       "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:openai.tokens.total{openai.model:ada*,$model,$env,$version,$service,$organization,$openai.user.api_key}.as_count()"
+                      "query": "sum:openai.tokens.total{openai.request.model:ada*,$model,$env,$version,$service,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:openai.tokens.total{openai.model:gpt-3.5*,$model,$env,$version,$service,$organization,$openai.user.api_key}.as_count()"
+                      "query": "sum:openai.tokens.total{openai.request.model:gpt-3.5*,$model,$env,$version,$service,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:openai.tokens.total{openai.model:curie*,$model,$env,$version,$service,$organization,$openai.user.api_key}.as_count()"
+                      "query": "sum:openai.tokens.total{openai.request.model:curie*,$model,$env,$version,$service,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "sum:openai.tokens.total{openai.model:babbage*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                      "query": "sum:openai.tokens.total{openai.request.model:babbage*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query5",
-                      "query": "sum:openai.tokens.total{openai.model:davinci*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                      "query": "sum:openai.tokens.total{openai.request.model:davinci*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query6",
-                      "query": "sum:openai.tokens.prompt{openai.model:gpt-4,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                      "query": "sum:openai.tokens.prompt{openai.request.model:gpt-4,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query7",
-                      "query": "sum:openai.tokens.completion{openai.model:gpt-4,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                      "query": "sum:openai.tokens.completion{openai.request.model:gpt-4,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query8",
-                      "query": "sum:openai.tokens.prompt{openai.model:gpt-4-32k*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                      "query": "sum:openai.tokens.prompt{openai.request.model:gpt-4-32k*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query9",
-                      "query": "sum:openai.tokens.completion{openai.model:gpt-4-32k*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                      "query": "sum:openai.tokens.completion{openai.request.model:gpt-4-32k*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query10",
-                      "query": "sum:openai.tokens.total{openai.model:text-embedding-ada*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                      "query": "sum:openai.tokens.total{openai.request.model:text-embedding-ada*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query11",
-                      "query": "sum:openai.tokens.total{openai.model:text-davinci*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                      "query": "sum:openai.tokens.total{openai.request.model:text-davinci*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query12",
-                      "query": "sum:openai.tokens.total{openai.model:text-curie*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                      "query": "sum:openai.tokens.total{openai.request.model:text-curie*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query13",
-                      "query": "sum:openai.tokens.total{openai.model:text-babbage*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                      "query": "sum:openai.tokens.total{openai.request.model:text-babbage*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query14",
-                      "query": "sum:openai.tokens.total{openai.model:text-ada*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                      "query": "sum:openai.tokens.total{openai.request.model:text-ada*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
                     }
                   ],
                   "response_format": "scalar"
@@ -907,7 +907,7 @@
             "id": 3868770172430520,
             "definition": {
               "type": "note",
-              "content": "OpenAI model pricing (per 1K tokens)\n- **ada**: $0.0004\n- **babbage**: $0.0005\n- **curie**: $0.002\n- **davinci**: $0.02\n- **gpt-3.5-turbo**: $0.002\n- **gpt-4-8k**: $0.03 prompt, $0.06 completion\n- **gpt-4-32k**: $0.06 prompt, $0.12 completion\n\n\n\nhttps://openai.com/pricing (2023-04-12)",
+              "content": "OpenAI base model pricing (per 1K tokens)\n- **ada**: $0.0001\n- **babbage**: $0.0004\n- **curie**: $0.002\n- **davinci**: $0.002\n- **gpt-3.5-turbo-4k**: $0.0015 prompt, $0.002 completion\n- **gpt-3.5-turbo-16k**: $0.003 prompt, $0.004 completion\n- **gpt-4-8k**: $0.03 prompt, $0.06 completion\n- **gpt-4-32k**: $0.06 prompt, $0.12 completion\n\n\n\nhttps://openai.com/pricing (2023-09-01)",
               "background_color": "orange",
               "font_size": "14",
               "text_align": "left",
