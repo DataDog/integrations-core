@@ -26,7 +26,10 @@ from datadog_checks.vsphere.constants import (
     EXTRA_FILTER_PROPERTIES_FOR_VMS,
     HISTORICAL_RESOURCES,
     MOR_TYPE_AS_STRING,
+    OBJECT_PROPERTIES_BY_RESOURCE_TYPE,
+    PROPERTY_METRICS_BY_RESOURCE_TYPE,
     REALTIME_RESOURCES,
+    SIMPLE_PROPERTIES_BY_RESOURCE_TYPE,
 )
 from datadog_checks.vsphere.resource_filters import ResourceFilter, create_resource_filter  # noqa: F401
 from datadog_checks.vsphere.types import (  # noqa: F401
@@ -34,6 +37,11 @@ from datadog_checks.vsphere.types import (  # noqa: F401
     MetricFilterConfig,
     MetricFilters,
     ResourceFilterConfig,
+)
+from datadog_checks.vsphere.utils import (
+    object_properties_to_collect,
+    property_metrics_to_collect,
+    simple_properties_to_collect,
 )
 
 
@@ -106,6 +114,7 @@ class VSphereConfig(object):
         # Filters
         self.resource_filters = self._parse_resource_filters(instance.get("resource_filters", []))
         self.metric_filters = self._parse_metric_regex_filters(instance.get("metric_filters", {}))
+
         # Since `collect_per_instance_filters` have the same structure as `metric_filters` we use the same parser
         self.collect_per_instance_filters = self._parse_metric_regex_filters(
             instance.get("collect_per_instance_filters", {})
@@ -256,3 +265,24 @@ class VSphereConfig(object):
             metric_filters[resource_type] = filters
 
         return {k: [re.compile(r) for r in v] for k, v in iteritems(metric_filters)}
+
+    @property
+    def object_properties_to_collect_by_mor(self):
+        return {
+            mor_string: object_properties_to_collect(mor_string, self.metric_filters)
+            for mor_string in OBJECT_PROPERTIES_BY_RESOURCE_TYPE.keys()
+        }
+
+    @property
+    def simple_properties_to_collect_by_mor(self):
+        return {
+            mor_string: simple_properties_to_collect(mor_string, self.metric_filters)
+            for mor_string in SIMPLE_PROPERTIES_BY_RESOURCE_TYPE.keys()
+        }
+
+    @property
+    def property_metrics_to_collect_by_mor(self):
+        return {
+            mor_string: property_metrics_to_collect(mor_string, self.metric_filters)
+            for mor_string in PROPERTY_METRICS_BY_RESOURCE_TYPE.keys()
+        }

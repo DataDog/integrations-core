@@ -51,7 +51,7 @@ def test_e2e_profile_hpe_nimble(dd_agent_check):
     aggregator.assert_metric('snmp.nimble.ioWrites', metric_type=aggregator.COUNT, tags=common_tags)
 
     tag_rows = [
-        ['nimble_vol_name:acted their their forward but'],
+        ['nimble_vol_name:acted their their forward but', 'nimble_vol_online:false'],
         ['nimble_vol_name:driving Jaded', 'nimble_vol_online:true'],
     ]
 

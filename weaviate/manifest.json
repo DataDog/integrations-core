@@ -12,6 +12,8 @@
     "title": "Weaviate",
     "media": [],
     "classifier_tags": [
+      "Category::AI",
+      "Category::Machine Learning & LLM",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS"

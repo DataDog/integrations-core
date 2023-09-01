@@ -73,8 +73,8 @@ def test_e2e_profile_infoblox_ipam(dd_agent_check):
         aggregator.assert_metric('snmp.ibNodeQueueToMaster', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['ib_service_description:forward oxen oxen', 'ib_service_name:enet-mgmt', 'ib_service_status:inactive'],
-        ['ib_service_description:kept zombies kept', 'ib_service_name:fan3', 'ib_service_status:warning'],
+        ['ib_service_desc:forward oxen oxen', 'ib_service_name:lcd', 'ib_service_status:inactive'],
+        ['ib_service_desc:kept zombies kept', 'ib_service_name:raid-disk8', 'ib_service_status:warning'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.ibMemberServiceStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)

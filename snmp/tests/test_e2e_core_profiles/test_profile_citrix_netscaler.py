@@ -90,12 +90,14 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
     aggregator.assert_metric('snmp.netscaler.vsvrSvcGrpBindCount', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
         [
+            'netscaler_vsvr_ip_address:210.102.241.146',
             'netscaler_vsvr_name:acted oxen driving their forward their kept Jaded',
             'netscaler_vsvr_port:12',
             'netscaler_vsvr_state:transition_to_out_of_service',
             'netscaler_vsvr_type:sslvpn_udp',
         ],
         [
+            'netscaler_vsvr_ip_address:53.144.47.94',
             'netscaler_vsvr_name:oxen kept their driving',
             'netscaler_vsvr_port:8',
             'netscaler_vsvr_state:up',
@@ -279,12 +281,14 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
 
     tag_rows = [
         [
+            'netscaler_svc_ip_address:42.229.1.138',
             'netscaler_svc_port:13',
             'netscaler_svc_service_full_name:zombies quaintly acted zombies kept driving driving Jaded',
             'netscaler_svc_service_name:quaintly driving quaintly their acted',
             'netscaler_svc_service_type:httpserver',
         ],
         [
+            'netscaler_svc_ip_address:215.131.83.58',
             'netscaler_svc_port:19',
             'netscaler_svc_service_full_name:quaintly kept Jaded Jaded zombies quaintly but',
             'netscaler_svc_service_name:their oxen zombies kept oxen Jaded zombies forward forward',
@@ -343,10 +347,15 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
 
     tag_rows = [
         [
+            'netscaler_server_ip_address:220.157.222.120',
             'netscaler_server_name:acted forward acted but their oxen Jaded quaintly quaintly',
             'netscaler_server_state:unknown',
         ],
-        ['netscaler_server_name:quaintly kept kept but driving oxen', 'netscaler_server_state:unknown'],
+        [
+            'netscaler_server_ip_address:18.109.172.33',
+            'netscaler_server_name:quaintly kept kept but driving oxen',
+            'netscaler_server_state:unknown',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.netscaler.server', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
