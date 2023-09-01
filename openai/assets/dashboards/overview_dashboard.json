@@ -799,92 +799,98 @@
                 {
                   "formulas": [
                     {
-                      "formula": "((query1 / 1000) * 0.0004) + ((query2 / 1000) * 0.002) + ((query3 / 1000) * 0.002) + ((query4 / 1000) * 0.0005) + ((query5 / 1000) * 0.02) + ((query6 / 1000) * 0.03) + ((query7 / 1000) * 0.06) + ((query8 / 1000) * 0.06) + ((query9 / 1000) * 0.12) + ((query10 / 1000) * 0.0004) + ((query11 / 1000) * 0.02) + ((query12 / 1000) * 0.002) + ((query13 / 1000) * 0.0005) + ((query14 / 1000) * 0.0004)"
+                      "formula": "((ada / 1000) * 0.0004) + ((gpt_3_5_4k_prompt / 1000) * 0.0015) + ((gpt_3_5_4k_completion / 1000) * 0.002) + ((gpt_3_5_16k_prompt / 1000) * 0.003) + ((gpt_3_5_16k_completion / 1000) * 0.004) + ((curie / 1000) * 0.002) + ((babbage / 1000) * 0.0004) + ((davinci / 1000) * 0.002) + ((gpt_4_8k_prompt / 1000) * 0.03) + ((gpt_4_8k_completion / 1000) * 0.06) + ((gpt_4_32k_prompt / 1000) * 0.06) + ((gpt_4_32k_completion / 1000) * 0.12) + ((text_ada_embedding / 1000) * 0.0001) + ((text_babbage / 1000) * 0.0005) + ((text_ada / 1000) * 0.0004)"
                     }
                   ],
                   "queries": [
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
-                      "name": "query1",
+                      "name": "ada",
                       "query": "sum:openai.tokens.total{openai.request.model:ada*,$model,$env,$version,$service,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
-                      "name": "query2",
-                      "query": "sum:openai.tokens.total{openai.request.model:gpt-3.5*,$model,$env,$version,$service,$organization,$openai.user.api_key}.as_count()"
+                      "name": "gpt_3_5_4k_prompt",
+                      "query": "sum:openai.tokens.prompt{openai.request.model:gpt-3.5-turbo,$model,$env,$version,$service,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
-                      "name": "query3",
-                      "query": "sum:openai.tokens.total{openai.request.model:curie*,$model,$env,$version,$service,$organization,$openai.user.api_key}.as_count()"
+                      "name": "gpt_3_5_4k_completion",
+                      "query": "sum:openai.tokens.completion{openai.request.model:gpt-3.5-turbo,$model,$env,$version,$service,$organization,$openai.user.api_key}.as_count()"
+                    },
+                                        {
+                      "aggregator": "sum",
+                      "data_source": "metrics",
+                      "name": "gpt_3_5_16k_prompt",
+                      "query": "sum:openai.tokens.prompt{openai.request.model:gpt-3.5-turbo-16k*,$model,$env,$version,$service,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
-                      "name": "query4",
+                      "name": "gpt_3_5_16k_completion",
+                      "query": "sum:openai.tokens.completion{openai.request.model:gpt-3.5-turbo-16k*,$model,$env,$version,$service,$organization,$openai.user.api_key}.as_count()"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "metrics",
+                      "name": "curie",
+                      "query": "sum:openai.tokens.total{openai.request.model:*curie*,$model,$env,$version,$service,$organization,$openai.user.api_key}.as_count()"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "metrics",
+                      "name": "babbage",
                       "query": "sum:openai.tokens.total{openai.request.model:babbage*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
-                      "name": "query5",
-                      "query": "sum:openai.tokens.total{openai.request.model:davinci*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                      "name": "davinci",
+                      "query": "sum:openai.tokens.total{openai.request.model:*davinci*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
-                      "name": "query6",
+                      "name": "gpt_4_8k_prompt",
                       "query": "sum:openai.tokens.prompt{openai.request.model:gpt-4,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
-                      "name": "query7",
+                      "name": "gpt_4_8k_completion",
                       "query": "sum:openai.tokens.completion{openai.request.model:gpt-4,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
-                      "name": "query8",
+                      "name": "gpt_4_32k_prompt",
                       "query": "sum:openai.tokens.prompt{openai.request.model:gpt-4-32k*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
-                      "name": "query9",
+                      "name": "gpt_4_32k_completion",
                       "query": "sum:openai.tokens.completion{openai.request.model:gpt-4-32k*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
-                      "name": "query10",
+                      "name": "text_ada_embedding",
                       "query": "sum:openai.tokens.total{openai.request.model:text-embedding-ada*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
-                      "name": "query11",
-                      "query": "sum:openai.tokens.total{openai.request.model:text-davinci*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
-                    },
-                    {
-                      "aggregator": "sum",
-                      "data_source": "metrics",
-                      "name": "query12",
-                      "query": "sum:openai.tokens.total{openai.request.model:text-curie*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
-                    },
-                    {
-                      "aggregator": "sum",
-                      "data_source": "metrics",
-                      "name": "query13",
+                      "name": "text_babbage",
                       "query": "sum:openai.tokens.total{openai.request.model:text-babbage*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
-                      "name": "query14",
+                      "name": "text_ada",
                       "query": "sum:openai.tokens.total{openai.request.model:text-ada*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
                     }
                   ],
