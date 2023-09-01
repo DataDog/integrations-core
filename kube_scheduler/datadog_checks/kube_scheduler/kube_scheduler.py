@@ -211,7 +211,7 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, SliMetricsScraperMixin, OpenMe
 
         self._perform_service_check(instance)
 
-        if self.slis_scraper_config['prometheus_url']:  # Prometheus
+        if self._slis_available:
             self.log.debug('processing kube scheduler sli metrics')
             self.process(self.slis_scraper_config)
 

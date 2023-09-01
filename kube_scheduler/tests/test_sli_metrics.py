@@ -32,7 +32,8 @@ def mock_metrics():
         yield
 
 
-def test_check_metrics_slis(aggregator, mock_metrics):
+def test_check_metrics_slis(aggregator, mock_metrics, mock_request):
+    mock_request.head('http://localhost:10259/metrics/slis', status_code=200)
     c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
