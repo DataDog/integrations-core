@@ -12,20 +12,11 @@ class KafkaCheck(AgentCheck):
 
     __NAMESPACE__ = 'kafka'
 
-    # This remapper is used to support legacy config values
-    TLS_CONFIG_REMAPPER = {
-        'ssl_check_hostname': {'name': 'tls_validate_hostname'},
-        'ssl_cafile': {'name': 'tls_ca_cert'},
-        'ssl_certfile': {'name': 'tls_cert'},
-        'ssl_keyfile': {'name': 'tls_private_key'},
-        'ssl_password': {'name': 'tls_private_key_password'},
-    }
-
     def __init__(self, name, init_config, instances):
         super(KafkaCheck, self).__init__(name, init_config, instances)
         self.config = KafkaConfig(self.init_config, self.instance, self.log)
         self._context_limit = self.config._context_limit
-        self.client = KafkaClient(self.config, self.get_tls_context(), self.log)
+        self.client = KafkaClient(self.config, self.log)
         self.check_initializations.insert(0, self.config.validate_config)
 
     def check(self, _):
