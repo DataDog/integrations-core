@@ -26,9 +26,7 @@ from datadog_checks.vsphere.constants import (
     HOST_RESOURCES,
     MAX_QUERY_METRICS_OPTION,
     PROPERTY_COUNT_METRICS,
-    REALTIME_RESOURCES,
     REALTIME_METRICS_INTERVAL_ID,
-    SIMPLE_PROPERTIES_BY_RESOURCE_TYPE,
 )
 from datadog_checks.vsphere.event import VSphereEvent
 from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
@@ -492,7 +490,9 @@ class VSphereCheck(AgentCheck):
                     # - An asterisk (*) to specify all instances of the metric for the specified counterId
                     # - Double-quotes ("") to specify aggregated statistics
                     # More info https://code.vmware.com/apis/704/vsphere/vim.PerformanceManager.MetricId.html
-                    if should_collect_per_instance_values(self._config, metric_name, resource_type):
+                    if should_collect_per_instance_values(
+                        self._config.collect_per_instance_filters, metric_name, resource_type
+                    ):
                         instance = "*"
                     else:
                         instance = ''

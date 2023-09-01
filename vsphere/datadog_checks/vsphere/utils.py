@@ -7,8 +7,6 @@ from pyVmomi import vim
 from six import iteritems
 
 from datadog_checks.base import to_string
-from datadog_checks.vsphere.config import VSphereConfig  # noqa: F401
-from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR
 from datadog_checks.vsphere.constants import (
     BOTH,
     HISTORICAL,
@@ -16,11 +14,12 @@ from datadog_checks.vsphere.constants import (
     OBJECT_PROPERTIES_BY_RESOURCE_TYPE,
     OBJECT_PROPERTIES_TO_METRIC_NAME,
     PROPERTY_METRICS_BY_RESOURCE_TYPE,
-    REALTIME
+    REALTIME,
     REFERENCE_METRIC,
     SHORT_ROLLUP,
     SIMPLE_PROPERTIES_BY_RESOURCE_TYPE,
 )
+from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR
 from datadog_checks.vsphere.resource_filters import ResourceFilter, match_any_regex  # noqa: F401
 from datadog_checks.vsphere.types import InfrastructureData, MetricFilters, MetricName  # noqa: F401
 
