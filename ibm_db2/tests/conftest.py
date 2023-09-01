@@ -59,7 +59,7 @@ class DbManager(object):
 def dd_environment():
     db = DbManager(CONFIG)
 
-    with docker_run(COMPOSE_FILE, conditions=[db.initialize, WaitFor(db.connect)]):
+    with docker_run(COMPOSE_FILE, conditions=[db.initialize, WaitFor(db.connect)], attempts=2):
         yield CONFIG, E2E_METADATA
 
 

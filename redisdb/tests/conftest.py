@@ -8,6 +8,7 @@ import pytest
 import redis
 
 from datadog_checks.dev import LazyFunction, RetryError, docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.redisdb import Redis
 
 from .common import DOCKER_COMPOSE_PATH, HERE, HOST, MASTER_PORT, PASSWORD, PORT, REPLICA_PORT
@@ -36,6 +37,8 @@ class CheckCluster(LazyFunction):
                     master.lpush('test_key1', 'test_value1')
                     master.lpush('test_key2', 'test_value2')
                     master.lpush('test_key3', 'test_value3')
+                    master.xadd('test_key4', {'test_value4b': 'test_value4a'})
+                    master.xadd('test_key4', {'test_value4b': 'test_value4b'})
                     break
             except redis.ConnectionError:
                 pass
@@ -50,12 +53,14 @@ def redis_auth():
     """
     Start a standalone redis server requiring authentication before running a
     test and stop it afterwards.
-    If there's any problem executing docker-compose, let the exception bubble
+    If there's any problem executing `docker compose`, let the exception bubble
     up.
     """
+    compose_file = os.path.join(HERE, 'compose', 'standalone.compose')
     with docker_run(
-        os.path.join(HERE, 'compose', 'standalone.compose'),
+        compose_file,
         env_vars={'REDIS_CONFIG': os.path.join(HERE, 'config', 'auth.conf')},
+        conditions=[CheckDockerLogs(compose_file, 'Ready to accept connections', wait=5)],
     ):
         yield
 

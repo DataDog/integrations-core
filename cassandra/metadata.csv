@@ -1,4 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+cassandra.active_tasks,gauge,10,task,,The number of tasks that the thread pool is actively executing.,0,cassandra,actv tsks,
 cassandra.bloom_filter_false_ratio,gauge,10,fraction,,The ratio of Bloom filter false positives to total checks.,-1,cassandra,bloom false ratio,
 cassandra.bytes_flushed.count,gauge,10,byte,,The amount of data that was flushed since (re)start.,0,cassandra,bytes flushed,
 cassandra.cas_commit_latency.75th_percentile,gauge,10,microsecond,,The latency of paxos commit round - p75.,-1,cassandra,cas commit latency p75,
@@ -23,7 +24,7 @@ cassandra.exceptions.count,gauge,10,error,,The number of exceptions thrown from 
 cassandra.key_cache_hit_rate,gauge,10,fraction,,The key cache hit rate.,1,cassandra,hit,
 cassandra.latency.75th_percentile,gauge,10,microsecond,,The client request latency - p75.,-1,cassandra,request latency p75,
 cassandra.latency.95th_percentile,gauge,10,microsecond,,The client request latency - p95.,-1,cassandra,request latency p95,
-cassandra.latency.one_minute_rate,gauge,10,request,second,The number of client requests.,0,cassandra,request cout,
+cassandra.latency.one_minute_rate,gauge,10,request,second,The number of client requests.,0,cassandra,request count,
 cassandra.live_disk_space_used.count,gauge,10,byte,,"The disk space used by ""live"" SSTables (only counts in use files).",0,cassandra,live disk used,
 cassandra.live_ss_table_count,gauge,10,file,,"Number of ""live"" (in use) SSTables.",0,cassandra,live sstables,
 cassandra.load.count,gauge,10,byte,,The disk space used by live data on a node.,0,cassandra,load,
@@ -49,6 +50,8 @@ cassandra.row_cache_miss.count,gauge,10,miss,,The number of table row cache miss
 cassandra.snapshots_size,gauge,10,byte,,The disk space truly used by snapshots.,0,cassandra,snapshot size,
 cassandra.ss_tables_per_read_histogram.75th_percentile,gauge,10,file,read,The number of SSTable data files accessed per read - p75.,-1,cassandra,sstables per read p75,
 cassandra.ss_tables_per_read_histogram.95th_percentile,gauge,10,file,read,The number of SSTable data files accessed per read - p95.,-1,cassandra,sstables per read p95,
+cassandra.timeouts.count,gauge,10,timeout,,Count of requests not acknowledged within configurable timeout window.,-1,cassandra,timeout,
+cassandra.timeouts.one_minute_rate,gauge,10,timeout,second,"Recent timeout rate, as an exponentially weighted moving average over a one-minute interval.",-1,cassandra,timeout/s,
 cassandra.tombstone_scanned_histogram.75th_percentile,gauge,10,record,read,Number of tombstones scanned per read - p75.,-1,cassandra,tombstones per read p75,
 cassandra.tombstone_scanned_histogram.95th_percentile,gauge,10,record,read,Number of tombstones scanned per read - p95.,-1,cassandra,tombstones per read p95,
 cassandra.total_blocked_tasks,gauge,10,task,,Total blocked tasks,0,cassandra,total blocked tasks,

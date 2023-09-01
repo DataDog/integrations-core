@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
-from typing import Callable, Union
+from typing import Callable, Union  # noqa: F401
 
 import requests
 from six.moves.urllib.parse import urljoin

@@ -1,0 +1,141 @@
+name: Impala
+files:
+  - name: impala.yaml
+    options:
+      - template: init_config
+        options:
+          - template: init_config/openmetrics
+      - template: instances
+        options:
+          - name: service_type
+            required: true
+            description: |
+              The Impala service you want to monitor. Possible values are `daemon`, `statestore`, and `catalog`.
+            value:
+              type: string
+              display_default: daemon
+              example: daemon
+              enum:
+                - 'daemon'
+                - 'statestore'
+                - 'catalog'
+          - template: instances/openmetrics
+            overrides:
+              openmetrics_endpoint.value.example: http://%%host%%:25000/metrics_prometheus
+              openmetrics_endpoint.description: |
+                The URL exposing metrics in the OpenMetrics format.
+                
+                The default port for the services are:
+                - Daemon: 25000
+                - Statestore: 25010
+                - Catalog: 25020
+      - template: logs
+        example:
+          - type: file
+            path: /var/log/impala/impalad.INFO
+            source: impala
+            tags:
+              - service_type:daemon
+            log_processing_rules:
+              - type: multi_line
+                pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+                name: new_log_start_with_log_level_and_date
+          - type: file
+            path: /var/log/impala/impalad.WARNING
+            source: impala
+            tags:
+              - service_type:daemon
+            log_processing_rules:
+              - type: multi_line
+                pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+                name: new_log_start_with_log_level_and_date
+          - type: file
+            path: /var/log/impala/impalad.ERROR
+            source: impala
+            tags:
+              - service_type:daemon
+            log_processing_rules:
+              - type: multi_line
+                pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+                name: new_log_start_with_log_level_and_date
+          - type: file
+            path: /var/log/impala/impalad.FATAL
+            source: impala
+            tags:
+              - service_type:daemon
+            log_processing_rules:
+              - type: multi_line
+                pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+                name: new_log_start_with_log_level_and_date
+          - type: file
+            path: /var/log/impala/catalogd.INFO
+            source: impala
+            tags:
+              - service_type:catalog
+            log_processing_rules:
+              - type: multi_line
+                pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+                name: new_log_start_with_log_level_and_date
+          - type: file
+            path: /var/log/impala/catalogd.WARNING
+            source: impala
+            tags:
+              - service_type:catalog
+            log_processing_rules:
+              - type: multi_line
+                pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+                name: new_log_start_with_log_level_and_date
+          - type: file
+            path: /var/log/impala/catalogd.ERROR
+            source: impala
+            tags:
+              - service_type:catalog
+            log_processing_rules:
+              - type: multi_line
+                pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+                name: new_log_start_with_log_level_and_date
+          - type: file
+            path: /var/log/impala/catalogd.FATAL
+            source: impala
+            tags:
+              - service_type:catalog
+            log_processing_rules:
+              - type: multi_line
+                pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+                name: new_log_start_with_log_level_and_date
+          - type: file
+            path: /var/log/impala/statestored.INFO
+            source: impala
+            tags:
+              - service_type:statestore
+            log_processing_rules:
+              - type: multi_line
+                pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+                name: new_log_start_with_log_level_and_date
+          - type: file
+            path: /var/log/impala/statestored.WARNING
+            source: impala
+            tags:
+              - service_type:statestore
+            log_processing_rules:
+              - type: multi_line
+                pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+                name: new_log_start_with_log_level_and_date
+          - type: file
+            path: /var/log/impala/statestored.ERROR
+            source: impala
+            tags:
+              - service_type:statestore
+            log_processing_rules:
+              - type: multi_line
+                pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+                name: new_log_start_with_log_level_and_date
+          - type: file
+            path: /var/log/impala/statestored.FATAL
+            source: impala
+            tags:
+              - service_type:statestore
+            log_processing_rules:
+              - type: multi_line
+                pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+                name: new_log_start_with_log_level_and_date

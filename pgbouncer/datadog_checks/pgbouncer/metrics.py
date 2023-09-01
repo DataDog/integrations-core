@@ -55,11 +55,31 @@ POOLS_METRICS = {
 }
 
 DATABASES_METRICS = {
-    'descriptors': [('name', 'name')],
+    'descriptors': [('name', 'name'), ('name', 'db'), ('database', 'postgres_db')],
     'metrics': [
         ('pool_size', ('pgbouncer.databases.pool_size', GAUGE)),
         ('max_connections', ('pgbouncer.databases.max_connections', GAUGE)),
         ('current_connections', ('pgbouncer.databases.current_connections', GAUGE)),
     ],
     'query': """SHOW DATABASES""",
+}
+
+CLIENTS_METRICS = {
+    'descriptors': [('database', 'db'), ('user', 'user'), ('state', 'state')],
+    'metrics': [
+        ('connect_time', ('pgbouncer.clients.connect_time', GAUGE)),
+        ('request_time', ('pgbouncer.clients.request_time', GAUGE)),
+        ('wait', ('pgbouncer.clients.wait', GAUGE)),  # >= 1.8
+        ('wait_us', ('pgbouncer.clients.wait_us', GAUGE)),  # >= 1.8
+    ],
+    'query': """SHOW CLIENTS""",
+}
+
+SERVERS_METRICS = {
+    'descriptors': [('database', 'db'), ('user', 'user'), ('state', 'state')],
+    'metrics': [
+        ('connect_time', ('pgbouncer.servers.connect_time', GAUGE)),
+        ('request_time', ('pgbouncer.servers.request_time', GAUGE)),
+    ],
+    'query': """SHOW SERVERS""",
 }

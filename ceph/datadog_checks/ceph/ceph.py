@@ -59,7 +59,7 @@ class Ceph(AgentCheck):
         ceph_args = '{} --cluster {}'.format(ceph_args, ceph_cluster)
 
         raw = {}
-        for cmd in ('mon_status', 'status', 'df detail', 'osd pool stats', 'osd perf', 'health detail'):
+        for cmd in ('mon_status', 'status', 'df detail', 'osd pool stats', 'osd perf', 'health detail', 'osd metadata'):
             try:
                 args = '{} {} -fjson'.format(ceph_args, cmd)
                 output, _, _ = get_subprocess_output(args.split(), self.log)
@@ -109,9 +109,20 @@ class Ceph(AgentCheck):
     def _extract_metrics(self, raw, tags):
         try:
             raw_osd_perf = raw.get('osd_perf', {}).get('osdstats', raw.get('osd_perf'))
+            osd_tags = {
+                metadata['id']: [
+                    'ceph_osd_objectstore:%s' % metadata["osd_objectstore"],
+                    'ceph_osd_device:%s' % metadata["devices"],
+                    'ceph_osd_device_id:%s' % metadata["device_ids"],
+                    'ceph_osd_device_class:%s' % metadata["default_device_class"],
+                    'ceph_version:%s' % metadata["ceph_version_short"],
+                    'ceph_release:%s' % metadata["ceph_release"],
+                ]
+                for metadata in raw.get('osd_metadata', [])
+            }
 
             for osdperf in raw_osd_perf['osd_perf_infos']:
-                local_tags = tags + ['ceph_osd:osd%s' % osdperf['id']]
+                local_tags = tags + ['ceph_osd:osd%s' % osdperf["id"]] + osd_tags.get(osdperf['id'], [])
                 self._publish(osdperf, self.gauge, ['perf_stats', 'apply_latency_ms'], local_tags)
                 self._publish(osdperf, self.gauge, ['perf_stats', 'commit_latency_ms'], local_tags)
         except (KeyError, TypeError):

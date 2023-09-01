@@ -1,11 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
-
 from ...utils import get_model_consumer
-
-pytestmark = [pytest.mark.conf, pytest.mark.conf_consumer, pytest.mark.conf_consumer_model]
 
 
 def test():
@@ -47,7 +43,7 @@ def test():
 
     model_definitions = consumer.render()
     files = model_definitions['test.yaml']
-    assert len(files) == 6
+    assert len(files) == 5
 
     _, validators_errors = files['validators.py']
     assert not validators_errors

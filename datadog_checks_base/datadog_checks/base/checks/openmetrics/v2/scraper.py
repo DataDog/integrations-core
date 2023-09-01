@@ -4,12 +4,14 @@
 import fnmatch
 import inspect
 import re
-from copy import deepcopy
+from copy import copy, deepcopy
 from itertools import chain
 from math import isinf, isnan
+from typing import List  # noqa: F401
 
-from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_metric_families_strict
-from prometheus_client.parser import text_fd_to_metric_families as parse_metric_families
+from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
+from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
+from requests.exceptions import ConnectionError
 
 from ....config import is_affirmative
 from ....constants import ServiceCheck
@@ -80,6 +82,7 @@ class OpenMetricsScraper:
             raise ConfigurationError('Setting `raw_metric_prefix` must be a string')
 
         self.enable_health_service_check = is_affirmative(config.get('enable_health_service_check', True))
+        self.ignore_connection_errors = is_affirmative(config.get('ignore_connection_errors', False))
 
         self.hostname_label = config.get('hostname_label', '')
         if not isinstance(self.hostname_label, str):
@@ -166,7 +169,9 @@ class OpenMetricsScraper:
                             )
 
                     self.exclude_metrics_by_labels[label] = (
-                        lambda label_value, pattern=re.compile('|'.join(values)): pattern.search(label_value)
+                        lambda label_value, pattern=re.compile('|'.join(values)): pattern.search(  # noqa: B008
+                            label_value
+                        )  # noqa: B008, E501
                         is not None
                     )
                 else:
@@ -174,7 +179,7 @@ class OpenMetricsScraper:
                         f'Label `{label}` of setting `exclude_metrics_by_labels` must be an array or set to `true`'
                     )
 
-        custom_tags = config.get('tags', [])
+        custom_tags = config.get('tags', [])  # type: List[str]
         if not isinstance(custom_tags, list):
             raise ConfigurationError('Setting `tags` must be an array')
 
@@ -192,11 +197,12 @@ class OpenMetricsScraper:
             ignored_tags_re = re.compile('|'.join(set(ignore_tags)))
             custom_tags = [tag for tag in custom_tags if not ignored_tags_re.search(tag)]
 
-        # These will be applied only to service checks
-        self.static_tags = [f'endpoint:{self.endpoint}']
-        self.static_tags.extend(custom_tags)
-        self.static_tags = tuple(self.static_tags)
+        self.static_tags = copy(custom_tags)
+        if is_affirmative(self.config.get('tag_by_endpoint', True)):
+            self.static_tags.append(f'endpoint:{self.endpoint}')
 
+        # These will be applied only to service checks
+        self.static_tags = tuple(self.static_tags)
         # These will be applied to everything except service checks
         self.tags = self.static_tags
 
@@ -213,16 +219,16 @@ class OpenMetricsScraper:
 
         self.http = RequestsWrapper(config, self.check.init_config, self.check.HTTP_CONFIG_REMAPPER, self.check.log)
 
-        # Decide how strictly we will adhere to the latest version of the specification
-        if is_affirmative(config.get('use_latest_spec', False)):
-            self.parse_metric_families = parse_metric_families_strict
-            # https://github.com/prometheus/client_python/blob/v0.9.0/prometheus_client/openmetrics/exposition.py#L7
-            self.http.options['headers'].setdefault(
-                'Accept', 'application/openmetrics-text; version=0.0.1; charset=utf-8'
-            )
+        self._content_type = ''
+        self._use_latest_spec = is_affirmative(config.get('use_latest_spec', False))
+        if self._use_latest_spec:
+            accept_header = 'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
         else:
-            self.parse_metric_families = parse_metric_families
-            self.http.options['headers'].setdefault('Accept', 'text/plain')
+            accept_header = 'text/plain'
+
+        # Request the appropriate exposition format
+        if self.http.options['headers'].get('Accept') == '*/*':
+            self.http.options['headers']['Accept'] = accept_header
 
         self.use_process_start_time = is_affirmative(config.get('use_process_start_time'))
 
@@ -273,6 +279,15 @@ class OpenMetricsScraper:
         if self.raw_line_filter is not None:
             line_streamer = self.filter_connection_lines(line_streamer)
 
+        # Since we determine `self.parse_metric_families` dynamically from the response and that's done as a
+        # side effect inside the `line_streamer` generator, we need to consume the first line in order to
+        # trigger that side effect.
+        try:
+            line_streamer = chain([next(line_streamer)], line_streamer)
+        except StopIteration:
+            # If line_streamer is an empty iterator, next(line_streamer) fails.
+            return
+
         for metric in self.parse_metric_families(line_streamer):
             self.submit_telemetry_number_of_total_metric_samples(metric)
 
@@ -282,6 +297,19 @@ class OpenMetricsScraper:
                 metric.name = metric.name[len(self.raw_metric_prefix) :]
 
             yield metric
+
+    @property
+    def parse_metric_families(self):
+        media_type = self._content_type.split(';')[0]
+        # Setting `use_latest_spec` forces the use of the OpenMetrics format, otherwise
+        # the format will be chosen based on the media type specified in the response's content-header.
+        # The selection is based on what Prometheus does:
+        # https://github.com/prometheus/prometheus/blob/v2.43.0/model/textparse/interface.go#L83-L90
+        return (
+            parse_openmetrics
+            if self._use_latest_spec or media_type == 'application/openmetrics-text'
+            else parse_prometheus
+        )
 
     def generate_sample_data(self, metric):
         """
@@ -320,7 +348,7 @@ class OpenMetricsScraper:
 
             tags.extend(self.tags)
 
-            hostname = self.hostname
+            hostname = ""
             if self.hostname_label and self.hostname_label in labels:
                 hostname = labels[self.hostname_label]
                 if self.hostname_formatter is not None:
@@ -334,9 +362,17 @@ class OpenMetricsScraper:
         Yield the connection line.
         """
 
-        with self.get_connection() as connection:
-            for line in connection.iter_lines(decode_unicode=True):
-                yield line
+        try:
+            with self.get_connection() as connection:
+                # Media type will be used to select parser dynamically
+                self._content_type = connection.headers.get('Content-Type', '')
+                for line in connection.iter_lines(decode_unicode=True):
+                    yield line
+        except ConnectionError as e:
+            if self.ignore_connection_errors:
+                self.log.warning("OpenMetrics endpoint %s is not accessible", self.endpoint)
+            else:
+                raise e
 
     def filter_connection_lines(self, line_streamer):
         """
@@ -374,6 +410,7 @@ class OpenMetricsScraper:
                     response.encoding = 'utf-8'
 
                 self.submit_telemetry_endpoint_response_size(response)
+
                 return response
 
     def send_request(self, **kwargs):
@@ -439,6 +476,7 @@ class OpenMetricsCompatibilityScraper(OpenMetricsScraper):
     def __init__(self, check, config):
         new_config = deepcopy(config)
         new_config.setdefault('enable_health_service_check', new_config.pop('health_service_check', True))
+        new_config.setdefault('ignore_connection_errors', new_config.pop('ignore_connection_errors', False))
         new_config.setdefault('collect_histogram_buckets', new_config.pop('send_histograms_buckets', True))
         new_config.setdefault('non_cumulative_histogram_buckets', new_config.pop('non_cumulative_buckets', False))
         new_config.setdefault('histogram_buckets_as_distributions', new_config.pop('send_distribution_buckets', False))

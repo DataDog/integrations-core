@@ -3,7 +3,7 @@ version: '3'
 services:
   sap-hana:
     container_name: sap-hana
-    image: store/saplabs/hanaexpress:${SAP_HANA_VERSION}
+    image: saplabs/hanaexpress:${SAP_HANA_VERSION}
     ulimits:
       nofile:
         soft: 1048576

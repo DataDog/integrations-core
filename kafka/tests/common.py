@@ -18,6 +18,9 @@ Metrics that do not work in our e2e:
     "kafka.consumer.kafka_commits",
     "kafka.consumer.messages_in",
     "kafka.consumer.zookeeper_commits",
+    "kafka.request.produce.rate",
+    "kafka.request.fetch_follower.rate",
+    "kafka.request.fetch_consumer.rate",
 """
 
 KAFKA_E2E_METRICS = [
@@ -44,6 +47,7 @@ KAFKA_E2E_METRICS = [
     "kafka.replication.offline_partitions_count",
     "kafka.replication.partition_count",
     "kafka.replication.under_replicated_partitions",
+    "kafka.replication.under_min_isr_partition_count",
     # Rates
     "kafka.messages_in.rate",
     "kafka.net.bytes_in.rate",

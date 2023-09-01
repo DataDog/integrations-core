@@ -14,6 +14,8 @@ The Memcache check is included in the [Datadog Agent][1] package, so you don't n
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section
 
+When launching the Memcache server, set the binding protocol `-B` to `binary` or `auto`. Automatic (auto) is the default.
+
 #### Metric collection
 
 <!-- xxx tabs xxx -->
@@ -124,7 +126,7 @@ Need help? Contact [Datadog support][13].
 - [Instrument Memcached performance metrics with DogStatsD][15]
 - [Monitoring ElastiCache performance metrics with Redis or Memcached][16]
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/mcache/datadog_checks/mcache/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

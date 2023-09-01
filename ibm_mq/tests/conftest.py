@@ -28,53 +28,45 @@ def get_check():
 
 @pytest.fixture
 def instance():
-    inst = copy.deepcopy(common.INSTANCE)
-    return inst
+    return copy.deepcopy(common.INSTANCE)
 
 
 @pytest.fixture
 def instance_ssl():
-    inst = copy.deepcopy(common.INSTANCE_SSL)
-    return inst
+    return copy.deepcopy(common.INSTANCE_SSL)
 
 
 @pytest.fixture
 def instance_with_connection_name():
-    inst = copy.deepcopy(common.INSTANCE_WITH_CONNECTION_NAME)
-    return inst
+    return copy.deepcopy(common.INSTANCE_WITH_CONNECTION_NAME)
 
 
 @pytest.fixture
 def instance_queue_pattern():
-    inst = copy.deepcopy(common.INSTANCE_QUEUE_PATTERN)
-    return inst
+    return copy.deepcopy(common.INSTANCE_QUEUE_PATTERN)
 
 
 @pytest.fixture
 def instance_queue_regex():
-    inst = copy.deepcopy(common.INSTANCE_QUEUE_REGEX)
-    return inst
+    return copy.deepcopy(common.INSTANCE_QUEUE_REGEX)
 
 
 @pytest.fixture
 def instance_collect_all():
-    inst = copy.deepcopy(common.INSTANCE_COLLECT_ALL)
-    return inst
+    return copy.deepcopy(common.INSTANCE_COLLECT_ALL)
 
 
 @pytest.fixture
 def instance_queue_regex_tag():
-    inst = copy.deepcopy(common.INSTANCE_QUEUE_REGEX_TAG)
-    return inst
+    return copy.deepcopy(common.INSTANCE_QUEUE_REGEX_TAG)
 
 
 @pytest.fixture
-def instance_ssl_dummy():
-    inst = copy.deepcopy(common.INSTANCE)
-    inst['ssl_auth'] = 'yes'
-    inst['ssl_cipher_spec'] = 'TLS_RSA_WITH_AES_256_CBC_SHA256'
-    inst['ssl_key_repository_location'] = '/dummy'
-    return inst
+def instance_ssl_dummy(instance):
+    instance['ssl_auth'] = 'yes'
+    instance['ssl_cipher_spec'] = 'TLS_RSA_WITH_AES_256_CBC_SHA256'
+    instance['ssl_key_repository_location'] = '/dummy'
+    return instance
 
 
 @pytest.fixture

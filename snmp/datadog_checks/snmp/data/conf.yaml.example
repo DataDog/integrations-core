@@ -66,8 +66,8 @@ init_config:
     # profiles:
     #   f5-big-ip:
     #     definition_file: f5-big-ip.yaml
-    #   router:
-    #     definition_file: generic-router.yaml
+    #   cisco-asr:
+    #     definition_file: cisco-asr.yaml
 
     ## @param refresh_oids_cache_interval - integer - optional - default: 0
     ## Note: Beta feature, only available using python SNMP integration.
@@ -106,21 +106,7 @@ init_config:
     #
     # ignore_nonincreasing_oid: false
 
-    ## @param namespace - string - optional - default: default
-    ## Namespace can be used to disambiguate devices with same IPs.
-    ## Changing namespace will cause devices being recreated in NDM app.
-    ## Only available using corecheck SNMP integration with `loader: core` config.
-    #
-    # namespace: default
-
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Additionally, this sets the default `service` for every log source.
-    #
-    # service: <SERVICE>
-
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -149,15 +135,15 @@ instances:
     #
     # snmp_version: 2
 
-    ## @param timeout - integer - optional - default: 5
-    ## Amount of second before timing out.
+    ## @param timeout - integer - optional - default: 2
+    ## Amount of second before timing out. Default of 5 for Python version of this check.
     #
-    # timeout: 5
+    # timeout: 2
 
-    ## @param retries - integer - optional - default: 5
-    ## Amount of retries before failure.
+    ## @param retries - integer - optional - default: 3
+    ## Amount of retries before failure. Default of 5 for Python version of this check.
     #
-    # retries: 5
+    # retries: 3
 
     ## @param loader - string - optional - default: python
     ## Check loader to use. Available loaders:
@@ -339,12 +325,32 @@ instances:
     #
     # refresh_oids_cache_interval: 3600
 
-    ## @param namespace - string - optional - default: default
-    ## Namespace can be used to disambiguate devices with same IPs.
-    ## Changing namespace will cause devices being recreated in NDM app.
-    ## Only available using corecheck SNMP integration with `loader: core` config.
+    ## @param interface_configs - list of mappings - optional
+    ## This option is used to override interface inbound/outbound speed and add interface tags.
+    ## Example:
+    ## interface_configs:
+    ##   - match_field: "name"  # (required) the field to match, can be `name` (interface name) or `index` (ifIndex)
+    ##     match_value: "eth0"  # (required) the value to match
+    ##     in_speed: 50         # (optional) inbound speed value in bits per sec, no value or 0 means no override
+    ##     out_speed: 25        # (optional) outbound speed value in bits per sec, no value or 0 means no override
+    ##     tags:                # (optional) interface level tags
+    ##       - "testTagKey:testTagValue"
+    ##       - "tagKey2:tagValue2"
     #
-    # namespace: default
+    # interface_configs:
+    #   - match_field: name
+    #     match_value: eth0
+    #     in_speed: 50
+    #     out_speed: 25
+    #   - match_field: index
+    #     match_value: '10'
+    #     in_speed: 50
+    #     out_speed: 25
+    #   - match_field: name
+    #     match_value: eth4
+    #     tags:
+    #     - monitored:true
+    #     - customKey:customValue
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -354,13 +360,6 @@ instances:
     # tags:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
-
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Overrides any `service` defined in the `init_config` section.
-    #
-    # service: <SERVICE>
 
     ## @param min_collection_interval - number - optional - default: 15
     ## This changes the collection interval of the check. For more information, see:

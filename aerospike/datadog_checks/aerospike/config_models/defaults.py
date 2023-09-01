@@ -7,84 +7,138 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-from datadog_checks.base.utils.models.fields import get_default_field_value
 
-
-def shared_mappings(field, value):
-    return get_default_field_value(field, value)
-
-
-def shared_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_datacenter_metrics(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_datacenters(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_disable_generic_tags(field, value):
+def shared_skip_proxy():
     return False
 
 
-def instance_empty_default_hostname(field, value):
-    return False
-
-
-def instance_host(field, value):
-    return 'localhost'
-
-
-def instance_metric_patterns(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_metrics(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_min_collection_interval(field, value):
-    return 15
-
-
-def instance_namespace_metrics(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_namespaces(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_password(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_port(field, value):
-    return 3000
-
-
-def instance_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tags(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_timeout(field, value):
+def shared_timeout():
     return 10
 
 
-def instance_tls_config(field, value):
-    return get_default_field_value(field, value)
+def instance_allow_redirects():
+    return True
 
 
-def instance_tls_name(field, value):
-    return get_default_field_value(field, value)
+def instance_auth_type():
+    return 'basic'
 
 
-def instance_username(field, value):
-    return get_default_field_value(field, value)
+def instance_cache_metric_wildcards():
+    return True
+
+
+def instance_cache_shared_labels():
+    return True
+
+
+def instance_collect_counters_with_distributions():
+    return False
+
+
+def instance_collect_histogram_buckets():
+    return True
+
+
+def instance_disable_generic_tags():
+    return False
+
+
+def instance_empty_default_hostname():
+    return False
+
+
+def instance_enable_health_service_check():
+    return True
+
+
+def instance_histogram_buckets_as_distributions():
+    return False
+
+
+def instance_host():
+    return 'localhost'
+
+
+def instance_ignore_connection_errors():
+    return False
+
+
+def instance_kerberos_auth():
+    return 'disabled'
+
+
+def instance_kerberos_delegate():
+    return False
+
+
+def instance_kerberos_force_initiate():
+    return False
+
+
+def instance_log_requests():
+    return False
+
+
+def instance_min_collection_interval():
+    return 15
+
+
+def instance_non_cumulative_histogram_buckets():
+    return False
+
+
+def instance_openmetrics_endpoint():
+    return 'http://127.0.0.1:9145/metrics'
+
+
+def instance_persist_connections():
+    return False
+
+
+def instance_port():
+    return 3000
+
+
+def instance_request_size():
+    return 16
+
+
+def instance_skip_proxy():
+    return False
+
+
+def instance_tag_by_endpoint():
+    return True
+
+
+def instance_telemetry():
+    return False
+
+
+def instance_timeout():
+    return 10
+
+
+def instance_tls_ignore_warning():
+    return False
+
+
+def instance_tls_use_host_header():
+    return False
+
+
+def instance_tls_verify():
+    return True
+
+
+def instance_use_latest_spec():
+    return False
+
+
+def instance_use_legacy_auth_encoding():
+    return True
+
+
+def instance_use_process_start_time():
+    return False

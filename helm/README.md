@@ -15,7 +15,74 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-This is a cluster check. For more information, see the [Cluster checks documentation][2].
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Helm" xxx -->
+
+This is a cluster check. You can enable this check by adding `datadog.helmCheck.enabled` to your Helm chart.
+
+**Note**: If no configuration is required, an empty `conf.d` can be passed.
+
+For more information, see the [Cluster Check documentation][2].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Operator" xxx -->
+
+This is a cluster check. You can enable this check by providing a configuration file `helm.yaml` to the cluster Agent in your `DatadogAgent` deployment configuration.
+
+```
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+metadata:
+  name: datadog
+spec:
+  [...]
+  override:
+    clusterAgent:
+      [...]
+      extraConfd:
+        configDataMap:
+          helm.yaml: |-
+            init_config:
+            instances:
+            - collect_events: false
+```
+
+This check requires additional permissions bound to the Kubernetes service account used by the cluster Agent pod to access the releases stored by Helm.
+
+```
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: datadog-helm-check
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: datadog-helm-check
+subjects:
+  - kind: ServiceAccount
+    name: datadog-cluster-agent
+    namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: datadog-helm-check
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+```
+
+**Note**: The `ServiceAccount` subject is an example with the installation in the `default` namespace. Adjust `name` and `namespace` in accordance with your deployment.
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -33,19 +100,33 @@ See [metadata.csv][4] for a list of metrics provided by this check.
 
 ### Events
 
-The Helm integration does not include any events.
+This check emits events when the `collect_events` option is set to `true`. The default is `false`.
+
+When the option is enabled, the check emits events when:
+- A new release is deployed.
+- A release is deleted.
+- A release is upgraded (new revision).
+- There's a status change, for example from deployed to superseded.
 
 ### Service Checks
 
-The Helm integration does not include any service checks.
+See [service_checks.json][5] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][5].
+Need help? Contact [Datadog support][6].
+
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Blog: Monitor your Helm-managed Kubernetes applications with Datadog][7]
 
 
 [1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [2]: https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [4]: https://github.com/DataDog/integrations-core/blob/master/helm/metadata.csv
-[5]: https://docs.datadoghq.com/help/
+[5]: https://github.com/DataDog/integrations-core/blob/master/helm/assets/service_checks.json
+[6]: https://docs.datadoghq.com/help/
+[7]: https://www.datadoghq.com/blog/monitor-helm-kubernetes-with-datadog/

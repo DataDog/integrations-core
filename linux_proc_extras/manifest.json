@@ -1,32 +1,45 @@
 {
-  "categories": [
-    "os & system"
-  ],
-  "creates_events": false,
-  "display_name": "Linux proc extras",
-  "guid": "47f243d7-5df4-47b5-9f1a-923b4f7cefe7",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "system.",
-  "metric_to_check": "system.inodes.total",
-  "name": "linux_proc_extras",
-  "public_title": "Datadog-Linux Proc Extras Integration",
-  "short_description": "Visualize and monitor linux_proc_extras states.",
-  "support": "core",
-  "supported_os": [
-    "linux"
-  ],
-  "type": "check",
-  "integration_id": "system",
+  "manifest_version": "2.0.0",
+  "app_uuid": "17477b56-4487-4b00-8820-70c6f64ae3c6",
+  "app_id": "system",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Visualize and monitor linux_proc_extras states.",
+    "title": "Linux Proc Extras",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Category::OS & System"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "Linux proc extras",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "system.",
+        "check": "system.inodes.total",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

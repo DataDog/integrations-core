@@ -117,7 +117,7 @@ data:
 [...]
   status.conf: |
     server {
-      listen 18080;
+      listen 81;
 
       location /nginx_status {
         stub_status on;
@@ -129,14 +129,14 @@ data:
     }
 ```
 
-Then, in your NGINX pod, expose the `18080` endpoint and mount that file in the NGINX configuration folder:
+Then, in your NGINX pod, expose the `81` endpoint and mount that file in the NGINX configuration folder:
 
 ```yaml
 spec:
   containers:
     - name: nginx
       ports:
-        - containerPort: 18080
+        - containerPort: 81
       volumeMounts:
         - mountPath: /etc/nginx/conf.d/status.conf
           subPath: status.conf
@@ -148,20 +148,6 @@ spec:
           name: "nginx-conf"
 ```
 
-Finally, expose that port in your NGINX service:
-
-```yaml
-spec:
-  ports:
-  - port: 80
-    protocol: TCP
-    targetPort: 80
-    name: default
-  - port: 81
-    protocol: TCP
-    targetPort: 18080
-    name: status
-```
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -278,6 +264,8 @@ To configure this check for an Agent running on Kubernetes:
 
 Set [Autodiscovery Integrations Templates][11] as pod annotations on your application container. Alternatively, you can configure templates with a [file, configmap, or key-value store][12].
 
+**Annotations v1** (for Datadog Agent < v7.36)
+
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -296,6 +284,29 @@ metadata:
     name: nginx
 ```
 
+**Annotations v2** (for Datadog Agent v7.36+)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  annotations:
+    ad.datadoghq.com/nginx.checks: |
+      {
+        "nginx": {
+          "init_config": {},
+          "instances": [
+            {
+              "nginx_status_url":"http://%%host%%:81/nginx_status/"
+            }
+          ]
+        }
+      }
+  labels:
+    name: nginx
+```
+
 **Note**: This instance configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
 
 #### Log collection
@@ -304,6 +315,8 @@ metadata:
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][13].
 
 Then, set [Log Integrations][10] as pod annotations. Alternatively, you can configure this with a [file, configmap, or key-value store][14].
+
+**Annotations v1/v2**
 
 ```yaml
 apiVersion: v1

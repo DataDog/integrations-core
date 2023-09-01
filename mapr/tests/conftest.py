@@ -12,9 +12,8 @@ from . import common
 E2E_METADATA = {
     'post_install_commands': [
         'apt-get update',
-        'apt-get install -y gcc librdkafka-dev',
-        'pip install --global-option=build_ext --global-option="--library-dirs=/opt/mapr/lib"'
-        ' --global-option="--include-dirs=/opt/mapr/include/" mapr-streams-python',
+        'apt-get install -y gcc',
+        'pip install mapr-streams-python',
     ]
 }
 
@@ -46,7 +45,7 @@ def mock_getconnection():
     def messages_iter():
         with open(os.path.join(common.HERE, 'fixtures', 'metrics.txt'), 'r') as f:
             for line in f:
-                msg = mock.MagicMock(error=lambda: None, value=lambda: line)
+                msg = mock.MagicMock(error=lambda: None, value=lambda line=line: line)
                 yield msg
             yield None
 

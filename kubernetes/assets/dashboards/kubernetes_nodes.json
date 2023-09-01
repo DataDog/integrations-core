@@ -8,7 +8,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "top(sum:kubernetes_state.node.by_condition{$cluster,status:true,$host,!condition:ready} by {status,condition,kube_cluster_name}, 10, 'last', 'desc')",
+                        "q": "top(sum:kubernetes_state.node.by_condition{$cluster,status:false,$host,condition:ready} by {kube_cluster_name}, 10, 'last', 'desc')",
                         "display_type": "line",
                         "style": {
                             "palette": "warm",
@@ -174,9 +174,6 @@
                 "title": "Total Kubernetes CPU requests per node",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -213,9 +210,6 @@
                 "title": "Total Kubernetes memory requests per node",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -341,9 +335,6 @@
                 "title": "Network in per node",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -380,9 +371,6 @@
                 "title": "Network out per node",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -419,9 +407,6 @@
                 "title": "Disk reads per node",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -458,9 +443,6 @@
                 "title": "Disk writes per node",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -496,14 +478,10 @@
             "id": 15,
             "definition": {
                 "type": "event_timeline",
-                "query": "sources:kubernetes $host $cluster",
-                "tags_execution": "and",
+                "query": "source:kubernetes $host $cluster",
                 "title": "",
                 "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                }
+                "title_align": "left"
             },
             "layout": {
                 "x": 0,
@@ -535,8 +513,7 @@
             "id": 17,
             "definition": {
                 "type": "event_stream",
-                "query": "sources:kubernetes $host $cluster",
-                "tags_execution": "and",
+                "query": "source:kubernetes $host $cluster",
                 "event_size": "s",
                 "title": "",
                 "title_size": "16",
@@ -1032,7 +1009,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.cpu.requests{$cluster,$host} by {kube_cluster_name}/sum:kubernetes.cpu.capacity{$cluster,$host} by {kube_cluster_name}*100",
+                        "q": "sum:kubernetes_state.container.cpu_requested{$cluster,$host} by {kube_cluster_name}/sum:kubernetes_state.node.cpu_capacity{$cluster,$host} by {kube_cluster_name}*100",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -1220,7 +1197,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.cpu.requests{$cluster,$host} by {host}/sum:kubernetes.cpu.capacity{$cluster,$host} by {host}*100",
+                        "q": "sum:kubernetes_state.container.cpu_requested{$cluster,$host} by {host}/sum:kubernetes_state.node.cpu_capacity{$cluster,$host} by {host}*100",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -1469,8 +1446,8 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.node.by_condition{$cluster,status:true,$host,!condition:ready}",
-                        "aggregator": "avg",
+                        "q": "sum:kubernetes_state.node.by_condition{$cluster,status:false,$host,condition:ready}",
+                        "aggregator": "last",
                         "conditional_formats": [
                             {
                                 "comparator": ">",
@@ -1513,6 +1490,5 @@
     ],
     "layout_type": "free",
     "is_read_only": true,
-    "notify_list": [],
-    "id": 30340
+    "notify_list": []
 }

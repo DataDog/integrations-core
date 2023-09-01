@@ -39,6 +39,22 @@ files:
         value:
           example: true
           type: boolean
+      - name: collect_per_client_metrics
+        description: |
+          Whether to collect detailed per-client metrics.
+
+          This is useful for detailed analysis of client behavior (e.g., wait time).
+        value:
+          example: false
+          type: boolean
+      - name: collect_per_server_metrics
+        description: |
+          Whether to collect detailed per-server metrics.
+
+          This is useful for detailed analysis of server behavior (e.g., last request time).
+        value:
+          example: false
+          type: boolean
       - template: instances/default
   - template: logs
     example:

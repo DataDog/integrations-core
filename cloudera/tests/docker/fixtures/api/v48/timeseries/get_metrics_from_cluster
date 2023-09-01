@@ -1,0 +1,173 @@
+{
+  "items": [
+    {
+      "timeSeries": [
+        {
+          "metadata": {
+            "metricName": "last(cpu_percent_across_hosts)",
+            "entityName": "cod--qfdcinkqrzw",
+            "startTime": "2022-12-07T18:58:21.447Z",
+            "endTime": "2022-12-07T19:03:21.447Z",
+            "attributes": {
+              "active": "true",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "category": "CLUSTER",
+              "version": "CDH 7.2.15",
+              "entityName": "1546335201",
+              "clusterName": "cod--qfdcinkqrzw"
+            },
+            "unitNumerators": [
+              "percent"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(cpu_percent_across_hosts) AS \"cpu_percent_across_hosts\" WHERE entityName = \"1546335201\" AND category = CLUSTER",
+            "alias": "cpu_percent_across_hosts",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-12-07T19:03:04.690Z",
+              "value": 1.3333333333333335,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(total_read_bytes_rate_across_disks)",
+            "entityName": "cod--qfdcinkqrzw",
+            "startTime": "2022-12-07T18:58:21.447Z",
+            "endTime": "2022-12-07T19:03:21.447Z",
+            "attributes": {
+              "active": "true",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "category": "CLUSTER",
+              "version": "CDH 7.2.15",
+              "entityName": "1546335201",
+              "clusterName": "cod--qfdcinkqrzw"
+            },
+            "unitNumerators": [
+              "bytes"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(total_read_bytes_rate_across_disks) AS \"total_read_bytes_rate_across_disks\" WHERE entityName = \"1546335201\" AND category = CLUSTER",
+            "alias": "total_read_bytes_rate_across_disks",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-12-07T19:03:04.690Z",
+              "value": 0,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(total_write_bytes_rate_across_disks)",
+            "entityName": "cod--qfdcinkqrzw",
+            "startTime": "2022-12-07T18:58:21.447Z",
+            "endTime": "2022-12-07T19:03:21.447Z",
+            "attributes": {
+              "active": "true",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "category": "CLUSTER",
+              "version": "CDH 7.2.15",
+              "entityName": "1546335201",
+              "clusterName": "cod--qfdcinkqrzw"
+            },
+            "unitNumerators": [
+              "bytes"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(total_write_bytes_rate_across_disks) AS \"total_write_bytes_rate_across_disks\" WHERE entityName = \"1546335201\" AND category = CLUSTER",
+            "alias": "total_write_bytes_rate_across_disks",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-12-07T19:03:04.690Z",
+              "value": 731110.4,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(total_bytes_receive_rate_across_network_interfaces)",
+            "entityName": "cod--qfdcinkqrzw",
+            "startTime": "2022-12-07T18:58:21.447Z",
+            "endTime": "2022-12-07T19:03:21.447Z",
+            "attributes": {
+              "active": "true",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "category": "CLUSTER",
+              "version": "CDH 7.2.15",
+              "entityName": "1546335201",
+              "clusterName": "cod--qfdcinkqrzw"
+            },
+            "unitNumerators": [
+              "bytes"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(total_bytes_receive_rate_across_network_interfaces) AS \"total_bytes_receive_rate_across_network_interfaces\" WHERE entityName = \"1546335201\" AND category = CLUSTER",
+            "alias": "total_bytes_receive_rate_across_network_interfaces",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-12-07T19:03:04.690Z",
+              "value": 456726.2666666666,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(total_bytes_transmit_rate_across_network_interfaces)",
+            "entityName": "cod--qfdcinkqrzw",
+            "startTime": "2022-12-07T18:58:21.447Z",
+            "endTime": "2022-12-07T19:03:21.447Z",
+            "attributes": {
+              "active": "true",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "category": "CLUSTER",
+              "version": "CDH 7.2.15",
+              "entityName": "1546335201",
+              "clusterName": "cod--qfdcinkqrzw"
+            },
+            "unitNumerators": [
+              "bytes"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(total_bytes_transmit_rate_across_network_interfaces) AS \"total_bytes_transmit_rate_across_network_interfaces\" WHERE entityName = \"1546335201\" AND category = CLUSTER",
+            "alias": "total_bytes_transmit_rate_across_network_interfaces",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-12-07T19:03:04.690Z",
+              "value": 83818.2,
+              "type": "SAMPLE"
+            }
+          ]
+        }
+      ],
+      "warnings": [],
+      "timeSeriesQuery": "SELECT last(cpu_percent_across_hosts) AS cpu_percent_across_hosts,last(total_read_bytes_rate_across_disks) AS total_read_bytes_rate_across_disks,last(total_write_bytes_rate_across_disks) AS total_write_bytes_rate_across_disks,last(total_bytes_receive_rate_across_network_interfaces) AS total_bytes_receive_rate_across_network_interfaces,last(total_bytes_transmit_rate_across_network_interfaces) AS total_bytes_transmit_rate_across_network_interfaces WHERE clusterName=\"cod--qfdcinkqrzw\" AND category=CLUSTER"
+    }
+  ]
+}

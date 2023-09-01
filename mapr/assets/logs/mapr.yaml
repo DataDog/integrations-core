@@ -1,0 +1,55 @@
+id: mapr
+metric_id: mapr
+facets:
+  - name: Logger Name
+    source: log
+    path: logger.name
+    groups:
+      - Source Code
+  - name: Thread Name
+    source: log
+    path: logger.thread_name
+    groups:
+      - Source Code
+pipeline:
+  type: pipeline
+  name: MapR
+  enabled: true
+  filter:
+    query: source:mapr
+  processors:
+    - type: date-remapper
+      name: Define `event_time` as the official date of the log
+      enabled: true
+      sources:
+        - event_time
+    - type: attribute-remapper
+      name: Map `tag` to `fluentd_tag`
+      enabled: true
+      sources:
+        - tag
+      target: fluentd_tag
+      preserveSource: false
+      overrideOnConflict: false
+      sourceType: attribute
+      targetType: attribute
+    - type: attribute-remapper
+      name: Map `thread` to `logger.thread_name`
+      enabled: true
+      sources:
+        - thread
+      target: logger.thread_name
+      preserveSource: false
+      overrideOnConflict: false
+      sourceType: attribute
+      targetType: attribute
+    - type: attribute-remapper
+      name: Map `class` to `logger.name`
+      enabled: true
+      sources:
+        - class
+      target: logger.name
+      preserveSource: false
+      overrideOnConflict: false
+      sourceType: attribute
+      targetType: attribute

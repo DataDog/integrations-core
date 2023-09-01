@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
-
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.testing import requires_py3, requires_windows
 
@@ -16,7 +14,7 @@ except Exception:
     PerfCountersBaseCheck = object
     PerfObject = object
 
-pytestmark = [requires_py3, requires_windows, pytest.mark.perf_counters]
+pytestmark = [requires_py3, requires_windows]
 
 
 class CustomCheck(PerfCountersBaseCheck):

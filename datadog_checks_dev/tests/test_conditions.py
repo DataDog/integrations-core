@@ -38,23 +38,21 @@ class TestWaitFor:
 class TestCheckCommandOutput:
     def test_no_matches(self):
         check_command_output = CheckCommandOutput(
-            '{} -c "import os;print(\'foo\')"'.format(sys.executable), ['bar'], attempts=1
+            [sys.executable, '-c', 'import os;print(\'foo\')'], ['bar'], attempts=1
         )
 
         with pytest.raises(RetryError):
             check_command_output()
 
     def test_matches(self):
-        check_command_output = CheckCommandOutput(
-            '{} -c "import os;print(\'foo\')"'.format(sys.executable), ['foo', 'bar']
-        )
+        check_command_output = CheckCommandOutput([sys.executable, '-c', 'import os;print(\'foo\')'], ['foo', 'bar'])
 
         matches = check_command_output()
         assert matches == 1
 
     def test_matches_all_fail(self):
         check_command_output = CheckCommandOutput(
-            '{} -c "import os;print(\'foo\')"'.format(sys.executable), ['foo', 'bar'], matches='all', attempts=1
+            [sys.executable, '-c', 'import os;print(\'foo\')'], ['foo', 'bar'], matches='all', attempts=1
         )
 
         with pytest.raises(RetryError):
@@ -62,7 +60,7 @@ class TestCheckCommandOutput:
 
     def test_matches_all_success(self):
         check_command_output = CheckCommandOutput(
-            '{} -c "import os;print(\'foobar\')"'.format(sys.executable), ['foo', 'bar'], matches='all'
+            [sys.executable, '-c', 'import os;print(\'foobar\')'], ['foo', 'bar'], matches='all'
         )
 
         matches = check_command_output()
@@ -70,11 +68,11 @@ class TestCheckCommandOutput:
 
 
 class TestCheckDockerLogs:
-    pytestmark = [pytest.mark.docker, not_windows_ci]
+    pytestmark = [not_windows_ci]
 
     def test_no_matches(self):
         compose_file = os.path.join(DOCKER_DIR, 'test_default.yaml')
-        run_command(['docker-compose', '-f', compose_file, 'down'])
+        run_command(['docker', 'compose', '-f', compose_file, 'down'])
         check_docker_logs = CheckDockerLogs(compose_file, 'Vault server started', attempts=1)
 
         with pytest.raises(RetryError):
@@ -85,10 +83,10 @@ class TestCheckDockerLogs:
         check_docker_logs = CheckDockerLogs(compose_file, 'Vault server started')
 
         try:
-            run_command(['docker-compose', '-f', compose_file, 'up', '-d'], check=True)
+            run_command(['docker', 'compose', '-f', compose_file, 'up', '-d'], check=True)
             check_docker_logs()
         finally:
-            run_command(['docker-compose', '-f', compose_file, 'down'], capture=True)
+            run_command(['docker', 'compose', '-f', compose_file, 'down'], capture=True)
 
 
 class TestCheckEndpoints:

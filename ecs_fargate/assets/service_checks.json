@@ -2,13 +2,13 @@
     {
         "agent_version": "6.0.0",
         "integration": "Amazon Fargate",
-        "check": "ecs_fargate.can_connect",
+        "check": "fargate_check",
         "statuses": [
             "ok",
             "critical"
         ],
         "groups": [
-            "enpoint"
+            "endpoint"
         ],
         "name": "Can Connect",
         "description": "Returns `CRITICAL` if the Agent is unable to connect to Fargate, otherwise returns `OK`."

@@ -9,8 +9,6 @@ from datadog_checks.dev import TempDir
 from datadog_checks.dev.fs import ensure_parent_dir_exists, path_join, write_file
 from datadog_checks.dev.tooling.configuration.template import ConfigTemplates
 
-pytestmark = [pytest.mark.conf, pytest.mark.conf_template]
-
 
 class TestLoadBasic:
     def test_default(self):

@@ -1,0 +1,35 @@
+{
+    debug
+    admin :2019
+}
+:80 {
+    root * /usr/share/caddy/
+    @post_auth_tokens {
+        method POST
+        path /identity/v3/auth/tokens
+    }
+    route @post_auth_tokens {
+        rewrite /identity/v3/auth/tokens /identity/v3/auth/tokens/post.json
+        header /identity/v3/auth/tokens/post.json X-Subject-Token "demo_test"
+        file_server
+    }
+    @get_auth_projects {
+        method GET
+        header X-Auth-Token "demo_test"
+        path /identity/v3/auth/projects
+    }
+    route @get_auth_projects {
+        rewrite /identity/v3/auth/projects /identity/v3/auth/projects/get.json
+        file_server
+    }
+    @get_projects {
+        method GET
+        header X-Auth-Token "demo_test"
+        path /identity/v3/projects
+    }
+    route @get_projects {
+        rewrite /identity/v3/projects /identity/v3/projects/get.json
+        file_server
+    }
+    file_server browse
+}

@@ -40,7 +40,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -48,8 +48,11 @@ instances:
     ## Name of your account (provided by Snowflake), including the platform and region if applicable.
     ## For more information on Snowflake account names,
     ## see https://docs.snowflake.com/en/user-guide/connecting.html#your-snowflake-account-name
+    ##
+    ## If you are using private connectivity with Snowflake, your account name should be in the following format:
+    ##   account: <ACCOUNT>.<REGION_ID>.privatelink
     #
-  - account: <ACCOUNT>
+  - account: <ORG_NAME>-<ACCOUNT_NAME>
 
     ## @param username - string - required
     ## Login name for the user.
@@ -77,6 +80,8 @@ instances:
 
     ## @param schema - string - optional - default: ACCOUNT_USAGE
     ## Name of the default schema to use for the database.
+    ##
+    ## To collect organization level metrics, set this to ORGANIZATION_USAGE.
     #
     # schema: ACCOUNT_USAGE
 
@@ -145,9 +150,9 @@ instances:
     # client_session_keep_alive: false
 
     ## @param metric_groups - list of strings - optional
-    ## List Snowflake metric groups to collect. Metric groups are determined by the metric prefixes.
+    ## List of Snowflake metric groups to collect. Metric groups are determined by the metric prefixes.
     ##
-    ## The available metric groups are:
+    ## When querying the ACCOUNT_USAGE schema, the available metric groups are:
     ##
     ##   - snowflake.query (enabled by default)
     ##   - snowflake.billing (enabled by default)
@@ -159,6 +164,16 @@ instances:
     ##   - snowflake.auto_recluster
     ##   - snowflake.pipe
     ##   - snowflake.replication
+    ##
+    ## When querying the ORGANIZATION_USAGE schema, the available metric groups are:
+    ##   - snowflake.organization.warehouse (enabled by default)
+    ##   - snowflake.organization.currency (enabled by default)
+    ##   - snowflake.organization.credit
+    ##   - snowflake.organization.storage (enabled by default)
+    ##   - snowflake.organization.contracts
+    ##   - snowflake.organization.balance
+    ##   - snowflake.organization.rate
+    ##   - snowflake.organization.data_transfer
     #
     # metric_groups:
     #   - snowflake.query
@@ -196,14 +211,37 @@ instances:
     ##              The number of columns must equal the number of columns returned in the query.
     ##              There are 2 required pieces of data:
     ##                a. name - The suffix to append to `<INTEGRATION>.` to form
-    ##                          the full metric name. If `type` is `tag`, this column is
+    ##                          the full metric name. If `type` is a `tag` type, this column is
     ##                          considered a tag and applied to every
     ##                          metric collected by this particular query.
     ##                b. type - The submission method (gauge, monotonic_count, etc.).
-    ##                          This can also be set to `tag` to tag each metric in the row
-    ##                          with the name and value of the item in this column. You can
-    ##                          use the `count` type to perform aggregation for queries that
-    ##                          return multiple rows with the same or no tags.
+    ##                          This can also be set to the following `tag` types to
+    ##                          tag each metric in the row with the name and value
+    ##                          of the item in this column:
+    ##                           i. tag           - This is the default tag type
+    ##                           ii. tag_list     - This allows multiple values to be attached
+    ##                                             to the tag name. For example: 
+    ##
+    ##                                             query = {
+    ##                                               "name": "example",
+    ##                                               "query": "...",
+    ##                                               "columns": [
+    ##                                                 {"name": "server_tag", "type": "tag_list"},
+    ##                                                 {"name": "foo", "type": "gauge"},
+    ##                                               ]
+    ##                                             }
+    ##
+    ##                                             May result in:
+    ##                                             gauge("foo", tags=[
+    ##                                                                 "server_tag:us",
+    ##                                                                 "server_tag:primary",
+    ##                                                                 "server_tag:default"
+    ##                                                               ])
+    ##                                             gauge("foo", tags=["server_tag:eu"])
+    ##                                             gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
+    ##                           iii. tag_not_null - This only sets tags in the metric if the value is not null
+    ##                          You can use the `count` type to perform aggregation
+    ##                          for queries that return multiple rows with the same or no tags.
     ##              Columns without a name are ignored. To skip a column, enter:
     ##                - {}
     ## 3. tags (optional) - A list of tags to apply to each metric.
@@ -234,12 +272,12 @@ instances:
     #
     # service: <SERVICE>
 
-    ## @param min_collection_interval - number - optional - default: 3600
+    ## @param min_collection_interval - number - optional - default: 15
     ## This changes the collection interval of the check. For more information, see:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     ##
     ## NOTE: Most Snowflake ACCOUNT_USAGE views are populated on an hourly basis,
-    ## so to minimize unnecessary queries the `min_collection_interval` defaults to 1 hour.
+    ## so to minimize unnecessary queries, set the `min_collection_interval` to 1 hour.
     ##
     ## Most metrics are aggregated by day, you can increase the interval to reduce the number of queries.
     #
@@ -254,7 +292,7 @@ instances:
 
     ## @param disable_generic_tags - boolean - optional - default: false
     ## Generic tags such as `cluster` will be replaced by <integration_name>_cluster to avoid
-    ## getting mixed with other integraton tags.
+    ## getting mixed with other integration tags.
     #
     disable_generic_tags: true
 

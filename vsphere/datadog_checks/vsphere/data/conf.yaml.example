@@ -13,7 +13,7 @@ init_config:
     ## Those options are used when making vSphere REST API calls to retrieve vSphere tags
     ## when `collect_tags` instance config is enabled.
     #
-    rest_api_options:
+    # rest_api_options:
 
         ## @param proxy - mapping - optional
         ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
@@ -47,7 +47,7 @@ init_config:
         #
         # timeout: 10
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -279,6 +279,17 @@ instances:
     #
     # collect_attributes: false
 
+    ## @param collect_property_metrics - boolean - optional - default: false
+    ## If true, the vSphere integration will collect additional metrics about the resource types
+    ## you have configured to monitor. These are configuration properties such as disk information
+    ## in a VM and DRS config status in clusters.
+    ##
+    ## Note: These metrics are collected at a frequency of `refresh_infrastructure_cache_interval`.
+    ## Warning: Depending on the size of the vSphere environment, property metric collection can be slow,
+    ## very CPU intensive and put pressure on the vCenter Server.
+    #
+    # collect_property_metrics: false
+
     ## @param attributes_prefix - string - optional
     ## Custom attributes attached to vSphere resources will be prefixed with this prefix when collected.
     ## Example use cases:
@@ -304,6 +315,14 @@ instances:
     ##       https://docs.datadoghq.com/integrations/faq/troubleshooting-duplicated-hosts-with-vsphere/.
     #
     # use_guest_hostname: false
+
+    ## @param vm_hostname_suffix_tag - string - optional
+    ## If specified, the integration will submit hostnames as <VM_NAME-SUFFIX> where suffix is the
+    ## value of the given tag key
+    ##
+    ## If a VM does not have a matching tag with the key, the integration will leave out the suffix
+    #
+    # vm_hostname_suffix_tag: <TAG_KEY>
 
     ## @param threads_count - integer - optional - default: 4
     ## This integration is using threads internally when making queries against the vCenter API.
@@ -381,7 +400,7 @@ instances:
     ## The options are used when making vSphere REST API calls to retrieve vSphere tags
     ## when `collect_tags` instance config is enabled.
     #
-    rest_api_options:
+    # rest_api_options:
 
         ## @param proxy - mapping - optional
         ## This overrides the `proxy` setting in `init_config`.
@@ -531,13 +550,19 @@ instances:
         ##     path (required): The absolute path for the file to read from.
         ##     pattern: A regular expression pattern with a single capture group used to find the
         ##              token rather than using the entire file, for example: Your secret is (.+)
+        ##   - type: oauth
+        ##     url (required): The token endpoint.
+        ##     client_id (required): The client identifier.
+        ##     client_secret (required): The client secret.
+        ##     basic_auth: Whether the provider expects credentials to be transmitted in
+        ##                 an HTTP Basic Auth header. The default is: false
         ##
         ## The available writers are:
         ##
         ##   - type: header
         ##     name (required): The name of the field, for example: Authorization
         ##     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
-        ##     placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
+        ##     placeholder: The substring in `value` to replace with the token, defaults to: <TOKEN>
         #
         # auth_token:
         #   reader:
@@ -674,7 +699,7 @@ instances:
         # log_requests: false
 
         ## @param persist_connections - boolean - optional - default: false
-        ## Whether or not to persist cookies and use connection pooling for increased performance.
+        ## Whether or not to persist cookies and use connection pooling for improved performance.
         #
         # persist_connections: false
 
@@ -682,6 +707,11 @@ instances:
         ## Whether or not to allow URL redirection.
         #
         # allow_redirects: true
+
+    ## @param connection_reset_timeout - integer - optional - default: 900
+    ## The time interval in seconds at which the agent should re-authenticate using the provided credentials
+    #
+    # connection_reset_timeout: 900
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

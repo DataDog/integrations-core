@@ -7,7 +7,7 @@ from contextlib import contextmanager
 
 from ...errors import SubprocessError
 from ...subprocess import run_command
-from ...utils import ON_WINDOWS, file_exists, find_free_port, get_ip, path_join
+from ...utils import ON_WINDOWS, file_exists, find_free_port, get_hostname, get_ip, path_join
 from ..commands.console import echo_debug, echo_warning
 from ..constants import get_root
 from .agent import (
@@ -300,8 +300,9 @@ class DockerInterface(object):
         env_vars = {
             # Agent 6 will simply fail without an API key
             'DD_API_KEY': self.api_key,
-            # Run expvar on a random port
-            'DD_EXPVAR_PORT': 0,
+            # Set agent hostname for CI
+            'DD_HOSTNAME': get_hostname(),
+            'DD_EXPVAR_PORT': 5000,
             # Run API on a random port
             'DD_CMD_PORT': find_free_port(get_ip()),
             # Disable trace agent
@@ -312,6 +313,7 @@ class DockerInterface(object):
             # More info: https://github.com/DataDog/integrations-core/pull/5454
             # TODO: Remove PYTHONDONTWRITEBYTECODE env var when Python 2 support is removed
             'PYTHONDONTWRITEBYTECODE': "1",
+            "DD_TELEMETRY_ENABLED": "1",
         }
         if self.dd_site:
             env_vars['DD_SITE'] = self.dd_site

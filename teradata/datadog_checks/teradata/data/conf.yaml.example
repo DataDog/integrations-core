@@ -1,0 +1,251 @@
+## All options defined here are available to all instances.
+#
+init_config:
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+    ## @param global_custom_queries - list of mappings - optional
+    ## See `custom_queries` defined below.
+    ##
+    ## Global custom queries can be applied to all instances using the
+    ## `use_global_custom_queries` setting at the instance level.
+    #
+    # global_custom_queries:
+    #   - query: <QUERY>
+    #     columns: <COLUMNS>
+    #     tags: <TAGS>
+
+## Every instance is scheduled independently of the others.
+#
+instances:
+
+    ## @param server - string - required
+    ## The IP address or FQDN (fully qualified domain name) of the Teradata database server.
+    #
+  - server: <SERVER>
+
+    ## @param port - integer - optional - default: 1025
+    ## Specifies the Teradata database port number
+    #
+    # port: 1025
+
+    ## @param username - string - optional
+    ## Username for the Datadog-Teradata check user.
+    #
+    # username: <USERNAME>
+
+    ## @param password - string - optional
+    ## Password for the Datadog-Teradata check user.
+    #
+    # password: <PASSWORD>
+
+    ## @param account - string - optional
+    ## The Datadog-Teradata check user's account string to use when logging into the database.
+    #
+    # account: <ACCOUNT>
+
+    ## @param database - string - required
+    ## The name of the database to access.
+    #
+    database: <DATABASE>
+
+    ## @param tables - list of strings or mapping - optional
+    ## Database tables to collect. If specifying a list of tables, the check will collect all disk metrics from
+    ## specified tables. If specifying a mapping, the available options are `include` and `exclude`. `include` will
+    ## collect all disk metrics from the specified tables. `exclude` will exclude collection of disk metrics from
+    ## specified tables. The check will exclude disk metric collection from a specified table if there is overlap.
+    #
+    # tables:
+    #   include:
+    #   - <TABLE_1>
+    #   - <TABLE_2>
+    #   exclude:
+    #   - <TABLE_3>
+
+    ## @param collect_table_disk_metrics - boolean - optional - default: false
+    ## Whether or not to collect table-specific disk space metrics from the DBC.AllSpaceV view.
+    ## If this option is enabled, Disk Space metrics will be collected for each included table specified in the
+    ## `tables` option, or all tables if the `tables` option is not configured.
+    ## Each metric will be tagged with `td_table`.
+    #
+    # collect_table_disk_metrics: false
+
+    ## @param collect_res_usage_metrics - boolean - optional - default: false
+    ## Collect metrics from the SPMA Resource Usage View.
+    #
+    # collect_res_usage_metrics: false
+
+    ## @param https_port - integer - optional - default: 443
+    ## The port number used for making TLS connections to the Teradata database.
+    #
+    # https_port: 443
+
+    ## @param ssl_mode - string - optional - default: Prefer
+    ## The SSL mode used for making TLS connections to the Teradata database.
+    ## Valid options are:
+    ## * Allow
+    ## * Disable
+    ## * Prefer
+    ## * Require
+    ## Note: Verify-CA and Verify-Full are currently not available.
+    #
+    # ssl_mode: Prefer
+
+    ## @param ssl_protocol - string - optional - default: TLSv1.2
+    ## Specifies the TLS protocol for HTTPS/TLS connections. Currently, only TLSv1.2 is supported.
+    #
+    # ssl_protocol: TLSv1.2
+
+    ## @param auth_mechanism - string - optional
+    ## The authentication mechanism for connecting to the Teradata data source. If no value is provided, the defined
+    ## local default mechanism is used, otherwise the default mechanism defined by the database is used.
+    ##
+    ## Valid options are:
+    ## * TD2 - Selects Teradata 2 authentication mechanism. Username and password are required. (Default)
+    ## * TDNEGO - Selects the Authentication Mechanism automatically based on the policy without user involvement.
+    ## * LDAP - Selects LDAP as the authentication mechanism. Specify the username and password using the `auth_data`
+    ##          configuration option.
+    ## * KRB5 - Selects Kerberos as the authentication mechanism. Specify the username and password using the
+    ##          `auth_data` configuration option.
+    ## * JWT - Selects JWT as the authentication mechanism, available in Teradata Advanced SQL Engine 16.20+.
+    ##         Specify the JSON Web Token using the `auth_data` configuration option.
+    #
+    # auth_mechanism: <AUTH_MECHANISM>
+
+    ## @param auth_data - string - optional
+    ## Specifies additional data needed by a logon authentication mechanism, such as a secure token,
+    ## Distinguished Name, or a domain/realm name. `auth_data` values are specific to each logon mechanism.
+    ## `auth_data` is not used with the TD2 mechanism.
+    ##
+    ## `auth_data` for the JWT mechanism contains token= followed by the JSON Web Token.
+    ## For example:
+    ## auth_data: token=dHkiOiJKV1QiLCJoI2tGIS42
+    ##
+    ## `auth_data` for the KRB5 mechanism can contain the Kerberos username, instance, realm, and password.
+    ## Use is optional, the current user can logon without supplying this information.
+    ## The sequence @@ always precedes the password.
+    ## For example:
+    ## auth_data: user1@ESDOM.ESDEV.TDAT@@mypassword
+    ##
+    ## `auth_data` for the LDAP mechanism can contain spaces, commas, and single quotes.
+    ## When specifying this parameter with a DataSource, no special processing is required.
+    ## For example:
+    ## auth_data: 'authcid=username password=userpassword'
+    ## or
+    ## auth_data: username@@userpassword
+    #
+    # auth_data: <AUTH_DATA>
+
+    ## @param only_custom_queries - boolean - optional - default: false
+    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
+    ## Only metrics specified in `custom_queries` will be collected.
+    #
+    # only_custom_queries: false
+
+    ## @param use_global_custom_queries - string - optional - default: true
+    ## How `global_custom_queries` should be used for this instance. There are 3 options:
+    ##
+    ## 1. true - `global_custom_queries` override `custom_queries`.
+    ## 2. false - `custom_queries` override `global_custom_queries`.
+    ## 3. extend - `global_custom_queries` are used in addition to any `custom_queries`.
+    #
+    # use_global_custom_queries: 'true'
+
+    ## @param custom_queries - list of mappings - optional
+    ## Each query must have 2 fields, and can have a third optional field:
+    ##
+    ## 1. query - The SQL to execute. It can be a simple statement or a multi-line script.
+    ##            Use the pipe `|` if you require a multi-line script.
+    ## 2. columns - The list representing each column, ordered sequentially from left to right.
+    ##              The number of columns must equal the number of columns returned in the query.
+    ##              There are 2 required pieces of data:
+    ##                a. name - The suffix to append to `<INTEGRATION>.` to form
+    ##                          the full metric name. If `type` is a `tag` type, this column is
+    ##                          considered a tag and applied to every
+    ##                          metric collected by this particular query.
+    ##                b. type - The submission method (gauge, monotonic_count, etc.).
+    ##                          This can also be set to the following `tag` types to
+    ##                          tag each metric in the row with the name and value
+    ##                          of the item in this column:
+    ##                           i. tag           - This is the default tag type
+    ##                           ii. tag_list     - This allows multiple values to be attached
+    ##                                             to the tag name. For example: 
+    ##
+    ##                                             query = {
+    ##                                               "name": "example",
+    ##                                               "query": "...",
+    ##                                               "columns": [
+    ##                                                 {"name": "server_tag", "type": "tag_list"},
+    ##                                                 {"name": "foo", "type": "gauge"},
+    ##                                               ]
+    ##                                             }
+    ##
+    ##                                             May result in:
+    ##                                             gauge("foo", tags=[
+    ##                                                                 "server_tag:us",
+    ##                                                                 "server_tag:primary",
+    ##                                                                 "server_tag:default"
+    ##                                                               ])
+    ##                                             gauge("foo", tags=["server_tag:eu"])
+    ##                                             gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
+    ##                           iii. tag_not_null - This only sets tags in the metric if the value is not null
+    ##                          You can use the `count` type to perform aggregation
+    ##                          for queries that return multiple rows with the same or no tags.
+    ##              Columns without a name are ignored. To skip a column, enter:
+    ##                - {}
+    ## 3. tags (optional) - A list of tags to apply to each metric.
+    #
+    # custom_queries:
+    #   - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo
+    #     columns:
+    #     - name: foo
+    #       type: tag
+    #     - name: event.total
+    #       type: gauge
+    #     tags:
+    #     - test:<INTEGRATION>
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

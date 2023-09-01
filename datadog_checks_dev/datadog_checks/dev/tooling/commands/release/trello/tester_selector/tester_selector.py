@@ -11,14 +11,14 @@ from ....console import echo_info, echo_warning
 from .github_trello_user_matcher import GithubTrelloUserMatcher
 from .github_users import GithubUser, GithubUsers, pr_date_str_to_date
 from .tester_selector_team import TesterSelectorTeam
-from .trello_users import TrelloUser, TrelloUsers
+from .trello_users import TrelloUser
 
 
 def create_tester_selector(trello: TrelloClient, repo: str, github_teams: List[str], user_config, app_dir: str):
     github = Github(user_config, 5, repo, 'DataDog')
     now = datetime.utcnow()
     user_cache_expiration = now + timedelta(days=-7)
-    trello_users = TrelloUsers(trello, app_dir, user_cache_expiration)
+    trello_users = [TrelloUser(member) for member in trello.get_board_members()]
     github_users = GithubUsers(github, app_dir, user_cache_expiration)
     userMatcher = GithubTrelloUserMatcher(trello_users)
 

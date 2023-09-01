@@ -1,38 +1,47 @@
 {
-  "aliases": [
-    "/integrations/goexpvar"
-  ],
-  "categories": [
-    "languages",
-    "autodiscovery"
-  ],
-  "creates_events": false,
-  "display_name": "Go-Expvar",
-  "guid": "33557f7a-5f24-43f3-9551-78432894e539",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "go_expvar.",
-  "metric_to_check": "go_expvar.memstats.alloc",
-  "name": "go_expvar",
-  "public_title": "Datadog-Go-Expvar Integration",
-  "short_description": "Collect expvar-instrumented metrics and memory stats from your Go service.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "go-expvar",
+  "manifest_version": "2.0.0",
+  "app_uuid": "cac5ebe3-fa36-49f7-93c5-22116c745e80",
+  "app_id": "go-expvar",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect expvar-instrumented metrics and memory stats from your Go service.",
+    "title": "Go-Expvar",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Languages"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "Go Expvar",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "go_expvar.",
+        "check": "go_expvar.memstats.alloc",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

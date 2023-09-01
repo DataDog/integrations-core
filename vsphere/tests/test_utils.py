@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -50,4 +49,6 @@ def test_should_collect_per_instance_values(metric_name, resource_type, expect_m
         None,
     )
 
-    assert expect_match == should_collect_per_instance_values(config, metric_name, resource_type)
+    assert expect_match == should_collect_per_instance_values(
+        config.collect_per_instance_filters, metric_name, resource_type
+    )

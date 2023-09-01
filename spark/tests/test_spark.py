@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 import os
 import ssl
 import threading
@@ -15,6 +16,7 @@ from six.moves import BaseHTTPServer
 from six.moves.urllib.parse import parse_qsl, unquote_plus, urlencode, urljoin, urlparse, urlunparse
 
 from datadog_checks.dev.http import MockResponse
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.spark import SparkCheck
 
 from .common import CLUSTER_NAME, CLUSTER_TAGS, INSTANCE_DRIVER_1, INSTANCE_DRIVER_2, INSTANCE_STANDALONE
@@ -551,7 +553,6 @@ SPARK_STREAMING_STATISTICS_METRIC_VALUES = {
     'spark.streaming.statistics.num_total_completed_batches': 28,
 }
 
-
 SPARK_STRUCTURED_STREAMING_METRIC_VALUES = {
     'spark.structured_streaming.input_rate': 12,
     'spark.structured_streaming.latency': 12,
@@ -563,6 +564,13 @@ SPARK_STRUCTURED_STREAMING_METRIC_VALUES = {
 SPARK_STRUCTURED_STREAMING_METRIC_NO_TAGS = {
     'spark.structured_streaming.input_rate',
     'spark.structured_streaming.latency',
+}
+
+SPARK_STRUCTURED_STREAMING_METRIC_PUNCTUATED_TAGS = {
+    # Metric to test for punctuation in the query names of stream metrics.
+    'spark.structured_streaming.input_rate': 100,
+    'spark.structured_streaming.latency': 100,
+    'spark.structured_streaming.processing_rate': 100,
 }
 
 
@@ -622,6 +630,7 @@ def test_yarn(aggregator, dd_run_check):
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.unit
@@ -706,6 +715,7 @@ def test_mesos(aggregator, dd_run_check):
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.unit
@@ -784,6 +794,7 @@ def test_driver_unit(aggregator, dd_run_check):
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.unit
@@ -846,6 +857,7 @@ def test_standalone_unit(aggregator, dd_run_check):
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.unit
@@ -908,6 +920,7 @@ def test_standalone_unit_with_proxy_warning_page(aggregator, dd_run_check):
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.unit
@@ -970,6 +983,7 @@ def test_standalone_pre20(aggregator, dd_run_check):
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.unit
@@ -1040,6 +1054,13 @@ def test_enable_query_name_tag_for_structured_streaming(
 
             aggregator.assert_metric(metric, value=value, tags=tags)
 
+        for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_PUNCTUATED_TAGS):
+            tags = base_tags + ["query_name:my.app.punctuation"]
+
+            aggregator.assert_metric(metric, value=value, tags=tags)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
 
 def test_do_not_crash_on_version_collection_failure():
     running_apps = {'foo': ('bar', 'http://foo.bar/'), 'foo2': ('bar', 'http://foo.bar/')}
@@ -1093,6 +1114,34 @@ def test_do_not_crash_on_single_app_failure():
         assert rest_requests_to_json.call_count == 2
 
 
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "instance,service_check",
+    [
+        (DRIVER_CONFIG, "driver"),
+        (YARN_CONFIG, "resource_manager"),
+        (MESOS_CONFIG, "mesos_master"),
+        (STANDALONE_CONFIG, "standalone_master"),
+        (STANDALONE_CONFIG_PRE_20, "standalone_master"),
+    ],
+    ids=["driver", "yarn", "mesos", "standalone", "standalone_pre_20"],
+)
+def test_no_running_apps(aggregator, dd_run_check, instance, service_check, caplog):
+    with mock.patch('requests.get', return_value=MockResponse("{}")):
+        with caplog.at_level(logging.WARNING):
+            dd_run_check(SparkCheck('spark', {}, [instance]))
+
+        # no metrics sent in this case
+        aggregator.assert_all_metrics_covered()
+        aggregator.assert_service_check(
+            'spark.{}.can_connect'.format(service_check),
+            status=SparkCheck.OK,
+            tags=['url:{}'.format(instance['spark_url'])] + CLUSTER_TAGS + instance.get('tags', []),
+        )
+
+    assert 'No running apps found. No metrics will be collected.' in caplog.text
+
+
 class StandaloneAppsResponseHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -1132,8 +1181,8 @@ def test_integration_standalone(aggregator, dd_run_check):
     )
     optional_metric_values = (SPARK_STREAMING_STATISTICS_METRIC_VALUES,)
     # Extract all keys
-    expected_metrics = set(k for j in expected_metric_values for k in j)
-    optional_metrics = set(k for j in optional_metric_values for k in j)
+    expected_metrics = {k for j in expected_metric_values for k in j}
+    optional_metrics = {k for j in optional_metric_values for k in j}
     # Check the running job metrics
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
@@ -1146,6 +1195,7 @@ def test_integration_standalone(aggregator, dd_run_check):
         tags=['url:{}'.format('http://spark-master:8080')] + CLUSTER_TAGS,
     )
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration
@@ -1164,8 +1214,8 @@ def test_integration_driver_1(aggregator, dd_run_check):
         SPARK_EXECUTOR_METRIC_VALUES,
     )
     # Extract all keys
-    expected_metrics = set(k for j in all_metric_values for k in j)
-    optional_metrics = set(k for j in optional_metric_values for k in j)
+    expected_metrics = {k for j in all_metric_values for k in j}
+    optional_metrics = {k for j in optional_metric_values for k in j}
 
     # Check the running job metrics
     for metric in expected_metrics:
@@ -1179,6 +1229,7 @@ def test_integration_driver_1(aggregator, dd_run_check):
         tags=['url:{}'.format('http://spark-app-1:4040')] + SPARK_DRIVER_CLUSTER_TAGS,
     )
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration
@@ -1198,8 +1249,8 @@ def test_integration_driver_2(aggregator, dd_run_check):
         SPARK_JOB_SUCCEEDED_METRIC_VALUES,
     )
     # Extract all keys
-    expected_metrics = set(k for j in all_metric_values for k in j)
-    optional_metrics = set(k for j in optional_metric_values for k in j)
+    expected_metrics = {k for j in all_metric_values for k in j}
+    optional_metrics = {k for j in optional_metric_values for k in j}
 
     # Check the running job metrics
     for metric in expected_metrics:
@@ -1213,3 +1264,4 @@ def test_integration_driver_2(aggregator, dd_run_check):
         tags=['url:{}'.format('http://spark-app-2:4050')] + SPARK_DRIVER_CLUSTER_TAGS,
     )
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

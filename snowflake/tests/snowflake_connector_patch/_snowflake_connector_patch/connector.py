@@ -4,6 +4,7 @@
 import re
 
 import requests
+from snowflake.connector.cursor import SnowflakeCursor
 
 from . import tables
 
@@ -22,9 +23,10 @@ def connect(*args, **kwargs):
 class Connection(object):
     def __init__(self, *args, **kwargs):
         super(Connection, self).__init__()
+        self.schema = kwargs.get('schema')
 
     def cursor(self, *args, **kwargs):
-        return Cursor(*args, **kwargs)
+        return Cursor(schema=self.schema, *args, **kwargs)  # noqa: B026
 
     def close(self):
         pass
@@ -33,7 +35,7 @@ class Connection(object):
 class Cursor(object):
     def __init__(self, *args, **kwargs):
         super(Cursor, self).__init__()
-
+        self.schema = kwargs.get('schema')
         self.__data = []
 
     @property
@@ -44,14 +46,24 @@ class Cursor(object):
         match = TABLE_PATTERN.search(query)
         if match:
             table_name = match.group(1)
-            self.__data = getattr(tables, table_name, [])
+            table_prefix = ''
+            if self.schema == 'ORGANIZATION_USAGE':
+                table_prefix = 'ORGANIZATION_'
+            table_attr = "{}{}".format(table_prefix, table_name)
+            self.__data = list(getattr(tables, table_attr, []))
         elif query == 'select current_version();':
             self.__data = [('4.30.2',)]
         else:
             self.__data = []
 
-    def fetchall(self):
-        return self.__data
+    def fetchone(self):
+        try:
+            return self.__data.pop(0)
+        except IndexError:
+            return None
+
+    def __iter__(self):
+        return SnowflakeCursor.__iter__(self)
 
     def close(self):
-        pass
+        self.__data = []

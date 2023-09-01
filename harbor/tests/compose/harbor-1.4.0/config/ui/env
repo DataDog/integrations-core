@@ -1,8 +1,0 @@
-LOG_LEVEL=debug
-CONFIG_PATH=/etc/ui/app.conf
-UI_SECRET=jJdpQL9fNUXscthr
-JOBSERVICE_SECRET=GskgQQy4mISrxKaO
-GODEBUG=netdns=cgo
-ADMINSERVER_URL=http://adminserver:8080
-UAA_CA_ROOT=/etc/ui/certificates/uaa_ca.pem
-_REDIS_URL=

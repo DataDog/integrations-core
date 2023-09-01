@@ -147,7 +147,7 @@ The Docker integration produces the following events:
 
 See [service_checks.json][20] for a list of service checks provided by this integration.
 
-**Note**: To use `docker.exit`, add `collect_exit_code: true` in your [Docker YAML file][21] and restart the Agent.
+**Note**: To use `docker.exit`, add `collect_exit_codes: true` in your [Docker YAML file][21] and restart the Agent.
 
 ## Troubleshooting
 
@@ -169,11 +169,11 @@ Need help? Contact [Datadog support][22].
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/docker_daemon/images/docker.png
 [2]: https://github.com/DataDog/docker-dd-agent
 [3]: https://github.com/DataDog/docker-dd-agent#cgroups
-[4]: https://app.datadoghq.com/account/settings#agent
+[4]: https://app.datadoghq.com/account/settings/agent/latest
 [5]: https://app.datadoghq.com/account/settings#integrations/docker
 [6]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/datadog_checks/docker_daemon/data/conf.yaml.example
 [7]: https://raw.githubusercontent.com/DataDog/integrations-core/master/docker_daemon/images/integrations-docker-dockerps.png
-[8]: https://app.datadoghq.com/account/settings#agent/docker
+[8]: https://app.datadoghq.com/account/settings/agent/latest?platform=docker
 [9]: https://github.com/DataDog/dd-agent/wiki/Proxy-Configuration#using-the-agent-as-a-proxy
 [10]: https://github.com/DataDog/dd-agent/wiki/Network-Traffic-and-Proxy-Configuration
 [11]: https://github.com/DataDog/dd-agent/wiki/Proxy-Configuration#using-a-web-proxy-as-proxy
@@ -186,9 +186,9 @@ Need help? Contact [Datadog support][22].
 [18]: https://docs.datadoghq.com/agent/#cli
 [19]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/metadata.csv
 [20]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/assets/service_checks.json
-[21]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/datadog_checks/docker_daemon/data/conf.yaml.example#L124
+[21]: https://github.com/DataDog/integrations-core/blob/7.39.0/docker_daemon/datadog_checks/docker_daemon/data/conf.yaml.example#L151-L154
 [22]: https://docs.datadoghq.com/help
-[23]: https://docs.datadoghq.com/integrations/faq/compose-and-the-datadog-agent
+[23]: https://docs.datadoghq.com/agent/guide/compose-and-the-datadog-agent
 [24]: https://docs.datadoghq.com/integrations/faq/dogstatsd-and-docker
 [25]: https://www.datadoghq.com/blog/the-docker-monitoring-problem
 [26]: https://www.datadoghq.com/blog/how-to-monitor-docker-resource-metrics

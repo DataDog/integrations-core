@@ -24,6 +24,9 @@ CASSANDRA_JVM_E2E_METRICS = list(set(JVM_E2E_METRICS) - CASSANDRA_JVM_METRICS_NO
 
 CASSANDRA_E2E_METRICS = (
     [
+        "cassandra.active_tasks",
+        "cassandra.timeouts.count",
+        "cassandra.timeouts.one_minute_rate",
         "cassandra.bloom_filter_false_ratio",
         "cassandra.bytes_flushed.count",
         "cassandra.cas_commit_latency.75th_percentile",

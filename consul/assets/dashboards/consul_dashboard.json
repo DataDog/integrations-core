@@ -432,6 +432,5 @@
     ],
     "layout_type": "free",
     "is_read_only": true,
-    "notify_list": [],
-    "id": 83
+    "notify_list": []
 }

@@ -15,7 +15,11 @@ def load_spec(check_root):
 
 def get_spec_path(check_root):
     manifest = json.loads(read_file(path_join(check_root, 'manifest.json')))
-    relative_spec_path = manifest.get('assets', {}).get('configuration', {}).get('spec', '')
+    assets = manifest.get('assets', {})
+    if 'integration' in assets:
+        relative_spec_path = assets['integration'].get('configuration', {}).get('spec', '')
+    else:
+        relative_spec_path = assets.get('configuration', {}).get('spec', '')
     if not relative_spec_path:
         raise ValueError('No config spec defined')
 

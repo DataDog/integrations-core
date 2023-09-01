@@ -11,8 +11,6 @@ from datadog_checks.base.utils.db import QueryManager
 
 from .common import create_query_manager, mock_executor
 
-pytestmark = pytest.mark.db
-
 
 class TestQueryCompilation:
     def test_no_query_name(self):

@@ -1,1 +1,131 @@
-[]
+[
+    {
+        "agent_version": "5.6.0",
+        "integration": "Kubernetes",
+        "check": "kubernetes_state.node.ready",
+        "statuses": [
+            "ok",
+            "warning",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "node"
+        ],
+        "name": "Node Ready",
+        "description": "Returns `CRITICAL` if a cluster node is not ready. Returns `WARNING` if status is unknown. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "5.6.0",
+        "integration": "Kubernetes",
+        "check": "kubernetes_state.node.out_of_disk",
+        "statuses": [
+            "ok",
+            "unknown",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "node"
+        ],
+        "name": "Node Out Of Disk",
+        "description": "Returns `CRITICAL` if a cluster node is out of disk space. Returns `UNKNOWN` if status is unknown. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "5.6.0",
+        "integration": "Kubernetes",
+        "check": "kubernetes_state.node.disk_pressure",
+        "statuses": [
+            "ok",
+            "unknown",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "node"
+        ],
+        "name": "Node Disk Pressure",
+        "description": "Returns `CRITICAL` if a cluster node is in a disk pressure state. Returns `UNKNOWN` if status is unknown. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "5.6.0",
+        "integration": "Kubernetes",
+        "check": "kubernetes_state.node.memory_pressure",
+        "statuses": [
+            "ok",
+            "unknown",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "node"
+        ],
+        "name": "Node Memory Pressure",
+        "description": "Returns `CRITICAL` if a cluster node is in a memory pressure state. Returns `UNKNOWN` if status is unknown. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "5.6.0",
+        "integration": "Kubernetes",
+        "check": "kubernetes_state.node.network_unavailable",
+        "statuses": [
+            "ok",
+            "unknown",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "node"
+        ],
+        "name": "Node Network Unavailable",
+        "description": "Returns `CRITICAL` if a cluster node is in a network unavailable state. Returns `UNKNOWN` if status is unknown. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "5.6.0",
+        "integration": "Kubernetes",
+        "check": "kubernetes_state.cronjob.on_schedule_check",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+           "kube_cluster_name",
+           "kube_namespace",
+           "kube_cronjob"
+        ],
+        "name": "CronJob next schedule",
+        "description": "Returns `CRITICAL` if a cron job scheduled time is unknown or in the past. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.22.0",
+        "integration": "Kubernetes",
+        "check": "kubernetes_state.job.complete",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+           "kube_cluster_name",
+           "kube_namespace",
+           "kube_cronjob",
+           "kube_job"
+        ],
+        "name": "Job completion status",
+        "description": " Returns `CRITICAL` if a job failed. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.36.0",
+        "integration": "Kubernetes",
+        "check": "kubernetes_state.cronjob.complete",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+           "kube_cluster_name",
+           "kube_namespace",
+           "kube_cronjob"
+        ],
+        "name": "CronJob completion status",
+        "description": " Returns `CRITICAL` if the last job of a cronjob failed. Returns `OK` otherwise."
+    }
+]

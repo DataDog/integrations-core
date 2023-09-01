@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 from datadog_checks.mongo.collectors.base import MongoCollector
 
 
@@ -26,3 +30,4 @@ class IndexStatsCollector(MongoCollector):
                     self.gauge('mongodb.collection.indexes.accesses.ops', val, idx_tags)
             except Exception as e:
                 self.log.error("Could not fetch indexes stats for collection %s: %s", coll_name, e)
+                raise e

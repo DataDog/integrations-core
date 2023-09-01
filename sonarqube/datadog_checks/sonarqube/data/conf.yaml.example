@@ -81,7 +81,7 @@ init_config:
     #
     # timeout: 10
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -125,8 +125,25 @@ instances:
     # default_exclude: []
 
     ## @param components - mapping - optional
-    ## The components for which metrics should be collected. Each object may override the default
-    ## options. The following example gathers all default metrics for "some-project",
+    ## A mapping of components for which metrics should be collected. Each object may override the default
+    ## options. Each component key may be configured with an optional configuration mapping to filter the metrics 
+    ## that should be collected.
+    ##
+    ## The top-level keys are the names of the desired component objects:
+    ##
+    ## components:
+    ##   some-project:
+    ##   another-project:
+    ##     <OPTION_1>: ...
+    ##     <OPTION_2>: ...
+    ##
+    ## The available component object options are:
+    ##
+    ##   tag:      Custom tag for the specified component.
+    ##   include:  List of metrics to include for the specified component.
+    ##   exclude:  List of metrics to exclude for the specified component.
+    ##
+    ## The following example gathers all default metrics for "some-project",
     ## and only what is included/excluded for "another-project":
     ##
     ##   components:
@@ -139,11 +156,58 @@ instances:
     ##         - security.
     ##       exclude:
     ##         - issues.(false_positive_issues|reopened_issues)
-    ##
-    ## Note: This is required for all project checks, whether `is_jmx` is set to `true`
-    ## or `false.
     #
     # components: {}
+
+    ## A mapping of components autodiscovery patterns for which metrics should be collected. Each included key may 
+    ## be configured with an optional `include` object to filter the metrics that should be collected.  
+    ##
+    ## The following example collects all defect metrics for those components with names starting with "my_project"
+    ## and only the metrics from the "issues" category for projects starting with "issue".
+    ## It also excludes projects starting with "temp" from autodiscovery.
+    ## The maximum total number of projects processed by autodiscovery is 10.
+    ##
+    ##   components_discovery:
+    ##     limit: 10
+    ##     include:
+    ##       my_project*:
+    ##       issue*:
+    ##         include:
+    ##           - issues.
+    ##     exclude:
+    ##       - temp*
+    #
+    # components_discovery:
+
+        ## @param limit - integer - optional - default: 10
+        ## Maximum number of components to be 'autodiscovered'.
+        #
+        # limit: 10
+
+        ## @param include - mapping - optional
+        ## Mapping of regular expressions keys and component config values that will be 'autodiscovered'.
+        ##
+        ## The top-level keys are the regular expressions patterns for the desired component names. 
+        ##
+        ## include:
+        ##   my_project*:
+        ##     <OPTION_1>: ...
+        ##   issue*:
+        ##     <OPTION_1>: ...
+        ##     <OPTION_2>: ...
+        ##
+        ## The available include component object options are:
+        ##
+        ##   tag:      Custom tag for the matching components.
+        ##   include:  List of metrics regular expressions patterns to include from the matching components.
+        ##   exclude:  List of metrics regular expressions patterns to exclude from the matching components.
+        #
+        # include: {}
+
+        ## @param exclude - list of strings - optional
+        ## List of regular expressions with the patterns of components that will not be 'autodiscovered'
+        #
+        # exclude: []
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
@@ -288,13 +352,19 @@ instances:
     ##     path (required): The absolute path for the file to read from.
     ##     pattern: A regular expression pattern with a single capture group used to find the
     ##              token rather than using the entire file, for example: Your secret is (.+)
+    ##   - type: oauth
+    ##     url (required): The token endpoint.
+    ##     client_id (required): The client identifier.
+    ##     client_secret (required): The client secret.
+    ##     basic_auth: Whether the provider expects credentials to be transmitted in
+    ##                 an HTTP Basic Auth header. The default is: false
     ##
     ## The available writers are:
     ##
     ##   - type: header
     ##     name (required): The name of the field, for example: Authorization
     ##     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
-    ##     placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
+    ##     placeholder: The substring in `value` to replace with the token, defaults to: <TOKEN>
     #
     # auth_token:
     #   reader:
@@ -431,7 +501,7 @@ instances:
     # log_requests: false
 
     ## @param persist_connections - boolean - optional - default: false
-    ## Whether or not to persist cookies and use connection pooling for increased performance.
+    ## Whether or not to persist cookies and use connection pooling for improved performance.
     #
     # persist_connections: false
 
@@ -582,12 +652,12 @@ instances:
 
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.

@@ -42,6 +42,8 @@ NodeStatus = namedtuple('NodeStatus', ['node_id', 'service_name', 'service_tags_
 
 
 class ConsulCheck(OpenMetricsBaseCheck):
+    DEFAULT_METRIC_LIMIT = 0
+
     def __init__(self, name, init_config, instances):
         instance = instances[0]
         self.url = instance.get('url')
@@ -372,6 +374,8 @@ class ConsulCheck(OpenMetricsBaseCheck):
                             tags.append('service:{}'.format(check['ServiceName']))
                     if check["ServiceID"]:
                         tags.append("consul_service_id:{}".format(check["ServiceID"]))
+                    if check["Node"]:
+                        tags.append("consul_node:{}".format(check["Node"]))
                     sc[sc_id] = {'status': status, 'tags': tags}
 
                 elif STATUS_SEVERITY[status] > STATUS_SEVERITY[sc[sc_id]['status']]:

@@ -1,37 +1,49 @@
 {
-  "display_name": "IBM i",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "ibm_i",
-  "metric_prefix": "ibm_i.",
-  "metric_to_check": "ibm_i.system.cpu_usage",
-  "creates_events": false,
-  "short_description": "Remotely monitor IBM i systems including jobs, job queues, ASPs, and more.",
-  "guid": "da389374-7541-47e5-bcd1-87cf3b88a469",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "IBM i",
-  "categories": [
-    "os & system"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "ibm-i",
+  "manifest_version": "2.0.0",
+  "app_uuid": "30045928-4be2-4efd-9a08-160e904494a1",
+  "app_id": "ibm-i",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Remotely monitor IBM i systems including jobs, job queues, ASPs, and more.",
+    "title": "IBM i",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Category::OS & System"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "IBM i",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "ibm_i.",
+        "check": "ibm_i.system.cpu_usage",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "IBM i Overview": "assets/dashboards/ibm_i_overview.json"
-    },
-    "monitors": {},
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

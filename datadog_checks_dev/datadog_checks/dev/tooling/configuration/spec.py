@@ -73,7 +73,7 @@ def files_validator(files, loader) -> None:
         else:
             file_names_origin[file_name] = file_index
 
-        if file_name == 'auto_conf.yaml':
+        if file_name == 'auto_conf.yaml' or file_name == 'conf.yaml.default':
             if 'example_name' in config_file and config_file['example_name'] != file_name:
                 loader.errors.append(
                     '{}, file #{}: Example file name `{}` should be `{}`'.format(

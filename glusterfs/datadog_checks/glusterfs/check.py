@@ -10,7 +10,7 @@ except ImportError:
 
 import os
 import shlex
-from typing import Dict, List
+from typing import Dict, List  # noqa: F401
 
 from six import iteritems
 

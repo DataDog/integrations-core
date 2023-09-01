@@ -16,7 +16,6 @@ EDGE_HUB_METRICS = [
         'edgehub_reported_properties_update_duration_seconds': 'reported_properties_update_duration_seconds',
         'edgehub_direct_method_duration_seconds': 'direct_method_duration_seconds',
         'edgehub_direct_methods_total': 'direct_methods_total',
-        'edgehub_queue_length': 'queue_length',
         'edgehub_messages_dropped_total': 'messages_dropped_total',
         'edgehub_messages_unack_total': 'messages_unack_total',
         'edgehub_offline_count_total': 'offline_count_total',

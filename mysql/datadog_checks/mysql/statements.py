@@ -4,6 +4,7 @@
 import copy
 import time
 from contextlib import closing
+from operator import attrgetter
 from typing import Any, Callable, Dict, List, Tuple
 
 import pymysql
@@ -16,6 +17,7 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.tracking import tracked_method
 
 from .util import DatabaseConfigurationError, warning_with_tags
 
@@ -70,11 +72,11 @@ class MySQLStatementMetrics(DBMAsyncJob):
             enabled=is_affirmative(config.statement_metrics_config.get('enabled', True)),
             expected_db_exceptions=(pymysql.err.DatabaseError,),
             min_collection_interval=config.min_collection_interval,
-            config_host=config.host,
             dbms="mysql",
             job_name="statement-metrics",
             shutdown_callback=self._close_db_conn,
         )
+        self._check = check
         self._metric_collection_interval = collection_interval
         self._connection_args = connection_args
         self._db = None
@@ -110,6 +112,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
     def run_job(self):
         self.collect_per_statement_metrics()
 
+    @tracked_method(agent_check_getter=attrgetter('_check'))
     def collect_per_statement_metrics(self):
         # Detect a database misconfiguration by checking if the performance schema is enabled since mysql
         # just returns no rows without errors if the performance schema is disabled
@@ -130,14 +133,11 @@ class MySQLStatementMetrics(DBMAsyncJob):
         rows = self._collect_per_statement_metrics()
         if not rows:
             return
-
-        for event in self._rows_to_fqt_events(rows):
+        # Omit internal tags for dbm payloads since those are only relevant to metrics processed directly
+        # by the agent
+        tags = [t for t in self._tags if not t.startswith('dd.internal')]
+        for event in self._rows_to_fqt_events(rows, tags):
             self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
-
-        # truncate query text to the maximum length supported by metrics tags
-        for row in rows:
-            row['digest_text'] = row['digest_text'][0:200] if row['digest_text'] is not None else None
-
         payload = {
             'host': self._check.resolved_hostname,
             'timestamp': time.time() * 1000,
@@ -146,10 +146,17 @@ class MySQLStatementMetrics(DBMAsyncJob):
             "ddagenthostname": self._check.agent_hostname,
             'ddagentversion': datadog_agent.get_version(),
             'min_collection_interval': self._metric_collection_interval,
-            'tags': self._tags,
+            'tags': tags,
+            'cloud_metadata': self._config.cloud_metadata,
             'mysql_rows': rows,
         }
         self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
+        self._check.count(
+            "dd.mysql.collect_per_statement_metrics.rows",
+            len(rows),
+            tags=tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
 
     def _collect_per_statement_metrics(self):
         # type: () -> List[PyMysqlRow]
@@ -202,7 +209,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
                 statement = obfuscate_sql_with_metadata(row['digest_text'], self._obfuscate_options)
                 obfuscated_statement = statement['query'] if row['digest_text'] is not None else None
             except Exception as e:
-                self.log.warning("Failed to obfuscate query '%s': %s", row['digest_text'], e)
+                self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['digest_text'], e)
                 continue
 
             normalized_row['digest_text'] = obfuscated_statement
@@ -214,13 +221,13 @@ class MySQLStatementMetrics(DBMAsyncJob):
 
         return normalized_rows
 
-    def _rows_to_fqt_events(self, rows):
+    def _rows_to_fqt_events(self, rows, tags):
         for row in rows:
             query_cache_key = _row_key(row)
             if query_cache_key in self._full_statement_text_cache:
                 continue
             self._full_statement_text_cache[query_cache_key] = True
-            row_tags = self._tags + ["schema:{}".format(row['schema_name'])] if row['schema_name'] else self._tags
+            row_tags = tags + ["schema:{}".format(row['schema_name'])] if row['schema_name'] else tags
             yield {
                 "timestamp": time.time() * 1000,
                 "host": self._check.resolved_hostname,

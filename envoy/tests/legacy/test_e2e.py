@@ -4,11 +4,13 @@
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy import Envoy
 
-from .common import FLAVOR, HOST, requires_legacy_environment
+from .common import FLAVOR, HOST
 
-pytestmark = [requires_legacy_environment]
+pytestmark = [pytest.mark.e2e]
+
 
 METRICS = [
     'envoy.cluster.assignment_stale',
@@ -280,7 +282,6 @@ METRICS_V3 = [
 ]
 
 
-@pytest.mark.e2e
 def test_e2e(dd_agent_check):
     instance = {"stats_url": "http://{}:8001/stats".format(HOST)}
     aggregator = dd_agent_check(instance, rate=True)
@@ -295,3 +296,4 @@ def test_e2e(dd_agent_check):
             aggregator.assert_metric(metric, at_least=0)
     # We can't assert all covered, as some aren't received every time
     aggregator.assert_service_check('envoy.can_connect', Envoy.OK)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

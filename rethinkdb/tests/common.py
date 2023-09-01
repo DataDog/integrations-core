@@ -2,14 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from typing import Callable, Dict, List, Set, Tuple, Union
+from typing import Callable, Dict, List, Set, Tuple, Union  # noqa: F401
 
 import pytest
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev import get_docker_hostname, get_here
 
-from .types import ServerName
+from .types import ServerName  # noqa: F401
 
 HERE = get_here()
 

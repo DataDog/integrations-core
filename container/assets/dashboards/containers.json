@@ -1,0 +1,892 @@
+{
+    "author_name": "Datadog",
+    "title": "Containers - Overview",
+    "description": "The Container dashboard enables you to get an overview of the status of the containers running in your cluster regardless of the runtime used to start them. It includes a view of how many containers are running per image over time, and a list of the top images that the containers are running. \n\nFurther reading on Container monitoring:\n\n- [Datadog's Container integration docs](https://docs.datadoghq.com/integrations/container/) \n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "widgets": [
+        {
+            "id": 15,
+            "definition": {
+                "type": "image",
+                "url": "/static/images/logos/container_small.svg",
+                "sizing": "contain",
+                "has_background": true,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            }
+        },
+        {
+            "id": 4,
+            "definition": {
+                "title": "Running containers",
+                "title_size": "16",
+                "title_align": "center",
+                "time": {
+                    "live_span": "1m"
+                },
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "count_not_null(query1)"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "query": "sum:container.uptime{$scope,$runtime} by {host,container_id}",
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "aggregator": "avg"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 0,
+                "timeseries_background": {
+                    "type": "area",
+                    "yaxis": {
+                        "include_zero": false
+                    }
+                }
+            }
+        },
+        {
+            "id": 11,
+            "definition": {
+                "title": "Running container change",
+                "title_size": "16",
+                "title_align": "center",
+                "time": {
+                    "live_span": "5m"
+                },
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "100 * (count_not_null(query2) / hour_before(count_not_null(query1)))"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "palette": "white_on_green",
+                                "value": 80
+                            },
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_yellow",
+                                "value": 50
+                            },
+                            {
+                                "comparator": ">=",
+                                "palette": "white_on_red",
+                                "value": 0
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "query": "avg:container.uptime{$scope,$runtime} by {host,container_id}",
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "aggregator": "last"
+                            },
+                            {
+                                "query": "avg:container.uptime{$scope,$runtime} by {host,container_id}",
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "aggregator": "last"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": false,
+                "custom_unit": "%",
+                "text_align": "center",
+                "custom_links": [],
+                "precision": 0
+            }
+        },
+        {
+            "id": 453428519921274,
+            "definition": {
+                "title": "CPU",
+                "type": "group",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7,
+                        "definition": {
+                            "title": "CPU user by image",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "live_span": "1h"
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:container.cpu.user{$scope,$runtime} by {image_name,image_tag}.fill(0)",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "cool"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        }
+                    },
+                    {
+                        "id": 12,
+                        "definition": {
+                            "title": "CPU system by image",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "live_span": "1h"
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:container.cpu.system{$scope,$runtime} by {image_name,image_tag}.fill(0)",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "cool"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        }
+                    },
+                    {
+                        "id": 6800648352823160,
+                        "definition": {
+                            "title": "CPU % (based on container limit)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "live_span": "1h"
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "100 * (query1 / query2)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:container.cpu.limit{$scope,$runtime} by {image_name,image_tag}.fill(0)",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        },
+                                        {
+                                            "query": "avg:container.cpu.usage{$scope,$runtime} by {image_name,image_tag}.fill(0)",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "cool"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": [],
+                            "custom_links": []
+                        }
+                    },
+                    {
+                        "id": 2,
+                        "definition": {
+                            "title": "Most CPU-intensive containers",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "live_span": "1h"
+                            },
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "cool"
+                                    },
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "avg:container.cpu.user{$scope,$runtime} by {image_name,image_tag}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "max"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": []
+                        }
+                    },
+                    {
+                        "id": 6,
+                        "definition": {
+                            "title": "CPU by container",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "time": {
+                                "live_span": "1h"
+                            },
+                            "type": "heatmap",
+                            "custom_links": [],
+                            "requests": [
+                                {
+                                    "q": "avg:container.cpu.user{$scope,$runtime} by {container_name,image_tag}",
+                                    "style": {
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": 8252210704917802,
+            "definition": {
+                "title": "Memory",
+                "type": "group",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8,
+                        "definition": {
+                            "title": "Memory usage by image",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "live_span": "1h"
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:container.memory.usage{$scope,$runtime} by {image_name,image_tag}.fill(0)",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        }
+                    },
+                    {
+                        "id": 18,
+                        "definition": {
+                            "title": "Swap by image",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "live_span": "1h"
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:container.memory.swap{$scope,$runtime} by {image_name,image_tag}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        }
+                    },
+                    {
+                        "id": 14,
+                        "definition": {
+                            "title": "Cache memory by image",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "live_span": "1h"
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:container.memory.cache{$scope,$runtime} by {image_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        }
+                    },
+                    {
+                        "id": 1,
+                        "definition": {
+                            "title": "Most RAM-intensive containers",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "live_span": "1h"
+                            },
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic"
+                                    },
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "avg:container.memory.rss{$scope,$runtime} by {container_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "max"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": []
+                        }
+                    },
+                    {
+                        "id": 3,
+                        "definition": {
+                            "title": "Memory by container",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "time": {
+                                "live_span": "1h"
+                            },
+                            "type": "heatmap",
+                            "custom_links": [],
+                            "requests": [
+                                {
+                                    "q": "avg:container.memory.rss{$scope,$runtime} by {container_name}",
+                                    "style": {
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": 7236584796897802,
+            "definition": {
+                "title": "Network",
+                "type": "group",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 23,
+                        "definition": {
+                            "title": "Avg. rx bytes by image",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:container.net.rcvd{$scope,$runtime} by {image_name,image_tag}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "cool"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "custom_links": []
+                        }
+                    },
+                    {
+                        "id": 24,
+                        "definition": {
+                            "title": "Avg. tx bytes by image",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "live_span": "1h"
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:container.net.sent{$scope,$runtime} by {image_name,image_tag}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "purple"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "custom_links": []
+                        }
+                    },
+                    {
+                        "id": 26,
+                        "definition": {
+                            "title": "tx by container",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "time": {
+                                "live_span": "1h"
+                            },
+                            "type": "heatmap",
+                            "custom_links": [],
+                            "requests": [
+                                {
+                                    "q": "avg:container.net.sent{$scope,$runtime} by {container_name}",
+                                    "style": {
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "id": 25,
+                        "definition": {
+                            "title": "Most tx-intensive containers",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "live_span": "1h"
+                            },
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "purple"
+                                    },
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "avg:container.net.sent{$scope,$runtime} by {container_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "max"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": []
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": 6635117687051768,
+            "definition": {
+                "title": "IO",
+                "type": "group",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 20,
+                        "definition": {
+                            "title": "Avg. I/O bytes read by image",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "live_span": "1h"
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:container.io.read{$scope,$runtime} by {image_name,image_tag}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "custom_links": []
+                        }
+                    },
+                    {
+                        "id": 21,
+                        "definition": {
+                            "title": "Avg. I/O bytes written by image",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "live_span": "1h"
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:container.io.write{$scope,$runtime} by {image_name,image_tag}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "custom_links": []
+                        }
+                    },
+                    {
+                        "id": 136906106904268,
+                        "definition": {
+                            "title": "Avg. I/O write operations by image",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "live_span": "1h"
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:container.io.write.operations{$scope,$runtime} by {image_name,image_tag}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "custom_links": []
+                        }
+                    },
+                    {
+                        "id": 6346811453404110,
+                        "definition": {
+                            "title": "Avg. I/O read operations by image",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "live_span": "1h"
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:container.io.read.operations{$scope,$runtime} by {image_name,image_tag}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "custom_links": []
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "scope",
+            "default": "*",
+            "prefix": "",
+            "available_values": []
+        },
+        {
+            "name": "runtime",
+            "default": "*",
+            "prefix": "runtime",
+            "available_values": [
+                "containerd",
+                "podman",
+                "cri-o",
+                "docker",
+                "garden",
+                "ecsfargate"
+            ]
+        }
+    ],
+    "layout_type": "ordered",
+    "is_read_only": true,
+    "reflow_type": "auto"
+}

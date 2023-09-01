@@ -51,6 +51,9 @@ def dd_environment(config_e2e):
     logs_path = _mysql_logs_path()
 
     with TempDir('logs') as logs_host_path:
+        # for Ubuntu
+        os.chmod(logs_host_path, 0o770)
+
         e2e_metadata = {'docker_volumes': ['{}:{}'.format(logs_host_path, logs_path)]}
 
         with docker_run(
@@ -98,6 +101,7 @@ def instance_complex():
             'schema_size_metrics': True,
             'table_size_metrics': True,
             'system_table_size_metrics': True,
+            'table_row_stats_metrics': True,
         },
         'tags': tags.METRIC_TAGS,
         'queries': [
@@ -128,12 +132,12 @@ def instance_additional_status():
         'disable_generic_tags': 'true',
         'additional_status': [
             {
-                'name': "innodb_rows_read",
+                'name': "Innodb_rows_read",
                 'metric_name': "mysql.innodb.rows_read",
                 'type': "rate",
             },
             {
-                'name': "row_lock_time",
+                'name': "Innodb_row_lock_time",
                 'metric_name': "mysql.innodb.row_lock_time",
                 'type': "rate",
             },
@@ -271,6 +275,7 @@ def version_metadata():
         'version.raw': mock.ANY,
         'version.build': mock.ANY,
         'flavor': flavor,
+        'resolved_hostname': 'forced_hostname',
     }
 
 
@@ -399,14 +404,16 @@ def _add_dog_user(conn):
     cur.execute("GRANT PROCESS ON *.* TO 'dog'@'%'")
     cur.execute("GRANT REPLICATION CLIENT ON *.* TO 'dog'@'%'")
     cur.execute("GRANT SELECT ON performance_schema.* TO 'dog'@'%'")
-    if MYSQL_FLAVOR == 'mysql' and MYSQL_VERSION == '8.0':
-        cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 0")
-    elif MYSQL_FLAVOR == 'mariadb' and MYSQL_VERSION == '10.5':
-        cur.execute("GRANT SLAVE MONITOR ON *.* TO 'dog'@'%'")
-        cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 0")
-    else:
+
+    # refactor try older mysql.user table first. if this fails, go to newer ALTER USER
+    try:
         cur.execute("UPDATE mysql.user SET max_user_connections = 0 WHERE user='dog' AND host='%'")
         cur.execute("FLUSH PRIVILEGES")
+    # need to get better exception in order to raise errors in the future
+    except Exception:
+        if MYSQL_FLAVOR == 'mariadb':
+            cur.execute("GRANT SLAVE MONITOR ON *.* TO 'dog'@'%'")
+        cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 0")
 
 
 def _add_bob_user(conn):

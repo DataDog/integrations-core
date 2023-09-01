@@ -1,0 +1,458 @@
+[
+  {
+    "name": "teradata.disk_space.max_perm.total",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 250000000
+  },
+  {
+    "name": "teradata.disk_space.max_spool.total",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 19831497687
+  },
+  {
+    "name": "teradata.disk_space.max_temp.total",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 19831497687
+  },
+  {
+    "name": "teradata.disk_space.curr_perm.total",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 34127872
+  },
+  {
+    "name": "teradata.disk_space.curr_spool.total",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.curr_persist_spool.total",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.curr_temp.total",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.peak_perm.total",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 34127872
+  },
+  {
+    "name": "teradata.disk_space.peak_spool.total",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.peak_persist_spool.total",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.peak_temp.total",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.max_prof_spool.total",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.max_prof_temp.total",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.max_prof_spool.total",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.max_prof_temp.total",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.alloc_perm.total",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 250000000
+  },
+  {
+    "name": "teradata.disk_space.alloc_spool.total",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 19831497687
+  },
+  {
+    "name": "teradata.disk_space.alloc_temp.total",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 19831497687
+  },
+  {
+    "name": "teradata.disk_space.perm_skew.total",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.spool_skew.total",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.temp_skew.total",
+    "type": 0,
+    "tags": [
+      "td_amp:0",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.max_perm.total",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 250000000
+  },
+  {
+    "name": "teradata.disk_space.max_spool.total",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 19831497687
+  },
+  {
+    "name": "teradata.disk_space.max_temp.total",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 19831497687
+  },
+  {
+    "name": "teradata.disk_space.curr_perm.total",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 34127872
+  },
+  {
+    "name": "teradata.disk_space.curr_spool.total",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.curr_persist_spool.total",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.curr_temp.total",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.peak_perm.total",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 34127872
+  },
+  {
+    "name": "teradata.disk_space.peak_spool.total",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.peak_persist_spool.total",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.peak_temp.total",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.alloc_perm.total",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 250000000
+  },
+  {
+    "name": "teradata.disk_space.alloc_spool.total",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 19831497687
+  },
+  {
+    "name": "teradata.disk_space.alloc_temp.total",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 19831497687
+  },
+  {
+    "name": "teradata.disk_space.perm_skew.total",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.spool_skew.total",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  },
+  {
+    "name": "teradata.disk_space.temp_skew.total",
+    "type": 0,
+    "tags": [
+      "td_amp:1",
+      "td_account:$M00ADMR",
+      "td_database:AdventureWorksDW",
+      "teradata_server:tdserver",
+      "teradata_port:1025"
+    ],
+    "value": 0
+  }
+]

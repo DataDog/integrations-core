@@ -87,6 +87,7 @@ class IbmAceCheck(AgentCheck, ConfigMixin):
             subscription.disconnect()
 
         if self._queue_manager is not None:
+            self.log.debug('Closing queue manager connection.')
             self._queue_manager.disconnect()
             self._queue_manager = None
 

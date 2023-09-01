@@ -1,453 +1,816 @@
 {
-    "title": "Vertica Overview",
+    "author_name": "Datadog",
     "description": "## Vertica Dashboard\n\nThis is an example Vertica dashboard demonstrating the metrics that the integration collects.",
-    "widgets": [
-      {
-        "id": 0,
-        "definition": {
-          "type": "image",
-          "url": "/static/images/logos/vertica_large.svg",
-          "sizing": "fit"
-        },
-        "layout": {
-          "x": 0,
-          "y": 0,
-          "width": 21,
-          "height": 10
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "service",
+            "prefix": "service"
         }
-      },
-      {
-        "id": 1,
-        "definition": {
-          "type": "query_value",
-          "requests": [
-            {
-              "q": "(max:vertica.node.total{*}-max:vertica.node.down{*})/max:vertica.node.total{*}*100",
-              "aggregator": "max",
-              "conditional_formats": [
-                {
-                  "comparator": "<=",
-                  "value": 80,
-                  "palette": "white_on_yellow"
-                },
-                {
-                  "comparator": ">",
-                  "value": 80,
-                  "palette": "white_on_green"
-                },
-                {
-                  "comparator": ">",
-                  "value": 50,
-                  "palette": "white_on_red"
-                }
-              ]
-            }
-          ],
-          "custom_links": [],
-          "title": "Nodes available",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "1m"
-          },
-          "autoscale": true,
-          "custom_unit": "%",
-          "precision": 0
-        },
-        "layout": {
-          "x": 0,
-          "y": 11,
-          "width": 21,
-          "height": 12
-        }
-      },
-      {
-        "id": 2,
-        "definition": {
-          "type": "query_value",
-          "requests": [
-            {
-              "q": "max:vertica.ksafety.current{*}",
-              "aggregator": "avg",
-              "conditional_formats": [
-                {
-                  "comparator": "<",
-                  "value": 1,
-                  "palette": "white_on_red"
-                },
-                {
-                  "comparator": "<",
-                  "value": 2,
-                  "palette": "white_on_yellow"
-                },
-                {
-                  "comparator": ">=",
-                  "value": 3,
-                  "palette": "white_on_green"
-                }
-              ]
-            }
-          ],
-          "custom_links": [],
-          "title": "K-safety: current value",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "1m"
-          },
-          "autoscale": false,
-          "precision": 0
-        },
-        "layout": {
-          "x": 0,
-          "y": 26,
-          "width": 21,
-          "height": 12
-        }
-      },
-      {
-        "id": 3,
-        "definition": {
-          "type": "query_value",
-          "requests": [
-            {
-              "q": "max:vertica.ksafety.intended{*}",
-              "aggregator": "avg"
-            }
-          ],
-          "custom_links": [],
-          "title": "K-safety: intended value",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "10m"
-          },
-          "autoscale": false,
-          "custom_unit": " ",
-          "precision": 0
-        },
-        "layout": {
-          "x": 0,
-          "y": 41,
-          "width": 21,
-          "height": 12
-        }
-      },
-      {
-        "id": 4,
-        "definition": {
-          "type": "note",
-          "content": "Availability",
-          "background_color": "gray",
-          "font_size": "18",
-          "text_align": "center",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "bottom"
-        },
-        "layout": {
-          "x": 22,
-          "y": 0,
-          "width": 45,
-          "height": 10
-        }
-      },
-      {
-        "id": 5,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "max:vertica.node.total{*}",
-              "display_type": "bars",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Nodes in the cluster",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "4h"
-          },
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 22,
-          "y": 11,
-          "width": 45,
-          "height": 12
-        }
-      },
-      {
-        "id": 6,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "max:vertica.node.down{*}",
-              "display_type": "bars",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Nodes down",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "4h"
-          },
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 22,
-          "y": 26,
-          "width": 45,
-          "height": 12
-        }
-      },
-      {
-        "id": 7,
-        "definition": {
-          "type": "hostmap",
-          "requests": {
-            "fill": {
-              "q": "avg:vertica.query.active{role:vertica} by {host}"
-            }
-          },
-          "custom_links": [],
-          "title": "Cluster map: active and inactive nodes",
-          "title_size": "16",
-          "title_align": "left",
-          "no_metric_hosts": true,
-          "no_group_hosts": true,
-          "scope": [
-            "role:vertica"
-          ],
-          "style": {
-            "palette": "green_to_orange",
-            "palette_flip": false
-          }
-        },
-        "layout": {
-          "x": 22,
-          "y": 41,
-          "width": 45,
-          "height": 18
-        }
-      },
-      {
-        "id": 8,
-        "definition": {
-          "type": "note",
-          "content": "Queries",
-          "background_color": "gray",
-          "font_size": "18",
-          "text_align": "center",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "right"
-        },
-        "layout": {
-          "x": 69,
-          "y": 0,
-          "width": 12,
-          "height": 29
-        }
-      },
-      {
-        "id": 9,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:vertica.query.active{*}, avg:vertica.query.total{*}.as_count()",
-              "display_type": "bars",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Active queries and total queries",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "4h"
-          },
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 82,
-          "y": 0,
-          "width": 47,
-          "height": 12
-        }
-      },
-      {
-        "id": 10,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:vertica.query.total{*}.as_count(), avg:vertica.query.total{*}.as_count()",
-              "display_type": "bars",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Rows in tables and projections",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "4h"
-          },
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 82,
-          "y": 15,
-          "width": 47,
-          "height": 12
-        }
-      },
-      {
-        "id": 11,
-        "definition": {
-          "type": "note",
-          "content": "Resources",
-          "background_color": "gray",
-          "font_size": "18",
-          "text_align": "center",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "right"
-        },
-        "layout": {
-          "x": 69,
-          "y": 31,
-          "width": 12,
-          "height": 44
-        }
-      },
-      {
-        "id": 12,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:vertica.storage.utilized{*}, avg:vertica.memory.utilized{*}",
-              "display_type": "line",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Storage and memory used",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "4h"
-          },
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 82,
-          "y": 31,
-          "width": 47,
-          "height": 12
-        }
-      },
-      {
-        "id": 13,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:vertica.node.resource_requests{*}",
-              "display_type": "bars",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Resource requests",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "4h"
-          },
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 82,
-          "y": 46,
-          "width": 47,
-          "height": 12
-        }
-      },
-      {
-        "id": 14,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:vertica.thread.active{*} by {node_name}, avg:vertica.socket.open{*} by {node_name}",
-              "display_type": "bars",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Open sockets and active threads",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "4h"
-          },
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 82,
-          "y": 61,
-          "width": 47,
-          "height": 12
-        }
-      }
     ],
-    "template_variables": [],
-    "layout_type": "free",
-    "is_read_only": true,
-    "notify_list": [],
-    "id": 30299
-  }
+    "title": "Vertica Overview",
+    "widgets": [
+        {
+            "definition": {
+                "banner_img": "/static/images/logos/vertica_large.svg",
+                "layout_type": "ordered",
+                "show_title": false,
+                "template_variables": [],
+                "title": "",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "transparent",
+                            "content": "This is a high-level overview of your Vertica clusters allowing you to identify potential issues at a glance and to track availability and performance from them.\n\n##### [**Datadog Vertica integration docs&nbsp;\u2197**](https://docs.datadoghq.com/integrations/vertica/)",
+                            "font_size": "18",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note"
+                        },
+                        "id": 5529997197380272,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 0
+                        }
+                    }
+                ]
+            },
+            "id": 7159557929654174,
+            "layout": {
+                "height": 5,
+                "width": 7,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "layout_type": "ordered",
+                "show_title": true,
+                "template_variables": [],
+                "title": "Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "custom_links": [],
+                            "custom_unit": "%",
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_yellow",
+                                            "value": 80
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_green",
+                                            "value": 80
+                                        },
+                                        {
+                                            "comparator": "<",
+                                            "palette": "white_on_red",
+                                            "value": 50
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "(query1 - query2) / query1 * 100"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "max",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "max:vertica.node.total{$service}"
+                                        },
+                                        {
+                                            "aggregator": "max",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "max:vertica.node.down{$service}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {
+                                "live_span": "1m"
+                            },
+                            "title": "Node availability",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 1,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_unit": "%",
+                            "precision": 1,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<",
+                                            "palette": "green_on_white",
+                                            "value": 80
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "yellow_on_white",
+                                            "value": 80
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "red_on_white",
+                                            "value": 90
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vertica.storage.utilized{$service}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Disk storage usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 5547623827115822,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 3,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "check": "vertica.node_state",
+                            "group_by": [],
+                            "grouping": "cluster",
+                            "tags": [],
+                            "title": "Nodes by state",
+                            "title_align": "center",
+                            "title_size": "13",
+                            "type": "check_status"
+                        },
+                        "id": 104237480733770,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_unit": "%",
+                            "precision": 1,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<",
+                                            "palette": "green_on_white",
+                                            "value": 80
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "yellow_on_white",
+                                            "value": 80
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "red_on_white",
+                                            "value": 90
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vertica.memory.utilized{$service}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Memory usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 3662926128062564,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 3,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 2502483688681926,
+            "layout": {
+                "height": 5,
+                "width": 5,
+                "x": 7,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "layout_type": "ordered",
+                "show_title": true,
+                "template_variables": [],
+                "title": "Availability",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "autoscale": false,
+                            "custom_links": [],
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<",
+                                            "palette": "white_on_red",
+                                            "value": 1
+                                        },
+                                        {
+                                            "comparator": "<",
+                                            "palette": "white_on_yellow",
+                                            "value": 2
+                                        },
+                                        {
+                                            "comparator": ">=",
+                                            "palette": "white_on_green",
+                                            "value": 2
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "max:vertica.ksafety.current{$service}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {
+                                "live_span": "1m"
+                            },
+                            "title": "K-safety: current value",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 8259176252662810,
+                        "layout": {
+                            "height": 1,
+                            "width": 2,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "K-safety represents the fault tolerance of your cluster. The value K represents the number of times the data is replicated.\n\nIf the number of failed nodes exceeds the K-safety value, some data may become unavailable and make the database unsafe.\n\n[**K-Safety on the official Vertica documentation&nbsp;\u2197**](https://www.vertica.com/docs/12.0.x/HTML/Content/Authoring/ConceptsGuide/Components/K-Safety.htm)",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 8944291631026084,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 2,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": false,
+                            "custom_links": [],
+                            "custom_unit": " ",
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "max:vertica.ksafety.intended{$service}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {
+                                "live_span": "10m"
+                            },
+                            "title": "K-safety: intended value",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 3,
+                        "layout": {
+                            "height": 1,
+                            "width": 2,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "max:vertica.node.down{$service}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "title": "Failed nodes",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "legend_layout": "auto",
+                            "legend_size": "0",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "max:vertica.node.total{$service}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Nodes in the cluster",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 4
+                        }
+                    }
+                ]
+            },
+            "id": 1701795269515262,
+            "layout": {
+                "height": 7,
+                "width": 6,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "layout_type": "ordered",
+                "show_title": true,
+                "template_variables": [],
+                "title": "Queries",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "round(query1)",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vertica.query.active{$service} by {node_name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Node Activity",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 3591350008153104,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "This shows the busiest nodes in your cluster according to the number of active queries.",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 8259581271014132,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 3,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vertica.query.active{$service}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:vertica.query.total{$service}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "title": "Active queries and total queries",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 9,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "legend_layout": "auto",
+                            "legend_size": "0",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vertica.query.total{$service}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "title": "Rows in tables and projections",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 10,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 4
+                        }
+                    }
+                ]
+            },
+            "id": 7369121657936142,
+            "layout": {
+                "height": 7,
+                "width": 6,
+                "x": 6,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "layout_type": "ordered",
+                "show_title": true,
+                "template_variables": [],
+                "title": "Resources",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "legend_layout": "auto",
+                            "legend_size": "0",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vertica.thread.active{$service} by {node_name}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:vertica.socket.open{$service} by {node_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Open sockets and active threads",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 14,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "legend_layout": "auto",
+                            "legend_size": "0",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vertica.storage.utilized{$service}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:vertica.memory.utilized{$service}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "title": "Storage and memory used",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 12,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "legend_layout": "auto",
+                            "legend_size": "0",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vertica.node.resource_requests{$service}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "title": "Resource requests",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 13,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 4
+                        }
+                    }
+                ]
+            },
+            "id": 8233699102311070,
+            "layout": {
+                "height": 7,
+                "is_column_break": true,
+                "width": 6,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "columns": [
+                    "host",
+                    "service"
+                ],
+                "indexes": [],
+                "message_display": "expanded-md",
+                "query": "source:vertica $service",
+                "show_date_column": true,
+                "show_message_column": true,
+                "sort": {
+                    "column": "time",
+                    "order": "desc"
+                },
+                "title": "All Logs",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "log_stream"
+            },
+            "id": 4301198688298808,
+            "layout": {
+                "height": 7,
+                "width": 6,
+                "x": 6,
+                "y": 0
+            }
+        }
+    ]
+}

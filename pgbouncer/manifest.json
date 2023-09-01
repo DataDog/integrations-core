@@ -1,35 +1,51 @@
 {
-  "categories": [
-    "data store",
-    "log collection",
-    "autodiscovery"
-  ],
-  "creates_events": false,
-  "display_name": "PGBouncer",
-  "guid": "51386802-4502-4991-b592-27eff1ca111c",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "pgbouncer.",
-  "metric_to_check": "pgbouncer.pools.sv_idle",
-  "name": "pgbouncer",
-  "process_signatures": [
-    "pgbouncer"
-  ],
-  "public_title": "Datadog-PGBouncer Integration",
-  "short_description": "Track connection pool metrics and monitor traffic to and from your application.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os"
-  ],
-  "type": "check",
-  "integration_id": "pgbouncer",
+  "manifest_version": "2.0.0",
+  "app_uuid": "8aabdf7d-2d07-4d77-a76e-0ade64d8e70f",
+  "app_id": "pgbouncer",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track connection pool metrics and monitor traffic to and from your application.",
+    "title": "PGBouncer",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Category::Data Store",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "PGBouncer",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "pgbouncer.",
+        "check": "pgbouncer.pools.sv_idle",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "pgbouncer"
+      ]
     },
-    "monitors": {},
     "dashboards": {
       "pgbouncer": "assets/dashboards/pgbouncer_dashboard.json"
     },
@@ -39,10 +55,8 @@
       "user_overview": "assets/saved_views/user_overview.json",
       "pgbouncer_processes": "assets/saved_views/pgbouncer_processes.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "pgbouncer"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

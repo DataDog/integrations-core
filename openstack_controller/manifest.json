@@ -1,39 +1,54 @@
 {
-  "display_name": "Openstack_controller",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "openstack_controller",
-  "metric_prefix": "openstack.",
-  "metric_to_check": "openstack.controller",
-  "creates_events": false,
-  "short_description": "Track hypervisor and VM-level resource usage, plus Neutron metrics.",
-  "guid": "49979592-9096-460a-b086-f173f26c6626",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "OpenStack Controller",
-  "categories": [
-    "cloud",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "openstack-controller",
+  "manifest_version": "2.0.0",
+  "app_uuid": "f5c2cc69-1efc-40b2-8dcd-61e1215b237d",
+  "app_id": "openstack-controller",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track hypervisor and VM-level resource usage, plus Neutron metrics.",
+    "title": "OpenStack Controller",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Cloud",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Openstack_controller",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "openstack.",
+        "check": "openstack.controller",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "OpenStack Controller Overview": "assets/dashboards/openstack-controller.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "openstack"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

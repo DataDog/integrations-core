@@ -26,11 +26,30 @@ CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));
 INSERT INTO datadog_test.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
 CREATE USER bob FOR LOGIN bob;
 CREATE USER fred FOR LOGIN fred;
+CREATE INDEX thingsindex ON datadog_test.dbo.ϑings (name);
 GO
 
 EXEC sp_addrolemember 'db_datareader', 'bob'
 EXEC sp_addrolemember 'db_datareader', 'fred'
 EXEC sp_addrolemember 'db_datawriter', 'bob'
+GO
+
+CREATE PROCEDURE bobProc AS
+BEGIN
+    SELECT * FROM ϑings;
+END;
+GO
+
+CREATE PROCEDURE bobProcParams @P1 INT = NULL, @P2 nvarchar(8) = NULL AS
+BEGIN
+    SELECT * FROM ϑings WHERE id = @P1;
+    SELECT id FROM ϑings WHERE name = @P2;
+END;
+GO
+
+GRANT EXECUTE on bobProcParams to bob;
+GRANT EXECUTE on bobProc to bob;
+GRANT EXECUTE on bobProc to fred;
 GO
 
 -- create an offline database to have an unavailable database to test with
@@ -80,4 +99,24 @@ BEGIN
 END;
 GO
 GRANT EXECUTE on exampleProcWithoutNocount to datadog;
+GO
+
+CREATE PROCEDURE encryptedProc WITH ENCRYPTION AS
+BEGIN
+    select count(*) from sys.databases;
+END;
+GO
+GRANT EXECUTE on encryptedProc to bob;
+GO
+
+-- create test procedure with multiple queries
+CREATE PROCEDURE multiQueryProc AS
+BEGIN
+    declare @total int = 0;
+    select @total = @total + count(*) from sys.databases where name like '%_';
+    select @total = @total + count(*) from sys.sysobjects where type = 'U';
+    select @total;
+END;
+GO
+GRANT EXECUTE on multiQueryProc to bob;
 GO

@@ -4,14 +4,11 @@
 import time
 from datetime import datetime, timedelta
 
-import pytest
 from dateutil.tz import gettz
 
 from datadog_checks.base.utils.time import UTC
 
 from .common import create_query_manager, mock_executor
-
-pytestmark = pytest.mark.db
 
 
 class TestColumnTransformers:
@@ -77,6 +74,39 @@ class TestColumnTransformers:
             9,
             metric_type=aggregator.GAUGE,
             tags=['test:foo', 'test:bar', 'test:tag3', 'foo_tag:tagE', 'foo_tag:tagF'],
+        )
+        aggregator.assert_all_metrics_covered()
+
+    def test_tag_not_null(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [
+                    {'name': 'test', 'type': 'tag'},
+                    {'name': 'foo_tag', 'type': 'tag_not_null'},
+                    {'name': 'test.foo', 'type': 'gauge'},
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['tag2', 'tagA', 7], ['tag3', None, 9]]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        aggregator.assert_metric(
+            'test.foo',
+            7,
+            metric_type=aggregator.GAUGE,
+            tags=['test:foo', 'test:bar', 'test:tag2', 'foo_tag:tagA'],
+        )
+
+        aggregator.assert_metric(
+            'test.foo',
+            9,
+            metric_type=aggregator.GAUGE,
+            tags=['test:foo', 'test:bar', 'test:tag3'],
         )
         aggregator.assert_all_metrics_covered()
 
@@ -296,6 +326,31 @@ class TestColumnTransformers:
         query_manager.execute()
 
         aggregator.assert_service_check('test.foo', 3, message='baz', tags=['test:foo', 'test:bar'])
+        aggregator.assert_all_metrics_covered()
+
+    def test_service_check_unknown_with_message_from_source(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [
+                    {'name': 'message_source', 'type': 'source'},
+                    {
+                        'name': 'test.foo',
+                        'type': 'service_check',
+                        'status_map': {'known': 'ok'},
+                        'message': 'failed due to {message_source}',
+                    },
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['crash', 'unknown']]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        aggregator.assert_service_check('test.foo', 3, message='failed due to crash', tags=['test:foo', 'test:bar'])
         aggregator.assert_all_metrics_covered()
 
     def test_time_elapsed_native(self, aggregator):

@@ -4,7 +4,7 @@
 import os
 import re
 import time
-from typing import Optional
+from typing import List, Optional
 
 import requests
 
@@ -51,6 +51,14 @@ def get_tags(repo, config):
 
     response.raise_for_status()
     return response.json()
+
+
+def get_pr_approvers(repo: str, pr_id: str, config: dict) -> List[str]:
+    response = requests.get(
+        f'https://api.github.com/repos/DataDog/{repo}/pulls/{pr_id}/reviews', auth=get_auth_info(config)
+    )
+    response.raise_for_status()
+    return [review['user']['login'] for review in response.json() if review['state'] == "APPROVED"]
 
 
 def get_pr_labels(pr_payload):

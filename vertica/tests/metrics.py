@@ -1,7 +1,9 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-ALL_METRICS = [
+from .common import VERTICA_MAJOR_VERSION
+
+ALL_METRICS = {
     'vertica.connection.active',
     'vertica.connection.total',
     'vertica.delete_vectors',
@@ -21,6 +23,7 @@ ALL_METRICS = [
     'vertica.license.usable',
     'vertica.license.used',
     'vertica.license.utilized',
+    'vertica.ros.containers',
     'vertica.memory.swap.total',
     'vertica.memory.swap.usable',
     'vertica.memory.swap.used',
@@ -37,6 +40,7 @@ ALL_METRICS = [
     'vertica.node.disk.used.wos',
     'vertica.node.down',
     'vertica.node.resource_requests',
+    'vertica.node.ros.containers',
     'vertica.node.row.ros',
     'vertica.node.row.total',
     'vertica.node.row.wos',
@@ -76,9 +80,31 @@ ALL_METRICS = [
     'vertica.table.disk.used',
     'vertica.table.disk.used.ros',
     'vertica.table.disk.used.wos',
+    'vertica.table.ros.containers',
     'vertica.table.row.ros',
     'vertica.table.row.total',
     'vertica.table.row.wos',
     'vertica.thread.active',
     'vertica.thread.max',
-]
+}
+
+if VERTICA_MAJOR_VERSION >= 11:
+    # Drop metrics not available in v11+
+    ALL_METRICS -= {
+        'vertica.node.disk.used.ros',
+        'vertica.node.disk.used.wos',
+        'vertica.node.row.ros',
+        'vertica.node.row.wos',
+        'vertica.projection.disk.used.ros',
+        'vertica.projection.disk.used.wos',
+        'vertica.projection.row.ros',
+        'vertica.projection.row.wos',
+        'vertica.table.disk.used.ros',
+        'vertica.table.disk.used.wos',
+        'vertica.table.row.ros',
+        'vertica.table.row.wos',
+        'vertica.disk.used.ros',
+        'vertica.disk.used.wos',
+        'vertica.row.ros',
+        'vertica.row.wos',
+    }

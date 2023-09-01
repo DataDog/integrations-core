@@ -5,8 +5,6 @@ import pytest
 
 from .common import create_query_manager, mock_executor
 
-pytestmark = pytest.mark.db
-
 
 class TestQueryResultIteration:
     def test_executor_empty_result(self):

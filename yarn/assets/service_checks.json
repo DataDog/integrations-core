@@ -12,5 +12,21 @@
         ],
         "name": "Can Connect",
         "description": "Returns `CRITICAL` if the Agent cannot connect to the ResourceManager URI to collect metrics, otherwise `OK`."
+    },
+    {
+        "agent_version": "7.16.0",
+        "integration": "Yarn",
+        "groups": [
+            "host",
+            "state"
+        ],
+        "check": "yarn.application.status",
+        "statuses": [
+            "ok",
+            "unknown",
+            "critical"
+        ],
+        "name": "Yarn Application Status",
+        "description": "By default, returns `OK` if the Yarn application state is `NEW`, `NEW_SAVING`, `SUBMITTED`, `ACCEPTED`, `RUNNING`, or `FINISHED`; `UNKNOWN` if the application state is `ALL`; and `CRITICAL` if the Yarn application state is `FAILED` or `KILLED`."
     }
 ]

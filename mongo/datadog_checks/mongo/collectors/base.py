@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 import re
 
 from six import PY3, iteritems
@@ -107,6 +111,17 @@ class MongoCollector(object):
                 if isinstance(metrics_to_collect[metric_name], tuple)
                 else metric_name
             )
+
+            # This is because https://datadoghq.atlassian.net/browse/AGENT-9001
+            # Delete this code when the metrics are definitely deprecated
+            if metric_name_alias in (
+                'opLatencies.reads.latency',
+                'opLatencies.writes.latency',
+                'opLatencies.commands.latency',
+            ):
+                deprecated_metric_name_alias = self._normalize(metric_name_alias, AgentCheck.rate, prefix)
+                AgentCheck.rate(self.check, deprecated_metric_name_alias, value, tags=tags)
+
             metric_name_alias = self._normalize(metric_name_alias, submit_method, prefix)
             submit_method(self.check, metric_name_alias, value, tags=tags)
             if metric_name_alias.endswith("countps"):

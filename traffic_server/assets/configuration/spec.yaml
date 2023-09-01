@@ -20,9 +20,9 @@ files:
           include:
               - traffic_server.node.*
               - traffic_server.process.http.code.*
-              - traffic_server.process.http.*current
-              - traffic_server.process.http.*_requests
-              - traffic_server.process.http.*_connections
+              - traffic_server.process.http(s|2)?.*current
+              - traffic_server.process.http(s|2)?.*_requests
+              - traffic_server.process.http(s|2)?.*_connections
               - traffic_server.process.http.transaction_.*
               - traffic_server.process.hostdb.*
               - traffic_server.process.dns.*

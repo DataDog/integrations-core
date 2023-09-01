@@ -45,3 +45,82 @@ QUERY_HISTORY = [
         Decimal('0.000000'),
     )
 ]
+ORGANIZATION_USAGE_IN_CURRENCY_DAILY = [('test', 'Standard', 'Compute', 'USD', Decimal('0.4'), Decimal('0.7'))]
+ORGANIZATION_WAREHOUSE_METERING_HISTORY = [
+    (
+        'test',
+        'account_name',
+        Decimal('300'),
+        Decimal('3.4'),
+        Decimal('902.49003'),
+        Decimal('4.9227'),
+        Decimal('212.43'),
+        Decimal('34.7'),
+    )
+]
+
+ORGANIZATION_METERING_DAILY_HISTORY = [
+    (
+        'account_name',
+        'Standard',
+        Decimal('300'),
+        Decimal('3.4'),
+        Decimal('902.49003'),
+        Decimal('4.9227'),
+        Decimal('212.43'),
+        Decimal('34.7'),
+        Decimal('342.8321'),
+        Decimal('1.7'),
+        Decimal('21.02'),
+        Decimal('2.9'),
+    ),
+]
+
+ORGANIZATION_CONTRACT_ITEMS = [
+    (
+        Decimal('4'),
+        'Free Usage',
+        'USD',
+        Decimal('23'),
+    ),
+]
+
+ORGANIZATION_STORAGE_DAILY_HISTORY = [
+    (
+        'account_name',
+        Decimal('4510'),
+        Decimal('349'),
+    ),
+]
+
+ORGANIZATION_REMAINING_BALANCE_DAILY = [
+    (
+        Decimal('4'),
+        'USD',
+        Decimal('23410'),
+        Decimal('814349'),
+        Decimal('-35435'),
+        Decimal('455435'),
+    ),
+]
+
+ORGANIZATION_RATE_SHEET_DAILY = [
+    (
+        Decimal('3'),
+        'test_account',
+        'usage',
+        'service',
+        'USD',
+        Decimal('312'),
+    ),
+]
+
+ORGANIZATION_DATA_TRANSFER_HISTORY = [
+    (
+        'test_account',
+        'AWS',
+        'GCP',
+        'COPY',
+        Decimal('13.56'),
+    ),
+]

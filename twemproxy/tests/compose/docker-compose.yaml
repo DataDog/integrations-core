@@ -1,4 +1,4 @@
-version: "2"
+version: "3.8"
 services:
   redis1:
     image: redis
@@ -32,16 +32,12 @@ services:
       - redis2
 
   twemproxy:
-    # Version 0.3.0
-    build:
-      context: .
-      args:
-        TWEMPROXY_VERSION: ${TWEMPROXY_VERSION}
+    image: malexer/twemproxy:${TWEMPROXY_VERSION}
     ports:
-      - 6100:6100
-      - 6222:6222
+      - 6222:22222
     environment:
       - ETCD_HOST=etcd0:4001
+      - REDIS_SERVERS=redis1:6379:1,redis2:6379:1
     depends_on:
       - etcd0
     volumes:

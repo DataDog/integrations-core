@@ -1,39 +1,53 @@
 {
-  "display_name": "Sidekiq",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "sidekiq",
-  "metric_prefix": "sidekiq.",
-  "metric_to_check": "sidekiq.jobs.count",
-  "creates_events": false,
-  "short_description": "Track metrics about your Sidekiq jobs, queues, and batches.",
-  "guid": "b4bc604c-73a5-4bd8-8dfe-3f80fc19976b",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-Sidekiq Integration",
-  "categories": [
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "sidekiq",
+  "manifest_version": "2.0.0",
+  "app_uuid": "c42a2d39-16db-4256-a6fb-287602ec4661",
+  "app_id": "sidekiq",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track metrics about your Sidekiq jobs, queues, and batches.",
+    "title": "Sidekiq",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Sidekiq",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "sidekiq.",
+        "check": "sidekiq.jobs.count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "Sidekiq Overview": "assets/dashboards/overview.json"
     },
-    "saved_views": {},
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "sidekiq"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

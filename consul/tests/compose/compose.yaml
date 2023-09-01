@@ -9,7 +9,7 @@ services:
       - "${CONSUL_PORT}:8500"
     networks:
       - network1
-    command: agent -dev -bootstrap -bind=0.0.0.0 -client=0.0.0.0
+    command: agent -dev -bootstrap -bind=0.0.0.0 -client=0.0.0.0 -node=node-consul-leader
 
   consul-follower-1:
     image: "consul:${CONSUL_VERSION}"
@@ -19,7 +19,7 @@ services:
       - network1
     depends_on:
       - "consul-leader"
-    command: ["/bin/sh", "-c", "sleep 5 && consul agent -dev -join=consul-leader -bind=0.0.0.0"]
+    command: ["/bin/sh", "-c", "sleep 5 && consul agent -dev -join=consul-leader -bind=0.0.0.0 -node=node-consul-follower-1"]
 
   consul-follower-2:
     image: "consul:${CONSUL_VERSION}"
@@ -29,7 +29,7 @@ services:
       - ${CONSUL_CONFIG_PATH}:/consul/config/server.json:ro
     depends_on:
       - "consul-follower-1"
-    command: ["/bin/sh", "-c", "sleep 5 && consul agent -dev -join=consul-leader -bind=0.0.0.0"]
+    command: ["/bin/sh", "-c", "sleep 5 && consul agent -dev -join=consul-leader -bind=0.0.0.0 -node=node-consul-follower-2"]
 
 
 networks:

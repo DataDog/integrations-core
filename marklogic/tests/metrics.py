@@ -66,14 +66,18 @@ FOREST_STATUS_TREE_CACHE_METRICS = [
     'marklogic.forests.compressed-tree-cache-ratio',
 ]
 
-HOST_STATUS_METRICS_SPECIFIC = [
+HOST_STATUS_METRICS_SPECIFIC_OPTIONAL = [
     # TODO: needs preprocessing to be available
-    # 'marklogic.hosts.memory-process-huge-pages-size',
-    # 'marklogic.hosts.memory-process-rss',
-    # 'marklogic.hosts.memory-system-free',
-    # 'marklogic.hosts.memory-system-total',
-    # 'marklogic.hosts.total-cpu-stat-system',
-    # 'marklogic.hosts.total-cpu-stat-user',
+    'marklogic.hosts.memory-process-huge-pages-size',
+    'marklogic.hosts.memory-process-rss',
+    'marklogic.hosts.memory-system-free',
+    'marklogic.hosts.memory-system-total',
+    'marklogic.hosts.total-cpu-stat-system',
+    'marklogic.hosts.total-cpu-stat-user',
+]
+
+
+HOST_STATUS_METRICS_SPECIFIC = [
     'marklogic.hosts.memory-process-swap-rate',
     'marklogic.hosts.total-hosts',
     'marklogic.hosts.total-hosts-offline',
@@ -275,3 +279,5 @@ GLOBAL_METRICS = (
     + SERVER_STATUS_METRICS
     + TRANSACTION_STATUS_METRICS
 )
+
+OPTIONAL_METRICS = HOST_STATUS_METRICS_SPECIFIC_OPTIONAL

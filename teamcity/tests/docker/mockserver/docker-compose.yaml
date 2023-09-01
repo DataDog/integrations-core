@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  teamcity:
+    image: mockserver/mockserver:latest
+    container_name: teamcity
+    command: -serverPort 8111
+    ports:
+      - 8111:8111
+    environment:
+      MOCKSERVER_INITIALIZATION_JSON_PATH: /config/initializerJson.json
+      MOCKSERVER_WATCH_INITIALIZATION_JSON: true
+    volumes:
+      - ./config:/config

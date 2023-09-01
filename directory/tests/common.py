@@ -13,7 +13,7 @@ FILE_METRICS = [
     "system.disk.directory.file.created_sec_ago",
 ]
 
-DIR_METRICS = ["system.disk.directory.files", "system.disk.directory.bytes"]
+DIR_METRICS = ["system.disk.directory.files", "system.disk.directory.folders", "system.disk.directory.bytes"]
 
 EXPECTED_METRICS = FILE_METRICS + DIR_METRICS
 

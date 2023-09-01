@@ -84,13 +84,15 @@ instances:
     password: <password>  # Defined in SonarQube's sonar.properties file
 ```
 
-**Note**: Once the integration is configured, have SonarQube scan at least one project so that the metrics to populate in Datadog.
+**Note**: Once the integration is configured, have SonarQube scan at least one project to send metrics to Datadog.
 
 Metrics collected by this integration are tagged with a `component` tag by default. If you wish to change the tag
 name on a per component basis, specify the `tag` property within the component definition. To set it for all projects,
 set the `default_tag` property on the instance config.
 
 **Note**: Projects in SonarQube often contain multiple source control branches. This integration can only collect metrics from the default branch in SonarQube (typically `main`).
+
+#### Search server metrics
 
 SonarQube exposes a search server, which can be monitored using an additional instance of this integration and a configuration of the JMX metrics. To learn how to customize the metrics to collect, see the [JMX Checks documentation][6] for more detailed instructions. For an example, use the config below and default JMX metric config in [sonarqube.d/metrics.yaml][3].
 
@@ -205,6 +207,54 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
+#### Components Discovery
+
+You can configure how your components are discovered with the `components_discovery` parameter.
+
+`limit`
+: Maximum number of items to be autodiscovered.  
+**Default value**: `10`
+
+`include`
+: Mapping of regular expression keys and component config values to autodiscover.  
+**Default value**: empty map
+
+`exclude`
+: List of regular expressions with the patterns of components to exclude from autodiscovery.  
+**Default value**: empty list
+
+**Examples**:
+
+Include a maximum of `5` components with names starting with `my_project`:
+
+```yaml
+components_discovery:
+  limit: 5
+  include:
+    'my_project*':
+```
+
+Include a maximum of `20` components and exclude those beginning with `temp`:
+
+```yaml
+components_discovery:
+  limit: 20
+  include:
+    '.*':
+  exclude:
+    - 'temp*'
+```
+
+Include all components with names starting with `issues`, apply the `issues_project` tag, and only collect metrics belonging to the category `issues`. As `limit` is not defined, the number of components discovered is limited to the default value `10`:
+```yaml
+components_discovery:
+  include:
+    'issues*':
+       tag: issues_project
+       include:
+         - issues.
+```
+
 ### Validation
 
 [Run the Agent's status subcommand][13] and look for `sonarqube` under the **JMXFetch** section:
@@ -273,7 +323,7 @@ Need help? Contact [Datadog support][8].
 
 
 [1]: https://www.sonarqube.org
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/sonarqube/datadog_checks/sonarqube/data/metrics.yaml
 [4]: https://docs.sonarqube.org/latest/instance-administration/monitoring/
 [5]: https://docs.sonarqube.org/latest/instance-administration/monitoring/#header-4

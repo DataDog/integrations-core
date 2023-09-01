@@ -1,7 +1,22 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import Any, Dict, List, Union
+
+# ===================================== DEPRECATION NOTICE =====================================
+# This module is pending deprecation. For authors and contributors: additional queries should be
+# declared using the QueryExecutor and QueryManager APIs.
+
+# Reason for deprecation:
+# Many of the metrics in this module filter on relations and require customers to explicitly
+# connect to every database on their instance via configuration. This is untenable for customers
+# with many databases and a maintenance pain for most; it is also unnecessary for views which
+# can retrieve all data from all databases when connected to the default database
+# (e.g. pg_locks). So to improve the customer experience and usability of configuration APIs,
+# future implementations of these metrics should support autodiscovery, eliminating the need
+# to connect to a specific database.
+# =============================================================================================
+
+from typing import Any, Dict, List, Union  # noqa: F401
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
@@ -35,7 +50,7 @@ SELECT mode,
   LEFT JOIN pg_namespace pn ON (pn.oid = pc.relnamespace)
  WHERE {relations}
    AND l.mode IS NOT NULL
-   AND pc.relname NOT LIKE 'pg_%%'
+   AND pc.relname NOT LIKE 'pg^_%%' ESCAPE '^'
  GROUP BY pd.datname, pc.relname, pn.nspname, locktype, mode""",
     'relation': True,
 }
@@ -78,6 +93,7 @@ IDX_METRICS = {
         'idx_scan': ('postgresql.index_scans', AgentCheck.rate),
         'idx_tup_read': ('postgresql.index_rows_read', AgentCheck.rate),
         'idx_tup_fetch': ('postgresql.index_rows_fetched', AgentCheck.rate),
+        'pg_relation_size(indexrelid) as index_size': ('postgresql.individual_index_size', AgentCheck.gauge),
     },
     'query': """
 SELECT relname,
@@ -92,26 +108,65 @@ SELECT relname,
 
 # The catalog pg_class catalogs tables and most everything else that has columns or is otherwise similar to a table.
 # For this integration we are restricting the query to ordinary tables.
-SIZE_METRICS = {
-    'descriptors': [('nspname', 'schema'), ('relname', 'table')],
-    'metrics': {
-        'pg_table_size(C.oid) as table_size': ('postgresql.table_size', AgentCheck.gauge),
-        'pg_indexes_size(C.oid) as index_size': ('postgresql.index_size', AgentCheck.gauge),
-        'pg_total_relation_size(C.oid) as total_size': ('postgresql.total_size', AgentCheck.gauge),
-    },
-    'relation': True,
+#
+# Sizes: Calling pg_relation_size, pg_table_size, pg_indexes_size or pg_total_relation_size
+# can be expensive as the relation needs to be locked and stat syscalls are made behind the hood.
+#
+# We want to limit those calls as much as possible at the cost of precision.
+# We also want to get toast size separated from the main table size.
+# We can't use pg_total_relation_size which includes both toast, index and table size.
+# Same for pg_table_size which includes both toast, table size.
+#
+# We will mainly rely on pg_relation_size which only get the size of the main fork.
+# To keep postgresql.table_size's old behaviour which was based on pg_table_size, we will
+# approximate table_size to (relation_size + toast_size). This will ignore FSM and VM size
+# but their sizes are dwarfed by the relation's size and it's an acceptable trade off
+# to ignore them to lower the amount of stat calls.
+#
+# Previous version filtered on nspname !~ '^pg_toast'. Since pg_toast namespace only
+# contains index and toast table, the filter was redundant with relkind = 'r'
+QUERY_PG_CLASS = {
+    'name': 'pg_class',
     'query': """
-SELECT
-  N.nspname,
-  relname,
-  {metrics_columns}
-FROM pg_class C
-LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
-WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND
-  nspname !~ '^pg_toast' AND
-  relkind = 'r' AND
-  {relations}""",
+SELECT current_database(),
+       s.schemaname, s.table, s.partition_of,
+       s.relpages, s.reltuples, s.relallvisible,
+       s.relation_size + s.toast_size,
+       s.relation_size,
+       s.index_size,
+       s.toast_size,
+       s.relation_size + s.index_size + s.toast_size
+FROM
+    (SELECT
+      N.nspname as schemaname,
+      relname as table,
+      I.inhparent::regclass AS partition_of,
+      C.relpages, C.reltuples, C.relallvisible,
+      pg_relation_size(C.oid) as relation_size,
+      CASE WHEN C.relhasindex THEN pg_indexes_size(C.oid) ELSE 0 END as index_size,
+      CASE WHEN C.reltoastrelid > 0 THEN pg_relation_size(C.reltoastrelid) ELSE 0 END as toast_size
+    FROM pg_class C
+    LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
+    LEFT JOIN pg_inherits I ON (I.inhrelid = C.oid)
+    WHERE NOT (nspname = ANY('{{pg_catalog,information_schema}}')) AND
+      relkind = 'r' AND
+      {relations} {limits}) as s""",
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'schema', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'partition_of', 'type': 'tag_not_null'},
+        {'name': 'postgresql.relation.pages', 'type': 'gauge'},
+        {'name': 'postgresql.relation.tuples', 'type': 'gauge'},
+        {'name': 'postgresql.relation.all_visible', 'type': 'gauge'},
+        {'name': 'postgresql.table_size', 'type': 'gauge'},
+        {'name': 'postgresql.relation_size', 'type': 'gauge'},
+        {'name': 'postgresql.index_size', 'type': 'gauge'},
+        {'name': 'postgresql.toast_size', 'type': 'gauge'},
+        {'name': 'postgresql.total_size', 'type': 'gauge'},
+    ],
 }
+
 
 # The pg_statio_all_tables view will contain one row for each table in the current database,
 # showing statistics about I/O on that specific table. The pg_statio_user_tables views contain the same information,
@@ -243,16 +298,18 @@ INDEX_BLOAT = {
     'relation': True,
 }
 
-RELATION_METRICS = [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
+RELATION_METRICS = [LOCK_METRICS, REL_METRICS, IDX_METRICS, STATIO_METRICS]
+DYNAMIC_RELATION_QUERIES = [QUERY_PG_CLASS]
 
 
 class RelationsManager(object):
     """Builds queries to collect metrics about relations"""
 
-    def __init__(self, yamlconfig):
-        # type: (List[Union[str, Dict]]) -> None
+    def __init__(self, yamlconfig, max_relations):
+        # type: (List[Union[str, Dict]], int) -> None
         self.log = get_check_logger()
         self.config = self._build_relations_config(yamlconfig)
+        self.max_relations = max_relations
         self.has_relations = len(self.config) > 0
 
     def filter_relation_query(self, query, schema_field):
@@ -278,9 +335,12 @@ class RelationsManager(object):
             relation_filter.append(')')
             relations_filter.append(' '.join(relation_filter))
 
-        relations_filter = ' OR '.join(relations_filter)
-        self.log.debug("Running query: %s with relations matching: %s", str(query), relations_filter)
-        return query.format(relations=relations_filter)
+        relations_filter = '(' + ' OR '.join(relations_filter) + ')'
+        limits_filter = 'LIMIT {}'.format(self.max_relations)
+        self.log.debug(
+            "Running query: %s with relations matching: %s, limits %s", str(query), relations_filter, self.max_relations
+        )
+        return query.format(relations=relations_filter, limits=limits_filter)
 
     @staticmethod
     def validate_relations_config(yamlconfig):

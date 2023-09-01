@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import pytest
-
 from datadog_checks.dev.testing import requires_windows
 
 try:
@@ -13,7 +11,6 @@ except ImportError:
 
 
 @requires_windows
-@pytest.mark.unit
 def test_get_running_sampler_does_not_leak():
     check = WinWMICheck('wmi_base_check', {}, [{}])
     with check.get_running_wmi_sampler(properties=[], filters=[]) as sampler:

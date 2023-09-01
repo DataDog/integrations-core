@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2021-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 import certifi
 
 from datadog_checks.base import ConfigurationError, is_affirmative
@@ -12,21 +16,23 @@ class MongoConfig(object):
 
         # x.509 authentication
 
-        cacert_cert_dir = instance.get('ssl_ca_certs')
+        cacert_cert_dir = instance.get('tls_ca_file')
         if cacert_cert_dir is None and (
-            is_affirmative(instance.get('options', {}).get("ssl")) or is_affirmative(instance.get('ssl'))
+            is_affirmative(instance.get('options', {}).get("tls")) or is_affirmative(instance.get('tls'))
         ):
             cacert_cert_dir = certifi.where()
 
-        self.ssl_params = exclude_undefined_keys(
+        self.tls_params = exclude_undefined_keys(
             {
-                'ssl': instance.get('ssl', None),
-                'ssl_keyfile': instance.get('ssl_keyfile', None),
-                'ssl_certfile': instance.get('ssl_certfile', None),
-                'ssl_cert_reqs': instance.get('ssl_cert_reqs', None),
-                'ssl_ca_certs': cacert_cert_dir,
+                'tls': instance.get('tls'),
+                'tlsCertificateKeyFile': instance.get('tls_certificate_key_file'),
+                'tlsCAFile': cacert_cert_dir,
+                'tlsAllowInvalidHostnames': instance.get('tls_allow_invalid_hostnames'),
+                'tlsAllowInvalidCertificates': instance.get('tls_allow_invalid_certificates'),
             }
         )
+
+        self.log.debug('tls_params: %s', self.tls_params)
 
         if 'server' in instance:
             self.server = instance['server']
@@ -37,19 +43,26 @@ class MongoConfig(object):
                 self.hosts,
                 _,
                 self.auth_source,
-            ) = parse_mongo_uri(self.server, sanitize_username=bool(self.ssl_params))
+            ) = parse_mongo_uri(self.server, sanitize_username=bool(self.tls_params))
             self.scheme = None
             self.additional_options = {}
             self.hosts = ["%s:%s" % (host[0], host[1]) for host in self.hosts]
         else:
             self.server = None
             self.hosts = instance.get('hosts', [])
+            if type(self.hosts) == str:
+                self.hosts = [self.hosts]
             self.username = instance.get('username')
             self.password = instance.get('password')
-            # Deprecated
             self.scheme = instance.get('connection_scheme', 'mongodb')
             self.db_name = instance.get('database')
             self.additional_options = instance.get('options', {})
+            if 'replicaSet' in self.additional_options:
+                raise ConfigurationError(
+                    'Setting the `replicaSet` option is not supported. '
+                    'Configure one check instance for each node instead'
+                )
+
             self.auth_source = self.additional_options.get('authSource') or self.db_name or 'admin'
 
         if not self.hosts:
@@ -59,19 +72,18 @@ class MongoConfig(object):
         if self.password and not self.username:
             raise ConfigurationError('`username` must be set when a `password` is specified')
 
-        if self.scheme != 'mongodb':
-            self.log.info("connection_scheme is deprecated and shouldn't be set to a value other than 'mongodb'")
-
         if not self.db_name:
             self.log.info('No MongoDB database found in URI. Defaulting to admin.')
             self.db_name = 'admin'
+
+        self.db_names = instance.get('dbnames', None)
 
         self.timeout = float(instance.get('timeout', DEFAULT_TIMEOUT)) * 1000
         self.additional_metrics = instance.get('additional_metrics', [])
 
         # Authenticate
         self.do_auth = True
-        self.use_x509 = self.ssl_params and not self.password
+        self.use_x509 = self.tls_params and not self.password
         if not self.username:
             self.log.info("Disabling authentication because a username was not provided.")
             self.do_auth = False
@@ -87,18 +99,25 @@ class MongoConfig(object):
         self.metric_tags = self._compute_metric_tags()
 
     def _get_clean_server_name(self):
-        if not self.server:
-            server = build_connection_string(
-                self.hosts,
-                username=self.username,
-                password=self.password,
-                scheme=self.scheme,
-                database=self.db_name,
-                options=self.additional_options,
+        try:
+            if not self.server:
+                server = build_connection_string(
+                    self.hosts,
+                    username=self.username,
+                    password=self.password,
+                    scheme=self.scheme,
+                    database=self.db_name,
+                    options=self.additional_options,
+                )
+            else:
+                server = self.server
+
+            self.log.debug("Parsing mongo uri with server: %s", server)
+            return parse_mongo_uri(server, sanitize_username=bool(self.tls_params))[4]
+        except Exception as e:
+            raise ConfigurationError(
+                "Could not build a mongo uri with the given hosts: %s. Error: %s" % (self.hosts, repr(e))
             )
-        else:
-            server = self.server
-        return parse_mongo_uri(server, sanitize_username=bool(self.ssl_params))[4]
 
     def _compute_service_check_tags(self):
         main_host = self.hosts[0]

@@ -7,9 +7,9 @@ import subprocess
 import sys
 import time
 from datetime import datetime
-from typing import List, NamedTuple, Tuple
+from typing import List, NamedTuple, Tuple  # noqa: F401
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.base.utils.serialization import json
 
@@ -37,12 +37,15 @@ class IbmICheck(AgentCheck, ConfigMixin):
         try:
             self.query_manager.execute()
             check_status = AgentCheck.OK
+            hostname = self._query_manager.hostname
         except AttributeError as e:
             self.warning('Could not set up query manager, skipping check run: %s', e)
-            check_status = None
+            check_status = AgentCheck.CRITICAL
+            hostname = self.config.hostname if self.config else None
         except Exception as e:
             self._delete_connection_subprocess(e)
             check_status = AgentCheck.CRITICAL
+            hostname = self.config.hostname if self.config else None
 
         # At least one query failed, set the service check as failing
         if self._current_errors:
@@ -52,8 +55,8 @@ class IbmICheck(AgentCheck, ConfigMixin):
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 check_status,
-                tags=self.config.tags,
-                hostname=self._query_manager.hostname,
+                tags=self.config.tags if self.config else [],
+                hostname=hostname,
             )
 
     def cancel(self):
@@ -213,22 +216,31 @@ class IbmICheck(AgentCheck, ConfigMixin):
     def set_up_query_manager(self):
         system_info = self.fetch_system_info()
         if system_info:
-            query_list = [
-                queries.get_cpu_usage(self.config.query_timeout),
-                queries.get_jobq_job_status(self.config.job_query_timeout),
-                queries.get_active_job_status(self.config.job_query_timeout),
-                queries.get_job_memory_usage(self.config.job_query_timeout),
-                queries.get_memory_info(self.config.query_timeout),
-                queries.get_job_queue_info(self.config.query_timeout),
-                queries.get_message_queue_info(self.config.system_mq_query_timeout, self.config.severity_threshold),
-            ]
+            query_list = []
+            QUERY_MAP = queries.query_map(self.config)
+            is_7_3_or_higher = system_info.os_version > 7 or (
+                system_info.os_version == 7 and system_info.os_release >= 3
+            )
 
-            if system_info.os_version > 7 or (system_info.os_version == 7 and system_info.os_release >= 3):
-                query_list.append(queries.get_base_disk_usage_73(self.config.query_timeout))
-                query_list.append(queries.get_disk_usage(self.config.query_timeout))
-                query_list.append(queries.get_subsystem_info(self.config.query_timeout))
-            else:
-                query_list.append(queries.get_base_disk_usage_72(self.config.query_timeout))
+            for query in self.config.queries:
+                if query.name == "disk_usage":
+                    # disk_usage works differently on 7.2 vs 7.3
+                    if is_7_3_or_higher:
+                        query_list.append(queries.get_base_disk_usage_73(self.config.query_timeout))
+                        query_list.append(queries.get_disk_usage(self.config.query_timeout))
+                    else:
+                        query_list.append(queries.get_base_disk_usage_72(self.config.query_timeout))
+                elif query.name == "subsystem":
+                    # subsystem is only supported on 7.3
+                    if is_7_3_or_higher:
+                        query_list.append(queries.get_subsystem_info(self.config.query_timeout))
+                    else:
+                        # For backwards compatibility, we don't fail
+                        self.log.info("Skipping 'subsystem' query since target system is older than 7.3")
+                elif query.name not in QUERY_MAP:
+                    raise ConfigurationError("Unknown or unsupported query name: {}".format(query.name))
+                else:
+                    query_list.append(QUERY_MAP[query.name])
 
             hostname = system_info.hostname
             # Override hostname with configuration

@@ -1,7 +1,12 @@
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 import itertools
 import json
 import os
 
+import pymongo.errors
 from bson import Timestamp, json_util
 from mock import MagicMock
 
@@ -45,8 +50,16 @@ class MockedDB(object):
     def __getitem__(self, coll_name):
         return MockedCollection(self._db_name, coll_name)
 
-    def authenticate(self, *_, **__):
-        return True
+    def aggregate(self, pipeline, **kwargs):
+        assert pipeline == [{"$currentOp": {}}], "Unexpected input to mocked DB method"
+
+        if self._db_name != "admin":
+            raise pymongo.errors.OperationFailure(
+                "$currentOp must be run against the 'admin' database with {aggregate: 1}"
+            )
+
+        with open(os.path.join(HERE, "fixtures", "current_op"), 'r') as f:
+            return json.load(f, object_hook=json_util.object_hook)
 
     def command(self, command, *args, **_):
         filename = command

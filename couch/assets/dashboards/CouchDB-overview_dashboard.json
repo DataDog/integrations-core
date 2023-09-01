@@ -1,0 +1,837 @@
+{
+    "author_name": "Datadog",
+    "description": "This dashboard provides an overview of your CouchDB deployment to help you identify performance issues, unexpected traffic changes, and unauthorized login attempts. Further reading on CouchDB monitoring: \n\n- [How to monitor CouchDB with Datadog](https://www.datadoghq.com/blog/monitoring-couchdb-with-datadog/)  \n\n- [Datadog\u2019s CouchDB integration docs](https://docs.datadoghq.com/integrations/couch/). \n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "free",
+    "template_variables": [
+        {
+            "default": "*",
+            "name": "couchdb",
+            "prefix": "host"
+        },
+        {
+            "default": "*",
+            "name": "scope",
+            "prefix": null
+        }
+    ],
+    "title": "CouchDB - Overview",
+    "widgets": [
+        {
+            "definition": {
+                "custom_links": [],
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "area",
+                        "q": "per_second(avg:couchdb.couchdb.httpd.requests{$couchdb,$scope})",
+                        "style": {
+                            "palette": "blue"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
+                "title": "HTTP request rate",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
+            },
+            "id": 0,
+            "layout": {
+                "height": 15,
+                "width": 42,
+                "x": 35,
+                "y": 52
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "precision": 0,
+                "requests": [
+                    {
+                        "aggregator": "max",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "green_on_white",
+                                "value": 20
+                            }
+                        ],
+                        "q": "avg:couchdb.couchdb.auth_cache_hits{$couchdb,$scope}"
+                    }
+                ],
+                "time": {
+                    "live_span": "1h"
+                },
+                "title": "Auth cache hits",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 1,
+            "layout": {
+                "height": 15,
+                "width": 20,
+                "x": 121,
+                "y": 45
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "area",
+                        "q": "per_minute(avg:couchdb.couchdb.httpd_request_methods.GET{$couchdb,$scope}), per_minute(avg:couchdb.couchdb.httpd_request_methods.PUT{$couchdb,$scope}), per_minute(avg:couchdb.couchdb.httpd_request_methods.POST{$couchdb,$scope}), per_minute(avg:couchdb.couchdb.httpd_request_methods.DELETE{$couchdb,$scope})"
+                    }
+                ],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
+                "title": "Number of HTTPD requests by type",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
+            },
+            "id": 2,
+            "layout": {
+                "height": 15,
+                "width": 42,
+                "x": 35,
+                "y": 74
+            }
+        },
+        {
+            "definition": {
+                "check": "couchdb.can_connect",
+                "grouping": "cluster",
+                "tags": [
+                    "*"
+                ],
+                "time": {
+                    "live_span": "10m"
+                },
+                "title": "Service status",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "check_status"
+            },
+            "id": 3,
+            "layout": {
+                "height": 15,
+                "width": 20,
+                "x": 35,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "custom_links": [],
+                "precision": 0,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "green_on_white",
+                                "value": 5
+                            }
+                        ],
+                        "q": "avg:couchdb.couchdb.open_os_files{$couchdb}"
+                    }
+                ],
+                "time": {
+                    "live_span": "10m"
+                },
+                "title": "File descriptors",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 4,
+            "layout": {
+                "height": 15,
+                "width": 20,
+                "x": 78,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "custom_unit": "DBs",
+                "precision": 0,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_red",
+                                "value": 5
+                            }
+                        ],
+                        "q": "avg:couchdb.couchdb.open_databases{$couchdb}"
+                    }
+                ],
+                "time": {
+                    "live_span": "10m"
+                },
+                "title": "Open databases",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 5,
+            "layout": {
+                "height": 15,
+                "width": 20,
+                "x": 57,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "area",
+                        "q": "per_second(avg:couchdb.couchdb.request_time.n{$couchdb,$scope})",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
+                "title": "Average request latency",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
+            },
+            "id": 6,
+            "layout": {
+                "height": 15,
+                "width": 42,
+                "x": 121,
+                "y": 23
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "precision": 0,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "palette": "red_on_white",
+                                "value": 5
+                            },
+                            {
+                                "comparator": ">=",
+                                "palette": "yellow_on_white",
+                                "value": 2
+                            }
+                        ],
+                        "q": "avg:couchdb.couchdb.auth_cache_misses{$couchdb,$scope}"
+                    }
+                ],
+                "time": {
+                    "live_span": "1h"
+                },
+                "title": "Auth cache misses",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 7,
+            "layout": {
+                "height": 15,
+                "width": 20,
+                "x": 143,
+                "y": 45
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "area",
+                        "q": "per_second(avg:couchdb.couchdb.database_reads{$couchdb,$scope})",
+                        "style": {
+                            "palette": "green"
+                        }
+                    },
+                    {
+                        "display_type": "area",
+                        "q": "0 - per_second(avg:couchdb.couchdb.database_writes{$couchdb,$scope})",
+                        "style": {
+                            "palette": "purple"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
+                "title": "Workload - Reads (green) & Writes (purple)",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
+            },
+            "id": 8,
+            "layout": {
+                "height": 15,
+                "width": 42,
+                "x": 121,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "area",
+                        "q": "per_minute(avg:couchdb.couchdb.httpd_status_codes.409{$couchdb}), per_minute(avg:couchdb.couchdb.httpd_status_codes.412{$couchdb}), per_minute(avg:couchdb.couchdb.httpd_status_codes.405{$couchdb}), per_minute(avg:couchdb.couchdb.httpd_status_codes.404{$couchdb}), per_minute(avg:couchdb.couchdb.httpd_status_codes.403{$couchdb}), per_minute(avg:couchdb.couchdb.httpd_status_codes.401{$couchdb}), per_minute(avg:couchdb.couchdb.httpd_status_codes.400{$couchdb})",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
+                "title": "Request with status code of 4xx",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
+            },
+            "id": 9,
+            "layout": {
+                "height": 15,
+                "width": 42,
+                "x": 35,
+                "y": 90
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "custom_links": [],
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "red_on_white",
+                                "value": 50000000
+                            },
+                            {
+                                "comparator": ">=",
+                                "palette": "yellow_on_white",
+                                "value": 4500000
+                            }
+                        ],
+                        "q": "avg:couchdb.by_db.file_size{$couchdb}"
+                    }
+                ],
+                "time": {
+                    "live_span": "4h"
+                },
+                "title": "Actual disk usage",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 10,
+            "layout": {
+                "height": 15,
+                "width": 20,
+                "x": 100,
+                "y": 29
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "area",
+                        "q": "per_second(avg:couchdb.couchdb.httpd.bulk_requests{$couchdb,$scope})",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
+                "title": "Number of bulk requests",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
+            },
+            "id": 11,
+            "layout": {
+                "height": 15,
+                "width": 42,
+                "x": 78,
+                "y": 52
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "area",
+                        "q": "per_minute(avg:couchdb.couchdb.httpd_status_codes.201{$couchdb}), per_minute(avg:couchdb.couchdb.httpd_status_codes.200{$couchdb})",
+                        "style": {
+                            "palette": "green"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
+                "title": "Request with status code of 2xx",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
+            },
+            "id": 12,
+            "layout": {
+                "height": 15,
+                "width": 42,
+                "x": 78,
+                "y": 74
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "custom_links": [],
+                "custom_unit": "Docs",
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:couchdb.by_db.doc_count{$couchdb}"
+                    }
+                ],
+                "time": {
+                    "live_span": "4h"
+                },
+                "title": "Overall doc count",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 13,
+            "layout": {
+                "height": 15,
+                "width": 20,
+                "x": 100,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "sizing": "zoom",
+                "type": "image",
+                "url": "/static/images/logos/couchdb_large.svg"
+            },
+            "id": 14,
+            "layout": {
+                "height": 14,
+                "width": 32,
+                "x": 1,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Performance",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 16,
+            "layout": {
+                "height": 5,
+                "width": 42,
+                "x": 121,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "Traffic Breakdown",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 17,
+            "layout": {
+                "height": 5,
+                "width": 85,
+                "x": 35,
+                "y": 68
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Authentication Cache",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 18,
+            "layout": {
+                "height": 5,
+                "width": 42,
+                "x": 121,
+                "y": 39
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "legend_size": "0",
+                "markers": [
+                    {
+                        "display_type": "error dashed",
+                        "value": "y = 3"
+                    }
+                ],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:couchdb.couchdb.httpd_status_codes.401{$couchdb,$couchdb,$scope}",
+                        "style": {
+                            "palette": "red"
+                        }
+                    },
+                    {
+                        "display_type": "bars",
+                        "q": "avg:couchdb.couchdb.auth_cache_misses{$couchdb,$scope}",
+                        "style": {
+                            "palette": "orange"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
+                "title": "Unauthorized login attempts",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
+            },
+            "id": 19,
+            "layout": {
+                "height": 15,
+                "width": 42,
+                "x": 121,
+                "y": 61
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "custom_links": [],
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:couchdb.by_db.doc_count{$couchdb}"
+                    }
+                ],
+                "time": {
+                    "live_span": "4h"
+                },
+                "title": "Expected disk size",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 20,
+            "layout": {
+                "height": 15,
+                "width": 20,
+                "x": 78,
+                "y": 29
+            }
+        },
+        {
+            "definition": {
+                "background_color": "white",
+                "content": "This dashboard provides an overview of your CouchDB deployment to help you identify performance issues, unexpected traffic changes, and unauthorized login attempts. Further reading on CouchDB monitoring: \n\n- [How to monitor CouchDB with Datadog](https://www.datadoghq.com/blog/monitoring-couchdb-with-datadog/)  \n\n- [Datadog\u2019s CouchDB integration docs](https://docs.datadoghq.com/integrations/couch/). \n\nClone this template dashboard to make changes and add your own graph widgets.",
+                "font_size": "14",
+                "has_padding": true,
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note",
+                "vertical_align": "top"
+            },
+            "id": 1462136476791456,
+            "layout": {
+                "height": 20,
+                "width": 32,
+                "x": 1,
+                "y": 16
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Throughput",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 1366189115582236,
+            "layout": {
+                "height": 5,
+                "width": 85,
+                "x": 35,
+                "y": 46
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Summary",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 6826317147906822,
+            "layout": {
+                "height": 5,
+                "width": 85,
+                "x": 35,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "Disk",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 8396765368389266,
+            "layout": {
+                "height": 5,
+                "width": 42,
+                "x": 78,
+                "y": 23
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "Monitoring CouchDB traffic in terms of HTTP status codes and request methods provide insights on database activity and host health.\n\nSet alerts when the number of\"forbidden\" responses (403) or internal server errors (500) suddenly increases.",
+                "font_size": "14",
+                "has_padding": true,
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note",
+                "vertical_align": "top"
+            },
+            "id": 5222167072936210,
+            "layout": {
+                "height": 15,
+                "width": 30,
+                "x": 3,
+                "y": 90
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "If there is a high number of deleted requests, consider optimizing the application logic. Document deletion is the kind of operation that's better and more effectively handled with a bulk update.",
+                "font_size": "14",
+                "has_padding": true,
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note",
+                "vertical_align": "top"
+            },
+            "id": 2184496852202062,
+            "layout": {
+                "height": 12,
+                "width": 30,
+                "x": 3,
+                "y": 73
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "Database I/O",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 5770076103030270,
+            "layout": {
+                "height": 5,
+                "width": 42,
+                "x": 35,
+                "y": 23
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:couchdb.couchdb.database_writes{$couchdb}"
+                    }
+                ],
+                "time": {
+                    "live_span": "4h"
+                },
+                "title": "Database writes",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 5908574824195298,
+            "layout": {
+                "height": 15,
+                "width": 20,
+                "x": 35,
+                "y": 29
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:couchdb.couchdb.database_reads{$couchdb}"
+                    }
+                ],
+                "time": {
+                    "live_span": "4h"
+                },
+                "title": "Database writes",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 8753613957283220,
+            "layout": {
+                "height": 15,
+                "width": 20,
+                "x": 57,
+                "y": 29
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "Database reads and writes show the I/O for your databases when documents have been read or modified and help you define the nature of the environment.\n\nYou can use the values for reads and writes to determine if your instance is balanced. Determining the nature of your instance allows you to optimize your server appropriately.",
+                "font_size": "14",
+                "has_padding": true,
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note",
+                "vertical_align": "top"
+            },
+            "id": 6916812584601094,
+            "layout": {
+                "height": 17,
+                "width": 32,
+                "x": 1,
+                "y": 37
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "CouchDB stores a fair amount of user credentials in memory to speed up the authentication process. Monitor the usage of the authentication cache to alert possible unauthorized access attempts.\n\nIf there is a high number of auth cache misses, it is possible the cache is undersized to service the volume of legitimate user requests or a brute force password/username attack is taking place.",
+                "font_size": "14",
+                "has_padding": true,
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note",
+                "vertical_align": "top"
+            },
+            "id": 3185785773379684,
+            "layout": {
+                "height": 22,
+                "width": 30,
+                "x": 165,
+                "y": 45
+            }
+        }
+    ]
+}

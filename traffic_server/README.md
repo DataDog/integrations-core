@@ -2,7 +2,15 @@
 
 ## Overview
 
-This check monitors [Traffic Server][1] through the Datadog Agent.
+This check monitors [Traffic Server][1] through the Datadog Agent. 
+
+Enable the Datadog-Apache Traffic Server integration to:
+
+- Ensure the availability and performance of online resources, such as websites and applications.
+- Track metrics such as hits, volume, and changes in traffic to websites and applications.
+- Determine average response times and sizes for requests.
+- Monitor system and error logs. 
+
 
 ## Setup
 
@@ -21,6 +29,23 @@ stats_over_http.so
 ### Configuration
 
 1. Edit the `traffic_server.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Traffic Server performance data. See the [sample traffic_server.d/conf.yaml][4] for all available configuration options.
+
+**Note**: When using the default [configuration file][4], not all metrics are collected by default.
+
+Comment out the `metric_patterns` option to collect all available metrics, or edit it to collect a different subset of metrics:
+
+```
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    ## Comment out this option to collect all available metrics.
+    #
+    metric_patterns:
+      include:
+         - <METRIC_1>
+         - <METRIC_2>
+```
 
 2. [Restart the Agent][5].
 
@@ -75,7 +100,7 @@ Need help? Contact [Datadog support][9].
 
 
 [1]: https://trafficserver.apache.org/
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/traffic_server/datadog_checks/traffic_server/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

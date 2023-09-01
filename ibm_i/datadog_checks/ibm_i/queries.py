@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from .config_models import InstanceConfig
 
 
 def get_base_disk_usage_72(timeout):
@@ -256,13 +257,24 @@ def get_job_queue_info(timeout):
     }
 
 
-def get_message_queue_info(timeout, sev):
+def get_message_queue_info(timeout, sev, message_queue_info):
+
+    # Getting the selected message queues if some were passed in the config file
+    message_queues_list = []
+    if hasattr(message_queue_info, 'selected_message_queues') and message_queue_info.selected_message_queues:
+        message_queues_list = [f"'{elt}'" for elt in message_queue_info.selected_message_queues]
+
+    # Building the message queues filter
+    message_queues_filter = (
+        f"WHERE MESSAGE_QUEUE_NAME IN ({', '.join(message_queues_list)}) " if message_queues_list else ""
+    )
+
     return {
         'name': 'message_queue_info',
         'query': {
             'text': (
                 f'SELECT MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY, COUNT(*), SUM(CASE WHEN SEVERITY >= {sev} THEN 1 ELSE 0 END) '  # noqa:E501
-                'FROM QSYS2.MESSAGE_QUEUE_INFO GROUP BY MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY'
+                f'FROM QSYS2.MESSAGE_QUEUE_INFO {message_queues_filter}GROUP BY MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY'  # noqa:E501
             ),
             'timeout': timeout,
         },
@@ -272,4 +284,21 @@ def get_message_queue_info(timeout, sev):
             {'name': 'ibm_i.message_queue.size', 'type': 'gauge'},
             {'name': 'ibm_i.message_queue.critical_size', 'type': 'gauge'},
         ],
+    }
+
+
+def query_map(config: InstanceConfig):
+    """Build a query map from query names to queries."""
+
+    # subsystem and disk_usage queries are not here since they are handled in a special way
+    return {
+        "cpu_usage": get_cpu_usage(config.query_timeout),
+        "jobq_job_status": get_jobq_job_status(config.job_query_timeout),
+        "active_job_status": get_active_job_status(config.job_query_timeout),
+        "job_memory_usage": get_job_memory_usage(config.job_query_timeout),
+        "memory_info": get_memory_info(config.query_timeout),
+        "job_queue": get_job_queue_info(config.query_timeout),
+        "message_queue_info": get_message_queue_info(
+            config.system_mq_query_timeout, config.severity_threshold, config.message_queue_info
+        ),
     }

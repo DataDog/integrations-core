@@ -7,6 +7,7 @@ variables:
   TAGGER_EMAIL: packages@datadoghq.com
   TAGGER_NAME: ci.integrations-core
   NOTIFICATIONS_SLACK_CHANNEL: agent-integrations
+  AGENT_BUILD_NOTIFICATIONS_SLACK_CHANNEL: agent-integrations-ops
 
 # Uncomment when/if we modify script to use Jira
 #
@@ -81,9 +82,9 @@ trigger-agent-build:
           DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL RELEASE_BRANCH=$RELEASE_BRANCH python -u /trigger_agent_build.py --output-file pipeline_id.txt
 
           # Get slack user
-          if [[ $GITLAB_USER_LOGIN = "gitsync" ]]; then EMAIL=$(git show -s --format="%ae" "$CI_COMMIT_SHA"); else EMAIL=$GITLAB_USER_EMAIL; fi
+          if [[ $GITLAB_USER_LOGIN = "codesync" ]]; then EMAIL=$(git show -s --format="%ae" "$CI_COMMIT_SHA"); else EMAIL=$GITLAB_USER_EMAIL; fi
           SLACK_AUTHOR=$(echo $EMAIL | email2slackid)
-          if [ -z "$SLACK_AUTHOR" ]; then echo "${EMAIL} cannot be translated into a Slack user, defaulting to ${NOTIFICATIONS_SLACK_CHANNEL}"; SLACK_AUTHOR=$NOTIFICATIONS_SLACK_CHANNEL; fi
+          if [ -z "$SLACK_AUTHOR" ]; then echo "${EMAIL} cannot be translated into a Slack user, defaulting to ${AGENT_BUILD_NOTIFICATIONS_SLACK_CHANNEL}"; SLACK_AUTHOR=$AGENT_BUILD_NOTIFICATIONS_SLACK_CHANNEL; fi
 
           MESSAGE="Starting a build of the agent, watch ${CI_PIPELINE_URL}."
           postmessage "$SLACK_AUTHOR" "$MESSAGE"
@@ -114,9 +115,9 @@ validate-agent-build:
           PIPELINE_ID=$(cat pipeline_id.txt)
 
           # Get slack user
-          if [[ $GITLAB_USER_LOGIN = "gitsync" ]]; then EMAIL=$(git show -s --format="%ae" "$CI_COMMIT_SHA"); else EMAIL=$GITLAB_USER_EMAIL; fi
+          if [[ $GITLAB_USER_LOGIN = "codesync" ]]; then EMAIL=$(git show -s --format="%ae" "$CI_COMMIT_SHA"); else EMAIL=$GITLAB_USER_EMAIL; fi
           SLACK_AUTHOR=$(echo $EMAIL | email2slackid)
-          if [ -z "$SLACK_AUTHOR" ]; then echo "${EMAIL} cannot be translated into a Slack user, defaulting to ${NOTIFICATIONS_SLACK_CHANNEL}"; SLACK_AUTHOR=$NOTIFICATIONS_SLACK_CHANNEL; fi
+          if [ -z "$SLACK_AUTHOR" ]; then echo "${EMAIL} cannot be translated into a Slack user, defaulting to ${AGENT_BUILD_NOTIFICATIONS_SLACK_CHANNEL}"; SLACK_AUTHOR=$AGENT_BUILD_NOTIFICATIONS_SLACK_CHANNEL; fi
 
           # Wait for the agent build to complete
           export BUILD_SUCCESS="true"
@@ -168,7 +169,7 @@ notify-failed-pipeline:
   script:
     - export SLACK_CACHE_DIR="${PWD}/.slack-cache"
     - |
-      MESSAGE="The pipeline uncountered an unexpected error."
+      MESSAGE="The pipeline encountered an unexpected error."
       postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
   tags: [ "runner:main" ]
 
@@ -214,7 +215,8 @@ reminder-image-builder:
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
   only:
     changes:
-      - .gitlab/reminder/**
+      - .gitlab/reminder/**/*
+      - .gitlab-ci.yml
     refs:
       - master
   script:
@@ -229,12 +231,13 @@ tagger-image-builder:
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
   only:
     changes:
-      - .gitlab/tagger/**
-      - datadog_checks_dev/**
+      - .gitlab/tagger/**/*
+      - ddev/**/*
+      - .gitlab-ci.yml
     refs:
       - master
   script:
-    - docker build --tag $TAGGER_IMAGE -f .gitlab/tagger/Dockerfile ./datadog_checks_dev/
+    - docker build --tag $TAGGER_IMAGE -f .gitlab/tagger/Dockerfile .
     - docker images $TAGGER_IMAGE
     - docker push $TAGGER_IMAGE
   except: [ tags, schedules ]
@@ -245,7 +248,8 @@ validate-log-intgs-builder:
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
   only:
     changes:
-      - .gitlab/validate-logs-intgs/**
+      - .gitlab/validate-logs-intgs/**/*
+      - .gitlab-ci.yml
     refs:
       - master
   script:
@@ -260,7 +264,8 @@ validate-agent-build-builder:
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
   only:
     changes:
-      - .gitlab/validate-agent-build/**
+      - .gitlab/validate-agent-build/**/*
+      - .gitlab-ci.yml
     refs:
       - master
   script:

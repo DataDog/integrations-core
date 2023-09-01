@@ -37,7 +37,10 @@ init_config:
 instances:
 
     ## @param host - string - required
-    ## Host and port of your SQL server.
+    ## Host and port of your SQL server. If a port is ommitted, a default port of 1433 will be used. 
+    ## If you use Sql Server Browser Service or a similar port autodiscovery service, pass in a port
+    ## of 0 to omit port from your connection string. This should allow SSBS to autodiscover the 
+    ## correct database port. 
     #
   - host: <HOST>,<PORT>
 
@@ -50,6 +53,14 @@ instances:
     ## Password for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
     #
     # password: <PASSWORD>
+
+    ## @param server_version - string - optional - default: 2014
+    ## Server version year of sqlserver the agent will connect to. 
+    ## Important for validating connection string attributes for older sqlserver versions.
+    ##
+    ## This is required if connecting to a SQLServer instance older than 2014.
+    #
+    # server_version: '2014'
 
     ## @param database - string - optional - default: master
     ## Database name to query.  Not compatible with `database_autodiscovery`.
@@ -170,8 +181,8 @@ instances:
     ## @param adoprovider - string - optional - default: SQLOLEDB
     ## Choose the ADO provider.  Note that the (default) provider
     ## SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
-    ## provider, set the adoprovider to "MSOLEDBSQL" below. You will also need
-    ## to download the new provider from
+    ## provider, set the adoprovider to "MSOLEDBSQL" below or "MSOLEDBSQL19" for version 19 of the driver.
+    ## You will also need to download the new provider from
     ## https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017
     #
     # adoprovider: SQLOLEDB
@@ -195,34 +206,52 @@ instances:
 
     ## @param connection_string - string - optional
     ## Specify a custom connection string to be used
-    ## Ex: "ApplicationIntent=ReadWrite" or "MultiSubnetFailover=yes"
-    ## "Trusted_Connection=yes" to use Windows Authentication (note that in this case the connection will be performed
-    ## with the `ddagentuser` user, you can find more information about this user
-    ## in https://docs.datadoghq.com/agent/faq/windows-agent-ddagent-user/)
+    ## Ex: "ApplicationIntent=ReadWrite" or "Trusted_Connection=Yes" to use Windows Authentication
+    ## (note that in this case the connection will be performed with the `ddagentuser` user, you can
+    ## find more information about this user in https://docs.datadoghq.com/agent/faq/windows-agent-ddagent-user/)
+    ##
+    ## Please note that certain connection string values will vary depending on the connection Provider used,
+    ## for example:
+    ## * "OLE DB" provider uses "MultiSubnetFailover=Yes"
+    ## * "ADO" provider uses "MultiSubnetFailover=True"
     #
     # connection_string: <CONNECTION_STRING>
 
     ## @param dbm - boolean - optional - default: false
     ## Set to `true` to enable Database Monitoring.
-    ## Reach out to your Customer Success Manager to request access to the beta.
     #
     # dbm: false
 
+    ## Configure collection of sys.configurations. This is an alpha feature.
+    #
+    # collect_settings:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of sys.configurations. Requires `dbm: true`.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the database settings collection interval (in seconds). Each collection involves a single query to
+        ## `sys.configurations`.
+        #
+        # collection_interval: 600
+
     ## Configure collection of query metrics
     #
-    query_metrics:
+    # query_metrics:
 
         ## @param enabled - boolean - optional - default: true
         ## Enable collection of query metrics. Requires `dbm: true`.
         #
         # enabled: true
 
-        ## @param collection_interval - number - optional - default: 10
+        ## @param collection_interval - number - optional - default: 60
         ## Set the query metric collection interval (in seconds). Each collection involves one or more queries to
         ## the SQL Server Query Plan Cache. If a non-default value is chosen then that exact same value must be used
         ## for *every* check instance. Running different instances with different collection intervals is not supported.
         #
-        # collection_interval: 10
+        # collection_interval: 60
 
         ## @param dm_exec_query_stats_row_limit - integer - optional - default: 10000
         ## Set the maximum number of query stats rows that can be retrieved in a single check run.
@@ -237,7 +266,7 @@ instances:
 
     ## Configure collection of active sessions monitoring
     #
-    query_activity:
+    # query_activity:
 
         ## @param enabled - boolean - optional - default: true
         ## Enable collection of active sessions. Requires `dbm: true`.
@@ -252,10 +281,110 @@ instances:
         #
         # collection_interval: 10
 
+    ## This block defines the configuration for AWS RDS and Aurora instances. 
+    ##
+    ## Complete this section if you have installed the Datadog AWS Integration 
+    ## (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances 
+    ## with SQL Server integration telemetry.
+    ##
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # aws:
+
+        ## @param instance_endpoint - string - optional - default: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+        ## Equal to the Endpoint.Address of the instance the agent is connecting to. 
+        ## This value is optional if the value of `host` is already configured to the instance endpoint.
+        ##
+        ## For more information on instance endpoints, 
+        ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
+        #
+        # instance_endpoint: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+
+    ## This block defines the configuration for Google Cloud SQL instances.
+    ##
+    ## Complete this section if you have installed the Datadog GCP Integration 
+    ## (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances 
+    ## with SQL Server integration telemetry.
+    ##
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # gcp:
+
+        ## @param project_id - string - optional - default: foo-project
+        ## Equal to the GCP resource's project ID.
+        ##
+        ## For more information on project IDs,
+        ## See the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
+        #
+        # project_id: foo-project
+
+        ## @param instance_id - string - optional - default: foo-database
+        ## Equal to the GCP resource's instance ID.
+        ##
+        ## For more information on instance IDs,
+        ## See the GCP docs https://cloud.google.com/sql/docs/sqlserver/instance-settings#instance-id-2ndgen
+        #
+        # instance_id: foo-database
+
+    ## This block defines the configuration for Azure Managed Instance, Azure SQL Database or 
+    ## SQLServer on Virtual Machines.
+    ##
+    ## Complete this section if you have installed the Datadog Azure Integration 
+    ## (https://docs.datadoghq.com/integrations/azure) to enrich instances 
+    ## with SQL Server integration telemetry.
+    ##
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # azure:
+
+        ## @param deployment_type - string - optional - default: sql_database
+        ## Equal to the deployment type for the managed database. 
+        ##
+        ## Acceptable values are:
+        ##   - `sql_database` 
+        ##   - `managed_instance`
+        ##   - `virtual_machine`
+        ##
+        ## For more information on deployment types, see the Azure
+        ## docs https://docs.microsoft.com/en-us/azure/azure-sql/azure-sql-iaas-vs-paas-what-is-overview?view=azuresql
+        #
+        # deployment_type: sql_database
+
+        ## @param fully_qualified_domain_name - string - optional - default: my-sqlserver-database.database.windows.net
+        ## Equal to the name of the SQL Database, Managed Instance (SQL MI) or virtual machine.
+        ##
+        ## This value is optional if the value of `host` is already configured to the fully qualified domain name.
+        #
+        # fully_qualified_domain_name: my-sqlserver-database.database.windows.net
+
+    ## Configuration section used for Azure AD Authentication.
+    ##
+    ## This supports using System or User assigned managed identities.
+    ## If this section is set, then the `username` and `password` fields will be ignored.
+    ##
+    ## For more information on Managed Identities, see the Azure docs
+    ## https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
+    #
+    # managed_identity:
+
+        ## @param client_id - string - optional
+        ## Client ID of the Managed Identity.
+        #
+        # client_id: <CLIENT_ID>
+
+        ## @param identity_scope - string - optional - default: https://database.windows.net/.default
+        ## The permission scope from where to access the identity token. This value is optional if using the default
+        ## identity scope for Azure managed databases.
+        ##
+        ## For more information on scopes, see the Azure docs
+        ## https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
+        #
+        # identity_scope: https://database.windows.net/.default
+
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
     #
-    obfuscator_options:
+    # obfuscator_options:
 
         ## @param replace_digits - boolean - optional - default: false
         ## Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
@@ -289,10 +418,17 @@ instances:
         #
         # collect_comments: true
 
-    ## @param command_timeout - integer - optional - default: 5
+        ## @param keep_sql_alias - boolean - optional - default: true
+        ## Set to `true` to keep sql aliases in obfuscated SQL statements. Examples of aliases are
+        ## `with select 1 as alias`, `select column as other_name`, or `select * from table t`.
+        ## When `true` these aliases will not be removed.
+        #
+        # keep_sql_alias: true
+
+    ## @param command_timeout - integer - optional - default: 10
     ## Timeout in seconds for the connection and each command run
     #
-    # command_timeout: 5
+    # command_timeout: 10
 
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
@@ -318,14 +454,37 @@ instances:
     ##              The number of columns must equal the number of columns returned in the query.
     ##              There are 2 required pieces of data:
     ##                a. name - The suffix to append to `<INTEGRATION>.` to form
-    ##                          the full metric name. If `type` is `tag`, this column is
+    ##                          the full metric name. If `type` is a `tag` type, this column is
     ##                          considered a tag and applied to every
     ##                          metric collected by this particular query.
     ##                b. type - The submission method (gauge, monotonic_count, etc.).
-    ##                          This can also be set to `tag` to tag each metric in the row
-    ##                          with the name and value of the item in this column. You can
-    ##                          use the `count` type to perform aggregation for queries that
-    ##                          return multiple rows with the same or no tags.
+    ##                          This can also be set to the following `tag` types to
+    ##                          tag each metric in the row with the name and value
+    ##                          of the item in this column:
+    ##                           i. tag           - This is the default tag type
+    ##                           ii. tag_list     - This allows multiple values to be attached
+    ##                                             to the tag name. For example: 
+    ##
+    ##                                             query = {
+    ##                                               "name": "example",
+    ##                                               "query": "...",
+    ##                                               "columns": [
+    ##                                                 {"name": "server_tag", "type": "tag_list"},
+    ##                                                 {"name": "foo", "type": "gauge"},
+    ##                                               ]
+    ##                                             }
+    ##
+    ##                                             May result in:
+    ##                                             gauge("foo", tags=[
+    ##                                                                 "server_tag:us",
+    ##                                                                 "server_tag:primary",
+    ##                                                                 "server_tag:default"
+    ##                                                               ])
+    ##                                             gauge("foo", tags=["server_tag:eu"])
+    ##                                             gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
+    ##                           iii. tag_not_null - This only sets tags in the metric if the value is not null
+    ##                          You can use the `count` type to perform aggregation
+    ##                          for queries that return multiple rows with the same or no tags.
     ##              Columns without a name are ignored. To skip a column, enter:
     ##                - {}
     ## 3. tags (optional) - A list of tags to apply to each metric.
@@ -341,9 +500,10 @@ instances:
     #     - test:<INTEGRATION>
 
     ## @param stored_procedure - string - optional
+    ## DEPRECATED - use `custom_queries` instead. For guidance, see:
+    ## https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
     ## Get metrics from custom proc in MyDB but only if the database is writable
     ## (i.e. it's the master in an availability group) Note: Custom proc must be defined in its own instance
-    ## See https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
     #
     # stored_procedure: <PROCEDURE_NAME>
 
@@ -391,12 +551,6 @@ instances:
     #
     # empty_default_hostname: false
 
-    ## @param disable_generic_tags - boolean - optional - default: false
-    ## Generic tags such as `host` are replaced by `sqlserver_host` to avoid
-    ## getting mixed with other integraton tags.
-    #
-    disable_generic_tags: true
-
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.
     ##
@@ -410,12 +564,12 @@ instances:
 
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.

@@ -8,11 +8,11 @@ from __future__ import absolute_import
 
 import re
 from collections import defaultdict
-from typing import List
+from typing import List  # noqa: F401
 
-from six import iteritems
+from six import PY2, iteritems
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
 
 try:
@@ -70,6 +70,28 @@ def parse_namespace(data, namespace, secondary):
 
 
 class AerospikeCheck(AgentCheck):
+    """
+    This is a legacy implementation that will be removed at some point, refer to check.py for the new implementation.
+    """
+
+    def __new__(cls, name, init_config, instances):
+        instance = instances[0]
+
+        if 'openmetrics_endpoint' in instance:
+            if PY2:
+                raise ConfigurationError(
+                    "This version of the integration is only available when using py3. "
+                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
+                    "for more information or use the older style config."
+                )
+            # TODO: when we drop Python 2 move this import up top
+            from .check import AerospikeCheckV2
+
+            return AerospikeCheckV2(name, init_config, instances)
+
+        else:
+            return super(AerospikeCheck, cls).__new__(cls)
+
     def __init__(self, name, init_config, instances):
         super(AerospikeCheck, self).__init__(name, init_config, instances)
 
@@ -371,7 +393,7 @@ class AerospikeCheck(AgentCheck):
     def get_metric_name(self, line):
         # match only works at the beginning
         # ':' or ';' are not allowed in namespace-name: https://www.aerospike.com/docs/guide/limitations.html
-        ns_metric_name_match = re.match(r'\{([^}:;]+)\}-(\w+):', line)
+        ns_metric_name_match = re.match(r'\{([^}:;]+)\}-([-\w]+):', line)
         if ns_metric_name_match:
             return ns_metric_name_match.groups()[0], ns_metric_name_match.groups()[1]
         elif line.startswith("batch-index"):
@@ -396,7 +418,7 @@ class AerospikeCheck(AgentCheck):
 
             ns, metric_name = self.get_metric_name(line)
             if metric_name is None:
-                return
+                continue
 
             namespace_tags = ['namespace:{}'.format(ns)] if ns else []
             namespace_tags.extend(self._tags)
@@ -452,7 +474,7 @@ class AerospikeCheck(AgentCheck):
 
             ns, metric_name = self.get_metric_name(line)
             if metric_name is None:
-                return
+                continue
 
             # need search because this isn't at the beginning
             ops_per_sec = re.search(r'(\w+\/\w+)', line)

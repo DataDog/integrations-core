@@ -17,7 +17,7 @@ def initialize_instance(values, **kwargs):
             'Set `private_key_path` or remove `private_key_password` entry.'
         )
 
-    if values.get('only_custom_queries', False) and len(values('metric_groups', [])) > 0:
+    if values.get('only_custom_queries', False) and len(values.get('metric_groups', [])) > 0:
         raise ConfigurationError(
             'Option `only_custom_queries` and `metric_groups` are not compatible. '
             '`only_custom_queries` prevents `metric_groups` to be collected.'

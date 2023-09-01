@@ -1564,6 +1564,42 @@
         ]
     },
     {
+        "name": "vsphere.cpu.capacity.contention.avg",
+        "value": 2.05,
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Dätacenter",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:host",
+            "vsphere_type:cluster"
+        ]
+    },
+    {
+        "name": "vsphere.cpu.capacity.contention.avg",
+        "value": 2.05,
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:host",
+            "vsphere_type:cluster"
+        ]
+    },
+    {
+        "name": "vsphere.cpu.capacity.contention.avg",
+        "value": 2.05,
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:datastore-cluster",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:host",
+            "vsphere_type:cluster"
+        ]
+    },
+    {
         "name": "vsphere.datacenter.count",
         "value": 1.0,
         "tags": [

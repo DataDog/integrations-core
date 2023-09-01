@@ -14,7 +14,6 @@ class MySQLConfig(object):
         self.host = instance.get('host', instance.get('server', ''))
         self.port = int(instance.get('port', 0))
         self.reported_hostname = instance.get('reported_hostname', '')
-        self.tags = list(instance.get('tags', []))
         self.mysql_sock = instance.get('sock', '')
         self.defaults_file = instance.get('defaults_file', '')
         self.user = instance.get('username', instance.get('user', ''))
@@ -32,6 +31,7 @@ class MySQLConfig(object):
         self.max_custom_queries = instance.get('max_custom_queries', DEFAULT_MAX_CUSTOM_QUERIES)
         self.charset = instance.get('charset')
         self.dbm_enabled = is_affirmative(instance.get('dbm', instance.get('deep_database_monitoring', False)))
+        self.table_rows_stats_enabled = is_affirmative(self.options.get('table_rows_stats_metrics', False))
         self.statement_metrics_limits = instance.get('statement_metrics_limits', None)
         self.full_statement_text_cache_max_size = instance.get('full_statement_text_cache_max_size', 10000)
         self.full_statement_text_samples_per_hour_per_query = instance.get(
@@ -39,7 +39,20 @@ class MySQLConfig(object):
         )
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
+        self.settings_config = instance.get('collect_settings', {}) or {}
         self.activity_config = instance.get('query_activity', {}) or {}
+        self.cloud_metadata = {}
+        aws = instance.get('aws', {})
+        gcp = instance.get('gcp', {})
+        azure = instance.get('azure', {})
+        # Remap fully_qualified_domain_name to name
+        azure = {k if k != 'fully_qualified_domain_name' else 'name': v for k, v in azure.items()}
+        if aws:
+            self.cloud_metadata.update({'aws': aws})
+        if gcp:
+            self.cloud_metadata.update({'gcp': gcp})
+        if azure:
+            self.cloud_metadata.update({'azure': azure})
         self.min_collection_interval = instance.get('min_collection_interval', 15)
         self.only_custom_queries = is_affirmative(instance.get('only_custom_queries', False))
         obfuscator_options_config = instance.get('obfuscator_options', {}) or {}
@@ -52,11 +65,15 @@ class MySQLConfig(object):
                     'replace_digits', obfuscator_options_config.get('quantize_sql_tables', False)
                 )
             ),
+            'keep_sql_alias': is_affirmative(obfuscator_options_config.get('keep_sql_alias', True)),
             'return_json_metadata': is_affirmative(obfuscator_options_config.get('collect_metadata', True)),
             'table_names': is_affirmative(obfuscator_options_config.get('collect_tables', True)),
             'collect_commands': is_affirmative(obfuscator_options_config.get('collect_commands', True)),
             'collect_comments': is_affirmative(obfuscator_options_config.get('collect_comments', True)),
         }
+        self.log_unobfuscated_queries = is_affirmative(instance.get('log_unobfuscated_queries', False))
+        self.log_unobfuscated_plans = is_affirmative(instance.get('log_unobfuscated_plans', False))
+        self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 1800)
         self.configuration_checks()
 
     def _build_tags(self, custom_tags):

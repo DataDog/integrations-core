@@ -6,10 +6,10 @@ from __future__ import division
 import re
 import time
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Tuple  # noqa: F401
 
-from datadog_checks.base.types import ServiceCheckStatus
-from datadog_checks.base.utils.db.types import Transformer, TransformerFactory
+from datadog_checks.base.types import ServiceCheckStatus  # noqa: F401
+from datadog_checks.base.utils.db.types import Transformer, TransformerFactory  # noqa: F401
 
 from ... import is_affirmative
 from ...constants import ServiceCheck
@@ -64,7 +64,7 @@ def get_tag_list(transformers, column_name, **modifiers):
     Tag name is determined by `column_name`. The column value represents a list of values. It is expected to be either
     a list of strings, or a comma-separated string.
 
-    For example, if the column is named `server_tag` and the column returned the value `'us,primary'`, then all
+    For example, if the column is named `server_tag` and the column returned the value `us,primary`, then all
     submissions for that row will be tagged by `server_tag:us` and `server_tag:primary`.
     """
     template = '%s:{}' % column_name
@@ -240,15 +240,26 @@ def get_service_check(transformers, column_name, **modifiers):
     - `UNKNOWN`
 
     Any encountered values that are not defined will be sent as `UNKNOWN`.
+
+    In addition, a `message` modifier can be passed which can contain placeholders
+    (based on Python's str.format) for other column names from the same query to add a message
+    dynamically to the service_check.
     """
     # Do work in a separate function to avoid having to `del` a bunch of variables
     status_map = _compile_service_check_statuses(modifiers)
+    message_field = modifiers.pop('message', None)
 
     service_check_method = transformers['__service_check'](transformers, column_name, **modifiers)  # type: Callable
 
-    def service_check(_, value, **kwargs):
+    def service_check(sources, value, **kwargs):
         # type: (List, str, Dict[str, Any]) -> None
-        service_check_method(_, status_map.get(value, ServiceCheck.UNKNOWN), **kwargs)
+        check_status = status_map.get(value, ServiceCheck.UNKNOWN)
+        if not message_field or check_status == ServiceCheck.OK:
+            message = None
+        else:
+            message = message_field.format(**sources)
+
+        service_check_method(sources, check_status, message=message, **kwargs)
 
     return service_check
 
@@ -273,7 +284,7 @@ def get_time_elapsed(transformers, column_name, **modifiers):
     Example:
 
     ```yaml
-        columns:
+    columns:
       - name: time_since_x
         type: time_elapsed
         format: native  # default value and can be omitted
@@ -480,6 +491,7 @@ COLUMN_TRANSFORMERS = {
     'temporal_percent': get_temporal_percent,
     'monotonic_gauge': get_monotonic_gauge,
     'tag': get_tag,
+    'tag_not_null': get_tag,
     'tag_list': get_tag_list,
     'match': get_match,
     'service_check': get_service_check,

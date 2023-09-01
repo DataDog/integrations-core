@@ -1,0 +1,107 @@
+## All options defined here are available to all instances.
+#
+init_config:
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independent of the others.
+#
+instances:
+
+  -
+    ## @param collectors - list of strings - optional
+    ## A list of resource types to collect
+    ##
+    ## Example to enable pods and nodes collectors:
+    #
+    # collectors:
+    #   - nodes
+    #   - pods
+
+    ## @param label_joins - map - optional
+    ## label_joins allows adding the tags to join from other KSM metrics.
+    ##
+    ## Example: Joining for deployment metrics. Based on:
+    ## kube_deployment_labels{deployment="kube-dns",label_addonmanager_kubernetes_io_mode="Reconcile"}
+    ## Use the following config to add the value of label_addonmanager_kubernetes_io_mode as a tag to your KSM
+    ## deployment metrics.
+    #
+    # label_joins:
+    #   kube_deployment_labels:
+    #     labels_to_match:
+    #       - deployment
+    #     labels_to_get:
+    #       - label_addonmanager_kubernetes_io_mode
+
+    ## @param labels_as_tags - map - optional
+    ## labels_as_tags allows to specify custom labels of kubernetes resources to be turned into Datadog tags attached the corresponding metrics.
+    ##
+    ## Example:
+    #
+    # labels_as_tags:
+    #   pod:
+    #     app.kubernetes.io/name: kube_app_name
+    #   node:
+    #     topology.kubernetes.io/region: kube_region
+
+    ## @param annotations_as_tags - map - optional
+    ## annotations_as_tags allows to specify custom annotations of kubernetes resources to be turned into Datadog tags attached the corresponding metrics.
+    ##
+    ## Example:
+    #
+    # annotations_as_tags:
+    #   pod:
+    #     my_pod_annotation: my_pod_tag
+
+    ## @param labels_mapper - map - optional
+    ## LabelsMapper can be used to translate kube-state-metrics labels to other tags.
+    ## Example: Adding kube_namespace tag instead of namespace
+    #
+    # labels_mapper:
+    #   namespace: kube_namespace
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+
+    ## @param disable_global_tags - bool - optional
+    ## disable_global_tags disables adding the global host tags defined via tags/DD_TAG in the Agent config, default false.
+    #
+    # disable_global_tags: false
+
+    ## @param namespaces - list of string - optional
+    ## namespaces contains the namespaces from which we collect metrics
+    ##
+    ##  Example: Enable metric collection for objects in prod and kube-system namespaces.
+    #
+    # namespaces:
+    #   - prod
+    #   - kube-system
+
+    ## @param resync_period - int - optional
+    ## resync_period is the frequency of resync'ing the metrics cache in seconds, default 5 minutes (kubernetes_informers_resync_period).
+    #
+    # resync_period: 300
+
+    ## @param telemetry - bool - optional
+    ## enables telemetry check's metrics, default false.
+    ## Metrics can be found under kubernetes_state.telemetry
+    #
+    # telemetry: false
+
+    ## @param skip_leader_election - bool - optional
+    ## skip_leader_election forces ignoring the leader election when running the check
+    ## Can be useful when running the check as cluster check
+    #
+    # skip_leader_election: false

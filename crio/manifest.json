@@ -1,36 +1,50 @@
 {
-  "categories": [
-    "containers"
-  ],
-  "creates_events": false,
-  "display_name": "CRI-O",
-  "guid": "40fd8230-d178-4e8e-9e6a-6ce4acc19a85",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "crio.",
-  "metric_to_check": "crio.operations.count",
-  "name": "crio",
-  "public_title": "Datadog-CRI-O Integration",
-  "short_description": "Track all your CRI-O metrics with Datadog",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "cri-o",
+  "manifest_version": "2.0.0",
+  "app_uuid": "a5f9ace1-19b5-4928-b98b-21f15d62cce2",
+  "app_id": "cri-o",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track all your CRI-O metrics with Datadog",
+    "title": "CRI-O",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Containers"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "monitors": {},
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "CRI-O",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "crio.",
+        "check": "crio.operations.count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "crio": "assets/dashboards/overview.json"
-    },
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

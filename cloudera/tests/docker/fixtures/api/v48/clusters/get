@@ -1,0 +1,31 @@
+{
+  "items": [
+    {
+      "name": "cluster_1",
+      "displayName": "cluster_1",
+      "fullVersion": "7.2.15",
+      "maintenanceMode": false,
+      "maintenanceOwners": [],
+      "clusterUrl": "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cmf/clusterRedirect/cod--qfdcinkqrzw",
+      "hostsUrl": "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cmf/clusterRedirect/cod--qfdcinkqrzw/hosts",
+      "entityStatus": "GOOD_HEALTH",
+      "uuid": "4f201e38-4f96-4a60-8fe5-11231a128617",
+      "dataContextRefs": [
+        {
+          "name": "agent-integ-cloudera-data-lake"
+        }
+      ],
+      "clusterType": "COMPUTE_CLUSTER",
+      "tags": [
+        {
+          "name": "_cldr_cb_clustertype",
+          "value": "Data Hub"
+        },
+        {
+          "name": "_cldr_cb_origin",
+          "value": "cloudbreak"
+        }
+      ]
+    }
+  ]
+}

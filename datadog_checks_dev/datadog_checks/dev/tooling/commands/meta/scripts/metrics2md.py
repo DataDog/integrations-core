@@ -5,10 +5,9 @@ import csv
 from io import StringIO
 
 import click
-import pyperclip
 
 from ....utils import read_metric_data_file
-from ...console import CONTEXT_SETTINGS, abort, echo_success
+from ...console import CONTEXT_SETTINGS, abort, echo_info
 
 VALID_FIELDS = {
     'metric_name',
@@ -20,6 +19,7 @@ VALID_FIELDS = {
     'orientation',
     'integration',
     'short_name',
+    'curated_metric',
 }
 
 DEFAULT_FIELDS = ('metric_name', 'description', 'metric_type', 'unit_name')
@@ -51,10 +51,7 @@ def metrics2md(check, fields):
             fields.append(field)
             chosen_fields.discard(field)
 
-    if check == 'cb':
-        metric_data = pyperclip.paste()
-    else:
-        metric_data = read_metric_data_file(check)
+    metric_data = read_metric_data_file(check)
 
     reader = csv.DictReader(StringIO(metric_data), delimiter=',')
 
@@ -63,10 +60,7 @@ def metrics2md(check, fields):
         rows.append(' | '.join(csv_row[field] or 'N/A' for field in fields))
 
     rows.sort()
-    num_metrics = len(rows)
-
     md_table_rows = [' | '.join(fields), ' | '.join('---' for _ in fields)]
     md_table_rows.extend(rows)
 
-    pyperclip.copy('\n'.join(md_table_rows))
-    echo_success(f"Successfully copied table with {num_metrics} metric{'s' if num_metrics > 1 else ''}")
+    echo_info('\n'.join(md_table_rows))

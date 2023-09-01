@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2018-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 # To use a consistent encoding
 from codecs import open
 from os import path
@@ -67,7 +71,7 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
     # The package we're going to ship
     packages=['datadog_checks.btrfs'],

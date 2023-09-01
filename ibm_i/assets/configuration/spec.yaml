@@ -72,4 +72,43 @@ files:
         minimum: 0
         exclusiveMinimum: true
         example: 30
+    - name: queries
+      description: |
+         List of queries to be run against the IBM i system. By default, all queries are run.
+      value:
+        type: array
+        items: 
+          type: object
+          required: [name]
+          properties:
+            - name: name
+              type: string
+        example: &queries_default
+          - name: "disk_usage"
+          - name: "cpu_usage"
+          - name: "jobq_job_status"
+          - name: "active_job_status"
+          - name: "job_memory_usage"
+          - name: "memory_info"
+          - name: "subsystem"
+          - name: "job_queue"
+          - name: "message_queue_info"
+        default: *queries_default
+    - name: message_queue_info
+      description: |
+        A configuration mapping for the message_queue_info query.
+
+        selected_message_queues restricts the message_queue_info query to a subset of the queues.
+        This can reduce the CPU usage on the target IBM i machine. By default no filter is applied.
+      value:
+        example:
+          selected_message_queues:
+            - QSYSOPR
+            - QPGMR
+        type: object
+        properties:
+          - name: selected_message_queues
+            type: array
+            items:
+              type: string
     - template: instances/default

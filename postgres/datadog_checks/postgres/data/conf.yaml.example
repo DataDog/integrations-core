@@ -9,7 +9,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -62,9 +62,8 @@ instances:
     #   - template%
     #   - rdsadmin
     #   - azure_maintenance
-    #   - postgres
 
-    ## @param ssl - string - optional - default: false
+    ## @param ssl - string - optional - default: disable
     ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
     ## is negotiated with the server. There are six modes:
     ## - `disable`: Only tries a non-SSL connection.
@@ -78,39 +77,37 @@ instances:
     ##                  trusted CA and that the requested server host name matches the one in the certificate.
     ##
     ## For a detailed description of how these options work see https://www.postgresql.org/docs/current/libpq-ssl.html
-    ##
-    ## Note: `true` is an alias for `require`, and `false` is an alias for `disable`.
     #
-    # ssl: 'false'
+    # ssl: disable
 
-    ## @param ssl_root_cert - string - optional - default: false
+    ## @param ssl_root_cert - string - optional
     ## The path to the ssl root certificate.
     ##
     ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
     #
-    # ssl_root_cert: /home/datadog/server-ca.pem
+    # ssl_root_cert: <SSL_ROOT_CERT>
 
-    ## @param ssl_cert - string - optional - default: false
+    ## @param ssl_cert - string - optional
     ## The path to the ssl certificate.
     ##
     ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
     #
-    # ssl_cert: /home/datadog/client-cert.pem
+    # ssl_cert: <SSL_CERT>
 
-    ## @param ssl_key - string - optional - default: false
+    ## @param ssl_key - string - optional
     ## The path to the ssl client key.
     ##
     ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
     #
-    # ssl_key: /home/datadog/client-key.pem
+    # ssl_key: <SSL_KEY>
 
-    ## @param ssl_password - string - optional - default: false
+    ## @param ssl_password - string - optional
     ## The password for the secret key specified in ssl_key, allowing client certificate private keys to be stored
     ## in encrypted form on disk.
     ##
     ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
     #
-    # ssl_password: ssl_key_password
+    # ssl_password: <SSL_PASSWORD>
 
     ## @param query_timeout - integer - optional - default: 5000
     ## Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
@@ -178,15 +175,24 @@ instances:
     #
     # collect_activity_metrics: false
 
+    ## @param activity_metrics_excluded_aggregations - list of strings - optional
+    ## A list of columns to remove from the pg_stat_activity aggregation.
+    ## By default, datname, usename and application_name will be used.
+    ## If applications with different application_name are creating a lot of short-lived queries,
+    ## removing application_name from the aggregation can help generate more stable metrics.
+    #
+    # activity_metrics_excluded_aggregations:
+    #   - application_name
+
     ## @param collect_database_size_metrics - boolean - optional - default: true
     ## Collect database size metrics.
     #
     # collect_database_size_metrics: true
 
-    ## @param collect_default_database - boolean - optional - default: false
+    ## @param collect_default_database - boolean - optional - default: true
     ## Include statistics from the default database 'postgres' in the check metrics.
     #
-    # collect_default_database: false
+    # collect_default_database: true
 
     ## @param collect_bloat_metrics - boolean - optional - default: false
     ## Collect metrics about table bloat. Only available when `relation` metrics are enabled.
@@ -196,6 +202,7 @@ instances:
     ## @param collect_wal_metrics - boolean - optional - default: false
     ## Collect metrics about WAL file age.
     ## NOTE: You must be running the check local to your database if you want to enable this option.
+    ## Starting PG10, wal metrics are collected by default using `pg_ls_waldir` and don't need local access anymore.
     #
     # collect_wal_metrics: false
 
@@ -231,6 +238,51 @@ instances:
     #     tags:
     #     - <TAG_KEY>:<TAG_VALUE>
 
+    ## Define the configuration for database autodiscovery.
+    ## Complete this section if you want to auto-discover databases on this host
+    ## instead of specifying each using dbname. 
+    #
+    # database_autodiscovery:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable database autodiscovery.
+        #
+        # enabled: false
+
+        ## @param max_databases - integer - optional - default: 100
+        ## The maximum number of databases this host should monitor.
+        #
+        # max_databases: 100
+
+        ## @param include - list of strings - optional - default: ['.*']
+        ## Regular expression for database names to include as part of 
+        ## database autodiscovery.
+        ## Will report metrics for databases that are found in this instance, 
+        ## ignores databases listed but not found.
+        ## Character casing is ignored. The regular expressions start matching from 
+        ## the beginning, so to match anywhere, prepend `.*`. For exact matches append `$`.
+        ## Defaults to `.*` to include everything.
+        #
+        # include:
+        #   - master$
+        #   - AdventureWorks.*
+
+        ## @param exclude - list of strings - optional
+        ## Regular expression for database names to exclude as part of `database_autodiscovery`.
+        ## Character casing is ignored. The regular expressions start matching from the beginning,
+        ## so to match anywhere, prepend `.*`. For exact matches append `$`.
+        ## In case of conflicts, database exclusion via `exclude` takes precedence over
+        ## those found via `include`
+        #
+        # exclude:
+        #   - model
+        #   - msdb
+
+        ## @param refresh - integer - optional - default: 600
+        ## Frequency in seconds of scans for new databases. Defaults to 10 minutes.
+        #
+        # refresh: 600
+
     ## @param application_name - string - optional - default: datadog-agent
     ## The application_name can be any string of less than NAMEDATALEN characters (64 characters in a standard build).
     ## It is typically set by an application upon connection to the server.
@@ -252,7 +304,7 @@ instances:
 
     ## Configure collection of query metrics
     #
-    query_metrics:
+    # query_metrics:
 
         ## @param enabled - boolean - optional - default: true
         ## Enable collection of query metrics. Requires `dbm: true`.
@@ -268,7 +320,7 @@ instances:
 
     ## Configure collection of query samples
     #
-    query_samples:
+    # query_samples:
 
         ## @param enabled - boolean - optional - default: true
         ## Enable collection of query samples. Requires `dbm: true`.
@@ -310,12 +362,18 @@ instances:
         #
         # seen_samples_cache_maxsize: 10000
 
+        ## @param explain_parameterized_queries - boolean - optional - default: true
+        ## This option will enable the ability to explain parameterized queries.
+        ## This is useful if your SQL clients are using the extended query protocol or prepared statements.
+        #
+        # explain_parameterized_queries: true
+
     ## Configure collection of query activity
     #
-    query_activity:
+    # query_activity:
 
         ## @param enabled - boolean - optional - default: true
-        ## Enable collection of query activity. Requires `dbm: true`, and enabling query_samples.
+        ## Enable collection of query activity. Requires `dbm: true`.
         #
         # enabled: true
 
@@ -331,10 +389,156 @@ instances:
         #
         # payload_row_limit: 3500
 
+    ## Configure collection of pg_settings. This is an alpha feature.
+    #
+    # collect_settings:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of pg_settings. Requires `dbm: true`.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the database settings collection interval (in seconds). Each collection involves a single query to
+        ## `pg_settings`.
+        #
+        # collection_interval: 600
+
+    ## Enable collection of database schemas. In order to collect schemas from all user databases, 
+    ## enable `database_autodiscovery`. To collect from a single database, set `dbname` to collect 
+    ## the schema for that database.
+    ## Relation metrics must be enabled for schema collection.
+    #
+    # collect_schemas:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of database schemas. Requires `dbm: true` and relation metrics must be enabled.
+        #
+        # enabled: false
+
+        ## @param max_tables - number - optional - default: 1000
+        ## Maximum amount of tables the Agent collects from the instance.
+        #
+        # max_tables: 1000
+
+        ## @param max_columns - number - optional - default: 50
+        ## Maximum amount of columns the Agent collects per table.
+        #
+        # max_columns: 50
+
+        ## @param collection_interval - number - optional - default: 600
+        ## The database schema collection interval (in seconds).
+        #
+        # collection_interval: 600
+
+    ## This block defines the configuration for AWS RDS and Aurora instances. 
+    ##
+    ## Complete this section if you have installed the Datadog AWS Integration 
+    ## (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances 
+    ## with Postgres integration telemetry.
+    ##
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # aws:
+
+        ## @param instance_endpoint - string - optional - default: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+        ## Equal to the Endpoint.Address of the instance the agent is connecting to. 
+        ## This value is optional if the value of `host` is already configured to the instance endpoint.
+        ##
+        ## For more information on instance endpoints, 
+        ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
+        #
+        # instance_endpoint: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+
+        ## @param region - string - optional - default: us-east-1
+        ## Equal to the region of the instance the agent is connecting to. 
+        ## This value is used to configure IAM authentication.
+        #
+        # region: us-east-1
+
+    ## This block defines the configuration for Google Cloud SQL instances.
+    ##
+    ## Complete this section if you have installed the Datadog GCP Integration 
+    ## (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances 
+    ## with Postgres integration telemetry.
+    ##
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # gcp:
+
+        ## @param project_id - string - optional - default: foo-project
+        ## Equal to the GCP resource's project ID.
+        ##
+        ## For more information on project IDs,
+        ## See the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
+        #
+        # project_id: foo-project
+
+        ## @param instance_id - string - optional - default: foo-database
+        ## Equal to the GCP resource's instance ID.
+        ##
+        ## For more information on instance IDs,
+        ## See the GCP docs https://cloud.google.com/sql/docs/postgres/instance-settings#instance-id-2ndgen
+        #
+        # instance_id: foo-database
+
+    ## This block defines the configuration for Azure Database for PostgreSQL.
+    ##
+    ## Complete this section if you have installed the Datadog Azure Integration 
+    ## (https://docs.datadoghq.com/integrations/azure) to enrich instances 
+    ## with Postgres integration telemetry.
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # azure:
+
+        ## @param deployment_type - string - optional - default: flexible_server
+        ## Equal to the deployment type for the managed database. 
+        ##
+        ## Acceptable values are:
+        ##   - `flexible_server` 
+        ##   - `single_server`
+        ##   - `virtual_machine`
+        ##
+        ## For more information on deployment types, 
+        ## see the Azure docs https://docs.microsoft.com/en-us/azure/postgresql/overview-postgres-choose-server-options
+        #
+        # deployment_type: flexible_server
+
+        ## @param fully_qualified_domain_name - string - optional - default: my-postgres-database.database.windows.net
+        ## Equal to the full qualified domain name of the Azure PostgreSQL database.
+        ##
+        ## This value is optional if the value of `host` is already configured to the fully qualified domain name.
+        #
+        # fully_qualified_domain_name: my-postgres-database.database.windows.net
+
+    ## Configuration section used for Azure AD Authentication.
+    ##
+    ## This supports using System or User assigned managed identities.
+    ## If this section is set, then the `username` and `password` fields will be ignored.
+    ##
+    ## For more information on Managed Identities, see the Azure docs
+    ## https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
+    #
+    # managed_identity:
+
+        ## @param client_id - string - optional
+        ## Client ID of the Managed Identity.
+        #
+        # client_id: <CLIENT_ID>
+
+        ## @param identity_scope - string - optional - default: https://ossrdbms-aad.database.windows.net/.default
+        ## The permission scope from where to access the identity token. This value is optional if using the default
+        ## identity scope for Azure managed databases.
+        ##
+        ## For more information on scopes, see the Azure docs
+        ## https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
+        #
+        # identity_scope: https://ossrdbms-aad.database.windows.net/.default
+
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
     #
-    obfuscator_options:
+    # obfuscator_options:
 
         ## @param replace_digits - boolean - optional - default: false
         ## Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
@@ -367,6 +571,20 @@ instances:
         ## Requires `collect_metadata: true`.
         #
         # collect_comments: true
+
+        ## @param keep_sql_alias - boolean - optional - default: true
+        ## Set to `true` to keep sql aliases in obfuscated SQL statements. Examples of aliases are
+        ## `with select 1 as alias`, `select column as other_name`, or `select * from table t`.
+        ## When `true` these aliases will not be removed.
+        #
+        # keep_sql_alias: true
+
+        ## @param keep_dollar_quoted_func - boolean - optional - default: true
+        ## Set to `true` to prevent dollar quoted function strings (e.g. `$func$`) from being removed.
+        ## When not removed, the sql content of dollar quoted func strings will be obfuscated.
+        ## Only strings with the tag `$func$` are supported.
+        #
+        # keep_dollar_quoted_func: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -415,12 +633,12 @@ instances:
 
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.

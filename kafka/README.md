@@ -13,6 +13,8 @@ This check has a limit of 350 metrics per instance. The number of returned metri
 
 To collect Kafka consumer metrics, see the [kafka_consumer check][3].
 
+If you would benefit from visualizing the topology of your streaming data pipelines, or from investigating localized bottlenecks within your data streams setup, check out [Data Streams Monitoring][24].
+
 **Note**: This integration attached sample configuration works only for Kafka >= 0.8.2.
 If you are running a version older than that, see the [Agent v5.2.x released sample files][22].
 
@@ -22,7 +24,7 @@ If you are running a version older than that, see the [Agent v5.2.x released sam
 
 The Agent's Kafka check is included in the [Datadog Agent][4] package, so you don't need to install anything else on your Kafka nodes.
 
-The check collects metrics with JMX, so you need a JVM on each kafka node so the Agent can fork [jmxfetch][5]. You can use the same JVM that Kafka uses.
+The check collects metrics from JMX with [JMXFetch][5]. A JVM is needed on each kafka node so the Agent can run JMXFetch. The same JVM that Kafka uses can be used for this.
 
 **Note**: The Kafka check cannot be used with Managed Streaming for Apache Kafka (Amazon MSK). Use the [Amazon MSK integration][6] instead.
 
@@ -153,11 +155,12 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 - [Monitoring Kafka performance metrics][19]
 - [Collecting Kafka performance metrics][20]
 - [Monitoring Kafka with Datadog][21]
+- [Kafka Overview on the Knowledge Center][23]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka/images/kafka_dashboard.png
 [2]: https://docs.datadoghq.com/integrations/java/
 [3]: https://docs.datadoghq.com/integrations/kafka/?tab=host#kafka-consumer-integration
-[4]: https://app.datadoghq.com/account/settings#agent
+[4]: https://app.datadoghq.com/account/settings/agent/latest
 [5]: https://github.com/DataDog/jmxfetch
 [6]: https://docs.datadoghq.com/integrations/amazon_msk/#pagetitle
 [7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -170,8 +173,10 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 [14]: https://github.com/DataDog/integrations-core/blob/master/kafka/metadata.csv
 [15]: https://github.com/DataDog/integrations-core/blob/master/kafka/assets/service_checks.json
 [16]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka/
-[17]: https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub/
+[17]: https://docs.datadoghq.com/integrations/guide/agent-failed-to-retrieve-rmiserver-stub/
 [19]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
 [20]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
 [21]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
 [22]: https://raw.githubusercontent.com/DataDog/dd-agent/5.2.1/conf.d/kafka.yaml.example
+[23]: https://www.datadoghq.com/knowledge-center/apache-kafka/
+[24]: https://www.datadoghq.com/product/data-streams-monitoring/

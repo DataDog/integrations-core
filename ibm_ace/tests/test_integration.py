@@ -10,9 +10,10 @@ from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import skip_windows_ci
 
-pytestmark = [skip_windows_ci, pytest.mark.usefixtures('dd_environment'), pytest.mark.integration]
+pytestmark = [skip_windows_ci, pytest.mark.integration]
 
 
+@pytest.mark.usefixtures('dd_environment')
 def test(dd_run_check, aggregator, instance, global_tags):
     from datadog_checks.ibm_ace import IbmAceCheck
 
@@ -33,7 +34,6 @@ def test(dd_run_check, aggregator, instance, global_tags):
 
 
 def test_critical_service_check(dd_agent_check, instance, global_tags):
-    subprocess.check_call(['docker', 'stop', 'ibm-ace-mq'])
     try:
         aggregator = dd_agent_check(instance)
         for subscription_type in ('resource_statistics', 'message_flows'):

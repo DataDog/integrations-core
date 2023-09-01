@@ -1,0 +1,2026 @@
+{
+    "author_name": "Datadog",
+    "description": "This dashboard provides a high-level overview of your VMware vSphere Tanzu Kubernetes Grid environment, with metrics from your vSphere hosts and VMs, along with information about your Kubernetes cluster and its containers.\n\nFurther reading for vSphere Tanzu Kubernetes Grid monitoring:\n\n- [VMware Tanzu TKG Docs](https://tanzu.vmware.com/kubernetes-grid)\n- [Datadog's vSphere Integration Docs](https://docs.datadoghq.com/integrations/vsphere/)\n- [Datadog's Kubernetes Docs](https://docs.datadoghq.com/containers/kubernetes/)\n- [Datadog's KSM Integration Docs](https://docs.datadoghq.com/integrations/kubernetes_state_core/?tab=operator)\n- [Datadog's Kubernetes Metrics Docs](https://docs.datadoghq.com/containers/kubernetes/data_collected/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "scope",
+            "prefix": ""
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "vsphere_vcenter",
+            "prefix": "vcenter_server"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "vsphere_cluster",
+            "prefix": "vsphere_cluster"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "vsphere_host",
+            "prefix": "vsphere_host"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "namespace",
+            "prefix": "kube_namespace"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "deployment",
+            "prefix": "kube_deployment"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "statefulset",
+            "prefix": "kube_stateful_set"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "daemonset",
+            "prefix": "kube_daemon_set"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "job",
+            "prefix": "kube_job"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "pod_name",
+            "prefix": "pod_name"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "kube_container_name",
+            "prefix": "kube_container_name"
+        }
+    ],
+    "title": "VMware vSphere TKG - Overview",
+    "widgets": [
+        {
+            "definition": {
+                "banner_img": "/static/images/logos/vsphere_tkg_large.svg",
+                "layout_type": "ordered",
+                "show_title": false,
+                "title": "New group",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "transparent",
+                            "content": "### Our VMware vSphere Tanzu Kubernetes Grid (TKG) dashboard gives you broad visibility into your vCenter and its Kubernetes environment\n\nThis dashboard provides a high-level overview of your VMware vSphere Tanzu Kubernetes Grid environment, with metrics from your vSphere hosts and VMs, along with information about your Kubernetes cluster and its containers.\n\nFurther reading for vSphere Tanzu Kubernetes Grid monitoring:\n\n- [VMware Tanzu TKG Docs](https://tanzu.vmware.com/kubernetes-grid)\n- [Datadog's vSphere Integration Docs](https://docs.datadoghq.com/integrations/vsphere/)\n- [Datadog's Kubernetes Docs](https://docs.datadoghq.com/containers/kubernetes/)\n- [Datadog's KSM Integration Docs](https://docs.datadoghq.com/integrations/kubernetes_state_core/?tab=operator)\n- [Datadog's Kubernetes Metrics Docs](https://docs.datadoghq.com/containers/kubernetes/data_collected/)",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 4034119923918144,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    }
+                ]
+            },
+            "id": 8736901664750432,
+            "layout": {
+                "height": 7,
+                "width": 6,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "group": [
+                    "kube_namespace",
+                    "kube_container_name"
+                ],
+                "no_group_hosts": false,
+                "no_metric_hosts": true,
+                "node_type": "container",
+                "requests": {
+                    "fill": {
+                        "q": "avg:process.stat.container.io.wbps{$vsphere_vcenter,$kube_container_name} by {host}"
+                    }
+                },
+                "scope": [
+                    "$vsphere_vcenter"
+                ],
+                "style": {
+                    "palette": "green_to_orange",
+                    "palette_flip": false
+                },
+                "title": "vSphere Containers",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "hostmap"
+            },
+            "id": 4640742340606598,
+            "layout": {
+                "height": 3,
+                "width": 6,
+                "x": 6,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "event_size": "l",
+                "query": "source:(vsphere OR kubernetes OR containerd OR docker OR datadog) $vsphere_host $vsphere_cluster $vsphere_vcenter $kube_container_name",
+                "title": "VMware TKG Events",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "event_stream"
+            },
+            "id": 1346452411294476,
+            "layout": {
+                "height": 4,
+                "width": 6,
+                "x": 6,
+                "y": 3
+            }
+        },
+        {
+            "definition": {
+                "background_color": "green",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Overview",
+                "title_align": "center",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Pods Running",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.pods.running{$scope,$namespace,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$job,$deployment,$statefulset,$daemonset,pod_phase:running}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Pods Running",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 4438940685931776,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "CPU Usage",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.cpu.usage.avg{$scope,$vsphere_cluster,$vsphere_host,$vsphere_vcenter} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "vSphere Host CPU Usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8429648118942722,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "max",
+                                "value"
+                            ],
+                            "legend_layout": "vertical",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "area",
+                                    "formulas": [
+                                        {
+                                            "alias": "Pods Running",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.pods.running{$scope,$namespace,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$deployment,$statefulset,$daemonset,$job,pod_phase:running} by {kube_namespace}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Pods Running by Namespace",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 7006111163124590,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Memory Usage",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.mem.usage.avg{$scope,$vsphere_cluster,$vsphere_host,$vsphere_vcenter} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "vSphere Host Memory Usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3874669323988304,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 3
+                        }
+                    }
+                ]
+            },
+            "id": 3418864353162908,
+            "layout": {
+                "height": 7,
+                "width": 12,
+                "x": 0,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "layout_type": "ordered",
+                "title": "Pods",
+                "title_align": "center",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "This group of metrics is generated from the [Kubernetes](https://docs.datadoghq.com/containers/kubernetes/data_collected/) integration and the [Kubernetes State Metrics Core](https://docs.datadoghq.com/integrations/kubernetes_state_core) integration. \n\nThese metrics show detailed information about your Kubernetes pods, allowing for easy drill down to seamlessly pinpoint problems.\n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 741311893555420,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "event_size": "l",
+                            "query": "source:kubernetes $vsphere_vcenter $kube_container_name",
+                            "title": "Kubernetes Events",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "event_stream"
+                        },
+                        "id": 5774791259600788,
+                        "layout": {
+                            "height": 3,
+                            "width": 9,
+                            "x": 3,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "area",
+                                    "formulas": [
+                                        {
+                                            "alias": "failed",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "pending",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "running",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "succeeded",
+                                            "formula": "query4"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.pod.status_phase{$namespace,pod_phase:failed,$scope,$vsphere_cluster,$vsphere_host,$vsphere_vcenter}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes_state.pod.status_phase{$namespace,pod_phase:pending,$scope,$vsphere_cluster,$vsphere_host,$vsphere_vcenter}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:kubernetes_state.pod.status_phase{$namespace,pod_phase:running,$scope,$vsphere_cluster,$vsphere_host,$vsphere_vcenter}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "sum:kubernetes_state.pod.status_phase{$namespace,pod_phase:succeeded,$scope,$vsphere_cluster,$vsphere_host,$vsphere_vcenter}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "cool"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Pods Status by Phase",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 3494762038682958,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.pod.status_phase{$namespace,$scope,$vsphere_cluster,$vsphere_host,$vsphere_vcenter} by {pod_phase}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Pods Status by Phase",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 5870366959138634,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.cpu.usage.total{$scope,$namespace,$deployment,!pod_name:no_pod,$statefulset,$daemonset,$job,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$kube_container_name} by {pod_name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "title": "CPU-intensive pods",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 6891432778307160,
+                        "layout": {
+                            "height": 3,
+                            "width": 2,
+                            "x": 0,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "max",
+                                "value"
+                            ],
+                            "legend_layout": "vertical",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "CPU Usage",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.cpu.usage.total{$namespace,$deployment,$scope,$statefulset,$daemonset,$job,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$kube_container_name} by {pod_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "cool"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "CPU Usage by Pod",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 1565688625897228,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 2,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.memory.usage{$scope,$namespace,$deployment,!pod_name:no_pod,$statefulset,$daemonset,$job,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$kube_container_name} by {pod_name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "title": "Memory-intensive pods",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 8613566619352784,
+                        "layout": {
+                            "height": 3,
+                            "width": 2,
+                            "x": 6,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "max",
+                                "value"
+                            ],
+                            "legend_layout": "vertical",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Memory Usage",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.memory.usage{$namespace,$deployment,$scope,$statefulset,$daemonset,$job,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$kube_container_name} by {pod_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "cool"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Memory Usage by Pod",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 6589391191734594,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 2000
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_yellow",
+                                            "value": 1500
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_green",
+                                            "value": 3000
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "max",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.pod.count{$scope,$namespace,$vsphere_cluster,$vsphere_host,$vsphere_vcenter} by {kube_namespace}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Pods Running By Namespace",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 6161160205724504,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 9
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_green",
+                                            "value": 24
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 32
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_yellow",
+                                            "value": 24
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.pod.ready{$scope,$namespace,condition:true,$vsphere_cluster,$vsphere_host,$vsphere_vcenter} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Pods in Ready State By Node",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 8704870376063862,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 9
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 0
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_green",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "exclude_null(query1)",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.pod.ready{condition:false,$scope,$namespace,$vsphere_cluster,$vsphere_host,$vsphere_vcenter} by {kube_namespace}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Pods in Bad State (Not Ready) by Namespace",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 3848732272463314,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 9
+                        }
+                    }
+                ]
+            },
+            "id": 8933567865449096,
+            "layout": {
+                "height": 13,
+                "width": 12,
+                "x": 0,
+                "y": 14
+            }
+        },
+        {
+            "definition": {
+                "background_color": "purple",
+                "layout_type": "ordered",
+                "title": "Containers",
+                "title_align": "center",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "event_size": "l",
+                            "query": "source:(containerd OR docker) $vsphere_host $vsphere_cluster $vsphere_vcenter $kube_container_name",
+                            "title": "Container Events",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "event_stream"
+                        },
+                        "id": 7819643771002422,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:kubernetes_state.container.status_report.count.waiting{$scope,$namespace,$vsphere_host,$vsphere_cluster,$vsphere_vcenter,$pod_name,$kube_container_name} by {reason,kube_container_name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Containers in Waiting State by Reason",
+                            "type": "treemap"
+                        },
+                        "id": 8438619968552878,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Ready",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Running",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Terminated",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "Waiting",
+                                            "formula": "query4"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.container.ready{$namespace,$scope,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$pod_name,$kube_container_name}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes_state.container.running{$namespace,$scope,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$pod_name,$kube_container_name}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:kubernetes_state.container.terminated{$namespace,$scope,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$pod_name,$kube_container_name}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "sum:kubernetes_state.container.waiting{$namespace,$scope,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$pod_name,$kube_container_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "purple"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Containers States",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 5129512503162770,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.containers.state.terminated{$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$scope,$deployment,$statefulset,$daemonset,$job,$pod_name,$kube_container_name} by {pod_name,reason}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "purple"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Containers OOM Killed (by Pod)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 935123463493438,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "max",
+                                "value"
+                            ],
+                            "legend_layout": "vertical",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "CrashloopBackOff",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.containers.state.waiting{$namespace,$deployment,reason:crashloopbackoff,$scope,$statefulset,$daemonset,$job,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$pod_name,$kube_container_name} by {pod_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "purple"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Containers in CrashloopBackOff (by Pod)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 656508063035940,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "area",
+                                    "formulas": [
+                                        {
+                                            "alias": "Restarts",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.container.restarts{$scope,$namespace,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$pod_name,$kube_container_name} by {pod_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "purple"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Container Restarts by Pod",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 8344338296649714,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "max",
+                                "value"
+                            ],
+                            "legend_layout": "vertical",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "CPU Usage",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.cpu.usage.total{$namespace,$deployment,$scope,$statefulset,$daemonset,$job,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$pod_name,$kube_container_name} by {kube_container_name,container_id}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "purple"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "CPU Usage by Container",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 4168817338968104,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 9
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "max",
+                                "value"
+                            ],
+                            "legend_layout": "vertical",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Memory Usage",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.memory.usage{$namespace,$deployment,$scope,$statefulset,$daemonset,$job,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$pod_name,$kube_container_name} by {kube_container_name,container_id}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "purple"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Memory Usage by Container",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 548956235839998,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 9
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "max",
+                                "value"
+                            ],
+                            "legend_layout": "vertical",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Received Bytes",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Transmitted Bytes",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.network.rx_bytes{$namespace,$deployment,$scope,$statefulset,$daemonset,$job,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$pod_name} by {pod_name}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes.network.tx_bytes{$namespace,$deployment,$scope,$statefulset,$daemonset,$job,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$pod_name} by {pod_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "purple"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Network Rate by Pod",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 4452460060384354,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 12
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "max",
+                                "value",
+                                "avg"
+                            ],
+                            "legend_layout": "vertical",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Received Errors",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Transmitted Errors",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.network.rx_errors{$namespace,$deployment,$scope,$statefulset,$daemonset,$job,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$pod_name} by {pod_name}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes.network.tx_errors{$namespace,$deployment,$scope,$statefulset,$daemonset,$job,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$pod_name} by {pod_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "purple"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Network Errors by Pod",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 2910207004674228,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 12
+                        }
+                    }
+                ]
+            },
+            "id": 2768845919270966,
+            "layout": {
+                "height": 16,
+                "is_column_break": true,
+                "width": 12,
+                "x": 0,
+                "y": 27
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_green",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "vSphere",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "green",
+                            "content": "This group of metrics is collected via the VMware vCenter API using the [vSphere integration](https://docs.datadoghq.com/integrations/vsphere/). \n\nThese metrics allow for easy visualization of the overall states of Hosts, VMs, and Datastores in your vSphere environment",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 5897850047060272,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "event_size": "l",
+                            "query": "source:vsphere $vsphere_vcenter $vsphere_host",
+                            "time": {},
+                            "title": "vSphere Events",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "event_stream"
+                        },
+                        "id": 7515715942197606,
+                        "layout": {
+                            "height": 3,
+                            "width": 9,
+                            "x": 3,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "CPU Usage",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.cpu.usage.avg{$scope,vsphere_type:host,$vsphere_vcenter,$vsphere_cluster,$vsphere_host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "cool"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "ESXi Host CPU Usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3126354812194200,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_green",
+                                            "value": 70
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_yellow",
+                                            "value": 90
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 90
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.cpu.usage.avg{$vsphere_host,vsphere_type:host,$vsphere_vcenter,$vsphere_cluster,$kube_container_name} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "title": "Top ESXi by CPU Utilization",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 2957727817265692,
+                        "layout": {
+                            "height": 3,
+                            "width": 2,
+                            "x": 4,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Memory Usage",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.mem.usage.avg{vsphere_type:host,$vsphere_host,$scope,$vsphere_vcenter,$vsphere_cluster} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "cool"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "ESXi Host Memory Usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8761075773161068,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 6,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_green",
+                                            "value": 70
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_yellow",
+                                            "value": 90
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 90
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.mem.usage.avg{vsphere_type:host,$vsphere_vcenter,$kube_container_name} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "title": "Top ESXi by Memory Usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 7136486823037350,
+                        "layout": {
+                            "height": 3,
+                            "width": 2,
+                            "x": 10,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "CPU Usage",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.cpu.usage.avg{$scope,$vsphere_host,vsphere_type:vm,$vsphere_vcenter,$vsphere_cluster} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "cool"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "VM CPU Usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8170269430018268,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_green",
+                                            "value": 70
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_yellow",
+                                            "value": 90
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 90
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 25,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.cpu.usage.avg{vsphere_type:vm,$vsphere_host,$vsphere_vcenter,$kube_container_name} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "title": "Top VMs by CPU Utilization",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 7924588845832026,
+                        "layout": {
+                            "height": 3,
+                            "width": 2,
+                            "x": 4,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Memory Usage",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.mem.usage.avg{vsphere_type:vm,$vsphere_host,$scope,$vsphere_vcenter,$vsphere_cluster} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "cool"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "VM Memory Usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1437628322342944,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 6,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_green",
+                                            "value": 70
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_yellow",
+                                            "value": 90
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 90
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.mem.usage.avg{vsphere_type:vm,$vsphere_vcenter,$vsphere_host,$vsphere_cluster,$scope,$kube_container_name} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "title": "Top VMs by Memory Usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 6013726188836522,
+                        "layout": {
+                            "height": 3,
+                            "width": 2,
+                            "x": 10,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#632ba6",
+                                            "palette": "custom_bg",
+                                            "value": 1
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 - query2",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.disk.capacity.latest{$vsphere_host,$scope,$vsphere_vcenter,$vsphere_cluster} by {vsphere_datastore}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:vsphere.disk.used.latest{$scope,$vsphere_host,$vsphere_vcenter,$vsphere_cluster} by {vsphere_datastore}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Bytes Free by Datastore",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 6658821916948094,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 9
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query2 / query1 * 100"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:vsphere.disk.used.latest{$scope,$vsphere_host,$vsphere_vcenter,$vsphere_cluster} by {vsphere_datastore}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.disk.capacity.latest{$vsphere_host,$scope,$vsphere_vcenter,$vsphere_cluster} by {vsphere_datastore}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Percent Disk Utilization by Datastore",
+                            "type": "treemap"
+                        },
+                        "id": 3341106827163402,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 9
+                        }
+                    }
+                ]
+            },
+            "id": 2451476149426598,
+            "layout": {
+                "height": 13,
+                "width": 12,
+                "x": 0,
+                "y": 43
+            }
+        }
+    ]
+}

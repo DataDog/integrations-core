@@ -95,6 +95,8 @@ MEMORY_METRICS = (
     'proxysql.memory.stack_memory_cluster_threads',
 )
 
+BACKENDS_METRICS = ('proxysql.backends.count',)
+
 QUERY_RULES_TAGS_METRICS = ('proxysql.query_rules.rule_hits',)
 
 

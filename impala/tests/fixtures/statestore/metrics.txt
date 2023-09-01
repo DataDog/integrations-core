@@ -1,0 +1,123 @@
+# HELP impala_rpc_method_statestore_StatestoreService_RegisterSubscriber_call_duration
+# TYPE impala_rpc_method_statestore_StatestoreService_RegisterSubscriber_call_duration summary
+impala_rpc_method_statestore_StatestoreService_RegisterSubscriber_call_duration{quantile="0.2"} 0.001
+impala_rpc_method_statestore_StatestoreService_RegisterSubscriber_call_duration{quantile="0.5"} 0.002
+impala_rpc_method_statestore_StatestoreService_RegisterSubscriber_call_duration{quantile="0.7"} 0.003
+impala_rpc_method_statestore_StatestoreService_RegisterSubscriber_call_duration{quantile="0.9"} 0.004
+impala_rpc_method_statestore_StatestoreService_RegisterSubscriber_call_duration{quantile="0.95"} 0.005
+impala_rpc_method_statestore_StatestoreService_RegisterSubscriber_call_duration{quantile="0.999"} 0.006
+impala_rpc_method_statestore_StatestoreService_RegisterSubscriber_call_duration_count 50
+impala_rpc_method_statestore_StatestoreService_RegisterSubscriber_call_duration_sum 0.004
+# HELP impala_thrift_server_StatestoreService_connection_setup_time Amount of time clients of StateStore Service spent waiting for connection to be set up
+# TYPE impala_thrift_server_StatestoreService_connection_setup_time summary
+impala_thrift_server_StatestoreService_connection_setup_time{quantile="0.2"} 1
+impala_thrift_server_StatestoreService_connection_setup_time{quantile="0.5"} 2
+impala_thrift_server_StatestoreService_connection_setup_time{quantile="0.7"} 3
+impala_thrift_server_StatestoreService_connection_setup_time{quantile="0.9"} 4
+impala_thrift_server_StatestoreService_connection_setup_time{quantile="0.95"} 5
+impala_thrift_server_StatestoreService_connection_setup_time{quantile="0.999"} 6
+impala_thrift_server_StatestoreService_connection_setup_time_count 2
+impala_thrift_server_StatestoreService_connection_setup_time_sum 20
+# HELP impala_thrift_server_StatestoreService_svc_thread_wait_time Amount of time clients of StateStore Service spent waiting for service threads
+# TYPE impala_thrift_server_StatestoreService_svc_thread_wait_time summary
+impala_thrift_server_StatestoreService_svc_thread_wait_time{quantile="0.2"} 7
+impala_thrift_server_StatestoreService_svc_thread_wait_time{quantile="0.5"} 8
+impala_thrift_server_StatestoreService_svc_thread_wait_time{quantile="0.7"} 9
+impala_thrift_server_StatestoreService_svc_thread_wait_time{quantile="0.9"} 10
+impala_thrift_server_StatestoreService_svc_thread_wait_time{quantile="0.95"} 11
+impala_thrift_server_StatestoreService_svc_thread_wait_time{quantile="0.999"} 12
+impala_thrift_server_StatestoreService_svc_thread_wait_time_count 4
+impala_thrift_server_StatestoreService_svc_thread_wait_time_sum 21
+# HELP impala_thrift_server_StatestoreService_connection_setup_queue_size The number of connections to the Statestore Service that have been accepted and are waiting to be setup.
+# TYPE impala_thrift_server_StatestoreService_connection_setup_queue_size gauge
+impala_thrift_server_StatestoreService_connection_setup_queue_size 4
+# HELP impala_thrift_server_StatestoreService_connections_in_use The number of active connections to this StateStore's service.
+# TYPE impala_thrift_server_StatestoreService_connections_in_use gauge
+impala_thrift_server_StatestoreService_connections_in_use 8
+# HELP impala_statestore_live_backends The number of registered Statestore subscribers.
+# TYPE impala_statestore_live_backends gauge
+impala_statestore_live_backends 2
+# HELP impala_subscriber_heartbeat_client_cache_total_clients The total number of clients in the Statestore heartbeat client cache.
+# TYPE impala_subscriber_heartbeat_client_cache_total_clients gauge
+impala_subscriber_heartbeat_client_cache_total_clients 2
+# HELP impala_thrift_server_StatestoreService_timedout_cnxn_requests The number of connection requests to the Statestore Service that have been timed out waiting to be setup.
+# TYPE impala_thrift_server_StatestoreService_timedout_cnxn_requests gauge
+impala_thrift_server_StatestoreService_timedout_cnxn_requests 13
+# HELP impala_subscriber_update_state_client_cache_clients_in_use The number of clients in use by the Statestore update state client cache.
+# TYPE impala_subscriber_update_state_client_cache_clients_in_use gauge
+impala_subscriber_update_state_client_cache_clients_in_use 12
+# HELP impala_thrift_server_StatestoreService_total_connections The total number of connections made to this StateStore's StateStore service over its lifetime.
+# TYPE impala_thrift_server_StatestoreService_total_connections counter
+impala_thrift_server_StatestoreService_total_connections 14
+# HELP impala_thread_manager_total_threads_created Threads created over the lifetime of the process.
+# TYPE impala_thread_manager_total_threads_created gauge
+impala_thread_manager_total_threads_created 40
+# HELP impala_thread_manager_running_threads The number of running threads in this process.
+# TYPE impala_thread_manager_running_threads gauge
+impala_thread_manager_running_threads 36
+# HELP impala_statestore_total_key_size_bytes The sum of the size of all keys for all topics tracked by the StateStore.
+# TYPE impala_statestore_total_key_size_bytes gauge
+impala_statestore_total_key_size_bytes 71
+# HELP impala_statestore_total_value_size_bytes The sum of the size of all values for all topics tracked by the StateStore.
+# TYPE impala_statestore_total_value_size_bytes gauge
+impala_statestore_total_value_size_bytes 209
+# HELP impala_statestore_topic_update_durations The time (sec) spent sending non-priority topic update RPCs. Includes subscriber-side processing time and network transmission time.
+# TYPE impala_statestore_topic_update_durations counter
+impala_statestore_topic_update_durations_total 734
+impala_statestore_topic_update_durations_last 0.001
+impala_statestore_topic_update_durations_min 0
+impala_statestore_topic_update_durations_max 3.475
+impala_statestore_topic_update_durations_mean 0.00629019
+impala_statestore_topic_update_durations_stddev 0.12813
+
+# HELP impala_subscriber_heartbeat_client_cache_clients_in_use The number of clients in use by the Statestore heartbeat client cache.
+# TYPE impala_subscriber_heartbeat_client_cache_clients_in_use gauge
+impala_subscriber_heartbeat_client_cache_clients_in_use 0
+# HELP impala_statestore_total_topic_size_bytes The sum of the size of all keys and all values for all topics tracked by the StateStore.
+# TYPE impala_statestore_total_topic_size_bytes gauge
+impala_statestore_total_topic_size_bytes 280
+# HELP impala_subscriber_update_state_client_cache_total_clients The total number of clients in the Statestore update state client cache.
+# TYPE impala_subscriber_update_state_client_cache_total_clients gauge
+impala_subscriber_update_state_client_cache_total_clients 3
+# HELP impala_statestore_priority_topic_update_durations The time (sec) spent sending priority topic update RPCs. Includes subscriber-side processing time and network transmission time.
+# TYPE impala_statestore_priority_topic_update_durations counter
+impala_statestore_priority_topic_update_durations_total 7161
+impala_statestore_priority_topic_update_durations_last 0.001
+impala_statestore_priority_topic_update_durations_min 0
+impala_statestore_priority_topic_update_durations_max 0.076
+impala_statestore_priority_topic_update_durations_mean 0.00119969
+impala_statestore_priority_topic_update_durations_stddev 0.00126705
+
+# HELP impala_statestore_heartbeat_durations The time (sec) spent sending heartbeat RPCs. Includes subscriber-side processing time and network transmission time.
+# TYPE impala_statestore_heartbeat_durations counter
+impala_statestore_heartbeat_durations_total 1468
+impala_statestore_heartbeat_durations_last 0.002
+impala_statestore_heartbeat_durations_min 0
+impala_statestore_heartbeat_durations_max 0.01
+impala_statestore_heartbeat_durations_mean 0.000962534
+impala_statestore_heartbeat_durations_stddev 0.000877721
+
+# HELP impala_memory_rss Resident set size (RSS) of this process, including TCMalloc, buffer pool and Jvm.
+# TYPE impala_memory_rss gauge
+impala_memory_rss 47427584
+# HELP impala_memory_total_used Total memory currently used by TCMalloc and buffer pool.
+# TYPE impala_memory_total_used gauge
+impala_memory_total_used 5316608
+# HELP impala_memory_mapped_bytes Total bytes of memory mappings in this process (the virtual memory size).
+# TYPE impala_memory_mapped_bytes gauge
+impala_memory_mapped_bytes 544841728
+# HELP impala_tcmalloc_physical_bytes_reserved Derived metric computing the amount of physical memory (in bytes) used by the process, including that actually in use and free bytes reserved by tcmalloc. Does not include the tcmalloc metadata.
+# TYPE impala_tcmalloc_physical_bytes_reserved gauge
+impala_tcmalloc_physical_bytes_reserved 5316608
+# HELP impala_tcmalloc_pageheap_free_bytes Number of bytes in free, mapped pages in page heap. These bytes can be used to fulfill allocation requests. They always count towards virtual memory usage, and unless the underlying memory is swapped out by the OS, they also count towards physical memory usage.
+# TYPE impala_tcmalloc_pageheap_free_bytes gauge
+impala_tcmalloc_pageheap_free_bytes 10
+# HELP impala_tcmalloc_pageheap_unmapped_bytes Number of bytes in free, unmapped pages in page heap. These are bytes that have been released back to the OS, possibly by one of the MallocExtension "Release" calls. They can be used to fulfill allocation requests, but typically incur a page fault. They always count towards virtual memory usage, and depending on the OS, typically do not count towards physical memory usage.
+# TYPE impala_tcmalloc_pageheap_unmapped_bytes gauge
+impala_tcmalloc_pageheap_unmapped_bytes 974848
+# HELP impala_tcmalloc_bytes_in_use Number of bytes used by the application. This will not typically match the memory use reported by the OS, because it does not include TCMalloc overhead or memory fragmentation.
+# TYPE impala_tcmalloc_bytes_in_use gauge
+impala_tcmalloc_bytes_in_use 3790248
+# HELP impala_tcmalloc_total_bytes_reserved Bytes of system memory reserved by TCMalloc.
+# TYPE impala_tcmalloc_total_bytes_reserved gauge
+impala_tcmalloc_total_bytes_reserved 6291456

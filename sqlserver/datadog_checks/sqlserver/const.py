@@ -9,6 +9,33 @@ PERF_AVERAGE_BULK = 1073874176
 PERF_COUNTER_BULK_COUNT = 272696576
 PERF_COUNTER_LARGE_RAWCOUNT = 65792
 
+# Engine Editions; see:
+# https://docs.microsoft.com/en-us/sql/t-sql/functions/serverproperty-transact-sql
+ENGINE_EDITION_PERSONAL = 1
+ENGINE_EDITION_STANDARD = 2
+ENGINE_EDITION_ENTERPRISE = 3
+ENGINE_EDITION_EXPRESS = 4
+ENGINE_EDITION_SQL_DATABASE = 5
+ENGINE_EDITION_AZURE_SYNAPSE_ANALYTICS = 6
+ENGINE_EDITION_AZURE_MANAGED_INSTANCE = 8
+ENGINE_EDITION_AZURE_SQL_EDGE = 9
+ENGINE_EDITION_AZURE_SYNAPSE_SERVERLESS_POOL = 11
+
+# Keys of the static info cache, used to cache server info which does not change
+STATIC_INFO_VERSION = 'version'
+STATIC_INFO_MAJOR_VERSION = 'major_version'
+STATIC_INFO_ENGINE_EDITION = 'engine_edition'
+AWS_RDS_HOSTNAME_SUFFIX = ".rds.amazonaws.com"
+AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES = {
+    # azure sql database has a special case, where we should emit
+    # a resource for both the server and the database because
+    # azure treats these as two separate entities, and both can have
+    # related tags and metrics
+    "sql_database": "azure_sql_server_database,azure_sql_server",
+    "managed_instance": "azure_sql_server_managed_instance",
+    "virtual_machine": "azure_virtual_machine_instance",
+}
+
 # Metric discovery queries
 COUNTER_TYPE_QUERY = """select distinct cntr_type
                         from sys.dm_os_performance_counters
@@ -23,7 +50,11 @@ BASE_NAME_QUERY = (
 )
 
 DEFAULT_AUTODISCOVERY_INTERVAL = 3600
-AUTODISCOVERY_QUERY = "select name from sys.databases"
+AUTODISCOVERY_QUERY = """select {columns} from sys.databases"""
+expected_sys_databases_columns = [
+    'name',
+    'physical_database_name',
+]
 
 VALID_METRIC_TYPES = ('gauge', 'rate', 'histogram')
 
@@ -57,17 +88,17 @@ INSTANCE_METRICS = [
     ('sqlserver.stats.batch_requests', 'Batch Requests/sec', ''),  # BULK_COUNT
     ('sqlserver.stats.sql_compilations', 'SQL Compilations/sec', ''),  # BULK_COUNT
     ('sqlserver.stats.sql_recompilations', 'SQL Re-Compilations/sec', ''),  # BULK_COUNT
-]
-
-# Performance table metrics, initially configured to track at instance-level only
-# With auto-discovery enabled, these metrics will be extended accordingly
-# datadog metric name, counter name, instance name
-INSTANCE_METRICS_TOTAL = [
     # SQLServer:Locks
     ('sqlserver.stats.lock_waits', 'Lock Waits/sec', '_Total'),  # BULK_COUNT
     # SQLServer:Plan Cache
     ('sqlserver.cache.object_counts', 'Cache Object Counts', '_Total'),
     ('sqlserver.cache.pages', 'Cache Pages', '_Total'),
+]
+
+# Performance table metrics, initially configured to track at instance-level only
+# With auto-discovery enabled, these metrics will be extended accordingly
+# datadog metric name, counter name, instance name
+INSTANCE_METRICS_DATABASE = [
     # SQLServer:Databases
     ('sqlserver.database.backup_restore_throughput', 'Backup/Restore Throughput/sec', '_Total'),
     ('sqlserver.database.log_bytes_flushed', 'Log Bytes Flushed/sec', '_Total'),
@@ -93,18 +124,6 @@ AO_METRICS_PRIMARY = [
 
 AO_METRICS_SECONDARY = [
     ('sqlserver.ao.secondary_replica_health', 'sys.dm_hadr_availability_group_states', 'secondary_recovery_health'),
-]
-
-# AlwaysOn metrics for Failover Cluster Instances (FCI).
-# This is in a separate category than other AlwaysOn metrics
-# because FCI specifies a different SQLServer setup
-# compared to Availability Groups (AG).
-# datadog metric name, sql table, column name
-# FCI status enum:
-#   0 = Up, 1 = Down, 2 = Paused, 3 = Joining, -1 = Unknown
-FCI_METRICS = [
-    ('sqlserver.fci.status', 'sys.dm_os_cluster_nodes', 'status'),
-    ('sqlserver.fci.is_current_owner', 'sys.dm_os_cluster_nodes', 'is_current_owner'),
 ]
 
 # Non-performance table metrics - can be database specific
@@ -151,22 +170,14 @@ DATABASE_FRAGMENTATION_METRICS = [
         'sys.dm_db_index_physical_stats',
         'avg_fragment_size_in_pages',
     ),
+    (
+        'sqlserver.database.index_page_count',
+        'sys.dm_db_index_physical_stats',
+        'page_count',
+    ),
 ]
 
 DATABASE_MASTER_FILES = [
     ('sqlserver.database.master_files.size', 'sys.master_files', 'size'),
     ('sqlserver.database.master_files.state', 'sys.master_files', 'state'),
-]
-
-DATABASE_FILES_IO = [
-    ('sqlserver.files.size_on_disk', 'size_on_disk_bytes', 'gauge'),
-    ('sqlserver.files.reads', 'num_of_reads', 'monotonic_count'),
-    ('sqlserver.files.read_bytes', 'num_of_bytes_read', 'monotonic_count'),
-    ('sqlserver.files.read_io_stall', 'io_stall_read_ms', 'monotonic_count'),
-    ('sqlserver.files.read_io_stall_queued', 'io_stall_queued_read_ms', 'monotonic_count'),
-    ('sqlserver.files.writes', 'num_of_writes', 'monotonic_count'),
-    ('sqlserver.files.written_bytes', 'num_of_bytes_written', 'monotonic_count'),
-    ('sqlserver.files.write_io_stall', 'io_stall_write_ms', 'monotonic_count'),
-    ('sqlserver.files.write_io_stall_queued', 'io_stall_queued_write_ms', 'monotonic_count'),
-    ('sqlserver.files.io_stall', 'io_stall', 'monotonic_count'),
 ]

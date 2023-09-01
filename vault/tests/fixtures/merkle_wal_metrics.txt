@@ -1,0 +1,35 @@
+# HELP vault_merkle_flushDirty vault_merkle_flushDirty
+# TYPE vault_merkle_flushDirty summary
+vault_merkle_flushDirty{quantile="0.5"} 0.036549897102340934
+vault_merkle_flushDirty{quantile="0.9"} 0.072019739201847930
+vault_merkle_flushDirty{quantile="0.99"} 0.102394830281734351
+vault_merkle_flushDirty_sum 592393.4352981173   
+vault_merkle_flushDirty_count 38328
+# HELP vault_merkle_saveCheckpoint vault_merkle_saveCheckpoint
+# TYPE vault_merkle_saveCheckpoint summary
+vault_merkle_saveCheckpoint{quantile="0.5"} 33.31519768321015
+vault_merkle_saveCheckpoint{quantile="0.9"} 35.32434113772411
+vault_merkle_saveCheckpoint{quantile="0.99"} 35.33231113274606
+vault_merkle_saveCheckpoint_sum 77911.49821207694
+vault_merkle_saveCheckpoint_count 2094
+# HELP vault_wal_deleteWALs vault_wal_deleteWALs
+# TYPE vault_wal_deleteWALs summary
+vault_wal_deleteWALs{quantile="0.5"} NaN
+vault_wal_deleteWALs{quantile="0.9"} NaN
+vault_wal_deleteWALs{quantile="0.99"} NaN
+vault_wal_deleteWALs_sum 40291.86017561583
+vault_wal_deleteWALs_count 261
+# HELP vault_wal_persistWALs vault_wal_persistWALs
+# TYPE vault_wal_persistWALs summary
+vault_wal_persistWALs{quantile="0.5"} NaN
+vault_wal_persistWALs{quantile="0.9"} NaN
+vault_wal_persistWALs{quantile="0.99"} NaN
+vault_wal_persistWALs_sum 1.4180657284152372e+06
+vault_wal_persistWALs_count 31041
+# HELP vault_wal_flushReady vault_wal_flushReady
+# TYPE vault_wal_flushReady summary
+vault_wal_flushReady{quantile="0.5"} NaN
+vault_wal_flushReady{quantile="0.9"} NaN
+vault_wal_flushReady{quantile="0.99"} NaN
+vault_wal_flushReady_sum 6.27692095097314e+06
+vault_wal_flushReady_count 91291

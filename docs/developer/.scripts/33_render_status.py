@@ -5,6 +5,7 @@ from datadog_checks.dev.tooling.utils import (
     get_available_logs_integrations,
     get_check_file,
     get_default_config_spec,
+    get_hatch_file,
     get_testable_checks,
     get_tox_file,
     get_valid_checks,
@@ -17,7 +18,9 @@ from datadog_checks.dev.tooling.utils import (
     has_process_signature,
     has_saved_views,
     has_recommended_monitor,
-    is_tile_only, is_logs_only, get_available_recommended_monitors_integrations,
+    is_tile_only,
+    is_logs_only,
+    get_available_recommended_monitors_integrations,
 )
 
 MARKER = '<docs-insert-status>'
@@ -200,9 +203,12 @@ def render_latest_version_progress():
     for check in valid_checks:
         skip_check = False
 
-        with open(get_tox_file(check)) as tox_file:
-            for line in tox_file:
-                if line.startswith('[testenv:latest]'):
+        hatch_config_file = get_hatch_file(check)
+        tox_config_file = get_tox_file(check)
+        config_file_path = hatch_config_file if os.path.isfile(hatch_config_file) else tox_config_file
+        with open(config_file_path) as config_file:
+            for line in config_file:
+                if line.startswith(('[testenv:latest]', '[envs.latest]', 'latest-env = true')):
                     supported_checks += 1
                     status = 'X'
                     break

@@ -11,19 +11,19 @@ with the beautiful [Material for MkDocs][docs-theme] theme.
 
 We use a select few [MkDocs plugins][mkdocs-plugins] to achieve the following:
 
-- minify HTML ([:octicons-octoface-24:][docs-plugin-minify])
-- display the date of the last Git modification of every page ([:octicons-octoface-24:][docs-plugin-revision-date])
-- automatically generate docs based on code and docstrings ([:octicons-octoface-24:][docs-plugin-auto-doc])
-- export the site as a PDF ([:octicons-octoface-24:][docs-plugin-pdf-export])
+- minify HTML ([:material-github:][docs-plugin-minify])
+- display the date of the last Git modification of every page ([:material-github:][docs-plugin-revision-date])
+- automatically generate docs based on code and docstrings ([:material-github:][docs-plugin-auto-doc])
+- export the site as a PDF ([:material-github:][docs-plugin-pdf-export])
 
 ## Extensions
 
 We also depend on a few [Python-Markdown extensions][python-markdown-extensions] to achieve the following:
 
-- support for emojis, collapsible elements, code highlighting, and other advanced features courtesy of the PyMdown extension suite ([:octicons-octoface-24:][docs-extension-pymdown])
-- ability to inline SVG icons from [Material][icons-material], [FontAwesome][icons-fontawesome], and [Octicons][icons-octicons] ([:octicons-octoface-24:][docs-extension-material])
-- allow arbitrary [scripts](#scripts) to modify MkDocs input files ([:octicons-octoface-24:][docs-extension-patcher])
-- automatically generate reference docs for [Click][click-github]-based command line interfaces ([:octicons-octoface-24:][docs-extension-auto-cli])
+- support for emojis, collapsible elements, code highlighting, and other advanced features courtesy of the PyMdown extension suite ([:material-github:][docs-extension-pymdown])
+- ability to inline SVG icons from [Material][icons-material], [FontAwesome][icons-fontawesome], and [Octicons][icons-octicons] ([:material-github:][docs-extension-material])
+- allow arbitrary [scripts](#scripts) to modify MkDocs input files ([:material-github:][docs-extension-patcher])
+- automatically generate reference docs for [Click][click-github]-based command line interfaces ([:material-github:][docs-extension-auto-cli])
 
 ## References
 
@@ -63,7 +63,7 @@ We use some [scripts][docs-scripts] to dynamically modify pages before being pro
 
 We [configure][root-tox-config] a [tox][tox-github] environment called `docs` that provides all the dependencies necessary to build the documentation.
 
-To build and view the documentation in your browser, run the [serve](../ddev/cli.md#serve) command (the first invocation may take a few extra moments):
+To build and view the documentation in your browser, run the [serve](../ddev/cli.md#ddev-docs-serve) command (the first invocation may take a few extra moments):
 
 ```
 ddev docs serve
@@ -75,7 +75,7 @@ By default, live reloading is enabled so any modification will be reflected in n
 
 ## Deploy
 
-Our [CI](ci.md#docs) deploys the documentation to [GitHub Pages][github-pages-docs] if any changes occur on commits to the `master` branch.
+Our CI [deploys](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/docs.yml) the documentation to [GitHub Pages][github-pages-docs] if any changes occur on commits to the `master` branch.
 
 !!! danger
     **Never make documentation non-deterministic as it will trigger deploys for every single commit.**

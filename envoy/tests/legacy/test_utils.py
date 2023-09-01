@@ -1,8 +1,11 @@
+# (C) Datadog, Inc. 2021-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
+
 from datadog_checks.envoy.utils import make_metric_tree
 
-from .common import requires_legacy_environment
-
-pytestmark = [requires_legacy_environment]
+pytestmark = [pytest.mark.unit]
 
 
 def test_make_metric_tree():

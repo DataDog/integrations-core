@@ -3,6 +3,7 @@ version: "3"
 services:
   hadoop-single-node:
     image: sequenceiq/hadoop-docker:${YARN_VERSION}
+    container_name: dd-yarn
     hostname: yarn-container
     environment:
       - CLUSTER_NAME=SparkCluster
@@ -10,5 +11,6 @@ services:
     ports:
       - "8088:8088"
     volumes:
+      - ./run_app.sh:/run_app.sh
       - ${DD_LOG_1}:/usr/local/hadoop/logs/yarn-root-nodemanager-yarn-container.log
       - ${DD_LOG_2}:/usr/local/hadoop/logs/yarn--resourcemanager-yarn-container.log

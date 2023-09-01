@@ -9,7 +9,7 @@ HERE = get_here()
 
 CHECK_NAME = 'snowflake'
 INSTANCE = {
-    'user': 'testuser',
+    'username': 'testuser',
     'password': 'pass',
     'account': 'test_acct.us-central1.gcp',
     'database': 'SNOWFLAKE',
@@ -18,8 +18,9 @@ INSTANCE = {
     'disable_generic_tags': True,
     'login_timeout': 3,
 }
+
 OAUTH_INSTANCE = {
-    'user': 'testuser',
+    'username': 'testuser',
     'account': 'test_acct.us-central1.gcp',
     'database': 'SNOWFLAKE',
     'schema': 'ACCOUNT_USAGE',

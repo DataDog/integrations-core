@@ -3,17 +3,19 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-import mock
 import pytest
 
 from datadog_checks.vertica import VerticaCheck
+from datadog_checks.vertica.vertica import VerticaClient
 
 from . import common
 from .metrics import ALL_METRICS
 
 
 @pytest.mark.e2e
-def test_check_e2e(dd_agent_check, instance):
+@pytest.mark.parametrize('connection_load_balance', [False, True])
+def test_check_e2e(dd_agent_check, instance, connection_load_balance):
+    instance["connection_load_balance"] = connection_load_balance
     aggregator = dd_agent_check(instance, rate=True)
 
     for metric in ALL_METRICS:
@@ -36,7 +38,8 @@ def test_check(aggregator, datadog_agent, instance, dd_run_check):
 
     aggregator.assert_all_metrics_covered()
 
-    version_metadata = {'version.scheme': 'semver', 'version.major': os.environ['VERTICA_VERSION'][0]}
+    major_version = common.VERTICA_MAJOR_VERSION
+    version_metadata = {'version.scheme': 'semver', 'version.major': str(major_version)}
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata_count(len(version_metadata) + 4)
 
@@ -55,18 +58,39 @@ def test_vertica_log_file_not_created(aggregator, instance, dd_run_check):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_check_connection_load_balance(instance, dd_run_check):
-    instance['connection_load_balance'] = True
-    check = VerticaCheck('vertica', {}, [instance])
+def test_check_connection_load_balance(monkeypatch):
+    options = common.connection_options_from_config(common.CONFIG)
+    options['connection_load_balance'] = True
+    client = VerticaClient(options)
 
-    def mock_reset_connection():
-        raise Exception('reset_connection was called')
+    client.connect()
+    old_connection = client.connection
+    client.connect()
 
-    with mock.patch('vertica_python.vertica.connection.Connection.reset_connection', side_effect=mock_reset_connection):
-        dd_run_check(check)
+    assert client.connection != old_connection
 
-        with pytest.raises(Exception, match='reset_connection was called'):
-            dd_run_check(check, extract_message=True)
+
+@pytest.mark.usefixtures('dd_environment')
+def test_connect_resets_connection_when_connection_closed():
+    options = common.connection_options_from_config(common.CONFIG)
+    client = VerticaClient(options)
+
+    client.connect()
+    client.connection.close()
+
+    old_connection = client.connection
+    client.connect()
+
+    assert client.connection != old_connection
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_connect_when_connection_is_open_reuses_connection():
+    options = common.connection_options_from_config(common.CONFIG)
+    client = VerticaClient(options)
+
+    conn = client.connect()
+    assert client.connect() == conn
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -112,7 +136,6 @@ def test_include_system_metric_group(aggregator, instance, dd_run_check):
     check = VerticaCheck('vertica', {}, [instance])
     dd_run_check(check)
 
-    aggregator.assert_metric('vertica.license.expiration', metric_type=aggregator.GAUGE)
     aggregator.assert_metric('vertica.node.total', metric_type=aggregator.GAUGE)
     aggregator.assert_metric('vertica.node.down', metric_type=aggregator.GAUGE)
     aggregator.assert_metric('vertica.node.allowed', metric_type=aggregator.GAUGE)

@@ -127,7 +127,7 @@
                             "precision": 0,
                             "requests": [
                                 {
-                                    "aggregator": "sum",
+                                    "aggregator": "avg",
                                     "conditional_formats": [
                                         {
                                             "comparator": ">",
@@ -215,7 +215,7 @@
                             "precision": 0,
                             "requests": [
                                 {
-                                    "aggregator": "sum",
+                                    "aggregator": "avg",
                                     "conditional_formats": [
                                         {
                                             "comparator": ">",
@@ -542,12 +542,12 @@
                                     "alias": "Last number of Jobs",
                                     "limit": 10,
                                     "order": "desc",
-                                    "q": "top(sum:kubernetes_state.job.count{$kube_cluster_name,owner_kind:cronjob} by {owner_name}, 50, 'mean', 'desc')"
+                                    "q": "top(sum:kubernetes_state.job.count{$kube_cluster_name} by {kube_cronjob}, 50, 'mean', 'desc')"
                                 },
                                 {
                                     "aggregator": "avg",
                                     "alias": "Average number of Jobs",
-                                    "q": "top(sum:kubernetes_state.job.count{$kube_cluster_name,owner_kind:cronjob} by {owner_name}, 50, 'mean', 'desc')"
+                                    "q": "top(sum:kubernetes_state.job.count{$kube_cluster_name} by {kube_cronjob}, 50, 'mean', 'desc')"
                                 }
                             ],
                             "title": "Top Cronjobs by Job count",
@@ -587,7 +587,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.job.count{$kube_cluster_name,owner_kind:cronjob} by {owner_name}"
+                                            "query": "sum:kubernetes_state.job.count{$kube_cluster_name} by {kube_cronjob}"
                                         }
                                     ],
                                     "response_format": "timeseries",

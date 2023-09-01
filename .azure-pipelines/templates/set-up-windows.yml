@@ -1,5 +1,0 @@
-steps:
-# Newer versions of Windows require this for full use of psutil.
-# See: https://github.com/giampaolo/psutil/issues/351
-- script: diskperf -y
-  displayName: 'Enable disk performance counters'

@@ -4,7 +4,7 @@
         "integration": "Traffic Server",
         "groups": [
             "host",
-            "instance"
+            "traffic_server_url"
         ],
         "check": "traffic_server.can_connect",
         "statuses": [

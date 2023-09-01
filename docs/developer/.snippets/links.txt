@@ -78,6 +78,7 @@
 [github-squash-and-merge]: https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-request-merges#squash-and-merge-your-pull-request-commits
 [gitlab-home]: https://gitlab.com
 [gofmt-docs]: https://golang.org/cmd/gofmt
+[hatch]: https://hatch.pypa.io/latest/
 [homebrew-home]: https://brew.sh
 [icons-fontawesome]: https://fontawesome.com/icons
 [icons-material]: https://google.github.io/material-design-icons/
@@ -112,7 +113,6 @@
 [pytest-usage]: https://docs.pytest.org/en/latest/usage.html
 [python-bpo-af-unix-win]: https://bugs.python.org/issue33408
 [python-cprofile]: https://docs.python.org/3/library/profile.html#module-cProfile
-[python-downloads-windows]: https://www.python.org/downloads/windows
 [python-home]: https://www.python.org
 [python-markdown-extensions]: https://github.com/Python-Markdown/markdown/wiki/Third-Party-Extensions
 [python-pdb]: https://docs.python.org/3/library/pdb.html

@@ -6,7 +6,7 @@ import pytest
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield
+    yield {'tags': ['foo:bar']}
 
 
 @pytest.fixture

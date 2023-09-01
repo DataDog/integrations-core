@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import string
 from enum import Enum
-from typing import Any, List, Tuple
+from typing import Any, List, Tuple  # noqa: F401
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
@@ -31,6 +31,9 @@ class DatabaseConfigurationError(Enum):
     pg_stat_statements_not_created = 'pg-stat-statements-not-created'
     pg_stat_statements_not_loaded = 'pg-stat-statements-not-loaded'
     undefined_explain_function = 'undefined-explain-function'
+    high_pg_stat_statements_max = 'high-pg-stat-statements-max-configuration'
+    autodiscovered_databases_exceeds_limit = 'autodiscovered-databases-exceeds-limit'
+    autodiscovered_metrics_exceeds_collection_interval = "autodiscovered-metrics-exceeds-collection-interval"
 
 
 def warning_with_tags(warning_message, *args, **kwargs):
@@ -56,7 +59,20 @@ def get_schema_field(descriptors):
     raise CheckException("The descriptors are missing a schema field")
 
 
+def payload_pg_version(version):
+    if not version:
+        return ""
+    return 'v{major}.{minor}.{patch}'.format(major=version.major, minor=version.minor, patch=version.patch)
+
+
 fmt = PartialFormatter()
+
+AWS_RDS_HOSTNAME_SUFFIX = ".rds.amazonaws.com"
+AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE = {
+    "flexible_server": "azure_postgresql_flexible_server",
+    "single_server": "azure_postgresql_server",
+    "virtual_machine": "azure_virtual_machine_instance",
+}
 
 DBM_MIGRATED_METRICS = {
     'numbackends': ('postgresql.connections', AgentCheck.gauge),
@@ -83,6 +99,73 @@ NEWER_92_METRICS = {
     'deadlocks': ('postgresql.deadlocks', AgentCheck.rate),
     'temp_bytes': ('postgresql.temp_bytes', AgentCheck.rate),
     'temp_files': ('postgresql.temp_files', AgentCheck.rate),
+}
+
+NEWER_14_METRICS = {
+    'session_time': ('postgresql.sessions.session_time', AgentCheck.monotonic_count),
+    'active_time': ('postgresql.sessions.active_time', AgentCheck.monotonic_count),
+    'idle_in_transaction_time': ('postgresql.sessions.idle_in_transaction_time', AgentCheck.monotonic_count),
+    'sessions': ('postgresql.sessions.count', AgentCheck.monotonic_count),
+    'sessions_abandoned': ('postgresql.sessions.abandoned', AgentCheck.monotonic_count),
+    'sessions_fatal': ('postgresql.sessions.fatal', AgentCheck.monotonic_count),
+    'sessions_killed': ('postgresql.sessions.killed', AgentCheck.monotonic_count),
+}
+
+QUERY_PG_STAT_DATABASE = {
+    'name': 'pg_stat_database',
+    'query': """
+        SELECT
+            datname,
+            deadlocks
+        FROM pg_stat_database
+    """.strip(),
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'postgresql.deadlocks.count', 'type': 'monotonic_count'},
+    ],
+}
+
+QUERY_PG_STAT_DATABASE_CONFLICTS = {
+    'name': 'pg_stat_database_conflicts',
+    'query': """
+        SELECT
+            datname,
+            confl_tablespace,
+            confl_lock,
+            confl_snapshot,
+            confl_bufferpin,
+            confl_deadlock
+        FROM pg_stat_database_conflicts
+    """.strip(),
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'postgresql.conflicts.tablespace', 'type': 'monotonic_count'},
+        {'name': 'postgresql.conflicts.lock', 'type': 'monotonic_count'},
+        {'name': 'postgresql.conflicts.snapshot', 'type': 'monotonic_count'},
+        {'name': 'postgresql.conflicts.bufferpin', 'type': 'monotonic_count'},
+        {'name': 'postgresql.conflicts.deadlock', 'type': 'monotonic_count'},
+    ],
+}
+
+QUERY_PG_UPTIME = {
+    'name': 'pg_uptime',
+    'query': "SELECT FLOOR(EXTRACT(EPOCH FROM current_timestamp - pg_postmaster_start_time()))",
+    'columns': [
+        {'name': 'postgresql.uptime', 'type': 'gauge'},
+    ],
+}
+
+QUERY_PG_CONTROL_CHECKPOINT = {
+    'name': 'pg_control_checkpoint',
+    'query': """
+        SELECT timeline_id,
+               EXTRACT (EPOCH FROM now() - checkpoint_time)
+        FROM pg_control_checkpoint();
+""",
+    'columns': [
+        {'name': 'postgresql.control.timeline_id', 'type': 'gauge'},
+        {'name': 'postgresql.control.checkpoint_delay', 'type': 'gauge'},
+    ],
 }
 
 COMMON_BGW_METRICS = {
@@ -129,8 +212,10 @@ LIMIT {table_count_limit}
 }
 
 q1 = (
-    'CASE WHEN pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn() THEN 0 ELSE GREATEST '
-    '(0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END'
+    'CASE WHEN exists(SELECT * FROM pg_stat_wal_receiver) '
+    'AND (pg_last_wal_receive_lsn() IS NULL '
+    'OR pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn()) THEN 0 '
+    'ELSE GREATEST(0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END'
 )
 q2 = 'abs(pg_wal_lsn_diff(pg_last_wal_receive_lsn(), pg_last_wal_replay_lsn()))'
 REPLICATION_METRICS_10 = {
@@ -139,7 +224,8 @@ REPLICATION_METRICS_10 = {
 }
 
 q = (
-    'CASE WHEN pg_last_xlog_receive_location() = pg_last_xlog_replay_location() THEN 0 ELSE GREATEST '
+    'CASE WHEN pg_last_xlog_receive_location() IS NULL OR '
+    'pg_last_xlog_receive_location() = pg_last_xlog_replay_location() THEN 0 ELSE GREATEST '
     '(0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END'
 )
 REPLICATION_METRICS_9_1 = {q: ('postgresql.replication_delay', AgentCheck.gauge)}
@@ -170,7 +256,12 @@ SELECT {metrics_columns}
 
 # Requires postgres 10+
 REPLICATION_STATS_METRICS = {
-    'descriptors': [('application_name', 'wal_app_name'), ('state', 'wal_state'), ('sync_state', 'wal_sync_state')],
+    'descriptors': [
+        ('application_name', 'wal_app_name'),
+        ('state', 'wal_state'),
+        ('sync_state', 'wal_sync_state'),
+        ('client_addr', 'wal_client_addr'),
+    ],
     'metrics': {
         'GREATEST (0, EXTRACT(epoch from write_lag)) as write_lag': (
             'postgresql.replication.wal_write_lag',
@@ -184,9 +275,66 @@ REPLICATION_STATS_METRICS = {
             'postgresql.replication.wal_replay_lag',
             AgentCheck.gauge,
         ),
+        'GREATEST (0, age(backend_xmin)) as backend_xmin_age': (
+            'postgresql.replication.backend_xmin_age',
+            AgentCheck.gauge,
+        ),
     },
     'relation': False,
-    'query': 'SELECT application_name, state, sync_state, {metrics_columns} FROM pg_stat_replication',
+    'query': """
+SELECT application_name, state, sync_state, client_addr, {metrics_columns}
+FROM pg_stat_replication
+""",
+}
+
+
+QUERY_PG_STAT_WAL_RECEIVER = {
+    'name': 'pg_stat_wal_receiver',
+    'query': """
+        WITH connected(c) AS (VALUES (1))
+        SELECT CASE WHEN status IS NULL THEN 'disconnected' ELSE status END AS connected,
+               c,
+               received_tli,
+               EXTRACT(EPOCH FROM (clock_timestamp() - last_msg_send_time)),
+               EXTRACT(EPOCH FROM (clock_timestamp() - last_msg_receipt_time)),
+               EXTRACT(EPOCH FROM (clock_timestamp() - latest_end_time))
+        FROM pg_stat_wal_receiver
+        RIGHT JOIN connected ON (true);
+    """.strip(),
+    'columns': [
+        {'name': 'status', 'type': 'tag'},
+        {'name': 'postgresql.wal_receiver.connected', 'type': 'gauge'},
+        {'name': 'postgresql.wal_receiver.received_timeline', 'type': 'gauge'},
+        {'name': 'postgresql.wal_receiver.last_msg_send_age', 'type': 'gauge'},
+        {'name': 'postgresql.wal_receiver.last_msg_receipt_age', 'type': 'gauge'},
+        {'name': 'postgresql.wal_receiver.latest_end_age', 'type': 'gauge'},
+    ],
+}
+
+QUERY_PG_REPLICATION_SLOTS = {
+    'name': 'pg_replication_slots',
+    'query': """
+    SELECT
+        slot_name,
+        slot_type,
+        CASE WHEN temporary THEN 'temporary' ELSE 'permanent' END,
+        CASE WHEN active THEN 'active' ELSE 'inactive' END,
+        CASE WHEN xmin IS NULL THEN NULL ELSE age(xmin) END,
+        pg_wal_lsn_diff(
+        CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, restart_lsn),
+        pg_wal_lsn_diff(
+        CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, confirmed_flush_lsn)
+    FROM pg_replication_slots;
+    """.strip(),
+    'columns': [
+        {'name': 'slot_name', 'type': 'tag'},
+        {'name': 'slot_type', 'type': 'tag'},
+        {'name': 'slot_persistence', 'type': 'tag'},
+        {'name': 'slot_state', 'type': 'tag'},
+        {'name': 'postgresql.replication_slot.xmin_age', 'type': 'gauge'},
+        {'name': 'postgresql.replication_slot.restart_delay_bytes', 'type': 'gauge'},
+        {'name': 'postgresql.replication_slot.confirmed_flush_delay_bytes', 'type': 'gauge'},
+    ],
 }
 
 CONNECTION_METRICS = {
@@ -201,6 +349,98 @@ WITH max_con AS (SELECT setting::float FROM pg_settings WHERE name = 'max_connec
 SELECT {metrics_columns}
   FROM pg_stat_database, max_con
 """,
+}
+
+SLRU_METRICS = {
+    'descriptors': [('name', 'slru_name')],
+    'metrics': {
+        'blks_zeroed': ('postgresql.slru.blks_zeroed', AgentCheck.monotonic_count),
+        'blks_hit': ('postgresql.slru.blks_hit', AgentCheck.monotonic_count),
+        'blks_read': ('postgresql.slru.blks_read', AgentCheck.monotonic_count),
+        'blks_written ': ('postgresql.slru.blks_written', AgentCheck.monotonic_count),
+        'blks_exists': ('postgresql.slru.blks_exists', AgentCheck.monotonic_count),
+        'flushes': ('postgresql.slru.flushes', AgentCheck.monotonic_count),
+        'truncates': ('postgresql.slru.truncates', AgentCheck.monotonic_count),
+    },
+    'relation': False,
+    'query': """
+SELECT name, {metrics_columns}
+  FROM pg_stat_slru
+""",
+}
+
+SNAPSHOT_TXID_METRICS = {
+    'name': 'pg_snapshot',
+    # Use CTE to only do a single call to pg_current_snapshot
+    # FROM LATERAL was necessary given that pg_snapshot_xip returns a setof xid8
+    'query': """
+WITH snap AS (
+    SELECT * from pg_current_snapshot()
+), xip_count AS (
+    SELECT COUNT(xip_list) FROM LATERAL (SELECT pg_snapshot_xip(pg_current_snapshot) FROM snap) as xip_list
+)
+select pg_snapshot_xmin(pg_current_snapshot), pg_snapshot_xmax(pg_current_snapshot), count from snap, xip_count;
+""",
+    'columns': [
+        {'name': 'postgresql.snapshot.xmin', 'type': 'gauge'},
+        {'name': 'postgresql.snapshot.xmax', 'type': 'gauge'},
+        {'name': 'postgresql.snapshot.xip_count', 'type': 'gauge'},
+    ],
+}
+
+# Use txid_current_snapshot for PG < 13
+SNAPSHOT_TXID_METRICS_LT_13 = {
+    'name': 'pg_snapshot_lt_13',
+    'query': """
+WITH snap AS (
+    SELECT * from txid_current_snapshot()
+), xip_count AS (
+    SELECT COUNT(xip_list) FROM LATERAL (SELECT txid_snapshot_xip(txid_current_snapshot) FROM snap) as xip_list
+)
+select txid_snapshot_xmin(txid_current_snapshot), txid_snapshot_xmax(txid_current_snapshot), count from snap, xip_count;
+""",
+    'columns': [
+        {'name': 'postgresql.snapshot.xmin', 'type': 'gauge'},
+        {'name': 'postgresql.snapshot.xmax', 'type': 'gauge'},
+        {'name': 'postgresql.snapshot.xip_count', 'type': 'gauge'},
+    ],
+}
+
+WAL_FILE_METRICS = {
+    'name': 'wal_metrics',
+    'query': """
+SELECT
+count(*),
+sum(size),
+EXTRACT (EPOCH FROM now() - min(modification))
+  FROM pg_ls_waldir();
+""",
+    'columns': [
+        {'name': 'postgresql.wal_count', 'type': 'gauge'},
+        {'name': 'postgresql.wal_size', 'type': 'gauge'},
+        {'name': 'postgresql.wal_age', 'type': 'gauge'},
+    ],
+}
+
+STAT_WAL_METRICS = {
+    'name': 'stat_wal_metrics',
+    'query': """
+SELECT wal_records, wal_fpi,
+       wal_bytes, wal_buffers_full,
+       wal_write, wal_sync,
+       wal_write_time, wal_sync_time
+  FROM pg_stat_wal
+""",
+    'columns': [
+        {'name': 'postgresql.wal.records', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.full_page_images', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.bytes', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.buffers_full', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.write', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.sync', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.write_time', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.sync_time', 'type': 'monotonic_count'},
+    ],
 }
 
 FUNCTION_METRICS = {
@@ -239,6 +479,9 @@ ACTIVITY_METRICS_9_6 = [
     "THEN 1 ELSE null END )",
     "COUNT(CASE WHEN wait_event is NOT NULL AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     "COUNT(CASE WHEN wait_event is NOT NULL AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "max(EXTRACT(EPOCH FROM (clock_timestamp() - xact_start)))",
+    "max(age(backend_xid))",
+    "max(age(backend_xmin))",
 ]
 
 # The metrics we retrieve from pg_stat_activity when the postgres version >= 9.2
@@ -249,6 +492,9 @@ ACTIVITY_METRICS_9_2 = [
     "THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "max(EXTRACT(EPOCH FROM (clock_timestamp() - xact_start)))",
+    "null",  # backend_xid is not available
+    "null",  # backend_xmin is not available
 ]
 
 # The metrics we retrieve from pg_stat_activity when the postgres version >= 8.3
@@ -259,6 +505,9 @@ ACTIVITY_METRICS_8_3 = [
     "THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "max(EXTRACT(EPOCH FROM (clock_timestamp() - xact_start)))",
+    "null",  # backend_xid is not available
+    "null",  # backend_xmin is not available
 ]
 
 # The metrics we retrieve from pg_stat_activity when the postgres version < 8.3
@@ -269,6 +518,9 @@ ACTIVITY_METRICS_LT_8_3 = [
     "THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "max(EXTRACT(EPOCH FROM (clock_timestamp() - query_start)))",
+    "null",  # backend_xid is not available
+    "null",  # backend_xmin is not available
 ]
 
 # The metrics we collect from pg_stat_activity that we zip with one of the lists above
@@ -278,21 +530,24 @@ ACTIVITY_DD_METRICS = [
     ('postgresql.active_queries', AgentCheck.gauge),
     ('postgresql.waiting_queries', AgentCheck.gauge),
     ('postgresql.active_waiting_queries', AgentCheck.gauge),
+    ('postgresql.activity.xact_start_age', AgentCheck.gauge),
+    ('postgresql.activity.backend_xid_age', AgentCheck.gauge),
+    ('postgresql.activity.backend_xmin_age', AgentCheck.gauge),
 ]
 
 # The base query for postgres version >= 10
 ACTIVITY_QUERY_10 = """
-SELECT datname,
-    {metrics_columns}
+SELECT {aggregation_columns_select}
+    {{metrics_columns}}
 FROM pg_stat_activity
 WHERE backend_type = 'client backend'
-GROUP BY datid, datname
+GROUP BY datid {aggregation_columns_group}
 """
 
 # The base query for postgres version < 10
 ACTIVITY_QUERY_LT_10 = """
-SELECT datname,
-    {metrics_columns}
+SELECT {aggregation_columns_select}
+    {{metrics_columns}}
 FROM pg_stat_activity
-GROUP BY datid, datname
+GROUP BY datid {aggregation_columns_group}
 """

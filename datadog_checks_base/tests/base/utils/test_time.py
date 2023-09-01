@@ -17,8 +17,6 @@ from datadog_checks.base.utils.time import (
     get_timestamp,
 )
 
-pytestmark = pytest.mark.time
-
 
 class TestNormalization:
     def test_replace(self):

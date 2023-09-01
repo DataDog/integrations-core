@@ -7,9 +7,11 @@ RATE = "rate"
 COUNT = "count"
 MONOTONIC = "monotonic_count"
 PROC_NAME = 'mysqld'
-
-DBM_MIGRATED_METRICS = {
-    'Connections': ('mysql.net.connections', GAUGE),
+AWS_RDS_HOSTNAME_SUFFIX = ".rds.amazonaws.com"
+AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE = {
+    "flexible_server": "azure_mysql_flexible_server",
+    "single_server": "azure_mysql_server",
+    "virtual_machine": "azure_virtual_machine_instance",
 }
 
 # Vars found in "SHOW STATUS;"
@@ -30,6 +32,7 @@ STATUS_VARS = {
     'Com_delete_multi': ('mysql.performance.com_delete_multi', RATE),
     'Com_replace_select': ('mysql.performance.com_replace_select', RATE),
     # Connection Metrics
+    'Connections': ('mysql.net.connections', RATE),
     'Max_used_connections': ('mysql.net.max_connections', GAUGE),
     'Aborted_clients': ('mysql.net.aborted_clients', RATE),
     'Aborted_connects': ('mysql.net.aborted_connects', RATE),
@@ -257,6 +260,11 @@ SCHEMA_VARS = {'information_schema_size': ('mysql.info.schema.size', GAUGE)}
 TABLE_VARS = {
     'information_table_index_size': ('mysql.info.table.index_size', GAUGE),
     'information_table_data_size': ('mysql.info.table.data_size', GAUGE),
+}
+
+TABLE_ROWS_STATS_VARS = {
+    'information_table_rows_read_total': ('mysql.info.table.rows.read', MONOTONIC),
+    'information_table_rows_changed_total': ('mysql.info.table.rows.changed', MONOTONIC),
 }
 
 # Vars found in "show slave status" or "show replication status" (depending on mysql version)

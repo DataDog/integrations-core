@@ -2,7 +2,7 @@ version: "3"
 
 services:
   namenode:
-    image: rmohr/activemq:${ACTIVEMQ_VERSION}
+    image: rmohr/activemq:${VERSION}
     container_name: dd-test-activemq-server
     environment:
       ACTIVEMQ_SUNJMX_START: >-

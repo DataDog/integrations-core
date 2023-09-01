@@ -14,5 +14,5 @@ from .common import HERE
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), mount_logs=True):
+    with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True, mount_logs=True):
         yield load_jmx_config(), {'use_jmx': True}

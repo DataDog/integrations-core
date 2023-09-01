@@ -8,6 +8,8 @@ import pytest
 
 from datadog_checks.sap_hana import SapHanaCheck
 
+from .common import TIMEOUT
+
 pytestmark = pytest.mark.unit
 
 
@@ -27,6 +29,60 @@ def test_error_query(instance, dd_run_check):
 
     dd_run_check(check)
     check.log.error.assert_any_call('Error querying %s: %s', 'SYS.M_DATABASE', 'test')
+
+
+def test_reconnect_on_connection_failure(instance, dd_run_check, aggregator):
+    def connection_error(*args, **kwargs):
+        raise Exception('Lost connection to HANA server')
+
+    check = SapHanaCheck('sap_hana', {}, [instance])
+    check.log = mock.MagicMock()
+
+    conn = mock.MagicMock()
+    cursor = mock.MagicMock()
+    cursor.execute = connection_error
+    conn.cursor = lambda: cursor
+    check._conn = conn
+
+    dd_run_check(check)
+
+    aggregator.assert_no_duplicate_service_checks()
+    aggregator.assert_service_check("sap_hana.{}".format(SapHanaCheck.SERVICE_CHECK_CONNECT), SapHanaCheck.WARNING)
+    conn.close.assert_called()
+    check.log.error.assert_any_call('Error querying %s: %s', 'SYS.M_DATABASE', 'Lost connection to HANA server')
+
+    # Assert than a connection is reattempted
+    check.get_connection = mock.MagicMock()
+    check.get_connection.return_value = conn
+    dd_run_check(check)
+    check.get_connection.assert_called()
+
+
+def test_emits_critical_service_check_when_connection_flakes(instance, dd_run_check, aggregator):
+    def connection_flakes(*args, **kwargs):
+        raise Exception('Session has been reconnected after an error')
+
+    check = SapHanaCheck('sap_hana', {}, [instance])
+    check.log = mock.MagicMock()
+
+    conn = mock.MagicMock()
+    cursor = mock.MagicMock()
+    cursor.execute = connection_flakes
+    conn.cursor = lambda: cursor
+    check._conn = conn
+
+    dd_run_check(check)
+
+    aggregator.assert_no_duplicate_service_checks()
+    aggregator.assert_service_check("sap_hana.{}".format(SapHanaCheck.SERVICE_CHECK_CONNECT), SapHanaCheck.WARNING)
+    check.log.error.assert_any_call(
+        'Error querying %s: %s', 'SYS.M_DATABASE', 'Session has been reconnected after an error'
+    )
+
+    # Assert than a connection is not reattempted
+    check.get_connection = mock.MagicMock()
+    dd_run_check(check)
+    check.get_connection.assert_not_called()
 
 
 def test_error_unknown(instance, dd_run_check):
@@ -137,6 +193,7 @@ def test_custom_query_configuration(instance):
 
 class TestConnectionProperties:
     def test_default(self, instance):
+        del instance['timeout']  # to check default value
         check = SapHanaCheck('sap_hana', {}, [instance])
 
         with mock.patch('datadog_checks.sap_hana.sap_hana.HanaConnection') as m:
@@ -193,8 +250,8 @@ class TestConnectionProperties:
                 port=instance['port'],
                 user=instance['username'],
                 password=instance['password'],
-                communicationTimeout=10000,
-                nodeConnectTimeout=10000,
+                communicationTimeout=TIMEOUT * 1000,
+                nodeConnectTimeout=TIMEOUT * 1000,
                 encrypt=True,
                 sslHostNameInCertificate=instance['server'],
                 sslSNIHostname=instance['server'],

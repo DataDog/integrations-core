@@ -15,6 +15,11 @@ from datadog_checks.base.utils.time import get_timestamp
 from .flows import get_statistics
 from .resources import get_resource
 
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
 # https://www.ibm.com/docs/en/app-connect/12.0?topic=performance-resource-statistics
 # https://www.ibm.com/docs/en/app-connect/12.0?topic=data-message-flow-accounting-statistics-collection-options
 SNAPSHOT_UPDATE_INTERVAL = 20
@@ -22,8 +27,9 @@ SNAPSHOT_UPDATE_INTERVAL = 20
 
 def get_unique_name(check_id, topic_string):
     # https://www.ibm.com/docs/en/ibm-mq/9.2?topic=reference-crtmqmsub-create-mq-subscription#q084220___q084220SUBNAME
+    hostname = datadog_agent.get_hostname()
     data = topic_string.encode('utf-8')
-    return f'datadog-{check_id}-{hashlib.sha256(data).hexdigest()}'
+    return f'datadog-{check_id}-{hostname}-{hashlib.sha256(data).hexdigest()}'
 
 
 class Subscription(ABC):
@@ -74,12 +80,14 @@ class Subscription(ABC):
 
         tags = [f'subscription:{self.TYPE}', *self.tags]
         if unknown_errors:
-            self._submit_health_status(ServiceCheck.CRITICAL, tags)
+            status_message = 'Subscription error for topic string: {}'.format(self.TOPIC_STRING)
+            self._submit_health_status(ServiceCheck.CRITICAL, tags, status_message)
             for error in unknown_errors.values():
-                self.check.log.error('Subscription error for topic string: %s\n%s', self.TOPIC_STRING, error)
+                self.check.log.error('%s\n%s', status_message, error)
         elif not message_cache:
-            self._submit_health_status(ServiceCheck.WARNING, tags)
-            self.check.log.warning('Subscription found nothing for topic string: %s', self.TOPIC_STRING)
+            status_message = 'Subscription found nothing for topic string: {}'.format(self.TOPIC_STRING)
+            self._submit_health_status(ServiceCheck.WARNING, tags, status_message)
+            self.check.log.warning(status_message)
         else:
             self._submit_health_status(ServiceCheck.OK, tags)
 
@@ -98,12 +106,15 @@ class Subscription(ABC):
         if self._sub is None:
             sub = pymqi.Subscription(self.check.queue_manager)
             # https://dsuch.github.io/pymqi/examples.html#how-to-subscribe-to-topics-and-avoid-mqrc-sub-already-exists-at-the-same-time
-            self.check.log.info('Subscribing to topic string: %s', self.TOPIC_STRING)
+            self.check.log.debug('Subscribing to `%s` topic string: %s.', self.TYPE, self.TOPIC_STRING)
             sub.sub(
                 sub_name=self.name,
                 topic_string=self.TOPIC_STRING,
                 sub_opts=(
-                    pymqi.CMQC.MQSO_CREATE + pymqi.CMQC.MQSO_RESUME + pymqi.CMQC.MQSO_DURABLE + pymqi.CMQC.MQSO_MANAGED
+                    pymqi.CMQC.MQSO_CREATE
+                    + pymqi.CMQC.MQSO_RESUME
+                    + pymqi.CMQC.MQSO_NON_DURABLE
+                    + pymqi.CMQC.MQSO_MANAGED
                 ),
             )
             self._sub = sub
@@ -112,11 +123,11 @@ class Subscription(ABC):
 
     def disconnect(self):
         if self._sub is not None:
-            self._sub.close(sub_close_options=pymqi.CMQC.MQCO_KEEP_SUB, close_sub_queue=True)
+            self._sub.close(sub_close_options=pymqi.CMQC.MQCO_REMOVE_SUB, close_sub_queue=True)
             self._sub = None
 
-    def _submit_health_status(self, status, tags):
-        self.check.service_check('mq.subscription', status, tags=tags)
+    def _submit_health_status(self, status, tags, message=None):
+        self.check.service_check('mq.subscription', status, tags=tags, message=message)
 
     def _get_elapsed_time(self):
         return get_timestamp() - self._last_execution_time
@@ -179,7 +190,11 @@ class FlowMonitoringSubscription(Subscription):
             for name, data in message['WMQIStatisticsAccounting'].items():
                 statistics = get_statistics(name)
                 if statistics is None:
-                    self.check.log.debug('Not collecting flow statistic group: %s', name)
+                    self.check.log.debug(
+                        'Not collecting flow statistic group: %s. Refer to the Datadog IBM ACE documentation for '
+                        'list of collected metrics.',
+                        name,
+                    )
                     continue
 
                 statistics.submit(self.check, data, self.tags)

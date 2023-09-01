@@ -32,7 +32,7 @@ HOSTNAME_TO_PORT_MAPPING = {
 
 @pytest.fixture(scope='session', autouse=True)
 def dd_environment(instance_e2e, mock_local_tls_dns):
-    with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True, sleep=5):
+    with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True, sleep=20):
         e2e_metadata = {'docker_volumes': ['{}:{}'.format(CA_CERT, CA_CERT_MOUNT_PATH)]}
         yield instance_e2e, e2e_metadata
 
@@ -185,11 +185,6 @@ def instance_remote_no_connect_port_in_host():
 
 
 @pytest.fixture
-def instance_remote_version_default_1_1():
-    return {'server': 'https://tls-v1-1.valid.mock', 'tls_ca_cert': CA_CERT}
-
-
-@pytest.fixture
 def instance_remote_version_default_1_2():
     return {'server': 'https://tls-v1-2.valid.mock', 'tls_ca_cert': CA_CERT}
 
@@ -250,5 +245,27 @@ def instance_remote_cert_warning_seconds():
         'server': 'https://valid.mock',
         'days_warning': -1,
         'seconds_warning': days_to_seconds(200),
+        'tls_ca_cert': CA_CERT,
+    }
+
+
+@pytest.fixture
+def instance_remote_postgresql_valid():
+    return {
+        'server': 'localhost',
+        'port': 55432,
+        'server_hostname': 'valid.mock',
+        'start_tls': 'postgres',
+        'tls_ca_cert': CA_CERT,
+    }
+
+
+@pytest.fixture
+def instance_remote_mysql_valid():
+    return {
+        'server': 'localhost',
+        'port': 3306,
+        'server_hostname': 'valid.mock',
+        'start_tls': 'mysql',
         'tls_ca_cert': CA_CERT,
     }

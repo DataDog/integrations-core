@@ -234,6 +234,16 @@ STATS_MEMORY_METRICS = {
     ],
 }
 
+STATS_MYSQL_BACKENDS = {
+    'name': 'stats_mysql_backends',
+    'query': 'SELECT  hostgroup, status, COUNT(*) FROM stats_mysql_connection_pool GROUP BY hostgroup, status',
+    'columns': [
+        {'name': 'hostgroup', 'type': 'tag'},
+        {'name': 'status', 'type': 'tag'},
+        {'name': 'backends.count', 'type': 'gauge'},
+    ],
+}
+
 STATS_MYSQL_QUERY_RULES = {
     'name': 'stats_mysql_query_rules',
     'query': 'SELECT rule_id, hits FROM stats_mysql_query_rules',

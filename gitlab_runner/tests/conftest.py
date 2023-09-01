@@ -13,6 +13,7 @@ from .common import (
     CONFIG,
     GITLAB_LOCAL_MASTER_PORT,
     GITLAB_LOCAL_RUNNER_PORT,
+    GITLAB_MASTER_URL,
     GITLAB_RUNNER_URL,
     GITLAB_TEST_TOKEN,
     HERE,
@@ -39,10 +40,12 @@ def dd_environment():
         compose_file=compose_file,
         env_vars=env,
         conditions=[
-            CheckDockerLogs(
-                compose_file, ['Gitlab is up!', 'Configuration loaded', 'Metrics server listening'], wait=5
-            ),
+            CheckDockerLogs(compose_file, patterns='Gitlab is up!', wait=5),
+            CheckDockerLogs(compose_file, patterns='Configuration loaded', wait=5),
+            CheckDockerLogs(compose_file, patterns='Metrics server listening', wait=5),
             CheckEndpoints(GITLAB_RUNNER_URL, attempts=180),
+            CheckEndpoints('{}/ci'.format(GITLAB_MASTER_URL), attempts=90),
         ],
+        attempts=2,
     ):
         yield CONFIG, E2E_METADATA

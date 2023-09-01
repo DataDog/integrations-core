@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 from six import iteritems
 
 from datadog_checks.mongo.collectors.base import MongoCollector
@@ -13,8 +17,10 @@ class TopCollector(MongoCollector):
     def compatible_with(self, deployment):
         # Can only be run on mongod nodes, and not on arbiters.
         if isinstance(deployment, MongosDeployment):
+            self.log.debug("Top collector can only be run on mongod nodes, mongos deployment detected.")
             return False
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
+            self.log.debug("Top collector can only be run on mongod nodes, arbiter node detected.")
             return False
         return True
 

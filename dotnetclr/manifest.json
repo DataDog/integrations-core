@@ -1,32 +1,45 @@
 {
-  "categories": [
-    "languages"
-  ],
-  "creates_events": false,
-  "display_name": ".NET CLR",
-  "guid": "3d21557e-65bd-4b66-99b9-5521f32b5957",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "dotnetclr.",
-  "metric_to_check": "dotnetclr.memory.time_in_gc",
-  "name": "dotnetclr",
-  "public_title": "Datadog-.NET CLR Integration",
-  "short_description": "Visualize and monitor Dotnetclr states",
-  "support": "core",
-  "supported_os": [
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "dotnetclr",
+  "manifest_version": "2.0.0",
+  "app_uuid": "2147d078-2742-413e-83eb-58400657de56",
+  "app_id": "dotnetclr",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Visualize and monitor Dotnetclr states",
+    "title": ".NET CLR",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Windows",
+      "Category::Languages"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": ".NET CLR",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "dotnetclr.",
+        "check": "dotnetclr.memory.time_in_gc",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

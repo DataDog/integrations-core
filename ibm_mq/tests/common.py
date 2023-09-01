@@ -151,7 +151,7 @@ E2E_METADATA = {
     'env_vars': {'LD_LIBRARY_PATH': '/opt/mqm/lib64:/opt/mqm/lib', 'C_INCLUDE_PATH': '/opt/mqm/inc'},
 }
 
-QUEUE_METRICS = [
+DEFAULT_QUEUE_METRICS = [
     ('ibm_mq.queue.service_interval', GAUGE),
     ('ibm_mq.queue.inhibit_put', GAUGE),
     ('ibm_mq.queue.depth_low_limit', GAUGE),
@@ -181,11 +181,16 @@ QUEUE_METRICS = [
     ('ibm_mq.queue.open_output_count', GAUGE),
     ('ibm_mq.queue.trigger_type', GAUGE),
     ('ibm_mq.queue.depth_percent', GAUGE),
+]
+
+RESET_QUEUE_METRICS = [
     ('ibm_mq.queue.high_q_depth', GAUGE),
     ('ibm_mq.queue.msg_deq_count', COUNT),
     ('ibm_mq.queue.msg_enq_count', COUNT),
     ('ibm_mq.queue.time_since_reset', COUNT),
 ]
+
+QUEUE_METRICS = DEFAULT_QUEUE_METRICS + RESET_QUEUE_METRICS
 
 QUEUE_STATUS_METRICS = [
     ('ibm_mq.queue.oldest_message_age', GAUGE),

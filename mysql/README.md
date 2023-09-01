@@ -4,20 +4,13 @@
 
 ## Overview
 
-The Datadog Agent can collect many metrics from MySQL databases, including (but not limited to):
+The MySQL integration tracks the performance of your MySQL instances. It collects metrics related to throughput, connections, errors, and InnoDB metrics.
 
-- Query throughput
-- Query performance, such as average query runtime, or slow queries
-- Connections, such as currently open connections, aborted connections, or errors
-- InnoDB, such as buffer pool metrics
-
-You can also create your own metrics using custom SQL queries.
-
-**Note:** This integration is also compatible with [MariaDB][2], as it serves as a ["drop-in replacement"][3] for MySQL.
+Enable [Database Monitoring][32] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, and query explain plans.
 
 ## Setup
 
-<div class="alert alert-info">This page describes the MySQL Agent integration. If you are looking for the Database Monitoring product for MySQL, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
+<div class="alert alert-info">This page describes the MySQL Agent standard integration. If you are looking for the Database Monitoring product for MySQL, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
 
 ### Installation
 
@@ -25,19 +18,18 @@ The MySQL check is included in the [Datadog Agent][4] package. No additional ins
 
 #### Prepare MySQL
 
+**Note**: To install Database Monitoring for MySQL, select your hosting solution in the [Database Monitoring documentation][33] for instructions.
+
+Proceed with the following steps in this guide only if you are installing the standard integration alone.
+
 On each MySQL server, create a database user for the Datadog Agent.
 
 The following instructions grant the Agent permission to login from any host using `datadog@'%'`. You can restrict the `datadog` user to be allowed to login only from localhost by using `datadog@'localhost'`. See [MySQL Adding Accounts, Assigning Privileges, and Dropping Accounts][5] for more info.
 
+Create the `datadog` user with the following command:
+
 ```shell
 mysql> CREATE USER 'datadog'@'%' IDENTIFIED BY '<UNIQUEPASSWORD>';
-Query OK, 0 rows affected (0.00 sec)
-```
-
-For mySQL 8.0+ create the `datadog` user with the native password hashing method:
-
-```shell
-mysql> CREATE USER 'datadog'@'%' IDENTIFIED WITH mysql_native_password by '<UNIQUEPASSWORD>';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
@@ -49,27 +41,37 @@ grep Uptime && echo -e "\033[0;32mMySQL user - OK\033[0m" || \
 echo -e "\033[0;31mCannot connect to MySQL\033[0m"
 ```
 
-```shell
-mysql -u datadog --password=<UNIQUEPASSWORD> -e "show slave status" && \
-echo -e "\033[0;32mMySQL grant - OK\033[0m" || \
-echo -e "\033[0;31mMissing REPLICATION CLIENT grant\033[0m"
-```
+The Agent needs a few privileges to collect metrics. Grant the `datadog` user only the following limited privileges.
 
-The Agent needs a few privileges to collect metrics. Grant the user the following limited privileges ONLY:
+For MySQL versions 5.6 and 5.7, grant `replication client` and set `max_user_connections` with the following command:
 
 ```shell
 mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'%' WITH MAX_USER_CONNECTIONS 5;
 Query OK, 0 rows affected, 1 warning (0.00 sec)
+```
 
+For MySQL 8.0 or greater, grant `replication client` and set `max_user_connections` with the following commands:
+
+```shell
+mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'%'
+Query OK, 0 rows affected (0.00 sec)
+mysql> ALTER USER 'datadog'@'%' WITH MAX_USER_CONNECTIONS 5;
+Query OK, 0 rows affected (0.00 sec)
+```
+
+Grant the `datadog` user the process privilege:
+
+```shell
 mysql> GRANT PROCESS ON *.* TO 'datadog'@'%';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
-For MySQL 8.0+ set `max_user_connections` with:
+Verify the replication client. Replace `<UNIQUEPASSWORD>` with the password you created above:
 
 ```shell
-mysql> ALTER USER 'datadog'@'%' WITH MAX_USER_CONNECTIONS 5;
-Query OK, 0 rows affected (0.00 sec)
+mysql -u datadog --password=<UNIQUEPASSWORD> -e "show slave status" && \
+echo -e "\033[0;32mMySQL grant - OK\033[0m" || \
+echo -e "\033[0;31mMissing REPLICATION CLIENT grant\033[0m"
 ```
 
 If enabled, metrics can be collected from the `performance_schema` database by granting an additional privilege:
@@ -108,9 +110,9 @@ Edit the `mysql.d/conf.yaml` file, in the `conf.d/` folder at the root of your [
   init_config:
 
   instances:
-    - server: 127.0.0.1
-      user: datadog
-      pass: "<YOUR_CHOSEN_PASSWORD>" # from the CREATE USER step earlier
+    - host: 127.0.0.1
+      username: datadog
+      password: "<YOUR_CHOSEN_PASSWORD>" # from the CREATE USER step earlier
       port: "<YOUR_MYSQL_PORT>" # e.g. 3306
       options:
         replication: false
@@ -235,7 +237,7 @@ Set [Autodiscovery Integration Templates][11] as Docker labels on your applicati
 ```yaml
 LABEL "com.datadoghq.ad.check_names"='["mysql"]'
 LABEL "com.datadoghq.ad.init_configs"='[{}]'
-LABEL "com.datadoghq.ad.instances"='[{"server": "%%host%%", "user": "datadog","pass": "<UNIQUEPASSWORD>"}]'
+LABEL "com.datadoghq.ad.instances"='[{"server": "%%host%%", "username": "datadog","password": "<UNIQUEPASSWORD>"}]'
 ```
 
 See [Autodiscovery template variables][12] for details on using `<UNIQUEPASSWORD>` as an environment variable instead of a label.
@@ -262,6 +264,8 @@ To configure this check for an Agent running on Kubernetes:
 
 Set [Autodiscovery Integrations Templates][15] as pod annotations on your application container. Alternatively, you can configure templates with a [file, configmap, or key-value store][16].
 
+**Annotations v1** (for Datadog Agent < v7.36)
+
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -274,10 +278,37 @@ metadata:
       [
         {
           "server": "%%host%%", 
-          "user": "datadog",
-          "pass": "<UNIQUEPASSWORD>"
+          "username": "datadog",
+          "password": "<UNIQUEPASSWORD>"
         }
       ]
+  labels:
+    name: mysql
+spec:
+  containers:
+    - name: mysql
+```
+
+**Annotations v2** (for Datadog Agent v7.36+)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mysql
+  annotations:
+    ad.datadoghq.com/mysql.checks: |
+      {
+        "mysql": {
+          "instances": [
+            {
+              "server": "%%host%%", 
+              "username": "datadog",
+              "password": "<UNIQUEPASSWORD>"
+            }
+          ]
+        }
+      }
   labels:
     name: mysql
 spec:
@@ -293,6 +324,8 @@ See [Autodiscovery template variables][12] for details on using `<UNIQUEPASSWORD
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][17].
 
 Then, set [Log Integrations][14] as pod annotations. Alternatively, you can configure this with a [file, configmap, or key-value store][18].
+
+**Annotations v1/v2**
 
 ```yaml
 apiVersion: v1
@@ -324,7 +357,7 @@ Set [Autodiscovery Integrations Templates][11] as Docker labels on your applicat
     "dockerLabels": {
       "com.datadoghq.ad.check_names": "[\"mysql\"]",
       "com.datadoghq.ad.init_configs": "[{}]",
-      "com.datadoghq.ad.instances": "[{\"server\": \"%%host%%\", \"user\": \"datadog\",\"pass\": \"<UNIQUEPASSWORD>\"}]"
+      "com.datadoghq.ad.instances": "[{\"server\": \"%%host%%\", \"username\": \"datadog\",\"password\": \"<UNIQUEPASSWORD>\"}]"
     }
   }]
 }
@@ -522,7 +555,7 @@ See [service_checks.json][22] for a list of service checks provided by this inte
 - [Can I use a named instance in the SQL Server integration?][24]
 - [Can I set up the dd-agent MySQL check on my Google CloudSQL?][25]
 - [MySQL Custom Queries][26]
-- [Can I collect SQL Server performance metrics beyond what is available in the sys.dm_os_performance_counters table? Try WMI][27]
+- [Use WMI to collect more SQL Server performance metrics][27]
 - [How can I collect more metrics from my SQL Server integration?][28]
 - [Database user lacks privileges][29]
 - [How to collect metrics with a SQL Stored Procedure?][30]
@@ -534,9 +567,7 @@ Additional helpful documentation, links, and articles:
 - [Monitoring MySQL performance metrics][31]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mysql/images/mysql-dash-dd.png
-[2]: https://mariadb.org
-[3]: https://mariadb.com/kb/en/library/mariadb-vs-mysql-compatibility
-[4]: https://app.datadoghq.com/account/settings#agent
+[4]: https://app.datadoghq.com/account/settings/agent/latest
 [5]: https://dev.mysql.com/doc/refman/8.0/en/creating-accounts.html
 [6]: https://docs.datadoghq.com/integrations/faq/mysql-localhost-error-localhost-vs-127-0-0-1/
 [7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -555,12 +586,14 @@ Additional helpful documentation, links, and articles:
 [20]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [21]: https://github.com/DataDog/integrations-core/blob/master/mysql/metadata.csv
 [22]: https://github.com/DataDog/integrations-core/blob/master/mysql/assets/service_checks.json
-[23]: https://docs.datadoghq.com/integrations/faq/connection-issues-with-the-sql-server-integration/
+[23]: https://docs.datadoghq.com/integrations/guide/connection-issues-with-the-sql-server-integration/
 [24]: https://docs.datadoghq.com/integrations/faq/can-i-use-a-named-instance-in-the-sql-server-integration/
 [25]: https://docs.datadoghq.com/integrations/faq/can-i-set-up-the-dd-agent-mysql-check-on-my-google-cloudsql/
 [26]: https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-from-custom-mysql-queries/
-[27]: https://docs.datadoghq.com/integrations/faq/can-i-collect-sql-server-performance-metrics-beyond-what-is-available-in-the-sys-dm-os-performance-counters-table-try-wmi/
+[27]: https://docs.datadoghq.com/integrations/guide/use-wmi-to-collect-more-sql-server-performance-metrics/
 [28]: https://docs.datadoghq.com/integrations/faq/how-can-i-collect-more-metrics-from-my-sql-server-integration/
 [29]: https://docs.datadoghq.com/integrations/faq/database-user-lacks-privileges/
 [30]: https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/#collecting-metrics-from-a-custom-procedure
 [31]: https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics
+[32]: https://docs.datadoghq.com/database_monitoring/
+[33]: https://docs.datadoghq.com/database_monitoring/#mysql

@@ -26,7 +26,14 @@ except ImportError:
 METRIC_TYPES = ['counter', 'gauge']
 
 # As case can vary depending on Kubernetes versions, we match the lowercase string
-ALLOWED_WAITING_REASONS = ['errimagepull', 'imagepullbackoff', 'crashloopbackoff', 'containercreating']
+ALLOWED_WAITING_REASONS = [
+    'errimagepull',
+    'imagepullbackoff',
+    'crashloopbackoff',
+    'containercreating',
+    'createcontainererror',
+    'invalidimagename',
+]
 ALLOWED_TERMINATED_REASONS = ['oomkilled', 'containercannotrun', 'error']
 
 kube_labels_mapper = {

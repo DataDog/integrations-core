@@ -408,6 +408,14 @@
         ]
     },
     {
+        "name": "mongodb.metrics.queryexecutor.scannedobjectsps",
+        "type": 1,
+        "value": 97.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
         "name": "mongodb.metrics.record.movesps",
         "type": 1,
         "value": 0.0,
@@ -571,6 +579,54 @@
         "name": "mongodb.network.numrequestsps",
         "type": 1,
         "value": 7893.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.oplatencies.reads.latencyps",
+        "type": 1,
+        "value": 2874788.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.oplatencies.writes.latencyps",
+        "type": 1,
+        "value": 193160.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.oplatencies.commands.latencyps",
+        "type": 1,
+        "value": 67574004.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.oplatencies.reads.latency",
+        "type": 0,
+        "value": 2874788.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.oplatencies.writes.latency",
+        "type": 0,
+        "value": 193160.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.oplatencies.commands.latency",
+        "type": 0,
+        "value": 67574004.0,
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test"
         ]

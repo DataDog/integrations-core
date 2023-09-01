@@ -4,6 +4,7 @@
 from __future__ import division
 
 import copy
+import time
 from fnmatch import translate
 from math import isinf, isnan
 from os.path import isfile
@@ -82,7 +83,8 @@ class OpenMetricsScraperMixin(object):
         if instance and endpoint is None:
             raise CheckException("You have to define a prometheus_url for each prometheus instance")
 
-        config['prometheus_url'] = endpoint
+        # Set the bearer token authorization to customer value, then get the bearer token
+        self.update_prometheus_url(instance, config, endpoint)
 
         # `NAMESPACE` is the prefix metrics will have. Need to be hardcoded in the
         # child check class.
@@ -348,24 +350,11 @@ class OpenMetricsScraperMixin(object):
         # INTERNAL FEATURE, might be removed in future versions
         config['_text_filter_blacklist'] = []
 
-        # Whether or not to use the service account bearer token for authentication.
-        # Can be explicitly set to true or false to send or not the bearer token.
-        # If set to the `tls_only` value, the bearer token will be sent only to https endpoints.
-        # If 'bearer_token_path' is not set, we use /var/run/secrets/kubernetes.io/serviceaccount/token
-        # as a default path to get the token.
-        bearer_token_auth = _get_setting('bearer_token_auth', False)
-        if bearer_token_auth == 'tls_only':
-            config['bearer_token_auth'] = config['prometheus_url'].startswith("https://")
-        else:
-            config['bearer_token_auth'] = is_affirmative(bearer_token_auth)
-
-        # Can be used to get a service account bearer token from files
-        # other than /var/run/secrets/kubernetes.io/serviceaccount/token
-        # 'bearer_token_auth' should be enabled.
-        config['bearer_token_path'] = instance.get('bearer_token_path', default_instance.get('bearer_token_path', None))
-
-        # The service account bearer token to be used for authentication
-        config['_bearer_token'] = self._get_bearer_token(config['bearer_token_auth'], config['bearer_token_path'])
+        # Refresh the bearer token every 60 seconds by default.
+        # Ref https://github.com/DataDog/datadog-agent/pull/11686
+        config['bearer_token_refresh_interval'] = instance.get(
+            'bearer_token_refresh_interval', default_instance.get('bearer_token_refresh_interval', 60)
+        )
 
         config['telemetry'] = is_affirmative(instance.get('telemetry', default_instance.get('telemetry', False)))
 
@@ -396,9 +385,11 @@ class OpenMetricsScraperMixin(object):
         """
         Get http handler for a specific scraper config.
         The http handler is cached using `prometheus_url` as key.
+        The http handler doesn't use the cache if a bearer token is used to allow refreshing it.
         """
         prometheus_url = scraper_config['prometheus_url']
-        if prometheus_url in self._http_handlers:
+        bearer_token = scraper_config['_bearer_token']
+        if prometheus_url in self._http_handlers and bearer_token is None:
             return self._http_handlers[prometheus_url]
 
         # TODO: Deprecate this behavior in Agent 8
@@ -433,6 +424,33 @@ class OpenMetricsScraperMixin(object):
         check run, such as when polling an external resource like the Kubelet.
         """
         self._http_handlers.clear()
+
+    def update_prometheus_url(self, instance, config, endpoint):
+        if not endpoint:
+            return
+
+        config['prometheus_url'] = endpoint
+        # Whether or not to use the service account bearer token for authentication.
+        # Can be explicitly set to true or false to send or not the bearer token.
+        # If set to the `tls_only` value, the bearer token will be sent only to https endpoints.
+        # If 'bearer_token_path' is not set, we use /var/run/secrets/kubernetes.io/serviceaccount/token
+        # as a default path to get the token.
+        namespace = instance.get('namespace')
+        default_instance = self.default_instances.get(namespace, {})
+        bearer_token_auth = instance.get('bearer_token_auth', default_instance.get('bearer_token_auth', False))
+        if bearer_token_auth == 'tls_only':
+            config['bearer_token_auth'] = config['prometheus_url'].startswith("https://")
+        else:
+            config['bearer_token_auth'] = is_affirmative(bearer_token_auth)
+
+        # Can be used to get a service account bearer token from files
+        # other than /var/run/secrets/kubernetes.io/serviceaccount/token
+        # 'bearer_token_auth' should be enabled.
+        config['bearer_token_path'] = instance.get('bearer_token_path', default_instance.get('bearer_token_path', None))
+
+        # The service account bearer token to be used for authentication
+        config['_bearer_token'] = self._get_bearer_token(config['bearer_token_auth'], config['bearer_token_path'])
+        config['_bearer_token_last_refresh'] = time.time()
 
     def parse_metric_family(self, response, scraper_config):
         """
@@ -557,6 +575,9 @@ class OpenMetricsScraperMixin(object):
         if not scraper_config['_flush_first_value'] and scraper_config['use_process_start_time']:
             agent_start_time = datadog_agent.get_process_start_time()
 
+        if scraper_config['bearer_token_auth']:
+            self._refresh_bearer_token(scraper_config)
+
         for metric in self.scrape_metrics(scraper_config):
             if agent_start_time is not None:
                 if metric.name == 'process_start_time_seconds' and metric.samples:
@@ -641,7 +662,7 @@ class OpenMetricsScraperMixin(object):
             sample_labels_keys = sample_labels.keys()
 
             if match_all or matching_labels.issubset(sample_labels_keys):
-                label_dict = dict()
+                label_dict = {}
 
                 if get_all:
                     for label_name, label_value in iteritems(sample_labels):
@@ -1191,6 +1212,17 @@ class OpenMetricsScraperMixin(object):
         except Exception as err:
             self.log.error("Cannot get bearer token from path: %s - error: %s", path, err)
             raise
+
+    def _refresh_bearer_token(self, scraper_config):
+        """
+        Refreshes the bearer token if the refresh interval is elapsed.
+        """
+        now = time.time()
+        if now - scraper_config['_bearer_token_last_refresh'] > scraper_config['bearer_token_refresh_interval']:
+            scraper_config['_bearer_token'] = self._get_bearer_token(
+                scraper_config['bearer_token_auth'], scraper_config['bearer_token_path']
+            )
+            scraper_config['_bearer_token_last_refresh'] = now
 
     def _histogram_convert_values(self, metric_name, converter):
         def _convert(metric, scraper_config=None):

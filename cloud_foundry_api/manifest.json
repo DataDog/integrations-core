@@ -1,36 +1,48 @@
 {
-  "display_name": "Cloud Foundry API",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "cloud_foundry_api",
-  "metric_prefix": "cloud_foundry_api.",
-  "metric_to_check": "cloud_foundry_api.events.count",
-  "creates_events": false,
-  "short_description": "Collects Cloud Foundry audit events.",
-  "guid": "82e5b924-c8c3-4467-bfde-5838857b6447",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-Cloud Foundry API Integration",
-  "categories": [
-    "cloud",
-    "orchestration"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "cloud-foundry-api",
+  "manifest_version": "2.0.0",
+  "app_uuid": "a0c8e3e8-f3de-4405-88d3-0856e6c0948f",
+  "app_id": "cloud-foundry-api",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collects Cloud Foundry audit events.",
+    "title": "Cloud Foundry API",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Cloud",
+      "Category::Orchestration"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "dashboards": {},
-    "monitors": {},
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "Cloud Foundry API",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "cloud_foundry_api.",
+        "check": "cloud_foundry_api.events.count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

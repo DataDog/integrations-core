@@ -12,17 +12,16 @@ from ...fs import chdir, file_exists, remove_path
 from ...subprocess import run_command
 from ...utils import ON_WINDOWS
 from ..constants import get_root
-from ..dependencies import read_check_base_dependencies
-from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
+from ..testing import (
+    construct_pytest_options,
+    display_check_envs,
+    fix_coverage_report,
+    get_test_envs,
+    prepare_test_commands,
+    pytest_coverage_sources,
+)
 from ..utils import code_coverage_enabled, complete_testable_checks
 from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_success, echo_waiting, echo_warning
-
-
-def display_envs(check_envs):
-    for check, envs in check_envs:
-        echo_success(f'`{check}`:')
-        for e in envs:
-            echo_info(f'    {e}')
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Run tests')
@@ -32,7 +31,7 @@ def display_envs(check_envs):
 @click.option('--bench', '-b', is_flag=True, help='Run only benchmarks')
 @click.option('--latest', is_flag=True, help='Only verify support of new product versions')
 @click.option('--e2e', is_flag=True, help='Run only end-to-end tests')
-@click.option('--ddtrace', is_flag=True, help='Run tests using dd-trace-py')
+@click.option('--ddtrace', is_flag=True, envvar='DDEV_TEST_ENABLE_TRACING', help='Run tests using dd-trace-py')
 @click.option('--cov', '-c', 'coverage', is_flag=True, help='Measure code coverage')
 @click.option('--cov-missing', '-cm', is_flag=True, help='Show line numbers of statements that were not executed')
 @click.option('--junit', '-j', 'junit', is_flag=True, help='Generate junit reports')
@@ -49,7 +48,8 @@ def display_envs(check_envs):
 @click.option('--pytest-args', '-pa', help='Additional arguments to pytest')
 @click.option('--force-base-unpinned', is_flag=True, help='Force using datadog-checks-base as specified by check dep')
 @click.option('--force-base-min', is_flag=True, help='Force using lowest viable release version of datadog-checks-base')
-@click.option('--force-env-rebuild', is_flag=True, help='Force creating a new env')
+@click.option('--force-env-rebuild', '-fr', is_flag=True, help='Force creating a new env')
+@click.option('--memray', is_flag=True, help='Run memray to measure memory usage on all tests')
 @click.pass_context
 def test(
     ctx,
@@ -77,6 +77,7 @@ def test(
     force_base_unpinned,
     force_base_min,
     force_env_rebuild,
+    memray,
 ):
     """Run tests for Agent-based checks.
 
@@ -89,14 +90,12 @@ def test(
     `$ ddev test mysql:mysql57,maria10130`
     """
     if list_envs:
-        check_envs = get_tox_envs(checks, every=True, sort=True, changed_only=changed)
-        display_envs(check_envs)
+        display_check_envs(checks, changed)
         return
 
     root = get_root()
     testing_on_ci = running_on_ci()
     color = ctx.obj['color']
-    repo = ctx.obj['repo_name']
 
     # Implicitly track coverage
     if cov_missing:
@@ -158,19 +157,19 @@ def test(
         test_env_vars['DD_API_KEY'] = api_key
         test_env_vars['TOX_TESTENV_PASSENV'] += ' DD_API_KEY'
 
-    check_envs = get_tox_envs(
+    check_envs = get_test_envs(
         checks, style=style, format_style=format_style, benchmark=bench, changed_only=changed, latest=latest
     )
     tests_ran = False
 
-    for check, envs in check_envs:
+    for check, env_names in check_envs:
         # Many checks don't have benchmark envs, etc.
-        if not envs:
+        if not env_names:
             echo_debug(f"No envs found for: `{check}`")
             continue
 
-        ddtrace_check = ddtrace
-        if ddtrace and ON_WINDOWS and any('py2' in env for env in envs):
+        ddtrace_check = ddtrace and check not in ('datadog_checks_dev', 'ddev')
+        if ddtrace and ON_WINDOWS and any('py2' in env for env in env_names):
             # The pytest flag --ddtrace is not available for windows-py2 env.
             # Removing it so it does not fail.
             echo_warning(
@@ -202,6 +201,7 @@ def test(
             pytest_args=pytest_args,
             e2e=e2e,
             ddtrace=ddtrace_check,
+            memray=memray,
         )
         if coverage:
             pytest_options = pytest_options.format(pytest_coverage_sources(check))
@@ -228,49 +228,27 @@ def test(
             echo_waiting(wait_text)
             echo_waiting('-' * len(wait_text))
 
-            command = [
-                'tox',
-                # so users won't get failures for our possibly strict CI requirements
-                '--skip-missing-interpreters',
-                # so coverage tracks the real locations instead of .tox virtual envs
-                '--develop',
-                # comma-separated list of environments
-                '-e {}'.format(','.join(envs)),
-            ]
+            env_vars = os.environ.copy()
+            commands = prepare_test_commands(
+                check,
+                env_names,
+                env_vars,
+                force_base_min,
+                force_base_unpinned,
+                force_env_rebuild,
+                verbose,
+                style,
+                format_style,
+                bench,
+            )
+            for command_args in commands:
+                command = ' '.join(command_args)
 
-            env = os.environ.copy()
+                echo_debug(f'TEST COMMAND: {command}')
+                result = run_command(command_args, env=env_vars)
 
-            base_or_dev = check.startswith('datadog_checks_')
-            if force_base_min and not base_or_dev:
-                check_base_dependencies, errors = read_check_base_dependencies(check)
-                if errors:
-                    abort(f'\nError collecting base package dependencies: {errors}')
-
-                spec = check_base_dependencies[check]
-                if spec is None:
-                    abort(f'\nFailed to determine minimum version of package `datadog_checks_base`: {spec}')
-
-                version = spec.split('>=')[-1]
-
-                env['TOX_FORCE_INSTALL'] = f"datadog_checks_base[deps]=={version}"
-            elif force_base_unpinned and not base_or_dev:
-                env['TOX_FORCE_UNPINNED'] = "datadog_checks_base"
-            elif (force_base_min or force_base_unpinned) and base_or_dev:
-                echo_info(f'Skipping forcing base dependency for check {check}')
-
-            if force_env_rebuild:
-                command.append('--recreate')
-
-            if verbose:
-                command.append('-' + 'v' * verbose)
-
-            command = ' '.join(command)
-
-            echo_debug(f'TOX COMMAND: {command}')
-            result = run_command(command, env=env)
-
-            if result.code:
-                abort('\nFailed!', code=result.code)
+                if result.code:
+                    abort('\nFailed!', code=result.code)
 
             if coverage and file_exists('.coverage') and code_coverage_enabled(check):
                 if not cov_keep:
@@ -287,8 +265,6 @@ def test(
 
                     fix_coverage_report(check, 'coverage.xml')
 
-                    if repo == 'integrations-core':
-                        run_command(['codecov', '-X', 'gcov', '--root', root, '-F', check, '-f', 'coverage.xml'])
                 else:
                     if not cov_keep:
                         remove_path('.coverage')
@@ -301,6 +277,7 @@ def test(
             break
 
     if not tests_ran:
+        # TODO: remove branch when tox is replaced by Hatch
         if format_style:
             echo_warning('Code formatting is not enabled!')
             echo_info('To enable it, set `dd_check_style = true` under the `[testenv]` section of `tox.ini`.')

@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional  # noqa: F401
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 
@@ -19,10 +19,11 @@ class TrafficServerCheck(AgentCheck):
         super(TrafficServerCheck, self).__init__(name, init_config, instances)
 
         self.traffic_server_url = self.instance.get("traffic_server_url")
-        self.tags = self.instance.get("tags", [])
-
         if self.traffic_server_url is None:
             raise ConfigurationError('Must specify a traffic_server_url')
+
+        self.tags = self.instance.get("tags", [])
+        self.tags.append("traffic_server_url:{}".format(self.traffic_server_url))
 
     def check(self, _):
         # type: (Any) -> None

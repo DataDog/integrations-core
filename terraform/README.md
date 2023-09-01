@@ -32,7 +32,11 @@ The Datadog Terraform provider is available through the [Terraform Registry][1].
     ```
 
 4. Run `terraform init`. This initializes the directory for use with Terraform and pulls the Datadog provider.
-5. Create any `.tf` file in the `terraform_config/` directory and start creating Datadog resources. For example:
+5. Create any `.tf` file in the `terraform_config/` directory and start creating Datadog resources. 
+
+## Create a monitor
+
+This example demonstrates a `monitor.tf` file that creates a [live process monitor][5].
 
     ```
     # monitor.tf
@@ -51,7 +55,7 @@ The Datadog Terraform provider is available through the [Terraform Registry][1].
     }
     ```
 
-6. Run `terraform apply` to create this monitor in your Datadog account!
+Run `terraform apply` to create this monitor in your Datadog account.
 
 ## Send Events to Datadog
 
@@ -98,3 +102,4 @@ Need help? Contact [Datadog support][3].
 [2]: https://learn.hashicorp.com/tutorials/terraform/install-cli
 [3]: https://docs.datadoghq.com/help/
 [4]: https://github.com/DataDog/datadogpy
+[5]: https://docs.datadoghq.com/monitors/types/process/

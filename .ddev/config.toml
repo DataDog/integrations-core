@@ -1,0 +1,156 @@
+[overrides.display-name]
+datadog_checks_base = "Datadog Checks Base"
+datadog_checks_dev = "Datadog Checks Dev"
+datadog_checks_downloader = "Datadog Checks Downloader"
+ecs_fargate = "Amazon ECS Fargate"
+fluentd = "Fluentd"
+kube_scheduler = "Kubernetes Scheduler"
+nfsstat = "NFSstat"
+nginx = "NGINX"
+nginx_ingress_controller = "NGINX Ingress Controller"
+openstack_controller = "OpenStack Controller"
+pulsar = "Pulsar"
+teamcity = "TeamCity"
+win32_event_log = "Windows Event Log"
+
+[overrides.ci.ddev]
+platforms = ["linux", "windows"]
+
+[overrides.ci.datadog_checks_base]
+platforms = ["linux", "windows"]
+
+[overrides.ci.datadog_checks_dev]
+platforms = ["linux", "windows"]
+
+[overrides.ci.datadog_checks_downloader]
+platforms = ["linux", "windows"]
+
+[overrides.ci.disk]
+platforms = ["linux", "windows"]
+
+[overrides.ci.dns_check]
+platforms = ["linux", "windows"]
+
+[overrides.ci.glusterfs]
+runners = { linux = ["ubuntu-20.04"] }
+
+[overrides.ci.hyperv]
+exclude = true
+
+[overrides.ci.ibm_mq]
+platforms = ["linux", "windows"]
+
+[overrides.ci.mesos_slave]
+runners = { linux = ["ubuntu-20.04"] }
+
+[overrides.ci.mysql]
+runners = { linux = ["ubuntu-20.04"] }
+
+[overrides.ci.network]
+platforms = ["linux", "windows"]
+
+[overrides.ci.spark]
+runners = { linux = ["ubuntu-20.04"] }
+
+[overrides.ci.ssh]
+runners = { linux = ["ubuntu-20.04"] }
+
+[overrides.ci.sqlserver]
+platforms = ["windows", "linux"]
+runners = { windows = ["windows-2019"] }
+
+[overrides.ci.tcp_check]
+platforms = ["linux", "windows"]
+
+[overrides.ci.tokumx]
+only-py2 = true
+
+[overrides.dependencies.licenses]
+# https://github.com/aerospike/aerospike-client-python/blob/master/LICENSE
+aerospike = ['Apache-2.0']
+# https://github.com/baztian/jaydebeapi/blob/master/COPYING
+JayDeBeApi = ['LGPL-3.0-only']
+# https://github.com/pyca/cryptography/blob/main/LICENSE
+cryptography = ['Apache-2.0', 'BSD-3-Clause', 'PSF']
+# https://github.com/rthalley/dnspython/blob/master/LICENSE
+dnspython = ['ISC']
+# https://github.com/cannatag/ldap3/blob/dev/COPYING.txt
+ldap3 = ['LGPL-3.0-only']
+# https://cloudera.github.io/cm_api/
+cm-client = ['Apache-2.0']
+# https://github.com/oauthlib/oauthlib/blob/master/LICENSE
+oauthlib = ['BSD-3-Clause']
+# https://github.com/hajimes/mmh3/blob/master/LICENSE
+mmh3 = ['CC0-1.0']
+# https://github.com/paramiko/paramiko/blob/master/LICENSE
+paramiko = ['LGPL-2.1-only']
+# https://github.com/oracle/python-oracledb/blob/main/LICENSE.txt
+oracledb = ['Apache-2.0']
+# https://github.com/psycopg/psycopg/blob/master/LICENSE.txt
+psycopg = ['LGPL-3.0-only']
+# https://github.com/psycopg/psycopg/blob/master/psycopg_pool/LICENSE.txt
+psycopg-pool = ['LGPL-3.0-only']
+# https://github.com/psycopg/psycopg2/blob/master/LICENSE
+# https://github.com/psycopg/psycopg2/blob/master/doc/COPYING.LESSER
+psycopg2-binary = ['LGPL-3.0-only', 'BSD-3-Clause']
+# https://github.com/Legrandin/pycryptodome/blob/master/LICENSE.rst
+pycryptodomex = ['Unlicense', 'BSD-2-Clause']
+# https://github.com/requests/requests-kerberos/pull/123
+requests-kerberos = ['ISC']
+# https://github.com/requests/requests-ntlm/blob/master/LICENSE
+requests-ntlm = ['ISC']
+# https://github.com/rethinkdb/rethinkdb-python/blob/master/LICENSE
+rethinkdb = ['Apache-2.0']
+# https://github.com/simplejson/simplejson/blob/master/LICENSE.txt
+simplejson = ['MIT']
+# https://github.com/Supervisor/supervisor/blob/master/LICENSES.txt
+supervisor = ['BSD-3-Clause-Modification']
+# https://github.com/Cairnarvon/uptime/blob/master/COPYING.txt
+uptime = ['BSD-2-Clause']
+# https://github.com/hickeroar/win_inet_pton/blob/master/LICENSE
+win-inet-pton = ['Unlicense']
+
+[overrides.dependencies.repo]
+PyYAML = 'https://github.com/yaml/pyyaml'
+Pyro4 = 'https://github.com/irmen/Pyro4'
+contextlib2 = 'https://github.com/jazzband/contextlib2'
+dnspython = 'https://github.com/rthalley/dnspython'
+foundationdb = 'https://github.com/apple/foundationdb'
+in-toto = 'https://github.com/in-toto/in-toto'
+lxml = 'https://github.com/lxml/lxml'
+oracledb = 'https://github.com/oracle/python-oracledb'
+packaging = 'https://github.com/pypa/packaging'
+paramiko = 'https://github.com/paramiko/paramiko'
+protobuf = 'https://github.com/protocolbuffers/protobuf'
+psycopg2-binary = 'https://github.com/psycopg/psycopg2'
+psycopg = 'https://github.com/psycopg/psycopg'
+pycryptodomex = 'https://github.com/Legrandin/pycryptodome'
+redis = 'https://github.com/redis/redis-py'
+requests = 'https://github.com/psf/requests'
+requests-toolbelt = 'https://github.com/requests/toolbelt'
+service-identity = 'https://github.com/pyca/service-identity'
+snowflake-connector-python = 'https://github.com/snowflakedb/snowflake-connector-python'
+supervisor = 'https://github.com/Supervisor/supervisor'
+tuf = 'https://github.com/theupdateframework/python-tuf'
+typing = 'https://github.com/python/typing'
+
+[overrides.validate.openmetrics]
+exclude = ["openmetrics"]
+
+[overrides.validate.metrics]
+exclude = [
+    'disk',
+    'go_expvar',
+    'go-metro',
+    'http',
+    'kubelet',
+    'kubernetes',
+    'kubernetes_state',
+    'network',
+    'ntp',
+    'process',
+    'riak_cs',
+    'system_core',
+    'system_swap',
+    'tcp',
+]

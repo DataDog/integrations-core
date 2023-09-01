@@ -120,6 +120,10 @@ For Agent v5, create the `/etc/dd-agent/conf.d/spark.yaml` configuration file wi
 
 For Agent v6/7, create the `/etc/datadog-agent/conf.d/spark.d/conf.yaml` configuration file with the [proper values on each EMR node][14].
 
+### Successful check but no metrics are collected
+
+The Spark integration only collects metrics about running apps. If you have no currently running apps, the check will just submit a health check.
+
 ## Further Reading
 
 Additional helpful documentation, links, and articles:
@@ -128,7 +132,7 @@ Additional helpful documentation, links, and articles:
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/spark/images/sparkgraph.png
 [2]: https://spark.apache.org/
-[3]: https://app.datadoghq.com/account/settings#agent
+[3]: https://app.datadoghq.com/account/settings/agent/latest
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/spark/datadog_checks/spark/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

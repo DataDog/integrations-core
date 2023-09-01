@@ -5,6 +5,7 @@
 import pytest
 
 from . import common
+from .metrics import METRICS_36_E2E_SKIPS
 
 
 @pytest.mark.e2e
@@ -13,7 +14,7 @@ def test_e2e(dd_agent_check, get_instance):
 
     common.assert_stat_metrics(aggregator)
     common.assert_latency_metrics(aggregator)
-    common.assert_mntr_metrics_by_version(aggregator, skip=common.METRICS_36_E2E_SKIPS)
+    common.assert_mntr_metrics_by_version(aggregator, skip=METRICS_36_E2E_SKIPS)
     common.assert_service_checks_ok(aggregator)
 
     expected_mode = get_instance['expected_mode']

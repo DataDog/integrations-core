@@ -6,6 +6,7 @@ import pytest
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.dev.testing import requires_py3
 
 from .common import skip_windows_ci
 
@@ -85,21 +86,35 @@ def test_channel_status_service_check_custom_mapping(aggregator, get_check, inst
         )
 
 
-@pytest.mark.parametrize('channel_status_mapping', [{'inactive': 'warningXX'}, {'inactiveXX': 'warning'}])
-def test_channel_status_service_check_custom_mapping_invalid_config(get_check, instance, channel_status_mapping):
+@pytest.mark.parametrize(
+    'channel_status_mapping, error_message',
+    [
+        ({'inactive': 'warningXX'}, "Invalid service check status: warningXX"),
+        ({'inactiveXX': 'warning'}, "has no attribute 'MQCHS_INACTIVEXX'"),
+    ],
+)
+def test_channel_status_service_check_custom_mapping_invalid_config(
+    get_check, instance, channel_status_mapping, error_message
+):
     instance['channel_status_mapping'] = channel_status_mapping
 
-    with pytest.raises(ConfigurationError):
+    with pytest.raises(ConfigurationError, match=error_message):
         get_check(instance)
 
 
 @pytest.mark.parametrize(
-    'mqcd_version', [pytest.param(10, id='unsupported-version'), pytest.param('foo', id='not-an-int')]
+    'mqcd_version',
+    [
+        pytest.param(10, id='unsupported-version'),
+        pytest.param('foo', id='not-an-int'),
+    ],
 )
 def test_invalid_mqcd_version(get_check, instance, mqcd_version):
     instance['mqcd_version'] = mqcd_version
 
-    with pytest.raises(ConfigurationError):
+    with pytest.raises(
+        ConfigurationError, match="mqcd_version must be a number between 1 and 9. {} found.".format(mqcd_version)
+    ):
         get_check(instance)
 
 
@@ -109,7 +124,7 @@ def test_set_mqcd_version(instance):
     from datadog_checks.ibm_mq.config import IBMMQConfig
 
     instance['mqcd_version'] = 9
-    config = IBMMQConfig(instance)
+    config = IBMMQConfig(instance, {})
     assert config.mqcd_version == pymqi.CMQC.MQCD_VERSION_9
 
 
@@ -128,7 +143,7 @@ def test_connection_config_ok(instance_config, expected_connection_name):
 
     instance_config.update({'channel': 'foo', 'queue_manager': 'bar'})
 
-    config = IBMMQConfig(instance_config)
+    config = IBMMQConfig(instance_config, {})
 
     assert config.connection_name == expected_connection_name
 
@@ -142,10 +157,8 @@ def test_connection_config_error(instance_config):
 
     instance_config.update({'channel': 'foo', 'queue_manager': 'bar'})
 
-    with pytest.raises(ConfigurationError) as excinfo:
-        IBMMQConfig(instance_config)
-
-    assert 'Specify only one host/port or connection_name configuration' in str(excinfo.value)
+    with pytest.raises(ConfigurationError, match='Specify only one host/port or connection_name configuration'):
+        IBMMQConfig(instance_config, {})
 
 
 @pytest.mark.parametrize(
@@ -160,7 +173,7 @@ def test_channel_queue_config_ok(instance_config):
 
     instance_config.update({'host': 'localhost', 'port': 1000})
 
-    IBMMQConfig(instance_config)
+    IBMMQConfig(instance_config, {})
     # finish without configuration error
 
 
@@ -178,28 +191,22 @@ def test_channel_queue_config_error(instance_config):
 
     instance_config.update({'host': 'localhost', 'port': 1000})
 
-    with pytest.raises(ConfigurationError) as excinfo:
-        IBMMQConfig(instance_config)
-
-    assert 'channel, queue_manager are required configurations' in str(excinfo.value)
+    with pytest.raises(ConfigurationError, match='channel, queue_manager are required configurations'):
+        IBMMQConfig(instance_config, {})
 
 
 @skip_windows_ci
-def test_ssl_connection_creation(get_check, instance):
+def test_ssl_connection_creation(get_check, instance_ssl_dummy):
     """
     Test that we are not getting unicode/bytes type error.
     """
     # Late import to not require it for e2e
     import pymqi
 
-    instance['ssl_auth'] = 'yes'
-    instance['ssl_cipher_spec'] = 'TLS_RSA_WITH_AES_256_CBC_SHA256'
-    instance['ssl_key_repository_location'] = '/dummy'
-
-    check = get_check(instance)
+    check = get_check(instance_ssl_dummy)
 
     with pytest.raises(pymqi.MQMIError) as excinfo:
-        check.check(instance)
+        check.check(instance_ssl_dummy)
 
     assert excinfo.value.reason == pymqi.CMQC.MQRC_KEY_REPOSITORY_ERROR
 
@@ -221,7 +228,7 @@ def test_ssl_check_normal_connection_before_ssl_connection(instance_ssl_dummy):
     from datadog_checks.ibm_mq.connection import get_queue_manager_connection
 
     logger = logging.getLogger(__file__)
-    config = IBMMQConfig(instance_ssl_dummy)
+    config = IBMMQConfig(instance_ssl_dummy, {})
 
     error = pymqi.MQMIError(pymqi.CMQC.MQCC_FAILED, pymqi.CMQC.MQRC_UNKNOWN_CHANNEL_NAME)
     with mock.patch(
@@ -257,3 +264,12 @@ def test_ssl_check_normal_connection_before_ssl_connection(instance_ssl_dummy):
 
         get_normal_connection.assert_called_with(config, logger)
         get_ssl_connection.assert_called_with(config, logger)
+
+
+@requires_py3
+def test_queue_manager_process_direct_ssl(instance):
+    from datadog_checks.ibm_mq.config import IBMMQConfig
+
+    instance['queue_manager_process'] = 'amqpcsea {}'.format(instance['queue_manager'])
+    config = IBMMQConfig(instance, {})
+    assert config.try_basic_auth is False

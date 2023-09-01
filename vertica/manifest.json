@@ -1,39 +1,57 @@
 {
-  "display_name": "Vertica",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "vertica",
-  "metric_prefix": "vertica.",
-  "metric_to_check": "vertica.connection.active",
-  "creates_events": false,
-  "short_description": "Monitor Vertica projection storage, license usage, and more.",
-  "guid": "884d1895-6791-487c-ac8e-7ccaad45db0b",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-Vertica Integration",
-  "categories": [
-    "data store",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "vertica",
+  "manifest_version": "2.0.0",
+  "app_uuid": "c5946789-de76-4ec6-9485-db83dd66fd28",
+  "app_id": "vertica",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor Vertica projection storage, license usage, and more.",
+    "title": "Vertica",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Vertica",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "vertica.",
+        "check": "vertica.connection.active",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "Vertica Overview": "assets/dashboards/overview.json"
     },
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
+    "monitors": {
+      "[Vertica] Nodes down above K-safety level": "assets/monitors/vertica_replication_safety.json"
+    },
     "logs": {
       "source": "vertica"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

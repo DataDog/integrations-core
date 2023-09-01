@@ -61,9 +61,9 @@ files:
       - name: gitlab_url
         required: true
         description: |
-          Master URL to probe for service health status
-          If you are using gitlab CE and not EE, use this url with
-          the authorization token: http://localhost/?token=<TOKEN>
+          Master URL to probe for service health status.
+          If you are using GitLab CE and not EE, use this URL with
+          the authorization token: http://localhost/?token=<TOKEN>.
         value:
           type: string
       - name: prometheus_endpoint
@@ -75,6 +75,10 @@ files:
       - template: instances/openmetrics_legacy
         overrides:
           prometheus_url.hidden: true
+          health_service_check.value.example: false
+          health_service_check.value.default: false
+          send_monotonic_counter.value.example: false
+          send_monotonic_counter.value.default: false
   - template: logs
     example:
       - type: journald

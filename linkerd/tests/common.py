@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2019-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 from datadog_checks.base.stubs import aggregator
 from datadog_checks.dev import get_here
 from datadog_checks.linkerd.metrics import construct_metrics_config

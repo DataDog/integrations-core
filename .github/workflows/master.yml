@@ -1,0 +1,40 @@
+name: Master
+
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  cache:
+    uses: ./.github/workflows/cache-shared-deps.yml
+
+  test:
+    needs:
+    - cache
+
+    uses: ./.github/workflows/test-all.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+    secrets: inherit
+
+  publish-test-results:
+    needs:
+    - test
+    if: success() || failure()
+    concurrency:
+      group: test-results
+
+    uses: ./.github/workflows/test-results-master.yml
+    secrets: inherit
+
+  submit-traces:
+    needs:
+    - test
+    if: success() || failure()
+
+    uses: ./.github/workflows/submit-traces.yml
+    secrets: inherit

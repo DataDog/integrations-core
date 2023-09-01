@@ -13,7 +13,7 @@ services:
     entrypoint:
       - /support/wait_for_master.sh
   gitlab:
-    image: gitlab/gitlab-ce:${GITLAB_RUNNER_VERSION}-ce.0
+    image: ${GITLAB_IMAGE:-gitlab/gitlab-ce}:${GITLAB_RUNNER_VERSION}-ce.0
     ports:
       - "${GITLAB_LOCAL_MASTER_PORT}:80"
     environment:

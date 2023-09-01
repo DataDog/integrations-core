@@ -1,44 +1,58 @@
 {
-  "display_name": "Hazelcast",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "hazelcast",
-  "metric_prefix": "hazelcast.",
-  "metric_to_check": [
-    "hazelcast.mc.license_expiration_time",
-    "hazelcast.instance.running"
-  ],
-  "creates_events": false,
-  "short_description": "Monitor Hazelcast members and the Management Center.",
-  "guid": "b2c63c99-f955-4494-a171-494f9dcf7d1f",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-Hazelcast Integration",
-  "categories": [
-    "data store",
-    "caching",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "hazelcast",
+  "manifest_version": "2.0.0",
+  "app_uuid": "00434289-3c74-4c25-8841-9e0c826510c2",
+  "app_id": "hazelcast",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor Hazelcast members and the Management Center.",
+    "title": "Hazelcast",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Caching",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Hazelcast",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "hazelcast.",
+        "check": [
+          "hazelcast.mc.license_expiration_time",
+          "hazelcast.instance.running"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "Hazelcast Overview": "assets/dashboards/overview.json"
     },
-    "monitors": {},
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "hazelcast"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

@@ -7,6 +7,7 @@ import os
 
 import mock
 import pytest
+from freezegun import freeze_time
 
 from datadog_checks.dev.fs import read_file
 from datadog_checks.silk import SilkCheck
@@ -75,3 +76,24 @@ def test_malformed_event(aggregator, instance, dd_run_check, file, log_warning, 
 
     aggregator.assert_event("test_event1", count=0)
     assert log_warning in caplog.text
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_events_test(aggregator, dd_run_check, instance):
+    # Freeze time when starting check to set initial time
+    with freeze_time("2012-01-13"):
+        check = SilkCheck('silk', {}, [instance])
+
+    # Freeze time running check initially to query for events from 1-13 to 1-14
+    with freeze_time("2012-01-14"):
+        dd_run_check(check)
+        aggregator.assert_event("Event 1", count=1)
+        aggregator.assert_event("Event 2", count=0)
+
+    # freeze time finally when running check 2nd time to query for events from 1-14 to 1-15
+    with freeze_time("2012-01-15"):
+        aggregator.reset()
+        dd_run_check(check)
+        aggregator.assert_event("Event 1", count=0)
+        aggregator.assert_event("Event 2", count=1)

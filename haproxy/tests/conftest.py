@@ -102,6 +102,9 @@ def prometheus_metrics():
                 metrics.pop(metric)
     if HAPROXY_VERSION < version.parse('2.4.9'):
         metrics.pop('haproxy_backend_agg_server_check_status')
+    if HAPROXY_VERSION < version.parse('2.4.21'):
+        metrics.pop('haproxy_backend_agg_check_status')
+        metrics.pop('haproxy_backend_agg_server_status')
 
     metrics = list(metrics.values())
     return metrics
@@ -136,21 +139,22 @@ def legacy_environment():
     env = {}
     env['HAPROXY_CONFIG_DIR'] = os.path.join(HERE, 'compose')
     env['HAPROXY_CONFIG_OPEN'] = os.path.join(HERE, 'compose', 'haproxy-open.cfg')
-    with docker_run(
-        compose_file=os.path.join(HERE, 'compose', 'haproxy.yaml'),
-        env_vars=env,
-        service_name="haproxy-open",
-        conditions=[WaitFor(wait_for_haproxy_open)],
-    ):
+    env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy.cfg')
+    if HAPROXY_VERSION >= version.parse('1.6'):
+        env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy-1_6.cfg')
 
-        if platform_supports_sockets:
-            with TempDir() as temp_dir:
-                host_socket_path = os.path.join(temp_dir, 'datadog-haproxy-stats.sock')
-                env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy.cfg')
-                if HAPROXY_VERSION >= version.parse('1.6'):
-                    env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy-1_6.cfg')
-                env['HAPROXY_SOCKET_DIR'] = temp_dir
+    with TempDir() as temp_dir:
+        host_socket_path = os.path.join(temp_dir, 'datadog-haproxy-stats.sock')
+        env['HAPROXY_SOCKET_DIR'] = temp_dir
 
+        with docker_run(
+            compose_file=os.path.join(HERE, 'compose', 'haproxy.yaml'),
+            env_vars=env,
+            service_name="haproxy-open",
+            conditions=[WaitFor(wait_for_haproxy_open)],
+        ):
+
+            if platform_supports_sockets:
                 with docker_run(
                     compose_file=os.path.join(HERE, 'compose', 'haproxy.yaml'),
                     env_vars=env,
@@ -174,8 +178,8 @@ def legacy_environment():
                     unixsocket_url = 'unix://{0}'.format(host_socket_path)
                     config['unixsocket_url'] = unixsocket_url
                     yield {'instances': [config, CONFIG_TCPSOCKET]}
-        else:
-            yield deepcopy(CHECK_CONFIG_OPEN)
+            else:
+                yield deepcopy(CHECK_CONFIG_OPEN)
 
 
 @pytest.fixture

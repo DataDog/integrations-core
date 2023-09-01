@@ -8,6 +8,7 @@ GAUGES = [
     "memcache.uptime",
     "memcache.bytes",
     "memcache.curr_connections",
+    "memcache.max_connections",
     "memcache.connection_structures",
     "memcache.threads",
     "memcache.pointer_size",

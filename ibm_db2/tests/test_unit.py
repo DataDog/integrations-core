@@ -32,19 +32,42 @@ def test_retry_connection(aggregator, instance):
     ibmdb2 = IbmDb2Check('ibm_db2', {}, [instance])
     conn1 = mock.MagicMock()
     ibmdb2._conn = conn1
-    ibmdb2.get_connection = mock.MagicMock()
-
-    exception_msg = "[IBM][CLI Driver] CLI0106E  Connection is closed. SQLSTATE=08003"
 
     def mock_exception(*args, **kwargs):
-        raise ConnectionError(exception_msg)
+        raise ConnectionError("[IBM][CLI Driver] CLI0106E  Connection is closed. SQLSTATE=08003")
 
     with mock.patch('ibm_db.exec_immediate', side_effect=mock_exception):
-
-        with pytest.raises(ConnectionError, match='CLI0106E  Connection is closed. SQLSTATE=08003'):
-            ibmdb2.check(instance)
+        with mock.patch('ibm_db.connect', return_value=mock.MagicMock()):
+            with pytest.raises(ConnectionError, match='CLI0106E  Connection is closed. SQLSTATE=08003'):
+                ibmdb2.check(instance)
         # new connection made
         assert ibmdb2._conn != conn1
+    aggregator.assert_service_check(IbmDb2Check.SERVICE_CHECK_CONNECT, IbmDb2Check.OK)
+
+
+def test_fails_to_reconnect(aggregator, instance):
+    ibmdb2 = IbmDb2Check('ibm_db2', {}, [instance])
+    conn1 = mock.MagicMock()
+    ibmdb2._conn = conn1
+
+    def mock_exception(*args, **kwargs):
+        raise ConnectionError("[IBM][CLI Driver] CLI0106E  Connection is closed. SQLSTATE=08003")
+
+    with mock.patch('ibm_db.exec_immediate', side_effect=mock_exception):
+        with mock.patch('ibm_db.connect', side_effect=mock_exception):
+            with pytest.raises(ConnectionError, match='Unable to create new connection'):
+                ibmdb2.check(instance)
+        # new connection could not be made
+        assert ibmdb2._conn is None
+    aggregator.assert_service_check(IbmDb2Check.SERVICE_CHECK_CONNECT, IbmDb2Check.CRITICAL)
+
+
+def test_ok_service_check_is_emitted_on_every_check_run(instance, aggregator):
+    ibmdb2 = IbmDb2Check('ibm_db2', {}, [instance])
+    ibmdb2._conn = mock.MagicMock()
+    with mock.patch('ibm_db.exec_immediate'):
+        ibmdb2.check(instance)
+    aggregator.assert_service_check(IbmDb2Check.SERVICE_CHECK_CONNECT, IbmDb2Check.OK)
 
 
 def test_query_function_error(aggregator, instance):

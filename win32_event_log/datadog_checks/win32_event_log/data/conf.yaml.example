@@ -102,7 +102,7 @@ instances:
     ##   /\ WARNING /\
     ##   Due to a limitation in the Windows events API, the maximum filtering on event IDs is 20 IDs per instance.
     ##   Because of this, you may need to split the ID filtering into multiple instances.
-    ##   
+    ##
     ## For advanced and more granular filtering, define a `query`.
     ##
     ## If `filters` nor `query` is specified, then all events from the subscribed `path` will be collected.
@@ -224,7 +224,7 @@ instances:
     #
     # payload_size: 10
 
-    ## @param bookmark_frequency - integer - optional - default: <PAYLOAD_SIZE>
+    ## @param bookmark_frequency - integer - optional
     ## How often to save the last seen event as a factor of the number of seen events.
     ## By default, the value of `payload_size` will be used.
     ##
@@ -235,8 +235,8 @@ instances:
     ## @param legacy_mode - boolean - optional - default: true
     ## Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
     ##
-    ##    /\ WARNING /\
-    ## This mode, by nature of the underlying technology, is significantly more resource intensive.
+    ##   /\ WARNING /\
+    ##   This mode, by nature of the underlying technology, is significantly more resource intensive.
     ##
     ## Setting this option to `false` is only supported on Agent versions 7 and above.
     #
@@ -354,12 +354,12 @@ instances:
 
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.

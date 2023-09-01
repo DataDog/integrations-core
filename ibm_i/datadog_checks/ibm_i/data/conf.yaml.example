@@ -9,7 +9,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -63,6 +63,31 @@ instances:
     ## The timeout (in seconds) applied to queries made on the IBM i system.
     #
     # query_timeout: 30
+
+    ## @param queries - list of mappings - optional
+    ## List of queries to be run against the IBM i system. By default, all queries are run.
+    #
+    # queries:
+    #   - name: disk_usage
+    #   - name: cpu_usage
+    #   - name: jobq_job_status
+    #   - name: active_job_status
+    #   - name: job_memory_usage
+    #   - name: memory_info
+    #   - name: subsystem
+    #   - name: job_queue
+    #   - name: message_queue_info
+
+    ## @param message_queue_info - mapping - optional
+    ## A configuration mapping for the message_queue_info query.
+    ##
+    ## selected_message_queues restricts the message_queue_info query to a subset of the queues.
+    ## This can reduce the CPU usage on the target IBM i machine. By default no filter is applied.
+    #
+    # message_queue_info:
+    #   selected_message_queues:
+    #   - QSYSOPR
+    #   - QPGMR
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

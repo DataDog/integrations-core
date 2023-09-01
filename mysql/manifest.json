@@ -1,42 +1,59 @@
 {
-  "categories": [
-    "data store",
-    "log collection"
-  ],
-  "creates_events": true,
-  "description": "The MySQL integration helps to collect performance and availability metrics from MySQL server instances.",
-  "display_name": "MySQL",
-  "guid": "056bfc7f-4775-4581-9442-502078593d10",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "mysql.",
-  "metric_to_check": "mysql.net.connections",
-  "name": "MySQL",
-  "process_signatures": [
-    "mysqld"
-  ],
-  "public_title": "Datadog-MySQL Integration",
-  "short_description": "Collect performance schema metrics, query throughput, custom metrics, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "mysql",
+  "manifest_version": "2.0.0",
+  "app_uuid": "f6177896-da1e-4bc4-ab19-fd32e8868647",
+  "app_id": "mysql",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect performance schema metrics, query throughput, custom metrics, and more.",
+    "title": "MySQL",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "monitors": {
-      "select query rate": "assets/monitors/select_query_rate.json",
-      "replica running": "assets/monitors/replica_running.json"
+    "integration": {
+      "source_type_name": "MySQL",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "mysql.",
+        "check": "mysql.net.connections",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "mysqld"
+      ]
     },
     "dashboards": {
       "mysql": "assets/dashboards/overview.json",
       "mysql-screenboard": "assets/dashboards/overview-screenboard.json"
+    },
+    "monitors": {
+      "select query rate": "assets/monitors/select_query_rate.json",
+      "replica running": "assets/monitors/replica_running.json"
     },
     "saved_views": {
       "operations": "assets/saved_views/operations.json",
@@ -44,10 +61,8 @@
       "slow_operations": "assets/saved_views/slow_operations.json",
       "mysql_processes": "assets/saved_views/mysql_processes.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "mysql"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

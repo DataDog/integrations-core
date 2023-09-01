@@ -52,7 +52,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -242,7 +242,7 @@ instances:
     # log_requests: false
 
     ## @param persist_connections - boolean - optional - default: false
-    ## Whether or not to persist cookies and use connection pooling for increased performance.
+    ## Whether or not to persist cookies and use connection pooling for improved performance.
     #
     # persist_connections: false
 
@@ -275,14 +275,37 @@ instances:
     ##              The number of columns must equal the number of columns returned in the query.
     ##              There are 2 required pieces of data:
     ##                a. name - The suffix to append to `<INTEGRATION>.` to form
-    ##                          the full metric name. If `type` is `tag`, this column is
+    ##                          the full metric name. If `type` is a `tag` type, this column is
     ##                          considered a tag and applied to every
     ##                          metric collected by this particular query.
     ##                b. type - The submission method (gauge, monotonic_count, etc.).
-    ##                          This can also be set to `tag` to tag each metric in the row
-    ##                          with the name and value of the item in this column. You can
-    ##                          use the `count` type to perform aggregation for queries that
-    ##                          return multiple rows with the same or no tags.
+    ##                          This can also be set to the following `tag` types to
+    ##                          tag each metric in the row with the name and value
+    ##                          of the item in this column:
+    ##                           i. tag           - This is the default tag type
+    ##                           ii. tag_list     - This allows multiple values to be attached
+    ##                                             to the tag name. For example: 
+    ##
+    ##                                             query = {
+    ##                                               "name": "example",
+    ##                                               "query": "...",
+    ##                                               "columns": [
+    ##                                                 {"name": "server_tag", "type": "tag_list"},
+    ##                                                 {"name": "foo", "type": "gauge"},
+    ##                                               ]
+    ##                                             }
+    ##
+    ##                                             May result in:
+    ##                                             gauge("foo", tags=[
+    ##                                                                 "server_tag:us",
+    ##                                                                 "server_tag:primary",
+    ##                                                                 "server_tag:default"
+    ##                                                               ])
+    ##                                             gauge("foo", tags=["server_tag:eu"])
+    ##                                             gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
+    ##                           iii. tag_not_null - This only sets tags in the metric if the value is not null
+    ##                          You can use the `count` type to perform aggregation
+    ##                          for queries that return multiple rows with the same or no tags.
     ##              Columns without a name are ignored. To skip a column, enter:
     ##                - {}
     ## 3. tags (optional) - A list of tags to apply to each metric.
@@ -339,12 +362,12 @@ instances:
 
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.

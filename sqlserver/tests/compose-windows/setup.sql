@@ -1,35 +1,73 @@
+------------------------------ COMMON SETUP ------------------------------
+ALTER login sa ENABLE;
+GO
+ALTER login sa WITH PASSWORD = 'Password123';
+GO
+
 -- datadog user
 CREATE LOGIN datadog WITH PASSWORD = 'Password12!';
-CREATE USER datadog FOR LOGIN datadog;GRANT SELECT on sys.dm_os_performance_counters to datadog;
+CREATE USER datadog FOR LOGIN datadog;
+GRANT SELECT on sys.dm_os_performance_counters to datadog;
 GRANT VIEW SERVER STATE to datadog;
-GRANT CONNECT ANY DATABASE to datadog;
 GRANT VIEW ANY DEFINITION to datadog;
 
 -- test users
 CREATE LOGIN bob WITH PASSWORD = 'Password12!';
 CREATE USER bob FOR LOGIN bob;
-GRANT CONNECT ANY DATABASE to bob;
 CREATE LOGIN fred WITH PASSWORD = 'Password12!';
 CREATE USER fred FOR LOGIN fred;
-GRANT CONNECT ANY DATABASE to fred;
+GO
+
+-- note that we deliberately don't grant "CONNECT ANY DATABASE" to the agent user here because that
+-- permission is not supported in SQL Server 2012. This is OK for the integration tests because in
+-- the tests instead we explicitly create the datadog user in each database as a workaround
+USE model;
+GO
+CREATE USER datadog FOR LOGIN datadog;
+GO
+USE msdb;
+GO
+CREATE USER datadog FOR LOGIN datadog;
 GO
 
 -- Create test database for integration tests
 -- only bob and fred have read/write access to this database
+-- the datadog user has only connect access but can't read any objects
 CREATE DATABASE datadog_test;
 GO
 USE datadog_test;
+GO
+
 -- This table is pronounced "things" except we've replaced "th" with the greek lower case "theta" to ensure we
 -- correctly support unicode throughout the integration.
 CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));
 INSERT INTO datadog_test.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
 CREATE USER bob FOR LOGIN bob;
 CREATE USER fred FOR LOGIN fred;
+-- we don't need to recreate the datadog user in this new DB because it already exists in the model
+-- database so it's copied by default to new databases
 GO
 
 EXEC sp_addrolemember 'db_datareader', 'bob'
 EXEC sp_addrolemember 'db_datareader', 'fred'
 EXEC sp_addrolemember 'db_datawriter', 'bob'
+GO
+
+CREATE PROCEDURE bobProc AS
+BEGIN
+    SELECT * FROM ϑings;
+END;
+GO
+
+CREATE PROCEDURE bobProcParams @P1 INT = NULL, @P2 nvarchar(8) = NULL AS
+BEGIN
+    SELECT * FROM ϑings WHERE id = @P1;
+    SELECT id FROM ϑings WHERE name = @P2;
+END;
+GO
+GRANT EXECUTE on bobProcParams to bob;
+GRANT EXECUTE on bobProc to bob;
+GRANT EXECUTE on bobProc to fred;
 GO
 
 -- create an offline database to have an unavailable database to test with
@@ -79,4 +117,24 @@ BEGIN
 END;
 GO
 GRANT EXECUTE on exampleProcWithoutNocount to datadog;
+GO
+
+CREATE PROCEDURE encryptedProc WITH ENCRYPTION AS
+BEGIN
+    select count(*) from sys.databases;
+END;
+GO
+GRANT EXECUTE on encryptedProc to bob;
+GO
+
+-- create test procedure with multiple queries
+CREATE PROCEDURE multiQueryProc AS
+BEGIN
+    declare @total int = 0;
+    select @total = @total + count(*) from sys.databases where name like '%_';
+    select @total = @total + count(*) from sys.sysobjects where type = 'U';
+    select @total;
+END;
+GO
+GRANT EXECUTE on multiQueryProc to bob;
 GO

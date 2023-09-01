@@ -203,7 +203,6 @@
                 "title": "CPU-intensive pods",
                 "title_size": "16",
                 "title_align": "left",
-                "time": { "live_span": "4h" },
                 "type": "toplist",
                 "requests": [
                   {
@@ -274,7 +273,6 @@
                 "title": "Memory-intensive pods",
                 "title_size": "16",
                 "title_align": "left",
-                "time": { "live_span": "4h" },
                 "type": "toplist",
                 "requests": [
                   {
@@ -350,7 +348,7 @@
                 "type": "toplist",
                 "requests": [
                   {
-                    "q": "top(sum:kubernetes.pods.running{$scope,$namespace,$deployment,$cluster,$statefulset,$daemonset,$job} by {kubernetes_cluster,kube_namespace}, 100, 'max', 'desc')",
+                    "q": "top(sum:kubernetes.pods.running{$scope,$namespace,$deployment,$cluster,$statefulset,$daemonset,$job} by {kube_cluster_name,kube_namespace}, 100, 'max', 'desc')",
                     "conditional_formats": [
                       {
                         "comparator": ">",
@@ -383,7 +381,7 @@
                 "type": "toplist",
                 "requests": [
                   {
-                    "q": "top(sum:kubernetes_state.pod.ready{$scope,$cluster,$namespace,$deployment,condition:true,$statefulset,$daemonset,$job} by {kubernetes_cluster,host,nodepool}, 10, 'last', 'desc')",
+                    "q": "top(sum:kubernetes_state.pod.ready{$scope,$cluster,$namespace,$deployment,condition:true,$statefulset,$daemonset,$job} by {kube_cluster_name,host,nodepool}, 10, 'last', 'desc')",
                     "conditional_formats": [
                       {
                         "comparator": "<=",
@@ -410,13 +408,13 @@
             {
               "id": 3848732272463314,
               "definition": {
-                "title": "Pods in Bad State (Not Ready) by Namespace",
+                "title": "Pods in Bad State by Namespace",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "toplist",
                 "requests": [
                   {
-                    "q": "top(exclude_null(sum:kubernetes_state.pod.ready{condition:false,$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job} by {kube_namespace}), 25, 'last', 'desc')",
+                    "q": "top(exclude_null(sum:kubernetes_state.pod.ready{condition:false,$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,!pod_phase:succeeded} by {kube_namespace}), 25, 'last', 'desc')",
                     "conditional_formats": [
                       {
                         "comparator": ">",
@@ -898,7 +896,5 @@
     "layout_type": "ordered",
     "is_read_only": false,
     "notify_list": [],
-    "reflow_type": "fixed",
-    "id": "jgq-uej-f4x"
+    "reflow_type": "fixed"
   }
-  

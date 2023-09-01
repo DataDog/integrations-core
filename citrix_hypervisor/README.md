@@ -69,10 +69,15 @@ See [service_checks.json][9] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][10].
 
+## Further reading
+
+Additional helpful documentation, links, and articles:
+
+- [Monitor Citrix Hypervisor performance with Datadog][11]
 
 [1]: https://www.citrix.com/products/citrix-hypervisor/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://app.datadoghq.com/account/settings#agent
+[3]: https://app.datadoghq.com/account/settings/agent/latest
 [4]: https://docs.citrix.com/en-us/xencenter/7-1/rbac-roles.html
 [5]: https://github.com/DataDog/integrations-core/blob/master/citrix_hypervisor/datadog_checks/citrix_hypervisor/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -80,3 +85,4 @@ Need help? Contact [Datadog support][10].
 [8]: https://github.com/DataDog/integrations-core/blob/master/citrix_hypervisor/metadata.csv
 [9]: https://github.com/DataDog/integrations-core/blob/master/citrix_hypervisor/assets/service_checks.json
 [10]: https://docs.datadoghq.com/help/
+[11]: https://www.datadoghq.com/blog/monitor-citrix-hypervisor-datadog/

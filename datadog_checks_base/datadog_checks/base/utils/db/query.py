@@ -2,11 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple  # noqa: F401
 
 from six import raise_from
 
-from datadog_checks.base.utils.db.types import Transformer, TransformerFactory
+from datadog_checks.base.utils.db.types import Transformer, TransformerFactory  # noqa: F401
 
 from .utils import create_extra_transformer
 
@@ -124,7 +124,7 @@ class Query(object):
                 # this we set the context to None. https://www.python.org/dev/peps/pep-0409/
                 raise_from(type(e)(error), None)
             else:
-                if column_type in ('tag', 'tag_list'):
+                if column_type in ('tag', 'tag_list', 'tag_not_null'):
                     column_data.append((column_name, (column_type, transformer)))
                 else:
                     # All these would actually submit data. As that is the default case, we represent it as
@@ -134,6 +134,7 @@ class Query(object):
         submission_transformers = column_transformers.copy()  # type: Dict[str, Transformer]
         submission_transformers.pop('tag')
         submission_transformers.pop('tag_list')
+        submission_transformers.pop('tag_not_null')
 
         extras = self.query_data.get('extras', [])  # type: List[Dict[str, Any]]
         if not isinstance(extras, list):

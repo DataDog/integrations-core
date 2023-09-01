@@ -1,0 +1,4 @@
+# CHANGELOG - Databricks
+
+## Unreleased
+

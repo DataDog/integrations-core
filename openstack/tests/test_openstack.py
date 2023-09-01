@@ -138,10 +138,10 @@ def test_unscoped_from_config():
 
                 assert scope.auth_token == 'fake_token'
                 assert len(scope.project_scope_map) == 1
-                for _, scope in iteritems(scope.project_scope_map):
-                    assert isinstance(scope, OpenStackProjectScope)
-                    assert scope.auth_token == 'fake_token'
-                    assert scope.tenant_id == '263fd9'
+                for _, project_scope in iteritems(scope.project_scope_map):
+                    assert isinstance(project_scope, OpenStackProjectScope)
+                    assert project_scope.auth_token == 'fake_token'
+                    assert project_scope.tenant_id == '263fd9'
 
 
 def test_get_nova_endpoint():
@@ -253,7 +253,7 @@ def test_network_exclusion(*args):
         'datadog_checks.openstack.OpenStackCheck.get_stats_for_single_network'
     ) as mock_get_stats_single_network:
 
-        openstack_check.exclude_network_id_rules = set([re.compile(rule) for rule in common.EXCLUDED_NETWORK_IDS])
+        openstack_check.exclude_network_id_rules = {re.compile(rule) for rule in common.EXCLUDED_NETWORK_IDS}
 
         # Retrieve network stats
         openstack_check.get_network_stats([])
@@ -264,7 +264,7 @@ def test_network_exclusion(*args):
         assert mock_get_stats_single_network.call_args[0][0] == common.FILTERED_NETWORK_ID
 
         # cleanup
-        openstack_check.exclude_network_id_rules = set([])
+        openstack_check.exclude_network_id_rules = set()
 
 
 @mock.patch(

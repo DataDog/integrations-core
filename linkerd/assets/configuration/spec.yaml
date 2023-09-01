@@ -11,6 +11,12 @@ files:
       overrides:
         openmetrics_endpoint.required: false
         openmetrics_endpoint.value.example: http://localhost:9990/admin/metrics/prometheus
+        exclude_labels.enabled: true
+        exclude_labels.value.example:
+          - destination_service
+        tag_by_endpoint.example: false
+        tag_by_endpoint.hidden: false
+        tag_by_endpoint.enabled: true
     - template: instances/openmetrics_legacy_base
       hidden: true
       overrides:

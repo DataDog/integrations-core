@@ -1,0 +1,114 @@
+[build-system]
+requires = ["hatchling>=1.17.1", "hatch-vcs>=0.3.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ddev"
+description = "The Datadog Agent integration developer tool"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "BSD-3-Clause"
+keywords = [
+    "datadog",
+    "agent",
+    "integration",
+]
+authors = [
+    { name = "Datadog", email = "packages@datadoghq.com" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.9",
+]
+dependencies = [
+    "click~=8.1.6",
+    "datadog-checks-dev[cli]~=24.0",
+    "hatch>=1.6.3",
+    "httpx",
+    "jsonpointer",
+    "pluggy",
+    "rich>=12.5.1",
+    "tomli; python_version < '3.11'",
+    "tomli-w",
+    "tomlkit",
+    "tqdm",
+]
+dynamic = ["version"]
+
+[project.urls]
+Source = "https://github.com/DataDog/integrations-core"
+
+[project.scripts]
+ddev = "ddev.cli:main"
+ddev-starship = "ddev.plugin.external.starship.prompt:main"
+
+[project.entry-points.hatch]
+datadog_checks = "ddev.plugin.external.hatch"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.version.raw-options]
+root = ".."
+version_scheme = "python-simplified-semver"
+local_scheme = "no-local-version"
+parentdir_prefix_version = "ddev-"
+git_describe_command = ["git", "describe", "--dirty", "--tags", "--long", "--match", "ddev-v*"]
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/ddev/_version.py"
+
+[tool.hatch.build.targets.app]
+scripts = ["ddev"]
+
+[tool.black]
+include = '\.pyi?$'
+line-length = 120
+skip-string-normalization = true
+target-version = ["py38"]
+
+[tool.ruff]
+exclude = []
+target-version = "py38"
+line-length = 120
+# Rules were ported over from the legacy flake8 settings for parity
+# All the rules can be found here: https://beta.ruff.rs/docs/rules/
+select = [
+  "B",
+  "C",
+  "E",
+  "F",
+  "G",
+  "W",
+  "I",
+]
+ignore = [
+  # From legacy flake8 settings
+  "E722",
+  "E741",
+  "B015",
+  "B904",
+  # Allow non-abstract empty methods in abstract base classes
+  "B027",
+  # Ignore McCabe complexity
+  "C901",
+]
+unfixable = [
+  # Don't touch unused imports
+  "F401",
+]
+
+[tool.ruff.isort]
+known-first-party = ["ddev"]
+
+[tool.ruff.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.per-file-ignores]
+#Tests can use assertions and relative imports
+"**/tests/**/*" = ["I252"]

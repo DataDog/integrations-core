@@ -287,8 +287,7 @@
         "custom_links": [],
         "events": [
           {
-            "q": "twistlock ",
-            "tags_execution": "and"
+            "q": "twistlock "
           }
         ],
         "title": "Count of hosts by CVE severity",
@@ -349,8 +348,7 @@
         "custom_links": [],
         "events": [
           {
-            "q": "twistlock ",
-            "tags_execution": "and"
+            "q": "twistlock"
           }
         ],
         "title": "Count of images by CVE severity",
@@ -394,6 +392,5 @@
   "template_variables": [],
   "layout_type": "free",
   "is_read_only": true,
-  "notify_list": [],
-  "id": 265
+  "notify_list": []
 }

@@ -64,21 +64,12 @@ class IbmDb2Check(AgentCheck):
 
     def check(self, instance):
         if self._conn is None:
-            connection = self.get_connection()
-            if connection is None:
-                self.service_check(
-                    self.SERVICE_CHECK_CONNECT,
-                    self.CRITICAL,
-                    tags=self._tags,
-                    message="Unable to create new connection to database: {}".format(self._db),
-                )
-                return
+            self._conn = self.get_connection()
+        self.emit_connection_service_checks()
+        if self._conn is None:
+            return
 
-            self._conn = connection
-
-        self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
         self.collect_metadata()
-
         for query_method in self._query_methods:
             try:
                 query_method()
@@ -88,6 +79,7 @@ class IbmDb2Check(AgentCheck):
                 self.log.warning('Encountered error running `%s`: %s', query_method.__name__, str(e))
                 continue
 
+    @AgentCheck.metadata_entrypoint
     def collect_metadata(self):
         try:
             raw_version = get_version(self._conn)
@@ -562,14 +554,26 @@ class IbmDb2Check(AgentCheck):
         connection_options = {ibm_db.ATTR_CASE: ibm_db.CASE_LOWER}
 
         try:
+            self.log.debug("Attempting to connect to Db2 with `%s`...", scrub_connection_string(target))
             connection = ibm_db.connect(target, username, password, connection_options)
         except Exception as e:
             if self._host:
                 self.log.error('Unable to connect with `%s`: %s', scrub_connection_string(target), e)
             else:  # no cov
                 self.log.error('Unable to connect to database `%s` as user `%s`: %s', target, username, e)
+            connection = None
+        return connection
+
+    def emit_connection_service_checks(self):
+        if self._conn is None:
+            self.service_check(
+                self.SERVICE_CHECK_CONNECT,
+                self.CRITICAL,
+                tags=self._tags,
+                message="Unable to create new connection to database: {}".format(self._db),
+            )
         else:
-            return connection
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
 
     @classmethod
     def get_connection_data(cls, db, username, password, host, port, security, tls_cert):
@@ -594,13 +598,14 @@ class IbmDb2Check(AgentCheck):
             cursor = ibm_db.exec_immediate(self._conn, query)
         except Exception as e:
             error = str(e)
-            self.log.error("Error executing query, attempting to a new connection: %s", error)
-            connection = self.get_connection()
-
-            if connection is None:
+            self.log.error("Error executing query: %s.\nAttempting to reconnect", error)
+            # ToDo: Probably the best strategy here would be to just set self._conn = None, abort the current check run
+            # and retry on the next check run.
+            self._conn = self.get_connection()
+            self.emit_connection_service_checks()
+            if self._conn is None:
                 raise ConnectionError("Unable to create new connection")
 
-            self._conn = connection
             cursor = ibm_db.exec_immediate(self._conn, query)
 
         row = method(cursor)

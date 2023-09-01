@@ -3,14 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
-from typing import Iterator
+from typing import Iterator  # noqa: F401
 
 import mock
 import pytest
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
-from datadog_checks.voltdb.types import Instance
+from datadog_checks.voltdb.types import Instance  # noqa: F401
 
 from . import common
 from .utils import CreateSchema, EnsureExpectedMetricsShowUp
@@ -46,7 +46,7 @@ def dd_environment(instance):
     else:
         e2e_metadata = {}
 
-    with docker_run(compose_file, conditions=conditions, env_vars=env_vars, mount_logs=True):
+    with docker_run(compose_file, conditions=conditions, env_vars=env_vars, mount_logs=True, attempts=2):
         yield instance, e2e_metadata
 
 

@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "## SingleStore\n\nThis dashboard provides a high-level view of your SingleStore metrics and can help you troubleshoot performance issues. For further reading on SingleStore:\n- [Datadog's SingleStore integration docs](https://docs.datadoghq.com/integrations/singlestore/)\n- [SingleStore docs](https://www.singlestore.com/)\n",
+    "description": "## SingleStore\n\nThis dashboard provides a high-level view of your SingleStore metrics and can help you troubleshoot performance issues. For further reading on SingleStore:\n- [Datadog's SingleStore integration docs](https://docs.datadoghq.com/integrations/singlestore/)\n- [SingleStore docs](https://www.singlestore.com/)",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -65,7 +65,7 @@
                         },
                         "id": 3225668633921688,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 4,
                             "x": 0,
                             "y": 0
@@ -82,11 +82,11 @@
                             "tick_edge": "left",
                             "tick_pos": "50%",
                             "type": "note",
-                            "vertical_align": "center"
+                            "vertical_align": "top"
                         },
                         "id": 6957244438968502,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 2,
                             "x": 4,
                             "y": 0
@@ -96,7 +96,7 @@
             },
             "id": 1157665696258174,
             "layout": {
-                "height": 5,
+                "height": 6,
                 "width": 6,
                 "x": 0,
                 "y": 0
@@ -129,9 +129,55 @@
                         "id": 3927820541860460,
                         "layout": {
                             "height": 1,
-                            "width": 2,
+                            "width": 4,
                             "x": 0,
                             "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "green",
+                            "content": "Returns CRITICAL if can't connect to the agent",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 3165931943757948,
+                        "layout": {
+                            "height": 1,
+                            "width": 2,
+                            "x": 4,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "change_type": "absolute",
+                                    "compare_to": "week_before",
+                                    "increase_good": true,
+                                    "order_by": "change",
+                                    "order_dir": "desc",
+                                    "q": "avg:singlestore.queries{*} by {host,singlestore_node_name}"
+                                }
+                            ],
+                            "title": "Overall Change in Query Count",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "change"
+                        },
+                        "id": 7154985404234518,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 1
                         }
                     },
                     {
@@ -180,77 +226,10 @@
                         },
                         "id": 7936188800096858,
                         "layout": {
-                            "height": 1,
-                            "width": 2,
-                            "x": 2,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "background_color": "green",
-                            "content": "Returns CRITICAL if SingleStore can't connect to the Agent.",
-                            "font_size": "14",
-                            "has_padding": true,
-                            "show_tick": true,
-                            "text_align": "left",
-                            "tick_edge": "top",
-                            "tick_pos": "50%",
-                            "type": "note",
-                            "vertical_align": "center"
-                        },
-                        "id": 3165931943757948,
-                        "layout": {
-                            "height": 1,
-                            "width": 2,
-                            "x": 0,
-                            "y": 1
-                        }
-                    },
-                    {
-                        "definition": {
-                            "background_color": "green",
-                            "content": "The number of failed attempts to connect to the server.",
-                            "font_size": "14",
-                            "has_padding": true,
-                            "show_tick": true,
-                            "text_align": "left",
-                            "tick_edge": "top",
-                            "tick_pos": "50%",
-                            "type": "note",
-                            "vertical_align": "center"
-                        },
-                        "id": 2725043647948800,
-                        "layout": {
-                            "height": 1,
-                            "width": 2,
-                            "x": 2,
-                            "y": 1
-                        }
-                    },
-                    {
-                        "definition": {
-                            "requests": [
-                                {
-                                    "change_type": "absolute",
-                                    "compare_to": "week_before",
-                                    "increase_good": true,
-                                    "order_by": "change",
-                                    "order_dir": "desc",
-                                    "q": "avg:singlestore.queries{*} by {host,singlestore_node_name}"
-                                }
-                            ],
-                            "title": "Overall Change in Query Count",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "change"
-                        },
-                        "id": 7154985404234518,
-                        "layout": {
                             "height": 2,
-                            "width": 4,
-                            "x": 0,
-                            "y": 2
+                            "width": 2,
+                            "x": 4,
+                            "y": 1
                         }
                     },
                     {
@@ -276,15 +255,36 @@
                             "height": 2,
                             "width": 4,
                             "x": 0,
-                            "y": 4
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "green",
+                            "content": "The number of failed attempts to connect to the server.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "top",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 2725043647948800,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 4,
+                            "y": 3
                         }
                     }
                 ]
             },
             "id": 478834208565686,
             "layout": {
-                "height": 7,
-                "width": 4,
+                "height": 6,
+                "width": 6,
                 "x": 6,
                 "y": 0
             }
@@ -420,7 +420,7 @@
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "Monitoring both successful write queries and failed write queries can alert you if there are high failure rates. \n\nIncluding the node ID and node name when measuring the metric provides insight on which nodes have high failure rates. ",
+                            "content": "Monitoring both successful write queries and failed write queries can alert you if there are high failure rates. \n\nIncluding the node ID and node name when measuring the metric provides insight on which node has the high failure rate. ",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -556,9 +556,10 @@
             "id": 8248176839393046,
             "layout": {
                 "height": 6,
+                "is_column_break": true,
                 "width": 6,
                 "x": 0,
-                "y": 5
+                "y": 0
             }
         },
         {
@@ -620,7 +621,7 @@
                         "id": 4306093285041010,
                         "layout": {
                             "height": 2,
-                            "width": 3,
+                            "width": 4,
                             "x": 0,
                             "y": 0
                         }
@@ -641,9 +642,30 @@
                         "id": 4728561616960636,
                         "layout": {
                             "height": 2,
-                            "width": 1,
-                            "x": 3,
+                            "width": 2,
+                            "x": 4,
                             "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "purple",
+                            "content": "The number of bytes received and sent per second. \n\nLooking at the bytes received and sent help understand network usage for a given workload and identify bottlenecks. This also helps to identify if any non-SingleStore DB activity is affecting a host\u2019s network",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "top",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 1438694074360080,
+                        "layout": {
+                            "height": 3,
+                            "width": 2,
+                            "x": 0,
+                            "y": 2
                         }
                     },
                     {
@@ -659,7 +681,7 @@
                             "markers": [],
                             "requests": [
                                 {
-                                    "display_type": "line",
+                                    "display_type": "area",
                                     "formulas": [
                                         {
                                             "alias": "Received ",
@@ -706,41 +728,20 @@
                         },
                         "id": 3947708272216820,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 4,
-                            "x": 0,
+                            "x": 2,
                             "y": 2
-                        }
-                    },
-                    {
-                        "definition": {
-                            "background_color": "purple",
-                            "content": "The number of bytes received and sent per second. \n\nLooking at the bytes received and sent helps you understand network usage for a given workload and identify bottlenecks. This also helps identify if any non-SingleStore DB activity is affecting a host\u2019s network. ",
-                            "font_size": "14",
-                            "has_padding": true,
-                            "show_tick": true,
-                            "text_align": "left",
-                            "tick_edge": "top",
-                            "tick_pos": "50%",
-                            "type": "note",
-                            "vertical_align": "center"
-                        },
-                        "id": 1438694074360080,
-                        "layout": {
-                            "height": 2,
-                            "width": 4,
-                            "x": 0,
-                            "y": 4
                         }
                     }
                 ]
             },
             "id": 5787111972095288,
             "layout": {
-                "height": 7,
-                "width": 4,
+                "height": 6,
+                "width": 6,
                 "x": 6,
-                "y": 7
+                "y": 0
             }
         },
         {
@@ -776,7 +777,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:singlestore.mem.total{*}"
+                                            "query": "avg:singlestore.mem.total{$host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -799,7 +800,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query0",
-                                            "query": "avg:singlestore.mem.used{*}"
+                                            "query": "avg:singlestore.mem.used{$host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -851,7 +852,7 @@
                     {
                         "definition": {
                             "background_color": "orange",
-                            "content": "The top nodes that are using the most memory. ",
+                            "content": "The top 10 nodes that are using the most memory of the host ",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
@@ -913,7 +914,7 @@
                 "height": 5,
                 "width": 6,
                 "x": 0,
-                "y": 11
+                "y": 0
             }
         },
         {
@@ -937,7 +938,7 @@
                             "markers": [],
                             "requests": [
                                 {
-                                    "display_type": "line",
+                                    "display_type": "bars",
                                     "formulas": [
                                         {
                                             "alias": "Number of queries",
@@ -975,7 +976,7 @@
                         "id": 3257324145743498,
                         "layout": {
                             "height": 2,
-                            "width": 4,
+                            "width": 6,
                             "x": 0,
                             "y": 0
                         }
@@ -996,7 +997,7 @@
                         "id": 452979998447382,
                         "layout": {
                             "height": 2,
-                            "width": 4,
+                            "width": 6,
                             "x": 0,
                             "y": 2
                         }
@@ -1006,9 +1007,9 @@
             "id": 958297220565540,
             "layout": {
                 "height": 5,
-                "width": 4,
+                "width": 6,
                 "x": 6,
-                "y": 14
+                "y": 0
             }
         }
     ]

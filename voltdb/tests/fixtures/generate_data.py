@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2021-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 # Not used by tests, but can be manually run to generate the mock_results.json file.
 import json
 import random

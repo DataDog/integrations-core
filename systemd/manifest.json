@@ -1,31 +1,46 @@
 {
-  "display_name": "Systemd",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "systemd",
-  "metric_prefix": "systemd.",
-  "metric_to_check": "systemd.units_by_state",
-  "creates_events": false,
-  "short_description": "Get metrics about Systemd and units managed by Systemd",
-  "guid": "acd470e7-5413-4deb-95fc-4b034d904691",
-  "support": "core",
-  "supported_os": [
-    "linux"
-  ],
-  "public_title": "Datadog-Systemd Integration",
-  "categories": [
-    "os & system"
-  ],
-  "type": "check",
-  "integration_id": "systemd",
-  "is_public": true,
+  "manifest_version": "2.0.0",
+  "app_uuid": "a18dccd2-35c0-40e2-9c0a-7a01a5daf5f3",
+  "app_id": "systemd",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Get metrics about Systemd and units managed by Systemd",
+    "title": "Systemd",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Category::OS & System"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "monitors": {},
+    "integration": {
+      "source_type_name": "Systemd",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "systemd.",
+        "check": "systemd.units_by_state",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
     "dashboards": {
       "Systemd Overview": "assets/dashboards/overview.json"
-    },
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

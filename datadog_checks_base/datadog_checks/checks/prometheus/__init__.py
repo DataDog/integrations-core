@@ -1,3 +1,3 @@
 # (C) Datadog, Inc. 2018-present
-# flake8: noqa
+# ruff: noqa
 from ...base.checks.prometheus import *

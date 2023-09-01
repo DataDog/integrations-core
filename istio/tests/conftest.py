@@ -59,15 +59,16 @@ def setup_istio():
 
     run_command(["kubectl", "apply", "-f", opj(istio, "samples", "bookinfo", "networking", "bookinfo-gateway.yaml")])
     run_command(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s"])
+    os.remove("istio.tar.gz")
 
 
 @pytest.fixture(scope='session')
 def dd_environment(dd_save_state):
     with kind_run(conditions=[setup_istio]) as kubeconfig:
         with ExitStack() as stack:
-            if VERSION == '1.5.1':
+            if VERSION == '1.13.3':
                 istiod_host, istiod_port = stack.enter_context(
-                    port_forward(kubeconfig, 'istio-system', 8080, 'deployment', 'istiod')
+                    port_forward(kubeconfig, 'istio-system', 15014, 'deployment', 'istiod')
                 )
 
                 istiod_endpoint = 'http://{}:{}/metrics'.format(istiod_host, istiod_port)

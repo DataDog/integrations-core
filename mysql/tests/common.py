@@ -5,7 +5,7 @@ import os
 from sys import maxsize
 
 import pytest
-from pkg_resources import parse_version
+from packaging.version import parse as parse_version
 
 from datadog_checks.dev import get_docker_hostname
 
@@ -21,6 +21,9 @@ if MYSQL_VERSION_IS_LATEST is False:
 else:
     MYSQL_VERSION_PARSED = parse_version(str(maxsize))
 CHECK_NAME = 'mysql'
+
+# adding flavor to differentiate mariadb from mysql
+MYSQL_FLAVOR = os.getenv('MYSQL_FLAVOR', '')
 
 HOST = get_docker_hostname()
 PORT = 13306

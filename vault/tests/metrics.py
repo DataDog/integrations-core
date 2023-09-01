@@ -69,6 +69,20 @@ METRICS_OPTIONAL = {
     'route.rollback',
     'route.rollback.auth.token',
     'route.rollback.auth.jwt',
+    'secrets.pki.tidy.cert_store_current_entry',
+    'secrets.pki.tidy.cert_store_deleted_count',
+    'secrets.pki.tidy.cert_store_total_entries',
+    'secrets.pki.tidy.cert_store_total_entries_remaining',
+    'secrets.pki.tidy.duration',
+    'secrets.pki.tidy.failure',
+    'secrets.pki.tidy.revoked_cert_current_entry',
+    'secrets.pki.tidy.revoked_cert_deleted_count',
+    'secrets.pki.tidy.revoked_cert_total_entries',
+    'secrets.pki.tidy.revoked_cert_total_entries_fixed_issuers',
+    'secrets.pki.tidy.revoked_cert_total_entries_incorrect_issuers',
+    'secrets.pki.tidy.revoked_cert_total_entries_remaining',
+    'secrets.pki.tidy.start_time_epoch',
+    'secrets.pki.tidy.success',
     'vault.barrier.list',
     'vault.barrier.put',
     'vault.cache.hit',
@@ -81,6 +95,7 @@ METRICS_OPTIONAL = {
     'vault.core.handle.login_request',
     'vault.core.post_unseal',
     'vault.core.unseal',
+    'vault.expire.fetch.lease',
     'vault.expire.register.auth',
     'vault.expire.renew_token',
     'vault.identity.entity',
@@ -116,3 +131,16 @@ KNOWN_COUNTERS = {
     'vault.identity.entity.creation',
     'vault.token.creation',
 }
+
+MERKLE_WAL_METRICS = [
+    'vault.vault.merkle.flushdirty',
+    'vault.vault.merkle.savecheckpoint',
+    'vault.vault.wal.deletewals',
+    'vault.vault.wal.persistwals',
+    'vault.vault.wal.flushready',
+]
+
+MERKLE_WAL_QUANTILES = [
+    'vault.vault.merkle.flushdirty',
+    'vault.vault.merkle.savecheckpoint',
+]

@@ -28,7 +28,8 @@ def container_up(service_name, port):
 @pytest.fixture(scope="session")
 def dd_environment():
     """
-    Start postgres and install pgbouncer. If there's any problem executing docker-compose, let the exception bubble up.
+    Start postgres and install pgbouncer.
+    If there's any problem executing `docker compose`, let the exception bubble up.
     """
     compose_file = 'docker-compose.yml'
     env_version = common.get_version_from_env()

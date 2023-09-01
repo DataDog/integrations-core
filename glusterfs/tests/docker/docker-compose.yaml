@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 services:
     gs1:
         container_name: gluster-node-1

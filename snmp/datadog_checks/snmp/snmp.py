@@ -12,7 +12,7 @@ import time
 import weakref
 from collections import defaultdict
 from concurrent import futures
-from typing import Any, DefaultDict, Dict, List, Optional, Pattern, Tuple
+from typing import Any, DefaultDict, Dict, List, Optional, Pattern, Tuple  # noqa: F401
 
 from six import iteritems
 
@@ -28,7 +28,7 @@ from .exceptions import PySnmpError
 from .metrics import as_metric_with_forced_type, as_metric_with_inferred_type, try_varbind_value_to_float
 from .mibs import MIBLoader
 from .models import OID
-from .parsing import ColumnTag, IndexTag, ParsedMetric, ParsedTableMetric, SymbolTag
+from .parsing import ColumnTag, IndexTag, ParsedMetric, ParsedTableMetric, SymbolTag  # noqa: F401
 from .pysnmp_types import ObjectIdentity, ObjectType, noSuchInstance, noSuchObject
 from .utils import (
     OIDPrinter,
@@ -123,7 +123,8 @@ class SnmpCheck(AgentCheck):
             try:
                 recursively_expand_base_profiles(definition)
             except Exception as exc:
-                raise ConfigurationError("Failed to expand base profiles in profile '{}': {}".format(name, exc))
+                self.log.warning("Failed to expand base profiles in profile '%s': %s", name, exc)
+                continue
 
             profiles[name] = {'definition': definition}
 
@@ -370,7 +371,7 @@ class SnmpCheck(AgentCheck):
         self._thread.start()
         self._executor = futures.ThreadPoolExecutor(max_workers=self._config.workers)
 
-    def check(self, instance):
+    def check(self, _):
         # type: (Dict[str, Any]) -> None
         start_time = time.time()
         self._submitted_metrics = 0
@@ -395,7 +396,8 @@ class SnmpCheck(AgentCheck):
             tags.extend(config.tags)
             self.gauge('snmp.discovered_devices_count', len(config.discovered_instances), tags=tags)
         else:
-            _, tags = self._check_device(config)
+            error, tags = self._check_device(config)
+            # no need to handle error here since it's already handled inside `self._check_device`
 
         self.submit_telemetry_metrics(start_time, tags)
 

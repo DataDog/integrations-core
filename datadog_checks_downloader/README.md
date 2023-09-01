@@ -28,7 +28,7 @@ to work with the check.
 To install the check in dev mode:
 
 ```shell
-pip install -e .[dev,deps]
+pip install -e '.[deps]'
 ```
 
 To download a new or updated integration, you may specify a precise
@@ -44,11 +44,52 @@ Or you may leave the version unspecified to download the latest version:
 python -m datadog_checks.downloader -vvvv datadog-$INTEGRATION
 ```
 
-To run the tests, [install tox][8] and just run:
+
+### Testing
+
+You can use `ddev` to run the tests.
+
+About how to install `ddev`, see https://docs.datadoghq.com/developers/integrations/python/ and https://datadoghq.dev/integrations-core/.
+
+For running tests locally, you need to download some test data first. You should only have to do it the first time, and later after some updates to the data:
 
 ```shell
-tox
+hatch run test-data:create
 ```
+
+This will run the script under `tests/scripts/download_test_data.py`, which will get a partial copy from
+the actual repository.
+
+Then to run the tests:
+
+```shell
+ddev test datadog_checks_downloader
+```
+
+
+### (Legacy) Testing by Invoking Pytest Directly
+
+You can select between online and offline tests when running testsuite using
+pytest:
+
+```shell
+pytest -vvvv -m online     # Run tests that use data from publicly a accessible repository.
+pytest -vvvv -m offline    # Run tests that use data stored in the Git repository.
+```
+
+For online tests, you can specify explicitly distribution and its version to
+run tests against:
+
+```shell
+pytest -vvvv -m online --distribution-name datadog-active-directory --distribution-version 1.10.0
+```
+
+To run checks against content served from own local directory where TUF, in-toto and wheel files are present:
+
+```shell
+pytest -vvvv --local-dir=/path/to/dir --distribution-name datadog-active-directory --distribution-version 1.10.0
+```
+
 
 ## Troubleshooting
 

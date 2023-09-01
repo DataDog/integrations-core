@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from cryptography.hazmat.backends import default_backend
 from cryptography.x509 import load_der_x509_certificate, load_pem_x509_certificate
 
 from datadog_checks.base import ConfigurationError
@@ -60,7 +59,6 @@ class TLSLocalCheck(object):
 
     @staticmethod
     def local_cert_loader(cert):
-        backend = default_backend()
         if b'-----BEGIN CERTIFICATE-----' in cert:
-            return load_pem_x509_certificate(cert, backend)
-        return load_der_x509_certificate(cert, backend)
+            return load_pem_x509_certificate(cert)
+        return load_der_x509_certificate(cert)

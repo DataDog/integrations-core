@@ -83,7 +83,7 @@ CRI does not include any events.
 
 Need help? Contact [Datadog support][5].
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/cri.d/conf.yaml.default
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://github.com/DataDog/integrations-core/blob/master/cri/metadata.csv

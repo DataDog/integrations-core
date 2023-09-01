@@ -27,7 +27,7 @@ files:
     - name: timeout
       description: Timeout of the TCP query in second.
       value:
-        type: integer
+        type: number
         example: 10
     - name: collect_response_time
       description: |
@@ -49,6 +49,12 @@ files:
         Set ip_cache_duration to `0` if the check should resolve the IP address on every check run.
     - name: multiple_ips
       description: Enable to run the check against all IPs attached to `host`.
+      value:
+        default: false
+        example: false
+        type: boolean
+    - name: ipv4_only
+      description: Enable to run the check against only IPv4-formatted addresses on every check run.
       value:
         default: false
         example: false

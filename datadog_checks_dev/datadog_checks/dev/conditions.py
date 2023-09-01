@@ -5,7 +5,7 @@ import re
 import socket
 import time
 from contextlib import closing
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Callable, Dict, List, Tuple, Union  # noqa: F401
 
 from six import string_types
 from six.moves.urllib.request import urlopen
@@ -64,7 +64,7 @@ class CheckEndpoints(LazyFunction):
     def __init__(
         self,
         endpoints,  # type: Union[str, List[str]]
-        timeout=1,  # type: int,
+        timeout=1,  # type: int
         attempts=60,  # type: int
         wait=1,  # type: int
     ):
@@ -109,6 +109,17 @@ class CheckCommandOutput(LazyFunction):
         attempts=60,  # type: int
         wait=1,  # type: int
     ):
+        """
+        Checks if the provided patterns are present in the output of a command
+
+        :param command: The command to run
+        :param patterns: List of patterns to match
+        :param matches: How many of the provided patterns need to match, it can be a number or "all"
+        :param stdout: Whether to search for the provided patterns in stdout
+        :param stderr: Whether to search for the provided patterns in stderr
+        :param attempts: How many times to try searching for the patterns
+        :param wait: How long, in seconds, to wait between attempts
+        """
         self.command = command
         self.stdout = stdout
         self.stderr = stderr
@@ -146,9 +157,11 @@ class CheckCommandOutput(LazyFunction):
                 log_output = result.stderr
 
             matches = 0
+            missing_patterns = set(self.patterns)
             for pattern in self.patterns:
                 if pattern.search(log_output):
                     matches += 1
+                    missing_patterns.remove(pattern)
 
             if matches >= self.matches:
                 return matches
@@ -156,10 +169,14 @@ class CheckCommandOutput(LazyFunction):
             time.sleep(self.wait)
         else:
             patterns = '\t- '.join([''] + [str(p) for p in self.patterns])
+            missing_patterns = '\t- '.join([''] + [str(p) for p in missing_patterns])
             raise RetryError(
-                u'Command: {}\nFailed to match `{}` of following patterns:\n{}\n'
-                u'Exit code: {}\nCaptured Output: {}'.format(
-                    self.command, self.matches, patterns, exit_code, log_output
+                u'Command: {}\nFailed to match `{}` of the patterns.\n'
+                u'Provided patterns: {}\n'
+                u'Missing patterns: {}\n'
+                u'Exit code: {}\n'
+                u'Captured Output: {}'.format(
+                    self.command, self.matches, patterns, missing_patterns, exit_code, log_output
                 )
             )
 
@@ -172,11 +189,22 @@ class CheckDockerLogs(CheckCommandOutput):
         matches=1,  # type: Union[str, int]
         stdout=True,  # type: bool
         stderr=True,  # type: bool
-        attempts=60,  # type: int,
+        attempts=60,  # type: int
         wait=1,  # type: int
     ):
+        """
+        Checks if the provided patterns are present in docker logs
+
+        :param identifier: The docker image identifier
+        :param patterns: List of patterns to match
+        :param matches: How many of the provided patterns need to match, it can be a number or "all"
+        :param stdout: Whether to search for the provided patterns in stdout
+        :param stderr: Whether to search for the provided patterns in stderr
+        :param attempts: How many times to try searching for the patterns
+        :param wait: How long, in seconds, to wait between attempts
+        """
         if file_exists(identifier):
-            command = ['docker-compose', '-f', identifier, 'logs']
+            command = ['docker', 'compose', '-f', identifier, 'logs']
         else:
             command = ['docker', 'logs', identifier]
 

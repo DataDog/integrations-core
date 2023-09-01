@@ -1,0 +1,5 @@
+extends:
+  - _base.yaml
+  - _generic-ucd.yaml
+
+sysobjectid: 1.2.3.1001

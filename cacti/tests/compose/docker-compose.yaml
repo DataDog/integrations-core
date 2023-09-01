@@ -2,11 +2,43 @@ version: "3"
 
 services:
   cacti:
-    build: .
-    container_name: dd-test-cacti
+    container_name: cacti
+    image: datadog/docker-library:cacti-1.2.19
+    domainname: example.com
+    hostname: cacti
+    ports:
+      - "8080:80"
+    environment:
+      - DB_NAME=cacti_master
+      - DB_USER=cactiuser
+      - DB_PASS=cactipassword
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_ROOT_PASS=rootpassword
+      - INITIALIZE_DB=1
+      - TZ=America/Los_Angeles
+    volumes:
+      - cacti-data:/cacti
+      - cacti-spine:/spine
+      - cacti-backups:/backups
+    links:
+      - db
+
+  db:
+    image: "mariadb:10.3"
+    container_name: cacti_db
+    domainname: example.com
+    hostname: db
     ports:
       - "13306:3306"
-      - "8080:80"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - TZ=America/Los_Angeles
     volumes:
-      - ${RRD_PATH}:/var/www/html/cacti/rra
-      - ${DD_LOG_1}:/opt/cacti/log/cacti.log
+      - cacti-db:/var/lib/mysql
+
+volumes:
+  cacti-db:
+  cacti-data:
+  cacti-spine:
+  cacti-backups:

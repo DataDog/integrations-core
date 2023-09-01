@@ -1,0 +1,16 @@
+[
+    {
+        "agent_version": "6.0.0",
+        "integration": "cert-manager",
+        "check": "cert_manager.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "endpoint"
+        ],
+        "name": "cert-manager OpenMetrics health",
+        "description": "Returns `CRITICAL` if the agent fails to connect to the OpenMetrics endpoint, otherwise `OK`."
+    }
+]

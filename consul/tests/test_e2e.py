@@ -33,7 +33,11 @@ def test_e2e(dd_agent_check, instance_single_node_install):
     aggregator.assert_service_check(
         'consul.up', ConsulCheck.OK, tags=['consul_datacenter:dc1', 'consul_url:http://{}:8500'.format(common.HOST)]
     )
-    aggregator.assert_service_check('consul.check', ConsulCheck.OK, tags=['check:serfHealth', 'consul_datacenter:dc1'])
+    aggregator.assert_service_check(
+        'consul.check',
+        ConsulCheck.OK,
+        tags=['check:serfHealth', 'consul_datacenter:dc1', 'consul_node:node-consul-follower-1'],
+    )
     aggregator.assert_service_check(
         'consul.can_connect', ConsulCheck.OK, tags=['url:http://{}:8500/v1/status/leader'.format(common.HOST)]
     )

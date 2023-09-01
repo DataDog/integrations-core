@@ -2,13 +2,21 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import re
+import time
 
 import psycopg2 as pg
 from psycopg2 import extras as pgextras
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
-from datadog_checks.pgbouncer.metrics import CONFIG_METRICS, DATABASES_METRICS, POOLS_METRICS, STATS_METRICS
+from datadog_checks.pgbouncer.metrics import (
+    CLIENTS_METRICS,
+    CONFIG_METRICS,
+    DATABASES_METRICS,
+    POOLS_METRICS,
+    SERVERS_METRICS,
+    STATS_METRICS,
+)
 
 
 class ShouldRestartException(Exception):
@@ -30,6 +38,8 @@ class PgBouncer(AgentCheck):
         self.tags = self.instance.get('tags', [])
         self.database_url = self.instance.get('database_url')
         self.use_cached = is_affirmative(self.instance.get('use_cached', True))
+        self.collect_per_client_metrics = is_affirmative(self.instance.get('collect_per_client_metrics', False))
+        self.collect_per_server_metrics = is_affirmative(self.instance.get('collect_per_server_metrics', False))
 
         if not self.database_url:
             if not self.host:
@@ -57,6 +67,11 @@ class PgBouncer(AgentCheck):
 
         metric_scope = [STATS_METRICS, POOLS_METRICS, DATABASES_METRICS, CONFIG_METRICS]
 
+        if self.collect_per_client_metrics:
+            metric_scope.append(CLIENTS_METRICS)
+        if self.collect_per_server_metrics:
+            metric_scope.append(SERVERS_METRICS)
+
         try:
             with db.cursor(cursor_factory=pgextras.DictCursor) as cursor:
                 for scope in metric_scope:
@@ -67,15 +82,13 @@ class PgBouncer(AgentCheck):
                     try:
                         self.log.debug("Running query: %s", query)
                         cursor.execute(query)
-                        rows = cursor.fetchall()
+                        rows = self.iter_rows(cursor)
 
                     except Exception as e:
                         self.log.exception("Not all metrics may be available: %s", str(e))
 
                     else:
                         for row in rows:
-                            self.log.debug("Processing row: %r", row)
-
                             if 'key' in row:  # We are processing "config metrics"
                                 # Make a copy of the row to allow mutation
                                 # (a `psycopg2.lib.extras.DictRow` object doesn't accept a new key)
@@ -90,7 +103,14 @@ class PgBouncer(AgentCheck):
                             tags += ["%s:%s" % (tag, row[column]) for (column, tag) in descriptors if column in row]
                             for (column, (name, reporter)) in metrics:
                                 if column in row:
-                                    reporter(self, name, row[column], tags)
+                                    value = row[column]
+                                    if column in ['connect_time', 'request_time']:
+                                        self.log.debug("Parsing timestamp; original value: %s", value)
+                                        # First get rid of any UTC suffix.
+                                        value = re.findall(r'^[^ ]+ [^ ]+', value)[0]
+                                        value = time.strptime(value, '%Y-%m-%d %H:%M:%S')
+                                        value = time.mktime(value)
+                                    reporter(self, name, value, tags)
 
                         if not rows:
                             self.log.warning("No results were found for query: %s", query)
@@ -99,6 +119,22 @@ class PgBouncer(AgentCheck):
             self.log.exception("Connection error")
 
             raise ShouldRestartException
+
+    def iter_rows(self, cursor):
+        row_num = 0
+        rows = iter(cursor)
+        while True:
+            try:
+                row = next(rows)
+            except StopIteration:
+                break
+            except Exception as e:
+                self.log.error('Error processing row %d: %s', row_num, e)
+            else:
+                self.log.debug('Processing row: %r', row)
+                yield row
+
+            row_num += 1
 
     def _get_connect_kwargs(self):
         """

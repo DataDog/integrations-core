@@ -572,7 +572,7 @@
                             "custom_links": [
                                 {
                                     "label": "View Pods overview",
-                                    "link": "https://app.datadoghq.com/screen/integration/30322/kubernetes-pods-overview"
+                                    "link": "/dash/integration/Kubernetes%20-%20Pods"
                                 }
                             ],
                             "precision": 0,
@@ -600,7 +600,7 @@
                             "custom_links": [
                                 {
                                     "label": "View Pods overview",
-                                    "link": "https://app.datadoghq.com/screen/integration/30322/kubernetes-pods-overview"
+                                    "link": "/dash/integration/Kubernetes%20-%20Pods"
                                 }
                             ],
                             "precision": 0,
@@ -785,6 +785,41 @@
                             "width": 2,
                             "x": 10,
                             "y": 2
+                        }
+                    },
+                    {
+                        "id": 112162236360634,
+                        "definition": {
+                            "title": "CRDs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.crd.count{$scope,$cluster}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 2,
+                            "height": 2
                         }
                     }
                 ]
@@ -3170,7 +3205,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "View more in the [Kubernetes Pods Overview Dashboard](https://app.datadoghq.com/dash/integration/30322/kubernetes-pods-overview?tpl_var_cluster=$cluster.value&tpl_var_scope=$scope.value)",
+                            "content": "View more in the [Kubernetes Pods Overview Dashboard](/dash/integration/Kubernetes%20-%20Pods?tpl_var_cluster=$cluster.value&tpl_var_scope=$scope.value)",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -3210,7 +3245,7 @@
                                             "value": 24
                                         }
                                     ],
-                                    "q": "top(sum:kubernetes_state.pod.ready{*,$cluster,condition:true,$scope} by {kubernetes_cluster,host,nodepool}, 10, 'last', 'desc')"
+                                    "q": "top(sum:kubernetes_state.pod.ready{*,$cluster,condition:true,$scope} by {kube_cluster_name,host,nodepool}, 10, 'last', 'desc')"
                                 }
                             ],
                             "title": "Pods in ready state by node",
@@ -3790,11 +3825,11 @@
                                     "display_type": "line",
                                     "metadata": [
                                         {
-                                            "alias_name": "network writes per node",
-                                            "expression": "sum:kubernetes.io.write_bytes{$scope,$cluster} by {kube_replica_set,host}-avg:kubernetes_state.replicaset.replicas_ready{$scope,$cluster} by {host}"
+                                            "alias_name": "IO writes per node ",
+                                            "expression": "sum:kubernetes.io.write_bytes{$scope,$cluster} by {host}"
                                         }
                                     ],
-                                    "q": "sum:kubernetes.io.write_bytes{$scope,$cluster} by {kube_replica_set,host}-avg:kubernetes_state.replicaset.replicas_ready{$scope,$cluster} by {host}",
+                                    "q": "sum:kubernetes.io.write_bytes{$scope,$cluster} by {host}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
@@ -3940,11 +3975,11 @@
                                     "display_type": "line",
                                     "metadata": [
                                         {
-                                            "alias_name": "disk reads per node ",
-                                            "expression": "sum:kubernetes.io.read_bytes{$scope,$cluster} by {kube_replica_set,host}-avg:kubernetes_state.replicaset.replicas_ready{$scope,$cluster} by {host}"
+                                            "alias_name": "disk reads per node",
+                                            "expression": "sum:kubernetes.io.read_bytes{$scope,$cluster} by {host}"
                                         }
                                     ],
-                                    "q": "sum:kubernetes.io.read_bytes{$scope,$cluster} by {kube_replica_set,host}-avg:kubernetes_state.replicaset.replicas_ready{$scope,$cluster} by {host}",
+                                    "q": "sum:kubernetes.io.read_bytes{$scope,$cluster} by {host}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
@@ -4038,7 +4073,6 @@
                     {
                         "definition": {
                             "query": "source:kubernetes $scope $cluster",
-                            "tags_execution": "and",
                             "time": {
                                 "live_span": "1d"
                             },
@@ -4058,8 +4092,7 @@
                     {
                         "definition": {
                             "event_size": "s",
-                            "query": "sources:kubernetes $scope $cluster",
-                            "tags_execution": "and",
+                            "query": "source:kubernetes $scope $cluster",
                             "time": {
                                 "live_span": "1w"
                             },

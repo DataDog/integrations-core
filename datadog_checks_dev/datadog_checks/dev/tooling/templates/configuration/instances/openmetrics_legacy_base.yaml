@@ -161,6 +161,12 @@
   value:
     example: <TOKEN_PATH>
     type: string
+- name: bearer_token_refresh_interval
+  description: |
+    The refresh interval to keep the bearer token up-to-date.
+  value:
+    example: 60
+    type: integer
 - name: ignore_metrics
   description: |
     A list of metrics to ignore, the "*" wildcard can be used to match multiple metric names.

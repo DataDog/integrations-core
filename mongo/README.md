@@ -37,10 +37,7 @@ In a Mongo shell, create a read-only user for the Datadog Agent in the `admin` d
 use admin
 db.auth("admin", "<YOUR_MONGODB_ADMIN_PASSWORD>")
 
-# On MongoDB 2.x, use the addUser command.
-db.addUser("datadog", "<UNIQUEPASSWORD>", true)
-
-# On MongoDB 3.x or higher, use the createUser command.
+# Create the user for the Datadog Agent.
 db.createUser({
   "user": "datadog",
   "pwd": "<UNIQUEPASSWORD>",
@@ -55,8 +52,8 @@ db.createUser({
 ##### Configure the agents
 You only need a single agent, preferably running on the same node, to collect all the available mongo metrics. See below for configuration options.
 <!-- xxz tab xxx -->
-<!-- xxx tab "ReplicaSet" xxx -->
-#### ReplicaSet
+<!-- xxx tab "Replica Set" xxx -->
+#### Replica set
 
 To configure this integration for a MongoDB replica set:
 
@@ -68,10 +65,7 @@ In a Mongo shell, authenticate to the primary and create a read-only user for th
 use admin
 db.auth("admin", "<YOUR_MONGODB_ADMIN_PASSWORD>")
 
-# On MongoDB 2.x, use the addUser command.
-db.addUser("datadog", "<UNIQUEPASSWORD>", true)
-
-# On MongoDB 3.x or higher, use the createUser command.
+# Create the user for the Datadog Agent.
 db.createUser({
   "user": "datadog",
   "pwd": "<UNIQUEPASSWORD>",
@@ -84,8 +78,35 @@ db.createUser({
 ```
 
 ##### Configure the agents
-You need to configure one agent for each member. See below for configuration options.
-**Note**: Monitoring of arbiter nodes is not supported remotely as mentioned in [MongoDB documentation][3]. Yet, any status change of an arbiter node is reported by the Agent connected to the primary.
+
+Install the Datadog Agent on each host in the MongoDB replica set and configure the Agent to connect to the replica on that host (`localhost`). Running an Agent on each host results in lower latency and execution times, and ensures that data is still connected in the event a host fails.
+
+For example, on the primary node:
+
+```yaml
+init_config:
+instances:
+  - hosts:
+      - mongo-primary:27017
+```
+
+On the secondary node:
+
+```yaml
+init_config:
+instances:
+  - hosts:
+      - mongo-secondary:27017
+```
+
+On the tertiary node:
+
+```yaml
+init_config:
+instances:
+  - hosts:
+      - mongo-tertiary:27017
+```
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Sharding" xxx -->
@@ -101,10 +122,7 @@ For each shard in your cluster, connect to the primary of the replica set and cr
 use admin
 db.auth("admin", "<YOUR_MONGODB_ADMIN_PASSWORD>")
 
-# On MongoDB 2.x, use the addUser command.
-db.addUser("datadog", "<UNIQUEPASSWORD>", true)
-
-# On MongoDB 3.x or higher, use the createUser command.
+# Create the user for the Datadog Agent.
 db.createUser({
   "user": "datadog",
   "pwd": "<UNIQUEPASSWORD>",
@@ -268,6 +286,8 @@ To configure this check for an Agent running on Kubernetes:
 
 Set [Autodiscovery Integrations Templates][13] as pod annotations on your application container. Aside from this, templates can also be configure with a [file, configmap, or key-value store][14].
 
+**Annotations v1** (for Datadog Agent < v7.36)
+
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -290,11 +310,40 @@ spec:
     - name: mongo
 ```
 
+**Annotations v2** (for Datadog Agent v7.36+)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mongo
+  annotations:
+    ad.datadoghq.com/mongo.checks: |
+      {
+        "mongo": {
+          "init_config": {},
+          "instances": [
+            {
+              "hosts": ["%%host%%:%%port%%"], 
+              "username": "datadog", 
+              "password": "<UNIQUEPASSWORD>", 
+              "database": "<DATABASE>"
+            }
+          ]
+        }
+      }
+spec:
+  containers:
+    - name: mongo
+```
+
 ##### Log collection
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][15].
 
 Then, set [Log Integrations][11] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][16].
+
+**Annotations v1/v2**
 
 ```yaml
 apiVersion: v1
@@ -401,7 +450,9 @@ See [metadata.csv][22] for a list of metrics provided by this check.
 
 See the [MongoDB 3.0 Manual][23] for more detailed descriptions of some of these metrics.
 
-**NOTE**: The following metrics are NOT collected by default, use the `additional_metrics` parameter in your `mongo.d/conf.yaml` file to collect them:
+#### Additional metrics
+
+The following metrics are **not** collected by default. Use the `additional_metrics` parameter in your `mongo.d/conf.yaml` file to collect them:
 
 | metric prefix            | what to add to `additional_metrics` to collect it |
 | ------------------------ | ------------------------------------------------- |
@@ -440,7 +491,7 @@ Additional helpful documentation, links, and articles:
 - [Monitoring MongoDB performance metrics (MMAP)][27]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mongo/images/mongo_dashboard.png
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.mongodb.com/manual/core/replica-set-arbiter/#authentication
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/mongo/datadog_checks/mongo/data/conf.yaml.example

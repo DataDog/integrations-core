@@ -4,7 +4,9 @@
 
 import pytest
 
-METRICS = [
+from datadog_checks.dev.utils import get_metadata_metrics
+
+METRICS = (
     'oracle.tablespace.used',
     # ProcessMetrics
     'oracle.process.pga_used_memory',
@@ -40,8 +42,8 @@ METRICS = [
     'oracle.tablespace.size',
     'oracle.tablespace.in_use',
     'oracle.tablespace.offline',
-]
-SERVICE_CHECKS = ['oracle.can_connect', 'oracle.can_query']
+)
+SERVICE_CHECKS = ('oracle.can_connect', 'oracle.can_query')
 
 
 @pytest.mark.e2e
@@ -53,3 +55,4 @@ def test_check(dd_agent_check):
     for service_check in SERVICE_CHECKS:
         aggregator.assert_service_check(service_check)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

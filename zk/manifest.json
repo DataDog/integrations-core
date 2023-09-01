@@ -1,50 +1,61 @@
 {
-  "aliases": [
-    "/integrations/zookeeper"
-  ],
-  "categories": [
-    "orchestration",
-    "notification",
-    "log collection",
-    "autodiscovery"
-  ],
-  "creates_events": false,
-  "display_name": "ZooKeeper",
-  "guid": "5519c110-5183-438e-85ad-63678c072ac7",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "zookeeper.",
-  "metric_to_check": "zookeeper.connections",
-  "name": "zk",
-  "process_signatures": [
-    "zkServer.sh start",
-    "java zoo.cfg"
-  ],
-  "public_title": "Datadog-ZooKeeper Integration",
-  "short_description": "Track client connections and latencies, and know when requests are backing up.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os"
-  ],
-  "type": "check",
-  "integration_id": "zookeeper",
+  "manifest_version": "2.0.0",
+  "app_uuid": "01aee33c-0c85-4800-ab79-c02a25da04fa",
+  "app_id": "zookeeper",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track client connections and latencies, and know when requests are backing up.",
+    "title": "ZooKeeper",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Category::Orchestration",
+      "Category::Notification",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "ZooKeeper",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "zookeeper.",
+        "check": "zookeeper.connections",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "zkServer.sh start",
+        "java zoo.cfg"
+      ]
     },
-    "monitors": {},
     "dashboards": {
       "zookeeper": "assets/dashboards/zookeeper_dashboard.json"
     },
-    "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": "zookeeper"
-    },
-    "metrics_metadata": "metadata.csv",
     "saved_views": {
       "zookeeper_processes": "assets/saved_views/zookeeper_processes.json"
+    },
+    "logs": {
+      "source": "zookeeper"
     }
   }
 }
