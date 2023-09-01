@@ -5,6 +5,10 @@ from pyVmomi import vim
 
 SOURCE_TYPE = 'vsphere'
 
+BOTH = 'both'
+HISTORICAL = 'historical'
+REALTIME = 'realtime'
+
 ALLOWED_FILTER_TYPES = ['whitelist', 'blacklist']
 ALLOWED_FILTER_PROPERTIES = ['name', 'inventory_path', 'tag', 'attribute']
 EXTRA_FILTER_PROPERTIES_FOR_VMS = ['hostname', 'guest_hostname']

@@ -22,6 +22,7 @@ from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCac
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import (
     DEFAULT_MAX_QUERY_METRICS,
+    HISTORICAL,
     HOST_RESOURCES,
     MAX_QUERY_METRICS_OPTION,
     PROPERTY_COUNT_METRICS,
@@ -478,7 +479,7 @@ class VSphereCheck(AgentCheck):
                 mors = self.infrastructure_cache.get_mors(resource_type)
                 counters = self.metrics_metadata_cache.get_metadata(resource_type)
                 metric_ids = []  # type: List[vim.PerformanceManager.MetricId]
-                is_historical = metric_type == 'historical'
+                is_historical = metric_type == HISTORICAL
                 for counter_key, metric_name in iteritems(counters):
                     # PerformanceManager.MetricId `instance` kwarg:
                     # - An asterisk (*) to specify all instances of the metric for the specified counterId

@@ -3,6 +3,12 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from pyVmomi import vim
 
+from datadog_checks.vsphere.constants import (
+    BOTH,
+    HISTORICAL,
+    REALTIME,
+)
+
 # https://code.vmware.com/apis/358/vsphere/doc/cpu_counters.html
 
 # Set of metrics that are emitted as percentages between 0 and 100. For those metrics, we divide the value by 100
@@ -60,7 +66,7 @@ PERCENT_METRICS = {
 
 # All metrics that can be collected from VirtualMachines.
 VM_METRICS = {
-    'realtime': [
+    REALTIME: [
         'cpu.costop.sum',
         'cpu.demand.avg',
         'cpu.demandEntitlementRatio.latest',
@@ -191,12 +197,12 @@ VM_METRICS = {
         'virtualDisk.writeLoadMetric.latest',
         'virtualDisk.writeOIO.latest',
     ],
-    'historical': ['disk.used.latest', 'disk.provisioned.latest', 'disk.unshared.latest'],
+    HISTORICAL: ['disk.used.latest', 'disk.provisioned.latest', 'disk.unshared.latest'],
 }
 
 # All metrics that can be collected from ESXi Hosts.
 HOST_METRICS = {
-    'realtime': [
+    REALTIME: [
         'cpu.coreUtilization.avg',
         'cpu.costop.sum',
         'cpu.demand.avg',
@@ -393,13 +399,13 @@ HOST_METRICS = {
         'virtualDisk.busResets.sum',
         'virtualDisk.commandsAborted.sum',
     ],
-    'historical': [],
+    HISTORICAL: [],
 }
 
 # All metrics that can be collected from Datastores.
 DATASTORE_METRICS = {
-    'realtime': [],
-    'historical': [
+    REALTIME: [],
+    HISTORICAL: [
         'datastore.busResets.sum',
         'datastore.commandsAborted.sum',
         'datastore.numberReadAveraged.avg',
@@ -451,8 +457,8 @@ CLUSTER_METRICS = {
     # clusterServices are only available for DRS and HA clusters, and can cause errors that are caught down
     # the line by the integration. That means some API calls are unnecessary.
     # TODO: Look if we can prevent those unnecessary API calls
-    'realtime': [],
-    'historical': [
+    REALTIME: [],
+    HISTORICAL: [
         'clusterServices.cpufairness.latest',
         'clusterServices.effectivecpu.avg',
         'clusterServices.effectivemem.avg',
@@ -504,19 +510,19 @@ ALLOWED_METRICS_FOR_MOR = {
 ALL_METRIC_GROUPS = [VM_METRICS, HOST_METRICS, DATACENTER_METRICS, DATASTORE_METRICS, CLUSTER_METRICS]
 
 RESOURCES_WITH_HISTORICAL_METRICS = [
-    group for group, metrics in ALLOWED_METRICS_FOR_MOR.items() if len(metrics['historical']) > 0
+    group for group, metrics in ALLOWED_METRICS_FOR_MOR.items() if len(metrics[HISTORICAL]) > 0
 ]
 RESOURCES_WITH_REALTIME_METRICS = [
-    group for group, metrics in ALLOWED_METRICS_FOR_MOR.items() if len(metrics['realtime']) > 0
+    group for group, metrics in ALLOWED_METRICS_FOR_MOR.items() if len(metrics[REALTIME]) > 0
 ]
 
 
 def is_metric_allowed(mor_type, metric_name, collection_type):
     allowed_metrics = ALLOWED_METRICS_FOR_MOR[mor_type]
-    if collection_type == 'both':
-        metrics = allowed_metrics['historical'] + allowed_metrics['realtime']
-    elif collection_type == 'historical':
-        metrics = allowed_metrics['historical']
+    if collection_type == BOTH:
+        metrics = allowed_metrics[HISTORICAL] + allowed_metrics[REALTIME]
+    elif collection_type == HISTORICAL:
+        metrics = allowed_metrics[HISTORICAL]
     else:
-        metrics = allowed_metrics['realtime']
+        metrics = allowed_metrics[REALTIME]
     return metric_name in metrics

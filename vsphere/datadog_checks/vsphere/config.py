@@ -15,6 +15,7 @@ from datadog_checks.vsphere.constants import (
     ALL_RESOURCES_WITH_METRICS,
     ALLOWED_FILTER_PROPERTIES,
     ALLOWED_FILTER_TYPES,
+    BOTH,
     DEFAULT_BATCH_COLLECTOR_SIZE,
     DEFAULT_MAX_QUERY_METRICS,
     DEFAULT_METRICS_PER_QUERY,
@@ -25,7 +26,9 @@ from datadog_checks.vsphere.constants import (
     DEFAULT_VSPHERE_ATTR_PREFIX,
     DEFAULT_VSPHERE_TAG_PREFIX,
     EXTRA_FILTER_PROPERTIES_FOR_VMS,
+    HISTORICAL,
     MOR_TYPE_AS_STRING,
+    REALTIME,
 )
 from datadog_checks.vsphere.metrics import RESOURCES_WITH_HISTORICAL_METRICS, RESOURCES_WITH_REALTIME_METRICS
 from datadog_checks.vsphere.resource_filters import ResourceFilter, create_resource_filter  # noqa: F401
@@ -96,15 +99,15 @@ class VSphereConfig(object):
             self.should_collect_events = True
 
         # Utility
-        if self.collection_type == 'both':
+        if self.collection_type == BOTH:
             self.collected_resource_types = ALL_RESOURCES_WITH_METRICS
-            self.collected_metric_types = ['realtime', 'historical']
-        elif self.collection_type == 'historical':
+            self.collected_metric_types = [REALTIME, HISTORICAL]
+        elif self.collection_type == HISTORICAL:
             self.collected_resource_types = RESOURCES_WITH_HISTORICAL_METRICS
-            self.collected_metric_types = ['historical']
+            self.collected_metric_types = [HISTORICAL]
         else:
             self.collected_resource_types = RESOURCES_WITH_REALTIME_METRICS
-            self.collected_metric_types = ['realtime']
+            self.collected_metric_types = [REALTIME]
 
         # Filters
         self.resource_filters = self._parse_resource_filters(instance.get("resource_filters", []))
