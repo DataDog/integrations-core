@@ -43,7 +43,7 @@ def test_e2e_profile_netgear_readynas(dd_agent_check):
             'netgear_readynasos_disk_model:acted but driving',
             'netgear_readynasos_disk_serial:their quaintly zombies acted zombies',
             'netgear_readynasos_disk_slot_name:their oxen forward Jaded but',
-            'netgear_readynasos_disk_state:offline',
+            'netgear_readynasos_disk_state:online',
         ],
         [
             'netgear_readynasos_disk_id:but kept',
@@ -51,7 +51,7 @@ def test_e2e_profile_netgear_readynas(dd_agent_check):
             'netgear_readynasos_disk_model:kept their',
             'netgear_readynasos_disk_serial:but driving their driving acted driving zombies their Jaded',
             'netgear_readynasos_disk_slot_name:acted',
-            'netgear_readynasos_disk_state:online',
+            'netgear_readynasos_disk_state:offline',
         ],
     ]
     for tag_row in tag_rows:
