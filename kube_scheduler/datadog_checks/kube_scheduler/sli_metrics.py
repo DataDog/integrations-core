@@ -26,7 +26,7 @@ class SliMetricsScraperMixin(object):
         super(SliMetricsScraperMixin, self).__init__(*args, **kwargs)
         self._slis_available = None
 
-    def _create_sli_prometheus_instance(self, instance):
+    def create_sli_prometheus_instance(self, instance):
         """
         Create a copy of the instance and set default values.
         This is so the base class can create a scraper_config with the proper values.
@@ -53,7 +53,12 @@ class SliMetricsScraperMixin(object):
         try:
             r = http_handler.head(url)
         except Exception as e:
-            self.log.debug("Unable to collect query slis endpoint: %s", e)
+            self.log.debug("Error querying SLIs endpoint: %s", e)
             return False
+        if r.status_code == 403:
+            self.log.debug(
+                "The /metrics/slis endpoint was introduced in Kubernetes v1.26. If you expect to see SLI metrics, \
+                please check that your permissions are configured properly."
+            )
         self._slis_available = r.status_code != 404 and r.status_code != 403
         return self._slis_available

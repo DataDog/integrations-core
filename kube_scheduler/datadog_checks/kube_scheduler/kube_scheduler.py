@@ -133,7 +133,7 @@ IGNORE_METRICS = [
 ]
 
 
-class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck, SliMetricsScraperMixin):
+class KubeSchedulerCheck(KubeLeaderElectionMixin, SliMetricsScraperMixin, OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
 
     KUBE_SCHEDULER_NAMESPACE = "kube_scheduler"
@@ -186,12 +186,14 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck, SliMetri
                 instance['health_url'] = url
 
         inst = instances[0] if instances else None
-        slis_instance = self._create_sli_prometheus_instance(inst)
+        slis_instance = self.create_sli_prometheus_instance(inst)
         self.slis_scraper_config = self.get_scraper_config(slis_instance)
+        self.detect_sli_endpoint(self.get_http_handler(self.slis_scraper_config), slis_instance.get('prometheus_url'))
 
     def check(self, instance):
         # Get the configuration for this specific instance
         scraper_config = self.get_scraper_config(instance)
+
         # Set up metric_transformers
         transformers = {}
         for metric_from, metric_to in TRANSFORM_VALUE_HISTOGRAMS.items():

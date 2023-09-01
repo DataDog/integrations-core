@@ -11,7 +11,7 @@ import requests_mock
 
 from datadog_checks.kube_scheduler import KubeSchedulerCheck
 
-instance = {'prometheus_url': 'http://localhost:10251/metrics/slis'}
+instance = {'prometheus_url': 'http://localhost:10259/metrics'}
 
 # Constants
 CHECK_NAME = 'kube_scheduler'
@@ -54,49 +54,33 @@ def mock_request():
         yield m
 
 
-def test_detect_sli_endpoint(mock_request):
+def test_detect_sli_endpoint(mock_metrics, mock_request):
     mock_request.head('http://localhost:10259/metrics/slis', status_code=200)
     c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
-    sli_scraper_config = c.slis_scraper_config
-    c._slis_available = None
-    http_handler = c.get_http_handler(sli_scraper_config)
-    available = c.detect_sli_endpoint(http_handler, 'http://localhost:10259/metrics/slis')
-    assert available is True
+    c.check(instance)
     assert c._slis_available is True
     assert mock_request.call_count == 1
 
 
-def test_detect_sli_endpoint_404(mock_request):
+def test_detect_sli_endpoint_404(mock_metrics, mock_request):
     mock_request.head('http://localhost:10259/metrics/slis', status_code=404)
     c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
-    sli_scraper_config = c.slis_scraper_config
-    c._slis_available = None
-    http_handler = c.get_http_handler(sli_scraper_config)
-    available = c.detect_sli_endpoint(http_handler, 'http://localhost:10259/metrics/slis')
-    assert available is False
+    c.check(instance)
     assert c._slis_available is False
     assert mock_request.call_count == 1
 
 
-def test_detect_sli_endpoint_403(mock_request):
+def test_detect_sli_endpoint_403(mock_metrics, mock_request):
     mock_request.head('http://localhost:10259/metrics/slis', status_code=403)
     c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
-    sli_scraper_config = c.slis_scraper_config
-    c._slis_available = None
-    http_handler = c.get_http_handler(sli_scraper_config)
-    available = c.detect_sli_endpoint(http_handler, 'http://localhost:10259/metrics/slis')
-    assert available is False
+    c.check(instance)
     assert c._slis_available is False
     assert mock_request.call_count == 1
 
 
-def test_detect_sli_endpoint_timeout(mock_request):
+def test_detect_sli_endpoint_timeout(mock_metrics, mock_request):
     mock_request.head('http://localhost:10259/metrics/slis', exc=requests.exceptions.ConnectTimeout)
     c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
-    sli_scraper_config = c.slis_scraper_config
-    c._slis_available = None
-    http_handler = c.get_http_handler(sli_scraper_config)
-    available = c.detect_sli_endpoint(http_handler, 'http://localhost:10259/metrics/slis')
-    assert available is False
+    c.check(instance)
     assert c._slis_available is None
     assert mock_request.call_count == 1
