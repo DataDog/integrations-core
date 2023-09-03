@@ -2,6 +2,7 @@
 requires = ["hatchling>=1.17.1", "hatch-vcs>=0.3.0"]
 build-backend = "hatchling.build"
 
+
 [project]
 name = "ddev"
 description = "The Datadog Agent integration developer tool"
