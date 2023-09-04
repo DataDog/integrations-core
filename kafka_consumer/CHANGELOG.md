@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.1.2 / 2023-09-04
+
 ***Fixed***:
 
 * Set tls_verify to string rather than boolean ([#15699](https://github.com/DataDog/integrations-core/pull/15699))
