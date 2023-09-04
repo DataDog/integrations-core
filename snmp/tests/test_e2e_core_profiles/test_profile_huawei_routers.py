@@ -41,11 +41,13 @@ def test_e2e_profile_huawei_routers(dd_agent_check):
             'huawei_hw_bgp_peer_remote_addr:190.114.96.169',
             'huawei_hw_bgp_peer_state:openconfirm',
             'huawei_hw_bgp_peer_vrf_name:acted acted but Jaded but driving their',
+            'huawei_hw_bgp_peer_un_avai_reason:configuration_lead_peer_down',
         ],
         [
             'huawei_hw_bgp_peer_remote_addr:93.22.18.75',
             'huawei_hw_bgp_peer_state:active',
             'huawei_hw_bgp_peer_vrf_name:oxen quaintly their their their quaintly zombies',
+            'huawei_hw_bgp_peer_un_avai_reason:direct_connect_interface_down',
         ],
     ]
     for tag_row in tag_rows:
