@@ -36,6 +36,7 @@ def test_e2e_profile_juniper_pulse_secure(dd_agent_check):
         'juniper_ive_esap_version:but Jaded acted quaintly forward oxen acted kept',
         'juniper_ive_product_name:kept their Jaded oxen but acted quaintly',
         'juniper_ive_product_version:kept kept acted driving oxen quaintly quaintly',
+        'juniper_ive_ive_max_concurrent_users_license_capacity:1000',
     ]
 
     # --- TEST EXTENDED METRICS ---
