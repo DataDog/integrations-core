@@ -12,6 +12,10 @@
 
 * Add short hand for force-env-rebuild ([#15716](https://github.com/DataDog/integrations-core/pull/15716))
 
+***Fixed***:
+
+* Allow bumping the version of clickhouse-driver ([#15745](https://github.com/DataDog/integrations-core/pull/15745))
+
 ## 24.1.0 / 2023-08-25
 
 ***Security***:
