@@ -44,12 +44,14 @@ def test_e2e_profile_infinera_coriant_groove(dd_agent_check):
             'coriant_groove_shelf_alias_name:driving their acted their',
             'coriant_groove_shelf_location:oxen but zombies kept acted oxen kept',
             'coriant_groove_shelf_oper_status:down',
+            'coriant_groove_shelf_avail_status:shutdown',
         ],
         [
             'coriant_groove_shelf_admin_status:up_no_alm',
             'coriant_groove_shelf_alias_name:Jaded kept oxen driving',
             'coriant_groove_shelf_location:forward but zombies forward',
             'coriant_groove_shelf_oper_status:down',
+            'coriant_groove_shelf_avail_status:failed',
         ],
     ]
     for tag_row in tag_rows:
@@ -68,6 +70,7 @@ def test_e2e_profile_infinera_coriant_groove(dd_agent_check):
             'coriant_groove_card_mode:regen',
             'coriant_groove_card_oper_status:down',
             'coriant_groove_card_required_type:chm1lh',
+            'coriant_groove_card_avail_status:lower_layer_down',
         ],
         [
             'coriant_groove_card_admin_status:up_no_alm',
@@ -76,6 +79,7 @@ def test_e2e_profile_infinera_coriant_groove(dd_agent_check):
             'coriant_groove_card_mode:not_applicable',
             'coriant_groove_card_oper_status:up',
             'coriant_groove_card_required_type:chm1',
+            'coriant_groove_card_avail_status:mismatch',
         ],
     ]
     for tag_row in tag_rows:
