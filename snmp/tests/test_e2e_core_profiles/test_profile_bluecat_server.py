@@ -32,7 +32,11 @@ def test_e2e_profile_bluecat_server(dd_agent_check):
         'snmp_host:bluecat-server.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
-    ] + []
+    ] + [
+        'bcn_sys_id_product:1.3.6.1.4.1.13315.2.1',
+        'bcn_sys_id_os_release:OS v1.2.3',
+        'bcn_sys_id_platform:BCN Platform X',
+    ]
 
     # --- TEST EXTENDED METRICS ---
     # Examples:
