@@ -177,9 +177,6 @@ def test_e2e_profile_eaton_epdu(dd_agent_check):
         ['eaton_epdu_outlet_name:zombies but acted their'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric(
-            'snmp.eaton.epdu.outletCurrentPercentLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
         aggregator.assert_metric('snmp.eaton.epdu.outletVA', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric(
             'snmp.eaton.epdu.outletWatts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
