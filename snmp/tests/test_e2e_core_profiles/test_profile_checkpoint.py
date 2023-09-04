@@ -31,6 +31,7 @@ def test_e2e_profile_checkpoint(dd_agent_check):
     ip_address = get_device_ip_from_config(config)
     common_tags = [
         'snmp_profile:checkpoint',
+        'snmp_host:checkpoint.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_vendor:checkpoint',
@@ -164,6 +165,7 @@ def test_e2e_profile_checkpoint(dd_agent_check):
         'id_tags': ['device_namespace:default', 'snmp_device:' + ip_address],
         'ip_address': '' + ip_address,
         'model': 'Check Point 3200',
+        'name': 'checkpoint.device.name',
         'os_name': 'Gaia',
         'os_version': '3.10.0',
         'product_name': 'SVN Foundation',
