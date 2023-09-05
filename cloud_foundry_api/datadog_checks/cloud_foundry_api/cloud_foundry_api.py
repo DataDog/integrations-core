@@ -18,7 +18,7 @@ from .constants import (
     API_SERVICE_CHECK_NAME,
     DEFAULT_EVENT_FILTER,
     DEFAULT_PAGE_SIZE,
-    MAX_LOOKBACK_SECONDS,
+    DEFAULT_MAX_LOOKBACK_SECONDS,
     MAX_PAGE_SIZE_V2,
     MAX_PAGE_SIZE_V3,
     MIN_V3_VERSION,
@@ -49,6 +49,7 @@ class CloudFoundryApiCheck(AgentCheck):
         self._event_filter = ",".join(self.instance.get("event_filter", DEFAULT_EVENT_FILTER))
         self._tags = self.instance.get("tags", [])
         self._per_page = self.instance.get("results_per_page", DEFAULT_PAGE_SIZE)
+        self._max_lookback = self.instance.get("max_lookback", DEFAULT_MAX_LOOKBACK_SECONDS)
 
         # write_persistent_cache(self, key, value)
         self._last_event_guid = self.read_persistent_cache(LAST_EVENT_GUID_CACHE_KEY)
@@ -306,7 +307,7 @@ class CloudFoundryApiCheck(AgentCheck):
                     self.log.exception("Could not parse event %s", cf_event)
                     continue
                 # Stop going through events if we've reached one we've already fetched or if we went back in time enough
-                if event_guid == last_event_guid or int(time.time()) - event_ts > MAX_LOOKBACK_SECONDS:
+                if event_guid == last_event_guid or int(time.time()) - event_ts > self._max_lookback:
                     scroll = False
                     break
                 # Store the event at which we want to stop on the next check run: the most recent of the current run

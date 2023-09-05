@@ -44,6 +44,12 @@ files:
         type: integer
         maximum: 5000
         display_default: 100
+    - name: max_lookback
+      description: |
+        Maximum time window (in seconds) for event collection from the API during the initial data retrieval.
+      value:
+        type: integer
+        display_default: 60
     - template: instances/default
     - template: instances/http
       overrides:
