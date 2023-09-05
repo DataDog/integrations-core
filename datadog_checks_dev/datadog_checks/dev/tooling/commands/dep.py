@@ -37,7 +37,6 @@ IGNORED_DEPS = {
     'pyasn1',  # Breaking snmp tests
     'pycryptodomex',  # Breaking snmp tests
     'pysnmp',  # Breaking snmp tests
-    'lz4',  # Breaking clickhouse tests
     'pyodbc',  # Breaking sqlserver tests
     'psutil',  # Breaking disk tests
     'aerospike',  # v8+ breaks agent build.
