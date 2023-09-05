@@ -492,6 +492,12 @@ class KubeletCheck(
             # Containers reporting
             containers = pod.get('status', {}).get('containerStatuses', [])
             has_container_running = False
+
+            # Exclude pods/containers based on namespace filtering
+            namespace = pod.get('metadata', {}).get('namespace')
+            if self.pod_list_utils.is_namespace_excluded(namespace):
+                continue
+
             for container in containers:
                 container_id = container.get('containerID')
                 if not container_id:
@@ -512,6 +518,9 @@ class KubeletCheck(
             pod_id = pod.get('metadata', {}).get('uid')
             if not pod_id:
                 self.log.debug('skipping pod with no uid')
+                continue
+            # Exclude pods/containers based on name/image
+            if self.pod_list_utils.is_excluded(container_id, pod_id):
                 continue
             tags = tagger.tag('kubernetes_pod_uid://%s' % pod_id, tagger.LOW) or None
             if not tags:
