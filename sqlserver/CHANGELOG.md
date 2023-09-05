@@ -12,6 +12,7 @@
 
 ***Fixed***:
 
+* Fix type `bytes`` is not JSON serializable for sqlserver activity collection ([#15763](https://github.com/DataDog/integrations-core/pull/15763))
 * Fix sqlserver file stats metrics for Azure SQL DB ([#15695](https://github.com/DataDog/integrations-core/pull/15695))
 
 ## 14.0.0 / 2023-08-18
