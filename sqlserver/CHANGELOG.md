@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+***Changed***:
+
+* Cache performance counter type to prevent querying for the same counter multiple times (especially for the per-db counters) ([#15714](https://github.com/DataDog/integrations-core/pull/15714))
+
+***Added***:
+
+* Add `index_name` tag to `.database.avg_fragmentation_in_percent`, `.database.fragment_count`, `.database.avg_fragment_size_in_pages` metrics. Also add a new metric `sqlserver.database.index_page_count`, tagged by `database_name`, `object_name`, `index_id` and `index_name`. ([#15721](https://github.com/DataDog/integrations-core/pull/15721))
+
+***Fixed***:
+
+* Fix sqlserver file stats metrics for Azure SQL DB ([#15695](https://github.com/DataDog/integrations-core/pull/15695))
+
 ## 14.0.0 / 2023-08-18
 
 ***Changed***:
@@ -32,7 +44,7 @@
 * Allow for collection of AO metrics for azure sql db ([#15508](https://github.com/DataDog/integrations-core/pull/15508))
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 12.0.0 / 2023-07-10
+## 12.0.0 / 2023-07-10 / Agent 7.47.0
 
 ***Changed***:
 

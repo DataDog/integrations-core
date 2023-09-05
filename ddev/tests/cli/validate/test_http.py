@@ -127,7 +127,7 @@ def test_spec_missing_instance(ddev, repository, helpers):
     )
 
 
-def test_validate_http_success(ddev, repository, helpers):
+def test_validate_http_success(ddev, helpers):
     result = ddev('validate', 'http', 'apache', 'arangodb', 'zk')
     assert result.exit_code == 0, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(

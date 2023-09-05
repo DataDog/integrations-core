@@ -665,7 +665,7 @@ class PostgreSql(AgentCheck):
             client_id = self._config.managed_identity.get('client_id', None)
             scope = self._config.managed_identity.get('identity_scope', None)
             if client_id is not None:
-                password = azure.generate_managed_identity_token(client_id=client_id, scope=scope)
+                password = azure.generate_managed_identity_token(client_id=client_id, identity_scope=scope)
 
             conn_args = {
                 'host': self._config.host,
@@ -734,7 +734,7 @@ class PostgreSql(AgentCheck):
         return self.pg_settings
 
     def _close_db_pool(self):
-        self.db_pool.close_all_connections(timeout=self._config.min_collection_interval)
+        self.db_pool.close_all_connections(timeout=0)
 
     def _collect_custom_queries(self, tags):
         """

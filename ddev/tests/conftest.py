@@ -94,7 +94,7 @@ def valid_integration(valid_integrations) -> str:
 
 
 @pytest.fixture(autouse=True)
-def config_file(tmp_path, monkeypatch) -> ConfigFile:
+def config_file(tmp_path, monkeypatch, local_repo) -> ConfigFile:
     for env_var in (
         'DD_SITE',
         'DD_LOGS_CONFIG_DD_URL',
@@ -107,8 +107,14 @@ def config_file(tmp_path, monkeypatch) -> ConfigFile:
 
     path = Path(tmp_path, 'config.toml')
     monkeypatch.setenv(ConfigEnvVars.CONFIG, str(path))
+
     config = ConfigFile(path)
-    config.restore()
+    config.reset()
+
+    # Provide a real default for times when tests have no need to modify the repo
+    config.model.repos['core'] = str(local_repo)
+    config.save()
+
     return config
 
 

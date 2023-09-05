@@ -44,16 +44,22 @@ class KafkaConfig:
         self._sasl_kerberos_keytab = instance.get('sasl_kerberos_keytab', os.environ.get("KRB5_CLIENT_KTNAME"))
         self._sasl_kerberos_principal = instance.get('sasl_kerberos_principal', 'kafkaclient')
         self._sasl_oauth_token_provider = instance.get('sasl_oauth_token_provider')
-        self._tls_ca_cert = instance.get("tls_ca_cert")
-        self._tls_cert = instance.get("tls_cert")
-        self._tls_private_key = instance.get("tls_private_key")
-        self._tls_private_key_password = instance.get("tls_private_key_password")
-        self._tls_validate_hostname = is_affirmative(instance.get("tls_validate_hostname", True))
+        self._tls_ca_cert = instance.get("tls_ca_cert") or instance.get("ssl_cafile")
+        self._tls_cert = instance.get("tls_cert") or instance.get("ssl_certfile")
+        self._tls_private_key = instance.get("tls_private_key") or instance.get("ssl_keyfile")
+        self._tls_private_key_password = instance.get("tls_private_key_password") or instance.get("ssl_password")
+        # Note: Remapped field is ignored if standard field is already used
+        self._tls_validate_hostname = (
+            is_affirmative(instance.get("tls_validate_hostname", True))
+            if "tls_validate_hostname" in instance
+            else is_affirmative(instance.get("ssl_check_hostname", True))
+        )
 
+        # tls_verify/enable.ssl.certificate.verification is required to be a string when passed into
         if self._tls_cert or self._tls_ca_cert or self._tls_private_key or self._tls_private_key_password:
-            self._tls_verify = True
+            self._tls_verify = "true"
         else:
-            self._tls_verify = is_affirmative(instance.get("tls_verify", True))
+            self._tls_verify = "true" if is_affirmative(instance.get("tls_verify", True)) else "false"
 
     def validate_config(self):
         if not self._kafka_connect_str:
