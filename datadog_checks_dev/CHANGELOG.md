@@ -15,6 +15,7 @@
 ***Fixed***:
 
 * Allow bumping the version of clickhouse-driver ([#15745](https://github.com/DataDog/integrations-core/pull/15745))
+* Allow bumping the version of lz4 ([#15747](https://github.com/DataDog/integrations-core/pull/15747))
 
 ## 24.1.0 / 2023-08-25
 
