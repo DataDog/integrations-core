@@ -267,16 +267,16 @@ class OpenStackControllerCheck(AgentCheck):
         reported_global_metrics = False
         if self._authenticate_domain(api):
             self.log.debug("Authenticated user for domain, reporting metrics using domain scope")
-            self._report_identity_metrics(api, tags)
-            self._report_domain_metrics(api, tags + ['domain_id:{}'.format(self.config.domain_id)])
-            reported_global_metrics = True
+            reported_identity_metrics = self._report_identity_metrics(api, tags)
+            reported_domain_metrics = self._report_domain_metrics(api, tags + ['domain_id:{}'.format(self.config.domain_id)])
+            reported_global_metrics = reported_identity_metrics and reported_domain_metrics
         for project in auth_projects:
             if self._authenticate_project(api, project):
                 if not reported_global_metrics:
                     self.log.debug("Authenticated user for project %s, reporting metrics using project scope", project)
-                    self._report_identity_metrics(api, tags)
-                    self._report_domain_metrics(api, tags + ['domain_id:{}'.format(self.config.domain_id)])
-                    reported_global_metrics = True
+                    reported_identity_metrics = self._report_identity_metrics(api, tags)
+                    reported_domain_metrics = self._report_domain_metrics(api, tags + ['domain_id:{}'.format(self.config.domain_id)])
+                    reported_global_metrics = reported_identity_metrics and reported_domain_metrics
                 self._report_project_metrics(api, project, tags + ['domain_id:{}'.format(self.config.domain_id)])
 
     def _authenticate_domain(self, api):
@@ -299,8 +299,10 @@ class OpenStackControllerCheck(AgentCheck):
             self._report_identity_groups(api, tags)
             self._report_identity_services(api, tags)
             self._report_identity_limits(api, tags)
+            return True
         except Exception as e:
             self.warning("Exception while reporting identity metrics: %s", e)
+            return False
 
     def _report_identity_response_time(self, api, tags):
         try:
@@ -452,10 +454,11 @@ class OpenStackControllerCheck(AgentCheck):
             )
 
     def _report_domain_metrics(self, api, tags):
-        self._report_compute_domain_metrics(api, tags)
-        self._report_network_domain_metrics(api, tags)
-        self._report_baremetal_domain_metrics(api, tags)
-        self._report_load_balancer_domain_metrics(api, tags)
+        reported_compute_metrics = self._report_compute_domain_metrics(api, tags)
+        reported_network_metrics = self._report_network_domain_metrics(api, tags)
+        reported_baremetal_metrics = self._report_baremetal_domain_metrics(api, tags)
+        reported_load_balancer_metrics = self._report_load_balancer_domain_metrics(api, tags)
+        return reported_compute_metrics and reported_network_metrics and reported_baremetal_metrics and reported_load_balancer_metrics
 
     def _authenticate_project(self, api, project):
         self.log.debug("authenticating user project scope")
@@ -486,12 +489,15 @@ class OpenStackControllerCheck(AgentCheck):
             self._report_compute_services(api, tags)
             self._report_compute_flavors(api, tags)
             self._report_compute_hypervisors(api, tags)
+            return True
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting compute domain metrics: %s", e)
             self.service_check(NOVA_SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags)
+            return False
         except Exception as e:
             self.warning("Exception while reporting compute domain metrics: %s", e)
+            return False
 
     def _report_compute_project_metrics(self, api, project_id, project_tags):
         try:
@@ -657,12 +663,15 @@ class OpenStackControllerCheck(AgentCheck):
         try:
             self._report_network_response_time(api, tags)
             self._report_network_agents(api, tags)
+            return True
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting network domain metrics: %s", e)
             self.service_check('openstack.neutron.api.up', AgentCheck.CRITICAL, tags=tags)
+            return False
         except Exception as e:
             self.warning("Exception while reporting network domain metrics: %s", e)
+            return False
 
     def _report_network_response_time(self, api, tags):
         response_time = api.get_network_response_time()
@@ -728,12 +737,15 @@ class OpenStackControllerCheck(AgentCheck):
             self._report_baremetal_response_time(api, tags)
             self._report_baremetal_nodes(api, tags)
             self._report_baremetal_conductors(api, tags)
+            return True
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting baremetal metrics: %s", e)
             self.service_check('openstack.ironic.api.up', AgentCheck.CRITICAL, tags)
+            return False
         except Exception as e:
             self.warning("Exception while reporting baremetal metrics: %s", e)
+            return False
 
     def _report_baremetal_response_time(self, api, tags):
         response_time = api.get_baremetal_response_time()
@@ -788,12 +800,16 @@ class OpenStackControllerCheck(AgentCheck):
     def _report_load_balancer_domain_metrics(self, api, tags):
         try:
             self._report_load_balancer_response_time(api, tags)
+            return True
         except HTTPError as e:
+            # TODO: don't submit SC multiple times if failed
             self.warning(e)
             self.log.error("HTTPError while reporting load balancer metrics: %s", e)
             self.service_check('openstack.octavia.api.up', AgentCheck.CRITICAL, tags=tags)
+            return False
         except Exception as e:
             self.warning("Exception while reporting load balancer metrics: %s", e)
+            return False
 
     def _report_load_balancer_response_time(self, api, tags):
         response_time = api.get_load_balancer_response_time()

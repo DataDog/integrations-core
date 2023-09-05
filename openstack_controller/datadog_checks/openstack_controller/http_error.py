@@ -7,7 +7,7 @@ def http_error(message):
             try:
                 func(self, *args, **kwargs)
             except HTTPError as e:
-                self.log.error("%s: %s", message, e)
+                raise Exception("%s: %s", message, e)
 
         return wrapper
 

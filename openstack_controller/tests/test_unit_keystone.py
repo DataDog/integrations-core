@@ -556,7 +556,7 @@ def test_services_metrics(aggregator, dd_run_check, instance, monkeypatch):
             'domain_id:default',
             'service_id:55b21161725a461793a2222749229306',
             'service_name:cinder',
-            'service_type:block-storage',
+            'service_type:block-storages',
         ],
     )
     aggregator.assert_metric(
