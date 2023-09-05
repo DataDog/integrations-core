@@ -29,7 +29,6 @@ from .console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
 # Dependencies to ignore when update dependencies
 IGNORED_DEPS = {
     'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
-    'flup',  # https://github.com/DataDog/integrations-core/pull/1997
     'dnspython',
     'pymysql',  # https://github.com/DataDog/integrations-core/pull/12612
     'foundationdb',  # Breaking datadog_checks_base tests
