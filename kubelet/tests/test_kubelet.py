@@ -695,6 +695,8 @@ def test_report_pods_running(monkeypatch, tagger):
     check = KubeletCheck('kubelet', {}, [{}])
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
     monkeypatch.setattr(check, 'gauge', mock.Mock())
+    attrs = {'is_namespace_excluded.return_value': False, 'is_excluded.return_value': False}
+    check.pod_list_utils = mock.Mock(**attrs)
     pod_list = check.retrieve_pod_list()
 
     check._report_pods_running(pod_list, [])
@@ -734,6 +736,8 @@ def test_report_pods_running_none_ids(monkeypatch, tagger):
     check = KubeletCheck('kubelet', {}, [{}])
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=podlist))
     monkeypatch.setattr(check, 'gauge', mock.Mock())
+    attrs = {'is_namespace_excluded.return_value': False, 'is_excluded.return_value': False}
+    check.pod_list_utils = mock.Mock(**attrs)
     pod_list = check.retrieve_pod_list()
 
     check._report_pods_running(pod_list, [])
@@ -947,7 +951,7 @@ def test_pod_expiration(monkeypatch, aggregator, tagger):
         check, 'compute_pod_expiration_datetime', mock.Mock(return_value=parse_rfc3339("2019-02-18T16:00:06Z"))
     )
 
-    attrs = {'is_excluded.return_value': False}
+    attrs = {'is_namespace_excluded.return_value': False, 'is_excluded.return_value': False}
     check.pod_list_utils = mock.Mock(**attrs)
 
     pod_list = check.retrieve_pod_list()
