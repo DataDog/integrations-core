@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+**Fixed**:
+* Adhere to container discovery management rules for `kubernetes.pods.running` and `kubernetes.containers.running` metrics ([#15749](https://github.com/DataDog/integrations-core/pull/15749))
+
 ## 7.9.1 / 2023-08-18
 
 ***Fixed***:
