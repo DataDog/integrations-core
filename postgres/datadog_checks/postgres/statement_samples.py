@@ -827,6 +827,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             "cloud_metadata": self._config.cloud_metadata,
             "postgres_activity": active_sessions,
             "postgres_connections": active_connections,
+            "normalization_options": self._config.normalization_options,
         }
         return event
 
