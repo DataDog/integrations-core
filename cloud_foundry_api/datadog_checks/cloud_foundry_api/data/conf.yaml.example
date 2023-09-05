@@ -34,6 +34,11 @@ instances:
     #
     # results_per_page: <RESULTS_PER_PAGE>
 
+    ## @param max_lookback - integer - optional - default: 60
+    ## Maximum time window (in seconds) for event collection from the API during the initial data retrieval.
+    #
+    # max_lookback: <MAX_LOOKBACK>
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
