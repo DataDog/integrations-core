@@ -852,7 +852,9 @@ class PostgresStatementSamples(DBMAsyncJob):
         return True
 
     def _get_track_activity_query_size(self):
-        return int(self._check.get_pg_settings().get("track_activity_query_size", TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE))
+        return int(
+            self._check.get_pg_settings().get("track_activity_query_size", TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE)
+        )
 
     @staticmethod
     def _get_truncation_state(track_activity_query_size, statement):
