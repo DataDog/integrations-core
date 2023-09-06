@@ -9,6 +9,7 @@
 ***Fixed***:
 
 * Remove unsupported metric in riverbed-interceptor.yaml ([#15678](https://github.com/DataDog/integrations-core/pull/15678))
+* [SNMP] Fix mapping for apc-pdu ([#15765](https://github.com/DataDog/integrations-core/pull/15765))
 
 ## 6.2.1 / 2023-09-05
 
