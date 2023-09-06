@@ -228,7 +228,6 @@ class MultiDatabaseConnectionPool(object):
             dbname=self._config.dbname,
             ttl_ms=self._config.idle_connection_timeout,
             max_pool_size=max_pool_conn_size,
-            startup_fn=self._check.load_pg_settings,
             persistent=True,
         )
         return conn
