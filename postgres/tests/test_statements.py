@@ -1869,20 +1869,21 @@ def test_pg_stat_statements_dealloc(aggregator, integration_check, dbm_instance_
         aggregator.assert_metric("postgresql.pg_stat_statements.dealloc", value=1, tags=expected_tags)
     aggregator.assert_metric("postgresql.pg_stat_statements.count", tags=expected_tags)
 
+
 def test_statement_metrics_pg_settings_not_loaded(integration_check, dbm_instance):
     # don't need samples for this test
     dbm_instance['query_samples']['enabled'] = False
     dbm_instance['query_activity']['enabled'] = False
 
     with mock.patch(
-            'datadog_checks.postgres.PostgreSql.load_pg_settings',
-            return_value={},
-        ):
-            check = integration_check(dbm_instance)
-            check._connect()
-            run_one_check(check, dbm_instance)
-            assert check.pg_settings == {}
-    
+        'datadog_checks.postgres.PostgreSql.load_pg_settings',
+        return_value={},
+    ):
+        check = integration_check(dbm_instance)
+        check._connect()
+        run_one_check(check, dbm_instance)
+        assert check.pg_settings == {}
+
     assert check.pg_settings == {}
     assert check.get_pg_settings() != {}
     assert 'pg_stat_statements.max' in check.pg_settings
