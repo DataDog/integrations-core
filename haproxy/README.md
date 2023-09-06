@@ -12,9 +12,11 @@ Capture HAProxy activity in Datadog to:
 
 ## Setup
 
-### Prerequisites
+This integration can collect metrics from a Prometheus endpoint (recommended) or from a socket-based integration through the stats endpoint (deprecated). Using the Prometheus endpoint requires HAProxy version 2 (enterprise version 1.9rc1) or later.
 
-This OpenMetrics-based integration has a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version (enterprise version 1.9rc1 or later) to enable the Prometheus endpoint on HAProxy. If you are using the legacy version, use the [HAProxy Prometheus exporter][3], or set up the [socket-based integration](#using-the-stats-endpoint). For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][29].
+When using the Prometheus endpoint, starting with version 4.0.0, this OpenMetrics-based integration has a *latest* mode (`use_openmetrics`: true) and a *legacy* mode (`use_openmetrics`: false and `use_prometheus`: true). To get all the most up-to-date features, Datadog recommends enabling the *latest* mode. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][29].
+
+To use the socket-based integration, set both `use_openmetrics` and `use_prometheus` to false and follow the [corresponding instructions](#using-the-stats-endpoint) on the Configuration section.
 
 The `use_openmetrics` option uses [OpenMetrics V2][26] for metric collection, which requires Agent v7.35 or later, or for you to [enable Python 3][27] in Agent v6.35 or later. For hosts that are unable to use Python 3 or are on Agent v7.34 or earlier, use the OpenMetrics V1 implementation or the [socket-based legacy integration](#using-the-stats-endpoint). 
 
@@ -124,7 +126,7 @@ spec:
 
 #### Using the stats endpoint
 
-<div class="alert alert-danger">This configuration strategy is provided as a reference for legacy users. If you are setting up the integration for the first time, consider using the Prometheus-based strategy described in the previous section.</div>
+This configuration strategy is provided as a reference for legacy users. If you are setting up the integration for the first time, consider using the Prometheus-based strategy described in the previous section.
 
 The Agent collects metrics using a stats endpoint:
 
