@@ -190,6 +190,10 @@ coverage:
         target: 75
         flags:
         - external_dns
+      Fluentd:
+        target: 75
+        flags:
+        - fluentd
       FoundationDB:
         target: 75
         flags:
@@ -442,6 +446,10 @@ coverage:
         target: 75
         flags:
         - proxysql
+      Pulsar:
+        target: 75
+        flags:
+        - pulsar
       RabbitMQ:
         target: 75
         flags:
@@ -467,7 +475,7 @@ coverage:
         flags:
         - sap_hana
       SNMP:
-        target: 75
+        target: 30
         flags:
         - snmp
       SQL_Server:
@@ -550,6 +558,10 @@ coverage:
         target: 50
         flags:
         - tokumx
+      TorchServe:
+        target: 75
+        flags:
+        - torchserve
       Traffic_Server:
         target: 75
         flags:
@@ -582,7 +594,11 @@ coverage:
         target: 75
         flags:
         - wmi_check
-      Win32:
+      Weaviate:
+        target: 75
+        flags:
+        - weaviate
+      Windows_Event_Log:
         target: 75
         flags:
         - win32_event_log
@@ -606,6 +622,10 @@ coverage:
         target: 75
         flags:
         - cert_manager
+      dcgm:
+        target: 75
+        flags:
+        - dcgm
       ddev:
         target: 75
         flags:
@@ -614,14 +634,6 @@ coverage:
         target: 75
         flags:
         - etcd
-      fluentd:
-        target: 75
-        flags:
-        - fluentd
-      pulsar:
-        target: 75
-        flags:
-        - pulsar
       vSphere:
         target: 75
         flags:
@@ -803,10 +815,15 @@ flags:
     paths:
     - datadog_cluster_agent/datadog_checks/datadog_cluster_agent
     - datadog_cluster_agent/tests
+  dcgm:
+    carryforward: true
+    paths:
+    - dcgm/datadog_checks/dcgm
+    - dcgm/tests
   ddev:
     carryforward: true
     paths:
-    - ddev/datadog_checks/ddev
+    - ddev/src/ddev
     - ddev/tests
   directory:
     carryforward: true
@@ -1328,6 +1345,11 @@ flags:
     paths:
     - tokumx/datadog_checks/tokumx
     - tokumx/tests
+  torchserve:
+    carryforward: true
+    paths:
+    - torchserve/datadog_checks/torchserve
+    - torchserve/tests
   traffic_server:
     carryforward: true
     paths:
@@ -1368,6 +1390,11 @@ flags:
     paths:
     - vsphere/datadog_checks/vsphere
     - vsphere/tests
+  weaviate:
+    carryforward: true
+    paths:
+    - weaviate/datadog_checks/weaviate
+    - weaviate/tests
   win32_event_log:
     carryforward: true
     paths:

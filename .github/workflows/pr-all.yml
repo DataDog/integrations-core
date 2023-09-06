@@ -21,7 +21,7 @@ jobs:
 
       # Options
       standard: true
-      test-py2: false
+      test-py2: true
     secrets: inherit
 
   save-event:

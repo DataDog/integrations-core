@@ -1,8 +1,3 @@
-[env]
-requires = [
-  "datadog-checks-dev",
-]
-
 [env.collectors.datadog-checks]
 check-types = true
 mypy-args = [
@@ -13,8 +8,8 @@ mypy-args = [
 python = "3.9"
 e2e-env = false
 dependencies = [
+  "pyyaml",
   "vcrpy",
-  "urllib3<2",
 ]
 # TODO: remove this when the old CLI is gone
 pre-install-commands = [

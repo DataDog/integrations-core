@@ -1,0 +1,33 @@
+[
+  {
+    "modelName": "linear_regression_1_1",
+    "modelVersion": "1",
+    "modelUrl": "linear_regression_1_1.mar",
+    "runtime": "python",
+    "minWorkers": 2,
+    "maxWorkers": 4,
+    "batchSize": 1,
+    "maxBatchDelay": 100,
+    "loadedAtStartup": false,
+    "workers": [
+      {
+        "id": "9000",
+        "startTime": "2023-06-05T18:33:52.496Z",
+        "status": "LOADING",
+        "memoryUsage": 418390016,
+        "pid": 46,
+        "gpu": false,
+        "gpuUsage": "N/A"
+      },
+      {
+        "id": "9007",
+        "startTime": "2023-06-05T18:33:52.496Z",
+        "status": "UNLOADING",
+        "memoryUsage": 418390017,
+        "pid": 666,
+        "gpu": true,
+        "gpuUsage": ""
+      }
+    ]
+  }
+]

@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import copy
 import re
 import time
 from collections import defaultdict
@@ -14,9 +15,10 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
-from datadog_checks.base.utils.db.utils import resolve_db_host
+from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
+from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.utils import Database, parse_sqlserver_major_version
 
@@ -26,6 +28,7 @@ except ImportError:
     from ..stubs import datadog_agent
 
 from datadog_checks.sqlserver import metrics
+from datadog_checks.sqlserver.__about__ import __version__
 from datadog_checks.sqlserver.connection import Connection, SQLConnectionError, split_sqlserver_host_port
 from datadog_checks.sqlserver.const import (
     AO_METRICS,
@@ -112,6 +115,7 @@ class SQLServer(AgentCheck):
         self.databases = set()
         self.autodiscovery_query = None
         self.ad_last_check = 0
+        self._sql_counter_types = {}
 
         self.proc = self.instance.get('stored_procedure')
         self.proc_type_mapping = {'gauge': self.gauge, 'rate': self.rate, 'histogram': self.histogram}
@@ -120,7 +124,9 @@ class SQLServer(AgentCheck):
         # DBM
         self.dbm_enabled = self.instance.get('dbm', False)
         self.statement_metrics_config = self.instance.get('query_metrics', {}) or {}
+        self.settings_config = self.instance.get('collect_settings', {}) or {}
         self.statement_metrics = SqlserverStatementMetrics(self)
+        self.sql_metadata = SqlserverMetadata(self)
         self.activity_config = self.instance.get('query_activity', {}) or {}
         self.activity = SqlserverActivity(self)
         self.cloud_metadata = {}
@@ -159,12 +165,22 @@ class SQLServer(AgentCheck):
         )
         self.log_unobfuscated_queries = is_affirmative(self.instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans = is_affirmative(self.instance.get('log_unobfuscated_plans', False))
+        self.database_instance_collection_interval = self.instance.get('database_instance_collection_interval', 1800)
+        self.connection_host = self.instance['host']
 
         self.static_info_cache = TTLCache(
             maxsize=100,
             # cache these for a full day
             ttl=60 * 60 * 24,
         )
+        # _database_instance_emitted: limit the collection and transmission of the database instance metadata
+        self._database_instance_emitted = TTLCache(
+            maxsize=1,
+            ttl=self.database_instance_collection_interval,
+        )  # type: TTLCache
+        # Keep a copy of the tags before the internal resource tags are set so they can be used for paths that don't
+        # go through the agent internal metrics submission processing those tags
+        self._non_internal_tags = copy.deepcopy(self.tags)
         self.check_initializations.append(self.initialize_connection)
         self.check_initializations.append(self.set_resolved_hostname)
         self.check_initializations.append(self.set_resolved_hostname_metadata)
@@ -179,6 +195,7 @@ class SQLServer(AgentCheck):
     def cancel(self):
         self.statement_metrics.cancel()
         self.activity.cancel()
+        self.sql_metadata.cancel()
 
     def config_checks(self):
         if self.autodiscovery and self.instance.get('database'):
@@ -565,7 +582,7 @@ class SQLServer(AgentCheck):
 
         # Load any custom metrics from conf.d/sqlserver.yaml
         for cfg in custom_metrics:
-            sql_type = None
+            sql_counter_type = None
             base_name = None
 
             custom_tags = tags + cfg.get('tags', [])
@@ -589,17 +606,21 @@ class SQLServer(AgentCheck):
                 user_type = cfg.get('type')
                 if user_type is not None and user_type not in VALID_METRIC_TYPES:
                     self.log.error('%s has an invalid metric type: %s', cfg['name'], user_type)
-                sql_type = None
+                sql_counter_type = None
                 try:
                     if user_type is None:
-                        sql_type, base_name = self.get_sql_type(cfg['counter_name'])
+                        sql_counter_type, base_name = self.get_sql_counter_type(cfg['counter_name'])
                 except Exception:
                     self.log.warning("Can't load the metric %s, ignoring", cfg['name'], exc_info=True)
                     continue
 
                 metrics_to_collect.append(
                     self.typed_metric(
-                        cfg_inst=cfg, table=db_table, base_name=base_name, user_type=user_type, sql_type=sql_type
+                        cfg_inst=cfg,
+                        table=db_table,
+                        base_name=base_name,
+                        user_type=user_type,
+                        sql_counter_type=sql_counter_type,
                     )
                 )
 
@@ -607,7 +628,11 @@ class SQLServer(AgentCheck):
                 for column in cfg['columns']:
                     metrics_to_collect.append(
                         self.typed_metric(
-                            cfg_inst=cfg, table=db_table, base_name=base_name, sql_type=sql_type, column=column
+                            cfg_inst=cfg,
+                            table=db_table,
+                            base_name=base_name,
+                            sql_counter_type=sql_counter_type,
+                            column=column,
                         )
                     )
 
@@ -629,7 +654,7 @@ class SQLServer(AgentCheck):
             tags = tags + ['database:{}'.format(db)]
         for name, counter_name, instance_name in metrics:
             try:
-                sql_type, base_name = self.get_sql_type(counter_name)
+                sql_counter_type, base_name = self.get_sql_counter_type(counter_name)
                 cfg = {
                     'name': name,
                     'counter_name': counter_name,
@@ -640,7 +665,10 @@ class SQLServer(AgentCheck):
 
                 metrics_to_collect.append(
                     self.typed_metric(
-                        cfg_inst=cfg, table=DEFAULT_PERFORMANCE_TABLE, base_name=base_name, sql_type=sql_type
+                        cfg_inst=cfg,
+                        table=DEFAULT_PERFORMANCE_TABLE,
+                        base_name=base_name,
+                        sql_counter_type=sql_counter_type,
                     )
                 )
             except SQLConnectionError:
@@ -649,20 +677,23 @@ class SQLServer(AgentCheck):
                 self.log.warning("Can't load the metric %s, ignoring", name, exc_info=True)
                 continue
 
-    def get_sql_type(self, counter_name):
+    def get_sql_counter_type(self, counter_name):
         """
         Return the type of the performance counter so that we can report it to
         Datadog correctly
-        If the sql_type is one that needs a base (PERF_RAW_LARGE_FRACTION and
+        If the sql_counter_type is one that needs a base (PERF_RAW_LARGE_FRACTION and
         PERF_AVERAGE_BULK), the name of the base counter will also be returned
         """
+        cached = self._sql_counter_types.get(counter_name)
+        if cached:
+            return cached
         with self.connection.get_managed_cursor() as cursor:
             cursor.execute(COUNTER_TYPE_QUERY, (counter_name,))
-            (sql_type,) = cursor.fetchone()
-            if sql_type == PERF_LARGE_RAW_BASE:
+            (sql_counter_type,) = cursor.fetchone()
+            if sql_counter_type == PERF_LARGE_RAW_BASE:
                 self.log.warning("Metric %s is of type Base and shouldn't be reported this way", counter_name)
             base_name = None
-            if sql_type in [PERF_AVERAGE_BULK, PERF_RAW_LARGE_FRACTION]:
+            if sql_counter_type in [PERF_AVERAGE_BULK, PERF_RAW_LARGE_FRACTION]:
                 # This is an ugly hack. For certains type of metric (PERF_RAW_LARGE_FRACTION
                 # and PERF_AVERAGE_BULK), we need two metrics: the metrics specified and
                 # a base metrics to get the ratio. There is no unique schema so we generate
@@ -676,18 +707,19 @@ class SQLServer(AgentCheck):
                     cursor.execute(BASE_NAME_QUERY, candidates)
                     base_name = cursor.fetchone().counter_name.strip()
                     self.log.debug("Got base metric: %s for metric: %s", base_name, counter_name)
+                    self._sql_counter_types[counter_name] = (sql_counter_type, base_name)
                 except Exception as e:
                     self.log.warning("Could not get counter_name of base for metric: %s", e)
 
-        return sql_type, base_name
+        return sql_counter_type, base_name
 
-    def typed_metric(self, cfg_inst, table, base_name=None, user_type=None, sql_type=None, column=None):
+    def typed_metric(self, cfg_inst, table, base_name=None, user_type=None, sql_counter_type=None, column=None):
         """
         Create the appropriate BaseSqlServerMetric object, each implementing its method to
         fetch the metrics properly.
         If a `type` was specified in the config, it is used to report the value
         directly fetched from SQLServer. Otherwise, it is decided based on the
-        sql_type, according to microsoft's documentation.
+        sql_counter_type, according to microsoft's documentation.
         """
         if table == DEFAULT_PERFORMANCE_TABLE:
             metric_type_mapping = {
@@ -703,7 +735,7 @@ class SQLServer(AgentCheck):
                 cls = metrics.SqlSimpleMetric
 
             else:
-                metric_type, cls = metric_type_mapping[sql_type]
+                metric_type, cls = metric_type_mapping[sql_counter_type]
         else:
             # Lookup metrics classes by their associated table
             metric_type_str, cls = metrics.TABLE_MAPPING[table]
@@ -737,10 +769,11 @@ class SQLServer(AgentCheck):
                         except Exception as e:
                             # service_check errors on auto discovered databases should not abort the check
                             self.log.warning("failed service check for auto discovered database: %s", e)
-
+            self._send_database_instance_metadata()
             if self.dbm_enabled:
                 self.statement_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
+                self.sql_metadata.run_job_loop(self.tags)
         else:
             self.log.debug("Skipping check")
 
@@ -761,7 +794,7 @@ class SQLServer(AgentCheck):
         queries = [get_query_file_stats(major_version, engine_edition)]
 
         if is_affirmative(self.instance.get('include_ao_metrics', False)):
-            if major_version > 2012 or engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE:
+            if major_version > 2012 or is_azure_database(engine_edition):
                 queries.extend(
                     [
                         get_query_ao_availability_groups(major_version),
@@ -770,17 +803,23 @@ class SQLServer(AgentCheck):
                     ]
                 )
             else:
-                self.log.warning('AlwaysOn metrics are not supported on version 2012')
+                self.log_missing_metric("AlwaysOn", major_version, engine_edition)
         if is_affirmative(self.instance.get('include_fci_metrics', False)):
             if major_version > 2012 or engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE:
                 queries.extend([QUERY_FAILOVER_CLUSTER_INSTANCE])
             else:
-                self.log.warning('Failover Cluster Instance metrics are not supported on version 2012')
+                self.log_missing_metric("Failover Cluster Instance", major_version, engine_edition)
 
         self._dynamic_queries = self._new_query_executor(queries)
         self._dynamic_queries.compile_queries()
         self.log.debug("initialized dynamic queries")
         return self._dynamic_queries
+
+    def log_missing_metric(self, metric_name, major_version, engine_version):
+        if major_version <= 2012:
+            self.log.warning('%s metrics are not supported on version 2012', metric_name)
+        else:
+            self.log.warning('%s metrics are not supported on Azure engine version: %s', metric_name, engine_version)
 
     def collect_metrics(self):
         """Fetch the metrics from all the associated database tables."""
@@ -918,3 +957,27 @@ class SQLServer(AgentCheck):
         self.connection.close_cursor(cursor)
         self.connection.close_db_connections(self.connection.PROC_GUARD_DB_KEY)
         return should_run
+
+    def _send_database_instance_metadata(self):
+        if self.resolved_hostname not in self._database_instance_emitted:
+            event = {
+                "host": self.resolved_hostname,
+                "agent_version": datadog_agent.get_version(),
+                "dbms": "sqlserver",
+                "kind": "database_instance",
+                "collection_interval": self.database_instance_collection_interval,
+                'dbms_version': "{},{}".format(
+                    self.static_info_cache.get(STATIC_INFO_VERSION, ""),
+                    self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
+                ),
+                'integration_version': __version__,
+                "tags": self._non_internal_tags,
+                "timestamp": time.time() * 1000,
+                "cloud_metadata": self.cloud_metadata,
+                "metadata": {
+                    "dbm": self.dbm_enabled,
+                    "connection_host": self.connection_host,
+                },
+            }
+            self._database_instance_emitted[self.resolved_hostname] = event
+            self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))

@@ -8,7 +8,6 @@ import pluggy
 from datadog_checks.dev.tooling.commands.create import create
 from datadog_checks.dev.tooling.commands.dep import dep
 from datadog_checks.dev.tooling.commands.run import run
-from datadog_checks.dev.tooling.commands.test import test
 
 from ddev._version import __version__
 from ddev.cli.application import Application
@@ -20,6 +19,7 @@ from ddev.cli.env import env
 from ddev.cli.meta import meta
 from ddev.cli.release import release
 from ddev.cli.status import status
+from ddev.cli.test import test
 from ddev.cli.validate import validate
 from ddev.config.constants import AppEnvVars, ConfigEnvVars
 from ddev.plugin import specs
@@ -118,13 +118,14 @@ def ddev(ctx: click.Context, core, extras, marketplace, agent, here, color, inte
     except OSError as e:  # no cov
         app.abort(f'Error loading configuration: {e}')
 
-    app.set_repo(core, extras, marketplace, agent, here)
-
     app.config.terminal.styles.parse_fields()
     errors = app.initialize_styles(app.config.terminal.styles.raw_data)
     if errors and color is not False and not app.quiet:  # no cov
         for error in errors:
             app.display_warning(error)
+
+    # Do this last
+    app.set_repo(core, extras, marketplace, agent, here)
 
     # TODO: remove this when the old CLI is gone
     app.initialize_old_cli()

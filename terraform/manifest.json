@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Manage your Datadog account using Terraform",
-    "title": "terraform",
+    "title": "Terraform",
     "media": [],
     "classifier_tags": [
       "Category::Configuration & Deployment",

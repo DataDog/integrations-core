@@ -4,6 +4,8 @@
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
+
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
@@ -45,6 +47,7 @@ def test_e2e_profile_juniper(dd_agent_check):
     assert_extend_generic_host_resources(aggregator, common_tags)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
     # --- TEST METADATA ---
     device = {
@@ -91,6 +94,7 @@ def test_e2e_profile_juniper_variation(dd_agent_check):
     assert_extend_generic_host_resources(aggregator, common_tags)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
     # --- TEST METADATA ---
     device = {
