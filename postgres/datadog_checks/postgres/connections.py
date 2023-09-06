@@ -144,7 +144,7 @@ class MultiDatabaseConnectionPool(object):
         """
         with self._mu:
             pool = self._get_connection_pool(dbname=dbname, ttl_ms=ttl_ms, timeout=timeout, persistent=persistent)
-            db = pool.getconn(timeout=timeout)
+            db = pool.getconn()
         try:
             yield db
         finally:

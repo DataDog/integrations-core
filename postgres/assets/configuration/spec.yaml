@@ -125,6 +125,13 @@ files:
       value:
         type: integer
         example: 5000
+    - name: connection_timeout
+      description: |
+        Sets the timeout (in ms) that the agent will wait to receive a connection from the database.
+      hidden: true
+      value:
+        type: integer
+        example: 5000
     - name: idle_connection_timeout
       description: |
         Sets the timeout (in ms) a connection used in the connection pool will be idle until it is closed by the pooler.
