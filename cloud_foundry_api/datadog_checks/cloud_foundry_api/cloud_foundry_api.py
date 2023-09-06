@@ -6,26 +6,25 @@ import json
 import time
 from typing import Any, Dict, Generator, Tuple  # noqa: F401
 
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.errors import CheckException, ConfigurationError
+from datadog_checks.base.types import Event  # noqa: F401
 from requests.exceptions import HTTPError, RequestException
 from semver import VersionInfo
 from six.moves.urllib_parse import urlparse
 
-from datadog_checks.base import AgentCheck
-from datadog_checks.base.errors import CheckException, ConfigurationError
-from datadog_checks.base.types import Event  # noqa: F401
-
 from .constants import (
     API_SERVICE_CHECK_NAME,
     DEFAULT_EVENT_FILTER,
-    DEFAULT_PAGE_SIZE,
     DEFAULT_MAX_LOOKBACK_SECONDS,
+    DEFAULT_PAGE_SIZE,
+    LAST_EVENT_GUID_CACHE_KEY,
     MAX_PAGE_SIZE_V2,
     MAX_PAGE_SIZE_V3,
     MIN_V3_VERSION,
     SOURCE_TYPE_NAME,
     TOCKEN_EXPIRATION_BUFFER,
     UAA_SERVICE_CHECK_NAME,
-    LAST_EVENT_GUID_CACHE_KEY,
 )
 from .utils import date_to_ts, get_next_url, join_url
 
