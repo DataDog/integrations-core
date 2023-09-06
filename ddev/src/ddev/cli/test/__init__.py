@@ -36,6 +36,7 @@ def fix_coverage_report(report_file: Path):
 @click.option('--memray', is_flag=True, help='Measure memory usage during test execution')
 @click.option('--recreate', '-r', is_flag=True, help='Recreate environments from scratch')
 @click.option('--list', '-l', 'list_envs', is_flag=True, help='Show available test environments')
+@click.option('--python-filter', envvar='PYTHON_FILTER', hidden=True)
 @click.option('--junit', is_flag=True, hidden=True)
 @click.option('--e2e', is_flag=True, hidden=True)
 @click.pass_obj
@@ -53,6 +54,7 @@ def test(
     memray: bool,
     recreate: bool,
     list_envs: bool,
+    python_filter: str | None,
     junit: bool,
     e2e: bool,
 ):
@@ -63,6 +65,7 @@ def test(
     import os
     import sys
 
+    from ddev.repo.constants import PYTHON_VERSION
     from ddev.testing.constants import EndToEndEnvVars, TestEnvVars
     from ddev.utils.ci import running_in_ci
 
@@ -128,11 +131,11 @@ def test(
         chosen_environments.append('lint')
         base_command.extend(('--env', 'lint', '--', 'fmt'))
     elif bench:
-        config_filter = {'benchmark-env': True}
-        base_command.extend(('--filter', json.dumps(config_filter), '--', 'benchmark'))
+        filter_data = json.dumps({'benchmark-env': True})
+        base_command.extend(('--filter', filter_data, '--', 'benchmark'))
     elif latest:
-        config_filter = {'latest-env': True}
-        base_command.extend(('--filter', json.dumps(config_filter), '--', 'test', '--run-latest-metrics'))
+        filter_data = json.dumps({'latest-env': True})
+        base_command.extend(('--filter', filter_data, '--', 'test', '--run-latest-metrics'))
     else:
         if environments:
             for env_name in environments.split(','):
@@ -141,6 +144,10 @@ def test(
         else:
             chosen_environments.append('default')
             base_command.append('--ignore-compat')
+
+        if python_filter:
+            filter_data = json.dumps({'python': python_filter})
+            base_command.extend(('--filter', filter_data))
 
         base_command.extend(('--', 'test-cov' if coverage else 'test'))
 
@@ -159,17 +166,25 @@ def test(
 
     app.display_debug(f'Targets: {", ".join(targets)}')
     for target in targets.values():
+        app.display_header(target.display_name)
+
         command = base_command.copy()
         env_vars = global_env_vars.copy()
 
         if standard_tests:
-            # TODO: remove the Windows limitation once we drop Python 2
-            if ddtrace and not app.platform.windows and (target.is_integration or target.name == 'datadog_checks_base'):
-                command.append('--ddtrace')
-                env_vars['DDEV_TRACE_ENABLED'] = 'true'
-                env_vars['DD_PROFILING_ENABLED'] = 'true'
-                env_vars['DD_SERVICE'] = os.environ.get('DD_SERVICE', 'ddev-integrations')
-                env_vars['DD_ENV'] = os.environ.get('DD_ENV', 'ddev-integrations')
+            if ddtrace and (target.is_integration or target.name == 'datadog_checks_base'):
+                # TODO: remove this once we drop Python 2
+                if app.platform.windows and (
+                    (python_filter and python_filter != PYTHON_VERSION)
+                    or not all(env_name.startswith('py3') for env_name in chosen_environments)
+                ):
+                    app.display_warning('Tracing is only supported on Python 3 on Windows')
+                else:
+                    command.append('--ddtrace')
+                    env_vars['DDEV_TRACE_ENABLED'] = 'true'
+                    env_vars['DD_PROFILING_ENABLED'] = 'true'
+                    env_vars['DD_SERVICE'] = os.environ.get('DD_SERVICE', 'ddev-integrations')
+                    env_vars['DD_ENV'] = os.environ.get('DD_ENV', 'ddev-integrations')
 
             if junit:
                 # In order to handle multiple environments the report files must contain the environment name.
@@ -190,7 +205,6 @@ def test(
         command.extend(args)
 
         with target.path.as_cwd(env_vars=env_vars):
-            app.display_header(target.display_name)
             app.display_debug(f'Command: {command}')
 
             if recreate:
