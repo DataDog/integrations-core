@@ -51,7 +51,6 @@ class CloudFoundryApiCheck(AgentCheck):
         self._per_page = self.instance.get("results_per_page", DEFAULT_PAGE_SIZE)
         self._max_lookback = self.instance.get("max_lookback", DEFAULT_MAX_LOOKBACK_SECONDS)
 
-        # write_persistent_cache(self, key, value)
         self._last_event_guid = self.read_persistent_cache(LAST_EVENT_GUID_CACHE_KEY)
         self._last_event_ts = 0
         self._oauth_token = ""
