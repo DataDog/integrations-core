@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 14.2.3 / 2023-09-06
+
 ***Fixed***:
 
 * Set lower connection timeout on connection pool, to avoid long running checks ([#15768](https://github.com/DataDog/integrations-core/pull/15768))
