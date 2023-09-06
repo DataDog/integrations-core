@@ -1339,7 +1339,7 @@ def test_load_pg_settings(aggregator, integration_check, dbm_instance, db_user):
     dbm_instance["dbname"] = "postgres"
     check = integration_check(dbm_instance)
     check._connect()
-    check.load_pg_settings(check.db)
+    check.load_pg_settings()
     if db_user == 'datadog_no_catalog':
         aggregator.assert_metric(
             "dd.postgres.error",
@@ -1362,9 +1362,14 @@ def test_pg_settings_caching(integration_check, dbm_instance):
     assert not check.pg_settings, "pg_settings should not have been initialized yet"
     check._connect()
     check.db_pool.get_main_db_pool()
+    # pg_settings is not loaded on connect
+    assert not check.pg_settings, "pg_settings should not have been initialized yet"
+    # pg_settings should now be lazy loaded
+    check.get_pg_settings()
+    assert check.pg_settings, "pg_settings should have been initialized"
     assert "track_activity_query_size" in check.pg_settings
     check.pg_settings["test_key"] = True
-    check.db_pool.get_main_db_pool()
+    check.get_pg_settings()
     assert (
         "test_key" in check.pg_settings
     ), "key should not have been blown away. If it was then pg_settings was not cached correctly"
@@ -1829,3 +1834,24 @@ def test_pg_stat_statements_dealloc(aggregator, integration_check, dbm_instance_
     if float(POSTGRES_VERSION) >= 14.0:
         aggregator.assert_metric("postgresql.pg_stat_statements.dealloc", value=1, tags=expected_tags)
     aggregator.assert_metric("postgresql.pg_stat_statements.count", tags=expected_tags)
+
+
+def test_statement_metrics_pg_settings_not_loaded(integration_check, dbm_instance):
+    # don't need samples for this test
+    dbm_instance['query_samples']['enabled'] = False
+    dbm_instance['query_activity']['enabled'] = False
+
+    with mock.patch(
+        'datadog_checks.postgres.PostgreSql.load_pg_settings',
+        return_value={},
+    ):
+        check = integration_check(dbm_instance)
+        check._connect()
+        run_one_check(check, dbm_instance)
+        assert check.pg_settings == {}
+
+    assert check.pg_settings == {}
+    assert check.get_pg_settings() != {}
+    assert 'pg_stat_statements.max' in check.pg_settings
+    assert 'track_activity_query_size' in check.pg_settings
+    assert 'track_io_timing' in check.pg_settings
