@@ -114,6 +114,7 @@ class PostgreSql(AgentCheck):
         self.check_initializations.append(self.set_resolved_hostname_metadata)
         self.check_initializations.append(self._connect)
         self.check_initializations.append(self.load_version)
+        self.check_initializations.append(self.load_pg_settings)
         self.check_initializations.append(self.initialize_is_aurora)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         self.autodiscovery = self._build_autodiscovery()
@@ -724,9 +725,9 @@ class PostgreSql(AgentCheck):
             self.db = self._new_connection(self._config.dbname, max_pool_size=1)
 
     # Reload pg_settings on a new connection to the main db
-    def load_pg_settings(self, db):
+    def load_pg_settings(self):
         try:
-            with db.connection() as conn:
+            with self.db.connection() as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
                     self.log.debug("Running query [%s]", PG_SETTINGS_QUERY)
                     cursor.execute(
@@ -749,6 +750,9 @@ class PostgreSql(AgentCheck):
             )
 
     def get_pg_settings(self):
+        if not bool(self.pg_settings):
+            # reload pg_settings if it's empty
+            self.load_pg_settings()
         return self.pg_settings
 
     def _close_db_pool(self):
