@@ -432,3 +432,4 @@ Need help? Contact [Datadog support][20].
 [27]: https://docs.datadoghq.com/agent/guide/agent-v6-python-3/?tab=helm#use-python-3-with-datadog-agent-v6
 [28]: https://github.com/DataDog/integrations-core/blob/0e34b3309cc1371095762bfcaf121b0b45a4e263/haproxy/datadog_checks/haproxy/data/conf.yaml.example#L631
 [29]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations
+[30]: https://docs.datadoghq.com/integrations/guide/prometheus-host-collection/
