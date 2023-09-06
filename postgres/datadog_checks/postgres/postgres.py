@@ -9,7 +9,7 @@ from time import time
 import psycopg
 from cachetools import TTLCache
 from psycopg.rows import dict_row
-from psycopg_pool import ConnectionPool
+from psycopg_pool import ConnectionPool, PoolTimeout
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
@@ -542,10 +542,20 @@ class PostgreSql(AgentCheck):
         start_time = time()
         databases = self.autodiscovery.get_items()
         for db in databases:
-            with self.db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
-                with conn.cursor() as cursor:
-                    for scope in relations_scopes:
-                        self._query_scope(cursor, scope, instance_tags, False, db)
+            try:
+                with self.db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
+                    with conn.cursor() as cursor:
+                        for scope in relations_scopes:
+                            self._query_scope(cursor, scope, instance_tags, False, db)
+            except PoolTimeout:
+                self.log.warning(
+                    "Unable to establish connection to %s in %d. "
+                    "If you wish to exclude this database from autodiscovery, "
+                    "add it to the `exclude` list",
+                    db,
+                    self._config.connection_timeout,
+                )
+
         elapsed_ms = (time() - start_time) * 1000
         self.histogram(
             "dd.postgres._collect_relations_autodiscovery.time",
