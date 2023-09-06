@@ -84,9 +84,20 @@ def test_e2e_profile_sinetica_eagle_i(dd_agent_check):
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.hawk.i2.op', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
-    aggregator.assert_metric('snmp.hawk.i2.pduRMSAmpsValue', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.hawk.i2.pduRMSVoltsValue', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.hawk.i2.pduTotalEnergyValue', metric_type=aggregator.GAUGE, tags=common_tags)
+    tag_rows = [
+        ['hawk_i2_pdu_name:oxen'],
+        ['hawk_i2_pdu_name:Jaded Jaded'],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric(
+            'snmp.hawk.i2.pduRMSAmpsValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.hawk.i2.pduRMSVoltsValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.hawk.i2.pduTotalEnergyValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     # --- TEST METADATA ---
     device = {
