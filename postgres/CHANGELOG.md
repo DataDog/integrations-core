@@ -6,6 +6,7 @@
 
 ***Fixed***:
 
+* Default `pg_stat_statements.max to 5000` if not set in pg_settings ([#15773](https://github.com/DataDog/integrations-core/pull/15773))
 * Set lower connection timeout on connection pool to avoid long running checks ([#15768](https://github.com/DataDog/integrations-core/pull/15768))
 
 ## 14.2.2 / 2023-09-05
