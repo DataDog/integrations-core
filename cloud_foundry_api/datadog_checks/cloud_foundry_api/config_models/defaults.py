@@ -106,6 +106,10 @@ def instance_log_requests(field, value):
     return False
 
 
+def instance_max_lookback(field, value):
+    return 60
+
+
 def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 

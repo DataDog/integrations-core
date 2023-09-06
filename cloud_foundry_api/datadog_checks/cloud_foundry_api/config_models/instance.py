@@ -71,6 +71,7 @@ class InstanceConfig(BaseModel):
     kerberos_keytab: Optional[str]
     kerberos_principal: Optional[str]
     log_requests: Optional[bool]
+    max_lookback: Optional[int]
     metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     ntlm_domain: Optional[str]
