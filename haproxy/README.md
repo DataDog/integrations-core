@@ -30,6 +30,8 @@ The HAProxy check is included in the [Datadog Agent][2] package, so you don't ne
 
 The recommended way to set up this integration is by enabling the Prometheus endpoint on HAProxy. This endpoint is built into HAProxy starting with version 2 (enterprise version 1.9rc1). If you are using an older version, consider setting up the [HAProxy Prometheus exporter][3], or alternatively set up the legacy socket-based integration described in the next section.
 
+To use Prometheus/OpenMetrics v1 instead of OpenMetrics v2, change the `use_openmetrics` option to `use_prometheus`, and change the `openmetrics_endpoint` option to `prometheus_url`. For more information, see the [Prometheus and OpenMetrics metrics collection from a host documentation][30].
+
 #### Prepare HAProxy
 
 1. Configure your `haproxy.conf` using the [official guide][4].
