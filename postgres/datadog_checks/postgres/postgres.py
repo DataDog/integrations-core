@@ -651,6 +651,7 @@ class PostgreSql(AgentCheck):
                 kwargs=args,
                 open=True,
                 name=dbname,
+                timeout=self._config.connection_timeout,
             )
         else:
             password = self._config.password
@@ -688,7 +689,14 @@ class PostgreSql(AgentCheck):
             if self._config.ssl_password:
                 conn_args['sslpassword'] = self._config.ssl_password
             args.update(conn_args)
-            pool = ConnectionPool(min_size=min_pool_size, max_size=max_pool_size, kwargs=args, open=True, name=dbname)
+            pool = ConnectionPool(
+                min_size=min_pool_size,
+                max_size=max_pool_size,
+                kwargs=args,
+                open=True,
+                name=dbname,
+                timeout=self._config.connection_timeout,
+            )
         return pool
 
     def _connect(self):
