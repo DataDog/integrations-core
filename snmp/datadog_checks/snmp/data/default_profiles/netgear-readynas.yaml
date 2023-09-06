@@ -85,9 +85,8 @@ metrics:
       OID: 1.3.6.1.4.1.4526.22.7
       name: volumeTable
     symbols:
-#      - OID: 1.3.6.1.4.1.4526.22.7.1.3
-#        name: netgear.readynasos.volumeRAIDLevel
-# string metric is not supported yet (keep this metric and this comment in profile until it's fixed)
+      - OID: 1.3.6.1.4.1.4526.22.7.1.3
+        name: netgear.readynasos.volumeRAIDLevel
       - OID: 1.3.6.1.4.1.4526.22.7.1.5
         name: netgear.readynasos.volumeSize
       - OID: 1.3.6.1.4.1.4526.22.7.1.6

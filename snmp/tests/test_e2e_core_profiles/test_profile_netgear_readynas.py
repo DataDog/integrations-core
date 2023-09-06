@@ -108,6 +108,9 @@ def test_e2e_profile_netgear_readynas(dd_agent_check):
         aggregator.assert_metric(
             'snmp.netgear.readynasos.volumeSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
+        aggregator.assert_metric(
+            'snmp.netgear.readynasos.volumeRAIDLevel', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
         [
