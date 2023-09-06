@@ -43,7 +43,7 @@ SELECT {cols}
 PG_STAT_STATEMENTS_COUNT_QUERY = "SELECT COUNT(*) FROM pg_stat_statements(false)"
 PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 = "SELECT COUNT(*) FROM pg_stat_statements"
 PG_STAT_STATEMENTS_DEALLOC = "SELECT dealloc FROM pg_stat_statements_info"
-
+DEFAULT_PG_STAT_STATEMENTS = 5000
 
 # Required columns for the check to run
 PG_STAT_STATEMENTS_REQUIRED_COLUMNS = frozenset({'calls', 'query', 'rows'})
@@ -241,7 +241,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             if self._check.get_pg_settings().get("track_io_timing") != "on":
                 desired_columns -= PG_STAT_STATEMENTS_TIMING_COLUMNS
 
-            pg_stat_statements_max = int(self._check.pg_settings.get("pg_stat_statements.max", 5000))
+            pg_stat_statements_max = int(self._check.get_pg_settings().get("pg_stat_statements.max", DEFAULT_PG_STAT_STATEMENTS))
             if pg_stat_statements_max > self._pg_stat_statements_max_warning_threshold:
                 self._check.record_warning(
                     DatabaseConfigurationError.high_pg_stat_statements_max,
@@ -384,7 +384,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 count = rows[0]['count']
             self._check.gauge(
                 "postgresql.pg_stat_statements.max",
-                self._check.pg_settings.get("pg_stat_statements.max", 5000),
+                self._check.get_pg_settings().get("pg_stat_statements.max", DEFAULT_PG_STAT_STATEMENTS),
                 tags=self.tags,
                 hostname=self._check.resolved_hostname,
             )

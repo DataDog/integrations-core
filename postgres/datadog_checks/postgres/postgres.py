@@ -749,6 +749,9 @@ class PostgreSql(AgentCheck):
             )
 
     def get_pg_settings(self):
+        if not bool(self.pg_settings):
+            # reload pg_settings if it's empty
+            self.load_pg_settings(self.db)
         return self.pg_settings
 
     def _close_db_pool(self):
