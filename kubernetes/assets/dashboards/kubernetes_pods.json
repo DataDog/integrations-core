@@ -582,7 +582,7 @@
                     "response_format": "timeseries",
                     "queries": [
                       {
-                        "query": "sum:kubernetes.containers.state.terminated{$cluster,$namespace,$deployment,reason:oomkilled,$statefulset,$daemonset,$job} by {pod_name}",
+                        "query": "sum:kubernetes.containers.state.terminated{$cluster,$namespace,$deployment,reason:oomkilled,$scope,$statefulset,$daemonset,$job} by {pod_name}",
                         "data_source": "metrics",
                         "name": "query1"
                       }

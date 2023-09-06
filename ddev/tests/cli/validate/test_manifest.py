@@ -14,7 +14,7 @@ def terminal_width():
         yield
 
 
-def test_no_dd_url(ddev, repository, helpers, config_file):
+def test_no_dd_url(ddev, helpers, config_file):
     config_file.model.orgs['default']['dd_url'] = ''
     config_file.save()
 
@@ -82,7 +82,7 @@ def test_error_multiple_integrations(ddev, repository, helpers, network_replay):
     )
 
 
-def test_passing(ddev, repository, helpers, network_replay):
+def test_passing(ddev, helpers, network_replay):
     network_replay('manifest/success.yaml', record_mode='none')
 
     result = ddev('validate', 'manifest', 'postgres')

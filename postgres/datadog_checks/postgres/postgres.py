@@ -734,7 +734,7 @@ class PostgreSql(AgentCheck):
         return self.pg_settings
 
     def _close_db_pool(self):
-        self.db_pool.close_all_connections(timeout=self._config.min_collection_interval)
+        self.db_pool.close_all_connections(timeout=0)
 
     def _collect_custom_queries(self, tags):
         """
