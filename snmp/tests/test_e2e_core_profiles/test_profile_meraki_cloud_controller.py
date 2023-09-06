@@ -71,14 +71,20 @@ def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
     aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=common_tags)
 
     tag_rows = [
-        ['mac_address:02:02:00:66:f5:7f', 'network:L_NETWORK', 'product:MR16-HW'],
+        ['mac_address:02:02:00:66:f5:7f', 'network:L_NETWORK', 'product:MR16-HW', 'device_name:Gymnasium'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.devClientCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.devStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['mac_address:02:02:00:66:f5:7f', 'network:L_NETWORK', 'product:MR16-HW', 'status:online'],
+        [
+            'mac_address:02:02:00:66:f5:7f',
+            'network:L_NETWORK',
+            'product:MR16-HW',
+            'status:online',
+            'device_name:Gymnasium',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.meraki.dev', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
