@@ -4,9 +4,9 @@
 
 import mock
 import pytest
-from datadog_checks.base.errors import CheckException, ConfigurationError
 from requests.exceptions import HTTPError, RequestException
 
+from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.cloud_foundry_api import CloudFoundryApiCheck
 
 from .constants import FREEZE_TIME
