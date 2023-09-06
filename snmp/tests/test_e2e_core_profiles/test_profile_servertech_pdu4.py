@@ -64,6 +64,20 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
 
     tag_rows = [
         [
+            'servertech_sentry4_st4_input_cord_id:on',
+            'servertech_sentry4_st4_input_cord_name:driving zombies forward their',
+            'servertech_sentry4_st4_input_cord_inlet_type:Jaded their',
+            'servertech_sentry4_st4_input_cord_nominal_voltage:15',
+            'servertech_sentry4_st4_input_cord_nominal_voltage_min:22',
+            'servertech_sentry4_st4_input_cord_nominal_voltage_max:8',
+            'servertech_sentry4_st4_input_cord_current_capacity:30',
+            'servertech_sentry4_st4_input_cord_current_capacity_max:19',
+            'servertech_sentry4_st4_input_cord_power_capacity:12',
+            'servertech_sentry4_st4_input_cord_line_count:3',
+            'servertech_sentry4_st4_input_cord_phase_count:5',
+            'servertech_sentry4_st4_input_cord_ocp_count:12',
+            'servertech_sentry4_st4_input_cord_branch_count:7',
+            'servertech_sentry4_st4_input_cord_outlet_count:13',
             'servertech_sentry4_st4_input_cord_active_power_status:over_limit',
             'servertech_sentry4_st4_input_cord_apparent_power_status:alarm',
             'servertech_sentry4_st4_input_cord_out_of_balance_status:conflict',
@@ -72,6 +86,20 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
             'servertech_sentry4_st4_input_cord_status:over_limit',
         ],
         [
+            'servertech_sentry4_st4_input_cord_id:on',
+            'servertech_sentry4_st4_input_cord_name:forward oxen oxen',
+            'servertech_sentry4_st4_input_cord_inlet_type:driving driving',
+            'servertech_sentry4_st4_input_cord_nominal_voltage:13',
+            'servertech_sentry4_st4_input_cord_nominal_voltage_min:20',
+            'servertech_sentry4_st4_input_cord_nominal_voltage_max:20',
+            'servertech_sentry4_st4_input_cord_current_capacity:13',
+            'servertech_sentry4_st4_input_cord_current_capacity_max:11',
+            'servertech_sentry4_st4_input_cord_power_capacity:3',
+            'servertech_sentry4_st4_input_cord_line_count:0',
+            'servertech_sentry4_st4_input_cord_phase_count:0',
+            'servertech_sentry4_st4_input_cord_ocp_count:8',
+            'servertech_sentry4_st4_input_cord_branch_count:9',
+            'servertech_sentry4_st4_input_cord_outlet_count:2',
             'servertech_sentry4_st4_input_cord_active_power_status:pwr_error',
             'servertech_sentry4_st4_input_cord_apparent_power_status:lost',
             'servertech_sentry4_st4_input_cord_out_of_balance_status:over_limit',
@@ -109,11 +137,17 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
 
     tag_rows = [
         [
+            'servertech_sentry4_st4_line_id:but',
+            'servertech_sentry4_st4_line_label:their',
+            'servertech_sentry4_st4_line_current_capacity:25',
             'servertech_sentry4_st4_line_current_status:normal',
             'servertech_sentry4_st4_line_state:unknown',
             'servertech_sentry4_st4_line_status:high_warning',
         ],
         [
+            'servertech_sentry4_st4_line_id:but',
+            'servertech_sentry4_st4_line_label:but Jaded forward kept kept',
+            'servertech_sentry4_st4_line_current_capacity:11',
             'servertech_sentry4_st4_line_current_status:pwr_error',
             'servertech_sentry4_st4_line_state:unknown',
             'servertech_sentry4_st4_line_status:disabled',
@@ -129,6 +163,10 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
 
     tag_rows = [
         [
+            'servertech_sentry4_st4_phase_id:but',
+            'servertech_sentry4_st4_phase_label:forward Jaded forward',
+            'servertech_sentry4_st4_phase_nominal_voltage:18',
+            'servertech_sentry4_st4_phase_outlet_count:27',
             'servertech_sentry4_st4_phase_power_factor_status:read_error',
             'servertech_sentry4_st4_phase_reactance:capacitive',
             'servertech_sentry4_st4_phase_state:off',
@@ -136,6 +174,10 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
             'servertech_sentry4_st4_phase_voltage_status:fuse_blown',
         ],
         [
+            'servertech_sentry4_st4_phase_id:but',
+            'servertech_sentry4_st4_phase_label:their forward Jaded',
+            'servertech_sentry4_st4_phase_nominal_voltage:29',
+            'servertech_sentry4_st4_phase_outlet_count:19',
             'servertech_sentry4_st4_phase_power_factor_status:reading',
             'servertech_sentry4_st4_phase_reactance:inductive',
             'servertech_sentry4_st4_phase_state:off',
@@ -173,6 +215,7 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
 
     tag_rows = [
         [
+            'servertech_sentry4_st4_ocp_status:profile_error',
             'servertech_sentry4_st4_ocp_branch_count:2',
             'servertech_sentry4_st4_ocp_current_capacity:22',
             'servertech_sentry4_st4_ocp_current_capacity_max:24',
@@ -182,6 +225,7 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
             'servertech_sentry4_st4_ocp_type:breaker',
         ],
         [
+            'servertech_sentry4_st4_ocp_status:lost',
             'servertech_sentry4_st4_ocp_branch_count:3',
             'servertech_sentry4_st4_ocp_current_capacity:9',
             'servertech_sentry4_st4_ocp_current_capacity_max:2',
@@ -190,8 +234,6 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
             'servertech_sentry4_st4_ocp_outlet_count:8',
             'servertech_sentry4_st4_ocp_type:breaker',
         ],
-        ['servertech_sentry4_st4_ocp_status:lost'],
-        ['servertech_sentry4_st4_ocp_status:profile_error'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -200,11 +242,23 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
 
     tag_rows = [
         [
+            'servertech_sentry4_st4_branch_id:kept',
+            'servertech_sentry4_st4_branch_label:driving forward but',
+            'servertech_sentry4_st4_branch_current_capacity:20',
+            'servertech_sentry4_st4_branch_phase_id:but',
+            'servertech_sentry4_st4_branch_ocp_id:oxen',
+            'servertech_sentry4_st4_branch_outlet_count:15',
             'servertech_sentry4_st4_branch_current_status:over_limit',
             'servertech_sentry4_st4_branch_state:on',
             'servertech_sentry4_st4_branch_status:settle',
         ],
         [
+            'servertech_sentry4_st4_branch_id:oxen',
+            'servertech_sentry4_st4_branch_label:zombies zombies',
+            'servertech_sentry4_st4_branch_current_capacity:12',
+            'servertech_sentry4_st4_branch_phase_id:but',
+            'servertech_sentry4_st4_branch_ocp_id:oxen',
+            'servertech_sentry4_st4_branch_outlet_count:15',
             'servertech_sentry4_st4_branch_current_status:under_limit',
             'servertech_sentry4_st4_branch_state:off',
             'servertech_sentry4_st4_branch_status:normal',
@@ -252,8 +306,20 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
         )
 
     tag_rows = [
-        ['servertech_sentry4_st4_temp_sensor_status:purged'],
-        ['servertech_sentry4_st4_temp_sensor_status:settle'],
+        [
+            'servertech_sentry4_st4_temp_sensor_status:settle',
+            'servertech_sentry4_st4_temp_sensor_id:as',
+            'servertech_sentry4_st4_temp_sensor_name:driving but',
+            'servertech_sentry4_st4_temp_sensor_value_min:5',
+            'servertech_sentry4_st4_temp_sensor_value_max:0',
+        ],
+        [
+            'servertech_sentry4_st4_temp_sensor_status:purged',
+            'servertech_sentry4_st4_temp_sensor_id:as',
+            'servertech_sentry4_st4_temp_sensor_name:forward driving but',
+            'servertech_sentry4_st4_temp_sensor_value_min:24',
+            'servertech_sentry4_st4_temp_sensor_value_max:6',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -266,7 +332,11 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
             'servertech_sentry4_st4_humid_sensor_name:their acted zombies their',
             'servertech_sentry4_st4_humid_sensor_status:not_found',
         ],
-        ['servertech_sentry4_st4_humid_sensor_status:not_found'],
+        [
+            'servertech_sentry4_st4_humid_sensor_id:sd',
+            'servertech_sentry4_st4_humid_sensor_name:zombies Jaded zombies',
+            'servertech_sentry4_st4_humid_sensor_status:not_found',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
