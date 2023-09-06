@@ -2,11 +2,21 @@ version: "3.5"
 
 services:
   openldap:
-    image: "datadog/docker-library:openldap_${OPENLDAP_VERSION}"
+    image: "bitnami/openldap:${OPENLDAP_VERSION}"
+    platform: linux/amd64
     ports:
-      - "3890:389"
-      - "6360:636"
+      - "1389:1389"
+      - "1636:1636"
+    command:
+      - "/opt/bitnami/scripts/openldap/run.sh"
+      - "-h"
+      # We need this to be able to add the ldapi URL
+      - "ldap://:1389/ ldaps://:1636/ ldapi://%2Fvar%2Frun%2Fslapd%2Fldapi"
     environment:
-      - LDAP_TLS_VERIFY_CLIENT=never
+      - LDAP_ENABLE_TLS=yes
+      - LDAP_TLS_CERT_FILE=/opt/bitnami/openldap/certs/server.crt
+      - LDAP_TLS_KEY_FILE=/opt/bitnami/openldap/certs/server.key
+      - LDAP_TLS_CA_FILE=/opt/bitnami/openldap/certs/server_ca.crt
     volumes:
       - ${HOST_SOCKET_DIR}:/var/run/slapd/
+      - ${OPENLDAP_CERTS_DIR}:/opt/bitnami/openldap/certs

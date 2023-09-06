@@ -7,108 +7,42 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-from datadog_checks.base.utils.models.fields import get_default_field_value
 
-
-def shared_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_additional_metrics(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_collections(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_collections_indexes_stats(field, value):
+def instance_collections_indexes_stats():
     return False
 
 
-def instance_connection_scheme(field, value):
+def instance_connection_scheme():
     return 'mongodb'
 
 
-def instance_custom_queries(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_database(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_dbnames(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags():
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname():
     return False
 
 
-def instance_hosts(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_metric_patterns(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval():
     return 15
 
 
-def instance_options(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_password(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_replica_check(field, value):
+def instance_replica_check():
     return True
 
 
-def instance_server(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tags(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_timeout(field, value):
+def instance_timeout():
     return 30
 
 
-def instance_tls(field, value):
+def instance_tls():
     return False
 
 
-def instance_tls_allow_invalid_certificates(field, value):
+def instance_tls_allow_invalid_certificates():
     return False
 
 
-def instance_tls_allow_invalid_hostnames(field, value):
+def instance_tls_allow_invalid_hostnames():
     return False
-
-
-def instance_tls_ca_file(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tls_certificate_key_file(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_username(field, value):
-    return get_default_field_value(field, value)

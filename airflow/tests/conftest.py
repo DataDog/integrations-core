@@ -6,18 +6,12 @@ from os import path
 
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import TempDir, docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
 
-from .common import AIRFLOW_VERSION, URL
+from .common import URL
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-
-TMP_DATA_FOLDER = path.join(HERE, 'compose', AIRFLOW_VERSION, 'tmp_data')
-
-E2E_METADATA = {
-    'docker_volumes': ['{}/datadog.yaml:/etc/datadog-agent/datadog.yaml'.format(TMP_DATA_FOLDER)],
-}
 
 
 def get_readme_mappings():
@@ -29,29 +23,23 @@ def get_readme_mappings():
     return readme[start : start + end]
 
 
-def create_datadog_config(datadog_config):
-    with open(path.join(TMP_DATA_FOLDER, 'datadog.yaml'), 'w') as f:
-        f.write(datadog_config)
-
-
 @pytest.fixture(scope='session')
 def dd_environment(instance):
     datadog_config = """
 dogstatsd_metrics_stats_enable: true
 """
-    create_datadog_config(datadog_config + get_readme_mappings())
+    with TempDir() as temp_dir:
+        with open(path.join(temp_dir, 'datadog.yaml'), 'w') as f:
+            f.write(datadog_config + get_readme_mappings())
 
-    endpoint = URL
-    if AIRFLOW_VERSION == "v2":
-        endpoint += "/api/v1/health"
-    else:
-        endpoint += "/api/experimental/test"
-
-    with docker_run(
-        os.path.join(HERE, 'compose', AIRFLOW_VERSION, 'docker-compose.yaml'),
-        conditions=[CheckEndpoints(endpoint, attempts=120)],
-    ):
-        yield instance, E2E_METADATA
+        with docker_run(
+            os.path.join(HERE, 'compose', 'docker-compose.yaml'),
+            build=True,
+            conditions=[CheckEndpoints(URL + "/api/v1/health", attempts=120)],
+        ):
+            yield instance, {
+                'docker_volumes': ['{}/datadog.yaml:/etc/datadog-agent/datadog.yaml'.format(temp_dir)],
+            }
 
 
 @pytest.fixture(scope='session')

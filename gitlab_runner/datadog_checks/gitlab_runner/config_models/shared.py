@@ -9,9 +9,9 @@
 
 from __future__ import annotations
 
-from typing import Optional, Sequence
+from typing import Optional
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -20,42 +20,42 @@ from . import defaults, validators
 
 
 class Proxy(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    http: Optional[str]
-    https: Optional[str]
-    no_proxy: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    http: Optional[str] = None
+    https: Optional[str] = None
+    no_proxy: Optional[tuple[str, ...]] = None
 
 
 class SharedConfig(BaseModel):
-    class Config:
-        allow_mutation = False
+    model_config = ConfigDict(
+        validate_default=True,
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    allowed_metrics: tuple[str, ...]
+    proxy: Optional[Proxy] = None
+    service: Optional[str] = None
+    skip_proxy: Optional[bool] = None
+    timeout: Optional[float] = None
 
-    allowed_metrics: Sequence[str]
-    proxy: Optional[Proxy]
-    service: Optional[str]
-    skip_proxy: Optional[bool]
-    timeout: Optional[float]
-
-    @root_validator(pre=True)
+    @model_validator(mode='before')
     def _initial_validation(cls, values):
         return validation.core.initialize_config(getattr(validators, 'initialize_shared', identity)(values))
 
-    @validator('*', pre=True, always=True)
-    def _ensure_defaults(cls, v, field):
-        if v is not None or field.required:
-            return v
+    @field_validator('*', mode='before')
+    def _validate(cls, value, info):
+        field = cls.model_fields[info.field_name]
+        field_name = field.alias or info.field_name
+        if field_name in info.context['configured_fields']:
+            value = getattr(validators, f'shared_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'shared_{info.field_name}', lambda: value)()
 
-        return getattr(defaults, f'shared_{field.name}')(field, v)
+        return validation.utils.make_immutable(value)
 
-    @validator('*')
-    def _run_validations(cls, v, field):
-        if not v:
-            return v
-
-        return getattr(validators, f'shared_{field.name}', identity)(v, field=field)
-
-    @root_validator(pre=False)
-    def _final_validation(cls, values):
-        return validation.core.finalize_config(getattr(validators, 'finalize_shared', identity)(values))
+    @model_validator(mode='after')
+    def _final_validation(cls, model):
+        return validation.core.check_model(getattr(validators, 'check_shared', identity)(model))

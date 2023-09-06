@@ -194,7 +194,7 @@ Additional helpful documentation, links, and articles:
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/rabbitmq/images/rabbitmq_dashboard.png
 [2]: https://www.rabbitmq.com
-[3]: https://app.datadoghq.com/account/settings#agent
+[3]: https://app.datadoghq.com/account/settings/agent/latest
 [4]: https://www.rabbitmq.com/management.html
 [5]: https://www.rabbitmq.com/rabbitmqctl.8.html#set_permissions
 [6]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

@@ -128,7 +128,7 @@ class BorrowedStatus:
 
 
 class Terminal:
-    def __init__(self, verbosity, enable_color, interactive):
+    def __init__(self, verbosity: int, enable_color: bool, interactive: bool):
         self.verbosity = verbosity
         self.interactive = interactive
         self.console = Console(
@@ -190,7 +190,7 @@ class Terminal:
         self.output(text, self._style_level_error, stderr=stderr, indent=indent, link=link, **kwargs)
 
     def display_warning(self, text='', stderr=True, indent=None, link=None, **kwargs):
-        if self.verbosity < VerbosityLevels.WARN:
+        if self.verbosity < VerbosityLevels.WARNING:
             return
 
         self.output(text, self._style_level_warning, stderr=stderr, indent=indent, link=link, **kwargs)
@@ -212,6 +212,12 @@ class Terminal:
             return
 
         self.output(text, self._style_level_waiting, stderr=stderr, indent=indent, link=link, **kwargs)
+
+    def display_debug(self, text='', stderr=True, indent=None, link=None, **kwargs):
+        if self.verbosity < VerbosityLevels.DEBUG:
+            return
+
+        self.output(f'DEBUG: {text}', None, stderr=stderr, indent=indent, link=link, **kwargs)
 
     def display_header(self, title=''):
         self.console.rule(Text(title, self._style_level_success))
