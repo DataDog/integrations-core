@@ -36,7 +36,7 @@ from ddev.utils.fs import Path
 @click.option(
     '--color/--no-color',
     default=None,
-    help='Whether or not to display colored output (default is auto-detection) [env vars: `DDEV_COLOR`/`NO_COLOR`]',
+    help='Whether or not to display colored output (default is auto-detection) [env vars: `FORCE_COLOR`/`NO_COLOR`]',
 )
 @click.option(
     '--interactive/--no-interactive',
