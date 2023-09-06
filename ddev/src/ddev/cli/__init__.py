@@ -8,7 +8,6 @@ import pluggy
 from datadog_checks.dev.tooling.commands.create import create
 from datadog_checks.dev.tooling.commands.dep import dep
 from datadog_checks.dev.tooling.commands.run import run
-from datadog_checks.dev.tooling.commands.test import test
 
 from ddev._version import __version__
 from ddev.cli.application import Application
@@ -20,6 +19,7 @@ from ddev.cli.env import env
 from ddev.cli.meta import meta
 from ddev.cli.release import release
 from ddev.cli.status import status
+from ddev.cli.test import test
 from ddev.cli.validate import validate
 from ddev.config.constants import AppEnvVars, ConfigEnvVars
 from ddev.plugin import specs

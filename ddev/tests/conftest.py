@@ -96,12 +96,17 @@ def valid_integration(valid_integrations) -> str:
 @pytest.fixture(autouse=True)
 def config_file(tmp_path, monkeypatch, local_repo) -> ConfigFile:
     for env_var in (
+        'DD_ENV',
+        'DD_SERVICE',
         'DD_SITE',
         'DD_LOGS_CONFIG_DD_URL',
         'DD_DD_URL',
         'DD_API_KEY',
         'DD_APP_KEY',
         'DDEV_REPO',
+        'DDEV_TEST_ENABLE_TRACING',
+        'HATCH_VERBOSE',
+        'HATCH_QUIET',
     ):
         monkeypatch.delenv(env_var, raising=False)
 
@@ -128,7 +133,7 @@ def temp_dir(tmp_path) -> Path:
 @pytest.fixture(scope='session', autouse=True)
 def isolation() -> Generator[Path, None, None]:
     with temp_directory() as d:
-        default_env_vars = {AppEnvVars.NO_COLOR: '1'}
+        default_env_vars = {'DDEV_SELF_TESTING': 'true', AppEnvVars.NO_COLOR: '1', 'COLUMNS': '80', 'LINES': '24'}
         with d.as_cwd(default_env_vars):
             yield d
 
