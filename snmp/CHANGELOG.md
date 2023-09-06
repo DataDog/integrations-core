@@ -8,8 +8,13 @@
 
 ***Fixed***:
 
-* Fix SNMP profiles metric tags mappings using MIBs ([#15668](https://github.com/DataDog/integrations-core/pull/15668))
 * Remove unsupported metric in riverbed-interceptor.yaml ([#15678](https://github.com/DataDog/integrations-core/pull/15678))
+
+## 6.2.1 / 2023-09-05
+
+***Fixed***:
+
+* Fix SNMP profiles metric tags mappings using MIBs ([#15668](https://github.com/DataDog/integrations-core/pull/15668))
 
 ## 6.2.0 / 2023-08-18
 
