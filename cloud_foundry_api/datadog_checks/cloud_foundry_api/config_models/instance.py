@@ -11,9 +11,10 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional, Sequence
 
+from pydantic import BaseModel, Field, root_validator, validator
+
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
-from pydantic import BaseModel, Field, root_validator, validator
 
 from . import defaults, validators
 
