@@ -250,56 +250,56 @@ metrics:
           name: volumeTableIsActive
         tag: volume_table_is_active
         mapping:
-          0: 'false'
-          1: 'true'
+          0: false
+          1: true
           # mapping in the metric description
       - column:
           OID: 1.3.6.1.4.1.42040.2.2.1.13
           name: volumeTableIsShared
         tag: volume_table_is_shared
         mapping:
-          0: 'false'
-          1: 'true'
+          0: false
+          1: true
           # mapping in the metric description
       - column:
           OID: 1.3.6.1.4.1.42040.2.2.1.14
           name: volumeTableIsReadOnly
         tag: volume_table_is_read_only
         mapping:
-          0: 'false'
-          1: 'true'
+          0: false
+          1: true
           # mapping in the metric description
       - column:
           OID: 1.3.6.1.4.1.42040.2.2.1.15
           name: volumeTableIsPinned
         tag: volume_table_is_pinned
         mapping:
-          0: 'false'
-          1: 'true'
+          0: false
+          1: true
           # mapping in the metric description
       - column:
           OID: 1.3.6.1.4.1.42040.2.2.1.16
           name: volumeTableIsRemote
         tag: volume_table_is_remote
         mapping:
-          0: 'false'
-          1: 'true'
+          0: false
+          1: true
           # mapping in the metric description
       - column:
           OID: 1.3.6.1.4.1.42040.2.2.1.17
           name: volumeTableAvEnabled
         tag: volume_table_av_enabled
         mapping:
-          0: 'false'
-          1: 'true'
+          0: false
+          1: true
           # mapping in the metric description
       - column:
           OID: 1.3.6.1.4.1.42040.2.2.1.18
           name: volumeTableRemoteAccessEnabled
         tag: volume_table_remote_access_enabled
         mapping:
-          0: 'false'
-          1: 'true'
+          0: false
+          1: true
           # mapping in the metric description
       - column:
           OID: 1.3.6.1.4.1.42040.2.2.1.5
