@@ -105,6 +105,7 @@ def config_file(tmp_path, monkeypatch, local_repo) -> ConfigFile:
         'DD_APP_KEY',
         'DDEV_REPO',
         'DDEV_TEST_ENABLE_TRACING',
+        'PYTHON_FILTER',
         'HATCH_VERBOSE',
         'HATCH_QUIET',
     ):
