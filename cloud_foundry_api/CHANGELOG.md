@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Fix `cloud_foundry_api` duplicate events issue ([#15698](https://github.com/DataDog/integrations-core/pull/15698))
+
 ## 3.0.0 / 2023-08-10
 
 ***Changed***:
