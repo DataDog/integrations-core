@@ -789,7 +789,7 @@ def test_cisco_3850(aggregator):
             aggregator.assert_metric('snmp.{}'.format(mem_metrics), metric_type=aggregator.GAUGE, tags=tags)
 
     neighbor_metrics = [
-        ('ospfNbrEvents', aggregator.RATE),
+        ('ospfNbrEvents', aggregator.COUNT),
         ('ospfNbrState', aggregator.GAUGE),
         ('ospfNbrLsRetransQLen', aggregator.GAUGE),
     ]
@@ -2378,7 +2378,7 @@ def test_aruba(aggregator):
 
     # OSPF metrics
     neighbor_metrics = [
-        ('ospfNbrEvents', aggregator.RATE),
+        ('ospfNbrEvents', aggregator.COUNT),
         ('ospfNbrState', aggregator.GAUGE),
         ('ospfNbrLsRetransQLen', aggregator.GAUGE),
     ]
