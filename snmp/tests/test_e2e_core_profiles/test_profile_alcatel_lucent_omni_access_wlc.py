@@ -33,7 +33,7 @@ def test_e2e_profile_alcatel_lucent_omni_access_wlc(dd_agent_check):
     ] + [
         'wlsx_model_name:quaintly Jaded oxen oxen',
         'wlsx_switch_license_serial_number:quaintly oxen their',
-        'wlsx_switch_role:3',
+        'wlsx_switch_role:standbymaster',
     ]
 
     # --- TEST EXTENDED METRICS ---
