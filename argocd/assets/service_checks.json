@@ -41,7 +41,7 @@
             "host",
             "endpoint"
         ],
-        "name": "ApplicationSet Controller cluster connection status",
+        "name": "ApplicationSet Controller OpenMetrics endpoint health",
         "description": "Returns `CRITICAL` if not connected to the cluster, otherwise returns `OK`."
     },
     {
