@@ -318,7 +318,14 @@ def local_pool(dbname, min_pool_size, max_pool_size):
         'password': PASSWORD_ADMIN,
         'dbname': dbname,
     }
-    return ConnectionPool(min_size=min_pool_size, max_size=max_pool_size, kwargs=args, open=True, name=dbname)
+    return ConnectionPool(
+        min_size=min_pool_size,
+        max_size=max_pool_size,
+        kwargs=args,
+        open=True,
+        name=dbname,
+        timeout=2,
+    )
 
 
 def get_activity(db_pool, unique_id):

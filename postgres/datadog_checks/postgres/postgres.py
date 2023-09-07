@@ -9,7 +9,7 @@ from time import time
 import psycopg
 from cachetools import TTLCache
 from psycopg.rows import dict_row
-from psycopg_pool import ConnectionPool
+from psycopg_pool import ConnectionPool, PoolTimeout
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
@@ -114,6 +114,7 @@ class PostgreSql(AgentCheck):
         self.check_initializations.append(self.set_resolved_hostname_metadata)
         self.check_initializations.append(self._connect)
         self.check_initializations.append(self.load_version)
+        self.check_initializations.append(self.load_pg_settings)
         self.check_initializations.append(self.initialize_is_aurora)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         self.autodiscovery = self._build_autodiscovery()
@@ -542,10 +543,20 @@ class PostgreSql(AgentCheck):
         start_time = time()
         databases = self.autodiscovery.get_items()
         for db in databases:
-            with self.db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
-                with conn.cursor() as cursor:
-                    for scope in relations_scopes:
-                        self._query_scope(cursor, scope, instance_tags, False, db)
+            try:
+                with self.db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
+                    with conn.cursor() as cursor:
+                        for scope in relations_scopes:
+                            self._query_scope(cursor, scope, instance_tags, False, db)
+            except PoolTimeout:
+                self.log.warning(
+                    "Unable to establish connection to %s in %d. "
+                    "If you wish to exclude this database from autodiscovery, "
+                    "add it to the `exclude` list",
+                    db,
+                    self._config.connection_timeout,
+                )
+
         elapsed_ms = (time() - start_time) * 1000
         self.histogram(
             "dd.postgres._collect_relations_autodiscovery.time",
@@ -651,6 +662,7 @@ class PostgreSql(AgentCheck):
                 kwargs=args,
                 open=True,
                 name=dbname,
+                timeout=self._config.connection_timeout,
             )
         else:
             password = self._config.password
@@ -688,7 +700,14 @@ class PostgreSql(AgentCheck):
             if self._config.ssl_password:
                 conn_args['sslpassword'] = self._config.ssl_password
             args.update(conn_args)
-            pool = ConnectionPool(min_size=min_pool_size, max_size=max_pool_size, kwargs=args, open=True, name=dbname)
+            pool = ConnectionPool(
+                min_size=min_pool_size,
+                max_size=max_pool_size,
+                kwargs=args,
+                open=True,
+                name=dbname,
+                timeout=self._config.connection_timeout,
+            )
         return pool
 
     def _connect(self):
@@ -706,9 +725,9 @@ class PostgreSql(AgentCheck):
             self.db = self._new_connection(self._config.dbname, max_pool_size=1)
 
     # Reload pg_settings on a new connection to the main db
-    def load_pg_settings(self, db):
+    def load_pg_settings(self):
         try:
-            with db.connection() as conn:
+            with self.db.connection() as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
                     self.log.debug("Running query [%s]", PG_SETTINGS_QUERY)
                     cursor.execute(
@@ -731,6 +750,9 @@ class PostgreSql(AgentCheck):
             )
 
     def get_pg_settings(self):
+        if not bool(self.pg_settings):
+            # reload pg_settings if it's empty
+            self.load_pg_settings()
         return self.pg_settings
 
     def _close_db_pool(self):
