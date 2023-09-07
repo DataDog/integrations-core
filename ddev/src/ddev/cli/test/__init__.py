@@ -103,6 +103,8 @@ def test(
 
         return
 
+    in_ci = running_in_ci()
+
     global_env_vars: dict[str, str] = {}
 
     hatch_verbosity = app.verbosity + 1
@@ -225,7 +227,7 @@ def test(
                 app.display_header('Coverage report')
                 app.platform.check_command([sys.executable, '-m', 'coverage', 'report', '--rcfile=../.coveragerc'])
 
-                if running_in_ci():
+                if in_ci:
                     app.platform.check_command(
                         [sys.executable, '-m', 'coverage', 'xml', '-i', '--rcfile=../.coveragerc']
                     )
