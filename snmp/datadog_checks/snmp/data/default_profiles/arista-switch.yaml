@@ -1,16 +1,12 @@
 extends:
-  - _arista-metadata.yaml
+  - _arista.yaml
   - _arista-queue.yaml
   - _base.yaml
   - _generic-bgp4.yaml
   - _generic-entity-sensor.yaml
-  - _generic-host-resources-base.yaml
   - _generic-if.yaml
-  - _generic-ip.yaml
   - _generic-lldp.yaml
   - _generic-ospf.yaml
-  - _generic-tcp.yaml
-  - _generic-udp.yaml
 
 sysobjectid:
   - 1.3.6.1.4.1.30065.1.3011.7010.427.48

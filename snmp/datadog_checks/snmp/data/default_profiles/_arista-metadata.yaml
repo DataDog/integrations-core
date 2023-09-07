@@ -4,8 +4,6 @@
 metadata:
   device:
     fields:
-      vendor:
-        value: "arista"
       serial_number:
         symbol:
           OID: 1.3.6.1.2.1.47.1.1.1.1.11.1  # entPhysicalSerialNum OID at index `1`

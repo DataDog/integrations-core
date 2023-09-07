@@ -10,6 +10,7 @@
 # Arista product descriptions are available at: https://www.arista.com/assets/data/docs/MIBS/ARISTA-PRODUCTS-MIB.txt
 
 extends:
+  - _arista.yaml
   - _arista-metadata.yaml
   - _arista-queue.yaml
   - _base.yaml
