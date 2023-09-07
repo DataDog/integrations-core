@@ -2,8 +2,11 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import datetime
+import decimal
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
+from ipaddress import IPv4Address
 
 import mock
 import pytest
@@ -14,6 +17,7 @@ from datadog_checks.base.utils.db.utils import (
     ConstantRateLimiter,
     DBMAsyncJob,
     RateLimitingTTLCache,
+    default_json_event_encoding,
     obfuscate_sql_with_metadata,
     resolve_db_host,
 )
@@ -254,3 +258,26 @@ def test_dbm_async_job_inactive_stop(aggregator):
     job.run_job_loop([])
     job._job_loop_future.result()
     aggregator.assert_metric("dd.test-dbms.async_job.inactive_stop", tags=['job:test-job'])
+
+
+@pytest.mark.parametrize(
+    "input,expected",
+    [
+        ({"foo": "bar"}, b'{"foo":"bar"}'),  # dict
+        ({"foo": "bar", "baz": 1}, b'{"foo":"bar","baz":1}'),  # dict with multiple keys
+        (
+            {"foo": "bar", "baz": 1, "qux": {"quux": "corge"}},
+            b'{"foo":"bar","baz":1,"qux":{"quux":"corge"}}',
+        ),  # nested dict
+        ({"foo": b'bar'}, b'{"foo":"bar"}'),  # dict with bytes
+        ({"foo": decimal.Decimal("1.0")}, b'{"foo":1.0}'),  # dict with decimal.Decimal
+        (
+            {"foo": datetime.datetime(2020, 1, 1, 0, 0, 0)},
+            b'{"foo":"2020-01-01T00:00:00"}',
+        ),  # dict with datetime.datetime
+        ({"foo": datetime.date(2020, 1, 1)}, b'{"foo":"2020-01-01"}'),  # dict with datetime.date
+        ({"foo": IPv4Address("192.168.1.1")}, b'{"foo":"192.168.1.1"}'),  # dict with IPv4Address
+    ],
+)
+def test_default_json_event_encoding(input, expected):
+    assert json.dumps(input, default=default_json_event_encoding) == expected
