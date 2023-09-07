@@ -11,13 +11,15 @@ import requests_mock
 
 from datadog_checks.kube_scheduler import KubeSchedulerCheck
 
+from .common import HERE
+
 # Constants
 CHECK_NAME = 'kube_scheduler'
 
 
 @pytest.fixture()
 def mock_metrics():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics_slis_1.27.3.txt')
+    f_name = os.path.join(HERE, 'fixtures', 'metrics_slis_1.27.3.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
     with mock.patch(
