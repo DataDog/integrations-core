@@ -100,6 +100,10 @@ class Integration:
         return normalized_integration.lower()
 
     @cached_property
+    def project_file(self) -> Path:
+        return self.path / 'pyproject.toml'
+
+    @cached_property
     def metrics_file(self) -> Path:
         relative_path = self.manifest.get('/assets/integration/metrics/metadata_path', 'metadata.csv')
         return self.path / relative_path
@@ -108,6 +112,32 @@ class Integration:
     def config_spec(self) -> Path:
         relative_path = self.manifest.get('/assets/integration/configuration/spec', 'assets/configuration/spec.yaml')
         return self.path / relative_path
+
+    @cached_property
+    def minimum_base_package_version(self) -> str | None:
+        from packaging.requirements import Requirement
+        from packaging.utils import canonicalize_name
+
+        from ddev.utils.toml import load_toml_data
+
+        data = load_toml_data(self.project_file.read_text())
+        for entry in data['project'].get('dependencies', []):
+            dep = Requirement(entry)
+            if canonicalize_name(dep.name) == 'datadog-checks-base':
+                if dep.specifier:
+                    specifier = str(sorted(dep.specifier, key=str)[-1])
+
+                    version_index = 0
+                    for i, c in enumerate(specifier):
+                        if c.isdigit():
+                            version_index = i
+                            break
+
+                    return specifier[version_index:]
+                else:
+                    return None
+
+        return None
 
     @cached_property
     def is_valid(self) -> bool:
@@ -123,7 +153,7 @@ class Integration:
 
     @cached_property
     def is_package(self) -> bool:
-        return (self.path / 'pyproject.toml').is_file()
+        return self.project_file.is_file()
 
     @cached_property
     def is_tile(self) -> bool:

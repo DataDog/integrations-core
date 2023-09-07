@@ -48,7 +48,7 @@ from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_succes
 @click.option('--pytest-args', '-pa', help='Additional arguments to pytest')
 @click.option('--force-base-unpinned', is_flag=True, help='Force using datadog-checks-base as specified by check dep')
 @click.option('--force-base-min', is_flag=True, help='Force using lowest viable release version of datadog-checks-base')
-@click.option('--force-env-rebuild', is_flag=True, help='Force creating a new env')
+@click.option('--force-env-rebuild', '-fr', is_flag=True, help='Force creating a new env')
 @click.option('--memray', is_flag=True, help='Run memray to measure memory usage on all tests')
 @click.pass_context
 def test(

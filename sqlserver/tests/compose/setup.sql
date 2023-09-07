@@ -26,6 +26,7 @@ CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));
 INSERT INTO datadog_test.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
 CREATE USER bob FOR LOGIN bob;
 CREATE USER fred FOR LOGIN fred;
+CREATE INDEX thingsindex ON datadog_test.dbo.ϑings (name);
 GO
 
 EXEC sp_addrolemember 'db_datareader', 'bob'

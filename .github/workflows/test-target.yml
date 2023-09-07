@@ -86,7 +86,9 @@ jobs:
     runs-on: ${{ fromJson(inputs.runner) }}
 
     env:
+      FORCE_COLOR: "1"
       PYTHON_VERSION: "${{ inputs.python-version || '3.9' }}"
+      PYTHON_FILTER: "${{ (inputs.test-py2 && !inputs.test-py3) && '2.7' || (!inputs.test-py2 && inputs.test-py3) && '3.9' || '' }}"
       SKIP_ENV_NAME: "${{ (inputs.test-py2 && !inputs.test-py3) && 'py3.*' || (!inputs.test-py2 && inputs.test-py3) && 'py2.*' || '' }}"
       # Windows E2E requires Windows containers
       DDEV_E2E_AGENT: "${{ inputs.platform == 'windows' && (inputs.agent-image-windows || 'datadog/agent-dev:master-py3-win-servercore') || inputs.agent-image }}"
@@ -163,6 +165,10 @@ jobs:
       run: |-
         ddev config set repos.${{ inputs.repo }} .
         ddev config set repo ${{ inputs.repo }}
+
+    - name: Lint
+      # TODO: use the more descriptive `--lint` variant when ddev is released
+      run: ddev test -s ${{ inputs.target }}
 
     - name: Prepare for testing
       env: >-

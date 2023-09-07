@@ -31,7 +31,7 @@ def test_e2e_profile_sinetica_eagle_i(dd_agent_check):
         'hawk_i2_inv_fw_revision:oxen Jaded',
         'hawk_i2_inv_hw_revision:acted',
         'hawk_i2_inv_serial_num:Jaded',
-        'hawk_i2_ip_temp_scale_flag:1',
+        'hawk_i2_ip_temp_scale_flag:celsius',
     ]
 
     # --- TEST EXTENDED METRICS ---
@@ -51,13 +51,13 @@ def test_e2e_profile_sinetica_eagle_i(dd_agent_check):
             'hawk_i2_ip_cont_curr_state:open',
             'hawk_i2_ip_cont_locn:kept',
             'hawk_i2_ip_cont_name:driving',
-            'hawk_i2_ip_cont_norm_state:1',
+            'hawk_i2_ip_cont_norm_state:open',
         ],
         [
             'hawk_i2_ip_cont_curr_state:open',
             'hawk_i2_ip_cont_locn:kept',
             'hawk_i2_ip_cont_name:driving zombies',
-            'hawk_i2_ip_cont_norm_state:1',
+            'hawk_i2_ip_cont_norm_state:open',
         ],
     ]
     for tag_row in tag_rows:

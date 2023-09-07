@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 4.1.2 / 2023-09-04
+
+***Fixed***:
+
+* Set tls_verify to string rather than boolean ([#15699](https://github.com/DataDog/integrations-core/pull/15699))
+* Filter out empty consumer groups ([#15657](https://github.com/DataDog/integrations-core/pull/15657))
+
 ## 4.1.1 / 2023-08-24
 
 ***Fixed***:
@@ -30,6 +37,13 @@
 * Optimize highwater offset collection ([#15285](https://github.com/DataDog/integrations-core/pull/15285))
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 * Simplify regex compilation ([#15239](https://github.com/DataDog/integrations-core/pull/15239))
+
+## 3.1.3 / 2023-08-14 / Agent 7.47.0
+
+***Fixed***:
+
+* Port Kafka consumer improvements to 7.47.x. See [#15565](https://github.com/DataDog/integrations-core/pull/15565).
+* Do not check consumer_groups if the offset is invalid. See [#15237](https://github.com/DataDog/integrations-core/pull/15237).
 
 ## 3.1.2 / 2023-07-13
 

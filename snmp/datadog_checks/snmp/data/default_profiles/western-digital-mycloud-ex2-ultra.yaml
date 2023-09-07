@@ -145,10 +145,11 @@ metric_tags:
     mapping:
       0: disable
       1: enable
+      # mapping in the metric description
   - OID: 1.3.6.1.4.1.5127.1.1.1.8.1.6.0
     symbol: wdmycloudex2NetType
     tag: wdmycloudex2_net_type
     mapping:
       0: workgroup
       1: active_directory
-
+      # mapping in the metric description

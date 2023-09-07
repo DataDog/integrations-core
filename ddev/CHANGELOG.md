@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add color output to tests in CI ([#15774](https://github.com/DataDog/integrations-core/pull/15774))
+
+***Fixed***:
+
+* Make sure repo override in envvar makes it into config ([#15782](https://github.com/DataDog/integrations-core/pull/15782))
+
+## 5.0.0 / 2023-09-06
+
+***Removed***:
+
+* Remove `release agent requirements` subcommand ([#15621](https://github.com/DataDog/integrations-core/pull/15621))
+
+***Added***:
+
+* Migrate test command ([#15762](https://github.com/DataDog/integrations-core/pull/15762))
+
+***Fixed***:
+
+* Bump datadog-checks-dev version to ~=24.0 ([#15683](https://github.com/DataDog/integrations-core/pull/15683))
+
 ## 4.0.1 / 2023-08-25
 
 ***Fixed***:
@@ -13,21 +35,19 @@
 ***Added***:
 
 * Migrate `ddev release agent integrations` to `ddev` ([#15569](https://github.com/DataDog/integrations-core/pull/15569))
+* Migrate documentation commands to ddev ([#15582](https://github.com/DataDog/integrations-core/pull/15582))
+* Migrate `ddev release agent integrations-changelog` to `ddev` ([#15598](https://github.com/DataDog/integrations-core/pull/15598))
 
 ***Removed***:
 
 * Remove the `ddev validate recommended-monitors` command ([#15563](https://github.com/DataDog/integrations-core/pull/15563))
-
-***Added***:
-
-* Migrate documentation commands to ddev ([#15582](https://github.com/DataDog/integrations-core/pull/15582))
-* Migrate `ddev release agent integrations` to `ddev` ([#15598](https://github.com/DataDog/integrations-core/pull/15598))
 
 ## 3.5.0 / 2023-08-11
 
 ***Added***:
 
 * Migrate `validate http` to ddev ([#15526](https://github.com/DataDog/integrations-core/pull/15526))
+* Migrate `ddev validate licenses` command to ddev ([#15475](https://github.com/DataDog/integrations-core/pull/15475))
 
 ***Fixed***:
 

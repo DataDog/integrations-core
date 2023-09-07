@@ -183,7 +183,7 @@ metrics:
   - MIB: EATON-EPDU-MIB
     table:
       name: groupCurrentTable
-      OID: 1.3.6.1.4.1.534.6.6.7.5.3
+      OID: 1.3.6.1.4.1.534.6.6.7.5.4
     symbols:
       - name: eaton.epdu.groupCurrent
         OID: 1.3.6.1.4.1.534.6.6.7.5.4.1.3

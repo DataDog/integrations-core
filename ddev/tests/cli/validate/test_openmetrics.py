@@ -1,7 +1,6 @@
 import pytest
 
 
-@pytest.mark.usefixtures('repository')
 @pytest.mark.parametrize(
     "check_name, classes",
     [
@@ -45,7 +44,6 @@ def test_openmetrics_fail_single_parameter(ddev, helpers, repository):
     assert "Errors: 1" in helpers.remove_trailing_spaces(result.output)
 
 
-@pytest.mark.usefixtures('repository')
 def test_openmetrics_skip_openmetrics(ddev, helpers):
     result = ddev("validate", "openmetrics", "openmetrics")
 
@@ -55,7 +53,6 @@ def test_openmetrics_skip_openmetrics(ddev, helpers):
     assert "Errors" not in helpers.remove_trailing_spaces(result.output)
 
 
-@pytest.mark.usefixtures('repository')
 @pytest.mark.parametrize(
     "repo, expected_message",
     [

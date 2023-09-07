@@ -27,7 +27,8 @@ classifiers = [
 ]
 dependencies = [
     "click~=8.1.6",
-    "datadog-checks-dev[cli]~=23.0",
+    "coverage",
+    "datadog-checks-dev[cli]~=24.0",
     "hatch>=1.6.3",
     "httpx",
     "jsonpointer",
