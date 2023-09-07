@@ -10,6 +10,7 @@
 
 * Fix SNMP profiles metric tags mappings using MIBs ([#15668](https://github.com/DataDog/integrations-core/pull/15668))
 * Remove unsupported metric in riverbed-interceptor.yaml ([#15678](https://github.com/DataDog/integrations-core/pull/15678))
+* [SNMP] update generic-ospf profile mappings ([#15764](https://github.com/DataDog/integrations-core/pull/15764))
 
 ## 6.2.0 / 2023-08-18
 
