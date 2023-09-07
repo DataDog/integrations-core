@@ -276,7 +276,7 @@ def test_dbm_async_job_inactive_stop(aggregator):
             b'{"foo":"2020-01-01T00:00:00"}',
         ),  # dict with datetime.datetime
         ({"foo": datetime.date(2020, 1, 1)}, b'{"foo":"2020-01-01"}'),  # dict with datetime.date
-        ({"foo": IPv4Address("192.168.1.1")}, b'{"foo":"192.168.1.1"}'),  # dict with IPv4Address
+        ({"foo": IPv4Address(u"192.168.1.1")}, b'{"foo":"192.168.1.1"}'),  # dict with IPv4Address
     ],
 )
 def test_default_json_event_encoding(input, expected):
