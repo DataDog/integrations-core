@@ -89,6 +89,8 @@ class Application(Terminal):
         self.__config['dd_app_key'] = self.config.orgs.get('default', {}).get('app_key', '')
         # Make sure that envvar overrides of repo make it into config.
         self.__config['repo'] = self.repo.name
+        # Transfer the -x/--here flag to the old CLI.
+        # In the new CLI that flag turns into a repo named "local" but the old CLI expects a bool kwarg "here".
         kwargs = {}
         if self.repo.name == 'local':
             kwargs['here'] = True
