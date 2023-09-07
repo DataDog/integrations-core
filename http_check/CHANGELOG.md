@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add `use_cert_from_response` option ([#15785](https://github.com/DataDog/integrations-core/pull/15785))
+
 ## 9.0.1 / 2023-08-18
 
 ***Fixed***:
