@@ -325,9 +325,6 @@ metrics:
     symbols:
       - name: eaton.epdu.outletVA
         OID: 1.3.6.1.4.1.534.6.6.7.6.5.1.2
-#      Metric is from a different table (outletCurrentTable)
-#      - name: eaton.epdu.outletCurrentPercentLoad
-#        OID: 1.3.6.1.4.1.534.6.6.7.6.4.1.10
       - name: eaton.epdu.outletWatts
         OID: 1.3.6.1.4.1.534.6.6.7.6.5.1.3
     metric_tags:
