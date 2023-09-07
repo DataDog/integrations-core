@@ -32,7 +32,7 @@
     {
         "agent_version": "7.49.0",
         "integration": "ArgoCD",
-        "check": "argocd.appset_controller.cluster.connection.status",
+        "check": "argocd.appset_controller.openmetrics.health",
         "statuses": [
             "ok",
             "critical"
