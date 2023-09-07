@@ -17,6 +17,7 @@
 * Allow bumping the version of clickhouse-driver ([#15745](https://github.com/DataDog/integrations-core/pull/15745))
 * Allow bumping the version of lz4 ([#15747](https://github.com/DataDog/integrations-core/pull/15747))
 * Remove flup from the dependency bump exclusion list ([#15748](https://github.com/DataDog/integrations-core/pull/15748))
+* Remove setuptools from the build-system for new integrations ([#15766](https://github.com/DataDog/integrations-core/pull/15766))
 
 ## 24.1.0 / 2023-08-25
 
