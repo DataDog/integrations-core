@@ -1,5 +1,4 @@
 extends:
-  - _arista.yaml
   - _arista-metadata.yaml
   - _arista-queue.yaml
   - _base.yaml
