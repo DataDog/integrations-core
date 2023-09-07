@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 14.2.4 / 2023-09-07
+
 ***Fixed***:
 
 * Initialize pg_settings on Postgres check start and lazy load pg_settings if it's not set ([#15773](https://github.com/DataDog/integrations-core/pull/15773))
