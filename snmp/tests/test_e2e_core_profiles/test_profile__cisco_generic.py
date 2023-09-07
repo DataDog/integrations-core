@@ -108,8 +108,8 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['temp_index:15', 'temp_state:6'],
-        ['temp_index:20', 'temp_state:2'],
+        ['temp_index:15', 'temp_state:not_functioning'],
+        ['temp_index:20', 'temp_state:warning'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -117,8 +117,8 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         )
 
     tag_rows = [
-        ['power_source:2', 'power_status_descr:kept Jaded oxen Jaded their'],
-        ['power_source:5', 'power_status_descr:their'],
+        ['power_source:ac', 'power_status_descr:kept Jaded oxen Jaded their'],
+        ['power_source:internal_redundant', 'power_status_descr:their'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -126,8 +126,8 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         )
 
     tag_rows = [
-        ['cisco_env_mon_supply_state:critical', 'power_source:5', 'power_status_descr:their'],
-        ['cisco_env_mon_supply_state:shutdown', 'power_source:2', 'power_status_descr:kept Jaded oxen Jaded their'],
+        ['cisco_env_mon_supply_state:critical', 'power_source:internal_redundant', 'power_status_descr:their'],
+        ['cisco_env_mon_supply_state:shutdown', 'power_source:ac', 'power_status_descr:kept Jaded oxen Jaded their'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -214,7 +214,7 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         aggregator.assert_metric('snmp.ciscoMemoryPoolUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['connection_type:5'],
+        ['connection_type:current_half_open'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -241,8 +241,8 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         aggregator.assert_metric('snmp.cvsChassisUpTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['rtt_index:26', 'rtt_state:inactive', 'rtt_type:tcpConnect'],
-        ['rtt_index:30', 'rtt_state:orderlyStop', 'rtt_type:script'],
+        ['rtt_index:26', 'rtt_state:inactive', 'rtt_type:tcp_connect'],
+        ['rtt_index:30', 'rtt_state:orderly_stop', 'rtt_type:script'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -253,8 +253,8 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         )
 
     tag_rows = [
-        ['rtt_index:26', 'rtt_state:inactive', 'rtt_type:tcpConnect'],
-        ['rtt_index:30', 'rtt_state:orderlyStop', 'rtt_type:script'],
+        ['rtt_index:26', 'rtt_state:inactive', 'rtt_type:tcp_connect'],
+        ['rtt_index:30', 'rtt_state:orderly_stop', 'rtt_type:script'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
