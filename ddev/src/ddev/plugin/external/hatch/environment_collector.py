@@ -24,6 +24,23 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         return self.root.name == 'ddev'
 
     @cached_property
+    def package_directory(self):
+        name = self.root.name
+        if name == 'ddev':
+            return 'ddev/src/ddev'
+
+        if name == 'datadog_checks_base':
+            directory = 'base'
+        elif name == 'datadog_checks_dev':
+            directory = 'dev'
+        elif name == 'datadog_checks_downloader':
+            directory = 'downloader'
+        else:
+            directory = name.replace('-', '_')
+
+        return f'datadog_checks/{directory}'
+
+    @cached_property
     def check_types(self):
         return self.config.get('check-types', False)
 
@@ -43,19 +60,17 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             return self.pip_install_command('-e', '../datadog_checks_dev')
 
     def base_package_install_command(self, features):
-        if not self.in_core_repo or os.environ.get('BASE_PACKAGE_FORCE_UNPINNED'):
+        if not self.in_core_repo:
             return self.pip_install_command(self.format_base_package(features))
-        elif base_package_version := os.environ.get('BASE_PACKAGE_FORCE_VERSION'):
-            return self.pip_install_command(self.format_base_package(features, version=base_package_version))
         elif not (self.is_base_package or self.is_dev_package):
-            return self.pip_install_command('-e', f'../{self.format_base_package(features, local=True)}')
+            return self.pip_install_command('-e', self.format_base_package(features, local=True))
 
     @staticmethod
     def format_base_package(features, version='', local=False):
         if not features:
             features = ['deps']
 
-        base_package = 'datadog_checks_base' if local else 'datadog-checks-base'
+        base_package = '../datadog_checks_base' if local else 'datadog-checks-base'
         formatted = f'{base_package}[{",".join(sorted(features))}]'
         if version:
             formatted += f'=={version}'
@@ -67,21 +82,28 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         return f'python -m pip install --disable-pip-version-check {{verbosity:flag:-1}} {" ".join(args)}'
 
     def finalize_config(self, config):
+        from ddev.testing.constants import TestEnvVars
+
         for env_name, env_config in config.items():
             is_template_env = env_name == 'default'
             is_test_env = env_config.setdefault('test-env', is_template_env)
             is_e2e_env = env_config.setdefault('e2e-env', is_template_env)
+            env_config.setdefault('benchmark-env', env_name == 'bench')
+            env_config.setdefault('latest-env', env_name == 'latest')
             if not (is_test_env or is_e2e_env):
                 continue
 
             if not (self.is_test_package or self.is_dev_package):
                 env_config.setdefault('features', ['deps'])
 
+            base_package_features = env_config.get('base-package-features', self.config.get('base-package-features'))
             install_commands = []
-            if install_command := self.base_package_install_command(
-                config.get('base-package-features', self.config.get('base-package-features'))
-            ):
+            if base_package_version := os.environ.get(TestEnvVars.BASE_PACKAGE_VERSION):
+                dependencies = env_config.setdefault('dependencies', [])
+                dependencies.append(self.format_base_package(base_package_features, version=base_package_version))
+            elif install_command := self.base_package_install_command(base_package_features):
                 install_commands.append(install_command)
+
             if self.test_package_install_command:
                 install_commands.append(self.test_package_install_command)
 
@@ -89,12 +111,17 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             scripts['_dd-install-packages'] = install_commands
             env_config.setdefault('post-install-commands', []).insert(0, '_dd-install-packages')
 
-            scripts['_dd-test'] = ['pytest -v --benchmark-skip {args:tests}']
-            scripts['_dd-benchmark'] = ['pytest -v --benchmark-only --benchmark-cprofile=tottime {args:tests}']
+            scripts['_dd-test'] = ['pytest -vv --benchmark-skip {args:tests}']
+            scripts['_dd-test-cov'] = [
+                f'pytest -vv --benchmark-skip --cov {self.package_directory} --cov tests '
+                f'--cov-config=../.coveragerc --cov-report= --cov-append {{args:tests}}',
+            ]
+            scripts['_dd-benchmark'] = ['pytest -vv --benchmark-only --benchmark-cprofile=tottime {args:tests}']
 
             # Set defaults that will be called but allow users to override while
             # retaining access to them for reuse
             scripts.setdefault('test', '_dd-test')
+            scripts.setdefault('test-cov', '_dd-test-cov')
             scripts.setdefault('benchmark', '_dd-benchmark')
 
     def get_initial_config(self):

@@ -12,6 +12,14 @@
 
 * Add short hand for force-env-rebuild ([#15716](https://github.com/DataDog/integrations-core/pull/15716))
 
+***Fixed***:
+
+* Allow bumping the version of clickhouse-driver ([#15745](https://github.com/DataDog/integrations-core/pull/15745))
+* Allow bumping the version of lz4 ([#15747](https://github.com/DataDog/integrations-core/pull/15747))
+* Remove flup from the dependency bump exclusion list ([#15748](https://github.com/DataDog/integrations-core/pull/15748))
+* Remove setuptools from the build-system for new integrations ([#15766](https://github.com/DataDog/integrations-core/pull/15766))
+* Stop using the old GPG_COMMAND constant from securesystemslib ([#15776](https://github.com/DataDog/integrations-core/pull/15776))
+
 ## 24.1.0 / 2023-08-25
 
 ***Security***:
