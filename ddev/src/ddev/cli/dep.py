@@ -7,7 +7,7 @@ from collections import defaultdict
 
 import click
 import orjson
-from aiohttp import request
+import httpx
 from packaging.markers import Marker
 from packaging.requirements import InvalidRequirement, Requirement
 from packaging.specifiers import InvalidSpecifier, SpecifierSet
@@ -162,18 +162,19 @@ def artifact_compatible_with_python(artifact, major_version):
     return f'py{major_version}' in python_version or f'cp{major_version}' in python_version
 
 
-async def get_version_data(url):
-    async with request('GET', url) as response:
-        try:
-            data = orjson.loads(await response.read())
-        except Exception as e:
-            raise type(e)(f'Error processing URL {url}: {e}')
-        else:
-            return data['info']['name'], data['releases']
+async def get_version_data(client, url):
+    try:
+        response = await client.get(url)
+        data = orjson.loads(response.text)
+    except Exception as e:
+        raise type(e)(f'Error processing URL {url}: {e}')
+    else:
+        return data['info']['name'], data['releases']
 
 
 async def fetch_versions(urls):
-    return await asyncio.gather(*(get_version_data(url) for url in urls))
+    async with httpx.AsyncClient() as client:
+        return await asyncio.gather(*(get_version_data(client, url) for url in urls))
 
 
 def scrape_version_data(urls):
