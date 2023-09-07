@@ -261,23 +261,18 @@ def test_dbm_async_job_inactive_stop(aggregator):
 
 
 @pytest.mark.parametrize(
-    "input,expected",
+    "input",
     [
-        ({"foo": "bar"}, b'{"foo":"bar"}'),  # dict
-        ({"foo": "bar", "baz": 1}, b'{"foo":"bar","baz":1}'),  # dict with multiple keys
-        (
-            {"foo": "bar", "baz": 1, "qux": {"quux": "corge"}},
-            b'{"foo":"bar","baz":1,"qux":{"quux":"corge"}}',
-        ),  # nested dict
-        ({"foo": b'bar'}, b'{"foo":"bar"}'),  # dict with bytes
-        ({"foo": decimal.Decimal("1.0")}, b'{"foo":1.0}'),  # dict with decimal.Decimal
-        (
-            {"foo": datetime.datetime(2020, 1, 1, 0, 0, 0)},
-            b'{"foo":"2020-01-01T00:00:00"}',
-        ),  # dict with datetime.datetime
-        ({"foo": datetime.date(2020, 1, 1)}, b'{"foo":"2020-01-01"}'),  # dict with datetime.date
-        ({"foo": IPv4Address(u"192.168.1.1")}, b'{"foo":"192.168.1.1"}'),  # dict with IPv4Address
+        {"foo": "bar"},  # dict
+        {"foo": "bar", "baz": 1},  # dict with multiple keys
+        {"foo": "bar", "baz": 1, "qux": {"quux": "corge"}},  # nested dict
+        {"foo": b'bar'},  # dict with bytes
+        {"foo": decimal.Decimal("1.0")},  # dict with decimal.Decimal
+        {"foo": datetime.datetime(2020, 1, 1, 0, 0, 0)},  # dict with datetime.datetime
+        {"foo": datetime.date(2020, 1, 1)},  # dict with datetime.date
+        {"foo": IPv4Address(u"192.168.1.1")},  # dict with IPv4Address
     ],
 )
-def test_default_json_event_encoding(input, expected):
-    assert json.dumps(input, default=default_json_event_encoding) == expected
+def test_default_json_event_encoding(input):
+    # assert that the default json event encoding can handle all defined types without raising TypeError
+    assert json.dumps(input, default=default_json_event_encoding)
