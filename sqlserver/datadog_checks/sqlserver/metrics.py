@@ -317,6 +317,7 @@ class SqlIoVirtualFileStat(BaseSqlServerMetric):
             self.pvs_vals[dbid, fid] = value
             metric_tags = [
                 'database:{}'.format(str(dbname).strip()),
+                'db:{}'.format(str(dbname).strip()),
                 'database_id:{}'.format(str(dbid).strip()),
                 'file_id:{}'.format(str(fid).strip()),
             ]
@@ -457,6 +458,7 @@ class SqlMasterDatabaseFileStats(BaseSqlServerMetric):
 
             metric_tags = [
                 'database:{}'.format(str(dbname)),
+                'db:{}'.format(str(dbname)),
                 'file_id:{}'.format(str(fileid)),
                 'file_type:{}'.format(str(filetype)),
                 'file_location:{}'.format(str(location)),
@@ -557,6 +559,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
 
             metric_tags = [
                 'database:{}'.format(str(self.instance)),
+                'db:{}'.format(str(self.instance)),
                 'file_id:{}'.format(str(fileid)),
                 'file_type:{}'.format(str(filetype)),
                 'file_location:{}'.format(str(location)),
@@ -593,6 +596,7 @@ class SqlDatabaseStats(BaseSqlServerMetric):
             db_recovery_model_desc = row[db_recovery_model_desc_index]
             metric_tags = [
                 'database:{}'.format(str(self.instance)),
+                'db:{}'.format(str(self.instance)),
                 'database_state_desc:{}'.format(str(db_state_desc)),
                 'database_recovery_model_desc:{}'.format(str(db_recovery_model_desc)),
             ]
@@ -633,6 +637,7 @@ class SqlDatabaseBackup(BaseSqlServerMetric):
             column_val = row[value_column_index]
             metric_tags = [
                 'database:{}'.format(str(self.instance)),
+                'db:{}'.format(str(self.instance)),
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
@@ -730,6 +735,7 @@ class SqlDbFragmentation(BaseSqlServerMetric):
 
             metric_tags = [
                 u'database_name:{}'.format(ensure_unicode(self.instance)),
+                u'db:{}'.format(ensure_unicode(self.instance)),
                 u'object_name:{}'.format(ensure_unicode(object_name)),
                 u'index_id:{}'.format(ensure_unicode(index_id)),
                 u'index_name:{}'.format(ensure_unicode(index_name)),
@@ -903,6 +909,7 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
                 'availability_group:{}'.format(str(resource_group_id)),
                 'availability_group_name:{}'.format(str(resource_group_name)),
                 'failover_mode_desc:{}'.format(str(failover_mode_desc)),
+                'db:{}'.format(str(database_name)),
             ]
             if is_primary_replica_index is not None:
                 is_primary_replica = row[is_primary_replica_index]
