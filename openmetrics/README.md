@@ -68,7 +68,7 @@ The version of this integration shipped with version 7.46 of the Agent gives pre
 
 Previous versions defaulted to `text/plain`, which normally results in the server returning metrics in the Prometheus exposition format. This means that updating to this version of the integration may result in switching from the Prometheus format to the OpenMetrics format.
 
-Even though in most circumstances the behavior should remain the same, there are applications that return metrics in a format that is not fully OpenMetrics compliant, despite setting the `Content-Type` to signal the use of the OpenMetrics standard format. This may cause our integration to report errors while parsing the metrics payload.
+Although the behavior should remain the same in most circumstances, some applications return metrics in a format that is not fully OpenMetrics-compliant, despite setting the `Content-Type` to signal the use of the OpenMetrics standard format. This may cause our integration to report errors while parsing the metrics payload.
 
 If you see parsing errors when scraping the OpenMetrics endpoint with this new version, you can force the use of the less strict Prometheus format by manually setting the `Accept` header that the integration sends to `text/plain` using the `headers` option in the [configuration file][14]. For instance: 
 
