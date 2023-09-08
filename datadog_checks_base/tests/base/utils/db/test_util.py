@@ -263,14 +263,14 @@ def test_dbm_async_job_inactive_stop(aggregator):
 @pytest.mark.parametrize(
     "input",
     [
-        {"foo": "bar"},  # dict
-        {"foo": "bar", "baz": 1},  # dict with multiple keys
-        {"foo": "bar", "baz": 1, "qux": {"quux": "corge"}},  # nested dict
-        {"foo": b'bar'},  # dict with bytes
-        {"foo": decimal.Decimal("1.0")},  # dict with decimal.Decimal
-        {"foo": datetime.datetime(2020, 1, 1, 0, 0, 0)},  # dict with datetime.datetime
-        {"foo": datetime.date(2020, 1, 1)},  # dict with datetime.date
-        {"foo": IPv4Address(u"192.168.1.1")},  # dict with IPv4Address
+        pytest.param({"foo": "bar"}, id='dict'),
+        pytest.param({"foo": "bar", "baz": 1}, id='dict-with-multiple-keys'),
+        pytest.param({"foo": "bar", "baz": 1, "qux": {"quux": "corge"}}, id='nested-dict'),
+        pytest.param({"foo": b'bar'}, id='dict-with-bytes'),
+        pytest.param({"foo": decimal.Decimal("1.0")}, id='dict-with-decimal'),
+        pytest.param({"foo": datetime.datetime(2020, 1, 1, 0, 0, 0)}, id='dict-with-datetime'),
+        pytest.param({"foo": datetime.date(2020, 1, 1)}, id='dict-with-date'),
+        pytest.param({"foo": IPv4Address(u"192.168.1.1")}, id='dict-with-IPv4Address'),
     ],
 )
 def test_default_json_event_encoding(input):
