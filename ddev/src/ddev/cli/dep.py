@@ -6,8 +6,8 @@ import copy
 from collections import defaultdict
 
 import click
-import orjson
 import httpx
+import orjson
 from packaging.markers import Marker
 from packaging.requirements import InvalidRequirement, Requirement
 from packaging.specifiers import InvalidSpecifier, SpecifierSet
@@ -167,9 +167,9 @@ async def get_version_data(client, url):
         response = await client.get(url)
         data = orjson.loads(response.text)
     except Exception as e:
-        raise type(e)(f'Error processing URL {url}: {e}')
-    else:
-        return data['info']['name'], data['releases']
+        raise RuntimeError(f'Error processing URL {url}') from e
+
+    return data['info']['name'], data['releases']
 
 
 async def fetch_versions(urls):
