@@ -186,6 +186,8 @@ def default_json_event_encoding(o):
         return o.isoformat()
     if isinstance(o, IPv4Address):
         return str(o)
+    if isinstance(o, bytes):
+        return o.decode('utf-8')
     raise TypeError
 
 
