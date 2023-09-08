@@ -9,7 +9,7 @@
 
 
 def instance_connection_timeout():
-    return 1
+    return 10
 
 
 def instance_disable_generic_tags():

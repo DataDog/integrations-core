@@ -61,7 +61,7 @@ files:
           Connection timeout in seconds
         value:
           type: integer
-          example: 1
+          example: 10
 
       - template: instances/db
         overrides:
