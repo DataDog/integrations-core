@@ -34,7 +34,7 @@ LABEL "com.datadoghq.ad.init_configs"='[{}]'
 LABEL "com.datadoghq.ad.instances"='[{"openmetrics_endpoint":"http://%%host%%:9153/metrics", "tags":["dns-pod:%%host%%"]}]'
 ```
 
-To enable the legacy OpenMetricsBaseCheckV1 version of the check, replace `openmetrics_endpoint` with `prometheus_url`:
+To enable the legacy mode of this OpenMetrics-based check, replace `openmetrics_endpoint` with `prometheus_url`:
 
 ```yaml
 LABEL "com.datadoghq.ad.instances"='[{"prometheus_url":"http://%%host%%:9153/metrics", "tags":["dns-pod:%%host%%"]}]' 
@@ -118,7 +118,7 @@ spec:
     - name: coredns
 ```
 
-To enable the legacy OpenMetricsBaseCheckV1 version of the check, replace `openmetrics_endpoint` with `prometheus_url`:
+To enable the legacy mode of this OpenMetrics-based check, replace `openmetrics_endpoint` with `prometheus_url`:
 
 **Annotations v1** (for Datadog Agent < v7.36)
 
@@ -193,7 +193,7 @@ Set [Autodiscovery Integrations Templates][10] as Docker labels on your applicat
 }
 ```
 
-To enable the legacy OpenMetricsBaseCheckV1 version of the check, replace `openmetrics_endpoint` with `prometheus_url`:
+To enable the legacy mode of this OpenMetrics-based check, replace `openmetrics_endpoint` with `prometheus_url`:
 
 ```json
       "com.datadoghq.ad.instances": "[{\"prometheus_url\":\"http://%%host%%:9153/metrics\", \"tags\":[\"dns-pod:%%host%%\"]}]"
