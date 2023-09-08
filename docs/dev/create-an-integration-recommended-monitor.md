@@ -39,7 +39,7 @@ Find your monitor in [Monitors Template list][4]. Ensure logos render correctly 
 
 ## Follow alerting best practices
 
-Below is an example of a well defined monitors:
+Below is an example of a well-defined monitors:
 
 {{< img src="developers/create-an-integration-recommended-monitor/monitor-example.png" alt="An example of a Recommended Monitor" width="100%">}}
 
