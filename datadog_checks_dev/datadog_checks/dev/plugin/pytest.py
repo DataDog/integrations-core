@@ -8,6 +8,7 @@ import os
 import re
 import warnings
 from base64 import urlsafe_b64encode
+from collections import namedtuple  # Not using dataclasses for Py2 compatibility
 from typing import Dict, List, Optional, Tuple  # noqa: F401
 
 import pytest
@@ -160,7 +161,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
             root = new_root
 
         python_path = os.environ[E2E_PARENT_PYTHON]
-        env = os.environ.get('TOX_ENV_NAME') or os.environ['HATCH_ENV_ACTIVE']
+        env = os.environ['HATCH_ENV_ACTIVE']
 
         # TODO: switch to `ddev` when the old CLI is gone
         check_command = [python_path, '-m', 'datadog_checks.dev', 'env', 'check', check, env, '--json']
@@ -341,11 +342,19 @@ def mock_performance_objects(mocker, dd_default_hostname):
     return mock_perf_objects
 
 
+TestType = namedtuple('TestType', 'name description filepath_match')
+TEST_TYPES = (
+    TestType('unit', 'marker for unit tests', 'test_unit'),
+    TestType('integration', 'marker for integration tests', 'test_integration'),
+    TestType('e2e', 'marker for end-to-end tests', 'test_e2e'),
+)
+
+
 def pytest_configure(config):
     # pytest will emit warnings if these aren't registered ahead of time
-    config.addinivalue_line('markers', 'unit: marker for unit tests')
-    config.addinivalue_line('markers', 'integration: marker for integration tests')
-    config.addinivalue_line('markers', 'e2e: marker for end-to-end Datadog Agent tests')
+    for ttype in TEST_TYPES:
+        config.addinivalue_line('markers', '{}: {}'.format(ttype.name, ttype.description))
+
     config.addinivalue_line("markers", "latest_metrics: marker for verifying support of new metrics")
 
 
@@ -353,8 +362,9 @@ def pytest_addoption(parser):
     parser.addoption("--run-latest-metrics", action="store_true", default=False, help="run check_metrics tests")
 
     if PY2:
-        # Add a dummy memray options to make it possible to run memray with `ddev test --memray <integration>`
-        # only on py3 environments
+        # Add dummy memray options to make it possible to run memray with `ddev test --memray <integration>`
+        # in both py2 and 3 environments. In py2 the option is simply ignored, see pytest_collection_modifyitems.
+        # In py3 the option enables the memray plugin.
         parser.addoption("--memray", action="store_true", default=False, help="Dummy parameter for memray")
         parser.addoption(
             "--hide-memray-summary",
@@ -383,3 +393,11 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "latest_metrics" in item.keywords:
             item.add_marker(skip_latest_metrics)
+
+        # In Python 2 we're using a much older version of pytest where the Item interface is different.
+        item_path = item.fspath if PY2 else item.path
+        if item_path is None:
+            continue
+        for ttype in TEST_TYPES:
+            if ttype.filepath_match in str(item_path):
+                item.add_marker(getattr(pytest.mark, ttype.name))

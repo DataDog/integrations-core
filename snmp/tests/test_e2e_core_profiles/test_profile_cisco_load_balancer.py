@@ -11,6 +11,7 @@ from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
     assert_extend_cisco,
+    assert_extend_cisco_generic,
     create_e2e_core_test_config,
     get_device_ip_from_config,
 )
@@ -33,6 +34,7 @@ def test_e2e_profile_cisco_load_balancer(dd_agent_check):
     # --- TEST EXTENDED METRICS ---
     # Examples:
     assert_extend_cisco(aggregator, common_tags)
+    assert_extend_cisco_generic(aggregator, common_tags)
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)

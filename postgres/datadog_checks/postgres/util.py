@@ -32,6 +32,8 @@ class DatabaseConfigurationError(Enum):
     pg_stat_statements_not_loaded = 'pg-stat-statements-not-loaded'
     undefined_explain_function = 'undefined-explain-function'
     high_pg_stat_statements_max = 'high-pg-stat-statements-max-configuration'
+    autodiscovered_databases_exceeds_limit = 'autodiscovered-databases-exceeds-limit'
+    autodiscovered_metrics_exceeds_collection_interval = "autodiscovered-metrics-exceeds-collection-interval"
 
 
 def warning_with_tags(warning_message, *args, **kwargs):
@@ -55,6 +57,12 @@ def get_schema_field(descriptors):
         if name == 'schema':
             return column
     raise CheckException("The descriptors are missing a schema field")
+
+
+def payload_pg_version(version):
+    if not version:
+        return ""
+    return 'v{major}.{minor}.{patch}'.format(major=version.major, minor=version.minor, patch=version.patch)
 
 
 fmt = PartialFormatter()
@@ -204,9 +212,10 @@ LIMIT {table_count_limit}
 }
 
 q1 = (
-    'CASE WHEN pg_last_wal_receive_lsn() IS NULL OR '
-    'pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn() THEN 0 ELSE GREATEST '
-    '(0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END'
+    'CASE WHEN exists(SELECT * FROM pg_stat_wal_receiver) '
+    'AND (pg_last_wal_receive_lsn() IS NULL '
+    'OR pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn()) THEN 0 '
+    'ELSE GREATEST(0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END'
 )
 q2 = 'abs(pg_wal_lsn_diff(pg_last_wal_receive_lsn(), pg_last_wal_replay_lsn()))'
 REPLICATION_METRICS_10 = {

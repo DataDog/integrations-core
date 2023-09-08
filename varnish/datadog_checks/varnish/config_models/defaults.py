@@ -7,56 +7,26 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-from datadog_checks.base.utils.models.fields import get_default_field_value
 
-
-def shared_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_daemon_host(field, value):
+def instance_daemon_host():
     return 'localhost'
 
 
-def instance_daemon_port(field, value):
+def instance_daemon_port():
     return 6082
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags():
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname():
     return False
 
 
-def instance_metric_patterns(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_metrics_filter(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval():
     return 15
 
 
-def instance_name(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_secretfile(field, value):
+def instance_secretfile():
     return '/etc/varnish/secret'
-
-
-def instance_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tags(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_varnishadm(field, value):
-    return get_default_field_value(field, value)

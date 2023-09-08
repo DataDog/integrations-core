@@ -734,3 +734,19 @@ vector_index_tombstone_cleanup_threads{class_name="Movies",shard_name="S4Gq0SGpz
 # HELP vector_index_tombstones Number of active vector index tombstones
 # TYPE vector_index_tombstones gauge
 vector_index_tombstones{class_name="Movies",shard_name="S4Gq0SGpzte6"} 0
+# HELP requests_total Number of all requests made
+# TYPE requests_total gauge
+requests_total{api="graphql",class_name="n/a",query_type="",status="ok"} 839
+requests_total{api="graphql",class_name="n/a",query_type="",status="user_error"} 3
+requests_total{api="graphql",class_name="n/a",query_type="Aggregate",status="user_error"} 8
+requests_total{api="graphql",class_name="n/a",query_type="Explore",status="user_error"} 3
+requests_total{api="graphql",class_name="n/a",query_type="Get",status="user_error"} 28
+requests_total{api="rest",class_name="n/a",query_type="batch",status="ok"} 1143
+requests_total{api="rest",class_name="n/a",query_type="classification",status="ok"} 9
+requests_total{api="rest",class_name="n/a",query_type="misc",status="ok"} 14
+requests_total{api="rest",class_name="n/a",query_type="nodes",status="ok"} 12
+requests_total{api="rest",class_name="n/a",query_type="objects",status="ok"} 839
+requests_total{api="rest",class_name="n/a",query_type="objects",status="server_error"} 4
+requests_total{api="rest",class_name="n/a",query_type="objects",status="user_error"} 56
+requests_total{api="rest",class_name="n/a",query_type="schema",status="ok"} 552
+requests_total{api="rest",class_name="n/a",query_type="schema",status="user_error"} 55
