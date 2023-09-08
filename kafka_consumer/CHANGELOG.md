@@ -1,5 +1,11 @@
 # CHANGELOG - kafka_consumer
 
+## 3.1.4-rc.1 / 2023-09-08
+
+***Fixed***:
+
+* Set tls_verify to string rather than boolean. See [#15699](https://github.com/DataDog/integrations-core/pull/15699).
+
 ## Unreleased
 
 ***Fixed***:
