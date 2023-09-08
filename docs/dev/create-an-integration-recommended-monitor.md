@@ -41,7 +41,7 @@ Find your monitor in [Monitors Template list][4]. Ensure logos render correctly 
 
 An integration monitor should contain the following information:
 
-{{< img src="developers/create-an-integration-recommended-monitor/monitor-example" alt="An example of a Recommended Monitor" width="100%">}}
+{{< img src="developers/create-an-integration-recommended-monitor/monitor-example.png" alt="An example of a Recommended Monitor" width="100%">}}
 
 - **Title** is what users see when browsing the content in the Datadog platform, it should allow them to quickly understand the underlying failure mode the alert is covering. See examples below:
     - New flaky tests
