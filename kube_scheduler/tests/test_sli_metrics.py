@@ -40,11 +40,11 @@ def test_check_metrics_slis(aggregator, mock_metrics, mock_request, instance):
         # Wrapper to keep assertions < 120 chars
         aggregator.assert_metric("{}.{}".format(CHECK_NAME, name), **kwargs)
 
-    assert_metric('slis.kubernetes_healthcheck', value=1, tags=['name:ping', 'type:healthz', 'custom:tag'])
+    assert_metric('slis.kubernetes_healthcheck', value=1, tags=['name:ping', 'type:healthz'])
     assert_metric(
         'slis.kubernetes_healthchecks_total',
         value=2450,
-        tags=['name:ping', 'status:success', 'type:healthz', 'custom:tag'],
+        tags=['name:ping', 'status:success', 'type:healthz'],
     )
 
     aggregator.assert_all_metrics_covered()
