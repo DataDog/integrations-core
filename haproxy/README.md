@@ -14,13 +14,13 @@ Capture HAProxy activity in Datadog to:
 
 This integration can collect metrics from a Prometheus endpoint (recommended) or from a socket-based integration through the stats endpoint (deprecated). Using the Prometheus endpoint requires HAProxy version 2 (enterprise version 1.9rc1) or later.
 
-When using the Prometheus endpoint, starting with version 4.0.0, this OpenMetrics-based integration has a *latest* mode (`use_openmetrics`: true) and a *legacy* mode (`use_openmetrics`: false and `use_prometheus`: true). To get all the most up-to-date features, Datadog recommends enabling the *latest* mode. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][29].
+When using the Prometheus endpoint, starting with version 4.0.0, this OpenMetrics-based integration has a latest mode (`use_openmetrics`: true) and a legacy mode (`use_openmetrics`: false and `use_prometheus`: true). To get all the most up-to-date features, Datadog recommends enabling the latest mode. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][29].
 
 To use the socket-based integration, set both `use_openmetrics` and `use_prometheus` to false and follow the [corresponding instructions](#using-the-stats-endpoint) on the Configuration section.
 
-The `use_openmetrics` option uses [OpenMetrics V2][26] for metric collection, which requires Agent v7.35 or later, or for you to [enable Python 3][27] in Agent v6.35 or later. For hosts that are unable to use Python 3 or are on Agent v7.34 or earlier, use the OpenMetrics V1 implementation or the [socket-based legacy integration](#using-the-stats-endpoint). 
+The `use_openmetrics` option uses the latest mode of [OpenMetrics][26], which requires Agent v7.35 or later, or for you to [enable Python 3][27] in Agent v6.35 or later for metric collection. For hosts that are unable to use Python 3 or are on Agent v7.34 or earlier, use the legacy mode of OpenMetrics or the [socket-based legacy integration](#using-the-stats-endpoint). 
 
-Metrics marked as `[OpenMetrics V1]` or `[OpenMetrics V2]` are only available using the corresponding version of the HAProxy integration. Metrics marked as `[OpenMetrics V1 and V2]` are collected by both versions.
+Metrics marked as `[OpenMetrics V1]` or `[OpenMetrics V2]` are only available using the corresponding mode of the HAProxy integration. Metrics marked as `[OpenMetrics V1 and V2]` are collected by both modes.
 
 ### Installation
 
