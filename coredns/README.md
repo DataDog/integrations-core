@@ -7,7 +7,7 @@ Get metrics from CoreDNS in real time to visualize and monitor DNS failures and 
 ## Setup
 
 
-Starting with version 1.11.0, this OpenMetrics-based integration has a latest mode (`use_openmetrics`: true) and a legacy mode (`use_openmetrics`: false). To get all the most up-to-date features, Datadog recommends enabling the latest mode. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][24].
+Starting with version 1.11.0, this OpenMetrics-based integration has a latest mode (enabled by setting `openmetrics_endpoint` to point to the target endpoint) and a legacy mode (enabled by setting `prometheus_url` instead). To get all the most up-to-date features, Datadog recommends enabling the latest mode. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][24].
 
 The latest mode of the CoreDNS check requires Python 3 and submits `.bucket` metrics and submits the `.sum` and `.count` histogram samples as monotonic count type. These metrics were previously submitted as `gauge` type in the legacy mode. See the [`metadata.csv` file][14] for a list of metrics available in each mode. 
 
