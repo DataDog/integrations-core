@@ -6,6 +6,10 @@
 
 * Add color output to tests in CI ([#15774](https://github.com/DataDog/integrations-core/pull/15774))
 
+***Fixed***:
+
+* Make sure repo override in envvar makes it into config ([#15782](https://github.com/DataDog/integrations-core/pull/15782))
+
 ## 5.0.0 / 2023-09-06
 
 ***Removed***:

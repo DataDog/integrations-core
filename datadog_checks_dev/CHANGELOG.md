@@ -19,6 +19,7 @@
 * Remove flup from the dependency bump exclusion list ([#15748](https://github.com/DataDog/integrations-core/pull/15748))
 * Remove setuptools from the build-system for new integrations ([#15766](https://github.com/DataDog/integrations-core/pull/15766))
 * Stop using the old GPG_COMMAND constant from securesystemslib ([#15776](https://github.com/DataDog/integrations-core/pull/15776))
+* Override the default test options for some integrations ([#15779](https://github.com/DataDog/integrations-core/pull/15779))
 
 ## 24.1.0 / 2023-08-25
 

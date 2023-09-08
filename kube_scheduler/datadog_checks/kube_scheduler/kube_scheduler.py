@@ -107,6 +107,10 @@ NEW_1_15_GAUGES = {
     'scheduler_pending_pods': 'pending_pods'
 }
 
+NEW_1_26_GAUGES = {
+    'scheduler_goroutines': 'goroutine_by_scheduling_operation',
+}
+
 DEFAULT_GO_METRICS = {
     'go_gc_duration_seconds': 'gc_duration_seconds',
     'go_goroutines': 'goroutines',
@@ -159,6 +163,7 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
                         DEFAULT_GAUGES,
                         NEW_1_15_GAUGES,
                         DEFAULT_GO_METRICS,
+                        NEW_1_26_GAUGES,
                         DEPRECARED_SUMMARIES,
                         NEW_1_23_HISTOGRAMS,
                     ],
