@@ -39,10 +39,13 @@ Find your monitor in [Monitors Template list][4]. Ensure logos render correctly 
 
 ## Follow alerting best practices
 
-An integration monitor should contain the following information:
+Below is an example of a well defined monitors:
 
 {{< img src="developers/create-an-integration-recommended-monitor/monitor-example.png" alt="An example of a Recommended Monitor" width="100%">}}
 
+Refer to our [documentation on defining a monitor][6].
+
+In addition to the monitor definition, the following information is required for recommended monitors:
 - **Title** is what users see when browsing the content in the Datadog platform, it should allow them to quickly understand the underlying failure mode the alert is covering. See examples below:
     - New flaky tests
     - High CPU usage on hosts
@@ -51,7 +54,6 @@ An integration monitor should contain the following information:
 - **Description** should be used to provide extra context around the failure mode and also about the impact this mode can have on the system. It should be concise and allow users to understand at a glance whether it is relevant or not for them to create a monitor out of it.
     - For example: “Too many opened connections on databases”: Get notified whenever the number of connections to the database is too high. When too many connections are opened, new clients might not be able to open new connections and thus to execute the queries serving end-users.
 - **Tags** should be set to "integration:<app_id>". See other available tags [here][7].
-- **Definition**: Please refer to our [publicly available documentation][6].
 
 
 [1]: /monitors
