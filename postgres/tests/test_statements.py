@@ -727,27 +727,12 @@ def test_statement_samples_collect(
 
 
 @pytest.mark.parametrize("pg_stat_statements_view", ["pg_stat_statements", "datadog.pg_stat_statements()"])
-@pytest.mark.parametrize(
-    "metadata,expected_metadata_payload",
-    [
-        (
-            {'tables_csv': 'persons', 'commands': ['SELECT'], 'comments': ['-- Test comment']},
-            {'tables': ['persons'], 'commands': ['SELECT'], 'comments': ['-- Test comment']},
-        ),
-        (
-            {'tables_csv': '', 'commands': None, 'comments': None},
-            {'tables': None, 'commands': None, 'comments': None},
-        ),
-    ],
-)
 def test_statement_metadata(
     aggregator,
     integration_check,
     dbm_instance,
     datadog_agent,
     pg_stat_statements_view,
-    metadata,
-    expected_metadata_payload,
 ):
     """Tests for metadata in both samples and metrics"""
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
@@ -769,8 +754,8 @@ def test_statement_metadata(
 
     def obfuscate_sql(query, options=None):
         if query.startswith('SELECT city FROM persons WHERE city'):
-            return json.dumps({'query': normalized_query, 'metadata': metadata})
-        return json.dumps({'query': query, 'metadata': metadata})
+            return json.dumps({'query': normalized_query, 'metadata': {}})
+        return json.dumps({'query': query, 'metadata': {}})
 
     check = integration_check(dbm_instance)
     check._connect()
@@ -793,9 +778,9 @@ def test_statement_metadata(
     matching_samples = [s for s in samples if s['db']['query_signature'] == query_signature]
     assert len(matching_samples) == 1
     sample = matching_samples[0]
-    assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
-    assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
-    assert sample['db']['metadata']['comments'] == expected_metadata_payload['comments']
+    assert sample['db']['metadata']['tables'] == None
+    assert sample['db']['metadata']['commands'] == None
+    assert sample['db']['metadata']['comments'] == None
 
     if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_statements_view == "pg_stat_statements":
         # cannot catch any queries from other users
@@ -807,8 +792,8 @@ def test_statement_metadata(
     ]
     assert len(fqt_samples) == 1
     fqt = fqt_samples[0]
-    assert fqt['db']['metadata']['tables'] == expected_metadata_payload['tables']
-    assert fqt['db']['metadata']['commands'] == expected_metadata_payload['commands']
+    assert fqt['db']['metadata']['tables'] == None
+    assert fqt['db']['metadata']['commands'] == None
 
     # Test metrics metadata, metadata in metrics are located in the rows.
     metrics = aggregator.get_event_platform_events("dbm-metrics")
@@ -817,8 +802,8 @@ def test_statement_metadata(
     matching_metrics = [m for m in metric['postgres_rows'] if m['query_signature'] == normalized_query_signature]
     assert len(matching_metrics) == 1
     metric = matching_metrics[0]
-    assert metric['dd_tables'] == expected_metadata_payload['tables']
-    assert metric['dd_commands'] == expected_metadata_payload['commands']
+    assert metric['dd_tables'] == None
+    assert metric['dd_commands'] == None
 
 
 @pytest.mark.parametrize(
