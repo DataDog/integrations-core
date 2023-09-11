@@ -321,6 +321,15 @@ metrics:
           6: fast_response_time
           7: least_request
           8: round_robin_strict
+          9: source_ip_hash_based_stateless
+          10: source_ip_only_hash_based_stateless
+          11: destination_ip_hash_based_stateless
+          12: source_destination_ip_hash_based_stateless
+          13: per_packet_round_robin_stateless
+          15: source_ip_only_hash
+          16: source_ip_with_port_hash
+          17: destination_ip_only_hash
+          18: destination_ip_with_port_hash
       - column:
           OID: 1.3.6.1.4.1.22610.2.4.3.3.1.2.1.4
           name: axServiceGroupDisplayStatus
@@ -418,9 +427,11 @@ metrics:
           name: axVirtualServerStatDisplayStatus
         tag: ax_virtual_server_stat_display_status
         mapping:
-          1: up
-          2: down
-          3: disabled
+          0: disabled
+          1: all_up
+          2: functional_up
+          3: partial_up
+          4: stopped
   - MIB: A10-AX-MIB
     table:
       name: axVirtualServerPortStatTable
@@ -451,8 +462,13 @@ metrics:
           17: smtp
           11: sip
           19: sips
-          18: sip_tcp
+          18: sip-tcp
           5: others
+          20: tcp_proxy
+          21: diameter
+          22: dns_udp
+          23: tftp
+          24: dns_tcp
       - column:
           name: axVirtualServerStatPortNum
           OID: 1.3.6.1.4.1.22610.2.4.3.4.4.1.1.3

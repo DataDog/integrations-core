@@ -24,7 +24,7 @@ metrics:
   - MIB: KYOCERA-MIB
     table:
       OID: 1.3.6.1.4.1.1347.43.20
-      name: kcprtMemoryDeviceTable
+      name: kcprtMemoryResource
     symbols:
       - OID: 1.3.6.1.4.1.1347.43.20.1.1.4
         name: kcprtMemoryDeviceTotalSize
@@ -68,6 +68,28 @@ metric_tags:
   - tag: kcprt_general_model_name
     OID: 1.3.6.1.4.1.1347.43.5.1.1.1.1  # kcprtGeneralModelName.1 (index 1)
     symbol: kcprtGeneralModelName
+    TODO_OID_NOT_FOUND: |
+      OID 1.3.6.1.4.1.1347.43.5.1.1.1.1 not found
+      Hints:
+      1. Check if the MIB compiles correctly (check output above).
+      2. Check if the MIB is up to date.
+      3. Check if OID is correct.
+      Note:
+      1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+          on the specific meaning of this index.
+          In the example below, the `.7` is the index and means hrCachedMemory:
+          https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - tag: kcprt_serial_number
     OID: 1.3.6.1.4.1.1347.43.5.1.1.28.1  # kcprtSerialNumber.1 (index 1)
     symbol: kcprtSerialNumber
+    TODO_OID_NOT_FOUND: |
+      OID 1.3.6.1.4.1.1347.43.5.1.1.28.1 not found
+      Hints:
+      1. Check if the MIB compiles correctly (check output above).
+      2. Check if the MIB is up to date.
+      3. Check if OID is correct.
+      Note:
+      1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+          on the specific meaning of this index.
+          In the example below, the `.7` is the index and means hrCachedMemory:
+          https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60

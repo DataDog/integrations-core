@@ -50,6 +50,7 @@ metrics:
           6: direct_connect_interface_down
           7: route_limit
           # the mapping is defined in the metric description
+          TODO: MAPPING NOT UPDATED - SYMBOL ENUMS NOT FOUND IN MIB DATABASE
   - MIB: HUAWEI-BGP-VPN-MIB
     table:
       name: hwBgpPeerRouteTable

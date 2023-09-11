@@ -8,7 +8,7 @@ metrics:
   - MIB: PHION-MIB
     table:
       OID: 1.3.6.1.4.1.10704.1.0
-      name: boxServices
+      name: firewall
     symbols:
       - name: phion.boxServices
         constant_value_one: true

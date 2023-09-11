@@ -28,10 +28,32 @@ metrics:
     symbol:
       OID: 1.3.6.1.2.1.25.2.3.1.6.1 # hrStorageUsed.1 = Physical memory
       name: memory.total
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.2.1.25.2.3.1.6.1 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: HOST-RESOURCES-MIB
     symbol:
       OID: 1.3.6.1.2.1.25.2.3.1.6.6 # hrStorageUsed.6 = Memory buffers
       name: feMemoryBuffers
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.2.1.25.2.3.1.6.6 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: HOST-RESOURCES-MIB
     symbol:
       OID: 1.3.6.1.2.1.25.2.3.1.6.7 # hrStorageUsed.7 = Cached memory
@@ -68,6 +90,17 @@ metrics:
   #       false: 2
   #     TODO: enum in scalar metric is not supported yet (keep this metric and this
   #       comment in profile until it's fixed)
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.2.1.25.2.3.1.6.7 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: FE-FIREEYE-MIB
     table:
       OID: 1.3.6.1.4.1.25597.11.2.1.3
@@ -85,26 +118,8 @@ metrics:
           name: fePhysicalDiskIsHealthy
         tag: fe_physical_disk_is_healthy
         mapping:
-          1: true
-          2: false
-  # - MIB: FE-FIREEYE-MIB
-  #   symbol:
-  #     OID: 1.3.6.1.4.1.25597.11.3.1.2.0
-  #     name: fePowerSupplyOverallIsHealthy
-  #     enum:
-  #       true: 1
-  #       false: 2
-  #     TODO: enum in scalar metric is not supported yet (keep this metric and this
-  #       comment in profile until it's fixed)
-  # - MIB: FE-FIREEYE-MIB
-  #   symbol:
-  #     OID: 1.3.6.1.4.1.25597.11.4.1.2.0
-  #     name: feFanOverallIsHealthy
-  #     enum:
-  #       true: 1
-  #       false: 2
-  #     TODO: enum in scalar metric is not supported yet (keep this metric and this
-  #       comment in profile until it's fixed)
+          1: 'true'
+          2: 'false'
   - MIB: FE-FIREEYE-MIB
     symbol:
       OID: 1.3.6.1.4.1.25597.13.1.1.0

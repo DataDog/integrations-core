@@ -98,6 +98,14 @@ metrics:
 
   # Snap mirrors
 
+        mapping:
+          1: uninitialized
+          2: snapvaulted
+          3: broken_off
+          4: quiesced
+          5: source
+          6: unknown
+          7: restoring
   - MIB: NETAPP-MIB
     table:
       OID: 1.3.6.1.4.1.789.1.9.20
@@ -116,6 +124,13 @@ metrics:
           OID: 1.3.6.1.4.1.789.1.9.20.1.5
           name: snapmirrorState
 
+        mapping:
+          1: uninitialized
+          2: snapmirrored
+          3: broken_off
+          4: quiesced
+          5: source
+          6: unknown
   - MIB: NETAPP-MIB
     table:
       OID: 1.3.6.1.4.1.789.1.9.20
@@ -136,6 +151,13 @@ metrics:
 
   # Disk filesystems
 
+        mapping:
+          1: uninitialized
+          2: snapmirrored
+          3: broken_off
+          4: quiesced
+          5: source
+          6: unknown
   - MIB: NETAPP-MIB
     table:
       OID: 1.3.6.1.4.1.789.1.5.4

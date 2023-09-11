@@ -26,8 +26,8 @@ metrics:
           1: down
           2: attempt
           3: init
-          4: twoWay
-          5: exchangeStart
+          4: two_way
+          5: exchange_start
           6: exchange
           7: loading
           8: full
@@ -55,8 +55,8 @@ metrics:
           1: down
           2: attempt
           3: init
-          4: twoWay
-          5: exchangeStart
+          4: two_way
+          5: exchange_start
           6: exchange
           7: loading
           8: full
@@ -88,8 +88,8 @@ metrics:
           1: down
           2: attempt
           3: init
-          4: twoWay
-          5: exchangeStart
+          4: two_way
+          5: exchange_start
           6: exchange
           7: loading
           8: full
@@ -117,8 +117,8 @@ metrics:
           1: down
           2: attempt
           3: init
-          4: twoWay
-          5: exchangeStart
+          4: two_way
+          5: exchange_start
           6: exchange
           7: loading
           8: full
@@ -152,10 +152,10 @@ metrics:
           1: down
           2: loopback
           3: waiting
-          4: pointToPoint
-          5: designatedRouter
-          6: backupDesignatedRouter
-          7: otherDesignatedRouter
+          4: point_to_point
+          5: designated_router
+          6: backup_designated_router
+          7: other_designated_router
         tag: if_state
   - MIB: OSPF-MIB
     table:
@@ -182,10 +182,10 @@ metrics:
           1: down
           2: loopback
           3: waiting
-          4: pointToPoint
-          5: designatedRouter
-          6: backupDesignatedRouter
-          7: otherDesignatedRouter
+          4: point_to_point
+          5: designated_router
+          6: backup_designated_router
+          7: other_designated_router
         tag: if_state
   - MIB: OSPF-MIB
     table:
@@ -210,7 +210,7 @@ metrics:
           name: ospfVirtIfState
         mapping:
           1: down
-          4: pointToPoint
+          4: point_to_point
         tag: if_state
   - MIB: OSPF-MIB
     table:
@@ -231,5 +231,5 @@ metrics:
           name: ospfVirtIfState
         mapping:
           1: down
-          4: pointToPoint
+          4: point_to_point
         tag: if_state

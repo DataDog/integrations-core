@@ -81,7 +81,7 @@ metrics:
   - MIB: ENTITY-SENSOR-MIB
     table:
       OID: 1.3.6.1.2.1.99.1.1.1
-      name: entPhySensorTable
+      name: entPhySensorEntry
     symbols:
       - OID: 1.3.6.1.2.1.99.1.1.1.4
         name: entPhySensorValue
@@ -92,14 +92,27 @@ metrics:
         column:
           OID: 1.3.6.1.2.1.99.1.1.1.1
           name: entPhySensorType
+        mapping:
+          1: other
+          2: unknown
+          3: volts_ac
+          4: volts_dc
+          5: amperes
+          6: watts
+          7: hertz
+          8: celsius
+          9: percent_rh
+          10: rpm
+          11: cmm
+          12: truthvalue
       - index: 1
         tag: sensor_id
 
 
   ### Interface
 
-  - # This table contains statistical information of the ingress queue in an interface.
-    MIB: ARISTA-QUEUE-MIB
+    # This table contains statistical information of the ingress queue in an interface.
+  - MIB: ARISTA-QUEUE-MIB
     table:
       OID: 1.3.6.1.4.1.30065.3.6.1.1
       name: aristaIngressQueueTable
@@ -117,8 +130,8 @@ metrics:
           OID: 1.3.6.1.4.1.30065.3.6.1.1.1.2
           name: aristaIngressQueueIndex
 
-  - # This table contains statistical objects for the egress queues of an interface.
-    MIB: ARISTA-QUEUE-MIB
+    # This table contains statistical objects for the egress queues of an interface.
+  - MIB: ARISTA-QUEUE-MIB
     table:
       OID: 1.3.6.1.4.1.30065.3.6.1.2
       name: aristaEgressQueueTable

@@ -198,31 +198,130 @@ metrics:
     table:
       OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4
       name: physicalDiskTable
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.4 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     symbols:
       - OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.4
         name: physicalDiskState
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.4 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
       - OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.11
         name: physicalDiskCapacityInMB
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.11 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
       - OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.17
         name: physicalDiskUsedSpaceInMB
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.17 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
       - OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.19
         name: physicalDiskFreeSpaceInMB
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.19 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.2
           name: physicalDiskName
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.2 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: disk_name
   - MIB: IDRAC-MIB-SMIv2
     table:
       OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4
       name: physicalDiskTable
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.4 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     symbols:
       - name: dell.physicalDisk
         constant_value_one: true
+        TODO_OID_NOT_FOUND: |2
+                           Table OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.4 not found
+                           Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.4
           name: physicalDiskState
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.4 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: disk_state
         mapping:
           1: unknown
@@ -238,42 +337,152 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.2
           name: physicalDiskName
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.2 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: disk_name
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.1
           name: physicalDiskNumber
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.1 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: disk_number
   - MIB: IDRAC-MIB-SMIv2
     table:
       OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9
       name: enclosurePowerSupplyTable
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.9 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     symbols:
       - OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.4
         name: enclosurePowerSupplyState
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.4 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.2
           name: enclosurePowerSupplyName
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.2 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: supply_name
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.1
           name: enclosurePowerSupplyNumber
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.1 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: enclosure_power_supply_number
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.15
           name: enclosurePowerSupplyFQDD
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.15 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: enclosure_power_supply_fqdd
   - MIB: IDRAC-MIB-SMIv2
     table:
       OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9
       name: enclosurePowerSupplyTable
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.9 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     symbols:
       - name: enclosurePowerSupply
         constant_value_one: true
+        TODO_OID_NOT_FOUND: |2
+                           Table OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.9 not found
+                           Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.4
           name: enclosurePowerSupplyState
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.4 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: enclosure_power_supply_state
         mapping:
           1: unknown
@@ -284,42 +493,152 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.2
           name: enclosurePowerSupplyName
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.2 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: supply_name
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.1
           name: enclosurePowerSupplyNumber
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.1 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: enclosure_power_supply_number
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.15
           name: enclosurePowerSupplyFQDD
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.15 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: enclosure_power_supply_fqdd
   - MIB: IDRAC-MIB-SMIv2
     table:
       OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.15
       name: batteryTable
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.15 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     symbols:
       - OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.15.1.4
         name: batteryState
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.15.1.4 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.15.1.20
           name: batteryFQDD
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.15.1.20 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: battery_fqdd
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.15.1.21
           name: batteryDisplayName
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.15.1.21 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: battery_name
   - MIB: IDRAC-MIB-SMIv2
     table:
       OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.15
       name: batteryTable
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.15 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     symbols:
       - name: dell.battery
         constant_value_one: true
+        TODO_OID_NOT_FOUND: |2
+                           Table OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.15 not found
+                           Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.15.1.4
           name: batteryState
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.15.1.4 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: battery_state
         mapping:
           1: unknown
@@ -332,46 +651,167 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.15.1.20
           name: batteryFQDD
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.15.1.20 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: battery_fqdd
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.15.1.21
           name: batteryDisplayName
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.15.1.21 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: battery_name
   - MIB: IDRAC-MIB-SMIv2
     table:
       OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.1
       name: controllerTable
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.1 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     symbols:
       - OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.37
         name: controllerRollUpStatus
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.37 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.1
           name: controllerNumber
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.1 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: controller_number
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.2
           name: controllerName
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.2 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: controller_name
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.42
           name: controllerPCISlot
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.42 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: controller_pci_slot
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.78
           name: controllerFQDD
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.78 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: controller_fqdd
   - MIB: IDRAC-MIB-SMIv2
     table:
       OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.1
       name: controllerTable
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.1 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     symbols:
       - name: dell.controller
         constant_value_one: true
+        TODO_OID_NOT_FOUND: |2
+                           Table OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.1 not found
+                           Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.37
           name: controllerRollUpStatus
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.37 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: controller_roll_up_status
         mapping:
           1: other
@@ -383,18 +823,62 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.1
           name: controllerNumber
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.1 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: controller_number
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.2
           name: controllerName
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.2 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: controller_name
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.42
           name: controllerPCISlot
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.42 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: controller_pci_slot
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.78
           name: controllerFQDD
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.78 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: controller_fqdd
   - MIB: IDRAC-MIB-SMIv2
     table:
@@ -640,6 +1124,27 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.5.4.600.30.1.7
           name: amperageProbeType
         tag: probe_type
+        mapping:
+          1: amperage_probe_type_is_other
+          2: amperage_probe_type_is_unknown
+          3: amperage_probe_type_is1_point5_volt
+          4: amperage_probe_type_is3_point3volt
+          5: amperage_probe_type_is5_volt
+          6: amperage_probe_type_is_minus5_volt
+          7: amperage_probe_type_is12_volt
+          8: amperage_probe_type_is_minus12_volt
+          9: amperage_probe_type_is_io
+          10: amperage_probe_type_is_core
+          11: amperage_probe_type_is_flea
+          12: amperage_probe_type_is_battery
+          13: amperage_probe_type_is_terminator
+          14: amperage_probe_type_is2_point5_volt
+          15: amperage_probe_type_is_gtl
+          16: amperage_probe_type_is_discrete
+          23: amperage_probe_type_is_power_supply_amps
+          24: amperage_probe_type_is_power_supply_watts
+          25: amperage_probe_type_is_system_amps
+          26: amperage_probe_type_is_system_watts
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.4.600.30.1.1
           name: amperageProbechassisIndex
@@ -660,6 +1165,27 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.5.4.600.30.1.7
           name: amperageProbeType
         tag: probe_type
+        mapping:
+          1: amperage_probe_type_is_other
+          2: amperage_probe_type_is_unknown
+          3: amperage_probe_type_is1_point5_volt
+          4: amperage_probe_type_is3_point3volt
+          5: amperage_probe_type_is5_volt
+          6: amperage_probe_type_is_minus5_volt
+          7: amperage_probe_type_is12_volt
+          8: amperage_probe_type_is_minus12_volt
+          9: amperage_probe_type_is_io
+          10: amperage_probe_type_is_core
+          11: amperage_probe_type_is_flea
+          12: amperage_probe_type_is_battery
+          13: amperage_probe_type_is_terminator
+          14: amperage_probe_type_is2_point5_volt
+          15: amperage_probe_type_is_gtl
+          16: amperage_probe_type_is_discrete
+          23: amperage_probe_type_is_power_supply_amps
+          24: amperage_probe_type_is_power_supply_watts
+          25: amperage_probe_type_is_system_amps
+          26: amperage_probe_type_is_system_watts
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.4.600.30.1.1
           name: amperageProbechassisIndex
@@ -725,6 +1251,26 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.5.4.600.20.1.7
           name: voltageProbeType
         tag: probe_type
+        mapping:
+          1: voltage_probe_type_is_other
+          2: voltage_probe_type_is_unknown
+          3: voltage_probe_type_is1_point5_volt
+          4: voltage_probe_type_is3_point3_volt
+          5: voltage_probe_type_is5_volt
+          6: voltage_probe_type_is_minus5_volt
+          7: voltage_probe_type_is12_volt
+          8: voltage_probe_type_is_minus12_volt
+          9: voltage_probe_type_is_io
+          10: voltage_probe_type_is_core
+          11: voltage_probe_type_is_flea
+          12: voltage_probe_type_is_battery
+          13: voltage_probe_type_is_terminator
+          14: voltage_probe_type_is2_point5_volt
+          15: voltage_probe_type_is_gtl
+          16: voltage_probe_type_is_discrete
+          17: voltage_probe_type_is_generic_discrete
+          18: voltage_probe_type_is_ps_voltage
+          19: voltage_probe_type_is_memory_status
   - MIB: IDRAC-MIB-SMIv2
     table:
       OID: 1.3.6.1.4.1.674.10892.5.4.600.20
@@ -745,6 +1291,26 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.5.4.600.20.1.7
           name: voltageProbeType
         tag: probe_type
+        mapping:
+          1: voltage_probe_type_is_other
+          2: voltage_probe_type_is_unknown
+          3: voltage_probe_type_is1_point5_volt
+          4: voltage_probe_type_is3_point3_volt
+          5: voltage_probe_type_is5_volt
+          6: voltage_probe_type_is_minus5_volt
+          7: voltage_probe_type_is12_volt
+          8: voltage_probe_type_is_minus12_volt
+          9: voltage_probe_type_is_io
+          10: voltage_probe_type_is_core
+          11: voltage_probe_type_is_flea
+          12: voltage_probe_type_is_battery
+          13: voltage_probe_type_is_terminator
+          14: voltage_probe_type_is2_point5_volt
+          15: voltage_probe_type_is_gtl
+          16: voltage_probe_type_is_discrete
+          17: voltage_probe_type_is_generic_discrete
+          18: voltage_probe_type_is_ps_voltage
+          19: voltage_probe_type_is_memory_status
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.4.600.20.1.5
           name: voltageProbeStatus
@@ -828,6 +1394,18 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.5.4.700.12.1.7
           name: coolingDeviceType
         tag: cooling_device_type
+        mapping:
+          1: cooling_device_type_is_other
+          2: cooling_device_type_is_unknown
+          3: cooling_device_type_is_a_fan
+          4: cooling_device_type_is_a_blower
+          5: cooling_device_type_is_a_chip_fan
+          6: cooling_device_type_is_a_cabinet_fan
+          7: cooling_device_type_is_a_power_supply_fan
+          8: cooling_device_type_is_a_heat_pipe
+          9: cooling_device_type_is_refrigeration
+          10: cooling_device_type_is_active_cooling
+          11: cooling_device_type_is_passive_cooling
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.4.700.12.1.8
           name: coolingDeviceLocationName
@@ -860,6 +1438,11 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.5.4.700.20.1.7
           name: temperatureProbeType
         tag: temperature_probe_type
+        mapping:
+          1: temperature_probe_type_is_other
+          2: temperature_probe_type_is_unknown
+          3: temperature_probe_type_is_ambient_esm
+          16: temperature_probe_type_is_discrete
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.4.700.20.1.8
           name: temperatureProbeLocationName
@@ -928,6 +1511,30 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.5.4.1100.50.1.7
           name: memoryDeviceType
         tag: device_type
+        mapping:
+          1: device_type_is_other
+          2: device_type_is_unknown
+          3: device_type_is_dram
+          4: device_type_is_edram
+          5: device_type_is_vram
+          6: device_type_is_sram
+          7: device_type_is_ram
+          8: device_type_is_rom
+          9: device_type_is_flash
+          10: device_type_is_eeprom
+          11: device_type_is_feprom
+          12: device_type_is_eprom
+          13: device_type_is_cdram
+          14: device_type_is3_dram
+          15: device_type_is_sdram
+          16: device_type_is_sgram
+          17: device_type_is_rdram
+          18: device_type_is_ddr
+          19: device_type_is_ddr2
+          20: device_type_is_ddr2_fbdimm
+          24: device_type_is_ddr3
+          25: device_type_is_fbd2
+          26: device_type_is_ddr4
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.4.1100.50.1.2
           name: memoryDeviceIndex
@@ -948,6 +1555,30 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.5.4.1100.50.1.7
           name: memoryDeviceType
         tag: device_type
+        mapping:
+          1: device_type_is_other
+          2: device_type_is_unknown
+          3: device_type_is_dram
+          4: device_type_is_edram
+          5: device_type_is_vram
+          6: device_type_is_sram
+          7: device_type_is_ram
+          8: device_type_is_rom
+          9: device_type_is_flash
+          10: device_type_is_eeprom
+          11: device_type_is_feprom
+          12: device_type_is_eprom
+          13: device_type_is_cdram
+          14: device_type_is3_dram
+          15: device_type_is_sdram
+          16: device_type_is_sgram
+          17: device_type_is_rdram
+          18: device_type_is_ddr
+          19: device_type_is_ddr2
+          20: device_type_is_ddr2_fbdimm
+          24: device_type_is_ddr3
+          25: device_type_is_fbd2
+          26: device_type_is_ddr4
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.4.1100.50.1.2
           name: memoryDeviceIndex
@@ -991,27 +1622,115 @@ metrics:
     table:
       OID: 1.3.6.1.4.1.674.10892.5.5.1.20.140.1
       name: virtualDiskTable
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.674.10892.5.5.1.20.140.1 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     symbols:
       - OID: 1.3.6.1.4.1.674.10892.5.5.1.20.140.1.1.4
         name: virtualDiskState
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.674.10892.5.5.1.20.140.1.1.4 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
       - OID: 1.3.6.1.4.1.674.10892.5.5.1.20.140.1.1.6
         name: virtualDiskSizeInMB
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.674.10892.5.5.1.20.140.1.1.6 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
       - OID: 1.3.6.1.4.1.674.10892.5.5.1.20.140.1.1.20
         name: virtualDiskComponentStatus
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.674.10892.5.5.1.20.140.1.1.20 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
       - OID: 1.3.6.1.4.1.674.10892.5.5.1.20.140.1.1.37
         name: virtualDiskT10PIStatus
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.674.10892.5.5.1.20.140.1.1.37 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.140.1.1.1
           name: virtualDiskNumber
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.140.1.1.1 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: virtual_disk_number
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.140.1.1.2
           name: virtualDiskName
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.140.1.1.2 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: virtual_disk_name
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.140.1.1.35
           name: virtualDiskFQDD
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.674.10892.5.5.1.20.140.1.1.35 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         tag: virtual_disk_fqdd
   - MIB: DELL-RAC-MIB
     symbol:

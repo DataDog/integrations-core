@@ -95,11 +95,6 @@ metrics:
         mapping:
           0: no_cable_detected
           1: connected
-  # - MIB: PEPLINK-BALANCE-MIB # TODO: Handle string for "up"/"down"
-  #   symbol:
-  #     name: peplink.balLanStatus
-  #     OID: 1.3.6.1.4.1.23695.1.1.1.6.1
-  #     format: TODO_handle_conversion_to_one
   - MIB: PEPLINK-BALANCE-MIB
     table:
       OID: 1.3.6.1.4.1.23695.1.1.2.2

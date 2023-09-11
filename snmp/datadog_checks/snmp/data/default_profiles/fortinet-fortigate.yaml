@@ -77,38 +77,137 @@ metrics:
 
   ### Processors
   # Only valid for processors types that support these statistics.
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.12356.101.4.1.3 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: FORTINET-FORTIGATE-MIB
     table:
       OID: 1.3.6.1.4.1.12356.101.4.4.2
       name: fgProcessorTable
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.12356.101.4.4.2 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     metric_type: monotonic_count_and_rate
     symbols:
       # The total number of packets received by this processor.
       - OID: 1.3.6.1.4.1.12356.101.4.4.2.1.6
         name: fgProcessorPktRxCount
       # The total number of packets transmitted by this processor.
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.12356.101.4.4.2.1.6 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
       - OID: 1.3.6.1.4.1.12356.101.4.4.2.1.7
         name: fgProcessorPktTxCount
       # The total number of packets dropped by this processor.
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.12356.101.4.4.2.1.7 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
       - OID: 1.3.6.1.4.1.12356.101.4.4.2.1.8
         name: fgProcessorPktDroppedCount
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.12356.101.4.4.2.1.8 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     metric_tags:
       # A unique identifier within the fgProcessorTable.
       - tag: processor_index
         column:
           OID: 1.3.6.1.4.1.12356.101.4.4.2.1.1
           name: fgProcessorEntIndex
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.12356.101.4.4.2.1.1 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: FORTINET-FORTIGATE-MIB
     table:
       OID: 1.3.6.1.4.1.12356.101.4.4.2
       name: fgProcessorTable
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.12356.101.4.4.2 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     symbols:
       # The processor's CPU usage (percentage), which is an average calculated over the last minute.
       - OID: 1.3.6.1.4.1.12356.101.4.4.2.1.2
         name: fgProcessorUsage
       # The processor's CPU system space usage, which is an average calculated over the last minute.
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.12356.101.4.4.2.1.2 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
       - OID: 1.3.6.1.4.1.12356.101.4.4.2.1.10
         name: fgProcessorSysUsage
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.12356.101.4.4.2.1.10 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     metric_tags:
       # A unique identifier within the fgProcessorTable.
       - tag: processor_index
@@ -117,21 +216,65 @@ metrics:
           name: fgProcessorEntIndex
 
   ### Memory
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.12356.101.4.4.2.1.1 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # Current memory utilization (percentage).
       OID: 1.3.6.1.4.1.12356.101.4.1.4.0
       name: fgSysMemUsage
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.12356.101.4.1.4 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # Total physical memory (RAM) installed (KB).
       OID: 1.3.6.1.4.1.12356.101.4.1.5.0
       name: fgSysMemCapacity
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.12356.101.4.1.5 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # Current lowmem utilization (percentage). Lowmem is memory available for the kernel's own data structures and kernel specific tables. The system can get into a bad state if it runs out of lowmem.
       OID: 1.3.6.1.4.1.12356.101.4.1.9.0
       name: fgSysLowMemUsage
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.12356.101.4.1.9 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # Total lowmem capacity (KB). See fgSysLowMemUsage for the description of lowmem.
@@ -139,11 +282,33 @@ metrics:
       name: fgSysLowMemCapacity
 
   ### Disk
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.12356.101.4.1.10 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # Current hard disk usage (MB), if disk is present.
       OID: 1.3.6.1.4.1.12356.101.4.1.6.0
       name: fgSysDiskUsage
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.12356.101.4.1.6 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # Total hard disk capacity (MB), if disk is present.
@@ -152,69 +317,246 @@ metrics:
 
   ### Virtual Domains
   # A table of virtual domains configured on the device.
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.12356.101.4.1.7 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: FORTINET-FORTIGATE-MIB
     table:
       OID: 1.3.6.1.4.1.12356.101.3.2.1
       name: fgVdTable
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.12356.101.3.2.1 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     symbols:
       # Operation mode of the virtual domain: nat(1), transparent(2)
       - OID: 1.3.6.1.4.1.12356.101.3.2.1.1.3
         name: fgVdEntOpMode
       # HA cluster member state of the virtual domain on this device: master(1), backup(2), standalone(3)
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.12356.101.3.2.1.1.3 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
       - OID: 1.3.6.1.4.1.12356.101.3.2.1.1.4
         name: fgVdEntHaState
       # CPU usage of the virtual domain (percentage).
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.12356.101.3.2.1.1.4 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
       - OID: 1.3.6.1.4.1.12356.101.3.2.1.1.5
         name: fgVdEntCpuUsage
       # Memory usage of the virtual domain (percentage).
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.12356.101.3.2.1.1.5 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
       - OID: 1.3.6.1.4.1.12356.101.3.2.1.1.6
         name: fgVdEntMemUsage
       # Number of active sessions on the virtual domain.
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.12356.101.3.2.1.1.6 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
       - OID: 1.3.6.1.4.1.12356.101.3.2.1.1.7
         name: fgVdEntSesCount
       # The session setup rate on the virtual domain.
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.12356.101.3.2.1.1.7 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
       - OID: 1.3.6.1.4.1.12356.101.3.2.1.1.8
         name: fgVdEntSesRate
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.12356.101.3.2.1.1.8 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     metric_tags:
       - tag: virtualdomain_index
         column:
           OID: 1.3.6.1.4.1.12356.101.3.2.1.1.1
           name: fgVdEntIndex
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.12356.101.3.2.1.1.1 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
       - tag: virtualdomain_name
         column:
           OID: 1.3.6.1.4.1.12356.101.3.2.1.1.2
           name: fgVdEntName
 
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.12356.101.3.2.1.1.2 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: FORTINET-FORTIGATE-MIB
     table:
       OID: 1.3.6.1.4.1.12356.101.3.2.1
       name: fgVdTable
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.12356.101.3.2.1 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     symbols:
       - name: fgVirtualDomain
         constant_value_one: true
+        TODO_OID_NOT_FOUND: |2
+                           Table OID 1.3.6.1.4.1.12356.101.3.2.1 not found
+                           Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     metric_tags:
       - tag: virtualdomain_index
         column:
           OID: 1.3.6.1.4.1.12356.101.3.2.1.1.1
           name: fgVdEntIndex
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.12356.101.3.2.1.1.1 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
       - tag: virtualdomain_name
         column:
           OID: 1.3.6.1.4.1.12356.101.3.2.1.1.2
           name: fgVdEntName
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.12356.101.3.2.1.1.2 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
       - tag: virtualdomain_state
         column:
           OID: 1.3.6.1.4.1.12356.101.3.2.1.1.4
           name: fgVdEntHaState
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.12356.101.3.2.1.1.4 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         mapping:
           1: primary
           2: secondary
           3: standalone
 
+          TODO: MAPPING NOT UPDATED - SYMBOL ENUMS NOT FOUND IN MIB DATABASE
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # The number of virtual domains in vdTable.
       OID: 1.3.6.1.4.1.12356.101.3.1.1.0
       name: fgVdNumber
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.12356.101.3.1.1 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # The maximum number of virtual domains allowed on the device as allowed by hardware and/or licensing.
@@ -223,23 +565,78 @@ metrics:
 
   ### Interfaces
   # Fortinet specific extensions to MIB-2 ifTable.
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.12356.101.3.1.2 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: FORTINET-FORTIGATE-MIB
     table:
       OID: 1.3.6.1.4.1.12356.101.7.2.1
       name: fgIntfTable
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.12356.101.7.2.1 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     symbols:
       - OID: 1.3.6.1.4.1.12356.101.7.2.1.1.1
         name: fgIntfEntVdom
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.12356.101.7.2.1.1.1 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     metric_tags:
       # The virtual domain the interface belongs to. This index corresponds to the index used by fgVdTable.
       - tag: virtualdomain_index
         column:
           OID: 1.3.6.1.4.1.12356.101.3.2.1.1.1
           name: fgVdEntIndex
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.4.1.12356.101.3.2.1.1.1 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
       - MIB: IF-MIB
         column:
           OID: 1.3.6.1.2.1.31.1.1.1.1
           name: ifName
+          TODO_OID_NOT_FOUND: |
+            OID 1.3.6.1.2.1.31.1.1.1.1 not found
+            Hints:
+            1. Check if the MIB compiles correctly (check output above).
+            2. Check if the MIB is up to date.
+            3. Check if OID is correct.
+            Note:
+            1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+                on the specific meaning of this index.
+                In the example below, the `.7` is the index and means hrCachedMemory:
+                https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
         table: ifXTable
         tag: interface
 
@@ -250,26 +647,81 @@ metrics:
       # Number of active sessions on the device.
       OID: 1.3.6.1.4.1.12356.101.4.1.8.0
       name: fgSysSesCount
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.12356.101.4.1.8 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # The average session setup rate over the past minute.
       OID: 1.3.6.1.4.1.12356.101.4.1.11.0
       name: fgSysSesRate1
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.12356.101.4.1.11 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # Number of active ipv6 sessions on the device.
       OID: 1.3.6.1.4.1.12356.101.4.1.15.0
       name: fgSysSes6Count
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.12356.101.4.1.15 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # The average ipv6 session setup rate over the past minute.
       OID: 1.3.6.1.4.1.12356.101.4.1.16.0
       name: fgSysSes6Rate1
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.12356.101.4.1.16 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # HTTP proxy current connections.
       OID: 1.3.6.1.4.1.12356.101.10.100.4.0
       name: fgApHTTPConnections
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.12356.101.10.100.4 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # Maximum number of connections supported by HTTP proxy.
@@ -278,18 +730,62 @@ metrics:
 
   ### Firewall
   # Firewall policy statistics table.
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.12356.101.10.100.5 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: FORTINET-FORTIGATE-MIB
     table:
       OID: 1.3.6.1.4.1.12356.101.5.1.2.1
       name: fgFwPolStatsTable
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.12356.101.5.1.2.1 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     metric_type: monotonic_count_and_rate
     symbols:
       # Number of packets matched to policy (passed or blocked, depending on policy action). Count is from the time the policy became active.
       - OID: 1.3.6.1.4.1.12356.101.5.1.2.1.1.2
         name: fgFwPolPktCount
       # Number of bytes in packets matching the policy.
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.12356.101.5.1.2.1.1.2 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
       - OID: 1.3.6.1.4.1.12356.101.5.1.2.1.1.3
         name: fgFwPolByteCount
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.12356.101.5.1.2.1.1.3 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     metric_tags:
       # Internal virtual domain index used to uniquely identify rows in this table. This index is also used by other tables referencing a virtual domain.
       - index: 1
@@ -302,14 +798,47 @@ metrics:
     table:
       OID: 1.3.6.1.4.1.12356.101.5.1.2.2
       name: fgFwPol6StatsTable
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.4.1.12356.101.5.1.2.2 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     metric_type: monotonic_count_and_rate
     symbols:
       # Number of packets matched to policy (passed or blocked, depending on policy action). Count is from the time the policy became active.
       - OID: 1.3.6.1.4.1.12356.101.5.1.2.2.1.2
         name: fgFwPol6PktCount
       # Number of bytes in packets matching the policy. See fgFwPol6PktCount.
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.12356.101.5.1.2.2.1.2 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
       - OID: 1.3.6.1.4.1.12356.101.5.1.2.2.1.3
         name: fgFwPol6ByteCount
+        TODO_OID_NOT_FOUND: |
+          OID 1.3.6.1.4.1.12356.101.5.1.2.2.1.3 not found
+          Hints:
+          1. Check if the MIB compiles correctly (check output above).
+          2. Check if the MIB is up to date.
+          3. Check if OID is correct.
+          Note:
+          1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+              on the specific meaning of this index.
+              In the example below, the `.7` is the index and means hrCachedMemory:
+              https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
     metric_tags:
       # Internal virtual domain index used to uniquely identify rows in this table. This index is also used by other tables referencing a virtual domain.
       - index: 1

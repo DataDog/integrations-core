@@ -28,10 +28,32 @@ metrics:
     symbol:
       name: memory.total
       OID: 1.3.6.1.2.1.25.2.3.1.5.1
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.2.1.25.2.3.1.5.1 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: HOST-RESOURCES-MIB
     symbol:
       name: memory.used
       OID: 1.3.6.1.2.1.25.2.3.1.6.1
+      TODO_OID_NOT_FOUND: |
+        OID 1.3.6.1.2.1.25.2.3.1.6.1 not found
+        Hints:
+        1. Check if the MIB compiles correctly (check output above).
+        2. Check if the MIB is up to date.
+        3. Check if OID is correct.
+        Note:
+        1. Manual handling is needed in cases where the OID contains index part and the name of the metric is based
+            on the specific meaning of this index.
+            In the example below, the `.7` is the index and means hrCachedMemory:
+            https://github.com/DataDog/integrations-core/blame/master/snmp/datadog_checks/snmp/data/default_profiles/dell-emc-data-domain.yaml#L60
   - MIB: DELLEMC-OS10-CHASSIS-MIB
     symbol:
       name: dell.os10ChassisTemp
@@ -224,14 +246,3 @@ metrics:
           4: opensent
           5: openconfirm
           6: established
-# Tagging by column OID is not supported at the moment. Should be a table/columns metric + tags instead.
-# metric_tags:
-#   - OID: 1.3.6.1.4.1.674.11000.5000.100.4.1.1.3.1.6
-#     symbol: dell.os10ChassisHwRev
-#     tag: dell_os10_chassis_hw_rev
-#   - OID: 1.3.6.1.4.1.674.11000.5000.100.4.1.1.3.1.7
-#     symbol: dell.os10ChassisServiceTag
-#     tag: dell_os10_chassis_service_tag
-#   - OID: 1.3.6.1.4.1.674.11000.5000.100.4.1.1.3.1.8
-#     symbol: dell.os10ChassisExpServiceCode
-#     tag: dell_os10_chassis_exp_service_code

@@ -175,6 +175,7 @@ metrics:
           0: false
           1: true
           2: reading_error
+          TODO: MAPPING NOT UPDATED - SYMBOL ENUMS NOT FOUND IN MIB DATABASE
       - column:
           OID: 1.3.6.1.4.1.2620.1.6.7.8.2.1.1
           name: fanSpeedSensorIndex
