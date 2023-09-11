@@ -126,7 +126,9 @@ class SQLServer(AgentCheck):
         # DBM
         self.dbm_enabled = self.instance.get('dbm', False)
         self.statement_metrics_config = self.instance.get('query_metrics', {}) or {}
-        self.procedure_metrics_config = self.instance.get('query_metrics', {}) or {} # TODO: Change query_metrics to procedure_metrics
+        self.procedure_metrics_config = (
+            self.instance.get('procedure_metrics', {}) or {}
+        )
         self.settings_config = self.instance.get('collect_settings', {}) or {}
         self.statement_metrics = SqlserverStatementMetrics(self)
         self.procedure_metrics = SqlserverProcedureMetrics(self)

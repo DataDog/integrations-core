@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import math
 import time
 import json
 
@@ -34,6 +33,7 @@ SQL_SERVER_PROCEDURE_METRICS_COLUMNS = [
     "total_spills",
 ]
 
+# TODO: we are doing TOP here, we should use some ORDER BY
 PROCEDURE_METRICS_QUERY = """\
 SELECT TOP ({limit})
     OBJECT_SCHEMA_NAME([object_id], [database_id]) as schema_name,
@@ -69,7 +69,6 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
 
     def __init__(self, check):
         self.log = check.log
-        self.log.debug("SqlserverProcedureMetrics start initialization")
         self.check = check
         # do not emit any dd.internal metrics for DBM specific check code
         self.tags = [t for t in self.check.tags if not t.startswith('dd.internal')]
@@ -81,7 +80,7 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
         self.collection_interval = collection_interval
         super(SqlserverProcedureMetrics, self).__init__(
             check,
-            run_sync=is_affirmative(check.procedure_metrics_config.get('run_sync', False)),
+            run_sync=False,
             enabled=is_affirmative(check.procedure_metrics_config.get('enabled', True)),
             expected_db_exceptions=(),
             min_collection_interval=check.min_collection_interval,
@@ -90,21 +89,14 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
             job_name="procedure-metrics",
             shutdown_callback=self._close_db_conn,
         )
-        self.disable_secondary_tags = is_affirmative(
-            check.procedure_metrics_config.get('disable_secondary_tags', False)
-        )
         self.dm_exec_procedure_stats_row_limit = int(
             check.procedure_metrics_config.get('dm_exec_procedure_stats_row_limit', 10000)
-        )
-        self.enforce_collection_interval_deadline = is_affirmative(
-            check.procedure_metrics_config.get('enforce_collection_interval_deadline', True)
         )
         self._state = StatementMetrics()
         self._conn_key_prefix = "dbm-procedures"
         self._procedure_metrics_query = None
         self._last_stats_query_time = None
-        self._max_procedure_metrics = check.procedure_metrics_config.get("max_queries", 250)
-        self.log.debug("SqlserverProcedureMetrics initialized")
+        self._max_procedure_metrics = check.procedure_metrics_config.get("max_procedures", 250)
 
     def _close_db_conn(self):
         pass
@@ -125,7 +117,6 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
         if self._procedure_metrics_query:
             return self._procedure_metrics_query
         available_columns = self._get_available_procedure_metrics_columns(cursor, SQL_SERVER_PROCEDURE_METRICS_COLUMNS)
-        # TODO: do we need disable_generic_tag branch here like in statements.py?
         self._procedure_metrics_query = PROCEDURE_METRICS_QUERY.format(
             procedure_metrics_columns=', '.join(['sum({}) as {}'.format(c, c) for c in available_columns]),
             limit=self.dm_exec_procedure_stats_row_limit,
@@ -160,6 +151,7 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
         # sort by total_elapsed_time and return the top max_queries
         rows = sorted(rows, key=lambda i: i['total_elapsed_time'], reverse=True)
         rows = rows[:max_queries]
+        # TODO: remove me before merging
         self.log.debug("about to emit %s", json.dumps(rows))
         return {
             'host': self.check.resolved_hostname,
@@ -181,7 +173,6 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
         Collects procedure metrics.
         :return:
         """
-        self.log.debug("collect_procedure_metrics - called")
         # re-use the check's conn module, but set extra_key=dbm- to ensure we get our own
         # raw connection. adodbapi and pyodbc modules are thread safe, but connections are not.
         with self.check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
