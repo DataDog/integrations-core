@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Split query obfuscation and run normalization on the backend ([#15803](https://github.com/DataDog/integrations-core/pull/15803))
+
 ## 14.2.4 / 2023-09-07
 
 ***Fixed***:
