@@ -36,15 +36,15 @@ SQL_SERVER_PROCEDURE_METRICS_COLUMNS = [
 
 PROCEDURE_METRICS_QUERY = """\
 SELECT TOP ({limit})
-    OBJECT_SCHEMA_NAME([object_id]) as schema_name,
-    OBJECT_NAME([object_id]) as procedure_name,
-    DB_NAME(database_id) as database_name,
+    OBJECT_SCHEMA_NAME([object_id], [database_id]) as schema_name,
+    OBJECT_NAME([object_id], [database_id]) as procedure_name,
+    DB_NAME([database_id]) as database_name,
     -- max(type_desc) as type_desc,
     -- max(cached_time) as cached_time,
     -- max(last_execution_time) as last_execution_time,
     {procedure_metrics_columns}
 FROM sys.dm_exec_procedure_stats
-GROUP BY database_name, schema_name, procedure_name;
+GROUP BY object_id, database_id;
 """
 
 
@@ -138,16 +138,18 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
         procedure_metrics_query = self._get_procedure_metrics_query_cached(cursor)
         now = time.time()
         self._last_stats_query_time = now
-        self.log.debug("Running query [%s] %s", procedure_metrics_query)
+        self.log.debug("Running query [%s]", procedure_metrics_query)
         cursor.execute(procedure_metrics_query)
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
         self.log.debug("loaded sql server procedure metrics len(rows)=%s", len(rows))
+        self.log.debug("rows are %s", json.dumps(rows))
         return rows
 
     def _collect_metrics_rows(self, cursor):
         rows = self._load_raw_procedure_metrics_rows(cursor)
+        rows = [r for r in rows if r.get('procedure_name') and r.get('database_name')]
         if not rows:
             return []
         metric_columns = [c for c in rows[0].keys() if c.startswith("total_") or c == 'execution_count']
