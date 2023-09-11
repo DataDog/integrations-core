@@ -42,7 +42,7 @@ SELECT TOP ({limit})
     -- max(type_desc) as type_desc,
     -- max(cached_time) as cached_time,
     -- max(last_execution_time) as last_execution_time,
-    {query_metrics_columns}
+    {procedure_metrics_columns}
 FROM sys.dm_exec_procedure_stats
 GROUP BY database_name, schema_name, procedure_name;
 """
@@ -127,7 +127,7 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
         available_columns = self._get_available_procedure_metrics_columns(cursor, SQL_SERVER_PROCEDURE_METRICS_COLUMNS)
         # TODO: do we need disable_generic_tag branch here like in statements.py?
         self._procedure_metrics_query = PROCEDURE_METRICS_QUERY.format(
-            query_metrics_column=', '.join(['sum({}) as {}'.format(c, c) for c in available_columns]),
+            procedure_metrics_columns=', '.join(['sum({}) as {}'.format(c, c) for c in available_columns]),
             limit=self.dm_exec_procedure_stats_row_limit,
         )
         return self._procedure_metrics_query
@@ -137,13 +137,9 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
         self.log.debug("collecting sql server procedure metrics")
         procedure_metrics_query = self._get_procedure_metrics_query_cached(cursor)
         now = time.time()
-        query_interval = self.collection_interval
-        if self._last_stats_query_time:
-            query_interval = now - self._last_stats_query_time
         self._last_stats_query_time = now
-        params = (math.ceil(query_interval),)
-        self.log.debug("Running query [%s] %s", procedure_metrics_query, params)
-        cursor.execute(procedure_metrics_query, params)
+        self.log.debug("Running query [%s] %s", procedure_metrics_query)
+        cursor.execute(procedure_metrics_query)
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
