@@ -129,7 +129,6 @@ metrics:
 
   # Power supplies.
 
-    # Current power meter reading in Watts.
         mapping:
           1: other
           2: unknown
@@ -144,6 +143,7 @@ metrics:
           11: ambient
           12: chassis
           13: bridge_card
+    # Current power meter reading in Watts.
   - MIB: CPQHLTH-MIB
     symbol:
       OID: 1.3.6.1.4.1.232.6.2.15.3.0
