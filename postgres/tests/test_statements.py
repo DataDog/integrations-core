@@ -778,9 +778,9 @@ def test_statement_metadata(
     matching_samples = [s for s in samples if s['db']['query_signature'] == query_signature]
     assert len(matching_samples) == 1
     sample = matching_samples[0]
-    assert sample['db']['metadata']['tables'] == None
-    assert sample['db']['metadata']['commands'] == None
-    assert sample['db']['metadata']['comments'] == None
+    assert sample['db']['metadata']['tables'] is None
+    assert sample['db']['metadata']['commands'] is None
+    assert sample['db']['metadata']['comments'] is None
 
     if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_statements_view == "pg_stat_statements":
         # cannot catch any queries from other users
@@ -792,8 +792,8 @@ def test_statement_metadata(
     ]
     assert len(fqt_samples) == 1
     fqt = fqt_samples[0]
-    assert fqt['db']['metadata']['tables'] == None
-    assert fqt['db']['metadata']['commands'] == None
+    assert fqt['db']['metadata']['tables'] is None
+    assert fqt['db']['metadata']['commands'] is None
 
     # Test metrics metadata, metadata in metrics are located in the rows.
     metrics = aggregator.get_event_platform_events("dbm-metrics")
@@ -802,8 +802,8 @@ def test_statement_metadata(
     matching_metrics = [m for m in metric['postgres_rows'] if m['query_signature'] == normalized_query_signature]
     assert len(matching_metrics) == 1
     metric = matching_metrics[0]
-    assert metric['dd_tables'] == None
-    assert metric['dd_commands'] == None
+    assert metric['dd_tables'] is None
+    assert metric['dd_commands'] is None
 
 
 @pytest.mark.parametrize(
