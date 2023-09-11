@@ -205,6 +205,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 'postgres_version': payload_pg_version(self._check.version),
                 'ddagentversion': datadog_agent.get_version(),
                 "ddagenthostname": self._check.agent_hostname,
+                "normalization_options": self._config.normalization_options,
             }
             self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
         except Exception:
@@ -434,9 +435,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
             obfuscated_query = statement['query']
             normalized_row['query'] = obfuscated_query
             normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
-            metadata = statement['metadata']
-            normalized_row['dd_tables'] = metadata.get('tables', None)
-            normalized_row['dd_commands'] = metadata.get('commands', None)
             normalized_rows.append(normalized_row)
 
         return normalized_rows
@@ -471,4 +469,5 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     "datname": row["datname"],
                     "rolname": row["rolname"],
                 },
+                "normalization_options": self._config.normalization_options,
             }

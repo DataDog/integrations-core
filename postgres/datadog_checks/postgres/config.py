@@ -121,33 +121,10 @@ class PostgresConfig:
         if azure:
             self.cloud_metadata.update({'azure': azure})
         obfuscator_options_config = instance.get('obfuscator_options', {}) or {}
-        self.obfuscator_options = {
-            # Valid values for this can be found at
-            # https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/database.md#connection-level-attributes
-            'dbms': 'postgresql',
-            'replace_digits': is_affirmative(
-                obfuscator_options_config.get(
-                    'replace_digits', obfuscator_options_config.get('quantize_sql_tables', False)
-                )
-            ),
-            'dollar_quoted_func': is_affirmative(obfuscator_options_config.get('keep_dollar_quoted_func', True)),
-            'keep_sql_alias': is_affirmative(obfuscator_options_config.get('keep_sql_alias', True)),
-            'return_json_metadata': is_affirmative(obfuscator_options_config.get('collect_metadata', True)),
-            'table_names': is_affirmative(obfuscator_options_config.get('collect_tables', True)),
-            'collect_commands': is_affirmative(obfuscator_options_config.get('collect_commands', True)),
-            'collect_comments': is_affirmative(obfuscator_options_config.get('collect_comments', True)),
-        }
+        self._set_obfuscation_normalization_options(obfuscator_options_config)
         self.log_unobfuscated_queries = is_affirmative(instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans = is_affirmative(instance.get('log_unobfuscated_plans', False))
         self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 1800)
-        
-        # Disable local normalization and run backend normalization
-        self.normalization_options = {
-            'dbms': 'postgresql',
-            'collect_tables': is_affirmative(obfuscator_options_config.get('collect_tables', True)),
-            'collect_commands': is_affirmative(obfuscator_options_config.get('collect_commands', True)),
-            'collect_comments': is_affirmative(obfuscator_options_config.get('collect_comments', True)),
-        }
 
     def _build_tags(self, custom_tags):
         # Clean up tags in case there was a None entry in the instance
@@ -172,6 +149,39 @@ class PostgresConfig:
         if rds_tags:
             tags.extend(rds_tags)
         return tags
+
+    def _set_obfuscation_normalization_options(self, obfuscator_options_config):
+        # Valid values for this can be found at
+        # https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/database.md#connection-level-attributes
+        dbms = 'postgresql'
+
+        # obfuscation options
+        replace_digits = is_affirmative(
+            obfuscator_options_config.get('replace_digits', obfuscator_options_config.get('quantize_sql_tables', False))
+        )
+        dollar_quoted_func = is_affirmative(obfuscator_options_config.get('keep_dollar_quoted_func', True))
+
+        # normalization options
+        collect_tables = is_affirmative(obfuscator_options_config.get('collect_tables', True))
+        collect_commands = is_affirmative(obfuscator_options_config.get('collect_commands', True))
+        collect_comments = is_affirmative(obfuscator_options_config.get('collect_comments', True))
+        keep_sql_alias = is_affirmative(obfuscator_options_config.get('keep_sql_alias', True))
+        backend_normalization = True
+
+        self.normalization_options = {
+            'dbms': dbms,
+            'collect_tables': collect_tables,
+            'collect_commands': collect_commands,
+            'collect_comments': collect_comments,
+            'keep_sql_alias': keep_sql_alias,
+            'backend_normalization': backend_normalization,
+        }
+        self.obfuscator_options = {
+            'dbms': dbms,
+            'replace_digits': replace_digits,
+            'dollar_quoted_func': dollar_quoted_func,
+            'backend_normalization': backend_normalization,
+        }
 
     @staticmethod
     def _get_custom_metrics(custom_metrics):
