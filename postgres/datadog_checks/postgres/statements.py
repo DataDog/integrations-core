@@ -437,6 +437,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
             obfuscated_query = statement['query']
             normalized_row['query'] = obfuscated_query
             normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
+            metadata = statement['metadata']
+            normalized_row['dd_tables'] = metadata.get('tables', None)
+            normalized_row['dd_commands'] = metadata.get('commands', None)
             normalized_rows.append(normalized_row)
 
         return normalized_rows

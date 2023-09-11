@@ -382,7 +382,11 @@ class PostgresStatementSamples(DBMAsyncJob):
             else:
                 statement = obfuscate_sql_with_metadata(row['query'], self._obfuscate_options)
                 obfuscated_query = statement['query']
+                metadata = statement['metadata']
                 normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
+                normalized_row['dd_tables'] = metadata.get('tables', None)
+                normalized_row['dd_commands'] = metadata.get('commands', None)
+                normalized_row['dd_comments'] = metadata.get('comments', None)
         except Exception as e:
             if self._config.log_unobfuscated_queries:
                 self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['query'], e)
