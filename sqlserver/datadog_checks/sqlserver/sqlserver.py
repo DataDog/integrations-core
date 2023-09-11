@@ -20,6 +20,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
+from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
 from datadog_checks.sqlserver.utils import Database, parse_sqlserver_major_version
 
 try:
@@ -125,8 +126,10 @@ class SQLServer(AgentCheck):
         # DBM
         self.dbm_enabled = self.instance.get('dbm', False)
         self.statement_metrics_config = self.instance.get('query_metrics', {}) or {}
+        self.procedure_metrics_config = self.instance.get('query_metrics', {}) or {} # TODO: Change query_metrics to procedure_metrics
         self.settings_config = self.instance.get('collect_settings', {}) or {}
         self.statement_metrics = SqlserverStatementMetrics(self)
+        self.procedure_metrics = SqlserverProcedureMetrics(self)
         self.sql_metadata = SqlserverMetadata(self)
         self.activity_config = self.instance.get('query_activity', {}) or {}
         self.activity = SqlserverActivity(self)
@@ -195,6 +198,7 @@ class SQLServer(AgentCheck):
 
     def cancel(self):
         self.statement_metrics.cancel()
+        self.procedure_metrics.cancel()
         self.activity.cancel()
         self.sql_metadata.cancel()
 
@@ -783,6 +787,7 @@ class SQLServer(AgentCheck):
             self._send_database_instance_metadata()
             if self.dbm_enabled:
                 self.statement_metrics.run_job_loop(self.tags)
+                self.procedure_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
                 self.sql_metadata.run_job_loop(self.tags)
         else:

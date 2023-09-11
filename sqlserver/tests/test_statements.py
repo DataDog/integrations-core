@@ -329,7 +329,7 @@ def test_statement_metrics_and_plans(
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
-    payload = dbm_metrics[0]
+    payload = next((n for n in dbm_metrics if n.get('collection_type') == 'query_metrics'), None)
     # host metadata
     assert payload['sqlserver_version'].startswith("Microsoft SQL Server"), "invalid version"
     assert payload['host'] == "stubbed.hostname", "wrong hostname"
@@ -474,7 +474,7 @@ def test_statement_metrics_limit(
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
-    payload = dbm_metrics[0]
+    payload = next((n for n in dbm_metrics if n.get('collection_type') == 'query_metrics'), None)
     # metrics rows
     sqlserver_rows = payload.get('sqlserver_rows', [])
     assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
@@ -651,7 +651,7 @@ def test_statement_cloud_metadata(
 
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(dbm_metrics) == 1, "should have collected exactly one metrics payload"
-    payload = dbm_metrics[0]
+    payload = next((n for n in dbm_metrics if n.get('collection_type') == 'query_metrics'), None)
     # host metadata
     assert payload['sqlserver_version'].startswith("Microsoft SQL Server"), "invalid version"
     assert payload['host'] == "stubbed.hostname", "wrong hostname"
