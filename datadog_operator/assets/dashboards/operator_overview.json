@@ -15,7 +15,7 @@
                         "id": 4981651194825710,
                         "definition": {
                             "type": "note",
-                            "content": "### The Datadog Operator is an open source Kubernetes Operator that enables you to deploy and configure the Datadog Agent in a Kubernetes environment.\n\nThe Datadog Operator dashboard gives you visibility into health and performance metrics of the Operator and overview of the resources it manages.\n\n***Some of the graphs assume `datadog-agent` as the [DatadogAgent](https://docs.datadoghq.com/containers/kubernetes/installation/?tab=operator#deploy-an-agent-with-the-operator) resource name. They will appear empty if that's not the case.***\n\nFurther reading around the Datadog Operator and Kubernetes Controllers\n* [Datadog Operator](https://docs.datadoghq.com/containers/datadog_operator/)\n* [Kubernetes Metrics Reference](https://kubernetes.io/docs/reference/instrumentation/metrics/)\n* [Kubernetes Operator Pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)",
+                            "content": "### The Datadog Operator is an open source Kubernetes Operator that enables you to deploy and configure the Datadog Agent in a Kubernetes environment.\n\nThe Datadog Operator dashboard gives you visibility into health and performance metrics of the Operator and overview of the resources it manages.\n\n***Some of the graphs assume `datadog` as the [DatadogAgent](https://docs.datadoghq.com/containers/kubernetes/installation/?tab=operator#deploy-an-agent-with-the-operator) resource name. They will appear empty if that's not the case.***\n\nFurther reading around the Datadog Operator and Kubernetes Controllers\n* [Datadog Operator](https://docs.datadoghq.com/containers/datadog_operator/)\n* [Kubernetes Metrics Reference](https://kubernetes.io/docs/reference/instrumentation/metrics/)\n* [Kubernetes Operator Pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)",
                             "background_color": "white",
                             "font_size": "14",
                             "text_align": "left",
@@ -435,7 +435,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes.memory.rss{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_app_instance:datadog-agent-cluster-agent,kube_deployment:*} by {kube_deployment,kube_cluster_name,kube_namespace}",
+                                            "query": "sum:kubernetes.memory.rss{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_app_instance:datadog-cluster-agent,kube_deployment:*} by {kube_deployment,kube_cluster_name,kube_namespace}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "last"
@@ -575,7 +575,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes.pods.running{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_app_instance:datadog-agent-agent}",
+                                            "query": "sum:kubernetes.pods.running{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_app_instance:datadog-agent}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "last"
@@ -615,7 +615,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes.pods.running{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_app_instance:datadog-agent-cluster-agent}",
+                                            "query": "sum:kubernetes.pods.running{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_app_instance:datadog-cluster-agent}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "last"
@@ -650,7 +650,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes.pods.running{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_deployment:*,kube_app_instance:datadog-agent-cluster-checks-runner}",
+                                            "query": "sum:kubernetes.pods.running{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_deployment:*,kube_app_instance:datadog-cluster-checks-runner}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "last"

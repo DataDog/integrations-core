@@ -8,7 +8,6 @@ import re
 import time
 
 from datadog_checks.base import is_affirmative
-from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
@@ -135,8 +134,8 @@ DM_EXEC_REQUESTS_COLS = [
 ]
 
 
-def _hash_to_hex(hash):
-    return to_native_string(binascii.hexlify(hash))
+def _hash_to_hex(hash) -> str:
+    return binascii.hexlify(hash).decode("utf-8")
 
 
 def agent_check_getter(self):

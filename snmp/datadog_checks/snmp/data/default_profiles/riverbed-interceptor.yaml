@@ -16,10 +16,11 @@ metrics:
     symbol:
       name: cpu.usage
       OID: 1.3.6.1.4.1.17163.1.3.5.1.4.0
-  - MIB: INTERCEPTOR-MIB
-    symbol:
-      name: riverbed.interceptor.health
-      OID: 1.3.6.1.4.1.17163.1.3.2.2.0
+  #  - MIB: INTERCEPTOR-MIB
+  #    symbol:
+  #      name: riverbed.interceptor.health
+  #      OID: 1.3.6.1.4.1.17163.1.3.2.2.0
+  # scalar string metric is not supported yet (keep this metric and this comment in profile until it's fixed)
   #  - MIB: INTERCEPTOR-MIB
   #    symbol:
   #      name: riverbed.interceptor.serviceStatus

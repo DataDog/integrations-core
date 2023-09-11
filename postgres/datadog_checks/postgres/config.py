@@ -58,6 +58,9 @@ class PostgresConfig:
                 '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
             )
         self.max_connections = instance.get('max_connections', 30)
+        connection_timeout_ms = instance.get('connection_timeout', 5000)
+        # Convert milliseconds to seconds and ensure a minimum of 2 seconds, which is enforced by psycopg
+        self.connection_timeout = max(2, connection_timeout_ms / 1000)
         self.tags = self._build_tags(instance.get('tags', []))
 
         ssl = instance.get('ssl', "disable")

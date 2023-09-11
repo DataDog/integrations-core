@@ -2,11 +2,29 @@
 
 ## Unreleased
 
-## 14.2.1 / 2023-08-29
+## 14.2.4 / 2023-09-07
+
+***Fixed***:
+
+* Initialize pg_settings on Postgres check start and lazy load pg_settings if it's not set ([#15773](https://github.com/DataDog/integrations-core/pull/15773))
+
+## 14.2.3 / 2023-09-06
+
+***Fixed***:
+
+* Set lower connection timeout on connection pool to avoid long running checks ([#15768](https://github.com/DataDog/integrations-core/pull/15768))
+
+## 14.2.2 / 2023-09-05
 
 ***Fixed***:
 
 * Revise postgresql.replication_delay to Function with Archive WAL-driven PostgreSQL Replica ([#15629](https://github.com/DataDog/integrations-core/pull/15629))
+* Pass timeout when connection pool closes ([#15724](https://github.com/DataDog/integrations-core/pull/15724))
+
+## 14.2.1 / 2023-08-29
+
+***Fixed***:
+
 * Return Azure AD auth token in correct format ([#15701](https://github.com/DataDog/integrations-core/pull/15701))
 
 ## 14.2.0 / 2023-08-18
