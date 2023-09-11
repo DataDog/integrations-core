@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import time
-import json
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
