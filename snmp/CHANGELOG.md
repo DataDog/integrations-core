@@ -2,15 +2,12 @@
 
 ## Unreleased
 
-***Changed***:
-
-* Delete unnecessary extend for ubiquiti profiles ([#15643](https://github.com/DataDog/integrations-core/pull/15643))
-
 ***Fixed***:
 
 * Remove unsupported metric in riverbed-interceptor.yaml ([#15678](https://github.com/DataDog/integrations-core/pull/15678))
 * [SNMP] Fix mapping for apc-pdu ([#15765](https://github.com/DataDog/integrations-core/pull/15765))
 * Fixes for SNMP Profiles introduced in 7.48 ([#15800](https://github.com/DataDog/integrations-core/pull/15800))
+* Delete unnecessary extend for ubiquiti profiles ([#15643](https://github.com/DataDog/integrations-core/pull/15643))
 
 ## 6.2.1 / 2023-09-05
 
