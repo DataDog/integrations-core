@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Changed***:
+
+* Bump the minimum base check version to 33.0.0 ([#15806](https://github.com/DataDog/integrations-core/pull/15806))
+
 ## 2.12.1 / 2023-08-18
 
 ***Fixed***:
