@@ -29,7 +29,7 @@ Save this file to your integration's `assets/monitors` folder.  Add the asset to
 
 ### Open a pull request
 
-Open a pull request (PR) to add your recommended monitor JSON file and updated manifest file to the corresponding integration folder in the [`integrations-extras` GitHub repository][5]. Datadog reviews all `integration-extras` PRs. Once approved, Datadog merges the PR and your integration dashboard is pushed to production.
+Open a pull request (PR) to add your recommended monitor JSON file and updated manifest file to the corresponding integration folder in the [`integrations-extras` GitHub repository][5]. Datadog reviews all `integration-extras` PRs. Once approved, Datadog merges the PR and your integration recommended monitor is pushed to production.
 
 ### Verify your monitor in production
 
