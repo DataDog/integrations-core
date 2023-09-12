@@ -434,6 +434,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     self._log.debug("Failed to obfuscate query | err=[%s]", e)
                 continue
 
+            self._log.debug("Obfuscated query=[%s] to [%s]", row['query'], statement['query'])
             obfuscated_query = statement['query']
             normalized_row['query'] = obfuscated_query
             normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)

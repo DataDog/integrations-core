@@ -381,6 +381,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 normalized_row['query_signature'] = compute_sql_signature(backend_type)
             else:
                 statement = obfuscate_sql_with_metadata(row['query'], self._obfuscate_options)
+                self._log.debug("Obfuscated query=[%s] to [%s]", row['query'], statement['query'])
                 obfuscated_query = statement['query']
                 metadata = statement['metadata']
                 normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
