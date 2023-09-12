@@ -72,9 +72,21 @@ INSTANCE_METRICS = [
     ('sqlserver.stats.procs_blocked', 'Processes blocked', ''),  # LARGE_RAWCOUNT
     # SQLServer:Access Methods
     ('sqlserver.access.page_splits', 'Page Splits/sec', ''),  # BULK_COUNT
+    ('sqlserver.access.full_scans', 'Full Scans/sec', ''),  # BULK_COUNT
+    ('sqlserver.access.range_scans', 'Range Scans/sec', ''),  # BULK_COUNT
+    ('sqlserver.access.probe_scans', 'Probe Scans/sec', ''),  # BULK_COUNT
+    ('sqlserver.access.index_searches', 'Index Searches/sec', ''),  # BULK_COUNT
     # SQLServer:Memory Manager
     ('sqlserver.memory.memory_grants_pending', 'Memory Grants Pending', ''),
     ('sqlserver.memory.total_server_memory', 'Total Server Memory (KB)', ''),
+    ('sqlserver.memory.sql_cache', 'SQL Cache Memory (KB)', ''),
+    ('sqlserver.memory.grants_outstanding', 'Memory Grants Outstanding', ''),
+    ('sqlserver.memory.database_cache', 'Database Cache Memory (KB)', ''),
+    ('sqlserver.memory.connection', 'Connection Memory (KB)', ''),
+    ('sqlserver.memory.optimizer', 'Optimizer Memory (KB)', ''),
+    ('sqlserver.memory.granted_workspace', 'Granted Workspace Memory (KB)', ''),
+    ('sqlserver.memory.lock', 'Lock Memory (KB)', ''),
+    ('sqlserver.memory.log_pool_memory', 'Log Pool Memory (KB)', ''),
     # SQLServer:Buffer Manager
     ('sqlserver.buffer.cache_hit_ratio', 'Buffer cache hit ratio', ''),  # RAW_LARGE_FRACTION
     ('sqlserver.buffer.page_life_expectancy', 'Page life expectancy', ''),  # LARGE_RAWCOUNT
@@ -90,9 +102,15 @@ INSTANCE_METRICS = [
     ('sqlserver.stats.sql_recompilations', 'SQL Re-Compilations/sec', ''),  # BULK_COUNT
     # SQLServer:Locks
     ('sqlserver.stats.lock_waits', 'Lock Waits/sec', '_Total'),  # BULK_COUNT
+    ('sqlserver.latches.latch_waits', 'Latch Waits/sec', ''),  # BULK_COUNT
+    ('sqlserver.latches.latch_wait_time', 'Average Latch Wait Time (ms)', ''),  # BULK_COUNT
+    ('sqlserver.locks.deadlocks', 'Number of Deadlocks/sec', '_Total'),  # BULK_COUNT
     # SQLServer:Plan Cache
     ('sqlserver.cache.object_counts', 'Cache Object Counts', '_Total'),
     ('sqlserver.cache.pages', 'Cache Pages', '_Total'),
+    # SQLServer:Database Replica
+    ('sqlserver.replica.transaction_delay', 'Transaction Delay', '_Total'),
+    ('sqlserver.replica.flow_control_sec', 'Flow Control/sec', '_Total'),
     # SQLServer:Transactions
     ('sqlserver.stats.version_store_size', 'Version Store Size (KB)', ''),
     ('sqlserver.stats.version_cleanup_rate', 'Version Cleanup rate (KB/s)', ''),
