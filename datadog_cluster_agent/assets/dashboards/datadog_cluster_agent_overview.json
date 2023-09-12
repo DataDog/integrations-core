@@ -1752,7 +1752,7 @@
                 "markers": [],
                 "requests": [
                     {
-                        "display_type": "area",
+                        "display_type": "bars",
                         "formulas": [
                             {
                                 "formula": "query1"
