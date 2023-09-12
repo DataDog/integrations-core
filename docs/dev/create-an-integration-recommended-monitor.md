@@ -1,68 +1,75 @@
 ---
 title: Create an Integration Recommended Monitor
 kind: documentation
+further_reading:
+- link: "/monitors/configuration/"
+  tag: "Documentation"
+  text: "Configure Monitors"
 ---
 
 ## Overview
 
-[Datadog Monitors][1] enable you to efficiently monitor your infrastructure and integrations by tracking key metrics. Datadog provides a set of out-of-the-box monitors for many features and integrations. You can access these by viewing your [Monitors Template list][4].
+[Datadog Monitors][1] track key metrics, so you can efficiently monitor your infrastructure and integrations. Datadog provides a set of out-of-the-box monitors for many features and integrations. View these monitors in your [Monitors Template list][2].
 
-If you have [created a Datadog integration][2], you may wish to create an out-of-the-box monitor to help your integration's users more quickly find value in your integration. This guide provides steps for creating an integration recommended monitor and best practices to follow during the creation process.
+Create an out-of-the-box monitor to help users find value in your Datadog integration. This guide provides steps for creating an integration recommended monitor and best practices to follow during the creation process.
 
-To create a Datadog integration, see [Create a New Integration][2].
+To create a Datadog integration, see [Create a New Integration][3].
 
+## Steps to create a recommended monitor
+### Build a monitor JSON Schema
 
-## Create an integration recommended monitor
-### Create a new monitor
+1. Navigate to **[Monitors > New Monitor][4]** and create a new monitor.
 
-In Datadog, [create a new monitor][4]. 
+2. Follow the [best practices](#configuration-best-practices) listed in this guide to configure your monitor.
+ 
+3. Click **Export Monitor**.
 
-Follow the best practices in this guide when defining your monitor.
+4. Check **Select to export as a recommended monitor**.
+    {{< img src="developers/integrations/monitor_json.png" alt="Monitor JSON modal to export as recommended monitor" style="width:100%;" >}}
 
-### Export your monitor
+5. Click **Copy** to use the JSON schema of your configured monitor.
 
-Select the checkbox to export the monitor as a recommended monitor.
-Export your monitor to JSON using the export button.
-Name the file according to your monitor title: for example, `your_integration_name_alert.json`.
+6. Save the copied schema to a JSON file and name it according to your monitor title. For example, `your_integration_name_alert.json`.
 
-Within the monitor JSON file, fill out the Title, Description, and Tags. See [follow alerting best practices][#follow-alerting-best-practices] for more info on how to best fill out these fields. 
-
-Save this file to your integration's `assets/monitors` folder.  Add the asset to your `manifest.json` file. See [Integrations Assets Reference][3] for more information about your integration's file structure and manifest file.
+7. In the monitor JSON file, fill out the Title, Description, and Tags. For more information, see [Configuration best practices](#configuration-best-practices). 
 
 ### Open a pull request
 
-Open a pull request (PR) to add your recommended monitor JSON file and updated manifest file to the corresponding integration folder in the [`integrations-extras` GitHub repository][5]. Datadog reviews all `integration-extras` PRs. Once approved, Datadog merges the PR and your integration recommended monitor is pushed to production.
+1. Save the monitor JSON file to your integration's `assets/monitors` folder.  Add the asset to your `manifest.json` file. See [Integrations Assets Reference][5] for more information about your integration's file structure and manifest file.
 
-### Verify your monitor in production
+2. Open a pull request (PR) to add your recommended monitor JSON file and updated manifest file to the corresponding integration folder in the [`integrations-extras` GitHub repository][6]. 
 
-First, ensure the relevant integration tile is `Installed` in Datadog. You must install an integration to see its associated out-of-the-box monitors.
+3. After it's approved, Datadog merges the PR and your integration recommended monitor is pushed to production.
 
-Find your monitor in [Monitors Template list][4]. Ensure logos render correctly on the Monitors Template lists page.
+## Verify your monitor in production
 
-## Follow alerting best practices
+To see the out-of-the-box monitor, the relevant integration tile must be `Installed` in Datadog. 
 
-Below is an example of a well-defined monitors:
+Find your monitor in the [Monitors Template list][2]. Ensure logos render correctly on the Monitors Template lists page.
 
-{{< img src="developers/create-an-integration-recommended-monitor/monitor-example.png" alt="An example of a Recommended Monitor" width="100%">}}
+## Configuration best practices
 
-Refer to our [documentation on defining a monitor][6].
+In addition to the monitor definition, the Title, Description, and Tags fields are required for recommended monitors. For more information, see the documentation on [configuring a monitor][7].
 
-In addition to the monitor definition, the Title, Description, and Tags fields are required for recommended monitors. Below are best practices for these fields:
-- **Title** is what users see when browsing the content in the Datadog platform, it should allow them to quickly understand the underlying failure mode the alert is covering. See examples below:
-    - New flaky tests
-    - High CPU usage on hosts
-    - New Error Tracking issues
-    - Too many opened connections on databases
-- **Description** should be used to provide extra context around the failure mode and also about the impact this mode can have on the system. It should be concise and allow users to understand at a glance whether it is relevant or not for them to create a monitor out of it.
-    - For example: “Too many opened connections on databases”: Get notified whenever the number of connections to the database is too high. When too many connections are opened, new clients might not be able to open new connections and thus to execute the queries serving end-users.
-- **Tags** should be set to "integration:<app_id>". See other available tags [here][7].
+|      | Description    | Examples |
+| ---  | ----------- | ----------- |
+|Title | Allows users to quickly understand the underlying failure mode the alert is covering.| - New flaky tests<br> - High CPU usage on hosts<br> - New Error Tracking issues</br> - Too many opened connections on databases|
+|Description | Provides extra context around the failure mode and also about the impact this mode can have on the system. It should be concise and allow users to understand at a glance whether it is relevant or not for them to create a monitor out of it.| **Title**: Too many opened connections on databases<br> **Description**: Get notified whenever the number of connections to the database is too high. When too many connections are opened, new clients might not be able to open new connections and thus to execute the queries serving end-users.|
+|Tags | Set to "integration:<app_id>".| See other available monitor tags [here][8].|
 
+Below is an example of a well-defined monitor:
+
+{{< img src="developers/integrations/example_recommended_monitor_config.png" alt="An example of a Recommended Monitor configuration" width="100%">}}
+
+## Further reading
+
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: /monitors
-[2]: /developers/integrations/new_check_howto/?tab=configurationtemplate
-[3]: /developers/integrations/check_references/#manifest-file
-[4]: https://app.datadoghq.com/monitors/recommended
-[5]: https://github.com/DataDog/integrations-extras
-[6]: https://docs.datadoghq.com/monitors/configuration/
-[7]: https://docs.datadoghq.com/monitors/manage/#monitor-tags
-[8]: 
+[2]: https://app.datadoghq.com/monitors/recommended
+[3]: /developers/integrations/new_check_howto/?tab=configurationtemplate
+[4]: https://app.datadoghq.com/monitors/create
+[5]: /developers/integrations/check_references/#manifest-file
+[6]: https://github.com/DataDog/integrations-extras
+[7]: /monitors/configuration/
+[8]: /monitors/manage/#monitor-tags
