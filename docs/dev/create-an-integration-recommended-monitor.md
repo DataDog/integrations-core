@@ -25,6 +25,8 @@ Select the checkbox to export the monitor as a recommended monitor.
 Export your monitor to JSON using the export button.
 Name the file according to your monitor title: for example, `your_integration_name_alert.json`.
 
+Within the monitor JSON file, fill out the Title, Description, and Tags. See [follow alerting best practices][#follow-alerting-best-practices] for more info on how to best fill out these fields. 
+
 Save this file to your integration's `assets/monitors` folder.  Add the asset to your `manifest.json` file. See [Integrations Assets Reference][3] for more information about your integration's file structure and manifest file.
 
 ### Open a pull request
@@ -45,7 +47,7 @@ Below is an example of a well-defined monitors:
 
 Refer to our [documentation on defining a monitor][6].
 
-In addition to the monitor definition, the following information is required for recommended monitors:
+In addition to the monitor definition, the Title, Description, and Tags fields are required for recommended monitors. Below are best practices for these fields:
 - **Title** is what users see when browsing the content in the Datadog platform, it should allow them to quickly understand the underlying failure mode the alert is covering. See examples below:
     - New flaky tests
     - High CPU usage on hosts
@@ -63,3 +65,4 @@ In addition to the monitor definition, the following information is required for
 [5]: https://github.com/DataDog/integrations-extras
 [6]: https://docs.datadoghq.com/monitors/configuration/
 [7]: https://docs.datadoghq.com/monitors/manage/#monitor-tags
+[8]: 
