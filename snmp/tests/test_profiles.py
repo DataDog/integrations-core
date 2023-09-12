@@ -969,10 +969,7 @@ def test_idrac(aggregator):
         for gauge in PROBE_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    tag_mappings = [
-        ('12', '6', '15'),
-        ('', 'voltage_probe_type_is1_point5_volt', 'voltage_probe_type_is_memory_status'),
-    ]
+    tag_mappings = [('12', '6', '15'), ('22', '3', '19')]
     for chassis_index, probe_type, probe_index in tag_mappings:
         tags = [
             'chassis_index:{}'.format(chassis_index),
