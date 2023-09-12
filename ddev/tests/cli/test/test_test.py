@@ -945,7 +945,15 @@ class TestPluginInteraction:
 
         assert run.call_args_list == [
             mocker.call(
+                [sys.executable, '-m', 'hatch', 'env', 'remove', 'default'],
+                shell=False,
+            ),
+            mocker.call(
                 [sys.executable, '-m', 'hatch', 'env', 'run', '--ignore-compat', '--', 'test', '--tb', 'short'],
+                shell=False,
+            ),
+            mocker.call(
+                [sys.executable, '-m', 'hatch', 'env', 'remove', 'default'],
                 shell=False,
             ),
         ]
