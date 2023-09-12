@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add [TCP proxy statistics](https://www.envoyproxy.io/docs/envoy/latest/configuration/listeners/network_filters/tcp_proxy_filter#statistics) ([#15704](https://github.com/DataDog/integrations-core/pull/15704))
+
 ## 3.0.0 / 2023-08-10
 
 ***Changed***:
@@ -16,7 +20,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 2.6.1 / 2023-07-10
+## 2.6.1 / 2023-07-10 / Agent 7.47.0
 
 ***Fixed***:
 

@@ -268,7 +268,7 @@ metrics:
           name: doorSwitchSensorValue
         tag: netbotz_door_switch_sensor_value
         mapping:
-          -1: none
+          -1: 'null'
           0: open
           1: closed
   - MIB: NETBOTZV2-MIB
@@ -352,4 +352,4 @@ metrics:
         mapping:
           0: no
           1: yes
-          2: none
+          2: 'null'

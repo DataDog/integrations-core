@@ -41,7 +41,8 @@ def test_e2e_profile_cyberpower_pdu(dd_agent_check):
     aggregator.assert_metric('snmp.cyberpower.ePDUStatusInputFrequency', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.cyberpower.ePDUStatusInputVoltage', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.cyberpower.envirHumidity', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cyberpower.envir_temperature', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cyberpower.envirTemperature', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cyberpower.envirTemperatureCelsius', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
         ['e_pdu_load_status_index:5', 'e_pdu_load_status_load_state:load_overload'],
         ['e_pdu_load_status_index:7', 'e_pdu_load_status_load_state:load_overload'],
@@ -153,10 +154,10 @@ def test_e2e_profile_cyberpower_pdu(dd_agent_check):
             'snmp.cyberpower.ePDU2DeviceStatusApparentPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cyberpower.ePDU2DeviceStatusLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cyberpower.ePDU2DeviceStatusCurrentLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cyberpower.ePDU2DeviceStatusPeakLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cyberpower.ePDU2DeviceStatusCurrentPeakLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
             'snmp.cyberpower.ePDU2DeviceStatusPowerFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row

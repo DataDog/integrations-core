@@ -115,6 +115,7 @@ class SQLServer(AgentCheck):
         self.databases = set()
         self.autodiscovery_query = None
         self.ad_last_check = 0
+        self._sql_counter_types = {}
 
         self.proc = self.instance.get('stored_procedure')
         self.proc_type_mapping = {'gauge': self.gauge, 'rate': self.rate, 'histogram': self.histogram}
@@ -581,7 +582,7 @@ class SQLServer(AgentCheck):
 
         # Load any custom metrics from conf.d/sqlserver.yaml
         for cfg in custom_metrics:
-            sql_type = None
+            sql_counter_type = None
             base_name = None
 
             custom_tags = tags + cfg.get('tags', [])
@@ -605,17 +606,21 @@ class SQLServer(AgentCheck):
                 user_type = cfg.get('type')
                 if user_type is not None and user_type not in VALID_METRIC_TYPES:
                     self.log.error('%s has an invalid metric type: %s', cfg['name'], user_type)
-                sql_type = None
+                sql_counter_type = None
                 try:
                     if user_type is None:
-                        sql_type, base_name = self.get_sql_type(cfg['counter_name'])
+                        sql_counter_type, base_name = self.get_sql_counter_type(cfg['counter_name'])
                 except Exception:
                     self.log.warning("Can't load the metric %s, ignoring", cfg['name'], exc_info=True)
                     continue
 
                 metrics_to_collect.append(
                     self.typed_metric(
-                        cfg_inst=cfg, table=db_table, base_name=base_name, user_type=user_type, sql_type=sql_type
+                        cfg_inst=cfg,
+                        table=db_table,
+                        base_name=base_name,
+                        user_type=user_type,
+                        sql_counter_type=sql_counter_type,
                     )
                 )
 
@@ -623,7 +628,11 @@ class SQLServer(AgentCheck):
                 for column in cfg['columns']:
                     metrics_to_collect.append(
                         self.typed_metric(
-                            cfg_inst=cfg, table=db_table, base_name=base_name, sql_type=sql_type, column=column
+                            cfg_inst=cfg,
+                            table=db_table,
+                            base_name=base_name,
+                            sql_counter_type=sql_counter_type,
+                            column=column,
                         )
                     )
 
@@ -645,7 +654,7 @@ class SQLServer(AgentCheck):
             tags = tags + ['database:{}'.format(db)]
         for name, counter_name, instance_name in metrics:
             try:
-                sql_type, base_name = self.get_sql_type(counter_name)
+                sql_counter_type, base_name = self.get_sql_counter_type(counter_name)
                 cfg = {
                     'name': name,
                     'counter_name': counter_name,
@@ -656,7 +665,10 @@ class SQLServer(AgentCheck):
 
                 metrics_to_collect.append(
                     self.typed_metric(
-                        cfg_inst=cfg, table=DEFAULT_PERFORMANCE_TABLE, base_name=base_name, sql_type=sql_type
+                        cfg_inst=cfg,
+                        table=DEFAULT_PERFORMANCE_TABLE,
+                        base_name=base_name,
+                        sql_counter_type=sql_counter_type,
                     )
                 )
             except SQLConnectionError:
@@ -665,20 +677,23 @@ class SQLServer(AgentCheck):
                 self.log.warning("Can't load the metric %s, ignoring", name, exc_info=True)
                 continue
 
-    def get_sql_type(self, counter_name):
+    def get_sql_counter_type(self, counter_name):
         """
         Return the type of the performance counter so that we can report it to
         Datadog correctly
-        If the sql_type is one that needs a base (PERF_RAW_LARGE_FRACTION and
+        If the sql_counter_type is one that needs a base (PERF_RAW_LARGE_FRACTION and
         PERF_AVERAGE_BULK), the name of the base counter will also be returned
         """
+        cached = self._sql_counter_types.get(counter_name)
+        if cached:
+            return cached
         with self.connection.get_managed_cursor() as cursor:
             cursor.execute(COUNTER_TYPE_QUERY, (counter_name,))
-            (sql_type,) = cursor.fetchone()
-            if sql_type == PERF_LARGE_RAW_BASE:
+            (sql_counter_type,) = cursor.fetchone()
+            if sql_counter_type == PERF_LARGE_RAW_BASE:
                 self.log.warning("Metric %s is of type Base and shouldn't be reported this way", counter_name)
             base_name = None
-            if sql_type in [PERF_AVERAGE_BULK, PERF_RAW_LARGE_FRACTION]:
+            if sql_counter_type in [PERF_AVERAGE_BULK, PERF_RAW_LARGE_FRACTION]:
                 # This is an ugly hack. For certains type of metric (PERF_RAW_LARGE_FRACTION
                 # and PERF_AVERAGE_BULK), we need two metrics: the metrics specified and
                 # a base metrics to get the ratio. There is no unique schema so we generate
@@ -692,18 +707,19 @@ class SQLServer(AgentCheck):
                     cursor.execute(BASE_NAME_QUERY, candidates)
                     base_name = cursor.fetchone().counter_name.strip()
                     self.log.debug("Got base metric: %s for metric: %s", base_name, counter_name)
+                    self._sql_counter_types[counter_name] = (sql_counter_type, base_name)
                 except Exception as e:
                     self.log.warning("Could not get counter_name of base for metric: %s", e)
 
-        return sql_type, base_name
+        return sql_counter_type, base_name
 
-    def typed_metric(self, cfg_inst, table, base_name=None, user_type=None, sql_type=None, column=None):
+    def typed_metric(self, cfg_inst, table, base_name=None, user_type=None, sql_counter_type=None, column=None):
         """
         Create the appropriate BaseSqlServerMetric object, each implementing its method to
         fetch the metrics properly.
         If a `type` was specified in the config, it is used to report the value
         directly fetched from SQLServer. Otherwise, it is decided based on the
-        sql_type, according to microsoft's documentation.
+        sql_counter_type, according to microsoft's documentation.
         """
         if table == DEFAULT_PERFORMANCE_TABLE:
             metric_type_mapping = {
@@ -719,7 +735,7 @@ class SQLServer(AgentCheck):
                 cls = metrics.SqlSimpleMetric
 
             else:
-                metric_type, cls = metric_type_mapping[sql_type]
+                metric_type, cls = metric_type_mapping[sql_counter_type]
         else:
             # Lookup metrics classes by their associated table
             metric_type_str, cls = metrics.TABLE_MAPPING[table]

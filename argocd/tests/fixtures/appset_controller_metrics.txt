@@ -1,0 +1,312 @@
+# HELP controller_runtime_active_workers Number of currently used workers per controller
+# TYPE controller_runtime_active_workers gauge
+controller_runtime_active_workers{controller="applicationset"} 0
+# HELP controller_runtime_max_concurrent_reconciles Maximum number of concurrent reconciles per controller
+# TYPE controller_runtime_max_concurrent_reconciles gauge
+controller_runtime_max_concurrent_reconciles{controller="applicationset"} 1
+# HELP controller_runtime_reconcile_errors_total Total number of reconciliation errors per controller
+# TYPE controller_runtime_reconcile_errors_total counter
+controller_runtime_reconcile_errors_total{controller="applicationset"} 0
+# HELP controller_runtime_reconcile_time_seconds Length of time per reconciliation per controller
+# TYPE controller_runtime_reconcile_time_seconds histogram
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="0.005"} 155
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="0.01"} 155
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="0.025"} 169
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="0.05"} 173
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="0.1"} 173
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="0.15"} 173
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="0.2"} 182
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="0.25"} 186
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="0.3"} 187
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="0.35"} 236
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="0.4"} 560
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="0.45"} 1055
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="0.5"} 1253
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="0.6"} 1317
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="0.7"} 1330
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="0.8"} 1332
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="0.9"} 1335
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="1"} 1337
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="1.25"} 1340
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="1.5"} 1346
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="1.75"} 1346
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="2"} 1346
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="2.5"} 1347
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="3"} 1347
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="3.5"} 1347
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="4"} 1347
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="4.5"} 1347
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="5"} 1347
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="6"} 1347
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="7"} 1347
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="8"} 1347
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="9"} 1347
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="10"} 1347
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="15"} 1347
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="20"} 1347
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="25"} 1347
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="30"} 1347
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="40"} 1347
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="50"} 1347
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="60"} 1347
+controller_runtime_reconcile_time_seconds_bucket{controller="applicationset",le="+Inf"} 1347
+controller_runtime_reconcile_time_seconds_sum{controller="applicationset"} 507.75374146199937
+controller_runtime_reconcile_time_seconds_count{controller="applicationset"} 1347
+# HELP controller_runtime_reconcile_total Total number of reconciliations per controller
+# TYPE controller_runtime_reconcile_total counter
+controller_runtime_reconcile_total{controller="applicationset",result="error"} 0
+controller_runtime_reconcile_total{controller="applicationset",result="requeue"} 0
+controller_runtime_reconcile_total{controller="applicationset",result="requeue_after"} 1160
+controller_runtime_reconcile_total{controller="applicationset",result="success"} 187
+# HELP go_gc_cycles_automatic_gc_cycles_total Count of completed GC cycles generated by the Go runtime.
+# TYPE go_gc_cycles_automatic_gc_cycles_total counter
+go_gc_cycles_automatic_gc_cycles_total 94
+# HELP go_gc_cycles_forced_gc_cycles_total Count of completed GC cycles forced by the application.
+# TYPE go_gc_cycles_forced_gc_cycles_total counter
+go_gc_cycles_forced_gc_cycles_total 0
+# HELP go_gc_cycles_total_gc_cycles_total Count of all completed GC cycles.
+# TYPE go_gc_cycles_total_gc_cycles_total counter
+go_gc_cycles_total_gc_cycles_total 94
+# HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 4.203e-05
+go_gc_duration_seconds{quantile="0.25"} 5.8597e-05
+go_gc_duration_seconds{quantile="0.5"} 6.8626e-05
+go_gc_duration_seconds{quantile="0.75"} 7.5367e-05
+go_gc_duration_seconds{quantile="1"} 0.00020818
+go_gc_duration_seconds_sum 0.006731028
+go_gc_duration_seconds_count 94
+# HELP go_gc_heap_allocs_by_size_bytes_total Distribution of heap allocations by approximate size. Note that this does not include tiny objects as defined by /gc/heap/tiny/allocs:objects, only tiny blocks.
+# TYPE go_gc_heap_allocs_by_size_bytes_total histogram
+go_gc_heap_allocs_by_size_bytes_total_bucket{le="8.999999999999998"} 162125
+go_gc_heap_allocs_by_size_bytes_total_bucket{le="24.999999999999996"} 4.055617e+06
+go_gc_heap_allocs_by_size_bytes_total_bucket{le="64.99999999999999"} 6.419226e+06
+go_gc_heap_allocs_by_size_bytes_total_bucket{le="144.99999999999997"} 7.433678e+06
+go_gc_heap_allocs_by_size_bytes_total_bucket{le="320.99999999999994"} 7.739696e+06
+go_gc_heap_allocs_by_size_bytes_total_bucket{le="704.9999999999999"} 7.933791e+06
+go_gc_heap_allocs_by_size_bytes_total_bucket{le="1536.9999999999998"} 8.007152e+06
+go_gc_heap_allocs_by_size_bytes_total_bucket{le="3200.9999999999995"} 8.049025e+06
+go_gc_heap_allocs_by_size_bytes_total_bucket{le="6528.999999999999"} 8.066024e+06
+go_gc_heap_allocs_by_size_bytes_total_bucket{le="13568.999999999998"} 8.081169e+06
+go_gc_heap_allocs_by_size_bytes_total_bucket{le="27264.999999999996"} 8.091232e+06
+go_gc_heap_allocs_by_size_bytes_total_bucket{le="+Inf"} 8.097072e+06
+go_gc_heap_allocs_by_size_bytes_total_sum 1.520581704e+09
+go_gc_heap_allocs_by_size_bytes_total_count 8.097072e+06
+# HELP go_gc_heap_allocs_bytes_total Cumulative sum of memory allocated to the heap by the application.
+# TYPE go_gc_heap_allocs_bytes_total counter
+go_gc_heap_allocs_bytes_total 1.520581704e+09
+# HELP go_gc_heap_allocs_objects_total Cumulative count of heap allocations triggered by the application. Note that this does not include tiny objects as defined by /gc/heap/tiny/allocs:objects, only tiny blocks.
+# TYPE go_gc_heap_allocs_objects_total counter
+go_gc_heap_allocs_objects_total 8.097072e+06
+# HELP go_gc_heap_frees_by_size_bytes_total Distribution of freed heap allocations by approximate size. Note that this does not include tiny objects as defined by /gc/heap/tiny/allocs:objects, only tiny blocks.
+# TYPE go_gc_heap_frees_by_size_bytes_total histogram
+go_gc_heap_frees_by_size_bytes_total_bucket{le="8.999999999999998"} 156619
+go_gc_heap_frees_by_size_bytes_total_bucket{le="24.999999999999996"} 3.970669e+06
+go_gc_heap_frees_by_size_bytes_total_bucket{le="64.99999999999999"} 6.308411e+06
+go_gc_heap_frees_by_size_bytes_total_bucket{le="144.99999999999997"} 7.308536e+06
+go_gc_heap_frees_by_size_bytes_total_bucket{le="320.99999999999994"} 7.608117e+06
+go_gc_heap_frees_by_size_bytes_total_bucket{le="704.9999999999999"} 7.798625e+06
+go_gc_heap_frees_by_size_bytes_total_bucket{le="1536.9999999999998"} 7.87067e+06
+go_gc_heap_frees_by_size_bytes_total_bucket{le="3200.9999999999995"} 7.911826e+06
+go_gc_heap_frees_by_size_bytes_total_bucket{le="6528.999999999999"} 7.928604e+06
+go_gc_heap_frees_by_size_bytes_total_bucket{le="13568.999999999998"} 7.943558e+06
+go_gc_heap_frees_by_size_bytes_total_bucket{le="27264.999999999996"} 7.953537e+06
+go_gc_heap_frees_by_size_bytes_total_bucket{le="+Inf"} 7.959313e+06
+go_gc_heap_frees_by_size_bytes_total_sum 1.498191008e+09
+go_gc_heap_frees_by_size_bytes_total_count 7.959313e+06
+# HELP go_gc_heap_frees_bytes_total Cumulative sum of heap memory freed by the garbage collector.
+# TYPE go_gc_heap_frees_bytes_total counter
+go_gc_heap_frees_bytes_total 1.498191008e+09
+# HELP go_gc_heap_frees_objects_total Cumulative count of heap allocations whose storage was freed by the garbage collector. Note that this does not include tiny objects as defined by /gc/heap/tiny/allocs:objects, only tiny blocks.
+# TYPE go_gc_heap_frees_objects_total counter
+go_gc_heap_frees_objects_total 7.959313e+06
+# HELP go_gc_heap_goal_bytes Heap size target for the end of the GC cycle.
+# TYPE go_gc_heap_goal_bytes gauge
+go_gc_heap_goal_bytes 3.6408256e+07
+# HELP go_gc_heap_objects_objects Number of objects, live or unswept, occupying heap memory.
+# TYPE go_gc_heap_objects_objects gauge
+go_gc_heap_objects_objects 137759
+# HELP go_gc_heap_tiny_allocs_objects_total Count of small allocations that are packed together into blocks. These allocations are counted separately from other allocations because each individual allocation is not tracked by the runtime, only their block. Each block is already accounted for in allocs-by-size and frees-by-size.
+# TYPE go_gc_heap_tiny_allocs_objects_total counter
+go_gc_heap_tiny_allocs_objects_total 945477
+# HELP go_gc_pauses_seconds_total Distribution individual GC-related stop-the-world pause latencies.
+# TYPE go_gc_pauses_seconds_total histogram
+go_gc_pauses_seconds_total_bucket{le="-5e-324"} 0
+go_gc_pauses_seconds_total_bucket{le="9.999999999999999e-10"} 0
+go_gc_pauses_seconds_total_bucket{le="9.999999999999999e-09"} 0
+go_gc_pauses_seconds_total_bucket{le="9.999999999999998e-08"} 0
+go_gc_pauses_seconds_total_bucket{le="1.0239999999999999e-06"} 0
+go_gc_pauses_seconds_total_bucket{le="1.0239999999999999e-05"} 39
+go_gc_pauses_seconds_total_bucket{le="0.00010239999999999998"} 186
+go_gc_pauses_seconds_total_bucket{le="0.0010485759999999998"} 188
+go_gc_pauses_seconds_total_bucket{le="0.010485759999999998"} 188
+go_gc_pauses_seconds_total_bucket{le="0.10485759999999998"} 188
+go_gc_pauses_seconds_total_bucket{le="+Inf"} 188
+go_gc_pauses_seconds_total_sum NaN
+go_gc_pauses_seconds_total_count 188
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 87
+# HELP go_info Information about the Go environment.
+# TYPE go_info gauge
+go_info{version="go1.18.10"} 1
+# HELP go_memory_classes_heap_free_bytes Memory that is completely free and eligible to be returned to the underlying system, but has not been. This metric is the runtime's estimate of free address space that is backed by physical memory.
+# TYPE go_memory_classes_heap_free_bytes gauge
+go_memory_classes_heap_free_bytes 1.3688832e+07
+# HELP go_memory_classes_heap_objects_bytes Memory occupied by live objects and dead objects that have not yet been marked free by the garbage collector.
+# TYPE go_memory_classes_heap_objects_bytes gauge
+go_memory_classes_heap_objects_bytes 2.2390696e+07
+# HELP go_memory_classes_heap_released_bytes Memory that is completely free and has been returned to the underlying system. This metric is the runtime's estimate of free address space that is still mapped into the process, but is not backed by physical memory.
+# TYPE go_memory_classes_heap_released_bytes gauge
+go_memory_classes_heap_released_bytes 3.56352e+06
+# HELP go_memory_classes_heap_stacks_bytes Memory allocated from the heap that is reserved for stack space, whether or not it is currently in-use.
+# TYPE go_memory_classes_heap_stacks_bytes gauge
+go_memory_classes_heap_stacks_bytes 1.703936e+06
+# HELP go_memory_classes_heap_unused_bytes Memory that is reserved for heap objects but is not currently used to hold heap objects.
+# TYPE go_memory_classes_heap_unused_bytes gauge
+go_memory_classes_heap_unused_bytes 4.79036e+06
+# HELP go_memory_classes_metadata_mcache_free_bytes Memory that is reserved for runtime mcache structures, but not in-use.
+# TYPE go_memory_classes_metadata_mcache_free_bytes gauge
+go_memory_classes_metadata_mcache_free_bytes 12000
+# HELP go_memory_classes_metadata_mcache_inuse_bytes Memory that is occupied by runtime mcache structures that are currently being used.
+# TYPE go_memory_classes_metadata_mcache_inuse_bytes gauge
+go_memory_classes_metadata_mcache_inuse_bytes 19200
+# HELP go_memory_classes_metadata_mspan_free_bytes Memory that is reserved for runtime mspan structures, but not in-use.
+# TYPE go_memory_classes_metadata_mspan_free_bytes gauge
+go_memory_classes_metadata_mspan_free_bytes 111024
+# HELP go_memory_classes_metadata_mspan_inuse_bytes Memory that is occupied by runtime mspan structures that are currently being used.
+# TYPE go_memory_classes_metadata_mspan_inuse_bytes gauge
+go_memory_classes_metadata_mspan_inuse_bytes 409680
+# HELP go_memory_classes_metadata_other_bytes Memory that is reserved for or used to hold runtime metadata.
+# TYPE go_memory_classes_metadata_other_bytes gauge
+go_memory_classes_metadata_other_bytes 6.126296e+06
+# HELP go_memory_classes_os_stacks_bytes Stack memory allocated by the underlying operating system.
+# TYPE go_memory_classes_os_stacks_bytes gauge
+go_memory_classes_os_stacks_bytes 0
+# HELP go_memory_classes_other_bytes Memory used by execution trace buffers, structures for debugging the runtime, finalizer and profiler specials, and more.
+# TYPE go_memory_classes_other_bytes gauge
+go_memory_classes_other_bytes 3.236858e+06
+# HELP go_memory_classes_profiling_buckets_bytes Memory that is used by the stack trace hash map used for profiling.
+# TYPE go_memory_classes_profiling_buckets_bytes gauge
+go_memory_classes_profiling_buckets_bytes 1.70223e+06
+# HELP go_memory_classes_total_bytes All memory mapped by the Go runtime into the current process as read-write. Note that this does not include memory mapped by code called via cgo or via the syscall package. Sum of all metrics in /memory/classes.
+# TYPE go_memory_classes_total_bytes gauge
+go_memory_classes_total_bytes 5.7754632e+07
+# HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes 2.2390696e+07
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 1.520581704e+09
+# HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table.
+# TYPE go_memstats_buck_hash_sys_bytes gauge
+go_memstats_buck_hash_sys_bytes 1.70223e+06
+# HELP go_memstats_frees_total Total number of frees.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total 8.90479e+06
+# HELP go_memstats_gc_cpu_fraction The fraction of this program's available CPU time used by the GC since the program started.
+# TYPE go_memstats_gc_cpu_fraction gauge
+go_memstats_gc_cpu_fraction 0
+# HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+# TYPE go_memstats_gc_sys_bytes gauge
+go_memstats_gc_sys_bytes 6.126296e+06
+# HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and still in use.
+# TYPE go_memstats_heap_alloc_bytes gauge
+go_memstats_heap_alloc_bytes 2.2390696e+07
+# HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used.
+# TYPE go_memstats_heap_idle_bytes gauge
+go_memstats_heap_idle_bytes 1.7252352e+07
+# HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use.
+# TYPE go_memstats_heap_inuse_bytes gauge
+go_memstats_heap_inuse_bytes 2.7181056e+07
+# HELP go_memstats_heap_objects Number of allocated objects.
+# TYPE go_memstats_heap_objects gauge
+go_memstats_heap_objects 137759
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes 3.56352e+06
+# HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.
+# TYPE go_memstats_heap_sys_bytes gauge
+go_memstats_heap_sys_bytes 4.4433408e+07
+# HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
+# TYPE go_memstats_last_gc_time_seconds gauge
+go_memstats_last_gc_time_seconds 1.6860703435215068e+09
+# HELP go_memstats_lookups_total Total number of pointer lookups.
+# TYPE go_memstats_lookups_total counter
+go_memstats_lookups_total 0
+# HELP go_memstats_mallocs_total Total number of mallocs.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total 9.042549e+06
+# HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures.
+# TYPE go_memstats_mcache_inuse_bytes gauge
+go_memstats_mcache_inuse_bytes 19200
+# HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system.
+# TYPE go_memstats_mcache_sys_bytes gauge
+go_memstats_mcache_sys_bytes 31200
+# HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures.
+# TYPE go_memstats_mspan_inuse_bytes gauge
+go_memstats_mspan_inuse_bytes 409680
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 520704
+# HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place.
+# TYPE go_memstats_next_gc_bytes gauge
+go_memstats_next_gc_bytes 3.6408256e+07
+# HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations.
+# TYPE go_memstats_other_sys_bytes gauge
+go_memstats_other_sys_bytes 3.236858e+06
+# HELP go_memstats_stack_inuse_bytes Number of bytes in use by the stack allocator.
+# TYPE go_memstats_stack_inuse_bytes gauge
+go_memstats_stack_inuse_bytes 1.703936e+06
+# HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator.
+# TYPE go_memstats_stack_sys_bytes gauge
+go_memstats_stack_sys_bytes 1.703936e+06
+# HELP go_memstats_sys_bytes Number of bytes obtained from system.
+# TYPE go_memstats_sys_bytes gauge
+go_memstats_sys_bytes 5.7754632e+07
+# HELP go_sched_goroutines_goroutines Count of live goroutines.
+# TYPE go_sched_goroutines_goroutines gauge
+go_sched_goroutines_goroutines 87
+# HELP go_sched_latencies_seconds Distribution of the time goroutines have spent in the scheduler in a runnable state before actually running.
+# TYPE go_sched_latencies_seconds histogram
+go_sched_latencies_seconds_bucket{le="-5e-324"} 0
+go_sched_latencies_seconds_bucket{le="9.999999999999999e-10"} 11086
+go_sched_latencies_seconds_bucket{le="9.999999999999999e-09"} 11086
+go_sched_latencies_seconds_bucket{le="9.999999999999998e-08"} 22386
+go_sched_latencies_seconds_bucket{le="1.0239999999999999e-06"} 38516
+go_sched_latencies_seconds_bucket{le="1.0239999999999999e-05"} 44635
+go_sched_latencies_seconds_bucket{le="0.00010239999999999998"} 46696
+go_sched_latencies_seconds_bucket{le="0.0010485759999999998"} 46859
+go_sched_latencies_seconds_bucket{le="0.010485759999999998"} 46861
+go_sched_latencies_seconds_bucket{le="0.10485759999999998"} 46861
+go_sched_latencies_seconds_bucket{le="+Inf"} 46861
+go_sched_latencies_seconds_sum NaN
+go_sched_latencies_seconds_count 46861
+# HELP go_threads Number of OS threads created.
+# TYPE go_threads gauge
+go_threads 22
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 13.87
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1.048576e+06
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 16
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 1.0848256e+08
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.68606159693e+09
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 8.2591744e+08
+# HELP process_virtual_memory_max_bytes Maximum amount of virtual memory available in bytes.
+# TYPE process_virtual_memory_max_bytes gauge
+process_virtual_memory_max_bytes 1.8446744073709552e+19
+# HELP rest_client_requests_total Number of HTTP requests, partitioned by status code, method, and host.
+# TYPE rest_client_requests_total counter
+rest_client_requests_total{code="200",host="172.20.0.1:443",method="GET"} 3770
+rest_client_requests_total{code="404",host="172.20.0.1:443",method="GET"} 1

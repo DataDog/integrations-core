@@ -269,7 +269,6 @@ metrics:
       - column:
           name: netscaler.vsvrIpAddress
           OID: 1.3.6.1.4.1.5951.4.1.3.1.1.2
-          format: ip_address
         tag: netscaler_vsvr_ip_address
       - column:
           name: netscaler.vsvrPort
@@ -325,12 +324,19 @@ metrics:
           73: diameter
           74: ssl_diameter
           75: tftp
-          90: tftpx
+          90: tftp
           91: pptp
           92: gre
           95: fix
           96: ssl_fix
-          99: service_unknown
+          104: user_tcp
+          105: user_ssl_tcp
+          113: mongo
+          114: mongo_tls
+          116: mqtt
+          117: mqtt_tls
+          118: quic_bridge
+          120: service_unknown
       - column:
           OID: 1.3.6.1.4.1.5951.4.1.3.1.1.5
           name: netscaler.vsvrState
@@ -479,6 +485,7 @@ metrics:
           18: source_ip_source_port
           19: lrtm
           20: call_id_hashed
+          21: api
       - column:
           OID: 1.3.6.1.4.1.5951.4.1.3.6.1.2
           name: netscaler.lbvsvrPersistanceType
@@ -506,6 +513,7 @@ metrics:
           19: rtsp_session_id
           20: diameter
           21: fix_session
+          22: user_session
   - MIB: NS-ROOT-MIB
     table:
       name: serviceGroupTable
@@ -568,12 +576,19 @@ metrics:
           73: diameter
           74: ssl_diameter
           75: tftp
-          90: tftpx
+          90: tftp
           91: pptp
           92: gre
           95: fix
           96: ssl_fix
-          99: service_unknown
+          104: user_tcp
+          105: user_ssl_tcp
+          113: mongo
+          114: mongo_tls
+          116: mqtt
+          117: mqtt_tls
+          118: quic_bridge
+          120: service_unknown
       - column:
           name: netscaler.svcgrpSvcGroupFullName
           OID: 1.3.6.1.4.1.5951.4.1.2.11.1.4
@@ -707,7 +722,6 @@ metrics:
       - column:
           name: netscaler.svcIpAddress
           OID: 1.3.6.1.4.1.5951.4.1.2.1.1.2
-          format: ip_address
         tag: netscaler_svc_ip_address
       - column:
           name: netscaler.svcPort
@@ -763,12 +777,19 @@ metrics:
           73: diameter
           74: ssl_diameter
           75: tftp
-          90: tftpx
+          90: tftp
           91: pptp
           92: gre
           95: fix
           96: ssl_fix
-          99: service_unknown
+          104: user_tcp
+          105: user_ssl_tcp
+          113: mongo
+          114: mongo_tls
+          116: mqtt
+          117: mqtt_tls
+          118: quic_bridge
+          120: service_unknown
       - column:
           name: netscaler.svcServiceFullName
           OID: 1.3.6.1.4.1.5951.4.1.2.1.1.54
@@ -788,7 +809,6 @@ metrics:
       - column:
           name: netscaler.serverIpAddress
           OID: 1.3.6.1.4.1.5951.4.1.2.2.1.2
-          format: ip_address
         tag: netscaler_server_ip_address
       - column:
           OID: 1.3.6.1.4.1.5951.4.1.2.2.1.3

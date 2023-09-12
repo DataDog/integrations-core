@@ -2512,6 +2512,27 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
         hostname='vm3',
     )
     aggregator.assert_metric(
+        'vsphere.vm.guest.net',
+        count=1,
+        value=1,
+        tags=base_tags_vm3 + ['device_id:43', 'is_connected:False'],
+        hostname='vm3',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.guest.net.ipConfig.address',
+        count=1,
+        value=1,
+        tags=base_tags_vm3 + ['device_id:43', 'is_connected:False', 'nic_ip_address:fe80::170:46ff:fe27:6311'],
+        hostname='vm3',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.guest.net.ipConfig.address',
+        count=1,
+        value=1,
+        tags=base_tags_vm3 + ['device_id:43', 'is_connected:False', 'nic_ip_address:fe70::150:46ff:fe47:6311'],
+        hostname='vm3',
+    )
+    aggregator.assert_metric(
         'vsphere.vm.summary.config.numCpu',
         value=1,
         count=1,
@@ -2737,7 +2758,7 @@ def test_datastore_property_metrics(aggregator, historical_instance, dd_run_chec
     aggregator.assert_metric('vsphere.datastore.summary.capacity', count=1, value=100, tags=base_tags)
 
 
-def test_property_metrics_filtered(
+def test_property_metrics_resource_filters(
     aggregator,
     realtime_instance,
     dd_run_check,
@@ -2814,6 +2835,121 @@ def test_property_metrics_filtered(
         count=0,
         hostname='host2',
     )
+
+
+def test_property_metrics_metric_filters(
+    aggregator,
+    default_instance,
+    dd_run_check,
+    service_instance,
+    vm_properties_ex,
+):
+
+    default_instance['collection_type'] = 'both'
+    default_instance['collect_property_metrics'] = True
+    default_instance['metric_filters'] = {
+        'host': ['host.summary.runtime.connectionState'],
+        'vm': ['vm.guest.net$', 'vm.summary.config.memorySizeMB', 'vm.guest.disk.freeSpace'],
+        'cluster': [],
+    }
+
+    service_instance.content.propertyCollector.RetrievePropertiesEx = vm_properties_ex
+
+    base_tags = ['vcenter_server:FAKE', 'vsphere_folder:unknown', 'vsphere_type:vm']
+    base_tags_vm1 = base_tags + ['vsphere_host:host1']
+    base_tags_vm3 = base_tags + ['vsphere_host:host2']
+
+    base_tags_host = ['vcenter_server:FAKE', 'vsphere_type:host']
+    base_tags_cluster = ['vcenter_server:FAKE', 'vsphere_type:cluster', 'vsphere_cluster:c1']
+    base_tags_datastore = ['vcenter_server:FAKE', 'vsphere_type:datastore', 'vsphere_datastore:ds1']
+
+    check = VSphereCheck('vsphere', {}, [default_instance])
+    dd_run_check(check)
+
+    # vms
+    aggregator.assert_metric('vsphere.vm.count', value=1, count=1, tags=base_tags_vm1)
+    aggregator.assert_metric('vsphere.vm.count', value=1, count=1, tags=base_tags_vm3)
+
+    aggregator.assert_metric(
+        'vsphere.vm.summary.config.memorySizeMB', count=1, value=2048, tags=base_tags_vm1, hostname='vm1'
+    )
+
+    aggregator.assert_metric(
+        'vsphere.vm.guest.disk.freeSpace',
+        count=1,
+        value=1270075392.0,
+        tags=base_tags_vm1 + ['disk_path:\\', 'file_system_type:ext4'],
+        hostname='vm1',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.guest.net',
+        count=1,
+        value=1,
+        tags=base_tags_vm1 + ['device_id:0', 'is_connected:True', 'nic_mac_address:00:61:58:72:53:13'],
+        hostname='vm1',
+    )
+
+    aggregator.assert_metric(
+        'vsphere.vm.guest.net',
+        count=1,
+        value=1,
+        tags=base_tags_vm1 + ['device_id:0', 'is_connected:True', 'nic_mac_address:00:61:58:72:53:13'],
+        hostname='vm1',
+    )
+
+    aggregator.assert_metric(
+        'vsphere.vm.guest.net',
+        count=1,
+        value=1,
+        tags=base_tags_vm3 + ['device_id:43', 'is_connected:False'],
+        hostname='vm3',
+    )
+
+    # hosts
+    aggregator.assert_metric('vsphere.host.count', value=2, count=2, tags=base_tags_host)
+    aggregator.assert_metric(
+        'vsphere.host.summary.runtime.connectionState',
+        count=1,
+        tags=base_tags_host + ['connectionState:connected'],
+        hostname='host1',
+    )
+    aggregator.assert_metric(
+        'vsphere.host.summary.runtime.connectionState',
+        count=1,
+        tags=base_tags_host + ['connectionState:notResponding'],
+        hostname='host2',
+    )
+
+    # clusters
+    aggregator.assert_metric('vsphere.cluster.count', value=1, count=1, tags=base_tags_cluster)
+    aggregator.assert_metric(
+        'vsphere.cluster.configuration.drsConfig.enabled', count=1, value=1, tags=base_tags_cluster + ['enabled:True']
+    )
+    aggregator.assert_metric(
+        'vsphere.cluster.configuration.dasConfig.enabled', count=1, value=1, tags=base_tags_cluster + ['enabled:True']
+    )
+    aggregator.assert_metric(
+        'vsphere.cluster.configuration.drsConfig.defaultVmBehavior',
+        count=1,
+        value=1,
+        tags=base_tags_cluster + ['defaultVmBehavior:fullyAutomated'],
+    )
+    aggregator.assert_metric(
+        'vsphere.cluster.configuration.drsConfig.vmotionRate', count=1, value=2, tags=base_tags_cluster
+    )
+
+    # datastores
+    aggregator.assert_metric('vsphere.datastore.count', value=1, count=1, tags=base_tags_datastore)
+    aggregator.assert_metric('vsphere.datastore.summary.freeSpace', count=1, value=305, tags=base_tags_datastore)
+    aggregator.assert_metric('vsphere.datastore.summary.capacity', count=1, value=100, tags=base_tags_datastore)
+
+    # other metrics and assert all covered
+    aggregator.assert_metric('datadog.vsphere.refresh_infrastructure_cache.time')
+    aggregator.assert_metric('datadog.vsphere.refresh_metrics_metadata_cache.time')
+    aggregator.assert_metric('datadog.vsphere.query_metrics.time')
+    aggregator.assert_metric('vsphere.cpu.totalmhz.avg')
+    aggregator.assert_metric('vsphere.datastore.busResets.sum')
+    aggregator.assert_all_metrics_covered()
 
 
 def test_property_metrics_expired_cache(
