@@ -49,8 +49,8 @@ metrics:
         tag: vertiv_temp_sensor_serial
       - column:
           OID: 1.3.6.1.4.1.21239.5.1.4.1.3
-          name: vertiv.tempSensorName
-        tag: vertiv_temp_sensor_name
+          name: vertiv.tempSensorLabel
+        tag: vertiv_temp_sensor_label
       - column:
           OID: 1.3.6.1.4.1.21239.5.1.4.1.4
           name: vertiv.tempSensorAvail
