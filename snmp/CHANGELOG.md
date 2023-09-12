@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 6.2.2 / 2023-09-12
+
 ***Fixed***:
 
 * Fix mapping for apc-pdu ([#15765](https://github.com/DataDog/integrations-core/pull/15765))
