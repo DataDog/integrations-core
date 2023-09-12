@@ -592,6 +592,14 @@ def test_resolved_hostname_set(
             instance_docker[k] = v
     instance_docker['dbm'] = dbm_enabled
     instance_docker['procedure_metrics'] = {'enabled': False}
+    instance_docker['query_metrics'] = {
+        'enabled': True,
+        'run_sync': True,
+        'collection_interval': 1,
+        # in tests sometimes things can slow down so we don't want this short deadline causing some events
+        # to fail to be collected on time
+        'enforce_collection_interval_deadline': False,
+    }
     if database:
         instance_docker['database'] = database
     if reported_hostname:
