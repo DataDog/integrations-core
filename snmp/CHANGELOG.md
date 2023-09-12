@@ -8,6 +8,7 @@
 * Fix mapping for apc-pdu ([#15765](https://github.com/DataDog/integrations-core/pull/15765))
 * Fixes for SNMP Profiles introduced in 7.48 ([#15800](https://github.com/DataDog/integrations-core/pull/15800))
 * Delete unnecessary extend for ubiquiti profiles ([#15643](https://github.com/DataDog/integrations-core/pull/15643))
+* Add comment for fanSpeedSensorStatus ([#15804](https://github.com/DataDog/integrations-core/pull/15804))
 
 ## 6.2.1 / 2023-09-05
 
