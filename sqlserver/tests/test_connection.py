@@ -351,6 +351,7 @@ def test_connection_cleanup(instance_docker):
 def test_connection_failure(aggregator, dd_run_check, instance_docker):
     instance_docker['dbm'] = True
     instance_docker['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    instance_docker['procedure_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     instance_docker['query_activity'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
 

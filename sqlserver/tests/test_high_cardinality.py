@@ -18,6 +18,7 @@ from .utils import HighCardinalityQueries, high_cardinality_only
 def dbm_instance(instance_docker):
     instance_docker['dbm'] = True
     instance_docker['query_metrics'] = {'enabled': True, 'run_sync': True}
+    instance_docker['procedure_metrics'] = {'enabled': True, 'run_sync': True}
     instance_docker['query_activity'] = {'enabled': True, 'run_sync': True}
     instance_docker['collect_settings'] = {'enabled': False}
     return copy(instance_docker)
@@ -87,7 +88,7 @@ def test_complete_metrics_run(dd_run_check, dbm_instance, high_cardinality_insta
 
 @high_cardinality_only
 @pytest.mark.skip(reason='skip until the metrics query is improved')
-@pytest.mark.parametrize('job', ['query_metrics', 'query_activity'])
+@pytest.mark.parametrize('job', ['query_metrics', 'query_activity', 'procedure_metrics'])
 @pytest.mark.parametrize(
     'background_config',
     [

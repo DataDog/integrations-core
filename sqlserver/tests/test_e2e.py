@@ -97,6 +97,7 @@ def test_check_docker(dd_agent_check, init_config, instance_e2e):
     # run run sync to ensure only a single run of both
     instance_e2e['query_activity'] = {'run_sync': True}
     instance_e2e['query_metrics'] = {'run_sync': True}
+    instance_e2e['procedure_metrics'] = {'run_sync': True}
     aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_e2e]}, rate=True)
 
     aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')

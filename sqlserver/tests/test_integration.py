@@ -58,6 +58,7 @@ def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, da
     # no need to assert metrics that are emitted from the dbm portion of the
     # integration in this check as they are all internal
     instance_docker['query_metrics'] = {'enabled': False}
+    instance_docker['procedure_metrics'] = {'enabled': False}
     instance_docker['query_activity'] = {'enabled': False}
     autodiscovery_dbs = ['master', 'msdb', 'datadog_test']
     if database_autodiscovery:
@@ -347,6 +348,7 @@ def test_autodiscovery_multiple_instances(aggregator, dd_run_check, instance_aut
 def test_custom_queries(aggregator, dd_run_check, instance_docker, custom_query, assert_metrics):
     instance = copy(instance_docker)
     instance['custom_queries'] = [custom_query]
+    instance['procedure_metrics'] = {'enabled': False}
 
     check = SQLServer(CHECK_NAME, {}, [instance])
     dd_run_check(check)
@@ -387,6 +389,7 @@ def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_
 @pytest.mark.parametrize('database_autodiscovery', [True, False])
 def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, database_autodiscovery):
     instance_docker['database_autodiscovery'] = database_autodiscovery
+    instance_docker['procedure_metrics'] = {'enabled': False}
     sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
     dd_run_check(sqlserver_check)
     seen_databases = set()
@@ -588,6 +591,7 @@ def test_resolved_hostname_set(
         for k, v in cloud_metadata.items():
             instance_docker[k] = v
     instance_docker['dbm'] = dbm_enabled
+    instance_docker['procedure_metrics'] = {'enabled': False}
     if database:
         instance_docker['database'] = database
     if reported_hostname:
@@ -619,6 +623,7 @@ def test_resolved_hostname_set(
 @pytest.mark.usefixtures('dd_environment')
 def test_database_instance_metadata(aggregator, dd_run_check, instance_docker, dbm_enabled, reported_hostname):
     instance_docker['dbm'] = dbm_enabled
+    instance_docker['procedure_metrics'] = {'enabled': False}
     if reported_hostname:
         instance_docker['reported_hostname'] = reported_hostname
     expected_host = reported_hostname if reported_hostname else 'stubbed.hostname'
