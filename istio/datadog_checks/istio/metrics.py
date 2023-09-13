@@ -200,6 +200,9 @@ MIXER_METRICS = {
     'mixer_mcp_sink_request_acks_total': 'mcp_sink.request_acks_total',
     'mixer_runtime_dispatches_total': 'runtime.dispatches_total',
     'mixer_runtime_dispatch_duration_seconds': 'runtime.dispatch_duration_seconds',
+    'mixer_config_rule_config_error_count': 'mixer.config.rule.config.error.count',
+    'mixer_config_rule_config_match_error_count': 'mixer.config.rule.config.match.error.count',
+    'mixer_config_unsatisfied_action_handler_count': 'mixer.config.unsatisfied.action.handler.count',
 }
 
 PILOT_METRICS = {
@@ -378,6 +381,33 @@ ISTIOD_METRICS = {
     'sidecar_injection_success_total': 'sidecar_injection.success_total',
     'sidecar_injection_failure_total': 'sidecar_injection.failure_total',
     'sidecar_injection_skip_total': 'sidecar_injection.skip_total',
+    ## New 1.6 metrics
+    'istio_mcp_clients_total': 'mcp.clients',
+    ## Pilot autodiscovery
+    'istio_mcp_request_nacks_total': 'mcp.request.nacks',
+    'istio_mcp_request_acks_total': 'mcp.request.acks',
+    # Galley
+    # Unknown
+    'galley_istio_networking_virtualservices': 'galley.istio.networking.virtualservices',
+    'galley_istio_networking_destinationrules': 'galley.istio.networking.destinationrules',
+    'galley_istio_networking_gateways': 'galley.istio.networking.gateways'
+    'galley_istio_authentication_meshpolicies': 'galley_istio_authentication_meshpolicies',
+
+    # Count
+    'galley_source_kube_event_error_total': 'galley.source.kube.event.error',
+    'galley_source_kube_dynamic_converter_failure_total': 'galley.source.kube.dynamic.converter.failure',
+    'galley_validation_cert_key_update_errors': 'galley.validation.cert.key.update.errors',
+    'galley_validation_http_error': 'galley.validation.http.error'
+    # Histogram/distribution
+    'galley_runtime_processor_snapshot_events_total': 'galley.runtime.processor.snapshot.events.total', #already in
+    # Mixer
+    'mixer_config_rule_config_error_count': 'mixer.config.rule.config.error.count',
+    'mixer_config_rule_config_match_error_count': 'mixer.config.rule.config.match.error.count',
+    'mixer_config_unsatisfied_action_handler_count': 'mixer.config.unsatisfied.action.handler.count',
+    'mixer_config_adapter_info_config_error_count': 'mixer.config.adapter.info.config.error.count',
+    'mixer_config_handler_validation_error_count': 'mixer.config.handler.validation.error.count',
+    'mixer_config_instance_config_error_count': 'mixer.config.instance.config.error.count',
+    'mixer_handler_handler_build_failure_count': 'mixer.handler.handler.build.failure.count',
 }
 
 ISTIOD_VERSION = {'istio_build': {'type': 'metadata', 'label': 'tag', 'name': 'version'}}
@@ -394,3 +424,35 @@ def construct_metrics_config(metric_map):
         metrics.append(config)
 
     return metrics
+
+
+
+istio_mcp_clients_total 
+istio_mcp_request_nacks_total 
+galley_source_kube_event_error_total 
+galley_source_kube_dynamic_converter_failure_total 
+galley_validation_cert_key_update_errors
+galley_validation_http_error 
+galley_runtime_processor_snapshot_events_total
+galley_istio_networking_virtualservices
+galley_istio_networking_destinationrules
+galley_istio_networking_gateways 
+galley_istio_authentication_meshpolicies 
+
+mixer_config_rule_config_error_count 
+mixer_config_rule_config_match_error_count 
+mixer_config_unsatisfied_action_handler_count
+
+
+
+
+mixer_config_adapter_info_config_error_count
+mixer_config_handler_validation_error_count
+mixer_config_instance_config_error_count
+mixer_handler_handler_build_failure_count
+
+
+
+
+
+
