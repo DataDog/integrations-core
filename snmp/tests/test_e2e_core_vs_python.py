@@ -517,6 +517,7 @@ def test_e2e_profile_dell_poweredge(dd_agent_check):
             'amperage_probe_status',
             'voltage_probe_status',
             'memory_device_status',
+            'probe_type',
         ],  # Skipping tags with mappings
     )
 
