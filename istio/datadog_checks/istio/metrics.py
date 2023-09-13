@@ -427,13 +427,3 @@ def construct_metrics_config(metric_map):
         metrics.append(config)
 
     return metrics
-
-
-
-
-
-
-
-
-
-
