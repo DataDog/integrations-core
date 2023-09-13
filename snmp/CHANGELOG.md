@@ -6,6 +6,7 @@
 
 * Remove unsupported metric in riverbed-interceptor.yaml ([#15678](https://github.com/DataDog/integrations-core/pull/15678))
 * Delete unnecessary extend for ubiquiti profiles ([#15643](https://github.com/DataDog/integrations-core/pull/15643))
+* Add comment for fanSpeedSensorStatus ([#15804](https://github.com/DataDog/integrations-core/pull/15804))
 
 ## 6.2.2 / 2023-09-12
 
