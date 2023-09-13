@@ -203,7 +203,7 @@ metrics:
         OID: 1.3.6.1.4.1.19746.1.3.3.1.1.8
       - name: datadomain.fileSystemTotalCompressionFactor
         OID: 1.3.6.1.4.1.19746.1.3.3.1.1.9
-      - name: datadomain.fileSystemReductionPercent
+      - name: datadomain.fileSystemReductionPercent1
         OID: 1.3.6.1.4.1.19746.1.3.3.1.1.11
     metric_tags:
       - column:
@@ -243,7 +243,7 @@ metrics:
         OID: 1.3.6.1.4.1.19746.1.5.1.1.1.14
       - name: datadomain.replInKBytesPerSecond
         OID: 1.3.6.1.4.1.19746.1.5.1.1.1.15
-      - name: datadomain.relOutKBytesPerSecond
+      - name: datadomain.replOutKBytesPerSecond
         OID: 1.3.6.1.4.1.19746.1.5.1.1.1.16
     metric_tags:
       - column:
