@@ -2,7 +2,7 @@
 title: Create an Integration Recommended Monitor
 kind: documentation
 further_reading:
-- link: "/monitors/configuration/"
+- link: "https://docs.datadoghq.com/monitors/configuration/"
   tag: "Documentation"
   text: "Configure Monitors"
 ---
@@ -65,11 +65,11 @@ Below is an example of a well-defined monitor:
 
 {{< partial name="whats-next/whats-next.html" >}}
 
-[1]: /monitors
+[1]: https://docs.datadoghq.com/monitors/
 [2]: https://app.datadoghq.com/monitors/recommended
-[3]: /developers/integrations/new_check_howto/?tab=configurationtemplate
+[3]: https://docs.datadoghq.com/developers/integrations/new_check_howto/?tab=configurationtemplate
 [4]: https://app.datadoghq.com/monitors/create
-[5]: /developers/integrations/check_references/#manifest-file
+[5]: https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
 [6]: https://github.com/DataDog/integrations-extras
-[7]: /monitors/configuration/
-[8]: /monitors/manage/#monitor-tags
+[7]: https://docs.datadoghq.com/monitors/configuration/
+[8]: https://docs.datadoghq.com/monitors/manage/#monitor-tags
