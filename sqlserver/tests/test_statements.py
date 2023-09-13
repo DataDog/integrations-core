@@ -468,10 +468,6 @@ def test_statement_metrics_limit(
     bob_conn.execute_with_retries(query, (), database=database)
     dd_run_check(check)
 
-    instance_tags = dbm_instance.get('tags', [])
-    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
-    expected_instance_tags | {"db:{}".format(database)}
-
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"

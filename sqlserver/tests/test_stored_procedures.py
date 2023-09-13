@@ -283,96 +283,81 @@ def test_procedure_metrics(
     )
 
 
-# @pytest.mark.integration
-# @pytest.mark.usefixtures('dd_environment')
-# @pytest.mark.parametrize(
-#     "database,query,expected_queries_patterns,",
-#     [
-#         [
-#             "master",
-#             "EXEC multiQueryProc",
-#             [
-#                 r"select @total = @total \+ count\(\*\) from sys\.databases where name like '%_'",
-#                 r"select @total = @total \+ count\(\*\) from sys\.sysobjects where type = 'U'",
-#             ],
-#         ]
-#     ],
-# )
-# def test_statement_metrics_limit(
-#     aggregator, dd_run_check, dbm_instance, bob_conn, database, query, expected_queries_patterns
-# ):
-#     dbm_instance['query_metrics']['max_queries'] = 5
-#     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_procedure_metrics_limit(aggregator, dd_run_check, dbm_instance, bob_conn):
+    dbm_instance['procedure_metrics']['max_procedures'] = 2
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
-#     # the check must be run three times:
-#     # 1) set _last_stats_query_time (this needs to happen before the 1st test queries to ensure the query time
-#     # interval is correct)
-#     # 2) load the test queries into the StatementMetrics state
-#     # 3) emit the query metrics based on the diff of current and last state
-#     dd_run_check(check)
-#     bob_conn.execute_with_retries(query, (), database=database)
-#     dd_run_check(check)
-#     aggregator.reset()
-#     bob_conn.execute_with_retries(query, (), database=database)
-#     dd_run_check(check)
+    # the check must be run three times:
+    # 1) set _last_stats_query_time (this needs to happen before the 1st test queries to ensure the query time
+    # interval is correct)
+    # 2) load the test queries into the StatementMetrics state
+    # 3) emit the procedure metrics based on the diff of current and last state
+    dd_run_check(check)
+    bob_conn.execute_with_retries('EXEC multiQueryProc', (), database='master')
+    bob_conn.execute_with_retries('EXEC encryptedProc', (), database='master')
+    bob_conn.execute_with_retries('EXEC bobProc', (), database='datadog_test')
+    dd_run_check(check)
+    aggregator.reset()
+    bob_conn.execute_with_retries('EXEC multiQueryProc', (), database='master')
+    bob_conn.execute_with_retries('EXEC encryptedProc', (), database='master')
+    bob_conn.execute_with_retries('EXEC bobProc', (), database='datadog_test')
+    dd_run_check(check)
 
-#     instance_tags = dbm_instance.get('tags', [])
-#     expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
-#     expected_instance_tags | {"db:{}".format(database)}
+    # dbm-metrics
+    dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
+    payload = next((n for n in dbm_metrics if n.get('collection_type') == 'procedure_metrics'), None)
+    # metrics rows
+    sqlserver_rows = payload.get('sqlserver_rows', [])
+    assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
+    assert len(sqlserver_rows) == dbm_instance['procedure_metrics']['max_procedures']
 
-#     # dbm-metrics
-#     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
-#     assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
-#     payload = next((n for n in dbm_metrics if n.get('collection_type') == 'query_metrics'), None)
-#     # metrics rows
-#     sqlserver_rows = payload.get('sqlserver_rows', [])
-#     assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
-#     assert len(sqlserver_rows) == dbm_instance['query_metrics']['max_queries']
-
-#     # check that it's sorted
-#     assert sqlserver_rows == sorted(sqlserver_rows, key=lambda i: i['total_elapsed_time'], reverse=True)
+    # check that it's sorted
+    assert sqlserver_rows == sorted(sqlserver_rows, key=lambda i: i['total_elapsed_time'], reverse=True)
 
 
-# @pytest.mark.parametrize("statement_metrics_enabled", [True, False])
-# def test_async_job_enabled(dd_run_check, dbm_instance, statement_metrics_enabled):
-#     dbm_instance['query_metrics'] = {'enabled': statement_metrics_enabled, 'run_sync': False}
-#     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-#     dd_run_check(check)
-#     check.cancel()
-#     if statement_metrics_enabled:
-#         assert check.procedure_metrics._job_loop_future is not None
-#         check.procedure_metrics._job_loop_future.result()
-#     else:
-#         assert check.procedure_metrics._job_loop_future is None
+@pytest.mark.parametrize("procedure_metrics_enabled", [True, False])
+def test_async_job_enabled(dd_run_check, dbm_instance, procedure_metrics_enabled):
+    dbm_instance['procedure_metrics'] = {'enabled': procedure_metrics_enabled, 'run_sync': False}
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    dd_run_check(check)
+    check.cancel()
+    if procedure_metrics_enabled:
+        assert check.procedure_metrics._job_loop_future is not None
+        check.procedure_metrics._job_loop_future.result()
+    else:
+        assert check.procedure_metrics._job_loop_future is None
 
 
-# @pytest.mark.integration
-# @pytest.mark.usefixtures('dd_environment')
-# def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
-#     dbm_instance['query_metrics']['run_sync'] = False
-#     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-#     dd_run_check(check)
-#     check.procedure_metrics._job_loop_future.result()
-#     aggregator.assert_metric(
-#         "dd.sqlserver.async_job.inactive_stop",
-#         tags=['job:query-metrics'] + _expected_dbm_instance_tags(dbm_instance),
-#         hostname='',
-#     )
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
+    dbm_instance['procedure_metrics']['run_sync'] = False
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    dd_run_check(check)
+    check.procedure_metrics._job_loop_future.result()
+    aggregator.assert_metric(
+        "dd.sqlserver.async_job.inactive_stop",
+        tags=['job:procedure-metrics'] + _expected_dbm_instance_tags(dbm_instance),
+        hostname='',
+    )
 
 
-# @pytest.mark.integration
-# @pytest.mark.usefixtures('dd_environment')
-# def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
-#     dbm_instance['query_metrics']['run_sync'] = False
-#     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-#     dd_run_check(check)
-#     check.cancel()
-#     # wait for it to stop and make sure it doesn't throw any exceptions
-#     check.procedure_metrics._job_loop_future.result()
-#     assert not check.procedure_metrics._job_loop_future.running(), "metrics thread should be stopped"
-#     # if the thread doesn't start until after the cancel signal is set then the db connection will never
-#     # be created in the first place
-#     aggregator.assert_metric(
-#         "dd.sqlserver.async_job.cancel",
-#         tags=_expected_dbm_instance_tags(dbm_instance) + ['job:query-metrics'],
-#     )
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
+    dbm_instance['procedure_metrics']['run_sync'] = False
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    dd_run_check(check)
+    check.cancel()
+    # wait for it to stop and make sure it doesn't throw any exceptions
+    check.procedure_metrics._job_loop_future.result()
+    assert not check.procedure_metrics._job_loop_future.running(), "metrics thread should be stopped"
+    # if the thread doesn't start until after the cancel signal is set then the db connection will never
+    # be created in the first place
+    aggregator.assert_metric(
+        "dd.sqlserver.async_job.cancel",
+        tags=_expected_dbm_instance_tags(dbm_instance) + ['job:procedure-metrics'],
+    )
