@@ -5,15 +5,10 @@
 from __future__ import unicode_literals
 
 import logging
-import math
-import os
-import re
-import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
 
 import pytest
-from lxml import etree as ET
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.sqlserver import SQLServer
@@ -254,7 +249,6 @@ def test_procedure_metrics(
 
     instance_tags = dbm_instance.get('tags', [])
     expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
-    expected_instance_tags_with_db = expected_instance_tags | {"db:{}".format(database)}
 
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
