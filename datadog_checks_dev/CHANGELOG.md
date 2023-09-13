@@ -2,10 +2,12 @@
 
 ## Unreleased
 
-# 24.2.0 / 2023-09-13
+# 25.1.0 / 2023-09-13
 
 * Added overview examples to the readme file ([#15817](https://github.com/DataDog/integrations-core/pull/15817))
   
+## 25.0.0 / 2023-09-13
+
 ***Changed***:
 
 * Adjust template and test collection based on new team guidelines ([#15078](https://github.com/DataDog/integrations-core/pull/15078))
