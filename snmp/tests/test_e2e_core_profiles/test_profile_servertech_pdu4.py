@@ -45,7 +45,7 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
             'servertech_sentry4_st4_unit_product_mfr_date:driving',
             'servertech_sentry4_st4_unit_product_sn:zombies oxen their',
             'servertech_sentry4_st4_unit_status:low_warning',
-            'servertech_sentry4_st4_unit_type:link',
+            'servertech_sentry4_st4_unit_type:link_pdu',
         ],
         [
             'servertech_sentry4_st4_unit_asset_tag:quaintly',
@@ -54,7 +54,7 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
             'servertech_sentry4_st4_unit_name:zombies quaintly kept forward',
             'servertech_sentry4_st4_unit_product_mfr_date:Jaded',
             'servertech_sentry4_st4_unit_product_sn:their',
-            'servertech_sentry4_st4_unit_type:primary',
+            'servertech_sentry4_st4_unit_type:master_pdu',
         ],
     ]
     for tag_row in tag_rows:

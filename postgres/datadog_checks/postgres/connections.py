@@ -144,7 +144,7 @@ class MultiDatabaseConnectionPool(object):
         """
         with self._mu:
             pool = self._get_connection_pool(dbname=dbname, ttl_ms=ttl_ms, timeout=timeout, persistent=persistent)
-            db = pool.getconn(timeout=timeout)
+            db = pool.getconn()
         try:
             yield db
         finally:
@@ -228,7 +228,6 @@ class MultiDatabaseConnectionPool(object):
             dbname=self._config.dbname,
             ttl_ms=self._config.idle_connection_timeout,
             max_pool_size=max_pool_conn_size,
-            startup_fn=self._check.load_pg_settings,
             persistent=True,
         )
         return conn

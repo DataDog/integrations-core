@@ -44,6 +44,10 @@ def instance_collect_wal_metrics():
     return False
 
 
+def instance_connection_timeout():
+    return 5000
+
+
 def instance_data_directory():
     return '/usr/local/pgsql/data'
 

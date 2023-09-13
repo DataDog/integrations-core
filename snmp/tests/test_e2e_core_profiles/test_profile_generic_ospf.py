@@ -61,22 +61,34 @@ def test_e2e_profile_generic_ospf(dd_agent_check):
         ['if_state:pointToPoint', 'neighbor_id:133.138.249.246', 'ospf_ip_addr:185.206.44.173'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ospfIf', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.ospfIfLsaCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.ospfIfRetransInterval', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.ospfIfState', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+
+    tag_rows = [
+        ['if_state:backup_designated_router', 'neighbor_id:197.51.68.111', 'ospf_ip_addr:153.137.11.77'],
+        ['if_state:point_to_point', 'neighbor_id:133.138.249.246', 'ospf_ip_addr:185.206.44.173'],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.ospfIf', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         ['if_state:pointToPoint', 'neighbor_id:178.106.85.220'],
         ['if_state:pointToPoint', 'neighbor_id:32.2.154.12'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ospfVirtIf', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.ospfVirtIfLsaCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric(
             'snmp.ospfVirtIfRetransInterval', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric('snmp.ospfVirtIfState', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+
+    tag_rows = [
+        ['if_state:point_to_point', 'neighbor_id:178.106.85.220'],
+        ['if_state:point_to_point', 'neighbor_id:32.2.154.12'],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.ospfVirtIf', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
