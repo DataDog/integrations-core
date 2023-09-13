@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-***CHANGED***
+***Changed***
 
 * Fix mappings in _dell-rac & dell-poweredge ([#15827](https://github.com/DataDog/integrations-core/pull/15827))
 
