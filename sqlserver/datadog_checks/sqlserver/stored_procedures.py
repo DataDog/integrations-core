@@ -43,6 +43,7 @@ SELECT TOP ({limit})
     -- max(last_execution_time) as last_execution_time,
     {procedure_metrics_columns}
 FROM sys.dm_exec_procedure_stats
+WHERE database_id <> 32767 -- reserved resource db
 GROUP BY object_id, database_id;
 """
 
@@ -52,11 +53,11 @@ def _row_key(row):
     :param row: a normalized row from STATEMENT_METRICS_QUERY
     :return: a tuple uniquely identifying this row
     """
-    return (
+    return "".join((
         row.get('database_name'),
         row['schema_name'],
         row['procedure_name'],
-    )
+    ))
 
 
 def agent_check_getter(self):
@@ -79,7 +80,7 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
         self.collection_interval = collection_interval
         super(SqlserverProcedureMetrics, self).__init__(
             check,
-            run_sync=False,
+            run_sync=is_affirmative(check.procedure_metrics_config.get('run_sync', True)),
             enabled=is_affirmative(check.procedure_metrics_config.get('enabled', True)),
             expected_db_exceptions=(),
             min_collection_interval=check.min_collection_interval,
@@ -133,8 +134,6 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        self.log.debug("loaded sql server procedure metrics len(rows)=%s", len(rows))
-        self.log.debug("rows are %s", json.dumps(rows))
         return rows
 
     def _collect_metrics_rows(self, cursor):
@@ -150,8 +149,6 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
         # sort by total_elapsed_time and return the top max_queries
         rows = sorted(rows, key=lambda i: i['total_elapsed_time'], reverse=True)
         rows = rows[:max_queries]
-        # TODO: remove me before merging
-        self.log.debug("about to emit %s", json.dumps(rows))
         return {
             'host': self.check.resolved_hostname,
             'timestamp': time.time() * 1000,
@@ -178,7 +175,7 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
             with self.check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 rows = self._collect_metrics_rows(cursor)
                 if not rows:
-                    self.log.debug("collect_procedure_metrics - no rows returned")
+                    self.log.debug("collect_procedure_metrics: no rows returned")
                     return
                 payload = self._to_metrics_payload(rows, self._max_procedure_metrics)
                 self.check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
