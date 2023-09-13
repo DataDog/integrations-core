@@ -111,9 +111,12 @@ class QueryMetrics(BaseModel):
         frozen=True,
     )
     collection_interval: Optional[float] = None
-    dm_exec_procedure_stats_row_limit: Optional[int] = None
+    disable_secondary_tags: Optional[bool] = None
+    dm_exec_query_stats_row_limit: Optional[int] = None
     enabled: Optional[bool] = None
-    max_procedures: Optional[int] = None
+    enforce_collection_interval_deadline: Optional[bool] = None
+    max_queries: Optional[int] = None
+    samples_per_hour_per_query: Optional[int] = None
 
 
 class ProcedureMetrics(BaseModel):
@@ -122,12 +125,9 @@ class ProcedureMetrics(BaseModel):
         frozen=True,
     )
     collection_interval: Optional[float] = None
-    disable_secondary_tags: Optional[bool] = None
-    dm_exec_query_stats_row_limit: Optional[int] = None
+    dm_exec_procedure_stats_row_limit: Optional[int] = None
     enabled: Optional[bool] = None
-    enforce_collection_interval_deadline: Optional[bool] = None
-    max_queries: Optional[int] = None
-    samples_per_hour_per_query: Optional[int] = None
+    max_procedures: Optional[int] = None
 
 
 class InstanceConfig(BaseModel):
