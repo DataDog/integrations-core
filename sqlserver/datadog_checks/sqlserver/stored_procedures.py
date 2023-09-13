@@ -53,11 +53,13 @@ def _row_key(row):
     :param row: a normalized row from STATEMENT_METRICS_QUERY
     :return: a tuple uniquely identifying this row
     """
-    return "".join((
-        row.get('database_name'),
-        row['schema_name'],
-        row['procedure_name'],
-    ))
+    return "".join(
+        (
+            row.get('database_name'),
+            row['schema_name'],
+            row['procedure_name'],
+        )
+    )
 
 
 def agent_check_getter(self):

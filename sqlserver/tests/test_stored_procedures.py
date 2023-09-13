@@ -12,13 +12,10 @@ import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
 
-import mock
 import pytest
 from lxml import etree as ET
 
-from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
-from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.const import (
     ENGINE_EDITION_ENTERPRISE,
@@ -47,6 +44,7 @@ logger = logging.getLogger(__name__)
 
 def _expected_dbm_instance_tags(dbm_instance):
     return dbm_instance['tags']
+
 
 @pytest.fixture(autouse=True)
 def stop_orphaned_threads():
@@ -119,61 +117,91 @@ test_procedure_metrics_parametrized = (
     "database,query,param_groups,execution_count,expected_objects",
     [
         [
-            "master", # database
-            "EXEC multiQueryProc", # query
+            "master",  # database
+            "EXEC multiQueryProc",  # query
             ((),),
             1,
             [
-                { 'schema_name': 'dbo', 'procedure_name': 'multiQueryProc', 'database_name': 'master', 'execution_count': 1 }
-            ]
+                {
+                    'schema_name': 'dbo',
+                    'procedure_name': 'multiQueryProc',
+                    'database_name': 'master',
+                    'execution_count': 1,
+                }
+            ],
         ],
         [
-            "master", # database
-            "EXEC multiQueryProc", # query
+            "master",  # database
+            "EXEC multiQueryProc",  # query
             ((),),
             5,
             [
-                { 'schema_name': 'dbo', 'procedure_name': 'multiQueryProc', 'database_name': 'master', 'execution_count': 5 }
-            ]
+                {
+                    'schema_name': 'dbo',
+                    'procedure_name': 'multiQueryProc',
+                    'database_name': 'master',
+                    'execution_count': 5,
+                }
+            ],
         ],
         [
-            "master", # database
-            "EXEC encryptedProc", # query
+            "master",  # database
+            "EXEC encryptedProc",  # query
             ((),),
             3,
             [
-                { 'schema_name': 'dbo', 'procedure_name': 'encryptedProc', 'database_name': 'master', 'execution_count': 3 }
-            ]
+                {
+                    'schema_name': 'dbo',
+                    'procedure_name': 'encryptedProc',
+                    'database_name': 'master',
+                    'execution_count': 3,
+                }
+            ],
         ],
         [
-            "datadog_test", # database
-            "EXEC bobProc", # query
+            "datadog_test",  # database
+            "EXEC bobProc",  # query
             ((),),
             1,
             [
-                { 'schema_name': 'dbo', 'procedure_name': 'bobProc', 'database_name': 'datadog_test', 'execution_count': 1 }
-            ]
+                {
+                    'schema_name': 'dbo',
+                    'procedure_name': 'bobProc',
+                    'database_name': 'datadog_test',
+                    'execution_count': 1,
+                }
+            ],
         ],
         [
-            "datadog_test", # database
-            "EXEC bobProc", # query
+            "datadog_test",  # database
+            "EXEC bobProc",  # query
             ((),),
             10,
             [
-                { 'schema_name': 'dbo', 'procedure_name': 'bobProc', 'database_name': 'datadog_test', 'execution_count': 10 }
-            ]
+                {
+                    'schema_name': 'dbo',
+                    'procedure_name': 'bobProc',
+                    'database_name': 'datadog_test',
+                    'execution_count': 10,
+                }
+            ],
         ],
         [
-            "datadog_test", # database
-            "EXEC bobProcParams @P1 = ?, @P2 = ?", # query
+            "datadog_test",  # database
+            "EXEC bobProcParams @P1 = ?, @P2 = ?",  # query
             (
                 (1, "foo"),
                 (2, "bar"),
             ),
-            1, # This will execute each param set once, for a total of 2 executions
+            1,  # This will execute each param set once, for a total of 2 executions
             [
-                { 'schema_name': 'dbo', 'procedure_name': 'bobProcParams', 'database_name': 'datadog_test', 'execution_count': 2 }
-            ]
+                {
+                    'schema_name': 'dbo',
+                    'procedure_name': 'bobProcParams',
+                    'database_name': 'datadog_test',
+                    'execution_count': 2,
+                }
+            ],
         ],
     ],
 )
@@ -232,7 +260,7 @@ def test_procedure_metrics(
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
     payload = next((n for n in dbm_metrics if n.get('collection_type') == 'procedure_metrics'), None)
-    
+
     for expected_object in expected_objects:
         matched = False
         for row in payload['sqlserver_rows']:
@@ -241,7 +269,9 @@ def test_procedure_metrics(
             if is_match:
                 matched = True
                 break
-        assert matched, "could not find expected_object in sqlserver_rows. expected={} seen={}".format(expected_objects, payload['sqlserver_rows'])
+        assert matched, "could not find expected_object in sqlserver_rows. expected={} seen={}".format(
+            expected_objects, payload['sqlserver_rows']
+        )
 
     assert len(payload['sqlserver_rows']) == len(expected_objects), 'should have as many emitted rows as expected'
     assert set(payload['tags']) == expected_instance_tags
@@ -307,10 +337,6 @@ def test_procedure_metrics(
 
 #     # check that it's sorted
 #     assert sqlserver_rows == sorted(sqlserver_rows, key=lambda i: i['total_elapsed_time'], reverse=True)
-
-
-
-
 
 
 # @pytest.mark.parametrize("statement_metrics_enabled", [True, False])
