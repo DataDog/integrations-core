@@ -46,7 +46,7 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.ospfVirtIf',
     'snmp.wlsxSysExtFan',  # Aruba constant metric
     'snmp.upsOutletGroupStatus',  # APC UPS constant metric
-    'snmp.cpiPduEas',  # Chatsworth constant metric
+    'snmp.cpiEas',  # Chatsworth constant metric
     'snmp.ciscoEnvMonSupplyStatus',  # Cisco constant metric
     'snmp.ciscoEnvMonFanStatus',  # Cisco constant metric
     'snmp.cefcFanTrayStatus',  # Cisco constant metric
