@@ -1003,7 +1003,7 @@ metrics:
           11: device_type_is_feprom
           12: device_type_is_eprom
           13: device_type_is_cdram
-          14: device_type_is3_dram
+          14: device_type_is_3dram
           15: device_type_is_sdram
           16: device_type_is_sgram
           17: device_type_is_rdram
