@@ -36,7 +36,12 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "python -m ray.util.client.server",
+        "gcs_server",
+        "raylet"
+      ]
     },
     "logs": {
       "source": "ray"

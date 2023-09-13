@@ -266,6 +266,7 @@ WORKER_METRICS = ['ray.' + m for m in WORKER_METRICS]
 
 OPTIONAL_METRICS = [
     'actors',
+    'tasks',
     'pull_manager.object_request_time.count',
     'serve.deployment.error',
     'serve.num_deployment_http_error_requests',
