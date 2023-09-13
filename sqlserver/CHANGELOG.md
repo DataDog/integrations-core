@@ -9,6 +9,7 @@
 
 ***Added***:
 
+* Add unit test to cover missing plan for stored proc with conditional branches and temp tables ([#15819](https://github.com/DataDog/integrations-core/pull/15819))
 * Add `index_name` tag to `.database.avg_fragmentation_in_percent`, `.database.fragment_count`, `.database.avg_fragment_size_in_pages` metrics. Also add a new metric `sqlserver.database.index_page_count`, tagged by `database_name`, `object_name`, `index_id` and `index_name`. ([#15721](https://github.com/DataDog/integrations-core/pull/15721))
 
 ***Fixed***:

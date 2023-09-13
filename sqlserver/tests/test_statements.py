@@ -875,9 +875,9 @@ def test_statement_conditional_stored_procedure_with_temp_table(
     aggregator, dd_run_check, dbm_instance, bob_conn, database, query
 ):
     # This test covers a very special case where a stored procedure has a conditional branch
-    # and uses temp tables. The plan will be NULL if there are any statements involving temp tables that 
+    # and uses temp tables. The plan will be NULL if there are any statements involving temp tables that
     # have not been executed. We simulate the case by running the stored procedure with a parameter that
-    # only executes the first branch of the conditional. The second branch will not be executed and the 
+    # only executes the first branch of the conditional. The second branch will not be executed and the
     # plan will be NULL. That being said, ALL executed statements in the stored procedure will have NULL plan.
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
