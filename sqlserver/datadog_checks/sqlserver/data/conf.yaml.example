@@ -277,19 +277,20 @@ instances:
     # procedure_metrics:
 
         ## @param enabled - boolean - optional - default: true
-        ## Enable collection of query metrics. Requires `dbm: true`.
+        ## Enable collection of procedure metrics. Requires `dbm: true`.
         #
         # enabled: true
 
         ## @param collection_interval - number - optional - default: 60
-        ## Set the query metric collection interval (in seconds). Each collection involves one or more queries to
-        ## the SQL Server Query Plan Cache. If a non-default value is chosen then that exact same value must be used
-        ## for *every* check instance. Running different instances with different collection intervals is not supported.
+        ## Set the procedure metric collection interval (in seconds). Each collection involves one query to
+        ## sys.dm_exec_procedure_stats. If a non-default value is chosen then that exact same value must
+        ## be used for *every* check instance. Running different instances with different collection intervals
+        ## is not supported.
         #
         # collection_interval: 60
 
-        ## @param dm_exec_query_stats_row_limit - integer - optional - default: 10000
-        ## Set the maximum number of query stats rows that can be retrieved in a single check run.
+        ## @param dm_exec_procedure_stats_row_limit - integer - optional - default: 10000
+        ## Set the maximum number of procedure stats rows that can be retrieved in a single check run.
         #
         # dm_exec_procedure_stats_row_limit: 10000
 
@@ -492,7 +493,7 @@ instances:
     ##                          of the item in this column:
     ##                           i. tag           - This is the default tag type
     ##                           ii. tag_list     - This allows multiple values to be attached
-    ##                                             to the tag name. For example:
+    ##                                             to the tag name. For example: 
     ##
     ##                                             query = {
     ##                                               "name": "example",
