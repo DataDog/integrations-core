@@ -857,7 +857,7 @@ metrics:
           11: feprom
           12: eprom
           13: cdram
-          14: n3_dram
+          14: n3dram
           15: sdram
           16: sgram
           17: rdram
@@ -1040,7 +1040,7 @@ metrics:
         tag: cucs_processor_unit_arch
         mapping:
           0: any
-          1: intel_p4_c
+          1: intel_p4c
           132: opteron
           134: turion64
           135: dual_core_opteron
