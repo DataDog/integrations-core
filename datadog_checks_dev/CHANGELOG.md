@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+***Added***:
+## 25.1.0 / 2023-09-13
+
+* Added required classifier tag examples to template 
+  
 ## 25.0.0 / 2023-09-13
 
 ***Changed***:
