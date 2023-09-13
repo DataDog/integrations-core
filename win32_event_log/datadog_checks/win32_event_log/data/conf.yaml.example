@@ -240,7 +240,7 @@ instances:
     ##
     ## Setting this option to `false` is only supported on Agent versions 7 and above.
     #
-    legacy_mode: false
+    # legacy_mode: false
 
     ## @param host - string - optional - default: localhost
     ## By default, the local machine's event logs are captured. To capture a remote
