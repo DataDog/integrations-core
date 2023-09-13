@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+***Added***:
+## 25.1.0 / 2023-09-13
+
+* Added required classifier tag examples to template ([#15828](https://github.com/DataDog/integrations-core/pull/15828))
+  
 ## 25.0.0 / 2023-09-13
 
 ***Changed***:
