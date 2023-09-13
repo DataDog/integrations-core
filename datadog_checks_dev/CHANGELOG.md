@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-# 25.1.0 / 2023-09-13
+# 24.2.0 / 2023-09-13
 
 * Added overview examples to the readme file
   
