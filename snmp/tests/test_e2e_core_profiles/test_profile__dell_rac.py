@@ -353,7 +353,7 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         [
             'amperage_probe_index:16',
             'chassis_index:3',
-            'probe_type:amperage_probe_type_is1_point5_volt',
+            'probe_type:amperage_probe_type_is_1point5_volt',
             'amperage_probe_status:critical_lower',
         ],
     ]
@@ -384,7 +384,7 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         ],
         [
             'chassis_index:29',
-            'probe_type:voltage_probe_type_is1_point5_volt',
+            'probe_type:voltage_probe_type_is_1point5_volt',
             'voltage_probe_index:25',
             'voltage_probe_status:critical_lower',
         ],
