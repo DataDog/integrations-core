@@ -96,6 +96,17 @@ class ObfuscatorOptions(BaseModel):
     replace_digits: Optional[bool] = None
 
 
+class ProcedureMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    dm_exec_procedure_stats_row_limit: Optional[int] = None
+    enabled: Optional[bool] = None
+    max_procedures: Optional[int] = None
+
+
 class QueryActivity(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -117,17 +128,6 @@ class QueryMetrics(BaseModel):
     enforce_collection_interval_deadline: Optional[bool] = None
     max_queries: Optional[int] = None
     samples_per_hour_per_query: Optional[int] = None
-
-
-class ProcedureMetrics(BaseModel):
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        frozen=True,
-    )
-    collection_interval: Optional[float] = None
-    dm_exec_procedure_stats_row_limit: Optional[int] = None
-    enabled: Optional[bool] = None
-    max_procedures: Optional[int] = None
 
 
 class InstanceConfig(BaseModel):
@@ -180,9 +180,9 @@ class InstanceConfig(BaseModel):
     password: Optional[str] = None
     proc_only_if: Optional[str] = None
     proc_only_if_database: Optional[str] = None
+    procedure_metrics: Optional[ProcedureMetrics] = None
     query_activity: Optional[QueryActivity] = None
     query_metrics: Optional[QueryMetrics] = None
-    procedure_metrics: Optional[ProcedureMetrics] = None
     reported_hostname: Optional[str] = None
     server_version: Optional[str] = None
     service: Optional[str] = None
