@@ -6,6 +6,7 @@
 
 * Remove unsupported metric in riverbed-interceptor.yaml ([#15678](https://github.com/DataDog/integrations-core/pull/15678))
 * Delete unnecessary extend for ubiquiti profiles ([#15643](https://github.com/DataDog/integrations-core/pull/15643))
+* Fix typo in mapping in _dell-rac.yaml ([#15826](https://github.com/DataDog/integrations-core/pull/15826))
 
 ## 6.2.2 / 2023-09-12
 
