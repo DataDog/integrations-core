@@ -71,6 +71,30 @@ GO
 GRANT EXECUTE on multiQueryProc to bob;
 GO
 
+-- test procedure with IF ELSE branches and temp tables
+CREATE PROCEDURE conditionalPlanTest
+ @Switch INTEGER
+AS
+BEGIN
+ CREATE TABLE #Ids (Id INTEGER PRIMARY KEY)
+ DECLARE @Count INTEGER
+
+ IF (@Switch > 0)
+  BEGIN
+   INSERT INTO #Ids (Id) VALUES (1)
+  END 
+
+ IF (@Switch > 1)
+  BEGIN
+   INSERT #Ids (Id) VALUES (2)
+  END
+
+ SELECT * FROM #Ids
+END
+GO
+GRANT EXECUTE on conditionalPlanTest to bob;
+GO
+
 -- Create test database for integration tests.
 -- Only bob and fred have read/write access to this database.
 CREATE DATABASE datadog_test;
