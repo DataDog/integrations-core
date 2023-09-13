@@ -663,18 +663,18 @@ metrics:
         mapping:
           1: amperage_probe_type_is_other
           2: amperage_probe_type_is_unknown
-          3: amperage_probe_type_is1_point5_volt
-          4: amperage_probe_type_is3_point3volt
-          5: amperage_probe_type_is5_volt
-          6: amperage_probe_type_is_minus5_volt
-          7: amperage_probe_type_is12_volt
-          8: amperage_probe_type_is_minus12_volt
+          3: amperage_probe_type_is_1point5_volt    # 1.5 volt
+          4: amperage_probe_type_is_3point3_volt    # 3.3 volt
+          5: amperage_probe_type_is_5_volt          # 5 volt
+          6: amperage_probe_type_is_minus5_volt     # -5 volt
+          7: amperage_probe_type_is_12_volt         # 12 volt
+          8: amperage_probe_type_is_minus12_volt    # -12 volt
           9: amperage_probe_type_is_io
           10: amperage_probe_type_is_core
           11: amperage_probe_type_is_flea
           12: amperage_probe_type_is_battery
           13: amperage_probe_type_is_terminator
-          14: amperage_probe_type_is2_point5_volt
+          14: amperage_probe_type_is_2point5_volt   # 2.5 volt
           15: amperage_probe_type_is_gtl
           16: amperage_probe_type_is_discrete
           23: amperage_probe_type_is_power_supply_amps
@@ -769,18 +769,18 @@ metrics:
         mapping:
           1: voltage_probe_type_is_other
           2: voltage_probe_type_is_unknown
-          3: voltage_probe_type_is1_point5_volt
-          4: voltage_probe_type_is3_point3_volt
-          5: voltage_probe_type_is5_volt
-          6: voltage_probe_type_is_minus5_volt
-          7: voltage_probe_type_is12_volt
-          8: voltage_probe_type_is_minus12_volt
+          3: voltage_probe_type_is_1point5_volt   # 1.5 volt
+          4: voltage_probe_type_is_3point3_volt   # 3.3 volt
+          5: voltage_probe_type_is_5_volt         # 5 volt
+          6: voltage_probe_type_is_minus5_volt    # -5 volt
+          7: voltage_probe_type_is_12_volt        # 12 volt
+          8: voltage_probe_type_is_minus12_volt   # -12 volt
           9: voltage_probe_type_is_io
           10: voltage_probe_type_is_core
           11: voltage_probe_type_is_flea
           12: voltage_probe_type_is_battery
           13: voltage_probe_type_is_terminator
-          14: voltage_probe_type_is2_point5_volt
+          14: voltage_probe_type_is_2point5_volt  # 2.5 volt
           15: voltage_probe_type_is_gtl
           16: voltage_probe_type_is_discrete
           17: voltage_probe_type_is_generic_discrete
@@ -1003,7 +1003,7 @@ metrics:
           11: device_type_is_feprom
           12: device_type_is_eprom
           13: device_type_is_cdram
-          14: device_type_is3_dram
+          14: device_type_is_3dram
           15: device_type_is_sdram
           16: device_type_is_sgram
           17: device_type_is_rdram

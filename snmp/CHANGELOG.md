@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Update mappings in SNMP profiles ([#15826](https://github.com/DataDog/integrations-core/pull/15826))
+
 ## 6.2.2 / 2023-09-12
 
 ***Fixed***:
