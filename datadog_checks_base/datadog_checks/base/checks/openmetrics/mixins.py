@@ -379,6 +379,9 @@ class OpenMetricsScraperMixin(object):
         # on first scrape.
         config['use_process_start_time'] = is_affirmative(_get_setting('use_process_start_time', False))
 
+        # Compression is enabled by default
+        config['_disable_compression'] = False
+
         return config
 
     def get_http_handler(self, scraper_config):
@@ -411,7 +414,8 @@ class OpenMetricsScraperMixin(object):
             headers['Authorization'] = 'Bearer {}'.format(bearer_token)
 
         # TODO: Determine if we really need this
-        headers.setdefault('accept-encoding', 'gzip')
+        if not scraper_config['_disable_compression']:
+            headers.setdefault('accept-encoding', 'gzip')
 
         # Explicitly set the content type we accept
         headers.setdefault('accept', 'text/plain')
