@@ -12,7 +12,7 @@
 * Add TempDB version store performance counters ([#15879](https://github.com/DataDog/integrations-core/pull/15879))
 * Add TempDB page counts metrics ([#15873](https://github.com/DataDog/integrations-core/pull/15873))
 * Add `index_name` tag to `.database.avg_fragmentation_in_percent`, `.database.fragment_count`, `.database.avg_fragment_size_in_pages` metrics. Also add a new metric `sqlserver.database.index_page_count`, tagged by `database_name`, `object_name`, `index_id` and `index_name`. ([#15721](https://github.com/DataDog/integrations-core/pull/15721))
-* When DBM is enabled, starts collecting stored procedure metrics from sys.dm_exec_procedure_stats ([#15805](https://github.com/DataDog/integrations-core/pull/15805)) at 60s interval (configurable). Also adds the corresponding `procedure_metrics` section to the config file. The new DBM-only metrics are `sqlserver.procedures.count`, `sqlserver.procedures.time`, `sqlserver.procedures.worker_time`, `sqlserver.procedures.physical_reads`, `sqlserver.procedures.logical_reads`, `sqlserver.procedures.logical_writes` and `sqlserver.procedures.spills`
+* When DBM is enabled, starts collecting stored procedure metrics from sys.dm_exec_procedure_stats at 60s interval (configurable). Also adds the corresponding `procedure_metrics` section to the config file. The new DBM-only metrics are `sqlserver.procedures.count`, `sqlserver.procedures.time`, `sqlserver.procedures.worker_time`, `sqlserver.procedures.physical_reads`, `sqlserver.procedures.logical_reads`, `sqlserver.procedures.logical_writes` and `sqlserver.procedures.spills`. ([#15805](https://github.com/DataDog/integrations-core/pull/15805))
 
 ***Fixed***:
 
