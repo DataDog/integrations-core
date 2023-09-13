@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***CHANGED***
+
+* Fix mappings in _dell-rac & dell-poweredge ([#15827](https://github.com/DataDog/integrations-core/pull/15827))
+
 ***Fixed***:
 
 * Remove unsupported metric in riverbed-interceptor.yaml ([#15678](https://github.com/DataDog/integrations-core/pull/15678))
