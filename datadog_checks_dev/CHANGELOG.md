@@ -4,7 +4,7 @@
 
 # 24.2.0 / 2023-09-13
 
-* Added overview examples to the readme file ([#15817]https://github.com/DataDog/integrations-core/pull/15817)
+* Added overview examples to the readme file ([#15817](https://github.com/DataDog/integrations-core/pull/15817))
   
 ***Changed***:
 
