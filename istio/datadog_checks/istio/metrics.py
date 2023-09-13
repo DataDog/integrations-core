@@ -394,13 +394,13 @@ ISTIOD_METRICS = {
     # Unknown
     'galley_istio_networking_virtualservices': 'galley.istio.networking.virtualservices',
     'galley_istio_networking_destinationrules': 'galley.istio.networking.destinationrules',
-    'galley_istio_networking_gateways': 'galley.istio.networking.gateways'
+    'galley_istio_networking_gateways': 'galley.istio.networking.gateways',
     'galley_istio_authentication_meshpolicies': 'galley_istio_authentication_meshpolicies',
     # Count
     'galley_source_kube_event_error_total': 'galley.source.kube.event.error',
     'galley_source_kube_dynamic_converter_failure_total': 'galley.source.kube.dynamic.converter.failure',
     'galley_validation_cert_key_update_errors': 'galley.validation.cert.key.update.errors',
-    'galley_validation_http_error': 'galley.validation.http.error'
+    'galley_validation_http_error': 'galley.validation.http.error',
     # Histogram/distribution
     #'galley_runtime_processor_snapshot_events_total': 'galley.runtime.processor.snapshot.events.total', #already in
     # Mixer
