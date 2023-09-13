@@ -331,8 +331,9 @@ files:
         - name: collection_interval
           description: |
             Set the procedure metric collection interval (in seconds). Each collection involves one or more queries to
-            the SQL Server dm_exec_procedure_stats DBM. If a non-default value is chosen then that exact same value must be used
-            for *every* check instance. Running different instances with different collection intervals is not supported.
+            the SQL Server dm_exec_procedure_stats. If a non-default value is chosen then that exact same value must
+            be used for *every* check instance. Running different instances with different collection intervals
+            is not supported.
           value:
             type: number
             example: 60
