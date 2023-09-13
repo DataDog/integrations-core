@@ -4,13 +4,7 @@
 
 ***Added***:
 
-# 25.1.0 / 2023-09-13
-
 * Added overview examples to the readme file ([#15817](https://github.com/DataDog/integrations-core/pull/15817))
-
-***Added***:
-## 25.1.0 / 2023-09-13
-
 * Added required classifier tag examples to template ([#15828](https://github.com/DataDog/integrations-core/pull/15828))
 
   
