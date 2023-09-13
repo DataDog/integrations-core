@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 25.0.0 / 2023-09-13
+
 ***Changed***:
 
 * Adjust template and test collection based on new team guidelines ([#15078](https://github.com/DataDog/integrations-core/pull/15078))
