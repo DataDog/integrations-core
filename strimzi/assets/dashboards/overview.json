@@ -587,7 +587,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:strimzi.cluster_operator.resources{host:$host.value, endpoint:$endpoint.value} by {endpoint,host,kind,namespace}",
+                                            "query": "avg:strimzi.cluster_operator.resources{host:$host.value, endpoint:$endpoint.value} by {endpoint,host,namespace,kind}",
                                             "aggregator": "last"
                                         }
                                     ],
