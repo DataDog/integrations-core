@@ -7,7 +7,6 @@ import threading
 import time
 import uuid
 
-import psycopg
 import pytest
 import psycopg
 from psycopg.rows import dict_row
