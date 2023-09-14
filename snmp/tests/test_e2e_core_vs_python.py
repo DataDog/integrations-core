@@ -475,7 +475,7 @@ def test_e2e_profile_cisco_icm(dd_agent_check):
 
 
 def test_e2e_profile_dell_poweredge(dd_agent_check):
-    config = common.generate_container_profile_config('x-poweredge')
+    config = common.generate_container_profile_config('dell-poweredge')
 
     # TODO: Fix python implementation for duplicate declarations
     metric_to_skip = [
