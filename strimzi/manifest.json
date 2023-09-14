@@ -44,6 +44,9 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "strimzi": "assets/dashboards/overview.json"
     }
   },
   "author": {
