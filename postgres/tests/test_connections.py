@@ -48,7 +48,7 @@ def test_conn_pool(pg_instance):
             assert len(rows) == 1 and list(rows[0].values())[0]
     assert len(pool._conns) == 1
     assert pool._stats.connection_opened == 2
-    success = pool.close_all_connections(timeout=0)
+    success = pool.close_all_connections()
     assert success
     assert len(pool._conns) == 0
     assert pool._stats.connection_closed == 2
@@ -98,7 +98,7 @@ def test_conn_pool_no_leaks_on_close(pg_instance):
         assert pool._stats.connection_opened == conn_count
         assert len(get_activity(pool2, unique_id)) == conn_count
 
-        pool.close_all_connections(timeout=0)
+        pool.close_all_connections()
         assert pool._stats.connection_closed == conn_count
         assert pool._stats.connection_closed_failed == 0
 
@@ -151,7 +151,7 @@ def test_conn_pool_no_leaks_on_prune(pg_instance):
                     conn_pids.append(conn.info.backend_pid)
         return set(conn_pids)
 
-    pool.close_all_connections(timeout=0)
+    pool.close_all_connections()
 
     pool._stats.reset()
 
@@ -307,7 +307,7 @@ def test_conn_pool_manages_connections(pg_instance):
     assert pool._stats.connection_closed == 1
 
     # close the rest
-    pool.close_all_connections(timeout=0)
+    pool.close_all_connections()
     assert pool._stats.connection_closed == limit + 1
 
 

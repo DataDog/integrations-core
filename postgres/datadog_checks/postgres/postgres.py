@@ -663,8 +663,8 @@ class PostgreSql(AgentCheck):
                 open=True,
                 name=dbname,
                 timeout=self._config.connection_timeout,
-                reconnect_timeout=30,
-                reconnect_failed=lambda e: self.log.error("Failed to reconnect to %s: %s", dbname, e),
+                reconnect_timeout=0,
+                reconnect_failed=self._reconnect_failed,
             )
         else:
             password = self._config.password
@@ -709,8 +709,8 @@ class PostgreSql(AgentCheck):
                 open=True,
                 name=dbname,
                 timeout=self._config.connection_timeout,
-                reconnect_timeout=30,
-                reconnect_failed=lambda e: self.log.error("Failed to reconnect to %s: %s", dbname, e),
+                reconnect_timeout=0,
+                reconnect_failed=self._reconnect_failed,
             )
         return pool
 
@@ -727,6 +727,20 @@ class PostgreSql(AgentCheck):
 
         if not self.db:
             self.db = self._new_connection(self._config.dbname, max_pool_size=1)
+            try:
+                self.db.wait(timeout=self._config.connection_timeout)
+            except PoolTimeout as e:
+                self.log.error(
+                    "Unable to establish connection to %s in %d. error: %s",
+                    self._config.dbname,
+                    self._config.connection_timeout,
+                    e.diag.message_primary,
+                )
+                self.db = None
+                raise e
+
+    def _reconnect_failed(self, pool: ConnectionPool) -> None:
+        self.log.error("Failed to reconnect to %s", pool.name)
 
     # Reload pg_settings on a new connection to the main db
     def load_pg_settings(self):
@@ -760,7 +774,7 @@ class PostgreSql(AgentCheck):
         return self.pg_settings
 
     def _close_db_pool(self):
-        self.db_pool.close_all_connections(timeout=0)
+        self.db_pool.close_all_connections()
 
     def _collect_custom_queries(self, tags):
         """
@@ -945,6 +959,6 @@ class PostgreSql(AgentCheck):
             if self._check_cancelled and self.db:
                 try:
                     # once check finishes on a cancel, shut down main connection gracefully
-                    self.db.close()
+                    self.db.close(timeout=0)
                 except Exception:
                     self.log.exception("failed to close DB connection for db=%s", self._config.dbname)
