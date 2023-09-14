@@ -102,7 +102,7 @@ class PostgreSql(AgentCheck):
         self.set_resource_tags()
         self.pg_settings = {}
         self._warnings_by_code = {}
-        self.db_pool = MultiDatabaseConnectionPool(self, self._new_connection_pool, self._config.max_connections)
+        self.db_pool = MultiDatabaseConnectionPool(self, self._new_connection, self._config.max_connections)
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.statement_metrics = PostgresStatementMetrics(self, self._config)
         self.statement_samples = PostgresStatementSamples(self, self._config)
@@ -695,7 +695,7 @@ class PostgreSql(AgentCheck):
             args.update(conn_args)
             return "", args
 
-    def _new_connection_pool(self, dbname: str, min_pool_size: int = 1, max_pool_size: int = None):
+    def _new_connection(self, dbname: str, min_pool_size: int = 1, max_pool_size: int = None):
         # required for autocommit as well as using params in queries
         connection_string, args = self._new_connection_info(dbname)
         if connection_string:
@@ -757,7 +757,7 @@ class PostgreSql(AgentCheck):
             self.db = None
 
         if not self.db:
-            self.db = self._new_connection_pool(self._config.dbname, max_pool_size=1)
+            self.db = self._new_connection(self._config.dbname, max_pool_size=1)
             # try:
             #     self.db.wait(timeout=self._config.connection_timeout)
             # except PoolTimeout as e:
