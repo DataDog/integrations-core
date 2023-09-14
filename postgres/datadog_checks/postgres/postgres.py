@@ -663,6 +663,8 @@ class PostgreSql(AgentCheck):
                 open=True,
                 name=dbname,
                 timeout=self._config.connection_timeout,
+                reconnect_timeout=30,
+                reconnect_failed=lambda e: self.log.error("Failed to reconnect to %s: %s", dbname, e),
             )
         else:
             password = self._config.password
@@ -707,6 +709,8 @@ class PostgreSql(AgentCheck):
                 open=True,
                 name=dbname,
                 timeout=self._config.connection_timeout,
+                reconnect_timeout=30,
+                reconnect_failed=lambda e: self.log.error("Failed to reconnect to %s: %s", dbname, e),
             )
         return pool
 
