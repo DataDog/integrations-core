@@ -17,7 +17,6 @@ from packaging.version import InvalidVersion, Version
 # Dependencies to ignore when update dependencies
 IGNORED_DEPS = {
     'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
-    'flup',  # https://github.com/DataDog/integrations-core/pull/1997
     'dnspython',
     'pymysql',  # https://github.com/DataDog/integrations-core/pull/12612
     'foundationdb',  # Breaking datadog_checks_base tests
@@ -25,8 +24,6 @@ IGNORED_DEPS = {
     'pyasn1',  # Breaking snmp tests
     'pycryptodomex',  # Breaking snmp tests
     'pysnmp',  # Breaking snmp tests
-    'clickhouse-driver',  # Breaking clickhouse tests
-    'lz4',  # Breaking clickhouse tests
     'pyodbc',  # Breaking sqlserver tests
     'psutil',  # Breaking disk tests
     'aerospike',  # v8+ breaks agent build.
