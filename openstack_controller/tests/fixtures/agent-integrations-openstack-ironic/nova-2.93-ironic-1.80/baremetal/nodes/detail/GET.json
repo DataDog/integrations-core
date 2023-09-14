@@ -220,7 +220,7 @@
       "secure_boot": null,
       "storage_interface": "noop",
       "target_power_state": null,
-      "target_provision_state": null,
+      "target_provision_state": "active",
       "target_raid_config": {},
       "traits": [
         "CUSTOM_GOLD"

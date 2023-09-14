@@ -176,9 +176,14 @@ def _create_load_balancer_amphora_tags(amphora_data, amphora_stats, loadbalancer
     return tags
 
 
-def _create_baremetal_nodes_metric_tags(node_name, node_uuid, conductor_group, power_state):
+def _create_baremetal_nodes_metric_tags(
+    node_name, node_uuid, conductor_group, power_state, provision_state, target_provision_state, driver
+):
     tags = [
         f'power_state:{power_state}',
+        f'provision_state:{provision_state}',
+        f'target_provision_state:{target_provision_state}',
+        f'driver:{driver}',
     ]
     if node_name:
         tags.append(f'node_name:{node_name}')
@@ -268,14 +273,18 @@ class OpenStackControllerCheck(AgentCheck):
         if self._authenticate_domain(api):
             self.log.debug("Authenticated user for domain, reporting metrics using domain scope")
             reported_identity_metrics = self._report_identity_metrics(api, tags)
-            reported_domain_metrics = self._report_domain_metrics(api, tags + ['domain_id:{}'.format(self.config.domain_id)])
+            reported_domain_metrics = self._report_domain_metrics(
+                api, tags + ['domain_id:{}'.format(self.config.domain_id)]
+            )
             reported_global_metrics = reported_identity_metrics and reported_domain_metrics
         for project in auth_projects:
             if self._authenticate_project(api, project):
                 if not reported_global_metrics:
                     self.log.debug("Authenticated user for project %s, reporting metrics using project scope", project)
                     reported_identity_metrics = self._report_identity_metrics(api, tags)
-                    reported_domain_metrics = self._report_domain_metrics(api, tags + ['domain_id:{}'.format(self.config.domain_id)])
+                    reported_domain_metrics = self._report_domain_metrics(
+                        api, tags + ['domain_id:{}'.format(self.config.domain_id)]
+                    )
                     reported_global_metrics = reported_identity_metrics and reported_domain_metrics
                 self._report_project_metrics(api, project, tags + ['domain_id:{}'.format(self.config.domain_id)])
 
@@ -458,7 +467,12 @@ class OpenStackControllerCheck(AgentCheck):
         reported_network_metrics = self._report_network_domain_metrics(api, tags)
         reported_baremetal_metrics = self._report_baremetal_domain_metrics(api, tags)
         reported_load_balancer_metrics = self._report_load_balancer_domain_metrics(api, tags)
-        return reported_compute_metrics and reported_network_metrics and reported_baremetal_metrics and reported_load_balancer_metrics
+        return (
+            reported_compute_metrics
+            and reported_network_metrics
+            and reported_baremetal_metrics
+            and reported_load_balancer_metrics
+        )
 
     def _authenticate_project(self, api, project):
         self.log.debug("authenticating user project scope")
@@ -766,6 +780,9 @@ class OpenStackControllerCheck(AgentCheck):
                     node_data.get('node_uuid'),
                     node_data.get('conductor_group'),
                     node_data.get('power_state'),
+                    node_data.get('provision_state'),
+                    node_data.get('target_provision_state'),
+                    node_data.get('driver'),
                 )
                 all_tags = node_tags + tags
                 self.gauge('openstack.ironic.node.up', value=is_up, tags=all_tags)

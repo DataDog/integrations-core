@@ -53,6 +53,9 @@ class BaremetalRest:
                     'node_name': node.get('name'),
                     'node_uuid': node.get('uuid'),
                     'power_state': node.get('power_state'),
+                    'provision_state': node.get('provision_state'),
+                    'target_provision_state': node.get('target_provision_state'),
+                    'driver': node.get('driver'),
                     'conductor_group': node.get('conductor_group'),
                     'is_up': is_up,
                 }

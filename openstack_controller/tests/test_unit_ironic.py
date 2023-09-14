@@ -92,10 +92,34 @@ def test_node_metrics_default(aggregator, dd_run_check, instance, monkeypatch):
     base_tags = ['domain_id:default', 'keystone_server:{}'.format(instance["keystone_server_url"])]
 
     nodes_tags = [
-        ['node_uuid:9d72cf53-19c8-4942-9314-005fa5d2a6a0', 'power_state:None'],
-        ['node_uuid:20512deb-e493-4796-a046-5d6e4e072c95', 'power_state:power on'],
-        ['node_uuid:54855e59-83ca-46f8-a78f-55d3370e0656', 'power_state:None'],
-        ['node_uuid:bd7a61bb-5fe0-4c93-9628-55e312f9ef0e', 'power_state:None'],
+        [
+            'node_uuid:9d72cf53-19c8-4942-9314-005fa5d2a6a0',
+            'power_state:None',
+            'driver:ipmi',
+            'provision_state:active',
+            'target_provision_state:None',
+        ],
+        [
+            'node_uuid:20512deb-e493-4796-a046-5d6e4e072c95',
+            'power_state:power on',
+            'driver:fake-hardware',
+            'provision_state:active',
+            'target_provision_state:None',
+        ],
+        [
+            'node_uuid:54855e59-83ca-46f8-a78f-55d3370e0656',
+            'power_state:None',
+            'driver:ipmi',
+            'provision_state:None',
+            'target_provision_state:None',
+        ],
+        [
+            'node_uuid:bd7a61bb-5fe0-4c93-9628-55e312f9ef0e',
+            'power_state:None',
+            'driver:ipmi',
+            'provision_state:None',
+            'target_provision_state:None',
+        ],
     ]
 
     for node_tags in nodes_tags:
@@ -121,21 +145,33 @@ def test_node_metrics_latest(aggregator, dd_run_check, instance_ironic_nova_micr
             'node_uuid:9d72cf53-19c8-4942-9314-005fa5d2a6a0',
             'node_name:node-0',
             'power_state:None',
+            'driver:ipmi',
+            'provision_state:active',
+            'target_provision_state:None',
         ],
         [
             'node_uuid:bd7a61bb-5fe0-4c93-9628-55e312f9ef0e',
             'node_name:node-1',
             'power_state:None',
+            'driver:ipmi',
+            'provision_state:available',
+            'target_provision_state:active',
         ],
         [
             'node_uuid:54855e59-83ca-46f8-a78f-55d3370e0656',
             'node_name:node-2',
             'power_state:None',
+            'driver:ipmi',
+            'provision_state:available',
+            'target_provision_state:None',
         ],
         [
             'node_uuid:20512deb-e493-4796-a046-5d6e4e072c95',
             'node_name:test',
             'power_state:power on',
+            'driver:fake-hardware',
+            'provision_state:active',
+            'target_provision_state:None',
         ],
     ]
 
