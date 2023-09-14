@@ -736,17 +736,6 @@ class PostgreSql(AgentCheck):
 
         if not self.db:
             self.db = self._new_connection(self._config.dbname, max_pool_size=1)
-            # try:
-            #     self.db.wait(timeout=self._config.connection_timeout)
-            # except PoolTimeout as e:
-            #     self.log.error(
-            #         "Unable to establish connection to %s in %d. error: %s",
-            #         self._config.dbname,
-            #         self._config.connection_timeout,
-            #         str(e),
-            #     )
-            #     self.db = None
-            #     raise e
 
     def _reconnect_failed(self, pool: ConnectionPool) -> None:
         self.log.error("Failed to reconnect to %s", pool.name)
