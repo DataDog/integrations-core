@@ -728,7 +728,7 @@ class PostgreSql(AgentCheck):
                     "Unable to establish connection to %s in %d. error: %s",
                     self._config.dbname,
                     self._config.connection_timeout,
-                    e.diag.message_primary,
+                    e,
                 )
             raise e
 
