@@ -590,6 +590,8 @@ def test_e2e_profile_idrac(dd_agent_check):
             'voltage_probe_status',
             'memory_device_status',
             'probe_type',
+            'cooling_device_type',
+            'temperature_probe_type',
         ],  # Skipping tags with mappings
     )
 
