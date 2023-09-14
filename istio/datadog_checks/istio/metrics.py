@@ -415,11 +415,27 @@ ISTIOD_METRICS = {
 
 ISTIOD_VERSION = {'istio_build': {'type': 'metadata', 'label': 'tag', 'name': 'version'}}
 
+# These metrics have a _total affix, eventhough they're not counters and should be excluded in the
+# construct_metrics_config function.
+NON_CONFORMING_METRICS = [
+    # Distribution/Histogram
+    'galley_runtime_processor_snapshot_events_total',
+    # LastValue/Gauge
+    'istio_mcp_clients_total',
+    'galley_runtime_state_type_instances_total',
+    'mixer_config_attributes_total',
+    'mixer_config_handler_configs_total',
+    'mixer_config_instance_configs_total',
+    'mixer_config_rule_configs_total',
+    'mixer_handler_daemons_total',
+    'mixer_handler_new_handlers_total',
+]
+
 
 def construct_metrics_config(metric_map):
     metrics = []
     for raw_metric_name, metric_name in metric_map.items():
-        if raw_metric_name.endswith('_total'):
+        if raw_metric_name.endswith('_total') and raw_metric_name not in NON_CONFORMING_METRICS:
             raw_metric_name = raw_metric_name[:-6]
             metric_name = metric_name[:-6]
 
