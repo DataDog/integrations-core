@@ -102,7 +102,7 @@ class PostgreSql(AgentCheck):
         self.set_resource_tags()
         self.pg_settings = {}
         self._warnings_by_code = {}
-        self.db_pool = MultiDatabaseConnectionPool(self, self._new_connection, self._config.max_connections)
+        self.db_pool = MultiDatabaseConnectionPool(self, self._new_connection_pool, self._config.max_connections)
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.statement_metrics = PostgresStatementMetrics(self, self._config)
         self.statement_samples = PostgresStatementSamples(self, self._config)
@@ -112,6 +112,7 @@ class PostgreSql(AgentCheck):
         self._clean_state()
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
         self.check_initializations.append(self.set_resolved_hostname_metadata)
+        self.check_initializations.append(self._attemp_to_connect)
         self.check_initializations.append(self._connect)
         self.check_initializations.append(self.load_version)
         self.check_initializations.append(self.load_pg_settings)
@@ -643,7 +644,7 @@ class PostgreSql(AgentCheck):
         if self.dynamic_queries:
             self.dynamic_queries.execute()
 
-    def _new_connection(self, dbname: str, min_pool_size: int = 1, max_pool_size: int = None):
+    def _new_connection_info(self, dbname: str):
         # required for autocommit as well as using params in queries
         args = {"autocommit": True, "cursor_factory": psycopg.ClientCursor}
         if self._config.host == 'localhost' and self._config.password == '':
@@ -655,17 +656,7 @@ class PostgreSql(AgentCheck):
             )
             if self._config.query_timeout:
                 connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
-            pool = ConnectionPool(
-                conninfo=connection_string,
-                min_size=min_pool_size,
-                max_size=max_pool_size,
-                kwargs=args,
-                open=True,
-                name=dbname,
-                timeout=self._config.connection_timeout,
-                reconnect_timeout=0,
-                reconnect_failed=self._reconnect_failed,
-            )
+            return connection_string, args
         else:
             password = self._config.password
             region = self._config.cloud_metadata.get('aws', {}).get('region', None)
@@ -702,6 +693,24 @@ class PostgreSql(AgentCheck):
             if self._config.ssl_password:
                 conn_args['sslpassword'] = self._config.ssl_password
             args.update(conn_args)
+            return "", args
+
+    def _new_connection_pool(self, dbname: str, min_pool_size: int = 1, max_pool_size: int = None):
+        # required for autocommit as well as using params in queries
+        connection_string, args = self._new_connection_info(dbname)
+        if connection_string:
+            pool = ConnectionPool(
+                conninfo=connection_string,
+                min_size=min_pool_size,
+                max_size=max_pool_size,
+                kwargs=args,
+                open=True,
+                name=dbname,
+                timeout=self._config.connection_timeout,
+                reconnect_timeout=0,
+                reconnect_failed=self._reconnect_failed,
+            )
+        else:
             pool = ConnectionPool(
                 min_size=min_pool_size,
                 max_size=max_pool_size,
@@ -713,6 +722,28 @@ class PostgreSql(AgentCheck):
                 reconnect_failed=self._reconnect_failed,
             )
         return pool
+    
+    def _attemp_to_connect(self):
+        connection_string, args = self._new_connection_info(self._config.dbname)
+        try:
+            if connection_string:
+                psycopg.connect(
+                    conninfo=connection_string,
+                    **args,
+                )
+            else:
+                psycopg.connect(
+                    **args,
+                )
+        except psycopg.OperationalError as e:
+            self.log.error(
+                    "Unable to establish connection to %s in %d. error: %s",
+                    self._config.dbname,
+                    self._config.connection_timeout,
+                    e.diag.message_primary,
+                )
+            raise e
+
 
     def _connect(self):
         """
@@ -726,18 +757,18 @@ class PostgreSql(AgentCheck):
             self.db = None
 
         if not self.db:
-            self.db = self._new_connection(self._config.dbname, max_pool_size=1)
-            try:
-                self.db.wait(timeout=self._config.connection_timeout)
-            except PoolTimeout as e:
-                self.log.error(
-                    "Unable to establish connection to %s in %d. error: %s",
-                    self._config.dbname,
-                    self._config.connection_timeout,
-                    e.diag.message_primary,
-                )
-                self.db = None
-                raise e
+            self.db = self._new_connection_pool(self._config.dbname, max_pool_size=1)
+            # try:
+            #     self.db.wait(timeout=self._config.connection_timeout)
+            # except PoolTimeout as e:
+            #     self.log.error(
+            #         "Unable to establish connection to %s in %d. error: %s",
+            #         self._config.dbname,
+            #         self._config.connection_timeout,
+            #         str(e),
+            #     )
+            #     self.db = None
+            #     raise e
 
     def _reconnect_failed(self, pool: ConnectionPool) -> None:
         self.log.error("Failed to reconnect to %s", pool.name)
