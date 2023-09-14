@@ -88,7 +88,7 @@ def test_complete_metrics_run(dd_run_check, dbm_instance, high_cardinality_insta
 
 @high_cardinality_only
 @pytest.mark.skip(reason='skip until the metrics query is improved')
-@pytest.mark.parametrize('job', ['query_metrics', 'query_activity', 'procedure_metrics'])
+@pytest.mark.parametrize('job', ['query_metrics', 'query_activity'])
 @pytest.mark.parametrize(
     'background_config',
     [

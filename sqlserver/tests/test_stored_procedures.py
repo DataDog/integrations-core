@@ -253,7 +253,7 @@ def test_procedure_metrics(
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
-    payload = next((n for n in dbm_metrics if n.get('collection_type') == 'procedure_metrics'), None)
+    payload = next((n for n in dbm_metrics if n.get('payload_type') == 'procedure_metrics'), None)
 
     for expected_object in expected_objects:
         matched = False
@@ -308,7 +308,7 @@ def test_procedure_metrics_limit(aggregator, dd_run_check, dbm_instance, bob_con
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
-    payload = next((n for n in dbm_metrics if n.get('collection_type') == 'procedure_metrics'), None)
+    payload = next((n for n in dbm_metrics if n.get('payload_type') == 'procedure_metrics'), None)
     # metrics rows
     sqlserver_rows = payload.get('sqlserver_rows', [])
     assert sqlserver_rows, "should have collected some sqlserver query metrics rows"

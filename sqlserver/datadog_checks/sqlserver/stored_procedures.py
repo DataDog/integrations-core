@@ -32,7 +32,6 @@ SQL_SERVER_PROCEDURE_METRICS_COLUMNS = [
     "total_spills",
 ]
 
-# TODO: we are doing TOP here, we should use some ORDER BY
 PROCEDURE_METRICS_QUERY = """\
 SELECT TOP ({limit})
     OBJECT_SCHEMA_NAME([object_id], [database_id]) as schema_name,
@@ -55,7 +54,7 @@ def _row_key(row):
     """
     return "".join(
         (
-            row.get('database_name'),
+            row['database_name'],
             row['schema_name'],
             row['procedure_name'],
         )
@@ -97,7 +96,6 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
         self._state = StatementMetrics()
         self._conn_key_prefix = "dbm-procedures"
         self._procedure_metrics_query = None
-        self._last_stats_query_time = None
         self._max_procedure_metrics = check.procedure_metrics_config.get("max_procedures", 250)
 
     def _close_db_conn(self):
@@ -127,10 +125,7 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _load_raw_procedure_metrics_rows(self, cursor):
-        self.log.debug("collecting sql server procedure metrics")
         procedure_metrics_query = self._get_procedure_metrics_query_cached(cursor)
-        now = time.time()
-        self._last_stats_query_time = now
         self.log.debug("Running query [%s]", procedure_metrics_query)
         cursor.execute(procedure_metrics_query)
         columns = [i[0] for i in cursor.description]
@@ -143,7 +138,7 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
         rows = [r for r in rows if r.get('procedure_name') and r.get('database_name')]
         if not rows:
             return []
-        metric_columns = [c for c in rows[0].keys() if c.startswith("total_") or c == 'execution_count']
+        metric_columns = [c for c in rows[0].keys() if c in SQL_SERVER_PROCEDURE_METRICS_COLUMNS]
         rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
         return rows
 
@@ -157,7 +152,7 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
             'min_collection_interval': self.collection_interval,
             'tags': self.tags,
             'cloud_metadata': self.check.cloud_metadata,
-            'collection_type': 'procedure_metrics',
+            'payload_type': 'procedure_metrics',
             'sqlserver_rows': rows,
             'sqlserver_version': self.check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self.check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
