@@ -5,6 +5,7 @@
 ***Added***:
 
 * Add color output to tests in CI ([#15774](https://github.com/DataDog/integrations-core/pull/15774))
+* Migrate `ddev dep` to `ddev` ([#15830](https://github.com/DataDog/integrations-core/pull/15830))
 
 ***Fixed***:
 
