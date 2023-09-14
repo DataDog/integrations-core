@@ -3,12 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import datetime
 import pprint
+import psycopg
+import pytest
 import threading
 import time
 import uuid
 
-import pytest
-import psycopg
 from psycopg.rows import dict_row
 from psycopg_pool import ConnectionPool
 
