@@ -139,11 +139,11 @@ class Integration:
 
         return None
 
-    @cached_property
+    @property
     def project_metadata(self) -> dict:
         import tomli
 
-        with open(self.path / 'pyproject.toml', 'rb') as f:
+        with open(self.project_file, 'rb') as f:
             return tomli.load(f)
 
     @cached_property
