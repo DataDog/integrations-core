@@ -710,20 +710,18 @@ class PostgreSql(AgentCheck):
         return pool
 
     def _attempt_to_connect(self):
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            args = self._new_connection_info(self._config.dbname)
-            args['connect_timeout'] = self._config.connection_timeout
-            future = executor.submit(psycopg.connect, **args)
-            try:
-                future.result(timeout=self._config.connection_timeout)
-            except (psycopg.OperationalError, concurrent.futures.TimeoutError) as e:
-                self.log.error(
-                    "Unable to establish connection to %s in %d. error: %s",
-                    self._config.dbname,
-                    self._config.connection_timeout,
-                    e,
-                )
-                raise e
+        args = self._new_connection_info(self._config.dbname)
+        args['connect_timeout'] = self._config.connection_timeout
+        try:
+            psycopg.connect(**args)
+        except psycopg.OperationalError as e:
+            self.log.error(
+                "Unable to establish connection to %s in %d. error: %s",
+                self._config.dbname,
+                self._config.connection_timeout,
+                e,
+            )
+            raise e
 
     def _connect(self):
         """
