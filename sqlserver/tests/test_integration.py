@@ -590,11 +590,7 @@ def test_resolved_hostname_set(
         for k, v in cloud_metadata.items():
             instance_docker[k] = v
     instance_docker['dbm'] = dbm_enabled
-    instance_docker['procedure_metrics'] = {
-        'enabled': True, 
-        'run_sync': True,
-        'collection_interval': 1
-    }
+    instance_docker['procedure_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
     instance_docker['query_metrics'] = {
         'enabled': True,
         'run_sync': True,
