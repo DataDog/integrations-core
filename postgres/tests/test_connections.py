@@ -323,6 +323,7 @@ def test_conn_attempt_to_connect(pg_instance):
     # Change the password to something that is not the correct password
     pg_instance['password'] = 1234
     check = PostgreSql('postgres', {}, [pg_instance])
+    check._attempt_to_connect()
     with pytest.raises(psycopg.OperationalError):
         check._attempt_to_connect()
 
