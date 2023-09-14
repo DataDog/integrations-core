@@ -102,7 +102,7 @@ class PostgreSql(AgentCheck):
         self.set_resource_tags()
         self.pg_settings = {}
         self._warnings_by_code = {}
-        self.db_pool = MultiDatabaseConnectionPool(self, self._new_connection, self._config.max_connections)
+        self.db_pool = MultiDatabaseConnectionPool(self, self._new_connection_pool, self._config.max_connections)
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.statement_metrics = PostgresStatementMetrics(self, self._config)
         self.statement_samples = PostgresStatementSamples(self, self._config)
@@ -709,6 +709,27 @@ class PostgreSql(AgentCheck):
         )
         return pool
 
+    def _attemp_to_connect(self):
+        connection_string, args = self._new_connection_info(self._config.dbname)
+        try:
+            if connection_string:
+                psycopg.connect(
+                    conninfo=connection_string,
+                    **args,
+                )
+            else:
+                psycopg.connect(
+                    **args,
+                )
+        except psycopg.OperationalError as e:
+            self.log.error(
+                    "Unable to establish connection to %s in %d. error: %s",
+                    self._config.dbname,
+                    self._config.connection_timeout,
+                    e.diag.message_primary,
+                )
+            raise e
+
     def _attempt_to_connect(self):
         args = self._new_connection_info(self._config.dbname)
         args['connect_timeout'] = self._config.connection_timeout
@@ -735,18 +756,18 @@ class PostgreSql(AgentCheck):
             self.db = None
 
         if not self.db:
-            self.db = self._new_connection(self._config.dbname, max_pool_size=1)
-            try:
-                self.db.wait(timeout=self._config.connection_timeout)
-            except PoolTimeout as e:
-                self.log.error(
-                    "Unable to establish connection to %s in %d. error: %s",
-                    self._config.dbname,
-                    self._config.connection_timeout,
-                    e.diag.message_primary,
-                )
-                self.db = None
-                raise e
+            self.db = self._new_connection_pool(self._config.dbname, max_pool_size=1)
+            # try:
+            #     self.db.wait(timeout=self._config.connection_timeout)
+            # except PoolTimeout as e:
+            #     self.log.error(
+            #         "Unable to establish connection to %s in %d. error: %s",
+            #         self._config.dbname,
+            #         self._config.connection_timeout,
+            #         str(e),
+            #     )
+            #     self.db = None
+            #     raise e
 
     def _reconnect_failed(self, pool: ConnectionPool) -> None:
         self.log.error("Failed to reconnect to %s", pool.name)
