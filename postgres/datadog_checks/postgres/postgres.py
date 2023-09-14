@@ -716,7 +716,7 @@ class PostgreSql(AgentCheck):
             psycopg.connect(**args)
         except psycopg.OperationalError as e:
             self.log.error(
-                "Unable to establish connection to %s in %d. error: %s",
+                "Unable to establish connection to %s in %d seconds. error: %s",
                 self._config.dbname,
                 self._config.connection_timeout,
                 e,
