@@ -729,10 +729,12 @@ class PostgreSql(AgentCheck):
             if connection_string:
                 psycopg.connect(
                     conninfo=connection_string,
+                    connect_timeout=self._config.connection_timeout,
                     **args,
                 )
             else:
                 psycopg.connect(
+                    connect_timeout=self._config.connection_timeout,
                     **args,
                 )
         except psycopg.OperationalError as e:
