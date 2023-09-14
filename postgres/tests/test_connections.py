@@ -8,6 +8,7 @@ import time
 import uuid
 
 import pytest
+import psycopg
 from psycopg.rows import dict_row
 from psycopg_pool import ConnectionPool
 
@@ -309,6 +310,20 @@ def test_conn_pool_manages_connections(pg_instance):
     # close the rest
     pool.close_all_connections()
     assert pool._stats.connection_closed == limit + 1
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_conn_attempt_to_connect(pg_instance):
+    """
+    We attempt to connect to the database and check that the connection is successful.
+    This test is meant to be run against a database that is not running.
+    """
+    # Change the port to a non-existent port
+    pg_instance['password'] = 1234
+    check = PostgreSql('postgres', {}, [pg_instance])
+    with pytest.raises(psycopg.OperationalError):
+        check._attempt_to_connect()
 
 
 def local_pool(dbname, min_pool_size, max_pool_size):

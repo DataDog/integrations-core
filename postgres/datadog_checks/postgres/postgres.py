@@ -112,7 +112,7 @@ class PostgreSql(AgentCheck):
         self._clean_state()
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
         self.check_initializations.append(self.set_resolved_hostname_metadata)
-        self.check_initializations.append(self._attemp_to_connect)
+        self.check_initializations.append(self._attempt_to_connect)
         self.check_initializations.append(self._connect)
         self.check_initializations.append(self.load_version)
         self.check_initializations.append(self.load_pg_settings)
@@ -647,16 +647,15 @@ class PostgreSql(AgentCheck):
     def _new_connection_info(self, dbname: str):
         # required for autocommit as well as using params in queries
         args = {"autocommit": True, "cursor_factory": psycopg.ClientCursor}
+        conn_args = {}
         if self._config.host == 'localhost' and self._config.password == '':
-            # Use ident method
-            connection_string = "user=%s dbname=%s application_name=%s" % (
-                self._config.user,
-                dbname,
-                self._config.application_name,
-            )
+            conn_args = {
+                'user': self._config.user,
+                'dbname': dbname,
+                'application_name': self._config.application_name,
+            }
             if self._config.query_timeout:
-                connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
-            return connection_string, args
+                conn_args['options'] = '-c statement_timeout=%s' % self._config.query_timeout
         else:
             password = self._config.password
             region = self._config.cloud_metadata.get('aws', {}).get('region', None)
@@ -692,60 +691,39 @@ class PostgreSql(AgentCheck):
                 conn_args['sslkey'] = self._config.ssl_key
             if self._config.ssl_password:
                 conn_args['sslpassword'] = self._config.ssl_password
-            args.update(conn_args)
-            return "", args
+        args.update(conn_args)
+        return args
 
     def _new_connection(self, dbname: str, min_pool_size: int = 1, max_pool_size: int = None):
         # required for autocommit as well as using params in queries
-        connection_string, args = self._new_connection_info(dbname)
-        if connection_string:
-            pool = ConnectionPool(
-                conninfo=connection_string,
-                min_size=min_pool_size,
-                max_size=max_pool_size,
-                kwargs=args,
-                open=True,
-                name=dbname,
-                timeout=self._config.connection_timeout,
-                reconnect_timeout=0,
-                reconnect_failed=self._reconnect_failed,
-            )
-        else:
-            pool = ConnectionPool(
-                min_size=min_pool_size,
-                max_size=max_pool_size,
-                kwargs=args,
-                open=True,
-                name=dbname,
-                timeout=self._config.connection_timeout,
-                reconnect_timeout=0,
-                reconnect_failed=self._reconnect_failed,
-            )
+        args = self._new_connection_info(dbname)
+        pool = ConnectionPool(
+            min_size=min_pool_size,
+            max_size=max_pool_size,
+            kwargs=args,
+            open=True,
+            name=dbname,
+            timeout=self._config.connection_timeout,
+            reconnect_timeout=0,
+            reconnect_failed=self._reconnect_failed,
+        )
         return pool
-    
-    def _attemp_to_connect(self):
-        connection_string, args = self._new_connection_info(self._config.dbname)
-        try:
-            if connection_string:
-                psycopg.connect(
-                    conninfo=connection_string,
-                    connect_timeout=self._config.connection_timeout,
-                    **args,
-                )
-            else:
-                psycopg.connect(
-                    connect_timeout=self._config.connection_timeout,
-                    **args,
-                )
-        except psycopg.OperationalError as e:
-            self.log.error(
+
+    def _attempt_to_connect(self):
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            args = self._new_connection_info(self._config.dbname)
+            args['connect_timeout'] = self._config.connection_timeout
+            future = executor.submit(psycopg.connect, **args)
+            try:
+                future.result(timeout=self._config.connection_timeout)
+            except (psycopg.OperationalError, concurrent.futures.TimeoutError) as e:
+                self.log.error(
                     "Unable to establish connection to %s in %d. error: %s",
                     self._config.dbname,
                     self._config.connection_timeout,
-                    e.diag.message_primary,
+                    e,
                 )
-            raise e
-
+                raise e
 
     def _connect(self):
         """
