@@ -150,7 +150,7 @@ class SqlFractionMetric(BaseSqlServerMetric):
                 'cntr_type': cntr_type,
                 'cntr_value': cntr_value,
                 'instance_name': instance_name.strip(),
-                'object_name': object_name.strip()
+                'object_name': object_name.strip(),
             }
             logger.debug("Adding new counter_result %s", str(counter_result))
             results[counter_name.strip()].append(counter_result)
@@ -161,7 +161,11 @@ class SqlFractionMetric(BaseSqlServerMetric):
         base_counters = results.get(self.base_name.strip())
 
         if not num_counters or not base_counters:
-            self.log.error('Skipping counter. Missing numerator and/or base counters \nsql_name={} \nbase_name={} \nresults={}'.format(self.sql_name, self.base_name, results))
+            self.log.error(
+                'Skipping counter. Missing numerator and/or base counters \nsql_name={} \nbase_name={} \nresults={}'.format(
+                    self.sql_name, self.base_name, results
+                )
+            )
             return
 
         base_by_key = {}
@@ -176,16 +180,24 @@ class SqlFractionMetric(BaseSqlServerMetric):
         for numerator in num_counters:
             instance_name = numerator['instance_name']
             object_name = numerator['object_name']
-            if (self.instance != ALL_INSTANCES and instance_name != self.instance and instance_name != self.physical_db_name):
+            if (
+                self.instance != ALL_INSTANCES
+                and instance_name != self.instance
+                and instance_name != self.physical_db_name
+            ):
                 continue
-            if (self.object_name and self.object_name != object_name):
+            if self.object_name and self.object_name != object_name:
                 continue
             key = '{}::{}'.format(numerator['instance_name'], numerator['object_name'])
 
             corresponding_base = base_by_key.get(key)
 
             if not corresponding_base:
-                self.log.warning('Could not find corresponding base counter for sql_name: {} base_name: {}'.format(self.sql_name, self.base_name))
+                self.log.warning(
+                    'Could not find corresponding base counter for sql_name: {} base_name: {}'.format(
+                        self.sql_name, self.base_name
+                    )
+                )
 
             metric_tags = list(self.tags)
             if self.instance == ALL_INSTANCES:

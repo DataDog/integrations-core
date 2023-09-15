@@ -399,22 +399,29 @@ def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, 
     if database_autodiscovery:
         assert 'datadog_test' in seen_databases
 
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_custom_metrics_fraction_counters(aggregator, dd_run_check, instance_docker, caplog):
     caplog.clear()
     caplog.set_level(logging.DEBUG)
     instance_docker['procedure_metrics'] = {'enabled': False}
-    sqlserver_check = SQLServer(CHECK_NAME, {'custom_metrics': [
+    sqlserver_check = SQLServer(
+        CHECK_NAME,
         {
-            'name': 'sqlserver.custom.plan_cache_test',
-            'counter_name': 'Cache Hit Ratio',
-            'instance_name': 'ALL',
-            'object_name': 'SQLServer:Plan Cache',
-            'tag_by': 'plan_type',
-            'tags': ['optional_tag:tagx'],
+            'custom_metrics': [
+                {
+                    'name': 'sqlserver.custom.plan_cache_test',
+                    'counter_name': 'Cache Hit Ratio',
+                    'instance_name': 'ALL',
+                    'object_name': 'SQLServer:Plan Cache',
+                    'tag_by': 'plan_type',
+                    'tags': ['optional_tag:tagx'],
+                },
+            ]
         },
-    ]}, [instance_docker])
+        [instance_docker],
+    )
     dd_run_check(sqlserver_check)
     seen_plan_type = set()
     for m in aggregator.metrics("sqlserver.custom.plan_cache_test"):

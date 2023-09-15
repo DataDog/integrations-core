@@ -247,6 +247,7 @@ def test_SqlMasterDatabaseFileStats_fetch_metric(col_val_row_1, col_val_row_2, c
             raise AssertionError('{}'.format(e))
         assert errors < 1
 
+
 def test_SqlFractionMetric_base(caplog):
     Row = namedtuple('Row', ['counter_name', 'cntr_type', 'cntr_value', 'instance_name', 'object_name'])
     fetchall_results = [
@@ -258,15 +259,15 @@ def test_SqlFractionMetric_base(caplog):
     mock_cursor = mock.MagicMock()
     mock_cursor.fetchall.return_value = fetchall_results
 
-    report_function=mock.MagicMock()
+    report_function = mock.MagicMock()
     metric_obj = SqlFractionMetric(
         cfg_instance={
-            'name': 'sqlserver.buffer.cache_hit_ratio', 
-            'counter_name': 'Buffer cache hit ratio', 
-            'instance_name': '', 
-            'physical_db_name': None, 
-            'tags': ['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname'], 
-            'hostname': 'stubbed.hostname'
+            'name': 'sqlserver.buffer.cache_hit_ratio',
+            'counter_name': 'Buffer cache hit ratio',
+            'instance_name': '',
+            'physical_db_name': None,
+            'tags': ['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname'],
+            'hostname': 'stubbed.hostname',
         },
         base_name='Buffer cache hit ratio base',
         report_function=report_function,
@@ -274,12 +275,16 @@ def test_SqlFractionMetric_base(caplog):
         logger=mock.MagicMock(),
     )
     results_rows, results_cols = SqlFractionMetric.fetch_all_values(
-        mock_cursor, 
-        ['Buffer cache hit ratio', 'Buffer cache hit ratio base'], 
-        mock.mock.MagicMock()
+        mock_cursor, ['Buffer cache hit ratio', 'Buffer cache hit ratio base'], mock.mock.MagicMock()
     )
     metric_obj.fetch_metric(results_rows, results_cols)
-    report_function.assert_called_with('sqlserver.buffer.cache_hit_ratio', 0.9976737943992127, raw=True, hostname='stubbed.hostname', tags=['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname'])
+    report_function.assert_called_with(
+        'sqlserver.buffer.cache_hit_ratio',
+        0.9976737943992127,
+        raw=True,
+        hostname='stubbed.hostname',
+        tags=['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname'],
+    )
 
 
 def test_SqlFractionMetric_group_by_instance(caplog):
@@ -295,14 +300,14 @@ def test_SqlFractionMetric_group_by_instance(caplog):
     mock_cursor = mock.MagicMock()
     mock_cursor.fetchall.return_value = fetchall_results
 
-    report_function=mock.MagicMock()
+    report_function = mock.MagicMock()
     metric_obj = SqlFractionMetric(
         cfg_instance={
-            'name': 'sqlserver.test.metric', 
-            'counter_name': 'Foo counter', 
-            'instance_name': 'ALL', 
-            'physical_db_name': None, 
-            'tags': ['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname'], 
+            'name': 'sqlserver.test.metric',
+            'counter_name': 'Foo counter',
+            'instance_name': 'ALL',
+            'physical_db_name': None,
+            'tags': ['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname'],
             'hostname': 'stubbed.hostname',
             'tag_by': 'db',
         },
@@ -312,13 +317,23 @@ def test_SqlFractionMetric_group_by_instance(caplog):
         logger=mock.MagicMock(),
     )
     results_rows, results_cols = SqlFractionMetric.fetch_all_values(
-        mock_cursor, 
-        ['Foo counter base', 'Foo counter'], 
-        mock.mock.MagicMock()
+        mock_cursor, ['Foo counter base', 'Foo counter'], mock.mock.MagicMock()
     )
     metric_obj.fetch_metric(results_rows, results_cols)
-    report_function.assert_any_call('sqlserver.test.metric', 0.02, raw=True, hostname='stubbed.hostname', tags=['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname', 'db:bar'])
-    report_function.assert_any_call('sqlserver.test.metric', 0.05, raw=True, hostname='stubbed.hostname', tags=['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname', 'db:zoo'])
+    report_function.assert_any_call(
+        'sqlserver.test.metric',
+        0.02,
+        raw=True,
+        hostname='stubbed.hostname',
+        tags=['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname', 'db:bar'],
+    )
+    report_function.assert_any_call(
+        'sqlserver.test.metric',
+        0.05,
+        raw=True,
+        hostname='stubbed.hostname',
+        tags=['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname', 'db:zoo'],
+    )
 
 
 def _mock_database_list():
