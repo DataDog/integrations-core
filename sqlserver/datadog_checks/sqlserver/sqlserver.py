@@ -592,7 +592,6 @@ class SQLServer(AgentCheck):
                     metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load any custom metrics from conf.d/sqlserver.yaml
-        self.log.warning('custom_metrics={}'.format(custom_metrics))
         for cfg in custom_metrics:
             sql_counter_type = None
             base_name = None

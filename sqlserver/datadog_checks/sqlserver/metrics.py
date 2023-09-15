@@ -145,7 +145,6 @@ class SqlFractionMetric(BaseSqlServerMetric):
 
         # We're going to store counters by name`
         for counter_name, cntr_type, cntr_value, instance_name, object_name in rows:
-            rowlist = [cntr_type, cntr_value, instance_name.strip(), object_name.strip()]
             counter_result = {
                 'cntr_type': cntr_type,
                 'cntr_value': cntr_value,
@@ -162,9 +161,10 @@ class SqlFractionMetric(BaseSqlServerMetric):
 
         if not num_counters or not base_counters:
             self.log.error(
-                'Skipping counter. Missing numerator and/or base counters \nsql_name={} \nbase_name={} \nresults={}'.format(
-                    self.sql_name, self.base_name, results
-                )
+                'Skipping counter. Missing numerator and/or base counters \nsql_name=%s \nbase_name=%s \nresults=%s',
+                self.sql_name,
+                self.base_name,
+                str(results),
             )
             return
 
