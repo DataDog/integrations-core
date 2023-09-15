@@ -1,5 +1,13 @@
 # CHANGELOG - Openstack_controller
 
+## 4.0.0-beta.9 / 2023-09-15
+
+***Added***:
+
+* Add support for domain scoped endpoints . See [#14476](https://github.com/DataDog/integrations-core/pull/14476).
+* Add support for octavia service and metrics. See [#14418](https://github.com/DataDog/integrations-core/pull/14418).
+* Add support for ironic service and metrics. See [#14340](https://github.com/DataDog/integrations-core/pull/14340).
+
 ## 3.0.0 / 2023-03-07
 
 * [Changed] Upgrade openstacksdk dependency and drop py2. See [#14109](https://github.com/DataDog/integrations-core/pull/14109).
