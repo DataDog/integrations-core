@@ -381,7 +381,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
             'cucs_processor_unit_vendor:quaintly forward',
         ],
         [
-            'cucs_processor_unit_arch:intel_p4_c',
+            'cucs_processor_unit_arch:intel_p4c',
             'cucs_processor_unit_cores:3089744816',
             'cucs_processor_unit_cores_enabled:50511177',
             'cucs_processor_unit_dn:kept driving',
@@ -395,7 +395,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
             'cucs_processor_unit_vendor:driving but their driving their driving forward forward',
         ],
         [
-            'cucs_processor_unit_arch:intel_p4_c',
+            'cucs_processor_unit_arch:intel_p4c',
             'cucs_processor_unit_cores:861697837',
             'cucs_processor_unit_cores_enabled:3562772907',
             'cucs_processor_unit_dn:forward their Jaded forward kept zombies',

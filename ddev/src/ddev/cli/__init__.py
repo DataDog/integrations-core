@@ -6,7 +6,6 @@ import os
 import click
 import pluggy
 from datadog_checks.dev.tooling.commands.create import create
-from datadog_checks.dev.tooling.commands.dep import dep
 from datadog_checks.dev.tooling.commands.run import run
 
 from ddev._version import __version__
@@ -14,6 +13,7 @@ from ddev.cli.application import Application
 from ddev.cli.ci import ci
 from ddev.cli.clean import clean
 from ddev.cli.config import config
+from ddev.cli.dep import dep
 from ddev.cli.docs import docs
 from ddev.cli.env import env
 from ddev.cli.meta import meta
