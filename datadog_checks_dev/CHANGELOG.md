@@ -6,6 +6,7 @@
 
 * Added overview examples to the readme file ([#15817](https://github.com/DataDog/integrations-core/pull/15817))
 * Added required classifier tag examples to template ([#15828](https://github.com/DataDog/integrations-core/pull/15828))
+* Prepare E2E tooling for better message passing ([#15843](https://github.com/DataDog/integrations-core/pull/15843))
   
 ## 25.0.0 / 2023-09-13
 
