@@ -336,8 +336,8 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         )
 
     tag_rows = [
-        ['amperage_probe_index:12', 'chassis_index:13', 'probe_type:8'],
-        ['amperage_probe_index:16', 'chassis_index:3', 'probe_type:3'],
+        ['amperage_probe_index:12', 'chassis_index:13', 'probe_type:amperage_probe_type_is_minus12_volt'],
+        ['amperage_probe_index:16', 'chassis_index:3', 'probe_type:amperage_probe_type_is_1point5_volt'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.amperageProbeReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -368,8 +368,8 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         aggregator.assert_metric('snmp.powerUsageStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['chassis_index:14', 'probe_type:19', 'voltage_probe_index:21'],
-        ['chassis_index:29', 'probe_type:3', 'voltage_probe_index:25'],
+        ['chassis_index:14', 'probe_type:voltage_probe_type_is_memory_status', 'voltage_probe_index:21'],
+        ['chassis_index:29', 'probe_type:voltage_probe_type_is_1point5_volt', 'voltage_probe_index:25'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.voltageProbeReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -416,14 +416,14 @@ def test_e2e_profile__dell_rac(dd_agent_check):
             'cooling_device_fqdd:driving oxen oxen oxen their',
             'cooling_device_location_name:quaintly driving forward kept zombies quaintly acted oxen',
             'cooling_device_name:13',
-            'cooling_device_type:4',
+            'cooling_device_type:cooling_device_type_is_a_blower',
         ],
         [
             'chassis_index:28',
             'cooling_device_fqdd:kept forward oxen their quaintly oxen oxen zombies driving',
             'cooling_device_location_name:forward quaintly zombies acted quaintly',
             'cooling_device_name:28',
-            'cooling_device_type:10',
+            'cooling_device_type:cooling_device_type_is_active_cooling',
         ],
     ]
     for tag_row in tag_rows:
@@ -438,13 +438,13 @@ def test_e2e_profile__dell_rac(dd_agent_check):
             'chassis_index:10',
             'temperature_probe_index:14',
             'temperature_probe_location_name:but',
-            'temperature_probe_type:3',
+            'temperature_probe_type:temperature_probe_type_is_ambient_esm',
         ],
         [
             'chassis_index:3',
             'temperature_probe_index:18',
             'temperature_probe_location_name:quaintly forward driving zombies oxen their oxen',
-            'temperature_probe_type:2',
+            'temperature_probe_type:temperature_probe_type_is_unknown',
         ],
     ]
     for tag_row in tag_rows:
