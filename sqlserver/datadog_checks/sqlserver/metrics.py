@@ -194,9 +194,9 @@ class SqlFractionMetric(BaseSqlServerMetric):
 
             if not corresponding_base:
                 self.log.warning(
-                    'Could not find corresponding base counter for sql_name: {} base_name: {}'.format(
-                        self.sql_name, self.base_name
-                    )
+                    'Could not find corresponding base counter for sql_name: %s base_name: %s',
+                    self.sql_name,
+                    self.base_name,
                 )
 
             metric_tags = list(self.tags)

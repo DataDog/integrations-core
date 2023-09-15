@@ -12,7 +12,7 @@ from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
-from datadog_checks.sqlserver.metrics import SqlMasterDatabaseFileStats, SqlFractionMetric
+from datadog_checks.sqlserver.metrics import SqlFractionMetric, SqlMasterDatabaseFileStats
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import Database, parse_sqlserver_major_version, set_default_driver_conf
 
