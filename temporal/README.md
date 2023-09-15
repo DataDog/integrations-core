@@ -72,7 +72,7 @@ The Temporal integration can collect logs from the Temporal Cluster and forward 
 
 Need help? Contact [Datadog support][9].
 
-## Further reading
+## Further Reading
 
 Additional helpful documentation, links, and articles:
 
