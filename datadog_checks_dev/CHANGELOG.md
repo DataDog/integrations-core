@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 25.1.0 / 2023-09-15
+
 ***Added***:
 
 * Added overview examples to the readme file ([#15817](https://github.com/DataDog/integrations-core/pull/15817))
