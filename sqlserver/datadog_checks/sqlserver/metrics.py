@@ -12,7 +12,6 @@ from functools import partial
 from datadog_checks.base import ensure_unicode
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.time import get_precise_time
-from datadog_checks.sqlserver.const import BASE_COUNTER_TYPES
 
 from .utils import construct_use_statement
 
@@ -162,7 +161,8 @@ class SqlFractionMetric(BaseSqlServerMetric):
         base_counters = results.get(self.base_name.strip())
 
         if not num_counters or not base_counters:
-            self.log.error('Missing numerator and/or base counters \nsql_name={} \nbase_name={} \nresults={}'.format(self.sql_name, self.base_name, results))
+            self.log.error('Skipping counter. Missing numerator and/or base counters \nsql_name={} \nbase_name={} \nresults={}'.format(self.sql_name, self.base_name, results))
+            return
 
         base_by_key = {}
 
@@ -172,7 +172,6 @@ class SqlFractionMetric(BaseSqlServerMetric):
             if base_by_key.get(key):
                 self.log.warning('Found duplicate base counters for key:{}'.format(key))
             base_by_key[key] = base
-        
 
         for numerator in num_counters:
             instance_name = numerator['instance_name']
