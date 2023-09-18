@@ -144,6 +144,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             maxsize=config.full_statement_text_cache_max_size,
             ttl=60 * 60 / config.full_statement_text_samples_per_hour_per_query,
         )
+        self._conn_ttl_ms = self._config.idle_connection_timeout
         self.connection_id = "query-metrics"
 
     def _execute_query(self, cursor, query, params=()):
