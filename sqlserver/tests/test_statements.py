@@ -95,7 +95,6 @@ def test_get_available_query_metrics_columns(dbm_instance, expected_columns, ava
             )
             assert result_available_columns == available_columns
 
-
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_get_statement_metrics_query_cached(aggregator, dbm_instance, caplog):
@@ -483,6 +482,7 @@ def test_statement_metrics_limit(
 
     # check that it's sorted
     assert sqlserver_rows == sorted(sqlserver_rows, key=lambda i: i['total_elapsed_time'], reverse=True)
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
@@ -910,6 +910,7 @@ def test_statement_conditional_stored_procedure_with_temp_table(
         assert event['sqlserver']['query_hash'] is not None
         assert event['sqlserver']['query_plan_hash'] is not None
 
+
 def _mock_database_list():
     Row = namedtuple('Row', 'name')
     fetchall_results = [
@@ -925,6 +926,7 @@ def _mock_database_list():
     # check excluded overrides included
     mock_cursor.fetchall.return_value = iter(fetchall_results)
     return fetchall_results, mock_cursor
+
 
 @pytest.mark.unit
 def test_metrics_lookback_multiplier(instance_docker):
