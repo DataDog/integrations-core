@@ -69,6 +69,9 @@ class ExplainParameterizedQueries:
         self._check = check
         self._config = config
 
+    def debug_stats_kwargs(self):
+        return self._check.debug_stats_kwargs()
+
     @tracked_method(agent_check_getter=agent_check_getter)
     def explain_statement(self, dbname, statement, obfuscated_statement):
         if self._check.version < V12:

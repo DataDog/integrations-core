@@ -146,6 +146,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
         )
         self._thread_id = "query-metrics"
 
+    def debug_stats_kwargs(self):
+        return self._check.debug_stats_kwargs()
+
     def _execute_query(self, cursor, query, params=()):
         try:
             self._log.debug("Running query [%s] %s", query, params)

@@ -208,6 +208,9 @@ class PostgresMetadata(DBMAsyncJob):
         if self._tags_no_db:
             t.extend(self._tags_no_db)
         return t
+    
+    def debug_stats_kwargs(self):
+        return self._check.debug_stats_kwargs()
 
     def run_job(self):
         # do not emit any dd.internal metrics for DBM specific check code
