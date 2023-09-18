@@ -390,10 +390,11 @@ ISTIOD_METRICS = {
     'istio_mcp_clients_total': 'mcp.clients',
     'istio_mcp_clients': 'mcp.clients',
     ## Pilot autodiscovery
+    # Unknown type
     'istio_mcp_request_nacks_total': 'mcp.request.nacks',
     'istio_mcp_request_acks_total': 'mcp.request.acks',
     # Galley
-    # Unknown
+    # Unknown type
     'galley_istio_networking_virtualservices': 'galley.istio.networking.virtualservices',
     'galley_istio_networking_destinationrules': 'galley.istio.networking.destinationrules',
     'galley_istio_networking_gateways': 'galley.istio.networking.gateways',
@@ -403,9 +404,8 @@ ISTIOD_METRICS = {
     'galley_source_kube_dynamic_converter_failure_total': 'galley.source.kube.dynamic.converter.failure',
     'galley_validation_cert_key_update_errors': 'galley.validation.cert.key.update.errors',
     'galley_validation_http_error': 'galley.validation.http.error',
-    # Histogram/distribution
-    #'galley_runtime_processor_snapshot_events_total': 'galley.runtime.processor.snapshot.events.total', #already in
     # Mixer
+    # Unknown type
     'mixer_config_rule_config_error_count': 'mixer.config.rule.config.error.count',
     'mixer_config_rule_config_match_error_count': 'mixer.config.rule.config.match.error.count',
     'mixer_config_unsatisfied_action_handler_count': 'mixer.config.unsatisfied.action.handler.count',
@@ -422,7 +422,7 @@ ISTIOD_VERSION = {'istio_build': {'type': 'metadata', 'label': 'tag', 'name': 'v
 NON_CONFORMING_METRICS = [
     # Distribution/Histogram
     'galley_runtime_processor_snapshot_events_total',
-    # LastValue/Gauge
+    # LastValue
     'istio_mcp_clients_total',
     'galley_runtime_state_type_instances_total',
     'mixer_handler_daemons_total',

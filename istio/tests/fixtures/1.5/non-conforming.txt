@@ -30,9 +30,3 @@ galley_runtime_processor_snapshot_events_total_count 2
 # TYPE mixer_handler_daemons_total gauge
 mixer_handler_daemons_total{handler="kubernetesenv.istio-system",initConfigID="1"} 4
 mixer_handler_daemons_total{handler="prometheus.istio-system",initConfigID="1"} 1
-# TYPE istio_mcp_clients_total gauge
-istio_mcp_clients_total{handler="kubernetesenv.istio-system",initConfigID="1"} 4
-istio_mcp_clients_total{handler="prometheus.istio-system",initConfigID="1"} 1
-# TYPE istio_mcp_clients_total counter
-istio_mcp_clients_total{handler="kubernetesenv.istio-system",initConfigID="1"} 4
-istio_mcp_clients_total{handler="prometheus.istio-system",initConfigID="1"} 1
