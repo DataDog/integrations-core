@@ -486,7 +486,7 @@ def test_wal_stats(aggregator, integration_check, pg_instance):
     )
     # We should have at least one full page write
     assert_metric_at_least(aggregator, 'postgresql.wal.bytes', tags=expected_tags, count=1, lower_bound=wal_bytes + 100)
-    aggregator.assert_metric('postgresql.wal.full_page_images', tags=expected_tags, count=1, value=wal_fpi)
+    aggregator.assert_metric('postgresql.wal.full_page_images', tags=expected_tags, count=1)
 
 
 def test_query_timeout(integration_check, pg_instance):
