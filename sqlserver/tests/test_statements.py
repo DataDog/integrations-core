@@ -95,6 +95,7 @@ def test_get_available_query_metrics_columns(dbm_instance, expected_columns, ava
             )
             assert result_available_columns == available_columns
 
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_get_statement_metrics_query_cached(aggregator, dbm_instance, caplog):
