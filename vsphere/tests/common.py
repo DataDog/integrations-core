@@ -4,6 +4,7 @@
 import os
 import re
 
+import mock
 from pyVmomi import vim, vmodl
 from six.moves.urllib.parse import urlparse
 
@@ -14,6 +15,10 @@ from datadog_checks.vsphere.api_rest import VSphereRestAPI
 HERE = os.path.abspath(os.path.dirname(__file__))
 
 VSPHERE_VERSION = os.environ.get('VSPHERE_VERSION')
+
+VSPHERE_USERNAME = 'FAKE'
+VSPHERE_PASSWORD = 'FAKE'
+VSPHERE_URL = 'FAKE'
 
 LAB_USERNAME = os.environ.get('TEST_VSPHERE_USER')
 LAB_PASSWORD = os.environ.get('TEST_VSPHERE_PASS')
@@ -40,9 +45,9 @@ LEGACY_DEFAULT_INSTANCE = {
     'event_config': {
         'collect_vcenter_alarms': True,
     },
-    'host': os.environ.get('VSPHERE_URL', 'FAKE'),
-    'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
-    'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
+    'host': VSPHERE_URL,
+    'username': VSPHERE_USERNAME,
+    'password': VSPHERE_PASSWORD,
 }
 
 LEGACY_REALTIME_INSTANCE = {
@@ -52,9 +57,9 @@ LEGACY_REALTIME_INSTANCE = {
     'event_config': {
         'collect_vcenter_alarms': True,
     },
-    'host': os.environ.get('VSPHERE_URL', 'FAKE'),
-    'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
-    'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
+    'host': VSPHERE_URL,
+    'username': VSPHERE_USERNAME,
+    'password': VSPHERE_PASSWORD,
     'collect_realtime_only': True,
 }
 
@@ -65,27 +70,27 @@ LEGACY_HISTORICAL_INSTANCE = {
     'event_config': {
         'collect_vcenter_alarms': True,
     },
-    'host': os.environ.get('VSPHERE_URL', 'FAKE'),
-    'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
-    'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
+    'host': VSPHERE_URL,
+    'username': VSPHERE_USERNAME,
+    'password': VSPHERE_PASSWORD,
     'collect_historical_only': True,
 }
 
 DEFAULT_INSTANCE = {
     'use_legacy_check_version': False,
     'empty_default_hostname': True,
-    'host': os.environ.get('VSPHERE_URL', 'FAKE'),
-    'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
-    'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
+    'host': VSPHERE_URL,
+    'username': VSPHERE_USERNAME,
+    'password': VSPHERE_PASSWORD,
     'ssl_verify': False,
 }
 
 REALTIME_INSTANCE = {
     'use_legacy_check_version': False,
     'empty_default_hostname': True,
-    'host': os.environ.get('VSPHERE_URL', 'FAKE'),
-    'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
-    'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
+    'host': VSPHERE_URL,
+    'username': VSPHERE_USERNAME,
+    'password': VSPHERE_PASSWORD,
     'ssl_verify': False,
     'collection_level': 4,
     'rest_api_options': None,
@@ -94,9 +99,9 @@ REALTIME_INSTANCE = {
 HISTORICAL_INSTANCE = {
     'use_legacy_check_version': False,
     'empty_default_hostname': True,
-    'host': os.environ.get('VSPHERE_URL', 'FAKE'),
-    'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
-    'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
+    'host': VSPHERE_URL,
+    'username': VSPHERE_USERNAME,
+    'password': VSPHERE_PASSWORD,
     'ssl_verify': False,
     'collection_level': 4,
     'collection_type': 'historical',
@@ -105,9 +110,9 @@ HISTORICAL_INSTANCE = {
 EVENTS_ONLY_INSTANCE = {
     'empty_default_hostname': True,
     'use_legacy_check_version': False,
-    'host': os.environ.get('VSPHERE_URL', 'FAKE'),
-    'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
-    'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
+    'host': VSPHERE_URL,
+    'username': VSPHERE_USERNAME,
+    'password': VSPHERE_PASSWORD,
     'ssl_verify': False,
     'collect_events_only': True,
 }
@@ -200,6 +205,15 @@ PERF_ENTITY_METRICS = [
         ],
     ),
     vim.PerformanceManager.EntityMetric(
+        entity=vim.VirtualMachine(moId="vm3"),
+        value=[
+            vim.PerformanceManager.IntSeries(
+                value=[32, 92],
+                id=vim.PerformanceManager.MetricId(counterId=103),
+            )
+        ],
+    ),
+    vim.PerformanceManager.EntityMetric(
         entity=vim.Datastore(moId="ds1"),
         value=[
             vim.PerformanceManager.IntSeries(
@@ -242,7 +256,6 @@ PERF_ENTITY_METRICS = [
                 value=[1, 3],
                 id=vim.PerformanceManager.MetricId(
                     counterId=102,
-                    # instance='dc2',
                 ),
             )
         ],
@@ -254,7 +267,17 @@ PERF_ENTITY_METRICS = [
                 value=[34, 61],
                 id=vim.PerformanceManager.MetricId(
                     counterId=103,
-                    # instance='host1',
+                ),
+            )
+        ],
+    ),
+    vim.PerformanceManager.EntityMetric(
+        entity=vim.HostSystem(moId="host2"),
+        value=[
+            vim.PerformanceManager.IntSeries(
+                value=[34, 61],
+                id=vim.PerformanceManager.MetricId(
+                    counterId=103,
                 ),
             )
         ],
@@ -380,6 +403,430 @@ PROPERTIES_EX = vim.PropertyCollector.RetrieveResult(
             ],
         ),
     ],
+)
+
+
+# VM 1 disk
+disk = vim.vm.GuestInfo.DiskInfo()
+disk.diskPath = '\\'
+disk.capacity = 2064642048
+disk.freeSpace = 1270075392
+disk.filesystemType = 'ext4'
+DISKS = vim.ArrayOfAnyType()
+DISKS.append(disk)
+
+# VM 1 net
+ip_address = vim.net.IpConfigInfo.IpAddress()
+ip_address.ipAddress = 'fe70::150:46ff:fe47:6311'
+ip_config = vim.net.IpConfigInfo()
+ip_config.ipAddress = vim.ArrayOfAnyType()
+ip_config.ipAddress.append(ip_address)
+net = vim.vm.GuestInfo.NicInfo()
+net.macAddress = '00:61:58:72:53:13'
+net.connected = True
+net.ipConfig = ip_config
+NETS = vim.ArrayOfAnyType()
+NETS.append(net)
+
+# VM 1 ip stack
+dns_config = vim.net.DnsConfigInfo()
+dns_config.hostName = 'test-hostname'
+dns_config.domainName = 'example.com'
+gateway = vim.net.IpRouteConfigInfo.Gateway()
+gateway.device = '0'
+gateway.ipAddress = None
+ip_route = vim.net.IpRouteConfigInfo.IpRoute()
+ip_route.prefixLength = 64
+ip_route.network = 'fe83::'
+ip_route.gateway = gateway
+ip_route_config = vim.net.IpRouteConfigInfo()
+ip_route_config.ipRoute = vim.ArrayOfAnyType()
+ip_route_config.ipRoute.append(ip_route)
+ip_stack = vim.vm.GuestInfo.StackInfo()
+ip_stack.dnsConfig = dns_config
+ip_stack.ipRouteConfig = ip_route_config
+IP_STACKS = vim.ArrayOfAnyType()
+IP_STACKS.append(ip_stack)
+
+# VM 3 disk
+DISKS_3 = vim.ArrayOfAnyType()
+
+# VM 3 net
+ip_address3 = vim.net.IpConfigInfo.IpAddress()
+ip_address3.ipAddress = 'fe70::150:46ff:fe47:6311'
+ip_address4 = vim.net.IpConfigInfo.IpAddress()
+ip_address4.ipAddress = 'fe80::170:46ff:fe27:6311'
+ip_config3 = vim.net.IpConfigInfo()
+ip_config3.ipAddress = vim.ArrayOfAnyType()
+ip_config3.ipAddress.append(ip_address3)
+ip_config3.ipAddress.append(ip_address4)
+net3 = vim.vm.GuestInfo.NicInfo()
+net3.macAddress = None
+net3.deviceConfigId = 43
+net3.ipConfig = ip_config3
+NETS_3 = vim.ArrayOfAnyType()
+NETS_3.append(net3)
+
+# VM 3 ip stack
+gateway3 = vim.net.IpRouteConfigInfo.Gateway()
+gateway3.device = '0'
+gateway3.ipAddress = '0.0.0.0'
+ip_route3 = vim.net.IpRouteConfigInfo.IpRoute()
+ip_route3.prefixLength = 32
+ip_route3.network = 'fe83::'
+ip_route3.gateway = gateway3
+ip_route_config3 = vim.net.IpRouteConfigInfo()
+ip_route_config3.ipRoute = vim.ArrayOfAnyType()
+ip_route_config3.ipRoute.append(ip_route3)
+ip_stack3 = vim.vm.GuestInfo.StackInfo()
+ip_stack3.dnsConfig = None
+ip_stack3.ipRouteConfig = ip_route_config3
+IP_STACKS_3 = vim.ArrayOfAnyType()
+IP_STACKS_3.append(ip_stack3)
+
+
+VM_PROPERTIES_EX = mock.MagicMock(
+    return_value=vim.PropertyCollector.RetrieveResult(
+        objects=[
+            vim.ObjectContent(
+                obj=vim.VirtualMachine(moId="vm1"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='vm1',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='runtime.powerState',
+                        val=vim.VirtualMachinePowerState.poweredOn,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.config.numCpu',
+                        val=2,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.config.memorySizeMB',
+                        val=2048,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.config.numVirtualDisks',
+                        val=1,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.config.numEthernetCards',
+                        val=1,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.quickStats.uptimeSeconds',
+                        val=12184573,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.guestFullName',
+                        val=None,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.disk',
+                        val=DISKS,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.net',
+                        val=NETS,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.ipStack',
+                        val=IP_STACKS,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.toolsVersion',
+                        val='11296',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.hardware.numCoresPerSocket',
+                        val='2',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.cpuAllocation.limit',
+                        val='-1',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.cpuAllocation.overheadLimit',
+                        val=None,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.memoryAllocation.limit',
+                        val='-1',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.memoryAllocation.overheadLimit',
+                        val=None,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='parent',
+                        val=vim.Folder(moId="root"),
+                    ),
+                    vmodl.DynamicProperty(
+                        name='runtime.host',
+                        val=vim.HostSystem(moId="host1"),
+                    ),
+                ],
+            ),
+            vim.ObjectContent(
+                obj=vim.VirtualMachine(moId="vm3"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='vm3',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='runtime.powerState',
+                        val=vim.VirtualMachinePowerState.poweredOn,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.config.numCpu',
+                        val=1,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.config.memorySizeMB',
+                        val=None,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.config.numVirtualDisks',
+                        val=3,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.config.numEthernetCards',
+                        val=3,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.quickStats.uptimeSeconds',
+                        val=1218453,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.guestFullName',
+                        val='Debian GNU/Linux 12 (32-bit)',
+                    ),
+                    vmodl.DynamicProperty(name='guest.disk', val=DISKS_3),
+                    vmodl.DynamicProperty(
+                        name='guest.net',
+                        val=NETS_3,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.ipStack',
+                        val=IP_STACKS_3,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.toolsRunningStatus',
+                        val='guestToolsRunning',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.toolsVersionStatus2',
+                        val='guestToolsSupportedOld',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.toolsVersion',
+                        val='11296',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.hardware.numCoresPerSocket',
+                        val='2',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.cpuAllocation.limit',
+                        val='10',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.cpuAllocation.overheadLimit',
+                        val='24',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.memoryAllocation.limit',
+                        val='-1',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.memoryAllocation.overheadLimit',
+                        val='59',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='parent',
+                        val=vim.Folder(moId="root"),
+                    ),
+                    vmodl.DynamicProperty(
+                        name='runtime.host',
+                        val=vim.HostSystem(moId="host2"),
+                    ),
+                ],
+            ),
+            vim.ObjectContent(
+                obj=vim.VirtualMachine(moId="vm2"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='vm2',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='runtime.powerState',
+                        val=vim.VirtualMachinePowerState.poweredOff,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.config.numCpu',
+                        val=2,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.config.memorySizeMB',
+                        val=2048,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.config.numVirtualDisks',
+                        val=1,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.config.numEthernetCards',
+                        val=1,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.quickStats.uptimeSeconds',
+                        val=12184573,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.guestFullName',
+                        val='Debian GNU/Linux 12 (32-bit)',
+                    ),
+                    vmodl.DynamicProperty(name='guest.disk', val=DISKS),
+                    vmodl.DynamicProperty(
+                        name='guest.net',
+                        val=NETS,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.ipStack',
+                        val=IP_STACKS,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.toolsRunningStatus',
+                        val='guestToolsRunning',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.toolsVersion',
+                        val='11296',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.hardware.numCoresPerSocket',
+                        val='2',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.cpuAllocation.limit',
+                        val='-1',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.cpuAllocation.overheadLimit',
+                        val=None,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.memoryAllocation.limit',
+                        val='-1',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.memoryAllocation.overheadLimit',
+                        val=None,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='parent',
+                        val=vim.Folder(moId="root"),
+                    ),
+                    vmodl.DynamicProperty(
+                        name='runtime.host',
+                        val=vim.HostSystem(moId="host2"),
+                    ),
+                ],
+            ),
+            vim.ObjectContent(
+                obj=vim.HostSystem(moId="host1"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='host1',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='hardware.cpuPowerManagementInfo.currentPolicy',
+                        val='Balanced',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.runtime.connectionState',
+                        val='connected',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.runtime.powerState',
+                        val='poweredOn',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.runtime.inMaintenanceMode',
+                        val='False',
+                    ),
+                ],
+            ),
+            vim.ObjectContent(
+                obj=vim.HostSystem(moId="host2"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='host2',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.runtime.connectionState',
+                        val='notResponding',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.runtime.powerState',
+                        val='unknown',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.runtime.inMaintenanceMode',
+                        val='True',
+                    ),
+                ],
+            ),
+            vim.ObjectContent(
+                obj=vim.ClusterComputeResource(moId="c1"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='c1',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='configuration.dasConfig.enabled',
+                        val=True,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='configuration.drsConfig.enabled',
+                        val=True,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='configuration.drsConfig.defaultVmBehavior',
+                        val='fullyAutomated',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='configuration.drsConfig.vmotionRate',
+                        val=2,
+                    ),
+                ],
+            ),
+            vim.ObjectContent(
+                obj=vim.Datastore(moId="ds1"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='ds1',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.freeSpace',
+                        val=305,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.capacity',
+                        val=100,
+                    ),
+                ],
+            ),
+        ],
+    )
 )
 
 

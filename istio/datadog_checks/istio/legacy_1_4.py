@@ -9,11 +9,7 @@ from datadog_checks.base.errors import CheckException
 
 from .constants import (
     BLACKLIST_LABELS,
-    CITADEL_NAMESPACE,
-    GALLEY_NAMESPACE,
-    MESH_NAMESPACE,
-    MIXER_NAMESPACE,
-    PILOT_NAMESPACE,
+    ISTIOD_NAMESPACE,
 )
 from .metrics import CITADEL_METRICS, GALLEY_METRICS, GENERIC_METRICS, MESH_METRICS, MIXER_METRICS, PILOT_METRICS
 
@@ -115,11 +111,12 @@ class LegacyIstioCheck_1_4(OpenMetricsBaseCheck):
         otherwise create the scraper and add it to the dict.
         """
         endpoint = instance.get('istio_mesh_endpoint')
+        namespace = instance.get('namespace', ISTIOD_NAMESPACE) + ".mesh"
 
         istio_mesh_instance = deepcopy(instance)
         istio_mesh_instance.update(
             {
-                'namespace': MESH_NAMESPACE,
+                'namespace': namespace,
                 'prometheus_url': endpoint,
                 'label_to_hostname': endpoint,
                 'metrics': [MESH_METRICS] + instance.get('metrics', []),
@@ -141,12 +138,13 @@ class LegacyIstioCheck_1_4(OpenMetricsBaseCheck):
         otherwise create the scraper and add it to the dict.
         """
         endpoint = instance.get('mixer_endpoint')
+        namespace = instance.get('namespace', ISTIOD_NAMESPACE) + ".mixer"
 
         process_mixer_instance = deepcopy(instance)
         MIXER_METRICS.update(GENERIC_METRICS)
         process_mixer_instance.update(
             {
-                'namespace': MIXER_NAMESPACE,
+                'namespace': namespace,
                 'prometheus_url': endpoint,
                 'metrics': [MIXER_METRICS] + instance.get('metrics', []),
                 # Defaults that were set when istio was based on PrometheusCheck
@@ -162,12 +160,13 @@ class LegacyIstioCheck_1_4(OpenMetricsBaseCheck):
         otherwise create the scraper and add it to the dict.
         """
         endpoint = instance.get('pilot_endpoint')
+        namespace = instance.get('namespace', ISTIOD_NAMESPACE) + ".pilot"
 
         process_pilot_instance = deepcopy(instance)
         PILOT_METRICS.update(GENERIC_METRICS)
         process_pilot_instance.update(
             {
-                'namespace': PILOT_NAMESPACE,
+                'namespace': namespace,
                 'prometheus_url': endpoint,
                 'metrics': [PILOT_METRICS] + instance.get('metrics', []),
             }
@@ -180,12 +179,13 @@ class LegacyIstioCheck_1_4(OpenMetricsBaseCheck):
         otherwise create the scraper and add it to the dict.
         """
         endpoint = instance.get('galley_endpoint')
+        namespace = instance.get('namespace', ISTIOD_NAMESPACE) + ".galley"
 
         process_galley_instance = deepcopy(instance)
         GALLEY_METRICS.update(GENERIC_METRICS)
         process_galley_instance.update(
             {
-                'namespace': GALLEY_NAMESPACE,
+                'namespace': namespace,
                 'prometheus_url': endpoint,
                 'metrics': [GALLEY_METRICS] + instance.get('metrics', []),
                 # The following metrics have been blakclisted due to high cardinality of tags
@@ -201,12 +201,13 @@ class LegacyIstioCheck_1_4(OpenMetricsBaseCheck):
         otherwise create the scraper and add it to the dict.
         """
         endpoint = instance.get('citadel_endpoint')
+        namespace = instance.get('namespace', ISTIOD_NAMESPACE) + ".citadel"
 
         process_citadel_instance = deepcopy(instance)
         CITADEL_METRICS.update(GENERIC_METRICS)
         process_citadel_instance.update(
             {
-                'namespace': CITADEL_NAMESPACE,
+                'namespace': namespace,
                 'prometheus_url': endpoint,
                 'metrics': [CITADEL_METRICS] + instance.get('metrics', []),
             }

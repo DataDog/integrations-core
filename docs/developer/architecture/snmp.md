@@ -16,7 +16,7 @@ Here's an overview of what this integration involves:
     * Auto-discovering devices over a network. (Pending deprecation in favor of Agent auto-discovery.)
 * An [Agent service listener](https://github.com/DataDog/datadog-agent/blob/master/pkg/autodiscovery/listeners/snmp.go), responsible for auto-discovering devices over a network and forwarding discovered instances to the existing Agent check scheduling pipeline. Also known as "Agent SNMP auto-discovery".
 
-The diagram below shows how these components interact for a typical VM-based setup (single Agent on a host). For Datadog Cluster Agent (DCA) deployments, see [Cluster Agent Integration](#cluster-agent-integration).
+The diagram below shows how these components interact for a typical VM-based setup (single Agent on a host). For Datadog Cluster Agent (DCA) deployments, see [Cluster Agent support](#cluster-agent-support).
 
 ![](../assets/images/snmp-architecture.png)
 
@@ -78,7 +78,7 @@ Agent auto-discovery uses [GoSNMP](https://github.com/soniah/gosnmp) to get the 
 
 Agent auto-discovery implements the same logic than the Python auto-discovery, but as a service listener in the Agent Go package.
 
-This approach leverages the existing Agent scheduling logic, and makes it possible to scale device auto-discovery using the Datadog Cluster Agent (see [Cluster Agent Integration](#cluster-agent-integration)).
+This approach leverages the existing Agent scheduling logic, and makes it possible to scale device auto-discovery using the Datadog Cluster Agent (see [Cluster Agent support](#cluster-agent-support)).
 
 Pending official documentation, here is an example configuration:
 
@@ -137,7 +137,7 @@ helm install datadog-monitoring --set datadog.apiKey=<YOUR_API_KEY> -f cluster-a
     datadog:
       ## @param apiKey - string - required
       ## Set this to your Datadog API key before the Agent runs.
-      ## ref: https://app.datadoghq.com/account/settings#agent/kubernetes
+      ## ref: https://app.datadoghq.com/account/settings/agent/latest?platform=kubernetes
       #
       apiKey: <DATADOG_API_KEY>
 

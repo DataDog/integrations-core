@@ -317,6 +317,7 @@ class SqlIoVirtualFileStat(BaseSqlServerMetric):
             self.pvs_vals[dbid, fid] = value
             metric_tags = [
                 'database:{}'.format(str(dbname).strip()),
+                'db:{}'.format(str(dbname).strip()),
                 'database_id:{}'.format(str(dbid).strip()),
                 'file_id:{}'.format(str(fid).strip()),
             ]
@@ -457,6 +458,7 @@ class SqlMasterDatabaseFileStats(BaseSqlServerMetric):
 
             metric_tags = [
                 'database:{}'.format(str(dbname)),
+                'db:{}'.format(str(dbname)),
                 'file_id:{}'.format(str(fileid)),
                 'file_type:{}'.format(str(filetype)),
                 'file_location:{}'.format(str(location)),
@@ -557,6 +559,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
 
             metric_tags = [
                 'database:{}'.format(str(self.instance)),
+                'db:{}'.format(str(self.instance)),
                 'file_id:{}'.format(str(fileid)),
                 'file_type:{}'.format(str(filetype)),
                 'file_location:{}'.format(str(location)),
@@ -593,6 +596,7 @@ class SqlDatabaseStats(BaseSqlServerMetric):
             db_recovery_model_desc = row[db_recovery_model_desc_index]
             metric_tags = [
                 'database:{}'.format(str(self.instance)),
+                'db:{}'.format(str(self.instance)),
                 'database_state_desc:{}'.format(str(db_state_desc)),
                 'database_recovery_model_desc:{}'.format(str(db_recovery_model_desc)),
             ]
@@ -633,6 +637,7 @@ class SqlDatabaseBackup(BaseSqlServerMetric):
             column_val = row[value_column_index]
             metric_tags = [
                 'database:{}'.format(str(self.instance)),
+                'db:{}'.format(str(self.instance)),
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
@@ -655,11 +660,16 @@ class SqlDbFragmentation(BaseSqlServerMetric):
     DEFAULT_METRIC_TYPE = 'gauge'
 
     QUERY_BASE = (
-        "select DB_NAME(database_id) as database_name, OBJECT_NAME(object_id, database_id) as object_name, "
-        "index_id, partition_number, fragment_count, avg_fragment_size_in_pages, "
-        "avg_fragmentation_in_percent "
-        "from {table} (DB_ID('{{db}}'),null,null,null,null) "
-        "where fragment_count is not null".format(table=TABLE)
+        "SELECT DB_NAME(DDIPS.database_id) as database_name, "
+        "OBJECT_NAME(DDIPS.object_id, DDIPS.database_id) as object_name, "
+        "DDIPS.index_id as index_id, DDIPS.fragment_count as fragment_count, "
+        "DDIPS.avg_fragment_size_in_pages as avg_fragment_size_in_pages, "
+        "DDIPS.page_count as page_count, "
+        "DDIPS.avg_fragmentation_in_percent as avg_fragmentation_in_percent, I.name as index_name "
+        "FROM {table} (DB_ID('{{db}}'),null,null,null,null) as DDIPS "
+        "INNER JOIN sys.indexes as I ON I.object_id = DDIPS.object_id "
+        "AND DDIPS.index_id = I.index_id "
+        "WHERE DDIPS.fragment_count is not null".format(table=TABLE)
     )
 
     def __init__(self, cfg_instance, base_name, report_function, column, logger):
@@ -676,10 +686,13 @@ class SqlDbFragmentation(BaseSqlServerMetric):
         logger.debug("%s: gathering fragmentation metrics for these databases: %s", cls.__name__, databases)
 
         for db in databases:
+            ctx = construct_use_statement(db)
             query = cls.QUERY_BASE.format(db=db)
-            logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
             start = get_precise_time()
             try:
+                logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
+                cursor.execute(ctx)
+                logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
                 cursor.execute(query)
                 data = cursor.fetchall()
             except Exception as e:
@@ -704,6 +717,7 @@ class SqlDbFragmentation(BaseSqlServerMetric):
         database_name = columns.index("database_name")
         object_name_index = columns.index("object_name")
         index_id_index = columns.index("index_id")
+        index_name_index = columns.index("index_name")
 
         for row in rows:
             if row[database_name] != self.instance:
@@ -712,6 +726,7 @@ class SqlDbFragmentation(BaseSqlServerMetric):
             column_val = row[value_column_index]
             object_name = row[object_name_index]
             index_id = row[index_id_index]
+            index_name = row[index_name_index]
 
             object_list = self.cfg_instance.get('db_fragmentation_object_names')
 
@@ -720,8 +735,10 @@ class SqlDbFragmentation(BaseSqlServerMetric):
 
             metric_tags = [
                 u'database_name:{}'.format(ensure_unicode(self.instance)),
+                u'db:{}'.format(ensure_unicode(self.instance)),
                 u'object_name:{}'.format(ensure_unicode(object_name)),
                 u'index_id:{}'.format(ensure_unicode(index_id)),
+                u'index_name:{}'.format(ensure_unicode(index_name)),
             ]
 
             metric_tags.extend(self.tags)
@@ -892,6 +909,7 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
                 'availability_group:{}'.format(str(resource_group_id)),
                 'availability_group_name:{}'.format(str(resource_group_name)),
                 'failover_mode_desc:{}'.format(str(failover_mode_desc)),
+                'db:{}'.format(str(database_name)),
             ]
             if is_primary_replica_index is not None:
                 is_primary_replica = row[is_primary_replica_index]

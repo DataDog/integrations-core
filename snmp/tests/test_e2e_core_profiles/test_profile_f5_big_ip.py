@@ -202,6 +202,14 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
         )
 
     tag_rows = [
+        ['node:node1', 'monitor_state:unchecked', 'monitor_status:down_manual_resume'],
+        ['node:node2', 'monitor_state:inband_down', 'monitor_status:inband_down'],
+        ['node:node3', 'monitor_state:irule_down', 'monitor_status:forced_up'],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.ltmNodeAddr', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+
+    tag_rows = [
         ['node:node1'],
         ['node:node2'],
         ['node:node3'],
@@ -325,6 +333,14 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
         )
 
     tag_rows = [
+        ['node:node1', 'pool:pool1', 'monitor_state:down'],
+        ['node:node2', 'pool:pool1', 'monitor_state:down_manual_resume'],
+        ['node:node3', 'pool:pool2', 'monitor_state:checking'],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.ltmPoolMember', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+
+    tag_rows = [
         ['node:node1', 'pool:pool1'],
         ['node:node2', 'pool:pool1'],
         ['node:node3', 'pool:pool2'],
@@ -378,11 +394,11 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
         )
 
     interfaces = [
-        ('1.0', 'desc2'),
-        ('mgmt', 'desc1'),
-        ('/Common/internal', 'desc5'),
-        ('/Common/http-tunnel', 'desc3'),
-        ('/Common/socks-tunnel', 'desc4'),
+        (32, 'mgmt', 'desc1'),
+        (48, '1.0', 'desc2'),
+        (80, '/Common/http-tunnel', 'desc3'),
+        (96, '/Common/socks-tunnel', 'desc4'),
+        (112, '/Common/internal', 'desc5'),
     ]
     interfaces_with_bandwidth_usage = {
         '1.0',
@@ -392,8 +408,12 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
 
     for metric in IF_SCALAR_GAUGE:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=2)
-    for interface, desc in interfaces:
-        interface_tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(desc)] + common_tags
+    for index, interface, desc in interfaces:
+        interface_tags = [
+            'interface:{}'.format(interface),
+            'interface_alias:{}'.format(desc),
+            'interface_index:{}'.format(index),
+        ] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=interface_tags, count=1

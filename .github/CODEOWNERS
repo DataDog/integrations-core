@@ -37,6 +37,8 @@ assets/               @DataDog/documentation @DataDog/agent-integrations
 /crio/manifest.json                       @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /datadog_cluster_agent/                   @DataDog/container-integrations @DataDog/agent-integrations
 /datadog_cluster_agent/*.md               @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/datadog_operator/                        @DataDog/container-ecosystems @DataDog/agent-integrations
+/datadog_operator/*.md                    @DataDog/container-ecosystems @DataDog/agent-integrations @DataDog/documentation
 /docker_daemon/                           @DataDog/container-integrations @DataDog/agent-integrations
 /docker_daemon/*.md                       @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /docker_daemon/metadata.csv               @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
@@ -164,6 +166,10 @@ datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring
 /oracle/                                            @DataDog/agent-integrations @DataDog/database-monitoring
 /oracle/*.md                                        @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
 /oracle/manifest.json                               @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
+
+# APM Integrations
+/langchain/         @DataDog/llm-obs @DataDog/agent-integrations @DataDog/documentation
+/openai/            @DataDog/llm-obs @DataDog/agent-integrations @DataDog/documentation
 
 
 # Windows agent

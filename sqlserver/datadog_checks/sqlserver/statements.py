@@ -447,11 +447,14 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self.log.debug("collecting plan. plan_handle=%s", plan_handle)
         self.log.debug("Running query [%s] %s", PLAN_LOOKUP_QUERY, (plan_handle,))
         cursor.execute(PLAN_LOOKUP_QUERY, ("0x" + plan_handle,))
-        result = cursor.fetchall()
-        if not result or not result[0]:
+        result = cursor.fetchone()
+        if not result:
             self.log.debug("failed to loan plan, it must have just been expired out of the plan cache")
             return None, None
-        return result[0]
+        raw_plan, is_plan_encrypted = result
+        if not raw_plan:
+            self.log.debug("plan was null in the plan cache")
+        return raw_plan, is_plan_encrypted
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_plans(self, rows, cursor, deadline):

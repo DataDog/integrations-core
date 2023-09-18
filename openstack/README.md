@@ -4,7 +4,7 @@
 
 ## Overview
 
-**Note**: This integration only applies to OpenStack v12 and below (non-containerized OpenStack). If you are looking to collect metrics from OpenStack v13+ (containerized OpenStack), use the [OpenStack Controller integration][2].
+**Note**: This integration only applies to OpenStack v12 and below. If you are looking to collect metrics from OpenStack v13+, use the [OpenStack Controller integration][2].
 
 Get metrics from OpenStack service in real time to:
 
@@ -165,7 +165,7 @@ Additional helpful documentation, links, and articles:
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/openstack/images/openstack_dashboard.png
 [2]: https://docs.datadoghq.com/integrations/openstack_controller
-[3]: https://app.datadoghq.com/account/settings#agent
+[3]: https://app.datadoghq.com/account/settings/agent/latest
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/openstack/datadog_checks/openstack/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

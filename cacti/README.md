@@ -162,7 +162,7 @@ A [Github issue][7] has been opened to track this memory leak.
 
 Need help? Contact [Datadog support][8].
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://github.com/DataDog/integrations-core/blob/master/cacti/datadog_checks/cacti/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
