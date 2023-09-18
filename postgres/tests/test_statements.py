@@ -98,12 +98,12 @@ def test_statement_samples_enabled_config(
 def test_statement_metrics_version(integration_check, dbm_instance, version, expected_payload_version):
     if version:
         check = integration_check(dbm_instance)
-        check._version = version
+        check.version = version
         check._connect()
         assert payload_pg_version(check.version) == expected_payload_version
     else:
         with mock.patch(
-            'datadog_checks.postgres.postgres.PostgreSql.version', new_callable=mock.PropertyMock
+            'datadog_checks.postgres.postgres.PostgreSql.load_version', new_callable=mock.MagicMock
         ) as patched_version:
             patched_version.return_value = None
             check = integration_check(dbm_instance)
@@ -171,7 +171,6 @@ def test_statement_metrics(
 
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
-    assert event['postgres_version'] == check.statement_metrics._payload_pg_version()
     assert event['ddagentversion'] == datadog_agent.get_version()
     assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
@@ -332,7 +331,6 @@ def test_statement_metrics_cloud_metadata(
 
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
-    assert event['postgres_version'] == check.statement_metrics._payload_pg_version()
     assert event['ddagentversion'] == datadog_agent.get_version()
     assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']

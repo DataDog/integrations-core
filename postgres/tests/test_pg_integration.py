@@ -408,7 +408,7 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
 def test_wrong_version(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     # Enforce to cache wrong version
-    check._version = VersionInfo(*[9, 6, 0])
+    check.version = VersionInfo(*[9, 6, 0])
 
     check.check(pg_instance)
     assert_state_clean(check)
@@ -627,6 +627,9 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
 @pytest.mark.usefixtures('dd_environment')
 def test_database_instance_metadata(aggregator, dd_run_check, pg_instance, dbm_enabled, reported_hostname):
     pg_instance['dbm'] = dbm_enabled
+    # this will block on cancel and wait for the coll interval of 600 seconds,
+    # unless the collection_interval is set to a short amount of time
+    pg_instance['collect_resources'] = {'collection_interval': 0.1}
     if reported_hostname:
         pg_instance['reported_hostname'] = reported_hostname
     expected_host = reported_hostname if reported_hostname else 'stubbed.hostname'
@@ -662,7 +665,6 @@ def assert_state_clean(check):
     assert check.metrics_cache.archiver_metrics is None
     assert check.metrics_cache.replication_metrics is None
     assert check.metrics_cache.activity_metrics is None
-    assert check._is_aurora is None
 
 
 def assert_state_set(check):
@@ -671,4 +673,3 @@ def assert_state_set(check):
     if POSTGRES_VERSION != '9.3':
         assert check.metrics_cache.archiver_metrics
     assert check.metrics_cache.replication_metrics
-    assert check._is_aurora is False

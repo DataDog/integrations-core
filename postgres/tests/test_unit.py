@@ -79,8 +79,8 @@ def test_get_instance_with_default(pg_instance, collect_default_database):
     """
     pg_instance['collect_default_database'] = collect_default_database
     check = PostgreSql('postgres', {}, [pg_instance])
-    check._version = VersionInfo(9, 2, 0)
-    res = check.metrics_cache.get_instance_metrics(check._version)
+    check.version = VersionInfo(9, 2, 0)
+    res = check.metrics_cache.get_instance_metrics(check.version)
     dbfilter = " AND psd.datname not ilike 'postgres'"
     if collect_default_database:
         assert dbfilter not in res['query']
