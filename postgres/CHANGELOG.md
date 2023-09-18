@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Changed***:
+
+* Attempt to connect to the database and fail fast before trying to establish a connection pool ([#15839](https://github.com/DataDog/integrations-core/pull/15839))
+
 ## 14.2.4 / 2023-09-07
 
 ***Fixed***:
