@@ -9,7 +9,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
-    # assert_all_profile_metrics_and_tags_covered,
+    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     assert_extend_generic_bgp4,
     assert_extend_generic_entity_sensor,
@@ -99,6 +99,11 @@ def test_e2e_profile_arista_switch(dd_agent_check):
         tags=common_tags + ['arista_if_rate_interval:764721249'],
     )
 
+    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
+
     # --- TEST METADATA ---
     device = {
         'description': 'arista-switch Device Description',
@@ -115,6 +120,6 @@ def test_e2e_profile_arista_switch(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
-    # assert_all_profile_metrics_and_tags_covered(profile, aggregator) TODO
+    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
