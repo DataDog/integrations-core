@@ -830,7 +830,7 @@ class PostgreSql(AgentCheck):
         try:
             # Check version
             self._connect()
-            self.load_version() # We don't want to cache versions between runs to capture minor updates for metadata
+            self.load_version()  # We don't want to cache versions between runs to capture minor updates for metadata
             if self._config.tag_replication_role:
                 replication_role_tag = "replication_role:{}".format(self._get_replication_role())
                 tags.append(replication_role_tag)
