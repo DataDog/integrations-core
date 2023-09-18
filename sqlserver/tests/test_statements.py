@@ -4,19 +4,19 @@
 
 from __future__ import unicode_literals
 
-from collections import namedtuple
 import logging
 import math
 import os
 import re
 import time
+from collections import namedtuple
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
+from unittest.mock import ANY
 
 import mock
 import pytest
 from lxml import etree as ET
-from unittest.mock import ANY
 
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
