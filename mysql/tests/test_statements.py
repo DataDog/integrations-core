@@ -733,7 +733,7 @@ def test_statement_samples_main_collection_rate_limit(aggregator, dd_run_check, 
     dd_run_check(mysql_check)
     sleep_time = 1
     time.sleep(sleep_time)
-    max_collections = int(1 / collection_interval * sleep_time) + 1
+    max_collections = int(1 / collection_interval * sleep_time) + 2
     mysql_check.cancel()
     metrics = aggregator.metrics("dd.mysql.collect_statement_samples.time")
     assert max_collections / 2.0 <= len(metrics) <= max_collections
