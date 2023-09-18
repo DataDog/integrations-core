@@ -2,11 +2,20 @@
 
 ## Unreleased
 
-## 14.2.3 / 2023-09-06
+***Changed***:
+
+* Attempt to connect to the database and fail fast before trying to establish a connection pool ([#15839](https://github.com/DataDog/integrations-core/pull/15839))
+
+## 14.2.4 / 2023-09-07
 
 ***Fixed***:
 
 * Initialize pg_settings on Postgres check start and lazy load pg_settings if it's not set ([#15773](https://github.com/DataDog/integrations-core/pull/15773))
+
+## 14.2.3 / 2023-09-06
+
+***Fixed***:
+
 * Set lower connection timeout on connection pool to avoid long running checks ([#15768](https://github.com/DataDog/integrations-core/pull/15768))
 
 ## 14.2.2 / 2023-09-05

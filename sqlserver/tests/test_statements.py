@@ -858,3 +858,52 @@ def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
         "dd.sqlserver.async_job.cancel",
         tags=_expected_dbm_instance_tags(dbm_instance) + ['job:query-metrics'],
     )
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "database,query,",
+    [
+        [
+            "master",
+            "EXEC conditionalPlanTest @Switch = 1",
+        ]
+    ],
+)
+def test_statement_conditional_stored_procedure_with_temp_table(
+    aggregator, dd_run_check, dbm_instance, bob_conn, database, query
+):
+    # This test covers a very special case where a stored procedure has a conditional branch
+    # and uses temp tables. The plan will be NULL if there are any statements involving temp tables that
+    # have not been executed. We simulate the case by running the stored procedure with a parameter that
+    # only executes the first branch of the conditional. The second branch will not be executed and the
+    # plan will be NULL. That being said, ALL executed statements in the stored procedure will have NULL plan.
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    dd_run_check(check)
+    bob_conn.execute_with_retries(query, (), database=database)
+    dd_run_check(check)
+    aggregator.reset()
+    bob_conn.execute_with_retries(query, (), database=database)
+    dd_run_check(check)
+
+    # dbm-metrics
+    dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
+    payload = dbm_metrics[0]
+    # metrics rows
+    sqlserver_rows = payload.get('sqlserver_rows', [])
+    assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
+
+    dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+    assert dbm_samples, "should have collected at least one sample"
+
+    matched_events = [s for s in dbm_samples if s['dbm_type'] == "plan" and "#Ids" in s['db']['statement']]
+    assert matched_events, "should have collected plan event"
+
+    for event in matched_events:
+        assert event['db']['plan']['definition'] is None
+        assert event['sqlserver']['plan_handle'] is not None
+        assert event['sqlserver']['query_hash'] is not None
+        assert event['sqlserver']['query_plan_hash'] is not None

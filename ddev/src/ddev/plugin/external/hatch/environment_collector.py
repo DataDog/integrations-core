@@ -60,7 +60,11 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             return self.pip_install_command('-e', '../datadog_checks_dev')
 
     def base_package_install_command(self, features):
-        if not self.in_core_repo:
+        from ddev.testing.constants import TestEnvVars
+
+        if base_package_version := os.environ.get(TestEnvVars.BASE_PACKAGE_VERSION):
+            return self.pip_install_command(self.format_base_package(features, version=base_package_version))
+        elif not self.in_core_repo:
             return self.pip_install_command(self.format_base_package(features))
         elif not (self.is_base_package or self.is_dev_package):
             return self.pip_install_command('-e', self.format_base_package(features, local=True))
@@ -82,7 +86,6 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         return f'python -m pip install --disable-pip-version-check {{verbosity:flag:-1}} {" ".join(args)}'
 
     def finalize_config(self, config):
-        from ddev.testing.constants import TestEnvVars
 
         for env_name, env_config in config.items():
             is_template_env = env_name == 'default'
@@ -98,10 +101,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
 
             base_package_features = env_config.get('base-package-features', self.config.get('base-package-features'))
             install_commands = []
-            if base_package_version := os.environ.get(TestEnvVars.BASE_PACKAGE_VERSION):
-                dependencies = env_config.setdefault('dependencies', [])
-                dependencies.append(self.format_base_package(base_package_features, version=base_package_version))
-            elif install_command := self.base_package_install_command(base_package_features):
+            if install_command := self.base_package_install_command(base_package_features):
                 install_commands.append(install_command)
 
             if self.test_package_install_command:

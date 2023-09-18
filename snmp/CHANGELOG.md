@@ -2,13 +2,29 @@
 
 ## Unreleased
 
-***Changed***:
+***Changed***
 
-* Delete unnecessary extend for ubiquiti profiles ([#15643](https://github.com/DataDog/integrations-core/pull/15643))
+* Refactor arista profiles extends ([#15767](https://github.com/DataDog/integrations-core/pull/15767))
+* Fix mappings in _dell-rac & dell-poweredge ([#15827](https://github.com/DataDog/integrations-core/pull/15827))
 
 ***Fixed***:
 
 * Remove unsupported metric in riverbed-interceptor.yaml ([#15678](https://github.com/DataDog/integrations-core/pull/15678))
+* Delete unnecessary extend for ubiquiti profiles ([#15643](https://github.com/DataDog/integrations-core/pull/15643))
+* Add comment for fanSpeedSensorStatus ([#15804](https://github.com/DataDog/integrations-core/pull/15804))
+
+## 6.2.3 / 2023-09-13
+
+***Fixed***:
+
+* Update mappings in SNMP profiles ([#15826](https://github.com/DataDog/integrations-core/pull/15826))
+
+## 6.2.2 / 2023-09-12
+
+***Fixed***:
+
+* Fix mapping for apc-pdu ([#15765](https://github.com/DataDog/integrations-core/pull/15765))
+* Fixes for SNMP Profiles introduced in 7.48 ([#15800](https://github.com/DataDog/integrations-core/pull/15800))
 
 ## 6.2.1 / 2023-09-05
 

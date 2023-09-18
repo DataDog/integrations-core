@@ -96,6 +96,7 @@ def valid_integration(valid_integrations) -> str:
 @pytest.fixture(autouse=True)
 def config_file(tmp_path, monkeypatch, local_repo) -> ConfigFile:
     for env_var in (
+        'FORCE_COLOR',
         'DD_ENV',
         'DD_SERVICE',
         'DD_SITE',

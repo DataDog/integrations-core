@@ -119,8 +119,8 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         )
 
     tag_rows = [
-        ['cisco_env_mon_supply_state:critical', 'power_source:5', 'power_status_descr:their'],
-        ['cisco_env_mon_supply_state:shutdown', 'power_source:2', 'power_status_descr:kept Jaded oxen Jaded their'],
+        ['cisco_env_mon_supply_state:critical', 'power_source:internal_redundant', 'power_status_descr:their'],
+        ['cisco_env_mon_supply_state:shutdown', 'power_source:ac', 'power_status_descr:kept Jaded oxen Jaded their'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(

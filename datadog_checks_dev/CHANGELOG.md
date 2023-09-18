@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 25.1.0 / 2023-09-15
+
+***Added***:
+
+* Added overview examples to the readme file ([#15817](https://github.com/DataDog/integrations-core/pull/15817))
+* Added required classifier tag examples to template ([#15828](https://github.com/DataDog/integrations-core/pull/15828))
+* Prepare E2E tooling for better message passing ([#15843](https://github.com/DataDog/integrations-core/pull/15843))
+  
+## 25.0.0 / 2023-09-13
+
 ***Changed***:
 
 * Adjust template and test collection based on new team guidelines ([#15078](https://github.com/DataDog/integrations-core/pull/15078))
@@ -17,6 +27,9 @@
 * Allow bumping the version of clickhouse-driver ([#15745](https://github.com/DataDog/integrations-core/pull/15745))
 * Allow bumping the version of lz4 ([#15747](https://github.com/DataDog/integrations-core/pull/15747))
 * Remove flup from the dependency bump exclusion list ([#15748](https://github.com/DataDog/integrations-core/pull/15748))
+* Remove setuptools from the build-system for new integrations ([#15766](https://github.com/DataDog/integrations-core/pull/15766))
+* Stop using the old GPG_COMMAND constant from securesystemslib ([#15776](https://github.com/DataDog/integrations-core/pull/15776))
+* Override the default test options for some integrations ([#15779](https://github.com/DataDog/integrations-core/pull/15779))
 
 ## 24.1.0 / 2023-08-25
 

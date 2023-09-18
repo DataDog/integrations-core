@@ -1,7 +1,10 @@
 # {integration_name}
 
 ## Overview
-High level overview of what this integration does.
+High level overview of what this integration does:
+- What does your product do (in 1-2 sentences)?
+- What will customers get from this integration, and why is it valuable to them?
+- What types of data will your integration send in or pull out, and what's the value of that data?
 
 Screenshots should be absent for this section, instead put them in the media carousel with captions.
 

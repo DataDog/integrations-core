@@ -103,6 +103,13 @@ def test(
 
         return
 
+    in_ci = running_in_ci()
+
+    # Also recreate the environment in the `compat` mode to make sure we are using the right base
+    # check version.
+    if compat:
+        recreate = True
+
     global_env_vars: dict[str, str] = {}
 
     hatch_verbosity = app.verbosity + 1
@@ -225,10 +232,15 @@ def test(
                 app.display_header('Coverage report')
                 app.platform.check_command([sys.executable, '-m', 'coverage', 'report', '--rcfile=../.coveragerc'])
 
-                if running_in_ci():
+                if in_ci:
                     app.platform.check_command(
                         [sys.executable, '-m', 'coverage', 'xml', '-i', '--rcfile=../.coveragerc']
                     )
                     fix_coverage_report(target.path / 'coverage.xml')
                 else:
                     (target.path / '.coverage').remove()
+
+            if compat:
+                # We destroy the environment since we edited it
+                for env_name in chosen_environments:
+                    app.platform.check_command([sys.executable, '-m', 'hatch', 'env', 'remove', env_name])

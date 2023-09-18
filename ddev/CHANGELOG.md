@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add color output to tests in CI ([#15774](https://github.com/DataDog/integrations-core/pull/15774))
+* Migrate `ddev dep` to `ddev` ([#15830](https://github.com/DataDog/integrations-core/pull/15830))
+
+***Fixed***:
+
+* Make sure repo override in envvar makes it into config ([#15782](https://github.com/DataDog/integrations-core/pull/15782))
+* Bump the `target-version` to python 3.9 for ruff and black ([#15824](https://github.com/DataDog/integrations-core/pull/15824))
+* Bump the `datadog-checks-dev` version to ~=25 ([#15823](https://github.com/DataDog/integrations-core/pull/15823))
+* Fix the `--compat` option of the `test` command ([#15815](https://github.com/DataDog/integrations-core/pull/15815))
+
 ## 5.0.0 / 2023-09-06
 
 ***Removed***:

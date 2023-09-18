@@ -1,0 +1,644 @@
+# HELP python_gc_objects_collected_total Objects collected during gc
+# TYPE python_gc_objects_collected_total counter
+python_gc_objects_collected_total{generation="0"} 2925.0
+python_gc_objects_collected_total{generation="1"} 602.0
+python_gc_objects_collected_total{generation="2"} 15.0
+# HELP python_gc_objects_uncollectable_total Uncollectable objects found during GC
+# TYPE python_gc_objects_uncollectable_total counter
+python_gc_objects_uncollectable_total{generation="0"} 0.0
+python_gc_objects_uncollectable_total{generation="1"} 0.0
+python_gc_objects_uncollectable_total{generation="2"} 0.0
+# HELP python_gc_collections_total Number of times this generation was collected
+# TYPE python_gc_collections_total counter
+python_gc_collections_total{generation="0"} 910.0
+python_gc_collections_total{generation="1"} 82.0
+python_gc_collections_total{generation="2"} 5.0
+# HELP python_info Python platform information
+# TYPE python_info gauge
+python_info{implementation="CPython",major="3",minor="8",patchlevel="13",version="3.8.13"} 1.0
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 1.496997888e+09
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 1.149952e+08
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.69115316316e+09
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 22.299999999999997
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 35.0
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1.048576e+06
+# HELP ray_node_mem_shared_bytes Total shared memory usage on a ray node
+# TYPE ray_node_mem_shared_bytes gauge
+ray_node_mem_shared_bytes{SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4"} 2.82390528e+08
+# HELP ray_component_cpu_percentage Total CPU usage of the components on a node.
+# TYPE ray_component_cpu_percentage gauge
+ray_component_cpu_percentage{Component="raylet",SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4",pid="21"} 2.4
+ray_component_cpu_percentage{Component="ray::IDLE",SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4",pid=""} 0.8
+ray_component_cpu_percentage{Component="agent",SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4",pid="65"} 2.4
+ray_component_cpu_percentage{Component="ray::HTTPProxyActor",SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4",pid=""} 1.2
+ray_component_cpu_percentage{Component="ray::echo_sleep",SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4",pid=""} 0.0
+# HELP ray_component_mem_shared_bytes SHM usage of all components of the node. It is equivalent to the top command's SHR column.
+# TYPE ray_component_mem_shared_bytes gauge
+ray_component_mem_shared_bytes{Component="raylet",SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4",pid="21"} 1.4721024e+07
+ray_component_mem_shared_bytes{Component="ray::IDLE",SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4",pid=""} 2.8749824e+07
+ray_component_mem_shared_bytes{Component="agent",SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4",pid="65"} 3.8813696e+07
+ray_component_mem_shared_bytes{Component="ray::HTTPProxyActor",SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4",pid=""} 7.0242304e+07
+ray_component_mem_shared_bytes{Component="ray::echo_sleep",SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4",pid=""} 0.0
+# HELP ray_component_rss_mb RSS usage of all components on the node.
+# TYPE ray_component_rss_mb gauge
+ray_component_rss_mb{Component="raylet",SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4",pid="21"} 27.426816
+ray_component_rss_mb{Component="ray::IDLE",SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4",pid=""} 86.728704
+ray_component_rss_mb{Component="agent",SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4",pid="65"} 112.939008
+ray_component_rss_mb{Component="ray::HTTPProxyActor",SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4",pid=""} 173.662208
+ray_component_rss_mb{Component="ray::echo_sleep",SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4",pid=""} 0.0
+# HELP ray_component_uss_mb USS usage of all components on the node.
+# TYPE ray_component_uss_mb gauge
+ray_component_uss_mb{Component="raylet",SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4",pid="21"} 13.135872
+ray_component_uss_mb{Component="ray::IDLE",SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4",pid=""} 58.703872
+ray_component_uss_mb{Component="agent",SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4",pid="65"} 74.50624
+ray_component_uss_mb{Component="ray::HTTPProxyActor",SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4",pid=""} 105.02144
+ray_component_uss_mb{Component="ray::echo_sleep",SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4",pid=""} 0.0
+# HELP ray_node_cpu_utilization Total CPU usage on a ray node
+# TYPE ray_node_cpu_utilization gauge
+ray_node_cpu_utilization{SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4"} 23.7
+# HELP ray_node_cpu_count Total CPUs available on a ray node
+# TYPE ray_node_cpu_count gauge
+ray_node_cpu_count{SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4"} 4.0
+# HELP ray_node_mem_used Memory usage on a ray node
+# TYPE ray_node_mem_used gauge
+ray_node_mem_used{SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4"} 4.18910208e+08
+# HELP ray_node_mem_available Memory available on a ray node
+# TYPE ray_node_mem_available gauge
+ray_node_mem_available{SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4"} 7.92813568e+09
+# HELP ray_node_mem_total Total memory on a ray node
+# TYPE ray_node_mem_total gauge
+ray_node_mem_total{SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4"} 8.347045888e+09
+# HELP ray_node_disk_io_read Total read from disk
+# TYPE ray_node_disk_io_read gauge
+ray_node_disk_io_read{SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4"} 1.1781057536e+010
+# HELP ray_node_disk_io_write Total written to disk
+# TYPE ray_node_disk_io_write gauge
+ray_node_disk_io_write{SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4"} 2.0590231552e+010
+# HELP ray_node_disk_io_read_count Total read ops from disk
+# TYPE ray_node_disk_io_read_count gauge
+ray_node_disk_io_read_count{SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4"} 198111.0
+# HELP ray_node_disk_io_write_count Total write ops to disk
+# TYPE ray_node_disk_io_write_count gauge
+ray_node_disk_io_write_count{SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4"} 394361.0
+# HELP ray_node_disk_io_read_speed Disk read speed
+# TYPE ray_node_disk_io_read_speed gauge
+ray_node_disk_io_read_speed{SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4"} 0.0
+# HELP ray_node_disk_io_write_speed Disk write speed
+# TYPE ray_node_disk_io_write_speed gauge
+ray_node_disk_io_write_speed{SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4"} 253739.26568816256
+# HELP ray_node_disk_read_iops Disk read iops
+# TYPE ray_node_disk_read_iops gauge
+ray_node_disk_read_iops{SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4"} 0.0
+# HELP ray_node_disk_write_iops Disk write iops
+# TYPE ray_node_disk_write_iops gauge
+ray_node_disk_write_iops{SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4"} 14.878068244575653
+# HELP ray_node_disk_usage Total disk usage (bytes) on a ray node
+# TYPE ray_node_disk_usage gauge
+ray_node_disk_usage{SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4"} 2.54029156352e+011
+# HELP ray_node_disk_free Total disk free (bytes) on a ray node
+# TYPE ray_node_disk_free gauge
+ray_node_disk_free{SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4"} 2.504900608e+09
+# HELP ray_node_disk_utilization_percentage Total disk utilization (percentage) on a ray node
+# TYPE ray_node_disk_utilization_percentage gauge
+ray_node_disk_utilization_percentage{SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4"} 99.02356020963308
+# HELP ray_node_network_sent Total network sent
+# TYPE ray_node_network_sent gauge
+ray_node_network_sent{SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4"} 1.449364e+06
+# HELP ray_node_network_received Total network received
+# TYPE ray_node_network_received gauge
+ray_node_network_received{SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4"} 650106.0
+# HELP ray_node_network_send_speed Network send speed
+# TYPE ray_node_network_send_speed gauge
+ray_node_network_send_speed{SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4"} 8491.558702350992
+# HELP ray_node_network_receive_speed Network receive speed
+# TYPE ray_node_network_receive_speed gauge
+ray_node_network_receive_speed{SessionName="session_2023-08-04_05-45-40_770085_8",ip="172.30.0.4"} 2407.6137692062866
+# HELP ray_object_directory_removed_locations Number of object locations removed per second. If this is high, a lot of objects have been removed from this node.
+# TYPE ray_object_directory_removed_locations gauge
+ray_object_directory_removed_locations{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_scheduler_failed_worker_startup_total Number of tasks that fail to be scheduled because workers were not available. Labels are broken per reason {JobConfigMissing, RegistrationTimedOut, RateLimited}
+# TYPE ray_scheduler_failed_worker_startup_total gauge
+ray_scheduler_failed_worker_startup_total{Component="raylet",NodeAddress="172.30.0.4",Reason="JobConfigMissing",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+ray_scheduler_failed_worker_startup_total{Component="raylet",NodeAddress="172.30.0.4",Reason="RegistrationTimedOut",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+ray_scheduler_failed_worker_startup_total{Component="raylet",NodeAddress="172.30.0.4",Reason="RateLimited",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_pull_manager_usage_bytes The total number of bytes usage broken per type {Available, BeingPulled, Pinned}
+# TYPE ray_pull_manager_usage_bytes gauge
+ray_pull_manager_usage_bytes{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="Available",Version="2.6.1",WorkerId=""} 2.257794662e+09
+ray_pull_manager_usage_bytes{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="BeingPulled",Version="2.6.1",WorkerId=""} 0.0
+ray_pull_manager_usage_bytes{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="Pinned",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_scheduler_unscheduleable_tasks Number of pending tasks (not scheduleable tasks) broken per reason {Infeasible, WaitingForResources, WaitingForPlasmaMemory, WaitingForRemoteResources, WaitingForWorkers}.
+# TYPE ray_scheduler_unscheduleable_tasks gauge
+ray_scheduler_unscheduleable_tasks{Component="raylet",NodeAddress="172.30.0.4",Reason="WaitingForPlasmaMemory",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+ray_scheduler_unscheduleable_tasks{Component="raylet",NodeAddress="172.30.0.4",Reason="Infeasible",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+ray_scheduler_unscheduleable_tasks{Component="raylet",NodeAddress="172.30.0.4",Reason="WaitingForResources",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+ray_scheduler_unscheduleable_tasks{Component="raylet",NodeAddress="172.30.0.4",Reason="WaitingForRemoteResources",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+ray_scheduler_unscheduleable_tasks{Component="raylet",NodeAddress="172.30.0.4",Reason="WaitingForWorkers",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_object_store_fallback_memory Amount of memory in fallback allocations in the filesystem.
+# TYPE ray_object_store_fallback_memory gauge
+ray_object_store_fallback_memory{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_scheduler_tasks Number of tasks waiting for scheduling broken per state {Cancelled, Executing, Waiting, Dispatched, Received}.
+# TYPE ray_scheduler_tasks gauge
+ray_scheduler_tasks{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",State="Dispatched",Version="2.6.1",WorkerId=""} 0.0
+ray_scheduler_tasks{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",State="Received",Version="2.6.1",WorkerId=""} 0.0
+ray_scheduler_tasks{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",State="SpilledUnschedulable",Version="2.6.1",WorkerId=""} 0.0
+ray_scheduler_tasks{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",State="Executing",Version="2.6.1",WorkerId=""} 0.0
+ray_scheduler_tasks{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",State="Cancelled",Version="2.6.1",WorkerId=""} 0.0
+ray_scheduler_tasks{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",State="SpilledWaiting",Version="2.6.1",WorkerId=""} 0.0
+ray_scheduler_tasks{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",State="Waiting",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_pull_manager_num_object_pins Number of object pin attempts by the pull manager, can be {Success, Failure}.
+# TYPE ray_pull_manager_num_object_pins gauge
+ray_pull_manager_num_object_pins{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="Success",Version="2.6.1",WorkerId=""} 0.0
+ray_pull_manager_num_object_pins{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="Failure",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_pull_manager_active_bundles Number of active bundle requests
+# TYPE ray_pull_manager_active_bundles gauge
+ray_pull_manager_active_bundles{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_object_store_memory Object store memory by various sub-kinds on this node
+# TYPE ray_object_store_memory gauge
+ray_object_store_memory{Component="raylet",Location="SPILLED",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+ray_object_store_memory{Component="raylet",Location="MMAP_SHM",NodeAddress="172.30.0.4",ObjectState="SEALED",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+ray_object_store_memory{Component="raylet",Location="MMAP_DISK",NodeAddress="172.30.0.4",ObjectState="SEALED",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+ray_object_store_memory{Component="raylet",Location="MMAP_SHM",NodeAddress="172.30.0.4",ObjectState="UNSEALED",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+ray_object_store_memory{Component="raylet",Location="MMAP_DISK",NodeAddress="172.30.0.4",ObjectState="UNSEALED",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="ea859198453a0a61cae536ebd0a34ef5f13b9fc1c11c7e2e0ba3df24"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="e73c1e3f1b636728c3e82e35fc75d566731b49fc4f4359838ebae1c4"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="bf3c634809aff6b3e91a353259be1703bdb0a48c990a75f9f9cdacfa"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="1834cb64b9e32cd3a0db530ce18c6cad2f527a7c64635026e1917604"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="99c117c70cc39f2b51c7887edbbfe9906139448a21ed5420de2fd918"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="9c48d7add532423e3ffd4a3d49c0e2d87b50fcbcee8859e1fbdd8372"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="22d19c7a9998d61ce3a730d3c20759085eab57980887470d0ac6c661"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="4814d42bab51c989a80c0835d7d6c18cf571eb520c3766f63e0b22c5"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="b4b1090f1eef40be4be7f4e9bf599f42df19b692d3bac28be567b617"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="a3ef6796368ccab6b6e4baca9b6156bd1d50ba65e46ef8e6b9b46cb3"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="da6cdf4387d58d568af863a81de1f4a8a2a26642220fc43476b9804a"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="92ea291a5408a9887cd143957496beaf999049d19637db033cb54da0"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="8d45b0f4aeab99b58ca674c3b68d388595fa55af563cb9423e1ed24d"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="a0b563ee33b7d7693b5536a3d3a7af4c4f0368427afc0665c5322fb9"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="54cbf7cd7f62332ad11c86de951b947109b56f7318d170e8fb1a6ea2"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="478eba182ac10aba3529e28355db5f5b73c3b18c0e5daed9f8e4d05a"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="0aa48b3aa1fdc92925b914763de29f3b66375badf98225ce8b39af01"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="e4a7b2a7cb24dae151a39ef230ef96af3d0a07f79f5c98adfbe315a9"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="cf64e8cf7af88a234da0e79a2512988c10859703fe65118e160059a2"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="af2e138d1d2bb2acf3e0949935b45ff9ae4478c489536c8655310dab"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="33bae8d542bd92c6a57adc673d85e2114aa7b03bc928503ecc296501"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="d795961299fa05b60fb40d52cb850920aaf461fe9ab8e005f87c36be"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="9e8a98995b79f4c59473b01a3fe3e3c9248f3b633ec0da85bad67b7d"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="09bc827ffb89bc6217d7efaaad52a3a5dfa68d08bcdbe27c1419e1f6"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="2119871477077656d72108e7ce93a409f52b706719218d1749de1a14"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="2f1e099ed511db3c0c350a3ca7453d85427f882e455309e7b21d45fa"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="36b620b4b81dde4aaf3611d7dfb99286886f98ebf301ba36678bca60"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="7b664c309901fca939fe4b3aaab205e2b4b4344db864b70414e14f09"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="227f81d102728230fae0f874566d10fe35d57bcc2e37024eddc0a954"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="ba66b7ef4bc41ade84bfb3e0be2129431a635e4c3053b153cb7656e3"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="8b65a0c2476d66d17b2a2c23987404e84ad59437b0ac6e51e722b065"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="f10fcb4c9d998e118185ebf87b561d318d996613b732f466473f5718"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="c7fa3e0c09579d5b5b0246a241d4bc7f9969ae949c398c82660f5326"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="a36a68e6b1d81f1259d786397a93eaa5cb2d60827b265cf198d0aea7"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="207ec9906d729cc01ed5ccefd7f965df2b98b9c26d4eeb1b29dda542"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="82019b70be5f3b718407ef21c9b9118046401150a3b4ca09a0d87b27"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="d5b975795d87aacb442a472cd4503d599499b132cca7765fb6d4bc06"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="2aa900ea0ff540d10044cf0bf2c846d921b42b067876d559b92617da"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="f69d3b53ee1170b79496c4b3f3064f2b56733160a50a04e2a7294afc"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="f2b51292035ddab0e31adb355f1a1a0a00680722e7dac7264b9a783d"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="7578c65c7d86eb1e97a1c7649541c753bd211550ccc765e8201c5b25"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="7d5bc070c2df734eb053c0557da42b0f77210519c6754fb66113f49d"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="031996d16ba34aa23ac05d25e278404470aa648ab7d87201fb971a74"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="cb06064cc49562bd4a32e79227a2ead4fd7f415ba34a2927b3607c8b"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="d00fce1321597273f2e414555d92db883c956bd33f5aae33752aeadf"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="be723ea0ea9091ab04eaed743f755cef8f7f99865f47d28fe3c6c4d4"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="752a030036c7b0a0454b5df8a1e9b0cb906999902b8ba526c1457c35"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="007b190d7c34f24145464764cb89d4aec812f6d1b54e9fe835694c10"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="07c93a8e334d1ca46b893b099e662052ef0bfa21ac5b4a4c72b3d6ad"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="f650ecbf91a6dcb40cbc761e244ef6b0556341880a4d73441c48edbb"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="b43d9cfa8026c34c86b7cfa6bee0a2ae922f5ce66a6e9a9f4705e269"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="74519568446cafefa0ee1ac2e3501a67112175b4fbc4f8720a0f78f6"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="f76a5ada229f5bc4c7c839998aca930d0bb77bebbe4c93802436270c"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="6a53bca66316edbc48c1aa74e220a6822653e2c065ca7d147e142659"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="6e5f2512c1d9e59a9af2747acc75ac7c2050de0d60edb314fe0eed5a"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="6a3afad7be2babc274f80737e9aea8ad9c35ebbf14dad4d526981e1e"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="623e34b70f0eb210f9212617f583d322166134bda51567049f5d5fad"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="56a08c8929035ad1293baa072f6209637d8be741c9cea6e398663f0c"} 0.0
+ray_object_store_memory{Component="core_worker",Location="WORKER_HEAP",NodeAddress="172.30.0.4",ObjectState="",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="6622d1030b2f367c515ef593e31ebbb1cbb5acf12cac634e6b9b64ee"} 0.0
+# HELP ray_object_store_used_memory Amount of memory currently occupied in the object store.
+# TYPE ray_object_store_used_memory gauge
+ray_object_store_used_memory{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_push_manager_in_flight_pushes Number of in flight object push requests.
+# TYPE ray_push_manager_in_flight_pushes gauge
+ray_push_manager_in_flight_pushes{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_grpc_server_req_finished_total Finished request number in grpc server
+# TYPE ray_grpc_server_req_finished_total counter
+ray_grpc_server_req_finished_total{Component="raylet",Method="NodeManagerService.grpc_server.RequestWorkerLease",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 50.0
+ray_grpc_server_req_finished_total{Component="raylet",Method="NodeManagerService.grpc_server.GetResourceLoad",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 1151.0
+ray_grpc_server_req_finished_total{Component="raylet",Method="NodeManagerService.grpc_server.GetSystemConfig",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 60.0
+ray_grpc_server_req_finished_total{Component="raylet",Method="NodeManagerService.grpc_server.ReportWorkerBacklog",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 2108.0
+ray_grpc_server_req_finished_total{Component="raylet",Method="AgentManagerService.grpc_server.RegisterAgent",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 1.0
+ray_grpc_server_req_finished_total{Component="raylet",Method="ObjectManagerService.grpc_server.FreeObjects",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 27.0
+ray_grpc_server_req_finished_total{Component="raylet",Method="NodeManagerService.grpc_server.GetNodeStats",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 230.0
+ray_grpc_server_req_finished_total{Component="raylet",Method="NodeManagerService.grpc_server.ReturnWorker",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 47.0
+# HELP ray_object_manager_received_chunks Number object chunks received broken per type {Total, FailedTotal, FailedCancelled, FailedPlasmaFull}.
+# TYPE ray_object_manager_received_chunks gauge
+ray_object_manager_received_chunks{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="FailedPlasmaFull",Version="2.6.1",WorkerId=""} 0.0
+ray_object_manager_received_chunks{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="FailedTotal",Version="2.6.1",WorkerId=""} 0.0
+ray_object_manager_received_chunks{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="FailedCancelled",Version="2.6.1",WorkerId=""} 0.0
+ray_object_manager_received_chunks{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="Total",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_pull_manager_requests Number of pull requests broken per type {Queued, Active, Pinned}.
+# TYPE ray_pull_manager_requests gauge
+ray_pull_manager_requests{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="Pinned",Version="2.6.1",WorkerId=""} 0.0
+ray_pull_manager_requests{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="Queued",Version="2.6.1",WorkerId=""} 0.0
+ray_pull_manager_requests{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="Active",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_grpc_server_req_new_total New request number in grpc server
+# TYPE ray_grpc_server_req_new_total counter
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.ShutdownRaylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 100.0
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.GetTasksInfo",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 100.0
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.CancelResourceReserve",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 100.0
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.FormatGlobalMemoryInfo",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 100.0
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.GlobalGC",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 100.0
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.CommitBundleResources",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 100.0
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.PinObjectIDs",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 100.0
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.RequestWorkerLease",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 150.0
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.GetNodeStats",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 330.0
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.NotifyGCSRestart",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 100.0
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.GetTaskFailureCause",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 100.0
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.ReleaseUnusedBundles",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 100.0
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.GetSystemConfig",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 160.0
+ray_grpc_server_req_new_total{Component="raylet",Method="ObjectManagerService.grpc_server.Push",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 200.0
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.GetObjectsInfo",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 100.0
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.PrepareBundleResources",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 100.0
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.ReleaseUnusedWorkers",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 100.0
+ray_grpc_server_req_new_total{Component="raylet",Method="ObjectManagerService.grpc_server.FreeObjects",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 227.0
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.ReturnWorker",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 147.0
+ray_grpc_server_req_new_total{Component="raylet",Method="ObjectManagerService.grpc_server.Pull",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 200.0
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.CancelWorkerLease",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 100.0
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.RequestObjectSpillage",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 100.0
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.UpdateResourceUsage",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 100.0
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.ReportWorkerBacklog",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 2208.0
+ray_grpc_server_req_new_total{Component="raylet",Method="AgentManagerService.grpc_server.RegisterAgent",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 101.0
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.GetResourceLoad",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 1251.0
+ray_grpc_server_req_new_total{Component="raylet",Method="NodeManagerService.grpc_server.RequestResourceReport",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 100.0
+# HELP ray_spill_manager_objects Number of local objects broken per state {Pinned, PendingRestore, PendingSpill}.
+# TYPE ray_spill_manager_objects gauge
+ray_spill_manager_objects{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",State="Pinned",Version="2.6.1",WorkerId=""} 0.0
+ray_spill_manager_objects{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",State="PendingSpill",Version="2.6.1",WorkerId=""} 0.0
+ray_spill_manager_objects{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",State="PendingRestore",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_internal_num_infeasible_scheduling_classes The number of unique scheduling classes that are infeasible.
+# TYPE ray_internal_num_infeasible_scheduling_classes gauge
+ray_internal_num_infeasible_scheduling_classes{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_object_directory_subscriptions Number of object location subscriptions. If this is high, the raylet is attempting to pull a lot of objects.
+# TYPE ray_object_directory_subscriptions gauge
+ray_object_directory_subscriptions{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_internal_num_processes_started_from_cache The total number of workers started from a cached worker process.
+# TYPE ray_internal_num_processes_started_from_cache gauge
+ray_internal_num_processes_started_from_cache{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 28.0
+# HELP ray_object_directory_added_locations Number of object locations added per second., If this is high, a lot of objects have been added on this node.
+# TYPE ray_object_directory_added_locations gauge
+ray_object_directory_added_locations{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_internal_num_processes_skipped_runtime_enviornment_mismatch The total number of cached workers skipped due to runtime environment mismatch.
+# TYPE ray_internal_num_processes_skipped_runtime_enviornment_mismatch gauge
+ray_internal_num_processes_skipped_runtime_enviornment_mismatch{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_pull_manager_requested_bundles Number of requested bundles broken per type {Get, Wait, TaskArgs}.
+# TYPE ray_pull_manager_requested_bundles gauge
+ray_pull_manager_requested_bundles{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="Wait",Version="2.6.1",WorkerId=""} 0.0
+ray_pull_manager_requested_bundles{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="Get",Version="2.6.1",WorkerId=""} 0.0
+ray_pull_manager_requested_bundles{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="TaskArgs",Version="2.6.1",WorkerId=""} 0.0
+ray_pull_manager_requested_bundles{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="CumulativeTotal",Version="2.6.1",WorkerId=""} 1.0
+# HELP ray_grpc_server_req_process_time_ms Request latency in grpc server
+# TYPE ray_grpc_server_req_process_time_ms gauge
+ray_grpc_server_req_process_time_ms{Component="raylet",Method="NodeManagerService.grpc_server.RequestWorkerLease",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 3853.376574
+ray_grpc_server_req_process_time_ms{Component="raylet",Method="NodeManagerService.grpc_server.GetResourceLoad",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.156837
+ray_grpc_server_req_process_time_ms{Component="raylet",Method="NodeManagerService.grpc_server.GetSystemConfig",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.394113
+ray_grpc_server_req_process_time_ms{Component="raylet",Method="NodeManagerService.grpc_server.ReportWorkerBacklog",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.183172
+ray_grpc_server_req_process_time_ms{Component="raylet",Method="AgentManagerService.grpc_server.RegisterAgent",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.944525
+ray_grpc_server_req_process_time_ms{Component="raylet",Method="ObjectManagerService.grpc_server.FreeObjects",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 3.521905
+ray_grpc_server_req_process_time_ms{Component="raylet",Method="NodeManagerService.grpc_server.GetNodeStats",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 1.779753
+ray_grpc_server_req_process_time_ms{Component="raylet",Method="NodeManagerService.grpc_server.ReturnWorker",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.491643
+# HELP ray_object_directory_updates Number of object location updates per second., If this is high, the raylet is attempting to pull a lot of objects and/or the locations for objects are frequently changing (e.g. due to many object copies or evictions).
+# TYPE ray_object_directory_updates gauge
+ray_object_directory_updates{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_object_store_dist The distribution of object size in bytes
+# TYPE ray_object_store_dist histogram
+ray_object_store_dist_bucket{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="CreatedByWorker",Version="2.6.1",WorkerId="",le="33554432.0"} 60.0
+ray_object_store_dist_bucket{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="CreatedByWorker",Version="2.6.1",WorkerId="",le="67108864.0"} 60.0
+ray_object_store_dist_bucket{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="CreatedByWorker",Version="2.6.1",WorkerId="",le="134217728.0"} 60.0
+ray_object_store_dist_bucket{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="CreatedByWorker",Version="2.6.1",WorkerId="",le="268435456.0"} 60.0
+ray_object_store_dist_bucket{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="CreatedByWorker",Version="2.6.1",WorkerId="",le="536870912.0"} 60.0
+ray_object_store_dist_bucket{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="CreatedByWorker",Version="2.6.1",WorkerId="",le="1073741824.0"} 60.0
+ray_object_store_dist_bucket{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="CreatedByWorker",Version="2.6.1",WorkerId="",le="2147483648.0"} 60.0
+ray_object_store_dist_bucket{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="CreatedByWorker",Version="2.6.1",WorkerId="",le="4294967296.0"} 60.0
+ray_object_store_dist_bucket{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="CreatedByWorker",Version="2.6.1",WorkerId="",le="8589934592.0"} 60.0
+ray_object_store_dist_bucket{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="CreatedByWorker",Version="2.6.1",WorkerId="",le="17179869184.0"} 60.0
+ray_object_store_dist_bucket{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="CreatedByWorker",Version="2.6.1",WorkerId="",le="+Inf"} 60.0
+ray_object_store_dist_count{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="CreatedByWorker",Version="2.6.1",WorkerId=""} 60.0
+ray_object_store_dist_sum{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="CreatedByWorker",Version="2.6.1",WorkerId=""} 480.0
+# HELP ray_object_manager_bytes Number of bytes pushed or received by type {PushedFromLocalPlasma, PushedFromLocalDisk, Received}.
+# TYPE ray_object_manager_bytes gauge
+ray_object_manager_bytes{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="Received",Version="2.6.1",WorkerId=""} 0.0
+ray_object_manager_bytes{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="PushedFromLocalPlasma",Version="2.6.1",WorkerId=""} 0.0
+ray_object_manager_bytes{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="PushedFromLocalDisk",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_pull_manager_retries_total Number of cumulative pull retries.
+# TYPE ray_pull_manager_retries_total gauge
+ray_pull_manager_retries_total{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_worker_register_time_ms end to end latency of register a worker process.
+# TYPE ray_worker_register_time_ms histogram
+ray_worker_register_time_ms_bucket{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="",le="1.0"} 0.0
+ray_worker_register_time_ms_bucket{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="",le="10.0"} 0.0
+ray_worker_register_time_ms_bucket{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="",le="100.0"} 0.0
+ray_worker_register_time_ms_bucket{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="",le="1000.0"} 2.0
+ray_worker_register_time_ms_bucket{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="",le="10000.0"} 60.0
+ray_worker_register_time_ms_bucket{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId="",le="+Inf"} 60.0
+ray_worker_register_time_ms_count{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 60.0
+ray_worker_register_time_ms_sum{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 143167.0
+# HELP ray_push_manager_chunks Number of object chunks transfer broken per type {InFlight, Remaining}.
+# TYPE ray_push_manager_chunks gauge
+ray_push_manager_chunks{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="InFlight",Version="2.6.1",WorkerId=""} 0.0
+ray_push_manager_chunks{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="Remaining",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_spill_manager_objects_bytes Byte size of local objects broken per state {Pinned, PendingSpill}.
+# TYPE ray_spill_manager_objects_bytes gauge
+ray_spill_manager_objects_bytes{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",State="Pinned",Version="2.6.1",WorkerId=""} 0.0
+ray_spill_manager_objects_bytes{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",State="PendingSpill",Version="2.6.1",WorkerId=""} 0.0
+ray_spill_manager_objects_bytes{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",State="Restored",Version="2.6.1",WorkerId=""} 0.0
+ray_spill_manager_objects_bytes{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",State="Spilled",Version="2.6.1",WorkerId=""} 0.0
+ray_spill_manager_objects_bytes{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",State="PendingRestore",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_spill_manager_request_total Number of {spill, restore} requests.
+# TYPE ray_spill_manager_request_total gauge
+ray_spill_manager_request_total{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="Restored",Version="2.6.1",WorkerId=""} 0.0
+ray_spill_manager_request_total{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="Spilled",Version="2.6.1",WorkerId=""} 0.0
+ray_spill_manager_request_total{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Type="FailedDeletion",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_grpc_server_req_handling_total Request number are handling in grpc server
+# TYPE ray_grpc_server_req_handling_total counter
+ray_grpc_server_req_handling_total{Component="raylet",Method="NodeManagerService.grpc_server.RequestWorkerLease",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 50.0
+ray_grpc_server_req_handling_total{Component="raylet",Method="NodeManagerService.grpc_server.GetResourceLoad",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 1151.0
+ray_grpc_server_req_handling_total{Component="raylet",Method="NodeManagerService.grpc_server.GetSystemConfig",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 60.0
+ray_grpc_server_req_handling_total{Component="raylet",Method="NodeManagerService.grpc_server.ReportWorkerBacklog",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 2108.0
+ray_grpc_server_req_handling_total{Component="raylet",Method="AgentManagerService.grpc_server.RegisterAgent",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 1.0
+ray_grpc_server_req_handling_total{Component="raylet",Method="ObjectManagerService.grpc_server.FreeObjects",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 27.0
+ray_grpc_server_req_handling_total{Component="raylet",Method="NodeManagerService.grpc_server.GetNodeStats",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 230.0
+ray_grpc_server_req_handling_total{Component="raylet",Method="NodeManagerService.grpc_server.ReturnWorker",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 47.0
+# HELP ray_object_directory_lookups Number of object location lookups per second. If this is high, the raylet is waiting on a lot of objects.
+# TYPE ray_object_directory_lookups gauge
+ray_object_directory_lookups{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_resources Logical Ray resources broken per state {AVAILABLE, USED}
+# TYPE ray_resources gauge
+ray_resources{Component="raylet",Name="object_store_memory",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",State="AVAILABLE",Version="2.6.1",WorkerId=""} 2.470442188e+09
+ray_resources{Component="raylet",Name="object_store_memory",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",State="USED",Version="2.6.1",WorkerId=""} 0.0
+ray_resources{Component="raylet",Name="CPU",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",State="AVAILABLE",Version="2.6.1",WorkerId=""} 2.0
+ray_resources{Component="raylet",Name="memory",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",State="AVAILABLE",Version="2.6.1",WorkerId=""} 5.764365108e+09
+ray_resources{Component="raylet",Name="CPU",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",State="USED",Version="2.6.1",WorkerId=""} 0.0
+ray_resources{Component="raylet",Name="memory",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",State="USED",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_internal_num_processes_started The total number of worker processes the worker pool has created.
+# TYPE ray_internal_num_processes_started gauge
+ray_internal_num_processes_started{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 60.0
+# HELP ray_internal_num_processes_skipped_job_mismatch The total number of cached workers skipped due to job mismatch.
+# TYPE ray_internal_num_processes_skipped_job_mismatch gauge
+ray_internal_num_processes_skipped_job_mismatch{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_internal_num_spilled_tasks The cumulative number of lease requeusts that this raylet has spilled to other raylets.
+# TYPE ray_internal_num_spilled_tasks gauge
+ray_internal_num_spilled_tasks{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_object_store_available_memory Amount of memory currently available in the object store.
+# TYPE ray_object_store_available_memory gauge
+ray_object_store_available_memory{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 2.470442188e+09
+# HELP ray_object_store_num_local_objects Number of objects currently in the object store.
+# TYPE ray_object_store_num_local_objects gauge
+ray_object_store_num_local_objects{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_object_manager_num_pull_requests Number of active pull requests for objects.
+# TYPE ray_object_manager_num_pull_requests gauge
+ray_object_manager_num_pull_requests{Component="raylet",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Version="2.6.1",WorkerId=""} 0.0
+# HELP ray_actors Current number of actors currently in a particular state.
+# TYPE ray_actors gauge
+ray_actors{Component="core_worker",JobId="01000000",Name="HTTPProxyActor",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_actors{Component="core_worker",JobId="01000000",Name="HTTPProxyActor",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="ALIVE",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} -0.0
+ray_actors{Component="core_worker",JobId="01000000",Name="HTTPProxyActor",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_TASK",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_actors{Component="core_worker",JobId="01000000",Name="HTTPProxyActor",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+# HELP ray_tasks Current number of tasks currently in a particular state.
+# TYPE ray_tasks gauge
+ray_tasks{Component="core_worker",IsRetry="0",JobId="01000000",Name="HTTPProxyActor.ready",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="01000000",Name="Unknown task",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="01000000",Name="Unknown task",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="",Name="ServeController.get_all_endpoints",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="owner",State="PENDING_ARGS_AVAIL",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="",Name="ServeController.get_root_url",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="owner",State="PENDING_ARGS_AVAIL",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="",Name="ServeController.get_http_config",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="owner",State="PENDING_ARGS_AVAIL",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="",Name="ServeController.listen_for_change",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="owner",State="FINISHED",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 202.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="",Name="ServeController.get_all_endpoints",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="owner",State="FINISHED",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 2.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="01000000",Name="HTTPProxyActor.ready",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="",Name="ServeController.get_root_url",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="owner",State="FINISHED",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 1.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="",Name="ServeController.get_all_endpoints",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="owner",State="PENDING_NODE_ASSIGNMENT",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="01000000",Name="HTTPProxyActor.__init__",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="01000000",Name="HTTPProxyActor.ready",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="01000000",Name="HTTPProxyActor.check_health",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="",Name="ServeController.get_http_config",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="owner",State="PENDING_NODE_ASSIGNMENT",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="",Name="ServeController.get_all_endpoints",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="owner",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="01000000",Name="HTTPProxyActor.ready",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="01000000",Name="HTTPProxyActor.__init__",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="01000000",Name="Unknown task",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="01000000",Name="HTTPProxyActor.check_health",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="01000000",Name="HTTPProxyActor.__init__",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="01000000",Name="HTTPProxyActor.check_health",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="",Name="ServeController.listen_for_change",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="owner",State="PENDING_ARGS_AVAIL",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="",Name="ServeController.get_http_config",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="owner",State="FINISHED",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 1.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="",Name="ServeController.get_deployment_info",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="owner",State="FINISHED",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 2.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="",Name="ServeController.listen_for_change",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="owner",State="PENDING_NODE_ASSIGNMENT",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="01000000",Name="HTTPProxyActor.__init__",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="01000000",Name="HTTPProxyActor.check_health",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="",Name="ServeController.listen_for_change",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="owner",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 4.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="",Name="ServeController.get_root_url",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="owner",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="01000000",Name="Unknown task",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="",Name="ServeController.get_deployment_info",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="owner",State="PENDING_NODE_ASSIGNMENT",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="",Name="ServeController.get_http_config",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="owner",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="",Name="ServeController.get_deployment_info",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="owner",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="",Name="ServeController.get_root_url",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="owner",State="PENDING_NODE_ASSIGNMENT",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="",Name="ServeController.get_deployment_info",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="owner",State="PENDING_ARGS_AVAIL",Version="2.6.1",WorkerId="9051a6713bd692b396fc75f15793703da5c27cefdf35dc5d1022d923"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="03000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="e73c1e3f1b636728c3e82e35fc75d566731b49fc4f4359838ebae1c4"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="03000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="e73c1e3f1b636728c3e82e35fc75d566731b49fc4f4359838ebae1c4"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="03000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="e73c1e3f1b636728c3e82e35fc75d566731b49fc4f4359838ebae1c4"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="03000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="e73c1e3f1b636728c3e82e35fc75d566731b49fc4f4359838ebae1c4"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="03000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="bf3c634809aff6b3e91a353259be1703bdb0a48c990a75f9f9cdacfa"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="03000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="bf3c634809aff6b3e91a353259be1703bdb0a48c990a75f9f9cdacfa"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="03000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="bf3c634809aff6b3e91a353259be1703bdb0a48c990a75f9f9cdacfa"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="03000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="bf3c634809aff6b3e91a353259be1703bdb0a48c990a75f9f9cdacfa"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="04000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="99c117c70cc39f2b51c7887edbbfe9906139448a21ed5420de2fd918"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="04000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="99c117c70cc39f2b51c7887edbbfe9906139448a21ed5420de2fd918"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="04000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="99c117c70cc39f2b51c7887edbbfe9906139448a21ed5420de2fd918"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="04000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="99c117c70cc39f2b51c7887edbbfe9906139448a21ed5420de2fd918"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="04000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="9c48d7add532423e3ffd4a3d49c0e2d87b50fcbcee8859e1fbdd8372"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="04000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="9c48d7add532423e3ffd4a3d49c0e2d87b50fcbcee8859e1fbdd8372"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="04000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="9c48d7add532423e3ffd4a3d49c0e2d87b50fcbcee8859e1fbdd8372"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="04000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="9c48d7add532423e3ffd4a3d49c0e2d87b50fcbcee8859e1fbdd8372"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="05000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="22d19c7a9998d61ce3a730d3c20759085eab57980887470d0ac6c661"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="05000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="22d19c7a9998d61ce3a730d3c20759085eab57980887470d0ac6c661"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="05000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="22d19c7a9998d61ce3a730d3c20759085eab57980887470d0ac6c661"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="05000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="22d19c7a9998d61ce3a730d3c20759085eab57980887470d0ac6c661"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="06000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="4814d42bab51c989a80c0835d7d6c18cf571eb520c3766f63e0b22c5"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="06000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="4814d42bab51c989a80c0835d7d6c18cf571eb520c3766f63e0b22c5"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="06000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="4814d42bab51c989a80c0835d7d6c18cf571eb520c3766f63e0b22c5"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="06000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="4814d42bab51c989a80c0835d7d6c18cf571eb520c3766f63e0b22c5"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="06000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="b4b1090f1eef40be4be7f4e9bf599f42df19b692d3bac28be567b617"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="06000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="b4b1090f1eef40be4be7f4e9bf599f42df19b692d3bac28be567b617"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="06000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="b4b1090f1eef40be4be7f4e9bf599f42df19b692d3bac28be567b617"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="06000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="b4b1090f1eef40be4be7f4e9bf599f42df19b692d3bac28be567b617"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="07000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="a3ef6796368ccab6b6e4baca9b6156bd1d50ba65e46ef8e6b9b46cb3"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="07000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="a3ef6796368ccab6b6e4baca9b6156bd1d50ba65e46ef8e6b9b46cb3"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="07000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="a3ef6796368ccab6b6e4baca9b6156bd1d50ba65e46ef8e6b9b46cb3"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="07000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="a3ef6796368ccab6b6e4baca9b6156bd1d50ba65e46ef8e6b9b46cb3"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="07000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="da6cdf4387d58d568af863a81de1f4a8a2a26642220fc43476b9804a"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="07000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="da6cdf4387d58d568af863a81de1f4a8a2a26642220fc43476b9804a"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="07000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="da6cdf4387d58d568af863a81de1f4a8a2a26642220fc43476b9804a"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="07000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="da6cdf4387d58d568af863a81de1f4a8a2a26642220fc43476b9804a"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="08000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="92ea291a5408a9887cd143957496beaf999049d19637db033cb54da0"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="08000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="92ea291a5408a9887cd143957496beaf999049d19637db033cb54da0"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="08000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="92ea291a5408a9887cd143957496beaf999049d19637db033cb54da0"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="08000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="92ea291a5408a9887cd143957496beaf999049d19637db033cb54da0"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="08000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="a0b563ee33b7d7693b5536a3d3a7af4c4f0368427afc0665c5322fb9"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="08000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="a0b563ee33b7d7693b5536a3d3a7af4c4f0368427afc0665c5322fb9"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="08000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="a0b563ee33b7d7693b5536a3d3a7af4c4f0368427afc0665c5322fb9"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="08000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="a0b563ee33b7d7693b5536a3d3a7af4c4f0368427afc0665c5322fb9"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="09000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="478eba182ac10aba3529e28355db5f5b73c3b18c0e5daed9f8e4d05a"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="09000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="478eba182ac10aba3529e28355db5f5b73c3b18c0e5daed9f8e4d05a"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="09000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="478eba182ac10aba3529e28355db5f5b73c3b18c0e5daed9f8e4d05a"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="09000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="478eba182ac10aba3529e28355db5f5b73c3b18c0e5daed9f8e4d05a"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="09000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="0aa48b3aa1fdc92925b914763de29f3b66375badf98225ce8b39af01"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="09000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="0aa48b3aa1fdc92925b914763de29f3b66375badf98225ce8b39af01"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="09000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="0aa48b3aa1fdc92925b914763de29f3b66375badf98225ce8b39af01"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="09000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="0aa48b3aa1fdc92925b914763de29f3b66375badf98225ce8b39af01"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0a000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="cf64e8cf7af88a234da0e79a2512988c10859703fe65118e160059a2"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0a000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="cf64e8cf7af88a234da0e79a2512988c10859703fe65118e160059a2"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0a000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="cf64e8cf7af88a234da0e79a2512988c10859703fe65118e160059a2"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0a000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="cf64e8cf7af88a234da0e79a2512988c10859703fe65118e160059a2"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0a000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="af2e138d1d2bb2acf3e0949935b45ff9ae4478c489536c8655310dab"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0a000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="af2e138d1d2bb2acf3e0949935b45ff9ae4478c489536c8655310dab"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0a000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="af2e138d1d2bb2acf3e0949935b45ff9ae4478c489536c8655310dab"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0a000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="af2e138d1d2bb2acf3e0949935b45ff9ae4478c489536c8655310dab"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0b000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="33bae8d542bd92c6a57adc673d85e2114aa7b03bc928503ecc296501"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0b000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="33bae8d542bd92c6a57adc673d85e2114aa7b03bc928503ecc296501"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0b000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="33bae8d542bd92c6a57adc673d85e2114aa7b03bc928503ecc296501"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0b000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="33bae8d542bd92c6a57adc673d85e2114aa7b03bc928503ecc296501"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0c000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="d795961299fa05b60fb40d52cb850920aaf461fe9ab8e005f87c36be"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0c000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="d795961299fa05b60fb40d52cb850920aaf461fe9ab8e005f87c36be"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0c000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="d795961299fa05b60fb40d52cb850920aaf461fe9ab8e005f87c36be"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0c000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="d795961299fa05b60fb40d52cb850920aaf461fe9ab8e005f87c36be"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0d000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="9e8a98995b79f4c59473b01a3fe3e3c9248f3b633ec0da85bad67b7d"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0d000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="9e8a98995b79f4c59473b01a3fe3e3c9248f3b633ec0da85bad67b7d"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0d000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="9e8a98995b79f4c59473b01a3fe3e3c9248f3b633ec0da85bad67b7d"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0d000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="9e8a98995b79f4c59473b01a3fe3e3c9248f3b633ec0da85bad67b7d"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0d000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="09bc827ffb89bc6217d7efaaad52a3a5dfa68d08bcdbe27c1419e1f6"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0d000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="09bc827ffb89bc6217d7efaaad52a3a5dfa68d08bcdbe27c1419e1f6"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0d000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="09bc827ffb89bc6217d7efaaad52a3a5dfa68d08bcdbe27c1419e1f6"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0d000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="09bc827ffb89bc6217d7efaaad52a3a5dfa68d08bcdbe27c1419e1f6"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0e000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="2119871477077656d72108e7ce93a409f52b706719218d1749de1a14"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0e000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="2119871477077656d72108e7ce93a409f52b706719218d1749de1a14"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0e000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="2119871477077656d72108e7ce93a409f52b706719218d1749de1a14"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0e000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="2119871477077656d72108e7ce93a409f52b706719218d1749de1a14"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0e000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="36b620b4b81dde4aaf3611d7dfb99286886f98ebf301ba36678bca60"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0e000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="36b620b4b81dde4aaf3611d7dfb99286886f98ebf301ba36678bca60"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0e000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="36b620b4b81dde4aaf3611d7dfb99286886f98ebf301ba36678bca60"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0e000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="36b620b4b81dde4aaf3611d7dfb99286886f98ebf301ba36678bca60"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0f000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="7b664c309901fca939fe4b3aaab205e2b4b4344db864b70414e14f09"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0f000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="7b664c309901fca939fe4b3aaab205e2b4b4344db864b70414e14f09"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0f000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="7b664c309901fca939fe4b3aaab205e2b4b4344db864b70414e14f09"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="0f000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="7b664c309901fca939fe4b3aaab205e2b4b4344db864b70414e14f09"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="10000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="227f81d102728230fae0f874566d10fe35d57bcc2e37024eddc0a954"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="10000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="227f81d102728230fae0f874566d10fe35d57bcc2e37024eddc0a954"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="10000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="227f81d102728230fae0f874566d10fe35d57bcc2e37024eddc0a954"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="10000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="227f81d102728230fae0f874566d10fe35d57bcc2e37024eddc0a954"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="10000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="ba66b7ef4bc41ade84bfb3e0be2129431a635e4c3053b153cb7656e3"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="10000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="ba66b7ef4bc41ade84bfb3e0be2129431a635e4c3053b153cb7656e3"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="10000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="ba66b7ef4bc41ade84bfb3e0be2129431a635e4c3053b153cb7656e3"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="10000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="ba66b7ef4bc41ade84bfb3e0be2129431a635e4c3053b153cb7656e3"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="11000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="8b65a0c2476d66d17b2a2c23987404e84ad59437b0ac6e51e722b065"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="11000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="8b65a0c2476d66d17b2a2c23987404e84ad59437b0ac6e51e722b065"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="11000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="8b65a0c2476d66d17b2a2c23987404e84ad59437b0ac6e51e722b065"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="11000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="8b65a0c2476d66d17b2a2c23987404e84ad59437b0ac6e51e722b065"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="11000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="c7fa3e0c09579d5b5b0246a241d4bc7f9969ae949c398c82660f5326"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="11000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="c7fa3e0c09579d5b5b0246a241d4bc7f9969ae949c398c82660f5326"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="11000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="c7fa3e0c09579d5b5b0246a241d4bc7f9969ae949c398c82660f5326"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="11000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="c7fa3e0c09579d5b5b0246a241d4bc7f9969ae949c398c82660f5326"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="12000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="a36a68e6b1d81f1259d786397a93eaa5cb2d60827b265cf198d0aea7"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="12000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="a36a68e6b1d81f1259d786397a93eaa5cb2d60827b265cf198d0aea7"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="12000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="a36a68e6b1d81f1259d786397a93eaa5cb2d60827b265cf198d0aea7"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="12000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="a36a68e6b1d81f1259d786397a93eaa5cb2d60827b265cf198d0aea7"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="13000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="207ec9906d729cc01ed5ccefd7f965df2b98b9c26d4eeb1b29dda542"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="13000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="207ec9906d729cc01ed5ccefd7f965df2b98b9c26d4eeb1b29dda542"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="13000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="207ec9906d729cc01ed5ccefd7f965df2b98b9c26d4eeb1b29dda542"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="13000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="207ec9906d729cc01ed5ccefd7f965df2b98b9c26d4eeb1b29dda542"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="13000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="d5b975795d87aacb442a472cd4503d599499b132cca7765fb6d4bc06"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="13000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="d5b975795d87aacb442a472cd4503d599499b132cca7765fb6d4bc06"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="13000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="d5b975795d87aacb442a472cd4503d599499b132cca7765fb6d4bc06"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="13000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="d5b975795d87aacb442a472cd4503d599499b132cca7765fb6d4bc06"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="14000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="f69d3b53ee1170b79496c4b3f3064f2b56733160a50a04e2a7294afc"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="14000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="f69d3b53ee1170b79496c4b3f3064f2b56733160a50a04e2a7294afc"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="14000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="f69d3b53ee1170b79496c4b3f3064f2b56733160a50a04e2a7294afc"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="14000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="f69d3b53ee1170b79496c4b3f3064f2b56733160a50a04e2a7294afc"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="14000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="f2b51292035ddab0e31adb355f1a1a0a00680722e7dac7264b9a783d"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="14000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="f2b51292035ddab0e31adb355f1a1a0a00680722e7dac7264b9a783d"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="14000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="f2b51292035ddab0e31adb355f1a1a0a00680722e7dac7264b9a783d"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="14000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="f2b51292035ddab0e31adb355f1a1a0a00680722e7dac7264b9a783d"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="15000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="7578c65c7d86eb1e97a1c7649541c753bd211550ccc765e8201c5b25"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="15000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="7578c65c7d86eb1e97a1c7649541c753bd211550ccc765e8201c5b25"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="15000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="7578c65c7d86eb1e97a1c7649541c753bd211550ccc765e8201c5b25"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="15000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="7578c65c7d86eb1e97a1c7649541c753bd211550ccc765e8201c5b25"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="16000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="7d5bc070c2df734eb053c0557da42b0f77210519c6754fb66113f49d"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="16000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="7d5bc070c2df734eb053c0557da42b0f77210519c6754fb66113f49d"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="16000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="7d5bc070c2df734eb053c0557da42b0f77210519c6754fb66113f49d"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="16000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="7d5bc070c2df734eb053c0557da42b0f77210519c6754fb66113f49d"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="16000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="cb06064cc49562bd4a32e79227a2ead4fd7f415ba34a2927b3607c8b"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="16000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="cb06064cc49562bd4a32e79227a2ead4fd7f415ba34a2927b3607c8b"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="16000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="cb06064cc49562bd4a32e79227a2ead4fd7f415ba34a2927b3607c8b"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="16000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="cb06064cc49562bd4a32e79227a2ead4fd7f415ba34a2927b3607c8b"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="17000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="be723ea0ea9091ab04eaed743f755cef8f7f99865f47d28fe3c6c4d4"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="17000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="be723ea0ea9091ab04eaed743f755cef8f7f99865f47d28fe3c6c4d4"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="17000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="be723ea0ea9091ab04eaed743f755cef8f7f99865f47d28fe3c6c4d4"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="17000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="be723ea0ea9091ab04eaed743f755cef8f7f99865f47d28fe3c6c4d4"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="17000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="752a030036c7b0a0454b5df8a1e9b0cb906999902b8ba526c1457c35"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="17000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="752a030036c7b0a0454b5df8a1e9b0cb906999902b8ba526c1457c35"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="17000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="752a030036c7b0a0454b5df8a1e9b0cb906999902b8ba526c1457c35"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="17000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="752a030036c7b0a0454b5df8a1e9b0cb906999902b8ba526c1457c35"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="18000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="007b190d7c34f24145464764cb89d4aec812f6d1b54e9fe835694c10"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="18000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="007b190d7c34f24145464764cb89d4aec812f6d1b54e9fe835694c10"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="18000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="007b190d7c34f24145464764cb89d4aec812f6d1b54e9fe835694c10"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="18000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="007b190d7c34f24145464764cb89d4aec812f6d1b54e9fe835694c10"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="19000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="07c93a8e334d1ca46b893b099e662052ef0bfa21ac5b4a4c72b3d6ad"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="19000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="07c93a8e334d1ca46b893b099e662052ef0bfa21ac5b4a4c72b3d6ad"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="19000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="07c93a8e334d1ca46b893b099e662052ef0bfa21ac5b4a4c72b3d6ad"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="19000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="07c93a8e334d1ca46b893b099e662052ef0bfa21ac5b4a4c72b3d6ad"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="19000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="f650ecbf91a6dcb40cbc761e244ef6b0556341880a4d73441c48edbb"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="19000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="f650ecbf91a6dcb40cbc761e244ef6b0556341880a4d73441c48edbb"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="19000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="f650ecbf91a6dcb40cbc761e244ef6b0556341880a4d73441c48edbb"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="19000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="f650ecbf91a6dcb40cbc761e244ef6b0556341880a4d73441c48edbb"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1a000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="b43d9cfa8026c34c86b7cfa6bee0a2ae922f5ce66a6e9a9f4705e269"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1a000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="b43d9cfa8026c34c86b7cfa6bee0a2ae922f5ce66a6e9a9f4705e269"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1a000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="b43d9cfa8026c34c86b7cfa6bee0a2ae922f5ce66a6e9a9f4705e269"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1a000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="b43d9cfa8026c34c86b7cfa6bee0a2ae922f5ce66a6e9a9f4705e269"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1a000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="74519568446cafefa0ee1ac2e3501a67112175b4fbc4f8720a0f78f6"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1a000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="74519568446cafefa0ee1ac2e3501a67112175b4fbc4f8720a0f78f6"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1a000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="74519568446cafefa0ee1ac2e3501a67112175b4fbc4f8720a0f78f6"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1a000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="74519568446cafefa0ee1ac2e3501a67112175b4fbc4f8720a0f78f6"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1b000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="f76a5ada229f5bc4c7c839998aca930d0bb77bebbe4c93802436270c"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1b000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="f76a5ada229f5bc4c7c839998aca930d0bb77bebbe4c93802436270c"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1b000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="f76a5ada229f5bc4c7c839998aca930d0bb77bebbe4c93802436270c"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1b000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="f76a5ada229f5bc4c7c839998aca930d0bb77bebbe4c93802436270c"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1b000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="6e5f2512c1d9e59a9af2747acc75ac7c2050de0d60edb314fe0eed5a"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1b000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="6e5f2512c1d9e59a9af2747acc75ac7c2050de0d60edb314fe0eed5a"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1b000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="6e5f2512c1d9e59a9af2747acc75ac7c2050de0d60edb314fe0eed5a"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1b000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="6e5f2512c1d9e59a9af2747acc75ac7c2050de0d60edb314fe0eed5a"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1c000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="6a3afad7be2babc274f80737e9aea8ad9c35ebbf14dad4d526981e1e"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1c000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="6a3afad7be2babc274f80737e9aea8ad9c35ebbf14dad4d526981e1e"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1c000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="6a3afad7be2babc274f80737e9aea8ad9c35ebbf14dad4d526981e1e"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1c000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="6a3afad7be2babc274f80737e9aea8ad9c35ebbf14dad4d526981e1e"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1d000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="623e34b70f0eb210f9212617f583d322166134bda51567049f5d5fad"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1d000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="623e34b70f0eb210f9212617f583d322166134bda51567049f5d5fad"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1d000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="623e34b70f0eb210f9212617f583d322166134bda51567049f5d5fad"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1d000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="623e34b70f0eb210f9212617f583d322166134bda51567049f5d5fad"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1d000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="SUBMITTED_TO_WORKER",Version="2.6.1",WorkerId="56a08c8929035ad1293baa072f6209637d8be741c9cea6e398663f0c"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1d000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_GET",Version="2.6.1",WorkerId="56a08c8929035ad1293baa072f6209637d8be741c9cea6e398663f0c"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1d000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING",Version="2.6.1",WorkerId="56a08c8929035ad1293baa072f6209637d8be741c9cea6e398663f0c"} 0.0
+ray_tasks{Component="core_worker",IsRetry="0",JobId="1d000000",Name="echo_sleep",NodeAddress="172.30.0.4",SessionName="session_2023-08-04_05-45-40_770085_8",Source="executor",State="RUNNING_IN_RAY_WAIT",Version="2.6.1",WorkerId="56a08c8929035ad1293baa072f6209637d8be741c9cea6e398663f0c"} 0.0
