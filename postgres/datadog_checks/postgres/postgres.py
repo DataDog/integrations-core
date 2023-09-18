@@ -393,7 +393,7 @@ class PostgreSql(AgentCheck):
             log_func(e)
             self.db.rollback()
             self.log.debug("Disabling replication metrics")
-            self._is_aurora = False
+            self.is_aurora = False
             self.metrics_cache.replication_metrics = {}
         except psycopg2.errors.UndefinedFunction as e:
             log_func(e)
