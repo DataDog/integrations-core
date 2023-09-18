@@ -194,7 +194,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
         self.collection_interval = collection_interval
-        
         super(SqlserverStatementMetrics, self).__init__(
             check,
             run_sync=is_affirmative(check.statement_metrics_config.get('run_sync', False)),
