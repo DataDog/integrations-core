@@ -13,6 +13,7 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
 
 import mock
+from unittest.mock import ANY
 import pytest
 from lxml import etree as ET
 
@@ -29,6 +30,8 @@ from datadog_checks.sqlserver.const import (
 from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
 
 from .common import CHECK_NAME
+
+from collections import namedtuple
 
 try:
     import pyodbc
@@ -481,7 +484,6 @@ def test_statement_metrics_limit(
     # check that it's sorted
     assert sqlserver_rows == sorted(sqlserver_rows, key=lambda i: i['total_elapsed_time'], reverse=True)
 
-
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
@@ -907,3 +909,28 @@ def test_statement_conditional_stored_procedure_with_temp_table(
         assert event['sqlserver']['plan_handle'] is not None
         assert event['sqlserver']['query_hash'] is not None
         assert event['sqlserver']['query_plan_hash'] is not None
+
+def _mock_database_list():
+    Row = namedtuple('Row', 'name')
+    fetchall_results = [
+        Row('master'),
+        Row('tempdb'),
+        Row('msdb'),
+        Row('AdventureWorks2017'),
+        Row('CaseSensitive2018'),
+        Row('Fancy2020db'),
+    ]
+    mock_cursor = mock.MagicMock()
+    mock_cursor.fetchall.return_value = iter(fetchall_results)
+    # check excluded overrides included
+    mock_cursor.fetchall.return_value = iter(fetchall_results)
+    return fetchall_results, mock_cursor
+
+@pytest.mark.unit
+def test_metrics_lookback_multiplier(instance_docker):
+    instance_docker['query_metrics'] = {'collection_interval': 3}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    _, mock_cursor = _mock_database_list()
+
+    check.statement_metrics._load_raw_query_metrics_rows(mock_cursor)
+    mock_cursor.execute.assert_called_with(ANY, (6,))
