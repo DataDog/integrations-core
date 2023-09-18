@@ -44,19 +44,32 @@ def dd_environment(dd_save_state):
             app_controller_host, app_controller_port = stack.enter_context(
                 port_forward(kubeconfig, 'argocd', 8082, 'service', 'argocd-metrics')
             )
+            appset_controller_host, appset_controller_port = stack.enter_context(
+                port_forward(kubeconfig, 'argocd', 8080, 'service', 'argocd-applicationset-controller')
+            )
             api_server_host, api_server_port = stack.enter_context(
                 port_forward(kubeconfig, 'argocd', 8083, 'service', 'argocd-server-metrics')
             )
             repo_server_host, repo_server_port = stack.enter_context(
                 port_forward(kubeconfig, 'argocd', 8084, 'service', 'argocd-repo-server')
             )
+            notifications_controller_host, notifications_controller_port = stack.enter_context(
+                port_forward(kubeconfig, 'argocd', 9001, 'service', 'argocd-notifications-controller-metrics')
+            )
             app_controller_endpoint = 'http://{}:{}/metrics'.format(app_controller_host, app_controller_port)
+            appset_controller_endpoint = 'http://{}:{}/metrics'.format(appset_controller_host, appset_controller_port)
             api_server_endpoint = 'http://{}:{}/metrics'.format(api_server_host, api_server_port)
             repo_server_endpoint = 'http://{}:{}/metrics'.format(repo_server_host, repo_server_port)
+            notifications_controller_endpoint = 'http://{}:{}/metrics'.format(
+                notifications_controller_host, notifications_controller_port
+            )
+
             instance = {
                 'app_controller_endpoint': app_controller_endpoint,
+                'appset_controller_endpoint': appset_controller_endpoint,
                 'api_server_endpoint': api_server_endpoint,
                 'repo_server_endpoint': repo_server_endpoint,
+                'notifications_controller_endpoint': notifications_controller_endpoint,
             }
 
             # save this instance to use for openmetrics_v2 instance, since the endpoint is different each run

@@ -7,10 +7,11 @@ import os
 from typing import cast
 
 from ddev.cli.terminal import Terminal
-from ddev.config.constants import AppEnvVars
+from ddev.config.constants import AppEnvVars, VerbosityLevels
 from ddev.config.file import ConfigFile, RootConfig
 from ddev.repo.core import Repository
 from ddev.utils.fs import Path
+from ddev.utils.github import GitHubManager
 from ddev.utils.platform import Platform
 
 
@@ -21,11 +22,12 @@ class Application(Terminal):
         self.__exit_func = exit_func
 
         self.config_file = ConfigFile()
-        self.quiet = self.verbosity < 0
-        self.verbose = self.verbosity > 0
+        self.quiet = self.verbosity < VerbosityLevels.INFO
+        self.verbose = self.verbosity > VerbosityLevels.INFO
 
-        # Lazily set this as we acquire more knowledge about the desired environment
+        # Lazily set these as we acquire more knowledge about the desired environment
         self.__repo = cast(Repository, None)
+        self.__github = cast(GitHubManager, None)
 
         # TODO: remove this when the old CLI is gone
         self.__config = {}
@@ -37,6 +39,10 @@ class Application(Terminal):
     @property
     def repo(self) -> Repository:
         return self.__repo
+
+    @property
+    def github(self) -> GitHubManager:
+        return self.__github
 
     def set_repo(self, core: bool, extras: bool, marketplace: bool, agent: bool, here: bool):
         # Config looks like this:
@@ -62,6 +68,10 @@ class Application(Terminal):
         else:
             self.__repo = Repository(self.config.repo.name, self.config.repo.path)
 
+        self.__github = GitHubManager(
+            self.repo, user=self.config.github.user, token=self.config.github.token, status=self.status
+        )
+
     def abort(self, text='', code=1, **kwargs):
         if text:
             self.display_error(text, **kwargs)
@@ -77,8 +87,13 @@ class Application(Terminal):
         self.__config['color'] = not self.console.no_color
         self.__config['dd_api_key'] = self.config.orgs.get('default', {}).get('api_key', '')
         self.__config['dd_app_key'] = self.config.orgs.get('default', {}).get('app_key', '')
-
-        kwargs = {'here' if self.repo.name == 'local' else self.repo.name: True}
+        # Make sure that envvar overrides of repo make it into config.
+        self.__config['repo'] = self.repo.name
+        # Transfer the -x/--here flag to the old CLI.
+        # In the new CLI that flag turns into a repo named "local" but the old CLI expects a bool kwarg "here".
+        kwargs = {}
+        if self.repo.name == 'local':
+            kwargs['here'] = True
         initialize_root(self.__config, **kwargs)
 
     def copy(self):

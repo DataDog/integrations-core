@@ -7,124 +7,58 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-from datadog_checks.base.utils.models.fields import get_default_field_value
 
-
-def shared_allowed_versions(field, value):
-    return get_default_field_value(field, value)
-
-
-def shared_fetch_intermediate_certs(field, value):
+def shared_fetch_intermediate_certs():
     return False
 
 
-def shared_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_allowed_versions(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_days_critical(field, value):
+def instance_days_critical():
     return 7.0
 
 
-def instance_days_warning(field, value):
+def instance_days_warning():
     return 14.0
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags():
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname():
     return False
 
 
-def instance_fetch_intermediate_certs(field, value):
+def instance_fetch_intermediate_certs():
     return False
 
 
-def instance_intermediate_cert_refresh_interval(field, value):
+def instance_intermediate_cert_refresh_interval():
     return 60
 
 
-def instance_local_cert_path(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_metric_patterns(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval():
     return 15
 
 
-def instance_name(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_port(field, value):
+def instance_port():
     return 443
 
 
-def instance_seconds_critical(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_seconds_warning(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_send_cert_duration(field, value):
+def instance_send_cert_duration():
     return False
 
 
-def instance_server_hostname(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_start_tls(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tags(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_timeout(field, value):
+def instance_timeout():
     return 10
 
 
-def instance_tls_ca_cert(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tls_cert(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tls_private_key(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tls_private_key_password(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tls_validate_hostname(field, value):
+def instance_tls_validate_hostname():
     return True
 
 
-def instance_tls_verify(field, value):
+def instance_tls_verify():
     return True
 
 
-def instance_transport(field, value):
+def instance_transport():
     return 'TCP'

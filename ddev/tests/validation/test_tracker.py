@@ -2,15 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from ddev.validation.tracker import ValidationTracker
 from rich.console import Console
 from rich.style import Style
 from rich.tree import Tree
 
+from ddev.validation.tracker import ValidationTracker
+
 
 def get_tracker():
     return ValidationTracker(
-        Console(),
+        Console(no_color=True, legacy_windows=True),
         Tree('validate test', style=Style.parse('bold')),
         success_style=Style.parse('bold cyan'),
         error_style=Style.parse('bold red'),

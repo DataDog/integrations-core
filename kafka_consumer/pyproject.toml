@@ -27,19 +27,18 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=27.1.0",
+    "datadog-checks-base>=32.6.0",
 ]
 dynamic = [
     "version",
 ]
-
 license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
     # confluent-kafka is built in omnibus, so bumping it here will have no real effect
     # if you bump this version, also bump the one in the `hatch.toml` file
-    "confluent-kafka==2.0.2; python_version > '3.0'",
+    "confluent-kafka==2.2.0; python_version > '3.0'",
 ]
 
 [project.urls]

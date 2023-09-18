@@ -1,0 +1,5 @@
+extends:
+  - _base.yaml
+  - _generic-ups.yaml
+
+sysobjectid: 1.2.3.4.5.6.7.8.999

@@ -435,6 +435,56 @@ def test_statement_metrics_and_plans(
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
+    "database,query,expected_queries_patterns,",
+    [
+        [
+            "master",
+            "EXEC multiQueryProc",
+            [
+                r"select @total = @total \+ count\(\*\) from sys\.databases where name like '%_'",
+                r"select @total = @total \+ count\(\*\) from sys\.sysobjects where type = 'U'",
+            ],
+        ]
+    ],
+)
+def test_statement_metrics_limit(
+    aggregator, dd_run_check, dbm_instance, bob_conn, database, query, expected_queries_patterns
+):
+    dbm_instance['query_metrics']['max_queries'] = 5
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    # the check must be run three times:
+    # 1) set _last_stats_query_time (this needs to happen before the 1st test queries to ensure the query time
+    # interval is correct)
+    # 2) load the test queries into the StatementMetrics state
+    # 3) emit the query metrics based on the diff of current and last state
+    dd_run_check(check)
+    bob_conn.execute_with_retries(query, (), database=database)
+    dd_run_check(check)
+    aggregator.reset()
+    bob_conn.execute_with_retries(query, (), database=database)
+    dd_run_check(check)
+
+    instance_tags = dbm_instance.get('tags', [])
+    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
+    expected_instance_tags | {"db:{}".format(database)}
+
+    # dbm-metrics
+    dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
+    payload = dbm_metrics[0]
+    # metrics rows
+    sqlserver_rows = payload.get('sqlserver_rows', [])
+    assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
+    assert len(sqlserver_rows) == dbm_instance['query_metrics']['max_queries']
+
+    # check that it's sorted
+    assert sqlserver_rows == sorted(sqlserver_rows, key=lambda i: i['total_elapsed_time'], reverse=True)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
     "metadata,expected_metadata_payload",
     [
         (
@@ -667,7 +717,8 @@ def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
     # without the cast this is expected to fail with
     # pyodbc.ProgrammingError: ('ODBC SQL type -150 is not yet supported.  column-index=77  type=-150', 'HY106')
     with datadog_conn_docker.cursor() as cursor:
-        params = (math.ceil(time.time() - now),)
+        lookback_seconds = math.ceil(time.time() - now) + 60
+        params = (lookback_seconds,)
         logging.debug("running statement_metrics_query [%s] %s", statement_metrics_query, params)
         cursor.execute(statement_metrics_query, params)
 
@@ -807,3 +858,52 @@ def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
         "dd.sqlserver.async_job.cancel",
         tags=_expected_dbm_instance_tags(dbm_instance) + ['job:query-metrics'],
     )
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "database,query,",
+    [
+        [
+            "master",
+            "EXEC conditionalPlanTest @Switch = 1",
+        ]
+    ],
+)
+def test_statement_conditional_stored_procedure_with_temp_table(
+    aggregator, dd_run_check, dbm_instance, bob_conn, database, query
+):
+    # This test covers a very special case where a stored procedure has a conditional branch
+    # and uses temp tables. The plan will be NULL if there are any statements involving temp tables that
+    # have not been executed. We simulate the case by running the stored procedure with a parameter that
+    # only executes the first branch of the conditional. The second branch will not be executed and the
+    # plan will be NULL. That being said, ALL executed statements in the stored procedure will have NULL plan.
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    dd_run_check(check)
+    bob_conn.execute_with_retries(query, (), database=database)
+    dd_run_check(check)
+    aggregator.reset()
+    bob_conn.execute_with_retries(query, (), database=database)
+    dd_run_check(check)
+
+    # dbm-metrics
+    dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
+    payload = dbm_metrics[0]
+    # metrics rows
+    sqlserver_rows = payload.get('sqlserver_rows', [])
+    assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
+
+    dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+    assert dbm_samples, "should have collected at least one sample"
+
+    matched_events = [s for s in dbm_samples if s['dbm_type'] == "plan" and "#Ids" in s['db']['statement']]
+    assert matched_events, "should have collected plan event"
+
+    for event in matched_events:
+        assert event['db']['plan']['definition'] is None
+        assert event['sqlserver']['plan_handle'] is not None
+        assert event['sqlserver']['query_hash'] is not None
+        assert event['sqlserver']['query_plan_hash'] is not None

@@ -48,6 +48,13 @@ class Producer(StoppableThread):
                     producer.produce('dc', b"Clark Kent", partition=partition)
                     producer.produce('dc', b"Arthur Curry", partition=partition)
                     producer.produce('dc', b"\xc2ShakalakaBoom", partition=partition)
+
+                    # This topic is not consumed by `my_consumer`, and shouldn't show up in consumer.offset
+                    producer.produce('unconsumed_topic', b"extra message 1", partition=partition)
+                    producer.produce('unconsumed_topic', b"extra message 2", partition=partition)
+                    producer.produce('unconsumed_topic', b"extra message 3", partition=partition)
+                    producer.produce('unconsumed_topic', b"extra message 4", partition=partition)
+                    producer.produce('unconsumed_topic', b"extra message 5", partition=partition)
                 except Exception:
                     pass
 

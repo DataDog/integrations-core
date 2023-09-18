@@ -275,7 +275,9 @@ class Disk(AgentCheck):
             # For legacy reasons,  the standard unit it kB
             metrics[self.METRIC_DISK.format(name)] = getattr(usage, name) / 1024
 
-        # FIXME: 8.x, use percent, a lot more logical than in_use
+        metrics[self.METRIC_DISK.format('utilized')] = usage.percent
+
+        # TODO: deprecate in favor of `utilized` metric
         metrics[self.METRIC_DISK.format('in_use')] = usage.percent / 100
 
         if Platform.is_unix():
@@ -311,9 +313,13 @@ class Disk(AgentCheck):
 
             metrics[self.METRIC_INODE.format('total')] = total
             metrics[self.METRIC_INODE.format('free')] = free
-            metrics[self.METRIC_INODE.format('used')] = total - free
-            # FIXME: 8.x, use percent, a lot more logical than in_use
-            metrics[self.METRIC_INODE.format('in_use')] = (total - free) / total
+
+            used = total - free
+            metrics[self.METRIC_INODE.format('used')] = used
+            metrics[self.METRIC_INODE.format('utilized')] = (used / total) * 100
+
+            # TODO: deprecate in favor of `utilized` metric
+            metrics[self.METRIC_INODE.format('in_use')] = used / total
 
         return metrics
 

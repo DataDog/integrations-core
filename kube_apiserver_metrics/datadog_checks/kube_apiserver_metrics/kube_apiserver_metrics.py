@@ -11,6 +11,7 @@ from datadog_checks.base.errors import CheckException
 
 METRICS = {
     'apiserver_current_inflight_requests': 'current_inflight_requests',
+    # Deprecated in 1.23 (replaced by apiserver_longrunning_requests)
     'apiserver_longrunning_gauge': 'longrunning_gauge',
     'go_threads': 'go_threads',
     'go_goroutines': 'go_goroutines',
@@ -62,6 +63,8 @@ METRICS = {
     # https://kubernetes.io/docs/reference/using-api/deprecation-policy/#rest-resources-aka-api-objects
     'apiserver_requested_deprecated_apis': 'requested_deprecated_apis',
     # For Kubernetes >= 1.23
+    # https://github.com/kubernetes/kubernetes/pull/103799
+    'apiserver_longrunning_requests': 'longrunning_gauge',
     # https://github.com/kubernetes/kubernetes/pull/104983
     'apiserver_storage_list_total': 'storage_list_total',
     'apiserver_storage_list_fetched_objects_total': 'storage_list_fetched_objects_total',
@@ -190,7 +193,7 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
     def rest_client_requests_total(self, metric, scraper_config):
         self.submit_metric('.rest_client_requests_total', metric, scraper_config)
 
-    def http_requests_total(self, metric, scraper_config):
+    def http_requests_total(self, metric, scraper_config):  # SKIP_HTTP_VALIDATION
         self.submit_metric('.http_requests_total', metric, scraper_config)
 
     def apiserver_request_count(self, metric, scraper_config):

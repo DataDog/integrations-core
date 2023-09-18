@@ -13,6 +13,7 @@ ecs.fargate.mem.cache,gauge,,byte,,Number of bytes of page cache memory (Linux o
 ecs.fargate.mem.active_file,gauge,,byte,,Number of bytes of file-backed memory on active LRU list (Linux only).,0,amazon_fargate,mem active file,
 ecs.fargate.mem.inactive_file,gauge,,byte,,Number of bytes of file-backed memory on inactive LRU list (Linux only).,0,amazon_fargate,mem inactive file,
 ecs.fargate.mem.limit,gauge,,byte,,Number of bytes memory limit (Linux only).,0,amazon_fargate,mem limit,
+ecs.fargate.mem.task.limit,gauge,,byte,,Task Memory Limit (shared by all containers).,0,amazon_fargate,task memory limit,
 ecs.fargate.mem.active_anon,gauge,,byte,,Number of bytes of anonymous and swap cache memory on active LRU list (Linux only).,0,amazon_fargate,mem active anon,
 ecs.fargate.mem.usage,gauge,,byte,,Number of bytes of memory used.,0,amazon_fargate,mem usage,
 ecs.fargate.mem.rss,gauge,,byte,,Number of bytes of anonymous and swap cache memory (includes transparent hugepages) (Linux only).,0,amazon_fargate,mem rss,
@@ -30,3 +31,5 @@ ecs.fargate.net.packet.in_dropped,gauge,,packet,,Number of ingoing packets dropp
 ecs.fargate.net.packet.out_dropped,gauge,,packet,,Number of outgoing packets dropped (Fargate 1.4.0+ required).,-1,amazon_fargate,out packets dropped,
 ecs.fargate.net.bytes_rcvd,rate,,byte,,Number of bytes received (Fargate 1.4.0+ required).,0,amazon_fargate, bytes received,
 ecs.fargate.net.bytes_sent,rate,,byte,,Number of bytes sent (Fargate 1.4.0+ required).,0,amazon_fargate,bytes sent,
+ecs.fargate.ephemeral_storage.utilized,gauge,,mebibyte,,The current ephemeral storage usage of this task. (Fargate 1.4.0+ required).,0,amazon_fargate,ephemeral storage utilized,
+ecs.fargate.ephemeral_storage.reserved,gauge,,mebibyte,,The reserved ephemeral storage of this task. (Fargate 1.4.0+ required).,0,amazon_fargate,ephemeral storage reserved,
