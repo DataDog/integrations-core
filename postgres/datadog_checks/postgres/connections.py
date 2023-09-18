@@ -100,6 +100,10 @@ class MultiDatabaseConnectionPool(object):
         Pass a function to startup_func if there is an action needed with the connection
         when re-establishing it.
         """
+        if not timeout:
+            # We don't want the wait indefinitely for the connection pool to free up
+            # if timeout is not specified, so we set it to the default connection timeout
+            timeout = self._config.connection_timeout
         start = datetime.datetime.now()
         self.prune_connections()
         with self._mu:
