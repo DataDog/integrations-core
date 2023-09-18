@@ -238,7 +238,7 @@ class MultiDatabaseConnectionPool(object):
 
         return True
 
-    def get_main_db_pool(self, max_pool_conn_size: int = 3):
+    def get_main_db_pool(self, max_pool_conn_size: int = 5):
         """
         Returns a memoized, persistent psycopg connection pool to `self.dbname`.
         Is meant to be shared across multiple threads, and opens a preconfigured max number of connections.
