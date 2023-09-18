@@ -440,7 +440,9 @@ class PostgresMetadata(DBMAsyncJob):
 
     def _collect_metadata_for_database(self, dbname):
         metadata = {}
-        with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
+        with self.db_pool.get_connection(
+                dbname, self._config.idle_connection_timeout, conn_id="_collect_metadata_for_database"
+        ) as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 database_info = self._query_database_information(cursor, dbname)
                 metadata.update(

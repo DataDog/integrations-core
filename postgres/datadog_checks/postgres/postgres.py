@@ -545,7 +545,9 @@ class PostgreSql(AgentCheck):
         databases = self.autodiscovery.get_items()
         for db in databases:
             try:
-                with self.db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
+                with self.db_pool.get_connection(
+                        db, self._config.idle_connection_timeout, conn_id="_collect_relations_autodiscovery"
+                ) as conn:
                     with conn.cursor() as cursor:
                         for scope in relations_scopes:
                             self._query_scope(cursor, scope, instance_tags, False, db)
