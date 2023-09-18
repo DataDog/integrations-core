@@ -5,6 +5,7 @@ import concurrent.futures
 import copy
 import os
 from time import time
+from typing import Optional
 
 import psycopg
 from cachetools import TTLCache
@@ -709,7 +710,7 @@ class PostgreSql(AgentCheck):
         )
         return pool
 
-    def _attempt_to_connect(self, dbname: str):
+    def _attempt_to_connect(self, dbname: Optional[str] = None):
         if not dbname:
             dbname = self._config.dbname
         args = self._new_connection_info(dbname)
