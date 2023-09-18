@@ -371,6 +371,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             )
         return normalized_rows
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _normalize_row(self, row):
         normalized_row = dict(copy.copy(row))
         obfuscated_query = None
@@ -520,21 +521,12 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _get_db_explain_setup_state(self, dbname):
         # type: (str) -> Tuple[Optional[DBExplainError], Optional[Exception]]
         try:
-            with self.db_pool.get_connection(dbname, self._conn_ttl_ms):
-                pass
+            result = self._run_explain(dbname, EXPLAIN_VALIDATION_QUERY, EXPLAIN_VALIDATION_QUERY)
         except psycopg.OperationalError as e:
             self._log.warning(
                 "cannot collect execution plans due to failed DB connection to dbname=%s: %s", dbname, repr(e)
             )
             return DBExplainError.connection_error, e
-        except psycopg.DatabaseError as e:
-            self._log.warning(
-                "cannot collect execution plans due to a database error in dbname=%s: %s", dbname, repr(e)
-            )
-            return DBExplainError.database_error, e
-
-        try:
-            result = self._run_explain(dbname, EXPLAIN_VALIDATION_QUERY, EXPLAIN_VALIDATION_QUERY)
         except psycopg.errors.InvalidSchemaName as e:
             self._log.warning("cannot collect execution plans due to invalid schema in dbname=%s: %s", dbname, repr(e))
             self._emit_run_explain_error(dbname, DBExplainError.invalid_schema, e)
@@ -569,6 +561,7 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         return None, None
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _get_db_explain_setup_state_cached(self, dbname):
         # type: (str) -> Tuple[DBExplainError, Exception]
         strategy_cache = self._collection_strategy_cache.get(dbname)
@@ -583,6 +576,7 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         return db_explain_error, err
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
         with self.db_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms) as conn:
@@ -786,6 +780,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             return event
         return None
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_plans(self, rows):
         events = []
         for row in rows:
