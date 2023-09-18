@@ -84,12 +84,9 @@ files:
                          trusted CA and that the requested server host name matches the one in the certificate.
 
         For a detailed description of how these options work see https://www.postgresql.org/docs/current/libpq-ssl.html
-
-        Note: `true` is an alias for `require`, and `false` is an alias for `disable`.
       value:
         type: string
-        display_default: false
-        example: "false"
+        example: "disable"
     - name: ssl_root_cert
       description: |
         The path to the ssl root certificate.
@@ -97,8 +94,6 @@ files:
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
       value:
         type: string
-        display_default: false
-        example: "/home/datadog/server-ca.pem"
     - name: ssl_cert
       description: |
         The path to the ssl certificate.
@@ -106,8 +101,6 @@ files:
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
       value:
         type: string
-        display_default: false
-        example: "/home/datadog/client-cert.pem"
     - name: ssl_key
       description: |
         The path to the ssl client key.
@@ -115,8 +108,6 @@ files:
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
       value:
         type: string
-        display_default: false
-        example: "/home/datadog/client-key.pem"
     - name: ssl_password
       description: |
         The password for the secret key specified in ssl_key, allowing client certificate private keys to be stored
@@ -125,14 +116,19 @@ files:
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
       value:
         type: string
-        display_default: false
-        example: "ssl_key_password"
     - name: query_timeout
       description: |
         Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
         to all metric collection queries. Aborts any statement that takes more than the specified number of milliseconds,
         starting from the time the command arrives at the server from the client. A value of zero turns this off.
         Cancelled queries won't log any metrics.
+      value:
+        type: integer
+        example: 5000
+    - name: connection_timeout
+      description: |
+        Sets the timeout (in ms) that the agent will wait to receive a connection from the database.
+      hidden: true
       value:
         type: integer
         example: 5000
@@ -145,6 +141,18 @@ files:
       value:
         type: integer
         example: 60000
+    - name: max_connections
+      hidden: true
+      description: |
+        Sets the upper bound limit on the number of concurrent connections the Agent can have on the database server.
+        The Agent needs to open additional connections to collect explain plans across databases. 
+        Idle connections are cached, but pruned over time to balance the performance impact of opening connections and the cost of having many open connections. 
+        Raising the default value should only be needed on workloads with >50 databases. 
+        Lowering the default value can reduce the number of explain plans collected and is not recommended in most cases.
+      value:
+        type: integer
+        example: 30
+        display_default: 30
     - name: relations
       description: |
         The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.
@@ -300,6 +308,62 @@ files:
                   type: <COLUMNS_2_TYPE>
               tags:
                 - <TAG_KEY>:<TAG_VALUE>
+    - name: database_autodiscovery 
+      description: |
+        Define the configuration for database autodiscovery.
+        Complete this section if you want to auto-discover databases on this host
+        instead of specifying each using dbname. 
+      options:
+        - name: enabled
+          description: Enable database autodiscovery.
+          value:
+            type: boolean
+            example: false
+            display_default: false 
+        - name: max_databases
+          description: The maximum number of databases this host should monitor.
+          value:
+            type: integer
+            example: 100
+            display_default: 100
+        - name: include
+          description: |
+            Regular expression for database names to include as part of 
+            database autodiscovery.
+            Will report metrics for databases that are found in this instance, 
+            ignores databases listed but not found.
+            Character casing is ignored. The regular expressions start matching from 
+            the beginning, so to match anywhere, prepend `.*`. For exact matches append `$`.
+            Defaults to `.*` to include everything.
+          value: 
+            type: array
+            items:
+              type: string
+            example:
+              - "master$"
+              - "AdventureWorks.*"
+            display_default:
+              - ".*"
+        - name: exclude
+          description: |
+            Regular expression for database names to exclude as part of `database_autodiscovery`.
+            Character casing is ignored. The regular expressions start matching from the beginning,
+            so to match anywhere, prepend `.*`. For exact matches append `$`.
+            In case of conflicts, database exclusion via `exclude` takes precedence over
+            those found via `include`
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "model"
+              - "msdb"
+        - name: refresh
+          description: Frequency in seconds of scans for new databases. Defaults to 10 minutes.
+          value:
+            type: integer
+            example: 600
+            display_default: 600
     - name: application_name
       description: |
         The application_name can be any string of less than NAMEDATALEN characters (64 characters in a standard build).
@@ -445,6 +509,40 @@ files:
             type: number
             example: 600
 
+    - name: collect_schemas
+      description: |
+        Enable collection of database schemas. In order to collect schemas from all user databases, 
+        enable `database_autodiscovery`. To collect from a single database, set `dbname` to collect 
+        the schema for that database.
+        Relation metrics must be enabled for schema collection.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of database schemas. Requires `dbm: true` and relation metrics must be enabled.
+          value:
+            type: boolean
+            example: false
+        - name: max_tables
+          description: |
+            Maximum amount of tables the Agent collects from the instance.
+          value:
+            type: number
+            example: 1000
+            display_default: 1000
+        - name: max_columns
+          description: |
+            Maximum amount of columns the Agent collects per table.
+          value:
+            type: number
+            example: 50
+            display_default: 50
+        - name: collection_interval
+          description: |
+            The database schema collection interval (in seconds).
+          value:
+            type: number
+            example: 600
+
     - name: aws
       description: |
         This block defines the configuration for AWS RDS and Aurora instances. 
@@ -534,6 +632,32 @@ files:
             type: string
             example: my-postgres-database.database.windows.net
 
+    - name: managed_identity
+      description: |
+        Configuration section used for Azure AD Authentication.
+        
+        This supports using System or User assigned managed identities.
+        If this section is set, then the `username` and `password` fields will be ignored.
+        
+        For more information on Managed Identities, see the Azure docs
+        https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
+      options:
+        - name: client_id
+          description: |
+            Client ID of the Managed Identity.
+          value:
+            type: string
+        - name: identity_scope
+          description: |
+            The permission scope from where to access the identity token. This value is optional if using the default
+            identity scope for Azure managed databases.
+            
+            For more information on scopes, see the Azure docs
+            https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
+          value:
+            type: string
+            example: https://ossrdbms-aad.database.windows.net/.default
+
     - name: obfuscator_options
       description: |
         Configure how the SQL obfuscator behaves.
@@ -613,6 +737,16 @@ files:
       value:
         type: boolean
         example: false
+        display_default: false
+    - name: database_instance_collection_interval
+      hidden: true
+      description: |
+        Set the database instance collection interval (in seconds). The database instance collection sends
+        basic information about the database instance along with a signal that it still exists. 
+        This collection does not involve any additional queries to the database.
+      value:
+        type: number
+        example: 1800
         display_default: false
     - template: instances/default
       overrides:

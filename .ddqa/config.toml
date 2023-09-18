@@ -23,7 +23,7 @@ exclude_members = [
 ]
 
 [teams."Platform Integrations"]
-jira_project = "PINT"
+jira_project = "PLINT"
 jira_issue_type = "Task"
 jira_statuses = [
   "To Do",
@@ -36,7 +36,7 @@ exclude_members = [
 ]
 
 [teams."Container Integrations"]
-jira_project = "CONT"
+jira_project = "CONTINT"
 jira_issue_type = "Task"
 jira_statuses = [
   "To Do",
@@ -46,7 +46,7 @@ jira_statuses = [
 github_team = "container-integrations"
 
 [teams."Database Monitoring"]
-jira_project = "DBM"
+jira_project = "DBMON"
 jira_issue_type = "Task"
 jira_statuses = [
   "Eventually",
@@ -56,7 +56,7 @@ jira_statuses = [
 github_team = "database-monitoring"
 
 [teams."Network Device Monitoring"]
-jira_project = "NDM"
+jira_project = "NDMII"
 jira_issue_type = "Task"
 jira_statuses = [
   "To Do",

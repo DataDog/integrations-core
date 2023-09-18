@@ -85,6 +85,7 @@ def generic_check_metrics(aggregator, check_deprecated):
     assert_metric('.max_fds')
 
     assert_metric('.nodes.evictions', metric_type=aggregator.MONOTONIC_COUNT, value=1, tags=["zone:test"])
+    assert_metric('.nodes.evictions', metric_type=aggregator.MONOTONIC_COUNT, value=3, tags=["zone:test-total"])
     assert_metric('.nodes.count', value=5, tags=["zone:test"])
     assert_metric('.nodes.unhealthy', value=1, tags=["zone:test"])
 
@@ -117,6 +118,10 @@ def generic_check_metrics(aggregator, check_deprecated):
     assert_metric('.queue.process_duration.sum', value=0.7717836519999999, tags=["queue:daemonset"])
     assert_metric('.queue.queue_duration.count', value=99.0, tags=["queue:daemonset", "upper_bound:none"])
     assert_metric('.queue.queue_duration.sum', value=0.3633380879999999, tags=["queue:daemonset"])
+
+    # Metrics from 1.26
+    assert_metric('.job_controller.terminated_pods_tracking_finalizer', value=6, tags=["event:add"])
+    assert_metric('.job_controller.terminated_pods_tracking_finalizer', value=6, tags=["event:delete"])
 
     # Leader election mixin
     expected_le_tags = ["record_kind:endpoints", "record_name:kube-controller-manager", "record_namespace:kube-system"]

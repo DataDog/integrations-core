@@ -9,9 +9,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
 
 DEFAULT_INSTANCE = {
-    'url': 'ldap://{}:3890'.format(HOST),
-    'username': 'cn=monitor,dc=example,dc=org',
-    'password': 'monitor',
+    'url': 'ldap://{}:1389'.format(HOST),
+    'username': 'cn=admin,dc=example,dc=org',
+    'password': 'adminpassword',
     'custom_queries': [
         {'name': 'stats', 'search_base': 'cn=statistics,cn=monitor', 'search_filter': '(!(cn=Statistics))'}
     ],
