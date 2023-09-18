@@ -4,7 +4,8 @@
 
 ***Changed***
 
-* Refactor arista profiles extends ([#15767](https://github.com/DataDog/integrations-core/pull/15767))
+* Add assert_all_profile_metrics_and_tags_covered & fix mappings in profiles ([#15720](https://github.com/DataDog/integrations-core/pull/15720))
+* Refactor Arista profiles extends ([#15767](https://github.com/DataDog/integrations-core/pull/15767))
 * Fix mappings in _dell-rac & dell-poweredge ([#15827](https://github.com/DataDog/integrations-core/pull/15827))
 
 ***Fixed***:
