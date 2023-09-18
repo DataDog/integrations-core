@@ -56,6 +56,7 @@ def test_common_replica_metrics(aggregator, integration_check, metrics_cache_rep
 @requires_over_10
 def test_wal_receiver_metrics(aggregator, integration_check, pg_instance, pg_replica_instance):
     check = integration_check(pg_replica_instance)
+    check._connect()
     check.initialize_is_aurora()
     expected_tags = _get_expected_tags(check, pg_replica_instance, status='streaming')
     with _get_superconn(pg_instance) as conn:
