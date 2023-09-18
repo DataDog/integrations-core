@@ -102,7 +102,6 @@ class MultiDatabaseConnectionPool(object):
         when re-establishing it.
         """
         start = datetime.datetime.now()
-        self.prune_connections()
         cid = MultiDatabaseConnectionPool._format_cid(dbname, conn_id)
         with self._mu:
             conn = self._conns.pop(cid, ConnectionInfo(None, None, None, None, None))
