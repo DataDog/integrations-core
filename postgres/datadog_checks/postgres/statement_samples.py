@@ -250,7 +250,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         # Keep track of last time we sent an activity event
         self._time_since_last_activity_event = 0
         self._pg_stat_activity_cols = None
-        self.connection_id = "explain-plans"
+        self.connection_id = "statement-samples"
 
     def _dbtags(self, db, *extra_tags):
         """
@@ -270,7 +270,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         query = PG_ACTIVE_CONNECTIONS_QUERY.format(
             pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
         )
-        with self.db_pool.get_main_db_pool().connection() as conn:
+        with self.db_pool.get_connection(self._config.dbname, self._conn_ttl_ms, conn_id=self.connection_id) as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
                 cursor.execute(query, params)
@@ -303,7 +303,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             pg_stat_activity_view=self._config.pg_stat_activity_view,
             extra_filters=extra_filters,
         )
-        with self.db_pool.get_main_db_pool().connection() as conn:
+        with self.db_pool.get_connection(self._config.dbname, self._conn_ttl_ms, conn_id=self.connection_id) as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
                 cursor.execute(query, params)
@@ -321,7 +321,7 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_available_activity_columns(self, all_expected_columns):
-        with self.db_pool.get_main_db_pool().connection() as conn:
+        with self.db_pool.get_connection(self._config.dbname, self._conn_ttl_ms, conn_id=self.connection_id) as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 cursor.execute(
                     "select * from {pg_stat_activity_view} LIMIT 0".format(

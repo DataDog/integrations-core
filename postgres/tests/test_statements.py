@@ -1399,7 +1399,6 @@ def test_pg_settings_caching(integration_check, dbm_instance):
     check = integration_check(dbm_instance)
     assert not check.pg_settings, "pg_settings should not have been initialized yet"
     check._connect()
-    check.db_pool.get_main_db_pool()
     # pg_settings is not loaded on connect
     assert not check.pg_settings, "pg_settings should not have been initialized yet"
     # pg_settings should now be lazy loaded

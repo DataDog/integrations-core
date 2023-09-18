@@ -144,7 +144,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             maxsize=config.full_statement_text_cache_max_size,
             ttl=60 * 60 / config.full_statement_text_samples_per_hour_per_query,
         )
-        self._thread_id = "query-metrics"
+        self.connection_id = "query-metrics"
 
     def _execute_query(self, cursor, query, params=()):
         try:
@@ -171,7 +171,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         query = STATEMENTS_QUERY.format(
             cols='*', pg_stat_statements_view=self._config.pg_stat_statements_view, extra_clauses="LIMIT 0", filters=""
         )
-        with self.db_pool.get_main_db_pool().connection() as conn:
+        with self.db_pool.get_connection(self._config.dbname, self._conn_ttl_ms, conn_id=self.connection_id) as conn:
             with conn.cursor() as cursor:
                 self._execute_query(cursor, query, params=())
                 col_names = [desc[0] for desc in cursor.description] if cursor.description else []
@@ -281,7 +281,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     "pg_database.datname NOT ILIKE %s" for _ in self._config.ignore_databases
                 )
                 params = params + tuple(self._config.ignore_databases)
-            with self.db_pool.get_main_db_pool().connection() as conn:
+            with self.db_pool.get_connection(
+                    self._config.dbname, self._conn_ttl_ms, conn_id=self.connection_id
+            ) as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
                     return self._execute_query(
                         cursor,
@@ -355,7 +357,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
         if self._check.version < V14:
             return
         try:
-            with self.db_pool.get_main_db_pool().connection() as conn:
+            with self.db_pool.get_connection(
+                    self._config.dbname, self._conn_ttl_ms, conn_id=self.connection_id
+            ) as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
                     rows = self._execute_query(
                         cursor,
@@ -376,7 +380,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
     def _emit_pg_stat_statements_metrics(self):
         query = PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 if self._check.version < V9_4 else PG_STAT_STATEMENTS_COUNT_QUERY
         try:
-            with self.db_pool.get_main_db_pool().connection() as conn:
+            with self.db_pool.get_connection(
+                    self._config.dbname, self._conn_ttl_ms, conn_id=self.connection_id
+            ) as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
                     rows = self._execute_query(
                         cursor,
