@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Restore the logic for the lookback time in the statement metrics query. It was previously the connection interval * 2, but was removed during a refactor. ([#15857](https://github.com/DataDog/integrations-core/pull/15857))
+
 ***Changed***:
 
 * Cache performance counter type to prevent querying for the same counter multiple times (especially for the per-db counters) ([#15714](https://github.com/DataDog/integrations-core/pull/15714))
