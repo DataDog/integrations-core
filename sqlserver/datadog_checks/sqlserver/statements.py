@@ -277,7 +277,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         now = time.time()
         query_interval = self.collection_interval * 2
         if self._last_stats_query_time:
-            query_interval = now - self._last_stats_query_time
+            query_interval = max(query_interval, now - self._last_stats_query_time)
         self._last_stats_query_time = now
         params = (math.ceil(query_interval),)
         self.log.debug("Running query [%s] %s", statement_metrics_query, params)
