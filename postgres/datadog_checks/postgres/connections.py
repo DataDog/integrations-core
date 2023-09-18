@@ -172,7 +172,7 @@ class MultiDatabaseConnectionPool(object):
                     self._stats.connection_pruned += 1
                     self._terminate_connection_unsafe(conn_name)
 
-    def close_all_connections(self, timeout=None):
+    def close_all_connections(self):
         """
         Will block until all connections are terminated, unless the pre-configured timeout is hit
         :param timeout:
@@ -181,7 +181,7 @@ class MultiDatabaseConnectionPool(object):
         success = True
         with self._mu:
             for dbname in list(self._conns):
-                if not self._terminate_connection_unsafe(dbname, timeout):
+                if not self._terminate_connection_unsafe(dbname):
                     success = False
         return success
 
@@ -200,7 +200,7 @@ class MultiDatabaseConnectionPool(object):
             # Could not evict a candidate; return None
             return None
 
-    def _terminate_connection_unsafe(self, dbname: str, timeout: float = None) -> bool:
+    def _terminate_connection_unsafe(self, dbname: str) -> bool:
         if dbname not in self._conns:
             return True
 
@@ -209,7 +209,7 @@ class MultiDatabaseConnectionPool(object):
             # pyscopg3 will IMMEDIATELY close the connection when calling close().
             # if timeout is not specified, psycopg will wait for the default 5s to stop the thread in the pool
             # if timeout is 0 or negative, psycopg will not wait for worker threads to terminate
-            db.close() if timeout is None else db.close(timeout=timeout)
+            db.close(timeout=0)
             self._stats.connection_closed += 1
         except Exception:
             self._stats.connection_closed_failed += 1
