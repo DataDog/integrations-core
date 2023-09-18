@@ -194,7 +194,7 @@ MIXER_METRICS = {
     'mixer_config_rule_configs_total': 'config.rule_configs_total',
     'mixer_dispatcher_destinations_per_request': 'dispatcher.destinations_per_request',
     'mixer_dispatcher_instances_per_request': 'dispatcher.instances_per_request',
-    'mixer_handler_daemons_total': 'handler.daemons_total',
+    'mixer_handler_daemons_total': 'handler.daemons',
     'mixer_handler_new_handlers_total': 'handler.new_handlers_total',
     'mixer_mcp_sink_reconnections': 'mcp_sink.reconnections',
     'mixer_mcp_sink_request_acks_total': 'mcp_sink.request_acks_total',
@@ -386,7 +386,9 @@ ISTIOD_METRICS = {
     'sidecar_injection_failure_total': 'sidecar_injection.failure_total',
     'sidecar_injection_skip_total': 'sidecar_injection.skip_total',
     ## New 1.6 metrics
+    # Unknown
     'istio_mcp_clients_total': 'mcp.clients',
+    'istio_mcp_clients': 'mcp.clients',
     ## Pilot autodiscovery
     'istio_mcp_request_nacks_total': 'mcp.request.nacks',
     'istio_mcp_request_acks_total': 'mcp.request.acks',
@@ -423,12 +425,7 @@ NON_CONFORMING_METRICS = [
     # LastValue/Gauge
     'istio_mcp_clients_total',
     'galley_runtime_state_type_instances_total',
-    'mixer_config_attributes_total',
-    'mixer_config_handler_configs_total',
-    'mixer_config_instance_configs_total',
-    'mixer_config_rule_configs_total',
     'mixer_handler_daemons_total',
-    'mixer_handler_new_handlers_total',
 ]
 
 
