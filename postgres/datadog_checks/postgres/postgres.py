@@ -904,6 +904,13 @@ class PostgreSql(AgentCheck):
             self._database_instance_emitted[self.resolved_hostname] = event
             self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
+    def debug_stats_kwargs(self):
+        return {
+            "tags": self.tags,
+            "hostname": self.resolved_hostname,
+            "raw": True,
+        }
+
     def check(self, _):
         tags = copy.copy(self.tags)
         # Collect metrics

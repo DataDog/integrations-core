@@ -261,6 +261,9 @@ class PostgresStatementSamples(DBMAsyncJob):
         if self._tags_no_db:
             t.extend(self._tags_no_db)
         return t
+    
+    def debug_stats_kwargs(self):
+        return self._check.debug_stats_kwargs()
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_active_connections(self):
