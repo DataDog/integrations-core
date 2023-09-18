@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 
+from collections import namedtuple
 import logging
 import math
 import os
@@ -13,9 +14,9 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
 
 import mock
-from unittest.mock import ANY
 import pytest
 from lxml import etree as ET
+from unittest.mock import ANY
 
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
@@ -30,8 +31,6 @@ from datadog_checks.sqlserver.const import (
 from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
 
 from .common import CHECK_NAME
-
-from collections import namedtuple
 
 try:
     import pyodbc
