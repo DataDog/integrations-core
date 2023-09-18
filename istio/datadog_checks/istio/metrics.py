@@ -388,7 +388,6 @@ ISTIOD_METRICS = {
     ## New 1.6 metrics
     # Unknown
     'istio_mcp_clients_total': 'mcp.clients',
-    'istio_mcp_clients': 'mcp.clients',
     ## Pilot autodiscovery
     # Unknown type
     'istio_mcp_request_nacks_total': 'mcp.request.nacks',
@@ -423,7 +422,6 @@ NON_CONFORMING_METRICS = [
     # Distribution/Histogram
     'galley_runtime_processor_snapshot_events_total',
     # LastValue
-    'istio_mcp_clients_total',
     'galley_runtime_state_type_instances_total',
     'mixer_handler_daemons_total',
 ]

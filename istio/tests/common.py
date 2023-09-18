@@ -369,6 +369,5 @@ NON_CONFORMING_METRICS = [
     'istio.galley.runtime_processor.snapshot_events_total.count',
     'istio.galley.runtime_processor.snapshot_events_total.sum',
     'istio.galley.runtime_state_type_instances_total',
-    'istio.mcp.clients.count',
     'istio.mixer.handler.daemons_total',
 ]
