@@ -261,6 +261,7 @@ class PostgresMetadata(DBMAsyncJob):
             return ""
         return 'v{major}.{minor}.{patch}'.format(major=version.major, minor=version.minor, patch=version.patch)
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_schema_info(self):
         databases = []
         if self._check.autodiscovery:
@@ -275,6 +276,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._time_since_last_schemas_query = time.time()
         return metadata
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _query_database_information(self, cursor: psycopg.cursor, dbname: str) -> Dict[str, Union[str, int]]:
         """
         Collect database info. Returns
@@ -288,6 +290,7 @@ class PostgresMetadata(DBMAsyncJob):
         row = cursor.fetchone()
         return row
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _query_schema_information(self, cursor: psycopg.cursor, dbname: str) -> Dict[str, str]:
         """
         Collect user schemas. Returns
@@ -303,6 +306,7 @@ class PostgresMetadata(DBMAsyncJob):
             print(row['name'])
         return schemas
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _get_table_info(self, cursor, dbname, schema_id):
         """
         Tables will be sorted by the number of total accesses (index_rel_scans + seq_scans) and truncated to
@@ -438,6 +442,7 @@ class PostgresMetadata(DBMAsyncJob):
 
         return table_payloads
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_metadata_for_database(self, dbname):
         metadata = {}
         with self.db_pool.get_connection(

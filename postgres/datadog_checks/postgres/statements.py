@@ -178,6 +178,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 self._stat_column_cache = col_names
                 return col_names
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def run_job(self):
         # do not emit any dd.internal metrics for DBM specific check code
         self.tags = [t for t in self._tags if not t.startswith('dd.internal')]

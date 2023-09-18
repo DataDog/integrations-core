@@ -570,6 +570,7 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         return None, None
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _get_db_explain_setup_state_cached(self, dbname):
         # type: (str) -> Tuple[DBExplainError, Exception]
         strategy_cache = self._collection_strategy_cache.get(dbname)
@@ -584,6 +585,7 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         return db_explain_error, err
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
         with self.db_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms, conn_id=self.connection_id) as conn:

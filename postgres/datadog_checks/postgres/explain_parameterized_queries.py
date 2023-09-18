@@ -149,6 +149,7 @@ class ExplainParameterizedQueries:
             )
         return None
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _deallocate_prepared_statement(self, conn, query_signature):
         try:
             self._execute_query(conn, "DEALLOCATE PREPARE dd_{query_signature}".format(query_signature=query_signature))
@@ -159,11 +160,13 @@ class ExplainParameterizedQueries:
                 e,
             )
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _execute_query(self, conn, query):
         with conn.cursor(row_factory=dict_row) as cursor:
             logger.debug('Executing query=[%s]', query)
             cursor.execute(query)
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _execute_query_and_fetch_rows(self, conn, query):
         with conn.cursor(row_factory=dict_row) as cursor:
             logger.debug('Executing query=[%s]', query)
