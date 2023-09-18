@@ -399,7 +399,7 @@ class PostgreSql(AgentCheck):
             log_func(e)
             log_func(
                 "It seems the PG version has been incorrectly identified as %s. "
-                "A reattempt to identify the right version will happen on next agent run." % self._version
+                "A reattempt to identify the right version will happen on next agent run." % self.version
             )
             self._clean_state()
             self.db.rollback()

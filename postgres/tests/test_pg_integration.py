@@ -407,11 +407,13 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
 @requires_over_10
 def test_wrong_version(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
-    # Enforce to cache wrong version
-    check.version = VersionInfo(*[9, 6, 0])
+    # Enforce the wrong version
+    check._version_utils.get_raw_version = mock.MagicMock(return_value="9.6.0")
 
     check.check(pg_instance)
     assert_state_clean(check)
+    # Reset the mock to a good version
+    check._version_utils.get_raw_version = mock.MagicMock(return_value="13.0.0")
 
     check.check(pg_instance)
     assert_state_set(check)
