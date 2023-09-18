@@ -11,7 +11,7 @@ from ddev.validation.tracker import ValidationTracker
 
 def get_tracker():
     return ValidationTracker(
-        Console(),
+        Console(no_color=True, legacy_windows=True),
         Tree('validate test', style=Style.parse('bold')),
         success_style=Style.parse('bold cyan'),
         error_style=Style.parse('bold red'),

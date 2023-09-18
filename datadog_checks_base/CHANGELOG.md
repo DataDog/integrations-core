@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+***Added***:
+
+* Upgrade clickhouse-driver to 0.2.6 on Python 3 ([#15726](https://github.com/DataDog/integrations-core/pull/15726))
+* Upgrade lz4 to 4.3.2 on Python 3 ([#15746](https://github.com/DataDog/integrations-core/pull/15746))
+
+***Fixed***:
+
+* Fix type `bytes` is not JSON serializable for dbm events ([#15763](https://github.com/DataDog/integrations-core/pull/15763))
+
+## 33.1.0 / 2023-08-25
+
+***Security***:
+
+* Update security dependencies ([#15667](https://github.com/DataDog/integrations-core/pull/15667))
+  * in-toto: 2.0.0
+  * securesystemslib: 0.28.0
+
+## 33.0.1 / 2023-08-24
+
 ***Fixed***:
 
 * Use `DD_TRACE_ENABLED` to disable ddtrace on Windows when using `process_isolation` ([#15635](https://github.com/DataDog/integrations-core/pull/15635))

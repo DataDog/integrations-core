@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Override the default test options for some integrations ([#15779](https://github.com/DataDog/integrations-core/pull/15779))
+
+## 4.3.0 / 2023-08-25
+
+***Security***:
+
+* Update security dependencies ([#15667](https://github.com/DataDog/integrations-core/pull/15667))
+  * in-toto: 2.0.0
+  * securesystemslib: 0.28.0
+
 ## 4.2.2 / 2023-07-10
 
 ***Fixed***:

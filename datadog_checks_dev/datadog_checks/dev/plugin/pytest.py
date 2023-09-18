@@ -8,6 +8,7 @@ import os
 import re
 import warnings
 from base64 import urlsafe_b64encode
+from collections import namedtuple  # Not using dataclasses for Py2 compatibility
 from typing import Dict, List, Optional, Tuple  # noqa: F401
 
 import pytest
@@ -16,6 +17,7 @@ from six import PY2
 from .._env import (
     E2E_FIXTURE_NAME,
     E2E_PARENT_PYTHON,
+    E2E_RESULT_FILE,
     SKIP_ENVIRONMENT,
     TESTING_PLUGIN,
     e2e_active,
@@ -127,15 +129,22 @@ def dd_environment_runner(request):
 
     data = {'config': config, 'metadata': metadata}
 
-    message = serialize_data(data)
-
-    message = 'DDEV_E2E_START_MESSAGE {} DDEV_E2E_END_MESSAGE'.format(message)
+    message_template = 'DDEV_E2E_START_MESSAGE {} DDEV_E2E_END_MESSAGE'
 
     if testing_plugin:
-        return message
+        return message_template.format(serialize_data(data))
     else:  # no cov
         # Exit testing and pass data back up to command
-        pytest.exit(message)
+        if E2E_RESULT_FILE in os.environ:
+            # Standard `pytest.exit` requires a reason but we want an empty string for minimal output
+            from _pytest.outcomes import Exit
+
+            with open(os.environ[E2E_RESULT_FILE], 'w', encoding='utf-8') as f:
+                f.write(json.dumps(data))
+
+            Exit('', 0)
+        else:
+            pytest.exit(message_template.format(serialize_data(data)))
 
 
 @pytest.fixture
@@ -341,11 +350,19 @@ def mock_performance_objects(mocker, dd_default_hostname):
     return mock_perf_objects
 
 
+TestType = namedtuple('TestType', 'name description filepath_match')
+TEST_TYPES = (
+    TestType('unit', 'marker for unit tests', 'test_unit'),
+    TestType('integration', 'marker for integration tests', 'test_integration'),
+    TestType('e2e', 'marker for end-to-end tests', 'test_e2e'),
+)
+
+
 def pytest_configure(config):
     # pytest will emit warnings if these aren't registered ahead of time
-    config.addinivalue_line('markers', 'unit: marker for unit tests')
-    config.addinivalue_line('markers', 'integration: marker for integration tests')
-    config.addinivalue_line('markers', 'e2e: marker for end-to-end Datadog Agent tests')
+    for ttype in TEST_TYPES:
+        config.addinivalue_line('markers', '{}: {}'.format(ttype.name, ttype.description))
+
     config.addinivalue_line("markers", "latest_metrics: marker for verifying support of new metrics")
 
 
@@ -384,3 +401,11 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "latest_metrics" in item.keywords:
             item.add_marker(skip_latest_metrics)
+
+        # In Python 2 we're using a much older version of pytest where the Item interface is different.
+        item_path = item.fspath if PY2 else item.path
+        if item_path is None:
+            continue
+        for ttype in TEST_TYPES:
+            if ttype.filepath_match in str(item_path):
+                item.add_marker(getattr(pytest.mark, ttype.name))

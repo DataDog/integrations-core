@@ -81,7 +81,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][10
 | Parameter            | Value                                |
 | -------------------- | ------------------------------------ |
 | `<INTEGRATION_NAME>` | `activemq`                           |
-| `<INIT_CONFIG>`      | blank or `{}`                        |
+| `<INIT_CONFIG>`      | `"is_jmx": true`                     |
 | `<INSTANCE_CONFIG>`  | `{"host": "%%host%%","port":"1099"}` |
 
 ##### Log collection
@@ -135,7 +135,7 @@ Additional helpful documentation, links, and articles:
 [7]: https://github.com/DataDog/integrations-core/blob/master/activemq/datadog_checks/activemq/data/conf.yaml.example
 [8]: https://github.com/DataDog/integrations-core/blob/master/activemq/datadog_checks/activemq/data/metrics.yaml
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[10]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[10]: https://docs.datadoghq.com/containers/guide/autodiscovery-with-jmx/?tab=containeragent
 [11]: https://docs.datadoghq.com/agent/kubernetes/log/
 [12]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [13]: https://github.com/DataDog/integrations-core/blob/master/activemq/assets/service_checks.json

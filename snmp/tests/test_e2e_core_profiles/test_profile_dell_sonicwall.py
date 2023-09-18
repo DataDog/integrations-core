@@ -46,10 +46,23 @@ def test_e2e_profile_dell_sonicwall(dd_agent_check):
     aggregator.assert_metric('snmp.sonicNatTranslationCount', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
         [
+            'sonic_sa_stat_dst_addr_begin:235.185.120.197',
+            'sonic_sa_stat_dst_addr_end:248.89.108.190',
+            'sonic_sa_stat_peer_gateway:47.169.129.76',
+            'sonic_sa_stat_src_addr_begin:57.166.34.35',
+            'sonic_sa_stat_src_addr_end:167.235.34.58',
             'sonic_sa_stat_create_time:Jaded driving acted quaintly',
             'sonic_sa_stat_user_name:but forward zombies but acted kept zombies Jaded',
         ],
-        ['sonic_sa_stat_create_time:driving quaintly oxen Jaded forward', 'sonic_sa_stat_user_name:kept but'],
+        [
+            'sonic_sa_stat_dst_addr_begin:60.247.243.34',
+            'sonic_sa_stat_dst_addr_end:157.82.31.152',
+            'sonic_sa_stat_peer_gateway:158.64.168.219',
+            'sonic_sa_stat_src_addr_begin:140.76.154.238',
+            'sonic_sa_stat_src_addr_end:240.205.65.247',
+            'sonic_sa_stat_create_time:driving quaintly oxen Jaded forward',
+            'sonic_sa_stat_user_name:kept but',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(

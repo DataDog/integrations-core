@@ -61,7 +61,7 @@ def test_e2e_profile_vertiv_watchdog(dd_agent_check):
     tag_rows = [
         [
             'vertiv_temp_sensor_avail:available',
-            'vertiv_temp_sensor_name:but',
+            'vertiv_temp_sensor_label:but',
             'vertiv_temp_sensor_serial:kept quaintly kept oxen quaintly but',
         ],
     ]

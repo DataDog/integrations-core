@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Run all the tests on py3 ([#15798](https://github.com/DataDog/integrations-core/pull/15798))
+
 ## 3.0.0 / 2023-08-10
 
 ***Changed***:
@@ -16,7 +20,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 2.14.1 / 2023-07-13
+## 2.14.1 / 2023-07-13 / Agent 7.47.0
 
 ***Fixed***:
 

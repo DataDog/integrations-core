@@ -2,13 +2,17 @@
 
 ## Unreleased
 
+***Added***:
+
+* Capture node_collector_evictions_total metric in kube controller manager ([#15737](https://github.com/DataDog/integrations-core/pull/15737))
+
 ## 4.4.0 / 2023-08-10
 
 ***Added***:
 
 * Add job_controller_terminated_pods_tracking_finalizer_total metric to kube controller manager check ([#15425](https://github.com/DataDog/integrations-core/pull/15425))
 
-## 4.3.1 / 2023-07-10
+## 4.3.1 / 2023-07-10 / Agent 7.47.0
 
 ***Fixed***:
 

@@ -170,6 +170,11 @@ DATABASE_FRAGMENTATION_METRICS = [
         'sys.dm_db_index_physical_stats',
         'avg_fragment_size_in_pages',
     ),
+    (
+        'sqlserver.database.index_page_count',
+        'sys.dm_db_index_physical_stats',
+        'page_count',
+    ),
 ]
 
 DATABASE_MASTER_FILES = [

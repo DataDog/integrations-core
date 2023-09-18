@@ -83,7 +83,7 @@ metrics:
           name: tlpPduDeviceOutputCurrentPrecision
         tag: tlp_pdu_device_output_current_precision
         mapping:
-          0: none
+          0: whole_number
           1: tenths
           2: hundredths
       - column:

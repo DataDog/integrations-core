@@ -7,6 +7,7 @@ import threading
 import time
 import uuid
 
+import psycopg
 import pytest
 from psycopg.rows import dict_row
 from psycopg_pool import ConnectionPool
@@ -48,7 +49,7 @@ def test_conn_pool(pg_instance):
             assert len(rows) == 1 and list(rows[0].values())[0]
     assert len(pool._conns) == 1
     assert pool._stats.connection_opened == 2
-    success = pool.close_all_connections(timeout=5)
+    success = pool.close_all_connections()
     assert success
     assert len(pool._conns) == 0
     assert pool._stats.connection_closed == 2
@@ -98,7 +99,7 @@ def test_conn_pool_no_leaks_on_close(pg_instance):
         assert pool._stats.connection_opened == conn_count
         assert len(get_activity(pool2, unique_id)) == conn_count
 
-        pool.close_all_connections(timeout=5)
+        pool.close_all_connections()
         assert pool._stats.connection_closed == conn_count
         assert pool._stats.connection_closed_failed == 0
 
@@ -151,7 +152,7 @@ def test_conn_pool_no_leaks_on_prune(pg_instance):
                     conn_pids.append(conn.info.backend_pid)
         return set(conn_pids)
 
-    pool.close_all_connections(timeout=5)
+    pool.close_all_connections()
 
     pool._stats.reset()
 
@@ -307,8 +308,22 @@ def test_conn_pool_manages_connections(pg_instance):
     assert pool._stats.connection_closed == 1
 
     # close the rest
-    pool.close_all_connections(timeout=5)
+    pool.close_all_connections()
     assert pool._stats.connection_closed == limit + 1
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_conn_attempt_to_connect(pg_instance):
+    """
+    We attempt to connect to the database and check that the connection is successful.
+    This test is meant to be run against a database that is not running.
+    """
+    # Change the password to something that is not the correct password
+    pg_instance['password'] = 1234
+    check = PostgreSql('postgres', {}, [pg_instance])
+    with pytest.raises(psycopg.OperationalError):
+        check._attempt_to_connect()
 
 
 def local_pool(dbname, min_pool_size, max_pool_size):
@@ -318,7 +333,14 @@ def local_pool(dbname, min_pool_size, max_pool_size):
         'password': PASSWORD_ADMIN,
         'dbname': dbname,
     }
-    return ConnectionPool(min_size=min_pool_size, max_size=max_pool_size, kwargs=args, open=True, name=dbname)
+    return ConnectionPool(
+        min_size=min_pool_size,
+        max_size=max_pool_size,
+        kwargs=args,
+        open=True,
+        name=dbname,
+        timeout=2,
+    )
 
 
 def get_activity(db_pool, unique_id):
