@@ -133,10 +133,10 @@ class MultiDatabaseConnectionPool(object):
                 last_accessed=datetime.datetime.now(),
                 persistent=persistent,
             )
-            self.histogram(
+            self._check.histogram(
                 "dd.postgres._get_connection_pool.time",
-                (time() - start_time) * 1000,
-                tags = ["conn_id:{}".format(conn_id)],
+                (time.time() - start_time) * 1000,
+                tags=["conn_id:" + cid],
                 hostname=self._check.resolved_hostname,
                 )
             return db_pool
