@@ -53,6 +53,9 @@ datadog-agent integration install datadog-snowflake==2.0.1
     -- Grant privileges on the SNOWFLAKE database to the new role.
     grant imported privileges on database SNOWFLAKE to role DATADOG;
 
+    -- Grant usage to your default warehouse to the role DATADOG.
+   grant usage to warehouse <WAREHOUSE> to role DATADOG;
+
     -- Create a user, skip this step if you are using an existing user.
     create user DATADOG_USER
     LOGIN_NAME = DATADOG_USER

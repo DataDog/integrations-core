@@ -159,7 +159,7 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
             'snmp.datadomain.fileSystemPreCompressionSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.fileSystemReductionPercent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemReductionPercent1', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
             'snmp.datadomain.fileSystemTotalCompressionFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
@@ -209,7 +209,7 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
             'snmp.datadomain.nvramWriteKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.relOutKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.replOutKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
             'snmp.datadomain.replInKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row

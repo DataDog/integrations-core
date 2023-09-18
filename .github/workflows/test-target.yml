@@ -209,7 +209,7 @@ jobs:
 
     - name: Run Unit & Integration tests with minimum version of base package
       if: inputs.standard && inputs.minimum-base-package
-      run: ddev test --force-base-min --force-env-rebuild --junit ${{ inputs.target }}
+      run: ddev test --compat --recreate --junit ${{ inputs.target }}
 
     - name: Run E2E tests with latest base package
       if: inputs.standard && inputs.repo == 'core'

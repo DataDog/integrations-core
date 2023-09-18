@@ -78,6 +78,12 @@ system_cpu_count 5.0
 # HELP strimzi_reconciliations_failed_total Number of reconciliations done by the operator for individual resources which failed
 # TYPE strimzi_reconciliations_failed_total counter
 strimzi_reconciliations_failed_total{kind="KafkaUser",namespace="kafka",selector="strimzi.io/cluster=my-cluster",} 18.0
+# HELP strimzi_reconciliations_locked_total Number of reconciliations skipped because another reconciliation for the same resource was still running
+# TYPE strimzi_reconciliations_locked_total counter
+strimzi_reconciliations_locked_total{kind="KafkaUser",namespace="kafka",selector="strimzi.io/cluster=my-cluster",} 18.0
+# HELP strimzi_reconciliations_successful_total Number of reconciliations done by the operator for individual resources which were successful
+# TYPE strimzi_reconciliations_successful_total counter
+strimzi_reconciliations_successful_total{kind="KafkaUser",namespace="kafka",selector="strimzi.io/cluster=my-cluster",} 18.0
 # HELP jvm_buffer_count_buffers An estimate of the number of buffers in the pool
 # TYPE jvm_buffer_count_buffers gauge
 jvm_buffer_count_buffers{id="mapped - 'non-volatile memory'",} 0.0
