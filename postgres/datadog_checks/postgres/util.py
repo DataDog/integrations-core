@@ -59,12 +59,6 @@ def get_schema_field(descriptors):
     raise CheckException("The descriptors are missing a schema field")
 
 
-def payload_pg_version(version):
-    if not version:
-        return ""
-    return 'v{major}.{minor}.{patch}'.format(major=version.major, minor=version.minor, patch=version.patch)
-
-
 fmt = PartialFormatter()
 
 AWS_RDS_HOSTNAME_SUFFIX = ".rds.amazonaws.com"
@@ -212,10 +206,9 @@ LIMIT {table_count_limit}
 }
 
 q1 = (
-    'CASE WHEN exists(SELECT * FROM pg_stat_wal_receiver) '
-    'AND (pg_last_wal_receive_lsn() IS NULL '
-    'OR pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn()) THEN 0 '
-    'ELSE GREATEST(0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END'
+    'CASE WHEN pg_last_wal_receive_lsn() IS NULL OR '
+    'pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn() THEN 0 ELSE GREATEST '
+    '(0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END'
 )
 q2 = 'abs(pg_wal_lsn_diff(pg_last_wal_receive_lsn(), pg_last_wal_replay_lsn()))'
 REPLICATION_METRICS_10 = {
