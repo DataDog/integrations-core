@@ -94,6 +94,7 @@ def test_get_available_query_metrics_columns(dbm_instance, expected_columns, ava
                 cursor, expected_columns
             )
             assert result_available_columns == available_columns
+            
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
