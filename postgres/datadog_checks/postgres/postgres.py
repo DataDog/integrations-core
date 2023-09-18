@@ -709,8 +709,10 @@ class PostgreSql(AgentCheck):
         )
         return pool
 
-    def _attempt_to_connect(self):
-        args = self._new_connection_info(self._config.dbname)
+    def _attempt_to_connect(self, dbname: str):
+        if not dbname:
+            dbname = self._config.dbname
+        args = self._new_connection_info(dbname)
         args['connect_timeout'] = self._config.connection_timeout
         try:
             psycopg.connect(**args)
