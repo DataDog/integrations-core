@@ -90,6 +90,7 @@ class MultiDatabaseConnectionPool(object):
         dbname: str,
         ttl_ms: int,
         timeout: int = None,
+        conn_id: str = None,
         min_pool_size: int = 1,
         max_pool_size: int = None,
         startup_fn: Callable[[ConnectionPool], None] = None,
@@ -102,8 +103,9 @@ class MultiDatabaseConnectionPool(object):
         """
         start = datetime.datetime.now()
         self.prune_connections()
+        cid = MultiDatabaseConnectionPool._format_cid(dbname, conn_id)
         with self._mu:
-            conn = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None))
+            conn = self._conns.pop(cid, ConnectionInfo(None, None, None, None, None))
             db_pool = conn.connection
             if db_pool is None or db_pool.closed:
                 if self.max_conns is not None:
@@ -124,7 +126,7 @@ class MultiDatabaseConnectionPool(object):
                 persistent = conn.persistent
 
             deadline = datetime.datetime.now() + datetime.timedelta(milliseconds=ttl_ms)
-            self._conns[dbname] = ConnectionInfo(
+            self._conns[cid] = ConnectionInfo(
                 connection=db_pool,
                 deadline=deadline,
                 active=True,
@@ -133,8 +135,17 @@ class MultiDatabaseConnectionPool(object):
             )
             return db_pool
 
+    @staticmethod
+    def _format_cid(dbname: str, conn_id: str = None):
+        cid = dbname
+        if conn_id:
+            cid = "{}-{}".format(conn_id, dbname)
+        return cid
+
     @contextlib.contextmanager
-    def get_connection(self, dbname: str, ttl_ms: int, timeout: int = None, persistent: bool = False):
+    def get_connection(
+            self, dbname: str, ttl_ms: int, timeout: int = None, conn_id: str = None, persistent: bool = False
+    ):
         """
         Grab a connection from the pool if the database is already connected.
         If max_conns is specified, and the database isn't already connected,
@@ -142,8 +153,11 @@ class MultiDatabaseConnectionPool(object):
         Blocks until a connection can be added to the pool,
         and optionally takes a timeout in seconds.
         """
+        cid = MultiDatabaseConnectionPool._format_cid(dbname, conn_id)
         with self._mu:
-            pool = self._get_connection_pool(dbname=dbname, ttl_ms=ttl_ms, timeout=timeout, persistent=persistent)
+            pool = self._get_connection_pool(
+                dbname=dbname, ttl_ms=ttl_ms, timeout=timeout, conn_id=conn_id, persistent=persistent
+            )
             db = pool.getconn()
         try:
             yield db
@@ -151,8 +165,8 @@ class MultiDatabaseConnectionPool(object):
             with self._mu:
                 try:
                     pool.putconn(db)
-                    if not self._conns[dbname].persistent:
-                        self._conns[dbname].active = False
+                    if not self._conns[cid].persistent:
+                        self._conns[cid].active = False
                 except KeyError:
                     # if self._get_connection_raw hit an exception, self._conns[conn_name] didn't get populated
                     pass
@@ -180,8 +194,8 @@ class MultiDatabaseConnectionPool(object):
         """
         success = True
         with self._mu:
-            for dbname in list(self._conns):
-                if not self._terminate_connection_unsafe(dbname):
+            for cid in list(self._conns):
+                if not self._terminate_connection_unsafe(cid):
                     success = False
         return success
 
@@ -200,11 +214,11 @@ class MultiDatabaseConnectionPool(object):
             # Could not evict a candidate; return None
             return None
 
-    def _terminate_connection_unsafe(self, dbname: str) -> bool:
-        if dbname not in self._conns:
+    def _terminate_connection_unsafe(self, cid: str) -> bool:
+        if cid not in self._conns:
             return True
 
-        db = self._conns.pop(dbname).connection
+        db = self._conns.pop(cid).connection
         try:
             # pyscopg3 will IMMEDIATELY close the connection when calling close().
             # if timeout is not specified, psycopg will wait for the default 5s to stop the thread in the pool
@@ -213,7 +227,7 @@ class MultiDatabaseConnectionPool(object):
             self._stats.connection_closed += 1
         except Exception:
             self._stats.connection_closed_failed += 1
-            self._log.exception("failed to close DB connection for db=%s", dbname)
+            self._log.exception("failed to close DB connection for db=%s", cid)
             return False
 
         return True
@@ -227,6 +241,7 @@ class MultiDatabaseConnectionPool(object):
         conn = self._get_connection_pool(
             dbname=self._config.dbname,
             ttl_ms=self._config.idle_connection_timeout,
+            conn_id="main",
             max_pool_size=max_pool_conn_size,
             persistent=True,
         )
