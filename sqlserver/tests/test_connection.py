@@ -1,4 +1,4 @@
-﻿# (C) Datadog, Inc. 2020-present
+# (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -167,6 +167,67 @@ def test_will_fail_for_wrong_parameters_in_the_connection_string(instance_minima
     )
 
     with pytest.raises(ConfigurationError, match=re.escape(match)):
+        connection._connection_options_validation('somekey', 'somedb')
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "name,managed_identity_config,should_fail,expected_err",
+    [
+        (
+            "valid managed_identity configuration",
+            {
+                'managed_identity': {
+                    'client_id': "foo",
+                },
+            },
+            False,
+            None,
+        ),
+        (
+            "valid config, but username/password set raises ConfigurationError",
+            {
+                'managed_identity': {
+                    'client_id': 'foo',
+                },
+                "username": "foo",
+                "password": "shame-nun",
+            },
+            True,
+            (
+                "Azure AD Authentication is configured, but username and password properties are also set "
+                "please remove `username` and `password` from your instance config to use"
+                "AD Authentication with a Managed Identity"
+            ),
+        ),
+        (
+            "managed_identity without client_id set raises ConfigurationError",
+            {
+                'managed_identity': {
+                    'not_what_i_want': 'foo',
+                },
+            },
+            True,
+            (
+                "Azure Managed Identity Authentication is not properly configured "
+                "missing required property, client_id"
+            ),
+        ),
+    ],
+)
+def test_managed_auth_config_valid(instance_minimal_defaults, name, managed_identity_config, should_fail, expected_err):
+    instance_minimal_defaults.pop('username')
+    instance_minimal_defaults.pop('password')
+    if managed_identity_config:
+        for k, v in managed_identity_config.items():
+            instance_minimal_defaults[k] = v
+    instance_minimal_defaults.update({'connector': 'odbc'})
+    check = SQLServer(CHECK_NAME, {}, [instance_minimal_defaults])
+    connection = Connection(check, {}, instance_minimal_defaults, None)
+    if should_fail:
+        with pytest.raises(ConfigurationError, match=re.escape(expected_err)):
+            connection._connection_options_validation('somekey', 'somedb')
+    else:
         connection._connection_options_validation('somekey', 'somedb')
 
 

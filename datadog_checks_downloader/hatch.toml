@@ -3,11 +3,6 @@
 [[envs.default.matrix]]
 python = ["3.9"]
 
-[envs.default.overrides]
-matrix.python.scripts = [
-  { key = "test", value = "_dd-test --capture=no --log-cli-level=debug" },
-]
-
 [envs.default]
 e2e-env = false
 dependencies = [

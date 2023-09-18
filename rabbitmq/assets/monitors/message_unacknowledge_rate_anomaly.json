@@ -1,33 +1,40 @@
 {
-  "name": "[RabbitMQ] Messages unacknowledged rate is higher than usual on: {{host.name}}",
-  "type": "query alert",
-  "query": "avg(last_4h):anomalies(avg:rabbitmq.queue.messages_unacknowledged.rate{*} by {rabbitmq_queue,host}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='hourly') >= 1",
-  "message": "The rate at which messages are being delivered without receiving acknowledgement is higher than usual. There may be errors or performance issues downstream.\n\nHost: {{host.name}}\nRabbitMQ Queue: {{rabbitmq_queue.name}}",
+  "version": 2,
+  "created_at": "2021-03-26",
+  "last_updated_at": "2021-03-26",
+  "title": "Messages unacknowledged rate is higher than usual on: {{host.name}}",
   "tags": [
     "integration:rabbitmq"
   ],
-  "options": {
-    "notify_audit": false,
-    "locked": false,
-    "timeout_h": 0,
-    "new_host_delay": 300,
-    "require_full_window": true,
-    "notify_no_data": false,
-    "renotify_interval": "0",
-    "escalation_message": "",
-    "no_data_timeframe": null,
-    "include_tags": true,
-    "thresholds": {
-      "critical": 1,
-      "critical_recovery": 0
+  "description": "Notify your team when a RabbitMQ message unacknowledged rate is higher than usual.",
+  "definition": {
+    "message": "The rate at which messages are being delivered without receiving acknowledgement is higher than usual. There may be errors or performance issues downstream.\n\nHost: {{host.name}}\nRabbitMQ Queue: {{rabbitmq_queue.name}}",
+    "name": "[RabbitMQ] Messages unacknowledged rate is higher than usual on: {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "timeout_h": 0
     },
-    "threshold_windows": {
-      "trigger_window": "last_15m",
-      "recovery_window": "last_15m"
-    }
-  },
-  "priority": null,
-  "recommended_monitor_metadata": {
-    "description": "Notify your team when a RabbitMQ message unacknowledged rate is higher than usual."
+    "priority": null,
+    "query": "avg(last_4h):anomalies(avg:rabbitmq.queue.messages_unacknowledged.rate{*} by {rabbitmq_queue,host}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='hourly') >= 1",
+    "tags": [
+      "integration:rabbitmq"
+    ],
+    "type": "query alert"
   }
 }

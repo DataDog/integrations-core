@@ -62,6 +62,18 @@ OpenMetrics configurations with generic wildcard values for the `metrics` option
 
 Datadog recommends that you use specific metric names or partial metric name matches for more precise collection.
 
+### Missing untyped metrics
+
+By default, the integration skips metrics that come without a type on a Prometheus exposition. If you want to collect untyped metrics, you must explicitly specify their type in the `metrics` mapping, for example:
+
+```yaml
+  metrics:
+    - "metric_without_type":
+        "type": "gauge"
+```
+
+Remember that metric names can be specified as regular expressions, making it possible to specify the type for a set of metrics without listing all of them individually.
+
 ### Errors parsing the OpenMetrics payload with Agent 7.46 and above
 
 Starting with version 3.0.0 of this integration, which is shipped by default with Agent 7.46 and above, the integration sends by default the `Accept` header set to `application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1;q=0.75,text/plain;version=0.0.4;q=0.5,*/*;q=0.1`. Previous versions set the `Accept` header to `text/plain`. The integration then dynamically determines which scraper to use based on the `Content-type` it receives from the server.
@@ -75,9 +87,9 @@ init_config:
   ...
 instances:
   - openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
-  ...
+    ...
     headers:
-      - Accept: text/plain
+      Accept: text/plain
 ```
 
 With this configuration, the endpoint returns the `Content-type` set to `text/plain`, causing the integration to use the previous scraper.

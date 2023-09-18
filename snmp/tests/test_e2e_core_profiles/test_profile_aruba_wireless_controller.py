@@ -31,7 +31,7 @@ def test_e2e_profile_aruba_wireless_controller(dd_agent_check):
     ] + [
         'wlsx_model_name:their driving kept their kept',
         'wlsx_switch_license_serial_number:forward kept forward',
-        'wlsx_switch_role:2',
+        'wlsx_switch_role:local',
         'wlsx_sys_ext_hw_version:Jaded zombies',
         'wlsx_sys_ext_sw_version:Jaded but acted zombies kept forward driving acted acted',
     ]
@@ -123,16 +123,24 @@ def test_e2e_profile_aruba_wireless_controller(dd_agent_check):
     aggregator.assert_metric('snmp.haTotalVapTunnels', metric_type=aggregator.GAUGE, tags=common_tags)
 
     aggregator.assert_metric(
-        'snmp.wlanStaRSSI', metric_type=aggregator.GAUGE, tags=common_tags + ['wlan_sta_phy_type:wired']
+        'snmp.wlanStaRSSI',
+        metric_type=aggregator.GAUGE,
+        tags=common_tags + ['wlan_sta_phy_type:wired', 'wlan_sta_ht_mode:he40'],
     )
     aggregator.assert_metric(
-        'snmp.wlanStaTransmitRate', metric_type=aggregator.GAUGE, tags=common_tags + ['wlan_sta_phy_type:wired']
+        'snmp.wlanStaTransmitRate',
+        metric_type=aggregator.GAUGE,
+        tags=common_tags + ['wlan_sta_phy_type:wired', 'wlan_sta_ht_mode:he40'],
     )
     aggregator.assert_metric(
-        'snmp.wlanStaTransmitRateCode', metric_type=aggregator.GAUGE, tags=common_tags + ['wlan_sta_phy_type:wired']
+        'snmp.wlanStaTransmitRateCode',
+        metric_type=aggregator.GAUGE,
+        tags=common_tags + ['wlan_sta_phy_type:wired', 'wlan_sta_ht_mode:he40'],
     )
     aggregator.assert_metric(
-        'snmp.wlanStaUpTime', metric_type=aggregator.GAUGE, tags=common_tags + ['wlan_sta_phy_type:wired']
+        'snmp.wlanStaUpTime',
+        metric_type=aggregator.GAUGE,
+        tags=common_tags + ['wlan_sta_phy_type:wired', 'wlan_sta_ht_mode:he40'],
     )
 
     aggregator.assert_metric('snmp.wlanStaRxBytes64', metric_type=aggregator.GAUGE, tags=common_tags)

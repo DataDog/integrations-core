@@ -1,11 +1,16 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from ..types import make_immutable_check_config
+from types import MappingProxyType
 
 
-def make_immutable(value):
-    return make_immutable_check_config(value)
+def make_immutable(obj):
+    if isinstance(obj, list):
+        return tuple(make_immutable(item) for item in obj)
+    elif isinstance(obj, dict):
+        return MappingProxyType({k: make_immutable(v) for k, v in obj.items()})
+
+    return obj
 
 
 def handle_deprecations(config_section, deprecations, fields, context):

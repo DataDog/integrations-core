@@ -114,6 +114,9 @@ AGENT_V2_METRICS = [
     "cilium.policy.implementation_delay.bucket",
     "cilium.policy.implementation_delay.count",
     "cilium.policy.implementation_delay.sum",
+    "cilium.kvstore.quorum_errors.count",
+    "cilium.kvstore.sync_queue_size",
+    "cilium.kvstore.initial_sync_completed",
 ]
 
 AGENT_V1_METRICS = [
@@ -195,6 +198,9 @@ AGENT_V1_METRICS = [
     "cilium.k8s_terminating.endpoints_events.total",
     "cilium.policy.implementation_delay.count",
     "cilium.policy.implementation_delay.sum",
+    "cilium.kvstore.quorum_errors.total",
+    "cilium.kvstore.sync_queue_size",
+    "cilium.kvstore.initial_sync_completed",
 ]
 
 # Some types changed moving from v1 to v2. We keep v2 in the metadata.csv file.
@@ -352,4 +358,7 @@ OPTIONAL_METRICS = {
     "cilium.policy.l7_received.count",
     "cilium.unreachable.health_endpoints",
     "cilium.unreachable.nodes",
+    "cilium.kvstore.quorum_errors.count",
+    "cilium.kvstore.sync_queue_size",
+    "cilium.kvstore.initial_sync_completed",
 }

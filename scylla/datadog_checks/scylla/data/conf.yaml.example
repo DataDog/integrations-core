@@ -51,7 +51,9 @@ instances:
   - prometheus_url: http://localhost:9180/metrics
 
     ## @param metric_groups - list of strings - optional
-    ## List of additional scylla metric groups to collect in addition to the default
+    ## List of additional Scylla metric groups to collect in addition to the default. Certain metric groups are
+    ## only exposed in newer versions of Scylla. Refer to the documentation to see what metrics are available 
+    ## for the different Scylla versions.
     #
     # metric_groups:
     #   - scylla.alien
@@ -71,6 +73,13 @@ instances:
     #   - scylla.sstables
     #   - scylla.thrift
     #   - scylla.tracing
+    #   - scylla.cdc
+    #   - scylla.forward_service
+    #   - scylla.raft
+    #   - scylla.repair
+    #   - scylla.schema_commitlog
+    #   - scylla.stall
+    #   - scylla.view
 
     ## @param prometheus_metrics_prefix - string - optional
     ## Removes a given <PREFIX> from exposed Prometheus metrics.

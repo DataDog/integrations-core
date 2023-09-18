@@ -2,243 +2,257 @@
 
 ## Unreleased
 
-## 2.19.1 / 2023-07-13
+## 3.0.0 / 2023-08-10
+
+***Changed***:
+
+* Bump the minimum base check version ([#15448](https://github.com/DataDog/integrations-core/pull/15448))
+
+***Added***:
+
+* Update generated config models ([#15212](https://github.com/DataDog/integrations-core/pull/15212))
 
 ***Fixed***:
 
-* Bump the minimum datadog-checks-base version. See [#15217](https://github.com/DataDog/integrations-core/pull/15217).
+* Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
+
+## 2.19.1 / 2023-07-13 / Agent 7.47.0
+
+***Fixed***:
+
+* Bump the minimum datadog-checks-base version ([#15217](https://github.com/DataDog/integrations-core/pull/15217))
 
 ## 2.19.0 / 2023-07-10
 
 ***Added***:
 
-* Bump dependencies for Agent 7.47. See [#15145](https://github.com/DataDog/integrations-core/pull/15145).
-* Upgrade Pydantic model code generator. See [#14779](https://github.com/DataDog/integrations-core/pull/14779).
+* Bump dependencies for Agent 7.47 ([#15145](https://github.com/DataDog/integrations-core/pull/15145))
+* Upgrade Pydantic model code generator ([#14779](https://github.com/DataDog/integrations-core/pull/14779))
 
 ***Fixed***:
 
-* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+* Bump Python version from py3.8 to py3.9 ([#14701](https://github.com/DataDog/integrations-core/pull/14701))
 
 ## 2.18.3 / 2023-04-14 / Agent 7.45.0
 
 ***Fixed***:
 
-* Fix `iis.*_up` service check when configured using a mapping. See [#13747](https://github.com/DataDog/integrations-core/pull/13747).
+* Fix `iis.*_up` service check when configured using a mapping ([#13747](https://github.com/DataDog/integrations-core/pull/13747))
 
 ## 2.18.2 / 2023-03-03 / Agent 7.44.0
 
 ***Fixed***:
 
-* Fix leak due to a bug in `win32pdh.GetFormattedCouterArray()`. See [#13901](https://github.com/DataDog/integrations-core/pull/13901).
-* Change the performance counter used by the `iis.app_pool_up` service check so it can tell when the app pool is down. See [#13734](https://github.com/DataDog/integrations-core/pull/13734).
+* Fix leak due to a bug in `win32pdh.GetFormattedCouterArray()` ([#13901](https://github.com/DataDog/integrations-core/pull/13901))
+* Change the performance counter used by the `iis.app_pool_up` service check so it can tell when the app pool is down ([#13734](https://github.com/DataDog/integrations-core/pull/13734))
 
 ## 2.18.1 / 2023-02-08 / Agent 7.42.2
 
 ***Fixed***:
 
-* Fix IIS Check memory leaked due to a bug in win32pdh.GetFormattedCounterArray(). See [#13897](https://github.com/DataDog/integrations-core/pull/13897).
+* Fix IIS Check memory leaked due to a bug in win32pdh.GetFormattedCounterArray() ([#13897](https://github.com/DataDog/integrations-core/pull/13897))
 
 ## 2.18.0 / 2022-12-09 / Agent 7.42.0
 
 ***Added***:
 
-* Implement multi-instance counters without Windows PdhEnumObjects API. See [#13243](https://github.com/DataDog/integrations-core/pull/13243).
+* Implement multi-instance counters without Windows PdhEnumObjects API ([#13243](https://github.com/DataDog/integrations-core/pull/13243))
 
 ## 2.17.0 / 2022-07-18 / Agent 7.39.0
 
 ***Added***:
 
-* Add functionality to load the legacy version of the integration. See [#12396](https://github.com/DataDog/integrations-core/pull/12396).
+* Add functionality to load the legacy version of the integration ([#12396](https://github.com/DataDog/integrations-core/pull/12396))
 
 ## 2.16.2 / 2022-05-15 / Agent 7.37.0
 
 ***Fixed***:
 
-* Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).
+* Upgrade dependencies ([#11958](https://github.com/DataDog/integrations-core/pull/11958))
 
 ## 2.16.1 / 2022-05-04
 
 ***Fixed***:
 
-* Remove http patch requests per second metric. See [#11823](https://github.com/DataDog/integrations-core/pull/11823).
+* Remove http patch requests per second metric ([#11823](https://github.com/DataDog/integrations-core/pull/11823))
 
 ## 2.16.0 / 2022-04-05 / Agent 7.36.0
 
 ***Added***:
 
-* Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
-* Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* Upgrade dependencies ([#11726](https://github.com/DataDog/integrations-core/pull/11726))
+* Add metric_patterns options to filter all metric submission by a list of regexes ([#11695](https://github.com/DataDog/integrations-core/pull/11695))
 
 ## 2.15.0 / 2022-02-19 / Agent 7.35.0
 
 ***Added***:
 
-* Add `pyproject.toml` file. See [#11373](https://github.com/DataDog/integrations-core/pull/11373).
+* Add `pyproject.toml` file ([#11373](https://github.com/DataDog/integrations-core/pull/11373))
 
 ***Fixed***:
 
-* Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+* Fix namespace packaging on Python 2 ([#11532](https://github.com/DataDog/integrations-core/pull/11532))
 
 ## 2.14.1 / 2022-01-08 / Agent 7.34.0
 
 ***Fixed***:
 
-* Add comment to autogenerated model files. See [#10945](https://github.com/DataDog/integrations-core/pull/10945).
+* Add comment to autogenerated model files ([#10945](https://github.com/DataDog/integrations-core/pull/10945))
 
 ## 2.14.0 / 2021-12-20
 
 ***Added***:
 
-* Add better filtering options. See [#10775](https://github.com/DataDog/integrations-core/pull/10775).
-* Add missing metric for the number of PATCH requests per second. See [#10773](https://github.com/DataDog/integrations-core/pull/10773).
-* Support new implementation of Windows performance counters on Python 3. See [#10546](https://github.com/DataDog/integrations-core/pull/10546).
+* Add better filtering options ([#10775](https://github.com/DataDog/integrations-core/pull/10775))
+* Add missing metric for the number of PATCH requests per second ([#10773](https://github.com/DataDog/integrations-core/pull/10773))
+* Support new implementation of Windows performance counters on Python 3 ([#10546](https://github.com/DataDog/integrations-core/pull/10546))
 
 ***Fixed***:
 
-* Properly hide legacy PDH config. See [#10858](https://github.com/DataDog/integrations-core/pull/10858).
-* Bump base package dependency. See [#10797](https://github.com/DataDog/integrations-core/pull/10797).
+* Properly hide legacy PDH config ([#10858](https://github.com/DataDog/integrations-core/pull/10858))
+* Bump base package dependency ([#10797](https://github.com/DataDog/integrations-core/pull/10797))
 
 ## 2.13.0 / 2021-10-04 / Agent 7.32.0
 
 ***Added***:
 
-* Add runtime configuration validation. See [#8938](https://github.com/DataDog/integrations-core/pull/8938).
+* Add runtime configuration validation ([#8938](https://github.com/DataDog/integrations-core/pull/8938))
 
 ## 2.12.0 / 2021-08-02 / Agent 7.31.0
 
 ***Added***:
 
-* Submit unknown iis counters. See [#9807](https://github.com/DataDog/integrations-core/pull/9807).
+* Submit unknown iis counters ([#9807](https://github.com/DataDog/integrations-core/pull/9807))
 
 ## 2.11.0 / 2021-04-19 / Agent 7.28.0
 
 ***Added***:
 
-* Upgrade pywin32 on Python 3. See [#8845](https://github.com/DataDog/integrations-core/pull/8845).
+* Upgrade pywin32 on Python 3 ([#8845](https://github.com/DataDog/integrations-core/pull/8845))
 
 ***Fixed***:
 
-* reuse base package refreshing. See [#8823](https://github.com/DataDog/integrations-core/pull/8823).
+* reuse base package refreshing ([#8823](https://github.com/DataDog/integrations-core/pull/8823))
 
 ## 2.10.5 / 2021-03-15
 
 ***Fixed***:
 
-* Better recreate base class refreshing strategy. See [#8821](https://github.com/DataDog/integrations-core/pull/8821).
+* Better recreate base class refreshing strategy ([#8821](https://github.com/DataDog/integrations-core/pull/8821))
 
 ## 2.10.4 / 2021-03-07 / Agent 7.27.0
 
 ***Fixed***:
 
-* Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+* Bump minimum base package version ([#8443](https://github.com/DataDog/integrations-core/pull/8443))
 
 ## 2.10.3 / 2020-12-11 / Agent 7.25.0
 
 ***Fixed***:
 
-* Add config specs. See [#8109](https://github.com/DataDog/integrations-core/pull/8109).
+* Add config specs ([#8109](https://github.com/DataDog/integrations-core/pull/8109))
 
 ## 2.10.2 / 2020-10-31 / Agent 7.24.0
 
 ***Fixed***:
 
-* Fix metrics collection on non-english systems. See [#7875](https://github.com/DataDog/integrations-core/pull/7875).
+* Fix metrics collection on non-english systems ([#7875](https://github.com/DataDog/integrations-core/pull/7875))
 
 ## 2.10.1 / 2020-08-19 / Agent 7.23.0
 
 ***Fixed***:
 
-* Add debug lines on skipped metrics. See [#7394](https://github.com/DataDog/integrations-core/pull/7394).
+* Add debug lines on skipped metrics ([#7394](https://github.com/DataDog/integrations-core/pull/7394))
 
 ## 2.10.0 / 2020-06-29 / Agent 7.21.0
 
 ***Added***:
 
-* Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).
+* Upgrade pywin32 to 228 ([#6980](https://github.com/DataDog/integrations-core/pull/6980))
 
 ## 2.9.0 / 2020-05-17 / Agent 7.20.0
 
 ***Added***:
 
-* Monitor application pools. See [#6549](https://github.com/DataDog/integrations-core/pull/6549).
-* Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* Monitor application pools ([#6549](https://github.com/DataDog/integrations-core/pull/6549))
+* Allow optional dependency installation for all checks ([#6589](https://github.com/DataDog/integrations-core/pull/6589))
 
 ## 2.8.1 / 2020-04-04 / Agent 7.19.0
 
 ***Fixed***:
 
-* Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
-* Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+* Update deprecated imports ([#6088](https://github.com/DataDog/integrations-core/pull/6088))
+* Remove logs sourcecategory ([#6121](https://github.com/DataDog/integrations-core/pull/6121))
 
 ## 2.8.0 / 2019-12-02 / Agent 7.16.0
 
 ***Added***:
 
-* Upgrade pywin32 to 227. See [#5036](https://github.com/DataDog/integrations-core/pull/5036).
+* Upgrade pywin32 to 227 ([#5036](https://github.com/DataDog/integrations-core/pull/5036))
 
 ## 2.7.0 / 2019-10-11 / Agent 6.15.0
 
 ***Added***:
 
-* Upgrade pywin32 to 225. See [#4563](https://github.com/DataDog/integrations-core/pull/4563).
+* Upgrade pywin32 to 225 ([#4563](https://github.com/DataDog/integrations-core/pull/4563))
 
 ## 2.6.1 / 2019-06-18 / Agent 6.13.0
 
 ***Fixed***:
 
-* Rename lower case manifest.in. See [#3858](https://github.com/DataDog/integrations-core/pull/3858).
+* Rename lower case manifest.in ([#3858](https://github.com/DataDog/integrations-core/pull/3858))
 
 ## 2.6.0 / 2019-06-01 / Agent 6.12.0
 
 ***Added***:
 
-* Handle the refresh_counters flag. See [#3840](https://github.com/DataDog/integrations-core/pull/3840).
+* Handle the refresh_counters flag ([#3840](https://github.com/DataDog/integrations-core/pull/3840))
 
 ## 2.5.0 / 2019-05-14
 
 ***Added***:
 
-* Cosmetic cleanups. See [#3706](https://github.com/DataDog/integrations-core/pull/3706).
-* Adhere to code style. See [#3521](https://github.com/DataDog/integrations-core/pull/3521).
+* Cosmetic cleanups ([#3706](https://github.com/DataDog/integrations-core/pull/3706))
+* Adhere to code style ([#3521](https://github.com/DataDog/integrations-core/pull/3521))
 
 ## 2.4.0 / 2019-03-29 / Agent 6.11.0
 
 ***Added***:
 
-* adds `iis_host` tag to metrics. See [#3294](https://github.com/DataDog/integrations-core/pull/3294).
+* adds `iis_host` tag to metrics ([#3294](https://github.com/DataDog/integrations-core/pull/3294))
 
 ***Fixed***:
 
-* ensure_unicode with normalize for py3 compatibility. See [#3218](https://github.com/DataDog/integrations-core/pull/3218).
+* ensure_unicode with normalize for py3 compatibility ([#3218](https://github.com/DataDog/integrations-core/pull/3218))
 
 ## 2.3.0 / 2019-02-18 / Agent 6.10.0
 
 ***Added***:
 
-* Support Python 3. See [#2999](https://github.com/DataDog/integrations-core/pull/2999).
+* Support Python 3 ([#2999](https://github.com/DataDog/integrations-core/pull/2999))
 
 ***Fixed***:
 
-* Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).
+* Resolve flake8 issues ([#3060](https://github.com/DataDog/integrations-core/pull/3060))
 
 ## 2.2.1 / 2019-01-04 / Agent 6.9.0
 
 ***Fixed***:
 
-* Change example config from "localhost" to ".". See [#2779](https://github.com/DataDog/integrations-core/pull/2779).
+* Change example config from "localhost" to "." ([#2779](https://github.com/DataDog/integrations-core/pull/2779))
 
 ## 2.2.0 / 2018-10-12 / Agent 6.6.0
 
 ***Added***:
 
-* Pin pywin32 dependency. See [#2322](https://github.com/DataDog/integrations-core/pull/2322).
+* Pin pywin32 dependency ([#2322](https://github.com/DataDog/integrations-core/pull/2322))
 
 ## 2.1.1 / 2018-09-04 / Agent 6.5.0
 
 ***Fixed***:
 
-* Fix 'attempted connection' metrics. See [#1970](https://github.com/DataDog/integrations-core/pull/1970).
-* Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+* Fix 'attempted connection' metrics ([#1970](https://github.com/DataDog/integrations-core/pull/1970))
+* Add data files to the wheel package ([#1727](https://github.com/DataDog/integrations-core/pull/1727))
 
 ## 2.1.0 / 2018-05-11
 
@@ -254,7 +268,7 @@
 
 ***Fixed***:
 
-* Fixeded tag initialization & reporting. See [#1185](https://github.com/DataDog/integrations-core/issues/1185).
+* Fixeded tag initialization & reporting ([#1185](https://github.com/DataDog/integrations-core/issues/1185))
 
 ## 2.0.1 / 2018-02-13
 

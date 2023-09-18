@@ -2,456 +2,478 @@
 
 ## Unreleased
 
-## 6.3.0 / 2023-07-10
+***Fixed***:
+
+* Add ability to filter property metrics ([#15474](https://github.com/DataDog/integrations-core/pull/15474))
+
+## 7.0.0 / 2023-08-10
+
+***Changed***:
+
+* Bump the minimum base check version ([#15427](https://github.com/DataDog/integrations-core/pull/15427))
 
 ***Added***:
 
-* Bump dependencies for Agent 7.47. See [#15145](https://github.com/DataDog/integrations-core/pull/15145).
-* Add ability to choose tag to append to VM hostname. See [#14657](https://github.com/DataDog/integrations-core/pull/14657).
-* Add new performance counter metrics. See [#14625](https://github.com/DataDog/integrations-core/pull/14625).
+* Add support for datastore property metrics ([#15389](https://github.com/DataDog/integrations-core/pull/15389))
+* Add cluster property metrics ([#15361](https://github.com/DataDog/integrations-core/pull/15361))
+* Add support for host property metrics  ([#15347](https://github.com/DataDog/integrations-core/pull/15347))
+* Add support for VM property metrics ([#14787](https://github.com/DataDog/integrations-core/pull/14787))
+* Update generated config models ([#15212](https://github.com/DataDog/integrations-core/pull/15212))
 
 ***Fixed***:
 
-* Always filter tags when constructing tags recursively and add improve testing . See [#14583](https://github.com/DataDog/integrations-core/pull/14583).
-* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
-* Handle None return value from RetrievePropertiesEx. See [#14699](https://github.com/DataDog/integrations-core/pull/14699).
+* Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
+
+## 6.3.0 / 2023-07-10 / Agent 7.47.0
+
+***Added***:
+
+* Bump dependencies for Agent 7.47 ([#15145](https://github.com/DataDog/integrations-core/pull/15145))
+* Add ability to choose tag to append to VM hostname ([#14657](https://github.com/DataDog/integrations-core/pull/14657))
+* Add new performance counter metrics ([#14625](https://github.com/DataDog/integrations-core/pull/14625))
+
+***Fixed***:
+
+* Always filter tags when constructing tags recursively and add improve testing  ([#14583](https://github.com/DataDog/integrations-core/pull/14583))
+* Bump Python version from py3.8 to py3.9 ([#14701](https://github.com/DataDog/integrations-core/pull/14701))
+* Handle None return value from RetrievePropertiesEx ([#14699](https://github.com/DataDog/integrations-core/pull/14699))
 
 ## 6.2.2 / 2023-05-26 / Agent 7.46.0
 
 ***Fixed***:
 
-* Add error handling when getting tags from API. See [#14566](https://github.com/DataDog/integrations-core/pull/14566).
+* Add error handling when getting tags from API ([#14566](https://github.com/DataDog/integrations-core/pull/14566))
 
 ## 6.2.1 / 2022-12-09 / Agent 7.42.0
 
 ***Fixed***:
 
-* Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
+* Update dependencies ([#13478](https://github.com/DataDog/integrations-core/pull/13478))
 
 ## 6.2.0 / 2022-09-16 / Agent 7.40.0
 
 ***Added***:
 
-* Add connection refresh option. See [#11507](https://github.com/DataDog/integrations-core/pull/11507).
-* Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+* Add connection refresh option ([#11507](https://github.com/DataDog/integrations-core/pull/11507))
+* Update HTTP config spec templates ([#12890](https://github.com/DataDog/integrations-core/pull/12890))
 
 ## 6.1.2 / 2022-05-15 / Agent 7.37.0
 
 ***Fixed***:
 
-* Fix uncommented parent options. See [#12013](https://github.com/DataDog/integrations-core/pull/12013).
+* Fix uncommented parent options ([#12013](https://github.com/DataDog/integrations-core/pull/12013))
 
 ## 6.1.1 / 2022-04-11 / Agent 7.36.0
 
 ***Fixed***:
 
-* Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11800](https://github.com/DataDog/integrations-core/pull/11800).
+* Remove outdated warning in the description for the `tls_ignore_warning` option ([#11800](https://github.com/DataDog/integrations-core/pull/11800))
 
 ## 6.1.0 / 2022-04-05
 
 ***Added***:
 
-* Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
-* Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* Upgrade dependencies ([#11726](https://github.com/DataDog/integrations-core/pull/11726))
+* Add metric_patterns options to filter all metric submission by a list of regexes ([#11695](https://github.com/DataDog/integrations-core/pull/11695))
 
 ***Fixed***:
 
-* Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
+* Remove outdated warning in the description for the `tls_ignore_warning` option ([#11591](https://github.com/DataDog/integrations-core/pull/11591))
 
 ## 6.0.0 / 2022-02-19 / Agent 7.35.0
 
 ***Changed***:
 
-* Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
+* Add tls_protocols_allowed option documentation ([#11251](https://github.com/DataDog/integrations-core/pull/11251))
 
 ***Added***:
 
-* Add `pyproject.toml` file. See [#11456](https://github.com/DataDog/integrations-core/pull/11456).
+* Add `pyproject.toml` file ([#11456](https://github.com/DataDog/integrations-core/pull/11456))
 
 ***Fixed***:
 
-* Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+* Fix namespace packaging on Python 2 ([#11532](https://github.com/DataDog/integrations-core/pull/11532))
 
 ## 5.12.1 / 2022-01-08 / Agent 7.34.0
 
 ***Fixed***:
 
-* Add comment to autogenerated model files. See [#10945](https://github.com/DataDog/integrations-core/pull/10945).
+* Add comment to autogenerated model files ([#10945](https://github.com/DataDog/integrations-core/pull/10945))
 
 ## 5.12.0 / 2021-10-04 / Agent 7.32.0
 
 ***Added***:
 
-* Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
-* Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
-* Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* Add HTTP option to control the size of streaming responses ([#10183](https://github.com/DataDog/integrations-core/pull/10183))
+* Add allow_redirect option ([#10160](https://github.com/DataDog/integrations-core/pull/10160))
+* Disable generic tags ([#10027](https://github.com/DataDog/integrations-core/pull/10027))
 
 ***Fixed***:
 
-* Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+* Fix the description of the `allow_redirects` HTTP option ([#10195](https://github.com/DataDog/integrations-core/pull/10195))
 
 ## 5.11.2 / 2021-08-30
 
 ***Fixed***:
 
-* Fix crash when some permissions are missing. See [#10012](https://github.com/DataDog/integrations-core/pull/10012).
+* Fix crash when some permissions are missing ([#10012](https://github.com/DataDog/integrations-core/pull/10012))
 
 ## 5.11.1 / 2021-08-25 / Agent 7.31.0
 
 ***Fixed***:
 
-* Fix collect_events default. See [#9979](https://github.com/DataDog/integrations-core/pull/9979).
+* Fix collect_events default ([#9979](https://github.com/DataDog/integrations-core/pull/9979))
 
 ## 5.11.0 / 2021-08-22
 
 ***Added***:
 
-* Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+* Use `display_default` as a fallback for `default` when validating config models ([#9739](https://github.com/DataDog/integrations-core/pull/9739))
 
 ***Fixed***:
 
-* Fix typos in log lines. See [#9907](https://github.com/DataDog/integrations-core/pull/9907).
-* Check if rest_api_options is empty. See [#9798](https://github.com/DataDog/integrations-core/pull/9798).
-* Fix config validation. See [#9781](https://github.com/DataDog/integrations-core/pull/9781).
+* Fix typos in log lines ([#9907](https://github.com/DataDog/integrations-core/pull/9907))
+* Check if rest_api_options is empty ([#9798](https://github.com/DataDog/integrations-core/pull/9798))
+* Fix config validation ([#9781](https://github.com/DataDog/integrations-core/pull/9781))
 
 ## 5.10.0 / 2021-05-28 / Agent 7.29.0
 
 ***Added***:
 
-* Add runtime configuration validation. See [#9005](https://github.com/DataDog/integrations-core/pull/9005).
-* Use new REST API when possible. See [#9293](https://github.com/DataDog/integrations-core/pull/9293).
+* Add runtime configuration validation ([#9005](https://github.com/DataDog/integrations-core/pull/9005))
+* Use new REST API when possible ([#9293](https://github.com/DataDog/integrations-core/pull/9293))
 
 ***Fixed***:
 
-* Upgrade pyvmomi to 7.0.2. See [#9287](https://github.com/DataDog/integrations-core/pull/9287).
+* Upgrade pyvmomi to 7.0.2 ([#9287](https://github.com/DataDog/integrations-core/pull/9287))
 
 ## 5.9.0 / 2021-04-01 / Agent 7.28.0
 
 ***Added***:
 
-* Add rest_api_options to expose all RequestsWrapper options. See [#9070](https://github.com/DataDog/integrations-core/pull/9070).
+* Add rest_api_options to expose all RequestsWrapper options ([#9070](https://github.com/DataDog/integrations-core/pull/9070))
 
 ***Fixed***:
 
-* Tag collection only available from vSphere 6.5. See [#8864](https://github.com/DataDog/integrations-core/pull/8864).
+* Tag collection only available from vSphere 6.5 ([#8864](https://github.com/DataDog/integrations-core/pull/8864))
 
 ## 5.8.1 / 2021-02-23 / Agent 7.27.0
 
 ***Fixed***:
 
-* Add `vsphere_cluster` tag from host parent. See [#8674](https://github.com/DataDog/integrations-core/pull/8674).
+* Add `vsphere_cluster` tag from host parent ([#8674](https://github.com/DataDog/integrations-core/pull/8674))
 
 ## 5.8.0 / 2021-02-12
 
 ***Added***:
 
-* Support filtering by tags set by integration. See [#8603](https://github.com/DataDog/integrations-core/pull/8603).
+* Support filtering by tags set by integration ([#8603](https://github.com/DataDog/integrations-core/pull/8603))
 
 ***Fixed***:
 
-* Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
-* Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+* Rename config spec example consumer option `default` to `display_default` ([#8593](https://github.com/DataDog/integrations-core/pull/8593))
+* Bump minimum base package version ([#8443](https://github.com/DataDog/integrations-core/pull/8443))
 
 ## 5.7.1 / 2020-10-31 / Agent 7.24.0
 
 ***Fixed***:
 
-* Re-add empty_default_hostname to configuration by default. See [#7732](https://github.com/DataDog/integrations-core/pull/7732).
+* Re-add empty_default_hostname to configuration by default ([#7732](https://github.com/DataDog/integrations-core/pull/7732))
 
 ## 5.7.0 / 2020-09-21 / Agent 7.23.0
 
 ***Added***:
 
-* Add datastore cluster tag. See [#7603](https://github.com/DataDog/integrations-core/pull/7603).
+* Add datastore cluster tag ([#7603](https://github.com/DataDog/integrations-core/pull/7603))
 
 ***Fixed***:
 
-* Better trace log. See [#7608](https://github.com/DataDog/integrations-core/pull/7608).
+* Better trace log ([#7608](https://github.com/DataDog/integrations-core/pull/7608))
 
 ## 5.6.0 / 2020-09-16
 
 ***Added***:
 
-* Add hostname to vsphere debug metrics. See [#7580](https://github.com/DataDog/integrations-core/pull/7580).
+* Add hostname to vsphere debug metrics ([#7580](https://github.com/DataDog/integrations-core/pull/7580))
 
 ***Fixed***:
 
-* Use server time to compute startTime. See [#7586](https://github.com/DataDog/integrations-core/pull/7586).
+* Use server time to compute startTime ([#7586](https://github.com/DataDog/integrations-core/pull/7586))
 
 ## 5.5.0 / 2020-09-15
 
 ***Added***:
 
-* Add debug logs to help support. See [#7577](https://github.com/DataDog/integrations-core/pull/7577).
-* Add config spec for vsphere. See [#7537](https://github.com/DataDog/integrations-core/pull/7537).
+* Add debug logs to help support ([#7577](https://github.com/DataDog/integrations-core/pull/7577))
+* Add config spec for vsphere ([#7537](https://github.com/DataDog/integrations-core/pull/7537))
 
 ***Fixed***:
 
-* Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+* Fix style for the latest release of Black ([#7438](https://github.com/DataDog/integrations-core/pull/7438))
 
 ## 5.4.0 / 2020-08-10 / Agent 7.22.0
 
 ***Added***:
 
-* Collect and submit vSphere attributes. See [#7180](https://github.com/DataDog/integrations-core/pull/7180).
+* Collect and submit vSphere attributes ([#7180](https://github.com/DataDog/integrations-core/pull/7180))
 
 ## 5.3.0 / 2020-06-29 / Agent 7.21.0
 
 ***Added***:
 
-* Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
-* Add collect events fallback. See [#6658](https://github.com/DataDog/integrations-core/pull/6658).
-* Filter by allowed events. See [#6659](https://github.com/DataDog/integrations-core/pull/6659).
+* Add note about warning concurrency ([#6967](https://github.com/DataDog/integrations-core/pull/6967))
+* Add collect events fallback ([#6658](https://github.com/DataDog/integrations-core/pull/6658))
+* Filter by allowed events ([#6659](https://github.com/DataDog/integrations-core/pull/6659))
 
 ***Fixed***:
 
-* Provide helpful error message when releasing a project with missing or improper tags. See [#6861](https://github.com/DataDog/integrations-core/pull/6861).
-* Move event to non legacy folder. See [#6751](https://github.com/DataDog/integrations-core/pull/6751).
-* Avoid calling get_latest_event_timestamp. See [#6656](https://github.com/DataDog/integrations-core/pull/6656).
+* Provide helpful error message when releasing a project with missing or improper tags ([#6861](https://github.com/DataDog/integrations-core/pull/6861))
+* Move event to non legacy folder ([#6751](https://github.com/DataDog/integrations-core/pull/6751))
+* Avoid calling get_latest_event_timestamp ([#6656](https://github.com/DataDog/integrations-core/pull/6656))
 
 ## 5.2.0 / 2020-05-17 / Agent 7.20.0
 
 ***Added***:
 
-* Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
-* Add version metadata. See [#6364](https://github.com/DataDog/integrations-core/pull/6364).
+* Allow optional dependency installation for all checks ([#6589](https://github.com/DataDog/integrations-core/pull/6589))
+* Add version metadata ([#6364](https://github.com/DataDog/integrations-core/pull/6364))
 
 ***Fixed***:
 
-* Properly error when filtering resources by the `tag` property but `collect_tags` is disabled. See [#6638](https://github.com/DataDog/integrations-core/pull/6638).
+* Properly error when filtering resources by the `tag` property but `collect_tags` is disabled ([#6638](https://github.com/DataDog/integrations-core/pull/6638))
 
 ## 5.1.2 / 2020-04-14 / Agent 7.19.0
 
 ***Fixed***:
 
-* Renew REST API session on failure. See [#6330](https://github.com/DataDog/integrations-core/pull/6330).
-* Fix vsphere capitalization. See [#6278](https://github.com/DataDog/integrations-core/pull/6278).
+* Renew REST API session on failure ([#6330](https://github.com/DataDog/integrations-core/pull/6330))
+* Fix vsphere capitalization ([#6278](https://github.com/DataDog/integrations-core/pull/6278))
 
 ## 5.1.1 / 2020-04-10
 
 ***Fixed***:
 
-* Fix tags race conditions with filtering. See [#6297](https://github.com/DataDog/integrations-core/pull/6297).
+* Fix tags race conditions with filtering ([#6297](https://github.com/DataDog/integrations-core/pull/6297))
 
 ## 5.1.0 / 2020-04-04
 
 ***Added***:
 
-* resource filters: allow blacklist and tag filtering. See [#6194](https://github.com/DataDog/integrations-core/pull/6194).
-* Add type annotations. See [#6036](https://github.com/DataDog/integrations-core/pull/6036).
+* resource filters: allow blacklist and tag filtering ([#6194](https://github.com/DataDog/integrations-core/pull/6194))
+* Add type annotations ([#6036](https://github.com/DataDog/integrations-core/pull/6036))
 
 ***Fixed***:
 
-* Limit tags collection logic to the monitored resources only. See [#6248](https://github.com/DataDog/integrations-core/pull/6248).
-* Revert `to_native_string` to `to_string` for integrations. See [#6238](https://github.com/DataDog/integrations-core/pull/6238).
-* Deprecating the legacy implementation. See [#6215](https://github.com/DataDog/integrations-core/pull/6215).
-* Fix hostname resolution. See [#6190](https://github.com/DataDog/integrations-core/pull/6190).
-* Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
-* Fix ssl context. See [#6075](https://github.com/DataDog/integrations-core/pull/6075).
-* Rename `to_string()` utility to `to_native_string()`. See [#5996](https://github.com/DataDog/integrations-core/pull/5996).
-* Improve logging of the legacy implementation. See [#5993](https://github.com/DataDog/integrations-core/pull/5993).
+* Limit tags collection logic to the monitored resources only ([#6248](https://github.com/DataDog/integrations-core/pull/6248))
+* Revert `to_native_string` to `to_string` for integrations ([#6238](https://github.com/DataDog/integrations-core/pull/6238))
+* Deprecating the legacy implementation ([#6215](https://github.com/DataDog/integrations-core/pull/6215))
+* Fix hostname resolution ([#6190](https://github.com/DataDog/integrations-core/pull/6190))
+* Update deprecated imports ([#6088](https://github.com/DataDog/integrations-core/pull/6088))
+* Fix ssl context ([#6075](https://github.com/DataDog/integrations-core/pull/6075))
+* Rename `to_string()` utility to `to_native_string()` ([#5996](https://github.com/DataDog/integrations-core/pull/5996))
+* Improve logging of the legacy implementation ([#5993](https://github.com/DataDog/integrations-core/pull/5993))
 
 ## 5.0.2 / 2020-02-29 / Agent 7.18.0
 
 ***Fixed***:
 
-* Disconnect vSphere connection to the server on refresh. See [#5929](https://github.com/DataDog/integrations-core/pull/5929).
+* Disconnect vSphere connection to the server on refresh ([#5929](https://github.com/DataDog/integrations-core/pull/5929))
 
 ## 5.0.1 / 2020-02-28
 
 ***Fixed***:
 
-* Remove some unnecessary warnings. See [#5916](https://github.com/DataDog/integrations-core/pull/5916).
-* Add tags section in conf.yaml. See [#5911](https://github.com/DataDog/integrations-core/pull/5911).
+* Remove some unnecessary warnings ([#5916](https://github.com/DataDog/integrations-core/pull/5916))
+* Add tags section in conf.yaml ([#5911](https://github.com/DataDog/integrations-core/pull/5911))
 
 ## 5.0.0 / 2020-02-22
 
 ***Changed***:
 
-* vSphere new implementation. See [#5251](https://github.com/DataDog/integrations-core/pull/5251).
+* vSphere new implementation ([#5251](https://github.com/DataDog/integrations-core/pull/5251))
 
 ***Added***:
 
-* Add `tls_ignore_warning` option. See [#5777](https://github.com/DataDog/integrations-core/pull/5777).
-* Submit resource count metrics with their tags. See [#5681](https://github.com/DataDog/integrations-core/pull/5681).
-* Add tags support v2 using requests. See [#5729](https://github.com/DataDog/integrations-core/pull/5729).
-* Add per instance values as tag. See [#5584](https://github.com/DataDog/integrations-core/pull/5584).
+* Add `tls_ignore_warning` option ([#5777](https://github.com/DataDog/integrations-core/pull/5777))
+* Submit resource count metrics with their tags ([#5681](https://github.com/DataDog/integrations-core/pull/5681))
+* Add tags support v2 using requests ([#5729](https://github.com/DataDog/integrations-core/pull/5729))
+* Add per instance values as tag ([#5584](https://github.com/DataDog/integrations-core/pull/5584))
 
 ***Fixed***:
 
-* Submit collected vsphere tags as host tags for realtime resources. See [#5776](https://github.com/DataDog/integrations-core/pull/5776).
-* Renaming vsphere_tags_prefix config to tags_prefix. See [#5771](https://github.com/DataDog/integrations-core/pull/5771).
-* Do not collect max, min and sum aggregates as they are the same as avg. See [#5638](https://github.com/DataDog/integrations-core/pull/5638).
+* Submit collected vsphere tags as host tags for realtime resources ([#5776](https://github.com/DataDog/integrations-core/pull/5776))
+* Renaming vsphere_tags_prefix config to tags_prefix ([#5771](https://github.com/DataDog/integrations-core/pull/5771))
+* Do not collect max, min and sum aggregates as they are the same as avg ([#5638](https://github.com/DataDog/integrations-core/pull/5638))
 
 ## 4.3.0 / 2019-12-13 / Agent 7.17.0
 
 ***Added***:
 
-* Add ability to exclude specific host tags from host metadata. See [#5201](https://github.com/DataDog/integrations-core/pull/5201).
+* Add ability to exclude specific host tags from host metadata ([#5201](https://github.com/DataDog/integrations-core/pull/5201))
 
 ## 4.2.2 / 2019-12-11
 
 ***Fixed***:
 
-* Creating container views using a context manager. See [#5187](https://github.com/DataDog/integrations-core/pull/5187).
-* Add warning log on historical metrics collection failure. See [#5161](https://github.com/DataDog/integrations-core/pull/5161).
+* Creating container views using a context manager ([#5187](https://github.com/DataDog/integrations-core/pull/5187))
+* Add warning log on historical metrics collection failure ([#5161](https://github.com/DataDog/integrations-core/pull/5161))
 
 ## 4.2.1 / 2019-11-15 / Agent 7.16.0
 
 ***Fixed***:
 
-* Collect the latest non-negative value for historical metrics. See [#5026](https://github.com/DataDog/integrations-core/pull/5026).
+* Collect the latest non-negative value for historical metrics ([#5026](https://github.com/DataDog/integrations-core/pull/5026))
 
 ## 4.2.0 / 2019-10-28
 
 ***Added***:
 
-* Adds the ability to collect realtime and historical metrics in two different instances for better performance. See [#4337](https://github.com/DataDog/integrations-core/pull/4337).
+* Adds the ability to collect realtime and historical metrics in two different instances for better performance ([#4337](https://github.com/DataDog/integrations-core/pull/4337))
 
 ## 4.1.3 / 2019-06-19 / Agent 6.13.0
 
 ***Fixed***:
 
-* Filters VMs in excluded hosts. See [#3933](https://github.com/DataDog/integrations-core/pull/3933).
+* Filters VMs in excluded hosts ([#3933](https://github.com/DataDog/integrations-core/pull/3933))
 
 ## 4.1.2 / 2019-06-17
 
 ***Fixed***:
 
-* [vsphere] update metric_to_check. See [#3904](https://github.com/DataDog/integrations-core/pull/3904).
-* Fix handling of gray events. See [#3864](https://github.com/DataDog/integrations-core/pull/3864).
+* [vsphere] update metric_to_check ([#3904](https://github.com/DataDog/integrations-core/pull/3904))
+* Fix handling of gray events ([#3864](https://github.com/DataDog/integrations-core/pull/3864))
 
 ## 4.1.1 / 2019-06-01 / Agent 6.12.0
 
 ***Fixed***:
 
-* Fix event alarms publishing. See [#3831](https://github.com/DataDog/integrations-core/pull/3831).
-* Fix unit for vsphere.mem.usage.avg. See [#3827](https://github.com/DataDog/integrations-core/pull/3827).
+* Fix event alarms publishing ([#3831](https://github.com/DataDog/integrations-core/pull/3831))
+* Fix unit for vsphere.mem.usage.avg ([#3827](https://github.com/DataDog/integrations-core/pull/3827))
 
 ## 4.1.0 / 2019-04-25
 
 ***Added***:
 
-* Adhere to code style. See [#3581](https://github.com/DataDog/integrations-core/pull/3581).
-* Support Python 3. See [#3250](https://github.com/DataDog/integrations-core/pull/3250).
+* Adhere to code style ([#3581](https://github.com/DataDog/integrations-core/pull/3581))
+* Support Python 3 ([#3250](https://github.com/DataDog/integrations-core/pull/3250))
 
 ## 4.0.0 / 2019-01-29 / Agent 6.10.0
 
 ***Changed***:
 
-* Wait for jobs to finish before returning from check function. See [#3034](https://github.com/DataDog/integrations-core/pull/3034).
+* Wait for jobs to finish before returning from check function ([#3034](https://github.com/DataDog/integrations-core/pull/3034))
 
 ## 3.6.2 / 2019-01-10 / Agent 6.9.0
 
 ***Fixed***:
 
-* Fix tags normalization. See [#2918](https://github.com/DataDog/integrations-core/pull/2918).
+* Fix tags normalization ([#2918](https://github.com/DataDog/integrations-core/pull/2918))
 
 ## 3.6.1 / 2019-01-04
 
 ***Fixed***:
 
-* Demote critical log levels to error. See [#2795](https://github.com/DataDog/integrations-core/pull/2795).
+* Demote critical log levels to error ([#2795](https://github.com/DataDog/integrations-core/pull/2795))
 
 ## 3.6.0 / 2018-11-29 / Agent 6.8.0
 
 ***Added***:
 
-* Add option to collect cluster, datacenter and datastore metrics. See [#2655](https://github.com/DataDog/integrations-core/pull/2655).
+* Add option to collect cluster, datacenter and datastore metrics ([#2655](https://github.com/DataDog/integrations-core/pull/2655))
 
 ## 3.5.0 / 2018-11-21
 
 ***Added***:
 
-* Handle unicode characters in vSphere object names. See [#2596](https://github.com/DataDog/integrations-core/pull/2596).
+* Handle unicode characters in vSphere object names ([#2596](https://github.com/DataDog/integrations-core/pull/2596))
 
 ## 3.4.0 / 2018-10-31
 
 ***Added***:
 
-* Add option to use guest hostname instead of VM name. See [#2479](https://github.com/DataDog/integrations-core/pull/2479).
-* Upgrade requests. See [#2481](https://github.com/DataDog/integrations-core/pull/2481).
+* Add option to use guest hostname instead of VM name ([#2479](https://github.com/DataDog/integrations-core/pull/2479))
+* Upgrade requests ([#2481](https://github.com/DataDog/integrations-core/pull/2481))
 
 ***Fixed***:
 
-* Fix "insufficient permission" error message formatting. See [#2480](https://github.com/DataDog/integrations-core/pull/2480).
+* Fix "insufficient permission" error message formatting ([#2480](https://github.com/DataDog/integrations-core/pull/2480))
 
 ## 3.3.1 / 2018-09-19 / Agent 6.5.2
 
 ***Fixed***:
 
-* Fix batch implementation logic. See [#2265](https://github.com/DataDog/integrations-core/pull/2265).
+* Fix batch implementation logic ([#2265](https://github.com/DataDog/integrations-core/pull/2265))
 
 ## 3.3.0 / 2018-09-17
 
 ***Changed***:
 
-* Precompute list of metric IDs to improve performance. See [#2221](https://github.com/DataDog/integrations-core/pull/2221).
+* Precompute list of metric IDs to improve performance ([#2221](https://github.com/DataDog/integrations-core/pull/2221))
 
 ***Added***:
 
-*  Add ability to filter metrics by collection level. See [#2226](https://github.com/DataDog/integrations-core/pull/2226).
+*  Add ability to filter metrics by collection level ([#2226](https://github.com/DataDog/integrations-core/pull/2226))
 
 ## 3.2.0 / 2018-09-11
 
 ***Changed***:
 
-* Rewrite the Mor cache. See [#2173](https://github.com/DataDog/integrations-core/pull/2173).
+* Rewrite the Mor cache ([#2173](https://github.com/DataDog/integrations-core/pull/2173))
 
 ***Fixed***:
 
-* Handle missing attributes in property collector result. See [#2205](https://github.com/DataDog/integrations-core/pull/2205).
-* Make the metadata cache thread safe. See [#2212](https://github.com/DataDog/integrations-core/pull/2212).
-* Make the connection list thread safe. See [#2201](https://github.com/DataDog/integrations-core/pull/2201).
-* Check that objects queue is initialized before processing it, and process it entirely. See [#2192](https://github.com/DataDog/integrations-core/pull/2192).
+* Handle missing attributes in property collector result ([#2205](https://github.com/DataDog/integrations-core/pull/2205))
+* Make the metadata cache thread safe ([#2212](https://github.com/DataDog/integrations-core/pull/2212))
+* Make the connection list thread safe ([#2201](https://github.com/DataDog/integrations-core/pull/2201))
+* Check that objects queue is initialized before processing it, and process it entirely ([#2192](https://github.com/DataDog/integrations-core/pull/2192))
 
 ## 3.1.0 / 2018-09-06 / Agent 6.5.0
 
 ***Changed***:
 
-* Downgrade pyvmomi to v6.5.0.2017.5-1. See [#2180](https://github.com/DataDog/integrations-core/pull/2180).
+* Downgrade pyvmomi to v6.5.0.2017.5-1 ([#2180](https://github.com/DataDog/integrations-core/pull/2180))
 
 ## 3.0.0 / 2018-09-04
 
 ***Changed***:
 
-* Upgrade pyvmomi to 6.7.0. See [#2153](https://github.com/DataDog/integrations-core/pull/2153).
-* Make first level cache thread safe. See [#2146](https://github.com/DataDog/integrations-core/pull/2146).
+* Upgrade pyvmomi to 6.7.0 ([#2153](https://github.com/DataDog/integrations-core/pull/2153))
+* Make first level cache thread safe ([#2146](https://github.com/DataDog/integrations-core/pull/2146))
 
 ## 2.4.0 / 2018-08-30
 
 ***Changed***:
 
-* Make the cache configuration thread safe. See [#2125](https://github.com/DataDog/integrations-core/pull/2125).
-* Removed unused `_clean` method, added more unit tests. See [#2120](https://github.com/DataDog/integrations-core/pull/2120).
+* Make the cache configuration thread safe ([#2125](https://github.com/DataDog/integrations-core/pull/2125))
+* Removed unused `_clean` method, added more unit tests ([#2120](https://github.com/DataDog/integrations-core/pull/2120))
 
 ***Fixed***:
 
-* Control size of the thread pool job queue. See [#2131](https://github.com/DataDog/integrations-core/pull/2131).
+* Control size of the thread pool job queue ([#2131](https://github.com/DataDog/integrations-core/pull/2131))
 
 ## 2.3.1 / 2018-08-28
 
 ***Fixed***:
 
-*  Fix `KeyError` due to race condition on the cache. See [#2099](https://github.com/DataDog/integrations-core/pull/2099).
+*  Fix `KeyError` due to race condition on the cache ([#2099](https://github.com/DataDog/integrations-core/pull/2099))
 
 ## 2.3.0 / 2018-08-21
 
 ***Changed***:
 
-* Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+* Add data files to the wheel package ([#1727](https://github.com/DataDog/integrations-core/pull/1727))
 
 ***Fixed***:
 
-* Drastically improve check performance by reducing number of calls to vSphere API. See [#2039](https://github.com/DataDog/integrations-core/pull/2039).
-* Retry connection once on failure, and correctly send CRITICAL service check if the connection still cannot be made. See [#2060](https://github.com/DataDog/integrations-core/pull/2060).
-* fix race condition and keyerror. See [#1893](https://github.com/DataDog/integrations-core/pull/1893).
+* Drastically improve check performance by reducing number of calls to vSphere API ([#2039](https://github.com/DataDog/integrations-core/pull/2039))
+* Retry connection once on failure, and correctly send CRITICAL service check if the connection still cannot be made ([#2060](https://github.com/DataDog/integrations-core/pull/2060))
+* fix race condition and keyerror ([#1893](https://github.com/DataDog/integrations-core/pull/1893))
 
 ## 2.2.0 / 2018-06-20 / Agent 6.4.0
 
 ***Changed***:
 
-* Bump requests to 2.19.1. See [#1743](https://github.com/DataDog/integrations-core/pull/1743).
+* Bump requests to 2.19.1 ([#1743](https://github.com/DataDog/integrations-core/pull/1743))
 
 ## 2.1.0 / 2018-05-11
 
@@ -463,14 +485,14 @@
 
 ***Added***:
 
-* Run with Agent versions >= 6. See [#1098](https://github.com/DataDog/integrations-core/issues/1098).
-* Add custom tag support. See [#1178](https://github.com/DataDog/integrations-core/issues/1178).
+* Run with Agent versions >= 6 ([#1098](https://github.com/DataDog/integrations-core/issues/1098))
+* Add custom tag support ([#1178](https://github.com/DataDog/integrations-core/issues/1178))
 
 ## 1.0.4 / 2017-10-10
 
 ***Fixed***:
 
-* Fix a possible leak of the vSphere password in the collector logs. See [#722](https://github.com/DataDog/integrations-core/issues/722).
+* Fix a possible leak of the vSphere password in the collector logs ([#722](https://github.com/DataDog/integrations-core/issues/722))
 
 ## 1.0.3 / 2017-08-28
 
@@ -482,13 +504,13 @@
 
 ***Fixed***:
 
-* Import `Timer` helper from `utils.timer` instead of deprecated `util`. See [#484](https://github.com/DataDog/integrations-core/issues/484)
+* Import `Timer` helper from `utils.timer` instead of deprecated `util` ([#484](https://github)com/DataDog/integrations-core/issues/484)
 
 ## 1.0.1 / 2017-06-05
 
 ***Fixed***:
 
-* Fix case where returned data series are empty. See [#346](https://github.com/DataDog/integrations-core/issues/346)
+* Fix case where returned data series are empty ([#346](https://github)com/DataDog/integrations-core/issues/346)
 
 ## 1.0.0 / 2017-03-22
 
