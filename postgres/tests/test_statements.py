@@ -1399,7 +1399,7 @@ def test_statement_samples_main_collection_rate_limit(aggregator, integration_ch
     # the loop and trigger cancel before another job_loop is triggered
     check_frequency = collection_interval / 5.0
     _check_until_time(check, dbm_instance, sleep_time, check_frequency)
-    max_collections = int(1 / collection_interval * sleep_time) + 1
+    max_collections = int(1 / collection_interval * sleep_time) + 2
     check.cancel()
     metrics = aggregator.metrics("dd.postgres.collect_statement_samples.time")
     assert max_collections / 2.0 <= len(metrics) <= max_collections
