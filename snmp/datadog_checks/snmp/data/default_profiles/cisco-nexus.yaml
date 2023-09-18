@@ -44,8 +44,8 @@ metrics:
           11: cmm
           12: truthvalue
           13: special_enum
-          14: d_bm
-          15: d_b
+          14: dbm
+          15: db
       - index: 1
         tag: sensor_id
   - MIB: CISCO-ENHANCED-MEMPOOL-MIB  # Overrides generic cisco defaults from _cisco-cpu-memory.yaml
