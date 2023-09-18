@@ -4,6 +4,7 @@
 
 ***Changed***
 
+* Refactor arista profiles extends ([#15767](https://github.com/DataDog/integrations-core/pull/15767))
 * Fix mappings in _dell-rac & dell-poweredge ([#15827](https://github.com/DataDog/integrations-core/pull/15827))
 
 ***Fixed***:
