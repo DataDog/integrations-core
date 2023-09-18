@@ -51,7 +51,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 )
 def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check = integration_check(pg_instance)
-    check._is_aurora = is_aurora
+    check.is_aurora = is_aurora
     check.check(pg_instance)
 
     expected_tags = _get_expected_tags(check, pg_instance)
