@@ -261,7 +261,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         if self._tags_no_db:
             t.extend(self._tags_no_db)
         return t
-    
+
     def debug_stats_kwargs(self):
         return self._check.debug_stats_kwargs()
 
