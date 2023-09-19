@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import copy
 import time
+from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 
 import psycopg
 from cachetools import TTLCache
@@ -127,12 +128,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
             job_name="query-metrics",
         )
         self._check = check
-        self.db_pool = check.db_pool
+        self._config = config
+        self.db_pool = MultiDatabaseConnectionPool(self._check, self._check._new_connection, self._config.max_connections)
         self._metrics_collection_interval = collection_interval
         self._pg_stat_statements_max_warning_threshold = config.statement_metrics_config.get(
             'pg_stat_statements_max_warning_threshold', 10000
         )
-        self._config = config
         self._tags_no_db = None
         self.tags = None
         self._state = StatementMetrics()

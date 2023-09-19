@@ -6,7 +6,8 @@ import copy
 import re
 import time
 from enum import Enum
-from typing import Dict, Optional, Tuple  # noqa: F401
+from typing import Dict, Optional, Tuple
+from datadog_checks.postgres.connections import MultiDatabaseConnectionPool  # noqa: F401
 
 import psycopg
 from cachetools import TTLCache
@@ -187,8 +188,6 @@ class PostgresStatementSamples(DBMAsyncJob):
                 'collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL
             )
 
-        self.db_pool = check.db_pool
-
         super(PostgresStatementSamples, self).__init__(
             check,
             rate_limit=1 / collection_interval,
@@ -204,6 +203,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
         self._check = check
         self._config = config
+        self.db_pool = MultiDatabaseConnectionPool(self._check, self._check._new_connection, self._config.max_connections)
         self._conn_ttl_ms = self._config.idle_connection_timeout
         self._tags_no_db = None
         self.tags = None
