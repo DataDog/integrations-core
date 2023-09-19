@@ -8,7 +8,7 @@
 
 ***Fixed***:
 
-* Revert psycopg3 upgrade ([#15859](https://github.com/DataDog/integrations-core/pull/15859))
+* Revert psycopg3 upgrade ([#15862](https://github.com/DataDog/integrations-core/pull/15862))
 
 ## 14.2.4 / 2023-09-07
 
