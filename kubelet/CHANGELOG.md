@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Fix kubelet check failing to initialize when the kubelet is temporarily unavailable ([#15706](https://github.com/DataDog/integrations-core/pull/15706))
+
 ## 7.9.1 / 2023-08-18
 
 ***Fixed***:

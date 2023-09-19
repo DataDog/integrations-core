@@ -2,9 +2,17 @@
 
 ## Unreleased
 
-***Changed***:
+***Added***:
 
 * Attempt to connect to the database and fail fast before trying to establish a connection pool ([#15839](https://github.com/DataDog/integrations-core/pull/15839))
+
+***Added***:
+
+* Add schema collection to Postgres integration (#15484) ([#15866](https://github.com/DataDog/integrations-core/pull/15866))
+
+***Fixed***:
+
+* Revert psycopg3 upgrade ([#15859](https://github.com/DataDog/integrations-core/pull/15859))
 
 ## 14.2.4 / 2023-09-07
 
