@@ -162,14 +162,14 @@ def test_max_relations(aggregator, integration_check, pg_instance):
     for name in RELATION_METRICS:
         relation_metrics = []
         for m in aggregator._metrics[name]:
-            if any(['table:' in tag for tag in m.tags]):
+            if any('table:' in tag for tag in m.tags):
                 relation_metrics.append(m)
         assert len(relation_metrics) == 1
 
     for name in _iterate_metric_name(QUERY_PG_CLASS):
         relation_metrics = []
         for m in aggregator._metrics[name]:
-            if any(['table:' in tag for tag in m.tags]):
+            if any('table:' in tag for tag in m.tags):
                 relation_metrics.append(m)
         assert len(relation_metrics) == 1
 

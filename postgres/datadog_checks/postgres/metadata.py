@@ -3,10 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
 from typing import Dict, List, Union  # noqa: F401
-from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 
 import psycopg
 from psycopg.rows import dict_row
+
+from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 
 try:
     import datadog_agent

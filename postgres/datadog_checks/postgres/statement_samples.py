@@ -7,12 +7,13 @@ import re
 import time
 from enum import Enum
 from typing import Dict, Optional, Tuple  # noqa: F401
-from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 
 import psycopg
 from cachetools import TTLCache
 from psycopg.rows import dict_row
 from six import PY2
+
+from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 
 try:
     import datadog_agent

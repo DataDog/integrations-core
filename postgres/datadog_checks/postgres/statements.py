@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import copy
 import time
-from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 
 import psycopg
 from cachetools import TTLCache
@@ -18,6 +17,7 @@ from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 
 from .util import DatabaseConfigurationError, payload_pg_version, warning_with_tags
 from .version_utils import V9_4, V14
