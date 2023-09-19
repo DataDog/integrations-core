@@ -95,7 +95,7 @@ def test_e2e_profile_netgear_readynas(dd_agent_check):
         )
 
     tag_rows = [
-        ['netgear_readynasos_volume_name:quaintly', 'netgear_readynasos_volume_status:online'],
+        ['netgear_readynasos_volume_name:quaintly', 'netgear_readynasos_volume_status:redundant'],
         [
             'netgear_readynasos_volume_name:zombies kept Jaded Jaded kept Jaded acted their',
             'netgear_readynasos_volume_status:unknown',
