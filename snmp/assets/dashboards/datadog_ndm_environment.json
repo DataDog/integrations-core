@@ -1468,10 +1468,19 @@
                             "markers": [],
                             "requests": [
                                 {
-                                    "display_type": "line",
+                                    "display_type": "bars",
                                     "formulas": [
                                         {
+                                            "alias": "Traps stored",
                                             "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Traps received",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Traps forwarded",
+                                            "formula": "query3"
                                         }
                                     ],
                                     "queries": [
@@ -1488,6 +1497,16 @@
                                             "search": {
                                                 "query": "source:snmp-traps snmp_device:$SNMP_Device.value"
                                             }
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:datadog.snmp_traps.received{$SNMP_Device, $Agent_Hostname, $Custom_Tag}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:datadog.snmp_traps.forwarded{$SNMP_Device, $Agent_Hostname, $Custom_Tag}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1499,7 +1518,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Traps indexed",
+                            "title": "Traps received, forwarded and stored in Datadog",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries",
@@ -1522,7 +1541,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**Why are traps not being received?**\n\n- Check your device configuration and ensure it is sending traps to the right port.\n- Check the Traps server listening port and ensure it is using an unprivileged port (> 1024). Or, allow the Datadog Agent to listen on privileged ports.\n",
+                            "content": "**Why are traps not being received?**\n\n- Check your device configuration and ensure it is sending traps to the right port.\n- Check the Traps server listening port and ensure it is using an unprivileged port (> 1024). Or, allow the Datadog Agent to listen on privileged ports.\n\nTraps telemetry metrics requires Agent 7.47+",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
@@ -1539,12 +1558,165 @@
                             "x": 6,
                             "y": 0
                         }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.snmp_traps.invalid_packet{$SNMP_Device, $Agent_Hostname, $Custom_Tag} by {snmp_device,reason}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Invalid packets",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4099907010209564,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.snmp_traps.incorrect_format{$SNMP_Device, $Agent_Hostname, $Custom_Tag} by {error}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "time": {},
+                            "title": "Traps incorrectly formatted",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6797913275200746,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 4,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Traps not enriched",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Variables not enriched",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.snmp_traps.traps_not_enriched{$SNMP_Device, $Agent_Hostname, $Custom_Tag}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:datadog.snmp_traps.vars_not_enriched{$SNMP_Device, $Agent_Hostname, $Custom_Tag}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "time": {},
+                            "title": "Traps and variables not enriched",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6242616545438898,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 8,
+                            "y": 2
+                        }
                     }
                 ]
             },
             "id": 5474701659400592,
             "layout": {
-                "height": 3,
+                "height": 5,
                 "is_column_break": true,
                 "width": 12,
                 "x": 0,
@@ -2404,7 +2576,7 @@
                 "height": 16,
                 "width": 12,
                 "x": 0,
-                "y": 36
+                "y": 38
             }
         },
         {
@@ -2683,7 +2855,7 @@
                 "height": 6,
                 "width": 12,
                 "x": 0,
-                "y": 52
+                "y": 54
             }
         }
     ]
