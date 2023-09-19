@@ -13,7 +13,7 @@ from datadog_checks.istio import Istio
 from . import common
 from .utils import _assert_tags_excluded, get_fixture_path
 
-FIXTURE_DIR = f'{get_here()}/fixtures'
+FIXTURE_DIR = '{}/fixtures'.format(get_here())
 
 
 pytestmark = [pytest.mark.skipif(PY2, reason='Test only available on Python 3')]
