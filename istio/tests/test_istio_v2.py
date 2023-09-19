@@ -156,14 +156,32 @@ def test_exclude_labels(exclude_labels, expected_exclude_labels):
 
 def test_non_conforming_metrics(aggregator, dd_run_check, mock_http_response):
     """
-    Test non conforming metrics for V2 implementation
+    Test non conforming metrics for V2 implementation such as histograms and gauges
+    ending with `_total`
     """
-    mock_http_response(file_path=get_fixture_path('1.5', 'non-conforming.txt'))
+    mock_http_response(file_path=get_fixture_path('./', 'non-conforming.txt'))
 
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_ISTIOD_INSTANCE])
     dd_run_check(check)
 
     for metric in common.NON_CONFORMING_METRICS:
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_all_metrics_covered()
+
+
+def test_mock_metrics(aggregator, dd_run_check, mock_http_response):
+    """
+    Test non conforming metrics for V2 implementation such as histograms and gauges
+    ending with `_total`
+    """
+    mock_http_response(file_path=get_fixture_path('./', 'mock-metrics.txt'))
+
+    check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_ISTIOD_INSTANCE])
+    dd_run_check(check)
+
+    for metric in common.MOCK_TEST_METRICS:
         aggregator.assert_metric(metric)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
