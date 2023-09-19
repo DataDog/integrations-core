@@ -104,7 +104,8 @@ class MultiDatabaseConnectionPool(object):
         self.prune_connections()
         conn = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None))
         db = conn.connection
-        if db is None or db.closed:
+        if db is None or db.closed or db.info.status != psycopg.pq.ConnStatus.OK:
+            # db.info.status checks if the connection is still active on the server
             if self.max_conns is not None:
                 # try to free space until we succeed
                 while len(self._conns) >= self.max_conns:
@@ -205,11 +206,9 @@ class MultiDatabaseConnectionPool(object):
 
         return True
 
-    @contextlib.contextmanager
     def get_main_db(self):
         """
         Returns a memoized, persistent psycopg connection to `self.dbname`.
         :return: a psycopg connection
         """
-        with self.get_connection(self._config.dbname, self._config.idle_connection_timeout, persistent=True) as db:
-            yield db
+        return self.get_connection(self._config.dbname, self._config.idle_connection_timeout, persistent=True)

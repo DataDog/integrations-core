@@ -478,3 +478,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     "rolname": row["rolname"],
                 },
             }
+
+    def cancel(self):
+        super(PostgresStatementMetrics, self).cancel()
+        self.db_pool.close_all_connections()

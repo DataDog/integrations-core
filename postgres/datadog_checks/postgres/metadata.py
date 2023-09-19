@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
-from typing import Dict, List, Optional, Tuple, Union
-from datadog_checks.postgres.connections import MultiDatabaseConnectionPool  # noqa: F401
+from typing import Dict, List, Union  # noqa: F401
+from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 
 import psycopg
 from psycopg.rows import dict_row
@@ -475,3 +475,7 @@ class PostgresMetadata(DBMAsyncJob):
                 rows = cursor.fetchall()
                 self._log.debug("Loaded %s rows from pg_settings", len(rows))
                 return [dict(row) for row in rows]
+
+    def cancel(self):
+        super(PostgresMetadata, self).cancel()
+        self.db_pool.close()

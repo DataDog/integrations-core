@@ -325,6 +325,26 @@ def test_conn_attempt_to_connect(pg_instance):
         check._attempt_to_connect()
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_conn_kill_unexpectedly(pg_instance):
+    """
+    When a connection is killed by postgres server, db.closed will not be set.
+    But the pool should not return this BAD connection.
+    Instead, it should create a new connection.
+    """
+    check = PostgreSql('postgres', {}, [pg_instance])
+    pool = MultiDatabaseConnectionPool(check, check._new_connection)
+    pool2 = MultiDatabaseConnectionPool(
+        check, lambda dbname: local_db(dbname)
+    )
+    with pool._get_connection_raw(check._config.dbname, 10000):
+        pass
+    kill_postgres_connection(pool2, check._config.dbname)
+    with pool.get_connection(check._config.dbname, 1) as conn:
+        assert not conn.closed
+
+
 def local_db(dbname):
     args = {
         'host': HOST,
@@ -348,3 +368,16 @@ def get_activity(db_pool, unique_id):
                 (unique_id,),
             )
             return cursor.fetchall()
+
+def kill_postgres_connection(db_pool, dbname):
+    """
+    Kills all connections to a database except the current connection
+    """
+    with db_pool.get_connection('postgres', 1) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT pg_terminate_backend(pid)"
+                " FROM pg_stat_activity"
+                " WHERE datname = %s AND pid <> pg_backend_pid()",
+                (dbname,),
+            )

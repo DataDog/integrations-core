@@ -65,9 +65,10 @@ class ExplainParameterizedQueries:
                 Returns: (plan)
     '''
 
-    def __init__(self, check, config):
+    def __init__(self, check, config, db_pool):
         self._check = check
         self._config = config
+        self.db_pool = db_pool
 
     def debug_stats_kwargs(self):
         return self._check.debug_stats_kwargs()
@@ -78,7 +79,7 @@ class ExplainParameterizedQueries:
             return None
 
         query_signature = compute_sql_signature(obfuscated_statement)
-        with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
+        with self.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
             self._set_plan_cache_mode(conn)
 
             if not self._create_prepared_statement(conn, statement, obfuscated_statement, query_signature):

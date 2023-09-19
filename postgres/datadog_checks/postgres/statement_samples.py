@@ -6,8 +6,8 @@ import copy
 import re
 import time
 from enum import Enum
-from typing import Dict, Optional, Tuple
-from datadog_checks.postgres.connections import MultiDatabaseConnectionPool  # noqa: F401
+from typing import Dict, Optional, Tuple  # noqa: F401
+from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 
 import psycopg
 from cachetools import TTLCache
@@ -210,7 +210,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._activity_last_query_start = None
         # The value is loaded when connecting to the main database
         self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
-        self._explain_parameterized_queries = ExplainParameterizedQueries(check, config)
+        self._explain_parameterized_queries = ExplainParameterizedQueries(check, config, self.db_pool)
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
 
         self._collection_strategy_cache = TTLCache(
@@ -879,3 +879,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         statement_bytes = bytes(statement) if PY2 else bytes(statement, "utf-8")
         truncated = len(statement_bytes) >= track_activity_query_size - (MAX_CHARACTER_SIZE_IN_BYTES + 1)
         return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated
+
+    def cancel(self):
+        super(PostgresStatementSamples, self).cancel()
+        self.db_pool.close_all_connections()
