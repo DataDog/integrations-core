@@ -54,7 +54,7 @@
             "endpoint"
         ],
         "name": "Vault prometheus health",
-        "description": "Returns `CRITICAL` if the check cannot access the metrics endpoint. Returns `OK` otherwise. This service check is only available by using the legacy OpenMetrics implementation (`use_openmetrics: false`)"
+        "description": "Returns `CRITICAL` if the check cannot access the Metrics endpoint. Returns `OK` otherwise. This service check is only available with the legacy mode (`use_openmetrics: false`)."
     },
     {
         "agent_version": "7.35.0",
@@ -69,6 +69,6 @@
             "endpoint"
         ],
         "name": "OpenMetrics endpoint health",
-        "description": "Returns `CRITICAL` if the Agent is unable to connect to the OpenMetrics endpoint, otherwise returns `OK`. This service check is only available by using the newer OpenMetrics implementation (`use_openmetrics: true`)"
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the OpenMetrics endpoint, otherwise returns `OK`. This service check is only available with the latest mode (`use_openmetrics: true`)."
     }
 ]
