@@ -276,7 +276,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._time_since_last_schemas_query = time.time()
         return metadata
 
-    def _query_database_information(self, cursor: psycopg2.cursor, dbname: str) -> Dict[str, Union[str, int]]:
+    def _query_database_information(self, cursor: psycopg2.extensions.cursor, dbname: str) -> Dict[str, Union[str, int]]:
         """
         Collect database info. Returns
             description: str
@@ -289,7 +289,7 @@ class PostgresMetadata(DBMAsyncJob):
         row = cursor.fetchone()
         return row
 
-    def _query_schema_information(self, cursor: psycopg2.cursor, dbname: str) -> Dict[str, str]:
+    def _query_schema_information(self, cursor: psycopg2.extensions.cursor, dbname: str) -> Dict[str, str]:
         """
         Collect user schemas. Returns
             id: str
@@ -313,7 +313,7 @@ class PostgresMetadata(DBMAsyncJob):
         """
         limit = self._config.schemas_metadata_config.get('max_tables', 1000)
         if self._config.relations:
-            if VersionUtils.transform_version(str(self._check._version))['version.major'] == "9":
+            if VersionUtils.transform_version(str(self._check.version))['version.major'] == "9":
                 cursor.execute(PG_TABLES_QUERY_V9.format(schema_oid=schema_id))
             else:
                 cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id))
@@ -350,7 +350,7 @@ class PostgresMetadata(DBMAsyncJob):
             # so we have to grab the total partition activity
             # note: partitions don't exist in V9, so we have to check this first
             if (
-                VersionUtils.transform_version(str(self._check._version))['version.major'] == "9"
+                VersionUtils.transform_version(str(self._check.version))['version.major'] == "9"
                 or not info["has_partitions"]
             ):
                 return (
@@ -368,7 +368,7 @@ class PostgresMetadata(DBMAsyncJob):
         return table_info[:limit]
 
     def _query_table_information_for_schema(
-        self, cursor: psycopg2.cursor, schema_id: str, dbname: str
+        self, cursor: psycopg2.extensions.cursor, schema_id: str, dbname: str
     ) -> List[Dict[str, Union[str, Dict]]]:
         """
         Collect table information per schema. Returns a list of dictionaries
@@ -405,7 +405,7 @@ class PostgresMetadata(DBMAsyncJob):
                 idxs = [dict(row) for row in rows]
                 this_payload.update({'indexes': idxs})
 
-            if VersionUtils.transform_version(str(self._check._version))['version.major'] != "9":
+            if VersionUtils.transform_version(str(self._check.version))['version.major'] != "9":
                 if table['has_partitions']:
                     cursor.execute(PARTITION_KEY_QUERY.format(parent=name))
                     row = cursor.fetchone()
