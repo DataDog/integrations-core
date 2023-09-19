@@ -156,12 +156,12 @@ The `pipx` python package is required for the `ddev` command line tools.
 
    - ARM (M1+) machines:
      ```
-     pipx install ddev --python /opt/homebrew/bin/python3.9
+     pipx install --python /opt/homebrew/bin/python3.9 ddev
      ```
 
    - MacOS on Intel machines:
      ```
-     pipx install ddev --python /usr/local/bin/python3.9
+     pipx install --python /usr/local/bin/python3.9 ddev
      ```
 
 1. Check the installation output and run any additional commands recommended by the installation script.

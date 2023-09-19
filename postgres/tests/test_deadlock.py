@@ -33,7 +33,8 @@ def wait_on_result(cursor=None, sql=None, binds=None, expected_value=None):
 def test_deadlock(aggregator, dd_run_check, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check._connect()
-    cursor = check.db.cursor()
+    conn = check._new_connection(pg_instance['dbname'])
+    cursor = conn.cursor()
 
     def wait(conn):
         while True:

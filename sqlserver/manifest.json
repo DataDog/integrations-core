@@ -50,11 +50,11 @@
       "sqlserver": "assets/dashboards/sqlserver_dashboard.json"
     },
     "monitors": {
-      "SQLServer ao not healthy": "assets/recommended_monitors/sqlserver_ao_not_healthy.json",
-      "SQLServer high processes blocked": "assets/recommended_monitors/sqlserver_high_processes_blocked.json",
-      "SQLServer high failed auto param": "assets/recommended_monitors/sqlserver_high_number_failed_auto_param.json",
-      "SQLServer db not online": "assets/recommended_monitors/sqlserver_db_not_online.json",
-      "SQLServer db not in sync": "assets/recommended_monitors/sqlserver_db_not_sync.json"
+      "SQLServer ao not healthy": "assets/monitors/sqlserver_ao_not_healthy.json",
+      "SQLServer high processes blocked": "assets/monitors/sqlserver_high_processes_blocked.json",
+      "SQLServer high failed auto param": "assets/monitors/sqlserver_high_number_failed_auto_param.json",
+      "SQLServer db not online": "assets/monitors/sqlserver_db_not_online.json",
+      "SQLServer db not in sync": "assets/monitors/sqlserver_db_not_sync.json"
     },
     "logs": {
       "source": "sqlserver"

@@ -50,16 +50,17 @@ class ConfigFile:
 
         return tomli_w.dumps(config.raw_data)
 
+    def reset(self):
+        config = RootConfig({})
+        config.parse_fields()
+        self.model = config
+
     def restore(self):
         import tomli_w
 
-        config = RootConfig({})
-        config.parse_fields()
-
-        content = tomli_w.dumps(config.raw_data)
+        self.reset()
+        content = tomli_w.dumps(self.model.raw_data)
         self.save(content)
-
-        self.model = config
 
     def update(self):  # no cov
         self.model.parse_fields()

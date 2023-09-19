@@ -23,6 +23,7 @@ AGENT_METRICS = {
     'cilium_drop_bytes_total': 'drop_bytes.total',
     'cilium_drop_count_total': 'drop_count.total',
     'cilium_endpoint_regeneration_time_stats_seconds': 'endpoint.regeneration_time_stats.seconds',
+    'cilium_endpoint_regenerations_total': 'endpoint.regenerations.total',
     'cilium_endpoint_state': 'endpoint.state',
     'cilium_errors_warnings_total': 'errors_warning.total',
     'cilium_forward_bytes_total': 'forward_bytes.total',
@@ -57,6 +58,8 @@ AGENT_METRICS = {
     'cilium_event_ts': 'event_timestamp',
     'cilium_kvstore_operations_duration_seconds': 'kvstore.operations_duration.seconds',
     'cilium_kvstore_events_queue_seconds': 'kvstore.events_queue.seconds',
+    'cilium_kvstore_quorum_errors_total': 'kvstore.quorum_errors.total',
+    'cilium_policy_implementation_delay': 'policy.implementation_delay',
     # Cilium <= 1.7
     'cilium_policy_l7_denied_total': 'policy.l7_denied.total',
     'cilium_policy_l7_forwarded_total': 'policy.l7_forwarded.total',
@@ -68,12 +71,28 @@ AGENT_METRICS = {
     'cilium_identity_count': 'identity.count',
     'cilium_policy_count': 'policy.count',
     'cilium_policy_import_errors': 'policy.import_errors.count',
+    # Cilium >= 1.9
+    'cilium_api_limiter_adjustment_factor': 'api_limiter.adjustment_factor',
+    'cilium_api_limiter_processed_requests_total': 'api_limiter.processed_requests.total',
+    'cilium_api_limiter_processing_duration_seconds': 'api_limiter.processing_duration.seconds',
+    'cilium_api_limiter_rate_limit': 'api_limiter.rate_limit',
+    'cilium_api_limiter_requests_in_flight': 'api_limiter.requests_in_flight',
+    'cilium_api_limiter_wait_duration_seconds': 'api_limiter.wait_duration.seconds',
     # Cilium 1.10+
     'cilium_k8s_client_api_calls_total': 'k8s_client.api_calls.count',
-    'cilium_endpoint_regenerations_total': 'endpoint.regenerations',
     'cilium_identity': 'identity.count',
     'cilium_policy': 'policy.count',
     'cilium_policy_import_errors_total': 'policy.import_errors.count',
+    'cilium_bpf_map_pressure': 'bpf.map_pressure',
+    'cilium_bpf_maps_virtual_memory_max_bytes': 'bpf.maps.virtual_memory.max.bytes',
+    'cilium_bpf_progs_virtual_memory_max_bytes': 'bpf.progs.virtual_memory.max.bytes',
+    'cilium_datapath_conntrack_dump_resets_total': 'datapath.conntrack_dump.resets.total',
+    'cilium_ipcache_errors_total': 'ipcache.errors.total',
+    'cilium_k8s_event_lag_seconds': 'k8s_event.lag.seconds',
+    'cilium_k8s_terminating_endpoints_events_total': 'k8s_terminating.endpoints_events.total',
+    # Cilium 1.14+
+    'cilium_kvstore_sync_queue_size': 'kvstore.sync_queue_size',
+    'cilium_kvstore_initial_sync_completed': 'kvstore.initial_sync_completed',
 }
 
 OPERATOR_V2_OVERRIDES = {

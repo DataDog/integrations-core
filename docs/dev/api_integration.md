@@ -56,7 +56,7 @@ The process to build an API-based integration looks like the following:
 2. Request a Datadog sandbox account for development.
 3. Begin development of your integration, which includes writing and hosting the integration code on your end as well as implementing the [OAuth protocol][28].
 4. Test your integration, as well as your OAuth client, in your Datadog sandbox account.
-5. Once your development work is tested and complete, follow the steps in [Create a Tile][20] in order to display your integration on the **Integrations** or **Marketplace** page.
+5. Once your development work is tested and complete, follow the steps in [Create a Tile][24] in order to display your integration on the **Integrations** or **Marketplace** page.
 6. Once your pull request is submitted and approved, the Datadog Technology Partner team will schedule a demo for a final review of your integration.
 7. You will have the option of testing the tile and integration in your Datadog sandbox account before publishing, or immediately publishing the integration for all customers.  
 

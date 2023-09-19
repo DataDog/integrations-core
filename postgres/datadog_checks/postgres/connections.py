@@ -28,12 +28,14 @@ class ConnectionInfo:
         active: bool,
         last_accessed: int,
         thread: threading.Thread,
+        persistent: bool,
     ):
         self.connection = connection
         self.deadline = deadline
         self.active = active
         self.last_accessed = last_accessed
         self.thread = thread
+        self.persistent = persistent
 
 
 class MultiDatabaseConnectionPool(object):
@@ -79,14 +81,23 @@ class MultiDatabaseConnectionPool(object):
                 )
         self.connect_fn = connect_fn
 
-    def _get_connection_raw(self, dbname: str, ttl_ms: int, timeout: int = None) -> psycopg2.extensions.connection:
+    def _get_connection_raw(
+        self,
+        dbname: str,
+        ttl_ms: int,
+        timeout: int = None,
+        startup_fn: Callable[[psycopg2.extensions.connection], None] = None,
+        persistent: bool = False,
+    ) -> psycopg2.extensions.connection:
         """
         Return a connection from the pool.
+        Pass a function to startup_func if there is an action needed with the connection
+        when re-establishing it.
         """
         start = datetime.datetime.now()
         self.prune_connections()
         with self._mu:
-            conn = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None))
+            conn = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None, None))
             db = conn.connection
             if db is None or db.closed:
                 if self.max_conns is not None:
@@ -100,6 +111,11 @@ class MultiDatabaseConnectionPool(object):
                         continue
                 self._stats.connection_opened += 1
                 db = self.connect_fn(dbname)
+                if startup_fn:
+                    startup_fn(db)
+            else:
+                # if already in pool, retain persistence status
+                persistent = conn.persistent
 
             if db.status != psycopg2.extensions.STATUS_READY:
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
@@ -112,21 +128,24 @@ class MultiDatabaseConnectionPool(object):
                 active=True,
                 last_accessed=datetime.datetime.now(),
                 thread=threading.current_thread(),
+                persistent=persistent,
             )
             return db
 
     @contextlib.contextmanager
-    def get_connection(self, dbname: str, ttl_ms: int, timeout: int = None):
+    def get_connection(self, dbname: str, ttl_ms: int, timeout: int = None, persistent: bool = False):
         """
         Grab a connection from the pool if the database is already connected.
         If max_conns is specified, and the database isn't already connected,
         make a new connection if the max_conn limit hasn't been reached.
         Blocks until a connection can be added to the pool,
         and optionally takes a timeout in seconds.
+        Note that leaving a connection context here does NOT close the connection in psycopg2;
+        connections must be manually closed by `close_all_connections()`.
         """
         try:
             with self._mu:
-                db = self._get_connection_raw(dbname, ttl_ms, timeout)
+                db = self._get_connection_raw(dbname, ttl_ms, timeout, persistent)
             yield db
         finally:
             with self._mu:
@@ -168,7 +187,7 @@ class MultiDatabaseConnectionPool(object):
         with self._mu:
             sorted_conns = sorted(self._conns.items(), key=lambda i: i[1].last_accessed)
             for name, conn_info in sorted_conns:
-                if not conn_info.active:
+                if not conn_info.active and not conn_info.persistent:
                     self._terminate_connection_unsafe(name)
                     return name
 
@@ -176,13 +195,12 @@ class MultiDatabaseConnectionPool(object):
             return None
 
     def _terminate_connection_unsafe(self, dbname: str):
-        db = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None)).connection
+        db = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None, None)).connection
         if db is not None:
             try:
                 self._stats.connection_closed += 1
                 db.close()
             except Exception:
                 self._stats.connection_closed_failed += 1
-                self._log.exception("failed to close DB connection for db=%s", dbname)
                 return False
         return True

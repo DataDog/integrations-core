@@ -16,6 +16,10 @@ requires_over_11 = pytest.mark.skipif(
     POSTGRES_VERSION is None or float(POSTGRES_VERSION) < 11,
     reason='This test is for over 11 only (make sure POSTGRES_VERSION is set)',
 )
+requires_over_13 = pytest.mark.skipif(
+    POSTGRES_VERSION is None or float(POSTGRES_VERSION) < 13,
+    reason='This test is for over 13 only (make sure POSTGRES_VERSION is set)',
+)
 requires_over_14 = pytest.mark.skipif(
     POSTGRES_VERSION is None or float(POSTGRES_VERSION) < 14,
     reason='This test is for over 14 only (make sure POSTGRES_VERSION is set)',

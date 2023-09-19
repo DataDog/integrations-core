@@ -139,7 +139,7 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
             event_payload = {
                 'source_type_name': self.SOURCE_TYPE_NAME,
                 'priority': self._event_priority,
-                'tags': list(self.config.tags),
+                'tags': list(self.config.tags) if self.config.tags is not None else [],
             }
 
             # As seen in every collector, before using members of the enum you need to check for existence. See:

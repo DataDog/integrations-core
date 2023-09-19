@@ -26,7 +26,9 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
 ]
 dependencies = [
-    "datadog-checks-dev[cli]~=22.0",
+    "click~=8.1.6",
+    "coverage",
+    "datadog-checks-dev[cli]~=25.0",
     "hatch>=1.6.3",
     "httpx",
     "jsonpointer",
@@ -35,6 +37,7 @@ dependencies = [
     "tomli; python_version < '3.11'",
     "tomli-w",
     "tomlkit",
+    "tqdm",
 ]
 dynamic = ["version"]
 
@@ -68,11 +71,11 @@ scripts = ["ddev"]
 include = '\.pyi?$'
 line-length = 120
 skip-string-normalization = true
-target-version = ["py38"]
+target-version = ["py39"]
 
 [tool.ruff]
 exclude = []
-target-version = "py38"
+target-version = "py39"
 line-length = 120
 # Rules were ported over from the legacy flake8 settings for parity
 # All the rules can be found here: https://beta.ruff.rs/docs/rules/
@@ -102,7 +105,7 @@ unfixable = [
 ]
 
 [tool.ruff.isort]
-known-first-party = ["{template_config['package_name']}"]
+known-first-party = ["ddev"]
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"
