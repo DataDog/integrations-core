@@ -6,11 +6,15 @@ import copy
 import pytest
 from six import PY2
 
+from datadog_checks.dev import get_here
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.istio import Istio
 
 from . import common
 from .utils import _assert_tags_excluded, get_fixture_path
+
+FIXTURE_DIR = f'{get_here()}/fixtures'
+
 
 pytestmark = [pytest.mark.skipif(PY2, reason='Test only available on Python 3')]
 
@@ -159,7 +163,7 @@ def test_non_conforming_metrics(aggregator, dd_run_check, mock_http_response):
     Test non conforming metrics for V2 implementation such as histograms and gauges
     ending with `_total`
     """
-    mock_http_response(file_path=get_fixture_path('./', 'non-conforming.txt'))
+    mock_http_response(file_path=get_fixture_path(FIXTURE_DIR, 'non-conforming.txt'))
 
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_ISTIOD_INSTANCE])
     dd_run_check(check)
@@ -176,7 +180,7 @@ def test_mock_metrics(aggregator, dd_run_check, mock_http_response):
     Test non conforming metrics for V2 implementation such as histograms and gauges
     ending with `_total`
     """
-    mock_http_response(file_path=get_fixture_path('./', 'mock-metrics.txt'))
+    mock_http_response(file_path=get_fixture_path(FIXTURE_DIR, 'mock-metrics.txt'))
 
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_ISTIOD_INSTANCE])
     dd_run_check(check)
