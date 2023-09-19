@@ -203,7 +203,9 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
         self._check = check
         self._config = config
-        self.db_pool = MultiDatabaseConnectionPool(self._check, self._check._new_connection, self._config.max_connections)
+        self.db_pool = MultiDatabaseConnectionPool(
+            self._check, self._check._new_connection, self._config.max_connections
+        )
         self._conn_ttl_ms = self._config.idle_connection_timeout
         self._tags_no_db = None
         self.tags = None

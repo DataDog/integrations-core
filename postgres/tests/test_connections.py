@@ -68,9 +68,7 @@ def test_conn_pool_no_leaks_on_close(pg_instance):
     check._config.application_name = unique_id
 
     # Used to make verification queries
-    pool2 = MultiDatabaseConnectionPool(
-        check, lambda dbname: local_db(dbname)
-    )
+    pool2 = MultiDatabaseConnectionPool(check, lambda dbname: local_db(dbname))
 
     # Iterate in the test many times to detect flakiness
     for _ in range(20):
@@ -129,9 +127,7 @@ def test_conn_pool_no_leaks_on_prune(pg_instance):
 
     pool = MultiDatabaseConnectionPool(check, check._new_connection)
     # Used to make verification queries
-    pool2 = MultiDatabaseConnectionPool(
-        check, lambda dbname: local_db(dbname)
-    )
+    pool2 = MultiDatabaseConnectionPool(check, lambda dbname: local_db(dbname))
     ttl_long = 90 * 1000
     ttl_short = 1
 
@@ -240,9 +236,7 @@ def test_conn_pool_single_connection(pg_instance):
     check._config.application_name = unique_id
 
     # Used to make verification queries
-    pool2 = MultiDatabaseConnectionPool(
-        check, lambda dbname: local_db(dbname)
-    )
+    pool2 = MultiDatabaseConnectionPool(check, lambda dbname: local_db(dbname))
 
     pool = MultiDatabaseConnectionPool(check, check._new_connection)
     with pool.get_connection("dogs_0", 1000):
@@ -335,9 +329,7 @@ def test_conn_kill_unexpectedly(pg_instance):
     """
     check = PostgreSql('postgres', {}, [pg_instance])
     pool = MultiDatabaseConnectionPool(check, check._new_connection)
-    pool2 = MultiDatabaseConnectionPool(
-        check, lambda dbname: local_db(dbname)
-    )
+    pool2 = MultiDatabaseConnectionPool(check, lambda dbname: local_db(dbname))
     with pool._get_connection_raw(check._config.dbname, 10000):
         pass
     kill_postgres_connection(pool2, check._config.dbname)
@@ -368,6 +360,7 @@ def get_activity(db_pool, unique_id):
                 (unique_id,),
             )
             return cursor.fetchall()
+
 
 def kill_postgres_connection(db_pool, dbname):
     """

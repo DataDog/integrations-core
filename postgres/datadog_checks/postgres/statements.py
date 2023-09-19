@@ -129,7 +129,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
         )
         self._check = check
         self._config = config
-        self.db_pool = MultiDatabaseConnectionPool(self._check, self._check._new_connection, self._config.max_connections)
+        self.db_pool = MultiDatabaseConnectionPool(
+            self._check, self._check._new_connection, self._config.max_connections
+        )
         self._metrics_collection_interval = collection_interval
         self._pg_stat_statements_max_warning_threshold = config.statement_metrics_config.get(
             'pg_stat_statements_max_warning_threshold', 10000
@@ -284,7 +286,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     "pg_database.datname NOT ILIKE %s" for _ in self._config.ignore_databases
                 )
                 params = params + tuple(self._config.ignore_databases)
-            with self.db_pool.get_main_db() as conn:    
+            with self.db_pool.get_main_db() as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
                     return self._execute_query(
                         cursor,

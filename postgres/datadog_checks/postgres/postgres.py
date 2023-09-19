@@ -643,7 +643,11 @@ class PostgreSql(AgentCheck):
 
     def _new_connection_info(self, dbname: str):
         # required for autocommit as well as using params in queries
-        args = {"autocommit": True, "cursor_factory": psycopg.ClientCursor, "connect_timeout": self._config.connection_timeout}
+        args = {
+            "autocommit": True,
+            "cursor_factory": psycopg.ClientCursor,
+            "connect_timeout": self._config.connection_timeout,
+        }
         conn_args = {}
         if self._config.host == 'localhost' and self._config.password == '':
             conn_args = {
@@ -850,9 +854,7 @@ class PostgreSql(AgentCheck):
                     else:
                         for info in metric_info:
                             metric, value, method = info
-                            getattr(self, method)(
-                                metric, value, tags=set(query_tags), hostname=self.resolved_hostname
-                            )
+                            getattr(self, method)(metric, value, tags=set(query_tags), hostname=self.resolved_hostname)
 
     def record_warning(self, code, message):
         # type: (DatabaseConfigurationError, str) -> None
