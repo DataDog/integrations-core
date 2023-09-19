@@ -1468,7 +1468,7 @@
                             "markers": [],
                             "requests": [
                                 {
-                                    "display_type": "line",
+                                    "display_type": "bars",
                                     "formulas": [
                                         {
                                             "alias": "Traps stored",
