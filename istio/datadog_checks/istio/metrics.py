@@ -440,9 +440,9 @@ ISTIOD_VERSION = {'istio_build': {'type': 'metadata', 'label': 'tag', 'name': 'v
 # These metrics have a _total affix, eventhough they're not counters and should be excluded in the
 # construct_metrics_config function.
 NON_CONFORMING_METRICS = [
-    # Distribution/Histogram
+    # Histogram
     'galley_runtime_processor_snapshot_events_total',
-    # LastValue
+    # Gauge
     'galley_runtime_state_type_instances_total',
     'mixer_handler_daemons_total',
 ]
