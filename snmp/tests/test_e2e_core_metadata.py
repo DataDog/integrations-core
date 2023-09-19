@@ -97,7 +97,7 @@ def test_e2e_core_metadata_f5(dd_agent_check):
             u'diagnoses': [
                 {
                     u'diagnoses': None,
-                    u'resource_id': u'default:192.168.176.2',
+                    u'resource_id': u'default:192.168.192.2',
                     u'resource_type': u'device',
                 },
             ],
