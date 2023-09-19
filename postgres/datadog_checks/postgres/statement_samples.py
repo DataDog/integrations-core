@@ -272,11 +272,10 @@ class PostgresStatementSamples(DBMAsyncJob):
         query = PG_ACTIVE_CONNECTIONS_QUERY.format(
             pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
         )
-        with self.db_pool.get_main_db_pool().connection() as conn:
-            with conn.cursor(row_factory=dict_row) as cursor:
-                self._log.debug("Running query [%s] %s", query, params)
-                cursor.execute(query, params)
-                rows = cursor.fetchall()
+        with self.db_pool.get_main_db().cursor(row_factory=dict_row) as cursor:
+            self._log.debug("Running query [%s] %s", query, params)
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
         self._report_check_hist_metrics(start_time, len(rows), "get_active_connections")
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return [dict(row) for row in rows]
@@ -305,11 +304,10 @@ class PostgresStatementSamples(DBMAsyncJob):
             pg_stat_activity_view=self._config.pg_stat_activity_view,
             extra_filters=extra_filters,
         )
-        with self.db_pool.get_main_db_pool().connection() as conn:
-            with conn.cursor(row_factory=dict_row) as cursor:
-                self._log.debug("Running query [%s] %s", query, params)
-                cursor.execute(query, params)
-                rows = cursor.fetchall()
+        with self.db_pool.get_main_db().cursor(row_factory=dict_row) as cursor:
+            self._log.debug("Running query [%s] %s", query, params)
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
         self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return rows
@@ -323,19 +321,18 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_available_activity_columns(self, all_expected_columns):
-        with self.db_pool.get_main_db_pool().connection() as conn:
-            with conn.cursor(row_factory=dict_row) as cursor:
-                cursor.execute(
-                    "select * from {pg_stat_activity_view} LIMIT 0".format(
-                        pg_stat_activity_view=self._config.pg_stat_activity_view
-                    )
+        with self.db_pool.get_main_db().cursor(row_factory=dict_row) as cursor:
+            cursor.execute(
+                "select * from {pg_stat_activity_view} LIMIT 0".format(
+                    pg_stat_activity_view=self._config.pg_stat_activity_view
                 )
-                all_columns = {i[0] for i in cursor.description}
-                available_columns = [c for c in all_expected_columns if c in all_columns]
-                missing_columns = set(all_expected_columns) - set(available_columns)
-                if missing_columns:
-                    self._log.debug("missing the following expected columns from pg_stat_activity: %s", missing_columns)
-                self._log.debug("found available pg_stat_activity columns: %s", available_columns)
+            )
+            all_columns = {i[0] for i in cursor.description}
+            available_columns = [c for c in all_expected_columns if c in all_columns]
+            missing_columns = set(all_expected_columns) - set(available_columns)
+            if missing_columns:
+                self._log.debug("missing the following expected columns from pg_stat_activity: %s", missing_columns)
+            self._log.debug("found available pg_stat_activity columns: %s", available_columns)
         return available_columns
 
     def _filter_and_normalize_statement_rows(self, rows):

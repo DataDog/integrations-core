@@ -364,28 +364,27 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
     check = integration_check(dbm_instance)
     check._connect()
     # Get a connection separate from the one used by the check to avoid hitting the connection pool limit
-    with check._new_connection('postgres', max_pool_size=1).connection() as conn:
-        with conn.cursor() as cursor:
-            # Execute the query once to begin tracking it. Execute again between checks to track the difference.
-            # This should result in a single metric for that query_signature having a value of 2
-            with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
-                mock_agent.side_effect = obfuscate_sql
-                cursor.execute(query, (['app1', 'app2'],))
-                cursor.execute(query, (['app1', 'app2', 'app3'],))
-                run_one_check(check, dbm_instance)
+    with check._new_connection('postgres').cursor() as cursor:
+        # Execute the query once to begin tracking it. Execute again between checks to track the difference.
+        # This should result in a single metric for that query_signature having a value of 2
+        with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+            mock_agent.side_effect = obfuscate_sql
+            cursor.execute(query, (['app1', 'app2'],))
+            cursor.execute(query, (['app1', 'app2', 'app3'],))
+            run_one_check(check, dbm_instance)
 
-                cursor.execute(query, (['app1', 'app2'],))
-                cursor.execute(query, (['app1', 'app2', 'app3'],))
-                run_one_check(check, dbm_instance)
+            cursor.execute(query, (['app1', 'app2'],))
+            cursor.execute(query, (['app1', 'app2', 'app3'],))
+            run_one_check(check, dbm_instance)
 
-            events = aggregator.get_event_platform_events("dbm-metrics")
-            assert len(events) == 1
-            event = events[0]
+        events = aggregator.get_event_platform_events("dbm-metrics")
+        assert len(events) == 1
+        event = events[0]
 
-            matching = [e for e in event['postgres_rows'] if e['query_signature'] == query_signature]
-            assert len(matching) == 1
-            row = matching[0]
-            assert row['calls'] == 2
+        matching = [e for e in event['postgres_rows'] if e['query_signature'] == query_signature]
+        assert len(matching) == 1
+        row = matching[0]
+        assert row['calls'] == 2
 
 
 @pytest.fixture
@@ -1399,7 +1398,7 @@ def test_pg_settings_caching(integration_check, dbm_instance):
     check = integration_check(dbm_instance)
     assert not check.pg_settings, "pg_settings should not have been initialized yet"
     check._connect()
-    check.db_pool.get_main_db_pool()
+    check.db_pool.get_main_db()
     # pg_settings is not loaded on connect
     assert not check.pg_settings, "pg_settings should not have been initialized yet"
     # pg_settings should now be lazy loaded
@@ -1889,8 +1888,10 @@ def test_statement_metrics_pg_settings_not_loaded(integration_check, dbm_instanc
         run_one_check(check, dbm_instance)
         assert check.pg_settings == {}
 
+    print(check.db)
     assert check.pg_settings == {}
-    assert check.get_pg_settings() != {}
+    check.get_pg_settings()
+    assert check.pg_settings != {}
     assert 'pg_stat_statements.max' in check.pg_settings
     assert 'track_activity_query_size' in check.pg_settings
     assert 'track_io_timing' in check.pg_settings

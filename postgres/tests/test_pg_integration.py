@@ -506,9 +506,8 @@ def test_query_timeout(integration_check, pg_instance):
     check = integration_check(pg_instance)
     check._connect()
     with pytest.raises(psycopg.errors.QueryCanceled):
-        with check.db.connection() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute("select pg_sleep(2000)")
+        with check.db.cursor() as cursor:
+            cursor.execute("select pg_sleep(2000)")
 
 
 @requires_over_10

@@ -10,7 +10,6 @@ import uuid
 import psycopg
 import pytest
 from psycopg.rows import dict_row
-from psycopg_pool import ConnectionPool
 
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.connections import ConnectionPoolFullError, MultiDatabaseConnectionPool
@@ -31,6 +30,7 @@ def test_conn_pool(pg_instance):
     pool = MultiDatabaseConnectionPool(check, check._new_connection)
     with pool.get_connection('postgres', 1):
         assert pool._stats.connection_opened == 1
+    time.sleep(0.001)
 
     # exiting the context block should set the connection to inactive
     # and it should be pruned
@@ -40,13 +40,12 @@ def test_conn_pool(pg_instance):
     assert pool._stats.connection_pruned == 1
     assert pool._stats.connection_closed_failed == 0
 
-    db = pool._get_connection_pool('postgres', 999 * 1000)
+    db = pool._get_connection_raw('postgres', 999 * 1000)
     # run a simple query, and return conn object to the pool
-    with db.connection() as conn:
-        with conn.cursor(row_factory=dict_row) as cursor:
-            cursor.execute("select 1")
-            rows = cursor.fetchall()
-            assert len(rows) == 1 and list(rows[0].values())[0]
+    with db.cursor(row_factory=dict_row) as cursor:
+        cursor.execute("select 1")
+        rows = cursor.fetchall()
+        assert len(rows) == 1 and list(rows[0].values())[0]
     assert len(pool._conns) == 1
     assert pool._stats.connection_opened == 2
     success = pool.close_all_connections()
@@ -70,14 +69,14 @@ def test_conn_pool_no_leaks_on_close(pg_instance):
 
     # Used to make verification queries
     pool2 = MultiDatabaseConnectionPool(
-        check, lambda dbname, min_pool_size, max_pool_size: local_pool(dbname, min_pool_size, max_pool_size)
+        check, lambda dbname: local_db(dbname)
     )
 
     # Iterate in the test many times to detect flakiness
     for _ in range(20):
 
         def exec_connection(pool, wg, dbname):
-            with pool._get_connection_pool(dbname, 10 * 1000).connection() as conn:
+            with pool.get_connection(dbname, 10 * 1000) as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
                     cursor.execute("select current_database()")
                     rows = cursor.fetchall()
@@ -131,7 +130,7 @@ def test_conn_pool_no_leaks_on_prune(pg_instance):
     pool = MultiDatabaseConnectionPool(check, check._new_connection)
     # Used to make verification queries
     pool2 = MultiDatabaseConnectionPool(
-        check, lambda dbname, min_pool_size, max_pool_size: local_pool(dbname, min_pool_size, max_pool_size)
+        check, lambda dbname: local_db(dbname)
     )
     ttl_long = 90 * 1000
     ttl_short = 1
@@ -242,7 +241,7 @@ def test_conn_pool_single_connection(pg_instance):
 
     # Used to make verification queries
     pool2 = MultiDatabaseConnectionPool(
-        check, lambda dbname, min_pool_size, max_pool_size: local_pool(dbname, min_pool_size, max_pool_size)
+        check, lambda dbname: local_db(dbname)
     )
 
     pool = MultiDatabaseConnectionPool(check, check._new_connection)
@@ -326,21 +325,14 @@ def test_conn_attempt_to_connect(pg_instance):
         check._attempt_to_connect()
 
 
-def local_pool(dbname, min_pool_size, max_pool_size):
+def local_db(dbname):
     args = {
         'host': HOST,
         'user': USER_ADMIN,
         'password': PASSWORD_ADMIN,
         'dbname': dbname,
     }
-    return ConnectionPool(
-        min_size=min_pool_size,
-        max_size=max_pool_size,
-        kwargs=args,
-        open=True,
-        name=dbname,
-        timeout=2,
-    )
+    return psycopg.connect(**args)
 
 
 def get_activity(db_pool, unique_id):

@@ -110,13 +110,10 @@ def e2e_instance():
 
 @pytest.fixture()
 def mock_cursor_for_replica_stats():
-    with mock.patch('psycopg_pool.ConnectionPool.connection') as pooled_conn:
+    with mock.patch('psycopg.connect') as connect:
+        cursor = mock.MagicMock()
         data = deque()
-        mocked_cursor = mock.MagicMock()
-        mocked_conn = mock.MagicMock()
-        mocked_conn.cursor.return_value = mocked_cursor
-
-        pooled_conn.return_value.__enter__.return_value = mocked_conn
+        connect.return_value = mock.MagicMock(cursor=mock.MagicMock(return_value=cursor))
 
         def cursor_execute(query, second_arg=""):
             print(query)
@@ -135,8 +132,7 @@ def mock_cursor_for_replica_stats():
             print("fetchone")
             return data.pop()
 
-        mocked_cursor.__enter__().execute = cursor_execute
-        mocked_cursor.__enter__().fetchall = cursor_fetchall
-        mocked_cursor.__enter__().fetchone = cursor_fetchone
-
+        cursor.__enter__().execute = cursor_execute
+        cursor.__enter__().fetchall = cursor_fetchall
+        cursor.__enter__().fetchone = cursor_fetchone
         yield

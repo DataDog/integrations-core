@@ -56,10 +56,9 @@ def test_deadlock(aggregator, dd_run_check, integration_check, pg_instance):
     update_sql = "update personsdup1 set address = 'changed' where personid = %s"
 
     deadlock_count_sql = "select deadlocks from pg_stat_database where datname = %s"
-    with check._new_connection(pg_instance['dbname']).connection() as conn:
-        with conn.cursor() as cursor:
-            cursor.execute(deadlock_count_sql, (DB_NAME,))
-            deadlocks_before = cursor.fetchone()[0]
+    with check._new_connection(pg_instance['dbname']).cursor() as cursor:
+        cursor.execute(deadlock_count_sql, (DB_NAME,))
+        deadlocks_before = cursor.fetchone()[0]
 
     conn_args = {'host': HOST, 'dbname': DB_NAME, 'user': "bob", 'password': "bob"}
     conn1 = psycopg.connect(**conn_args, autocommit=False, cursor_factory=ClientCursor)
