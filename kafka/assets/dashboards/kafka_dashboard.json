@@ -82,7 +82,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "Useful Links**\n\n* [Kafka Integration Doc](https://docs.datadoghq.com/integrations/kafka/?tab=host)\n* [Kafka Blog by Datadog](https://www.datadoghq.com/blog/monitor-kafka-with-datadog/)\n* [ZooKeeper Integration Doc](https://docs.datadoghq.com/integrations/zk/?tab=host)\n* [Data Streams Monitoring](https://www.datadoghq.com/product/data-streams-monitoring/)",
+                            "content": "**Useful Links**\n\n* [Kafka Integration Doc](https://docs.datadoghq.com/integrations/kafka/?tab=host)\n* [Kafka Blog by Datadog](https://www.datadoghq.com/blog/monitor-kafka-with-datadog/)\n* [ZooKeeper Integration Doc](https://docs.datadoghq.com/integrations/zk/?tab=host)\n* [Data Streams Monitoring](https://www.datadoghq.com/product/data-streams-monitoring/)",
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": false,
