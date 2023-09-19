@@ -44,8 +44,6 @@ class PostgresMetricsCache:
         self.replication_stats_metrics = None
         self.activity_metrics = None
         self._count_metrics = None
-        if self.config.relations:
-            self.table_activity_metrics = {}
 
     def clean_state(self):
         self.instance_metrics = None
@@ -54,8 +52,6 @@ class PostgresMetricsCache:
         self.replication_metrics = None
         self.replication_stats_metrics = None
         self.activity_metrics = None
-        if self.config.relations:
-            self.table_activity_metrics = {}
 
     def get_instance_metrics(self, version):
         """
@@ -97,10 +93,9 @@ class PostgresMetricsCache:
             'relation': False,
         }
 
-        if len(self.config.ignore_databases) > 0:
-            res["query"] += " WHERE " + " AND ".join(
-                "psd.datname not ilike '{}'".format(db) for db in self.config.ignore_databases
-            )
+        res["query"] += " WHERE " + " AND ".join(
+            "psd.datname not ilike '{}'".format(db) for db in self.config.ignore_databases
+        )
 
         if self.config.dbstrict:
             res["query"] += " AND psd.datname in('{}')".format(self.config.dbname)

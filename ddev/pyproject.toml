@@ -27,7 +27,8 @@ classifiers = [
 ]
 dependencies = [
     "click~=8.1.6",
-    "datadog-checks-dev[cli]~=23.0",
+    "coverage",
+    "datadog-checks-dev[cli]~=25.0",
     "hatch>=1.6.3",
     "httpx",
     "jsonpointer",
@@ -70,11 +71,11 @@ scripts = ["ddev"]
 include = '\.pyi?$'
 line-length = 120
 skip-string-normalization = true
-target-version = ["py38"]
+target-version = ["py39"]
 
 [tool.ruff]
 exclude = []
-target-version = "py38"
+target-version = "py39"
 line-length = 120
 # Rules were ported over from the legacy flake8 settings for parity
 # All the rules can be found here: https://beta.ruff.rs/docs/rules/

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+***Added***:
+
+* Upgrade clickhouse-driver to 0.2.6 on Python 3 ([#15726](https://github.com/DataDog/integrations-core/pull/15726))
+* Upgrade lz4 to 4.3.2 on Python 3 ([#15746](https://github.com/DataDog/integrations-core/pull/15746))
+
+***Fixed***:
+
+* Fix type `bytes` is not JSON serializable for dbm events ([#15763](https://github.com/DataDog/integrations-core/pull/15763))
+
 ## 33.1.0 / 2023-08-25
 
 ***Security***:

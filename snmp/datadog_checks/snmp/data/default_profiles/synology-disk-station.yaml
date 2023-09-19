@@ -108,6 +108,7 @@ metrics:
           3: not_initialized
           4: system_partition_failed
           5: crashed
+          # mapping in the metric description
   - MIB: SYNOLOGY-RAID-MIB
     table:
       name: raidTable
@@ -150,6 +151,7 @@ metrics:
           19: raid_convert_shr_to_pool
           20: raid_migrate_shr1_to_shr2
           21: raid_unknown_status
+          # full list of mappings here https://global.download.synology.com/download/Document/Software/DeveloperGuide/Firmware/DSM/All/enu/Synology_DiskStation_MIB_Guide.pdf
   - MIB: SYNOLOGY-SMART-MIB
     table:
       name: diskSMARTTable

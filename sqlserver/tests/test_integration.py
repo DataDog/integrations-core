@@ -161,6 +161,7 @@ def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autod
 
     master_tags = [
         'database:master',
+        'db:master',
         'database_files_state_desc:ONLINE',
         'file_id:1',
         'file_location:/var/opt/mssql/data/master.mdf',
@@ -168,6 +169,7 @@ def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autod
     ] + instance_tags
     msdb_tags = [
         'database:msdb',
+        'db:msdb',
         'database_files_state_desc:ONLINE',
         'file_id:1',
         'file_location:/var/opt/mssql/data/MSDBData.mdf',
