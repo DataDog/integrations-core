@@ -78,7 +78,7 @@ class CadvisorPrometheusScraperMixin(object):
         Create a copy of the instance and set default values.
         This is so the base class can create a scraper_config with the proper values.
         """
-        endpoint = get_prometheus_url("dummy_url/cadvisor", self.log)
+        endpoint = get_prometheus_url("dummy_url/cadvisor")
         cadvisor_instance = deepcopy(instance)
         cadvisor_instance.update(
             {

@@ -33,7 +33,7 @@ class ProbesPrometheusScraperMixin(object):
         Create a copy of the instance and set default values.
         This is so the base class can create a scraper_config with the proper values.
         """
-        endpoint = get_prometheus_url("dummy_url/probes", self.log)
+        endpoint = get_prometheus_url("dummy_url/probes")
         probes_instance = deepcopy(instance)
         probes_instance.update(
             {
