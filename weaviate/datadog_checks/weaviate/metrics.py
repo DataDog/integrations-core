@@ -78,4 +78,6 @@ METRICS = {
     'bucket_pause_durations_ms': 'bucket.pause.durations.ms',
     'backup_restore_data_transferred': 'backup.restore.data.transferred',
     'backup_store_data_transferred': 'backup.store.data.transferred',
+    # Weaviate 1.20.0+ only
+    'requests_total': 'requests',
 }

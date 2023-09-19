@@ -59,6 +59,12 @@ def get_schema_field(descriptors):
     raise CheckException("The descriptors are missing a schema field")
 
 
+def payload_pg_version(version):
+    if not version:
+        return ""
+    return 'v{major}.{minor}.{patch}'.format(major=version.major, minor=version.minor, patch=version.patch)
+
+
 fmt = PartialFormatter()
 
 AWS_RDS_HOSTNAME_SUFFIX = ".rds.amazonaws.com"

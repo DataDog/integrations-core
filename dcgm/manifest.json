@@ -8,10 +8,12 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Monitors the exposed GPU metrics leveraged by the DCGM Exporter",
-    "title": "DCGM Exporter",
+    "description": "Monitors the exposed GPU metrics leveraged by the Nvidia DCGM Exporter",
+    "title": "Nvidia DCGM Exporter",
     "media": [],
     "classifier_tags": [
+      "Category::AI",
+      "Category::Machine Learning & LLM",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS"
@@ -33,7 +35,10 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "dcgm-exporter"
+      ]
     },
     "dashboards": {
       "DCGM Exporter (Nvidia GPU Monitoring) Overview": "assets/dashboards/dcgm_overview.json"

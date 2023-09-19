@@ -37,46 +37,46 @@ metrics:
       name: trafficShape
     symbols:
       - OID: 1.3.6.1.4.1.10704.1.12.1.2
-        name: phion.trafficShapeRate
+        name: phion.trafficShape.rate
         metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.10704.1.12.1.3
-        name: phion.trafficShapeSessions
+        name: phion.trafficShape.sessions
         metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.10704.1.12.1.4
-        name: phion.trafficShapeClass1Total
+        name: phion.trafficShape.class1Total
         metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.10704.1.12.1.5
-        name: phion.trafficShapeClass1Pakets
+        name: phion.trafficShape.class1Pakets
         metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.10704.1.12.1.6
-        name: phion.trafficShapeClass1Drop
+        name: phion.trafficShape.class1Drop
         metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.10704.1.12.1.7
-        name: phion.trafficShapeClass2Total
+        name: phion.trafficShape.class2Total
         metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.10704.1.12.1.8
-        name: phion.trafficShapeClass2Pakets
+        name: phion.trafficShape.class2Pakets
         metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.10704.1.12.1.9
-        name: phion.trafficShapeClass2Drop
+        name: phion.trafficShape.class2Drop
         metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.10704.1.12.1.10
-        name: phion.trafficShapeClass3Total
+        name: phion.trafficShape.class3Total
         metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.10704.1.12.1.11
-        name: phion.trafficShapeClass3Pakets
+        name: phion.trafficShape.class3Pakets
         metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.10704.1.12.1.12
-        name: phion.trafficShapeClass3Drop
+        name: phion.trafficShape.class3Drop
         metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.10704.1.12.1.13
-        name: phion.trafficShapeNoDelayTotal
+        name: phion.trafficShape.noDelayTotal
         metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.10704.1.12.1.14
-        name: phion.trafficShapeNoDelayPakets
+        name: phion.trafficShape.noDelayPakets
         metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.10704.1.12.1.15
-        name: phion.trafficShapeNoDelayDrop
+        name: phion.trafficShape.noDelayDrop
         metric_type: monotonic_count
     metric_tags:
       - column:
@@ -137,17 +137,18 @@ metrics:
           OID: 1.3.6.1.4.1.10704.1.7.1.1
           name: bgpNeighborAddress
         tag: bgp_neighbor_address
-      - column:
-          OID: 1.3.6.1.4.1.10704.1.7.1.2
-          name: bgpNeighborState
-        tag: bgp_neighbor_state
-        mapping:
-          1: idle
-          2: connect
-          3: active
-          4: opensent
-          5: openconfirm
-          6: established
+      # - column:
+      #     OID: 1.3.6.1.4.1.10704.1.7.1.2
+      #     name: bgpNeighborState
+      #   tag: bgp_neighbor_state
+      #   mapping:
+      #     1: idle
+      #     2: connect
+      #     3: active
+      #     4: opensent
+      #     5: openconfirm
+      #     6: established
+      #    mappings not found in MIB
   - MIB: PHION-MIB
     table:
       OID: 1.3.6.1.4.1.10704.1.8

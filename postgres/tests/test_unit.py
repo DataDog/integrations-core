@@ -4,7 +4,7 @@
 import copy
 
 import mock
-import psycopg
+import psycopg2
 import pytest
 from mock import MagicMock
 from pytest import fail
@@ -79,8 +79,8 @@ def test_get_instance_with_default(pg_instance, collect_default_database):
     """
     pg_instance['collect_default_database'] = collect_default_database
     check = PostgreSql('postgres', {}, [pg_instance])
-    check._version = VersionInfo(9, 2, 0)
-    res = check.metrics_cache.get_instance_metrics(check._version)
+    check.version = VersionInfo(9, 2, 0)
+    res = check.metrics_cache.get_instance_metrics(check.version)
     dbfilter = " AND psd.datname not ilike 'postgres'"
     if collect_default_database:
         assert dbfilter not in res['query']
@@ -124,7 +124,7 @@ def test_malformed_get_custom_queries(check):
     # Make sure we gracefully handle an error while performing custom queries
     malformed_custom_query_column = {}
     malformed_custom_query['columns'] = [malformed_custom_query_column]
-    db.cursor().__enter__().execute.side_effect = psycopg.ProgrammingError('FOO')
+    db.cursor().__enter__().execute.side_effect = psycopg2.ProgrammingError('FOO')
     check._collect_custom_queries([])
     check.log.error.assert_called_once_with(
         "Error executing query for metric_prefix %s: %s", malformed_custom_query['metric_prefix'], 'FOO'
@@ -294,9 +294,9 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
     check = integration_check(pg_instance)
     try:
         check.db_pool.get_connection(pg_instance['dbname'], 100)
-    except psycopg.ProgrammingError as e:
+    except psycopg2.ProgrammingError as e:
         fail(str(e))
-    except psycopg.OperationalError:
+    except psycopg2.OperationalError:
         # could not connect to server because there is no server running
         pass
 

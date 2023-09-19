@@ -93,10 +93,9 @@ class PostgresMetricsCache:
             'relation': False,
         }
 
-        if len(self.config.ignore_databases) > 0:
-            res["query"] += " WHERE " + " AND ".join(
-                "psd.datname not ilike '{}'".format(db) for db in self.config.ignore_databases
-            )
+        res["query"] += " WHERE " + " AND ".join(
+            "psd.datname not ilike '{}'".format(db) for db in self.config.ignore_databases
+        )
 
         if self.config.dbstrict:
             res["query"] += " AND psd.datname in('{}')".format(self.config.dbname)

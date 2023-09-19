@@ -84,12 +84,9 @@ files:
                          trusted CA and that the requested server host name matches the one in the certificate.
 
         For a detailed description of how these options work see https://www.postgresql.org/docs/current/libpq-ssl.html
-
-        Note: `true` is an alias for `require`, and `false` is an alias for `disable`.
       value:
         type: string
-        display_default: "false"
-        example: "false"
+        example: "disable"
     - name: ssl_root_cert
       description: |
         The path to the ssl root certificate.
@@ -97,8 +94,6 @@ files:
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
       value:
         type: string
-        display_default: "false"
-        example: "/home/datadog/server-ca.pem"
     - name: ssl_cert
       description: |
         The path to the ssl certificate.
@@ -106,8 +101,6 @@ files:
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
       value:
         type: string
-        display_default: "false"
-        example: "/home/datadog/client-cert.pem"
     - name: ssl_key
       description: |
         The path to the ssl client key.
@@ -115,8 +108,6 @@ files:
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
       value:
         type: string
-        display_default: "false"
-        example: "/home/datadog/client-key.pem"
     - name: ssl_password
       description: |
         The password for the secret key specified in ssl_key, allowing client certificate private keys to be stored
@@ -125,8 +116,6 @@ files:
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
       value:
         type: string
-        display_default: "false"
-        example: "ssl_key_password"
     - name: query_timeout
       description: |
         Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
@@ -602,6 +591,32 @@ files:
             type: string
             example: my-postgres-database.database.windows.net
 
+    - name: managed_identity
+      description: |
+        Configuration section used for Azure AD Authentication.
+        
+        This supports using System or User assigned managed identities.
+        If this section is set, then the `username` and `password` fields will be ignored.
+        
+        For more information on Managed Identities, see the Azure docs
+        https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
+      options:
+        - name: client_id
+          description: |
+            Client ID of the Managed Identity.
+          value:
+            type: string
+        - name: identity_scope
+          description: |
+            The permission scope from where to access the identity token. This value is optional if using the default
+            identity scope for Azure managed databases.
+            
+            For more information on scopes, see the Azure docs
+            https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
+          value:
+            type: string
+            example: https://ossrdbms-aad.database.windows.net/.default
+
     - name: obfuscator_options
       description: |
         Configure how the SQL obfuscator behaves.
@@ -681,6 +696,16 @@ files:
       value:
         type: boolean
         example: false
+        display_default: false
+    - name: database_instance_collection_interval
+      hidden: true
+      description: |
+        Set the database instance collection interval (in seconds). The database instance collection sends
+        basic information about the database instance along with a signal that it still exists. 
+        This collection does not involve any additional queries to the database.
+      value:
+        type: number
+        example: 1800
         display_default: false
     - template: instances/default
       overrides:

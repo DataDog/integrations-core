@@ -24,12 +24,11 @@ The method also accepts arbitrary keyword arguments that are forwarded to any de
 
 ## Transformers
 
-::: datadog_checks.base.utils.metadata.MetadataManager
-    rendering:
+::: datadog_checks.base.utils.metadata.core.MetadataManager
+    options:
       heading_level: 3
       show_root_heading: false
       show_root_toc_entry: false
-    selection:
       members:
         - transform_version
         - transform_config

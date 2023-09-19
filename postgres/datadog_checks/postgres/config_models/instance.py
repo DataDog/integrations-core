@@ -68,6 +68,15 @@ class Gcp(BaseModel):
     project_id: Optional[str] = None
 
 
+class ManagedIdentity(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    client_id: Optional[str] = None
+    identity_scope: Optional[str] = None
+
+
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -159,6 +168,7 @@ class InstanceConfig(BaseModel):
     custom_queries: Optional[tuple[MappingProxyType[str, Any], ...]] = None
     data_directory: Optional[str] = None
     database_autodiscovery: Optional[DatabaseAutodiscovery] = None
+    database_instance_collection_interval: Optional[float] = None
     dbm: Optional[bool] = None
     dbname: Optional[str] = None
     dbstrict: Optional[bool] = None
@@ -170,6 +180,7 @@ class InstanceConfig(BaseModel):
     ignore_databases: Optional[tuple[str, ...]] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
+    managed_identity: Optional[ManagedIdentity] = None
     max_connections: Optional[int] = None
     max_relations: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None

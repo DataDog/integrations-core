@@ -8,8 +8,8 @@ The Network Time Protocol (NTP) integration is enabled by default and reports th
 - Metric delays
 - Gaps in graphs of metrics
 
-By default, the check detects which cloud provider the Agent is running on and use the private
-NTP server of that cloud provider if available. If no cloud provider is detected, the agent will
+By default, the check detects which cloud provider the Agent is running on and uses the private
+NTP server of that cloud provider, if available. If no cloud provider is detected, the agent will
 default to the NTP servers below:
 
 - `0.datadog.pool.ntp.org`

@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2023-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
 from pathlib import Path
@@ -607,7 +610,7 @@ def test_warnings(ddev, repository, helpers):
     )
 
 
-def test_metrics_passing(ddev, repository, helpers):
+def test_metrics_passing(ddev, helpers):
     result = ddev('validate', 'metadata', 'postgres')
 
     assert result.exit_code == 0, result.output

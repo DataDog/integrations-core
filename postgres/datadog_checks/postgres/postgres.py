@@ -1,20 +1,22 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import concurrent.futures
 import copy
 import os
 from time import time
 
-import psycopg
-from psycopg import ClientCursor
-from psycopg.rows import dict_row
+import psycopg2
+from cachetools import TTLCache
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
+from datadog_checks.base.utils.db.utils import (
+    default_json_event_encoding,
+)
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
-from datadog_checks.postgres import aws
+from datadog_checks.base.utils.serialization import json
+from datadog_checks.postgres import aws, azure
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
 from datadog_checks.postgres.metadata import PostgresMetadata
@@ -29,6 +31,7 @@ from datadog_checks.postgres.relationsmanager import (
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
+from .__about__ import __version__
 from .config import PostgresConfig
 from .util import (
     AWS_RDS_HOSTNAME_SUFFIX,
@@ -50,6 +53,7 @@ from .util import (
     DatabaseConfigurationError,  # noqa: F401
     fmt,
     get_schema_field,
+    payload_pg_version,
     warning_with_tags,
 )
 from .version_utils import V9, V9_2, V10, V13, V14, VersionUtils
@@ -74,11 +78,10 @@ class PostgreSql(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(PostgreSql, self).__init__(name, init_config, instances)
         self.db = None
-        self.persistent_conn = None
         self._resolved_hostname = None
         self._agent_hostname = None
-        self._version = None
-        self._is_aurora = None
+        self.version = None
+        self.is_aurora = None
         self._version_utils = VersionUtils()
         # Deprecate custom_metrics in favor of custom_queries
         if 'custom_metrics' in self.instance:
@@ -89,23 +92,32 @@ class PostgreSql(AgentCheck):
         self._config = PostgresConfig(self.instance)
         self.cloud_metadata = self._config.cloud_metadata
         self.tags = self._config.tags
+        # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
+        # go through the agent internal metrics submission processing those tags
+        self._non_internal_tags = copy.deepcopy(self.tags)
         self.set_resource_tags()
         self.pg_settings = {}
         self._warnings_by_code = {}
-        self.db_pool = MultiDatabaseConnectionPool(self, self._new_connection, self._config.max_connections)
+        self.db_pool = MultiDatabaseConnectionPool(self._new_connection, self._config.max_connections)
         self.metrics_cache = PostgresMetricsCache(self._config)
-        self.statement_metrics = PostgresStatementMetrics(self, self._config)
-        self.statement_samples = PostgresStatementSamples(self, self._config)
-        self.metadata_samples = PostgresMetadata(self, self._config)
+        self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
+        self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
+        self.metadata_samples = PostgresMetadata(self, self._config, shutdown_callback=self._close_db_pool)
         self._relations_manager = RelationsManager(self._config.relations, self._config.max_relations)
-        self._check_cancelled = False
         self._clean_state()
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
         self.check_initializations.append(self.set_resolved_hostname_metadata)
+        self.check_initializations.append(self._connect)
+        self.check_initializations.append(self.load_version)
+        self.check_initializations.append(self.initialize_is_aurora)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         self.autodiscovery = self._build_autodiscovery()
-
         self._dynamic_queries = None
+        # _database_instance_emitted: limit the collection and transmission of the database instance metadata
+        self._database_instance_emitted = TTLCache(
+            maxsize=1,
+            ttl=self._config.database_instance_collection_interval,
+        )  # type: TTLCache
 
     def _build_autodiscovery(self):
         if not self._config.discovery_config['enabled']:
@@ -168,7 +180,7 @@ class PostgreSql(AgentCheck):
         )
 
     def execute_query_raw(self, query):
-        with self.db.cursor() as cursor:
+        with self._get_main_db().cursor() as cursor:
             cursor.execute(query)
             rows = cursor.fetchall()
             return rows
@@ -178,7 +190,7 @@ class PostgreSql(AgentCheck):
         if self._dynamic_queries:
             return self._dynamic_queries
 
-        if self._version is None:
+        if self.version is None:
             self.log.debug("Version set to None due to incorrect identified version, aborting dynamic queries")
             return None
 
@@ -243,31 +255,14 @@ class PostgreSql(AgentCheck):
 
     def cancel(self):
         """
-        Cancels and waits for all threads to stop, and then
-        closes any open db connections
+        Cancels and waits for all threads to stop.
         """
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            tasks = [
-                executor.submit(thread.cancel)
-                for thread in [self.statement_samples, self.statement_metrics, self.metadata_samples]
-            ]
-
-            try:
-                concurrent.futures.wait(tasks, timeout=self._config.min_collection_interval)
-            except concurrent.futures.TimeoutError:
-                self.log.warning(
-                    "Not all job loops were completed in time when cancelling the main check. "
-                    "Proceeding with the check cancellation. "
-                    "Some unexpected errors related to closed connections may occur after this message."
-                )
-
-        self._close_db_pool()
-        self._check_cancelled = True
+        self.statement_samples.cancel()
+        self.statement_metrics.cancel()
+        self.metadata_samples.cancel()
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
-        self._version = None
-        self._is_aurora = None
         self.metrics_cache.clean_state()
         self._dynamic_queries = None
 
@@ -329,19 +324,16 @@ class PostgreSql(AgentCheck):
         oldest_file_age = now - os.path.getctime(oldest_file)
         return oldest_file_age
 
-    @property
-    def version(self):
-        if self._version is None:
-            raw_version = self._version_utils.get_raw_version(self.db)
-            self._version = self._version_utils.parse_version(raw_version)
-            self.set_metadata('version', raw_version)
-        return self._version
+    def load_version(self):
+        raw_version = self._version_utils.get_raw_version(self.db)
+        self.version = self._version_utils.parse_version(raw_version)
+        self.set_metadata('version', raw_version)
+        return self.version
 
-    @property
-    def is_aurora(self):
-        if self._is_aurora is None:
-            self._is_aurora = self._version_utils.is_aurora(self.db)
-        return self._is_aurora
+    def initialize_is_aurora(self):
+        if self.is_aurora is None:
+            self.is_aurora = self._version_utils.is_aurora(self.db)
+        return self.is_aurora
 
     @property
     def resolved_hostname(self):
@@ -396,22 +388,22 @@ class PostgreSql(AgentCheck):
                 cursor.execute(query.replace(r'%', r'%%'))
 
             results = cursor.fetchall()
-        except psycopg.errors.FeatureNotSupported as e:
+        except psycopg2.errors.FeatureNotSupported as e:
             # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
             self.db.rollback()
             self.log.debug("Disabling replication metrics")
-            self._is_aurora = False
+            self.is_aurora = False
             self.metrics_cache.replication_metrics = {}
-        except psycopg.errors.UndefinedFunction as e:
+        except psycopg2.errors.UndefinedFunction as e:
             log_func(e)
             log_func(
                 "It seems the PG version has been incorrectly identified as %s. "
-                "A reattempt to identify the right version will happen on next agent run." % self._version
+                "A reattempt to identify the right version will happen on next agent run." % self.version
             )
             self._clean_state()
             self.db.rollback()
-        except (psycopg.ProgrammingError, psycopg.errors.QueryCanceled) as e:
+        except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
             log_func("Not all metrics may be available: %s" % str(e))
             self.db.rollback()
 
@@ -609,7 +601,7 @@ class PostgreSql(AgentCheck):
             )
             if self._config.query_timeout:
                 connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
-            conn = psycopg.connect(conninfo=connection_string, autocommit=True, cursor_factory=ClientCursor)
+            conn = psycopg2.connect(connection_string)
         else:
             password = self._config.password
             region = self._config.cloud_metadata.get('aws', {}).get('region', None)
@@ -620,12 +612,16 @@ class PostgreSql(AgentCheck):
                     port=self._config.port,
                     region=region,
                 )
+            client_id = self._config.managed_identity.get('client_id', None)
+            scope = self._config.managed_identity.get('identity_scope', None)
+            if client_id is not None:
+                password = azure.generate_managed_identity_token(client_id=client_id, identity_scope=scope)
 
             args = {
                 'host': self._config.host,
                 'user': self._config.user,
                 'password': password,
-                'dbname': dbname,
+                'database': dbname,
                 'sslmode': self._config.ssl_mode,
                 'application_name': self._config.application_name,
             }
@@ -641,31 +637,28 @@ class PostgreSql(AgentCheck):
                 args['sslkey'] = self._config.ssl_key
             if self._config.ssl_password:
                 args['sslpassword'] = self._config.ssl_password
-
-            conn = psycopg.connect(**args, autocommit=True, cursor_factory=ClientCursor)
+            conn = psycopg2.connect(**args)
+        # Autocommit is enabled by default for safety for all new connections (to prevent long-lived transactions).
+        conn.set_session(autocommit=True, readonly=True)
         return conn
 
     def _connect(self):
         """
-        Set the connection for main check thread.
-        This is to be managed outside the
-        db connection pool, so on cancel it
-        can be properly closed after the check completes
+        Get and memoize connections to instances.
+        The connection created here will be persistent. It will not be automatically
+        evicted from the connection pool.
         """
         if self.db and self.db.closed:
             # Reset the connection object to retry to connect
             self.db = None
-        if self.db:
-            if self.db.info.status != psycopg.pq.ConnStatus.OK:
-                # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
-                self.db.rollback()
-        else:
-            self.db = self._new_connection(self._config.dbname)
+
+        if not self.db:
+            self.db = self._get_main_db()
 
     # Reload pg_settings on a new connection to the main db
     def _load_pg_settings(self, db):
         try:
-            with db.cursor(row_factory=dict_row) as cursor:
+            with db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
                 self.log.debug("Running query [%s]", PG_SETTINGS_QUERY)
                 cursor.execute(
                     PG_SETTINGS_QUERY,
@@ -674,10 +667,9 @@ class PostgreSql(AgentCheck):
                 rows = cursor.fetchall()
                 self.pg_settings.clear()
                 for setting in rows:
-                    name = setting['name']
-                    val = setting['setting']
+                    name, val = setting
                     self.pg_settings[name] = val
-        except (psycopg.DatabaseError, psycopg.OperationalError) as err:
+        except (psycopg2.DatabaseError, psycopg2.OperationalError) as err:
             self.log.warning("Failed to query for pg_settings: %s", repr(err))
             self.count(
                 "dd.postgres.error",
@@ -686,19 +678,16 @@ class PostgreSql(AgentCheck):
                 hostname=self.resolved_hostname,
             )
 
-    def get_pg_settings(self):
-        return self.pg_settings
-
-    def get_main_db(self):
+    def _get_main_db(self):
         """
-        Returns a memoized, persistent psycopg connection to `self.dbname`.
-        Utilizes the db connection pool, and is meant to be shared across multiple threads.
-        :return: a psycopg connection
+        Returns a memoized, persistent psycopg2 connection to `self.dbname`.
+        Threadsafe as long as no transactions are used
+        :return: a psycopg2 connection
         """
         # reload settings for the main DB only once every time the connection is reestablished
         conn = self.db_pool._get_connection_raw(
-            dbname=self._config.dbname,
-            ttl_ms=self._config.idle_connection_timeout,
+            self._config.dbname,
+            self._config.idle_connection_timeout,
             startup_fn=self._load_pg_settings,
             persistent=True,
         )
@@ -732,7 +721,7 @@ class PostgreSql(AgentCheck):
                 try:
                     self.log.debug("Running query: %s", query)
                     cursor.execute(query)
-                except (psycopg.ProgrammingError, psycopg.errors.QueryCanceled) as e:
+                except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
                     self.log.error("Error executing query for metric_prefix %s: %s", metric_prefix, str(e))
                     self.db.rollback()
                     continue
@@ -814,12 +803,34 @@ class PostgreSql(AgentCheck):
         for warning in messages:
             self.warning(warning)
 
+    def _send_database_instance_metadata(self):
+        if self.resolved_hostname not in self._database_instance_emitted:
+            event = {
+                "host": self.resolved_hostname,
+                "agent_version": datadog_agent.get_version(),
+                "dbms": "postgres",
+                "kind": "database_instance",
+                "collection_interval": self._config.database_instance_collection_interval,
+                'dbms_version': payload_pg_version(self.version),
+                'integration_version': __version__,
+                "tags": self._non_internal_tags,
+                "timestamp": time() * 1000,
+                "cloud_metadata": self._config.cloud_metadata,
+                "metadata": {
+                    "dbm": self._config.dbm_enabled,
+                    "connection_host": self._config.host,
+                },
+            }
+            self._database_instance_emitted[self.resolved_hostname] = event
+            self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+
     def check(self, _):
         tags = copy.copy(self.tags)
         # Collect metrics
         try:
             # Check version
             self._connect()
+            self.load_version()  # We don't want to cache versions between runs to capture minor updates for metadata
             if self._config.tag_replication_role:
                 replication_role_tag = "replication_role:{}".format(self._get_replication_role())
                 tags.append(replication_role_tag)
@@ -837,7 +848,7 @@ class PostgreSql(AgentCheck):
                 self.metadata_samples.run_job_loop(tags)
             if self._config.collect_wal_metrics:
                 self._collect_wal_metrics(tags)
-
+            self._send_database_instance_metadata()
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")
             self._clean_state()
@@ -865,13 +876,6 @@ class PostgreSql(AgentCheck):
                 self.db.commit()
             except Exception as e:
                 self.log.warning("Unable to commit: %s", e)
-            self._version = None  # We don't want to cache versions between runs to capture minor updates for metadata
         finally:
             # Add the warnings saved during the execution of the check
             self._report_warnings()
-            if self._check_cancelled and self.db:
-                try:
-                    # once check finishes on a cancel, shut down main connection gracefully
-                    self.db.close()
-                except Exception:
-                    self.log.exception("failed to close DB connection for db=%s", self._config.dbname)

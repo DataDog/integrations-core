@@ -58,6 +58,7 @@ def test_e2e_profile_apc_pdu(dd_agent_check):
         [
             'powernet_r_pdu_outlet_status_index:14',
             'powernet_r_pdu_outlet_status_outlet_name:forward kept zombies oxen oxen driving their',
+            'powernet_r_pdu_outlet_status_outlet_state:outlet_status_off',
         ],
         [
             'powernet_r_pdu_outlet_status_index:9',

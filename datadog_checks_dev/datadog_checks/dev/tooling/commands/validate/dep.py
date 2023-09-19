@@ -236,7 +236,7 @@ def dep(check, require_base_check_version, min_base_check_version):
         check_dependency_definitions = get_dependency_set(check_dependencies[name])
 
         # Only report mismatches when this dependency is actually present within the checks specified
-        if check_dependency_definitions and agent_dependency_definitions != check_dependency_definitions:
+        if check_dependency_definitions and not check_dependency_definitions.issubset(agent_dependency_definitions):
             failed = True
             message = (
                 f'Mismatch for dependency `{name}`:\n'

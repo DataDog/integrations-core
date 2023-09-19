@@ -177,6 +177,8 @@ metrics:
           OID: 1.3.6.1.4.1.232.6.2.14.13.1.15
           name: cpqHeResMem2ModuleCellTablePtr
         tag: mem_board_index
+
+  # DEPRECATED: use the next table instead
   - MIB: CPQHLTH-MIB
     table:
       OID: 1.3.6.1.4.1.232.6.2.9.3
@@ -184,6 +186,17 @@ metrics:
     symbols:
       - OID: 1.3.6.1.4.1.232.6.2.9.3.1.5
         name: cpqHeFltTolPowerSupplyStatus
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.232.6.2.9.3.1.1
+          name: cpqHeFltTolPowerSupplyChassis
+        tag: chassis_num
+
+  - MIB: CPQHLTH-MIB
+    table:
+      OID: 1.3.6.1.4.1.232.6.2.9.3
+      name: cpqHeFltTolPowerSupplyTable
+    symbols:
       - name: cpqHeFltTolPowerSupply
         constant_value_one: true
       - OID: 1.3.6.1.4.1.232.6.2.9.3.1.7
@@ -195,23 +208,23 @@ metrics:
           OID: 1.3.6.1.4.1.232.6.2.9.3.1.5
           name: cpqHeFltTolPowerSupplyStatus
         mapping:
-          1: noError
-          2: generalFailure
-          3: bistFailure
-          4: fanFailure
-          5: tempFailure
-          6: interlockOpen
-          7: epromFailed
-          8: vrefFailed
-          9: dacFailed
-          10: ramTestFailed
-          11: voltageChannelFailed
-          12: orringdiodeFailed
-          13: brownOut
-          14: giveupOnStartup
-          15: nvramInvalid
-          16: calibrationTableInvalid
-          17: noPowerInput
+          1: no_error
+          2: general_failure
+          3: bist_failure
+          4: fan_failure
+          5: temp_failure
+          6: interlock_open
+          7: eprom_failed
+          8: vref_failed
+          9: dac_failed
+          10: ram_test_failed
+          11: voltage_channel_failed
+          12: orringdiode_failed
+          13: brown_out
+          14: giveup_on_startup
+          15: nvram_invalid
+          16: calibration_table_invalid
+          17: no_power_input
         tag: power_supply_status
       - column:
           OID: 1.3.6.1.4.1.232.6.2.9.3.1.1

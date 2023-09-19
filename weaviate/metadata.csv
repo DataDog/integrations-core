@@ -77,6 +77,7 @@ weaviate.queries.durations_ms.count,count,,operation,,"The count of operations o
 weaviate.queries.durations_ms.sum,count,,millisecond,,The sum of query durations in milliseconds,0,weaviate,weaviate queries duration sum,
 weaviate.queries.filtered.vector.durations_ms.count,count,,,,The count of the duration of queries summary,0,weaviate,weaviate queries filtered vector duration count,
 weaviate.queries.filtered.vector.durations_ms.sum,count,,millisecond,,The duration of queries in milliseconds,0,weaviate,weaviate queries filtered vector duration sum,
+weaviate.requests,gauge,,request,,"The number of requests tagged by a given status(ok, user_error, server_error). Available only on Weaviate version 1.20.0+",0,weaviate,weaviate requests count,
 weaviate.startup.diskio.throughput.bucket,count,,operation,,"The number of operations observed for the the disk I/O throughput duration by `upper_bound` buckets",0,weaviate,weaviate startup diskio throughput bucket,
 weaviate.startup.diskio.throughput.count,count,,operation,,"The count of operations observed in the disk I/O throughput duration histogram",0,weaviate,weaviate startup diskio throughput count,
 weaviate.startup.diskio.throughput.sum,count,,byte,second,"The sum of disk I/O throughput startup operations in bytes/s, such as reading back the HNSW index or recovering LSM segments. The operation itself is defined by the operation label",0,weaviate,weaviate startup diskio throughput sum,

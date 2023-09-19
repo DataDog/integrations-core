@@ -12,6 +12,8 @@
     "title": "LangChain",
     "media": [],
     "classifier_tags": [
+      "Category::AI",
+      "Category::Machine Learning & LLM",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs",
       "Submitted Data Type::Traces",
@@ -40,8 +42,8 @@
       "LangChain Overview Dashboard": "assets/dashboards/overview_dashboard.json"
     },
     "monitors": {
-      "Request Latency": "assets/recommended_monitors/request_duration.json",
-      "Error Rate": "assets/recommended_monitors/error_rate.json"
+      "Request Latency": "assets/monitors/request_duration.json",
+      "Error Rate": "assets/monitors/error_rate.json"
     }
   },
   "author": {

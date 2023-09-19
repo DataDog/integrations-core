@@ -28,13 +28,7 @@ from .console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
 
 # Dependencies to ignore when update dependencies
 IGNORED_DEPS = {
-    'psycopg2-binary',  # https://github.com/DataDog/integrations-core/pull/10456
     'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
-    'flup',  # https://github.com/DataDog/integrations-core/pull/1997
-    # https://github.com/DataDog/integrations-core/pull/10105;
-    # snowflake-connector-python caps cryptography which means we need to be careful with how we update it
-    # (and do so manually)
-    'cryptography',
     'dnspython',
     'pymysql',  # https://github.com/DataDog/integrations-core/pull/12612
     'foundationdb',  # Breaking datadog_checks_base tests
@@ -42,8 +36,6 @@ IGNORED_DEPS = {
     'pyasn1',  # Breaking snmp tests
     'pycryptodomex',  # Breaking snmp tests
     'pysnmp',  # Breaking snmp tests
-    'clickhouse-driver',  # Breaking clickhouse tests
-    'lz4',  # Breaking clickhouse tests
     'pyodbc',  # Breaking sqlserver tests
     'psutil',  # Breaking disk tests
     'aerospike',  # v8+ breaks agent build.
@@ -52,6 +44,8 @@ IGNORED_DEPS = {
     'pyvmomi',  # 7->8 breaks vsphere tests.
     # 4.3->4.4 changes the license field in the package metadata to something our validations cannot handle.
     'pymongo',
+    # We need pydantic 2.0.2 for the rpm x64 agent build (see https://github.com/DataDog/datadog-agent/pull/18303)
+    'pydantic',
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others

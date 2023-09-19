@@ -86,6 +86,7 @@ class InstanceConfig(BaseModel):
     allow_redirects: Optional[bool] = None
     api_server_endpoint: Optional[str] = None
     app_controller_endpoint: Optional[str] = None
+    appset_controller_endpoint: Optional[str] = None
     auth_token: Optional[AuthToken] = None
     auth_type: Optional[str] = None
     aws_host: Optional[str] = None

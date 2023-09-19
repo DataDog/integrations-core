@@ -2,370 +2,390 @@
 
 ## Unreleased
 
-## 3.4.1 / 2023-07-10
+## 4.0.1 / 2023-08-18
 
 ***Fixed***:
 
-* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+* Add metrics for PKI tidy operations ([#14327](https://github.com/DataDog/integrations-core/pull/14327))
+
+## 4.0.0 / 2023-08-10
+
+***Changed***:
+
+* Bump the minimum base check version ([#15427](https://github.com/DataDog/integrations-core/pull/15427))
+
+***Added***:
+
+* Update generated config models ([#15212](https://github.com/DataDog/integrations-core/pull/15212))
+
+***Fixed***:
+
+* Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
+
+## 3.4.1 / 2023-07-10 / Agent 7.47.0
+
+***Fixed***:
+
+* Bump Python version from py3.8 to py3.9 ([#14701](https://github.com/DataDog/integrations-core/pull/14701))
 
 ## 3.4.0 / 2023-05-26 / Agent 7.46.0
 
 ***Added***:
 
-* Add an ignore_connection_errors option to the openmetrics check. See [#14504](https://github.com/DataDog/integrations-core/pull/14504).
+* Add an ignore_connection_errors option to the openmetrics check ([#14504](https://github.com/DataDog/integrations-core/pull/14504))
 
 ***Fixed***:
 
-* Update minimum datadog base package version. See [#14463](https://github.com/DataDog/integrations-core/pull/14463).
-* Deprecate `use_latest_spec` option. See [#14446](https://github.com/DataDog/integrations-core/pull/14446).
+* Update minimum datadog base package version ([#14463](https://github.com/DataDog/integrations-core/pull/14463))
+* Deprecate `use_latest_spec` option ([#14446](https://github.com/DataDog/integrations-core/pull/14446))
 
 ## 3.3.3 / 2022-10-28 / Agent 7.41.0
 
 ***Fixed***:
 
-* Ensure X-Vault-Request header is set to `true` on all requests. See [#13006](https://github.com/DataDog/integrations-core/pull/13006).
+* Ensure X-Vault-Request header is set to `true` on all requests ([#13006](https://github.com/DataDog/integrations-core/pull/13006))
 
 ## 3.3.2 / 2022-09-16 / Agent 7.40.0
 
 ***Fixed***:
 
-* Do not use the `client_token` if `no_token` is true with the openmetrics v1 implementation. See [#12776](https://github.com/DataDog/integrations-core/pull/12776).
-* Use the `client_token` option with the openmetrics v2 implementation. See [#12764](https://github.com/DataDog/integrations-core/pull/12764).
+* Do not use the `client_token` if `no_token` is true with the openmetrics v1 implementation ([#12776](https://github.com/DataDog/integrations-core/pull/12776))
+* Use the `client_token` option with the openmetrics v2 implementation ([#12764](https://github.com/DataDog/integrations-core/pull/12764))
 
 ## 3.3.1 / 2022-08-05 / Agent 7.39.0
 
 ***Fixed***:
 
-* Properly read `collect_secondary_dr` and improve code readability. See [#12435](https://github.com/DataDog/integrations-core/pull/12435).
+* Properly read `collect_secondary_dr` and improve code readability ([#12435](https://github.com/DataDog/integrations-core/pull/12435))
 
 ## 3.3.0 / 2022-06-01 / Agent 7.38.0
 
 ***Added***:
 
-* Add config option to collect from secondary replication mode. See [#12099](https://github.com/DataDog/integrations-core/pull/12099).
+* Add config option to collect from secondary replication mode ([#12099](https://github.com/DataDog/integrations-core/pull/12099))
 
 ***Fixed***:
 
-* Ensure vault_wal_gc_total is collected as gauge. See [#12036](https://github.com/DataDog/integrations-core/pull/12036).
+* Ensure vault_wal_gc_total is collected as gauge ([#12036](https://github.com/DataDog/integrations-core/pull/12036))
 
 ## 3.2.1 / 2022-05-18 / Agent 7.37.0
 
 ***Fixed***:
 
-* Fix extra metrics description example. See [#12043](https://github.com/DataDog/integrations-core/pull/12043).
+* Fix extra metrics description example ([#12043](https://github.com/DataDog/integrations-core/pull/12043))
 
 ## 3.2.0 / 2022-05-11
 
 ***Added***:
 
-* Add `vault.replication.wal.gc.*` metrics. See [#11984](https://github.com/DataDog/integrations-core/pull/11984).
+* Add `vault.replication.wal.gc.*` metrics ([#11984](https://github.com/DataDog/integrations-core/pull/11984))
 
 ***Fixed***:
 
-* Fix metric naming. See [#11847](https://github.com/DataDog/integrations-core/pull/11847).
+* Fix metric naming ([#11847](https://github.com/DataDog/integrations-core/pull/11847))
 
 ## 3.1.0 / 2022-04-05 / Agent 7.36.0
 
 ***Added***:
 
-* Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* Add metric_patterns options to filter all metric submission by a list of regexes ([#11695](https://github.com/DataDog/integrations-core/pull/11695))
 
 ***Fixed***:
 
-* Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
+* Remove outdated warning in the description for the `tls_ignore_warning` option ([#11591](https://github.com/DataDog/integrations-core/pull/11591))
 
 ## 3.0.2 / 2022-02-23 / Agent 7.35.0
 
 ***Fixed***:
 
-* Add OpenMetrics V2 service check to Vault. See [#11558](https://github.com/DataDog/integrations-core/pull/11558).
+* Add OpenMetrics V2 service check to Vault ([#11558](https://github.com/DataDog/integrations-core/pull/11558))
 
 ## 3.0.1 / 2022-02-19
 
 ***Fixed***:
 
-* Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+* Fix namespace packaging on Python 2 ([#11532](https://github.com/DataDog/integrations-core/pull/11532))
 
 ## 3.0.0 / 2022-02-16
 
 ***Changed***:
 
-* Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
+* Add tls_protocols_allowed option documentation ([#11251](https://github.com/DataDog/integrations-core/pull/11251))
 
 ***Added***:
 
-* Add `pyproject.toml` file. See [#11453](https://github.com/DataDog/integrations-core/pull/11453).
-* Add support for OpenMetrics v2. See [#11293](https://github.com/DataDog/integrations-core/pull/11293).
+* Add `pyproject.toml` file ([#11453](https://github.com/DataDog/integrations-core/pull/11453))
+* Add support for OpenMetrics v2 ([#11293](https://github.com/DataDog/integrations-core/pull/11293))
 
 ## 2.17.1 / 2022-01-08 / Agent 7.34.0
 
 ***Fixed***:
 
-* Add comment to autogenerated model files. See [#10945](https://github.com/DataDog/integrations-core/pull/10945).
+* Add comment to autogenerated model files ([#10945](https://github.com/DataDog/integrations-core/pull/10945))
 
 ## 2.17.0 / 2021-10-04 / Agent 7.32.0
 
 ***Added***:
 
-* Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
-* Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* Add HTTP option to control the size of streaming responses ([#10183](https://github.com/DataDog/integrations-core/pull/10183))
+* Add allow_redirect option ([#10160](https://github.com/DataDog/integrations-core/pull/10160))
 
 ***Fixed***:
 
-* Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+* Fix the description of the `allow_redirects` HTTP option ([#10195](https://github.com/DataDog/integrations-core/pull/10195))
 
 ## 2.16.0 / 2021-09-09
 
 ***Added***:
 
-* Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
-* Update vault metrics. See [#9953](https://github.com/DataDog/integrations-core/pull/9953).
+* Disable generic tags ([#10027](https://github.com/DataDog/integrations-core/pull/10027))
+* Update vault metrics ([#9953](https://github.com/DataDog/integrations-core/pull/9953))
 
 ## 2.15.0 / 2021-08-22 / Agent 7.31.0
 
 ***Added***:
 
-* Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+* Use `display_default` as a fallback for `default` when validating config models ([#9739](https://github.com/DataDog/integrations-core/pull/9739))
 
 ## 2.14.0 / 2021-07-20
 
 ***Added***:
 
-* Add new vault metrics. See [#9728](https://github.com/DataDog/integrations-core/pull/9728).
-* Add Vault route metrics to be fetched from the Prometheus endpoint. See [#9612](https://github.com/DataDog/integrations-core/pull/9612). Thanks [mdgreenfield](https://github.com/mdgreenfield).
-* Add newer Hashicorp Vault metrics. See [#9641](https://github.com/DataDog/integrations-core/pull/9641). Thanks [mdgreenfield](https://github.com/mdgreenfield).
+* Add new vault metrics ([#9728](https://github.com/DataDog/integrations-core/pull/9728))
+* Add Vault route metrics to be fetched from the Prometheus endpoint ([#9612](https://github.com/DataDog/integrations-core/pull/9612)) Thanks [mdgreenfield](https://github.com/mdgreenfield).
+* Add newer Hashicorp Vault metrics ([#9641](https://github.com/DataDog/integrations-core/pull/9641)) Thanks [mdgreenfield](https://github.com/mdgreenfield).
 
 ## 2.13.0 / 2021-05-28 / Agent 7.29.0
 
 ***Added***:
 
-* Add runtime configuration validation. See [#9002](https://github.com/DataDog/integrations-core/pull/9002).
+* Add runtime configuration validation ([#9002](https://github.com/DataDog/integrations-core/pull/9002))
 
 ## 2.12.0 / 2021-04-19 / Agent 7.28.0
 
 ***Added***:
 
-* Add Additional Vault Route Metrics. See [#8761](https://github.com/DataDog/integrations-core/pull/8761).
+* Add Additional Vault Route Metrics ([#8761](https://github.com/DataDog/integrations-core/pull/8761))
 
 ***Fixed***:
 
-* Fix refactored imports. See [#9136](https://github.com/DataDog/integrations-core/pull/9136).
-* Bump minimum base package. See [#9107](https://github.com/DataDog/integrations-core/pull/9107).
+* Fix refactored imports ([#9136](https://github.com/DataDog/integrations-core/pull/9136))
+* Bump minimum base package ([#9107](https://github.com/DataDog/integrations-core/pull/9107))
 
 ## 2.11.0 / 2021-03-07 / Agent 7.27.0
 
 ***Added***:
 
-* Rename cluster_name tag to vault_cluster. See [#8577](https://github.com/DataDog/integrations-core/pull/8577).
+* Rename cluster_name tag to vault_cluster ([#8577](https://github.com/DataDog/integrations-core/pull/8577))
 
 ***Fixed***:
 
-* Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+* Bump minimum base package version ([#8443](https://github.com/DataDog/integrations-core/pull/8443))
 
 ## 2.10.0 / 2020-12-11 / Agent 7.25.0
 
 ***Added***:
 
-* Add new Vault 1.5+ metrics. See [#8031](https://github.com/DataDog/integrations-core/pull/8031).
+* Add new Vault 1.5+ metrics ([#8031](https://github.com/DataDog/integrations-core/pull/8031))
 
 ## 2.9.1 / 2020-11-04 / Agent 7.24.0
 
 ***Fixed***:
 
-* Fix secondary mode detection logic. See [#7926](https://github.com/DataDog/integrations-core/pull/7926).
+* Fix secondary mode detection logic ([#7926](https://github.com/DataDog/integrations-core/pull/7926))
 
 ## 2.9.0 / 2020-10-21
 
 ***Added***:
 
-* Detect replication DR secondary mode and skip Prometheus metric collection. See [#7825](https://github.com/DataDog/integrations-core/pull/7825).
+* Detect replication DR secondary mode and skip Prometheus metric collection ([#7825](https://github.com/DataDog/integrations-core/pull/7825))
 
 ## 2.8.0 / 2020-10-13
 
 ***Added***:
 
-* Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
-* [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+* Add ability to dynamically get authentication information ([#7660](https://github.com/DataDog/integrations-core/pull/7660))
+* [doc] Add encoding in log config sample ([#7708](https://github.com/DataDog/integrations-core/pull/7708))
 
 ***Fixed***:
 
-* Fix vault raft storage metric name. See [#6622](https://github.com/DataDog/integrations-core/pull/6622). Thanks [tgermain](https://github.com/tgermain).
+* Fix vault raft storage metric name ([#6622](https://github.com/DataDog/integrations-core/pull/6622)) Thanks [tgermain](https://github.com/tgermain).
 
 ## 2.7.0 / 2020-09-21 / Agent 7.23.0
 
 ***Added***:
 
-* Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
+* Add RequestsWrapper option to support UTF-8 for basic auth ([#7441](https://github.com/DataDog/integrations-core/pull/7441))
 
 ***Fixed***:
 
-* Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
-* Update proxy section in conf.yaml. See [#7336](https://github.com/DataDog/integrations-core/pull/7336).
+* Fix style for the latest release of Black ([#7438](https://github.com/DataDog/integrations-core/pull/7438))
+* Update proxy section in conf.yaml ([#7336](https://github.com/DataDog/integrations-core/pull/7336))
 
 ## 2.6.1 / 2020-08-10 / Agent 7.22.0
 
 ***Fixed***:
 
-* Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
-* DOCS-838 Template wording. See [#7038](https://github.com/DataDog/integrations-core/pull/7038).
-* Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).
+* Update logs config service field to optional ([#7209](https://github.com/DataDog/integrations-core/pull/7209))
+* DOCS-838 Template wording ([#7038](https://github.com/DataDog/integrations-core/pull/7038))
+* Update ntlm_domain example ([#7118](https://github.com/DataDog/integrations-core/pull/7118))
 
 ## 2.6.0 / 2020-06-29 / Agent 7.21.0
 
 ***Added***:
 
-* Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* Add note about warning concurrency ([#6967](https://github.com/DataDog/integrations-core/pull/6967))
 
 ***Fixed***:
 
-* Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
+* Fix template specs typos ([#6912](https://github.com/DataDog/integrations-core/pull/6912))
 
 ## 2.5.0 / 2020-05-17 / Agent 7.20.0
 
 ***Added***:
 
-* Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* Allow optional dependency installation for all checks ([#6589](https://github.com/DataDog/integrations-core/pull/6589))
 
 ## 2.4.0 / 2020-05-04
 
 ***Added***:
 
-* Add Raft storage backend metrics. See [#6492](https://github.com/DataDog/integrations-core/pull/6492). Thanks [fabienrenaud](https://github.com/fabienrenaud).
+* Add Raft storage backend metrics ([#6492](https://github.com/DataDog/integrations-core/pull/6492)) Thanks [fabienrenaud](https://github.com/fabienrenaud).
 
 ## 2.3.2 / 2020-05-04 / Agent 7.19.2
 
 ***Fixed***:
 
-* Fixed infinite stream of Vault leader detection events. See [#6552](https://github.com/DataDog/integrations-core/pull/6552). Thanks [fabienrenaud](https://github.com/fabienrenaud).
+* Fixed infinite stream of Vault leader detection events ([#6552](https://github.com/DataDog/integrations-core/pull/6552)) Thanks [fabienrenaud](https://github.com/fabienrenaud).
 
 ## 2.3.1 / 2020-04-07 / Agent 7.19.0
 
 ***Fixed***:
 
-* Add `kerberos_cache` to HTTP config options. See [#6279](https://github.com/DataDog/integrations-core/pull/6279).
+* Add `kerberos_cache` to HTTP config options ([#6279](https://github.com/DataDog/integrations-core/pull/6279))
 
 ## 2.3.0 / 2020-04-04
 
 ***Added***:
 
-* Add option to set SNI hostname via the `Host` header for RequestsWrapper. See [#5833](https://github.com/DataDog/integrations-core/pull/5833).
+* Add option to set SNI hostname via the `Host` header for RequestsWrapper ([#5833](https://github.com/DataDog/integrations-core/pull/5833))
 
 ***Fixed***:
 
-* Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
-* Fix event submission on leader change. See [#6039](https://github.com/DataDog/integrations-core/pull/6039).
+* Remove logs sourcecategory ([#6121](https://github.com/DataDog/integrations-core/pull/6121))
+* Fix event submission on leader change ([#6039](https://github.com/DataDog/integrations-core/pull/6039))
 
 ## 2.2.1 / 2020-02-25 / Agent 7.18.0
 
 ***Fixed***:
 
-* Update datadog_checks_base dependencies. See [#5846](https://github.com/DataDog/integrations-core/pull/5846).
+* Update datadog_checks_base dependencies ([#5846](https://github.com/DataDog/integrations-core/pull/5846))
 
 ## 2.2.0 / 2020-02-22
 
 ***Added***:
 
-* Add `service` option to default configuration. See [#5805](https://github.com/DataDog/integrations-core/pull/5805).
-* Add missing vault summary metric. See [#5670](https://github.com/DataDog/integrations-core/pull/5670).
+* Add `service` option to default configuration ([#5805](https://github.com/DataDog/integrations-core/pull/5805))
+* Add missing vault summary metric ([#5670](https://github.com/DataDog/integrations-core/pull/5670))
 
 ## 2.1.2 / 2020-01-24 / Agent 7.17.0
 
 ***Fixed***:
 
-* Send summary count metrics as a count. See [#5538](https://github.com/DataDog/integrations-core/pull/5538).
+* Send summary count metrics as a count ([#5538](https://github.com/DataDog/integrations-core/pull/5538))
 
 ## 2.1.1 / 2020-01-13
 
 ***Fixed***:
 
-* Fix http handler. See [#5434](https://github.com/DataDog/integrations-core/pull/5434).
+* Fix http handler ([#5434](https://github.com/DataDog/integrations-core/pull/5434))
 
 ## 2.1.0 / 2020-01-09
 
 ***Added***:
 
-* Add support for metric collection without a token. See [#5424](https://github.com/DataDog/integrations-core/pull/5424).
-* Make OpenMetrics use the RequestsWrapper. See [#5414](https://github.com/DataDog/integrations-core/pull/5414).
+* Add support for metric collection without a token ([#5424](https://github.com/DataDog/integrations-core/pull/5424))
+* Make OpenMetrics use the RequestsWrapper ([#5414](https://github.com/DataDog/integrations-core/pull/5414))
 
 ## 2.0.0 / 2019-12-21
 
 ***Changed***:
 
-* Collect prometheus metrics if a client token is available. See [#5177](https://github.com/DataDog/integrations-core/pull/5177).
+* Collect prometheus metrics if a client token is available ([#5177](https://github.com/DataDog/integrations-core/pull/5177))
 
 ## 1.7.1 / 2019-10-21 / Agent 6.15.0
 
 ***Fixed***:
 
-* Fix is_leader when vault sealed. See [#4838](https://github.com/DataDog/integrations-core/pull/4838).
+* Fix is_leader when vault sealed ([#4838](https://github.com/DataDog/integrations-core/pull/4838))
 
 ## 1.7.0 / 2019-10-18
 
 ***Added***:
 
-* Allows certain expected HTTP error status_codes for the `/sys/health` endpoint. See [#4745](https://github.com/DataDog/integrations-core/pull/4745).
+* Allows certain expected HTTP error status_codes for the `/sys/health` endpoint ([#4745](https://github.com/DataDog/integrations-core/pull/4745))
 
 ## 1.6.0 / 2019-10-07
 
 ***Added***:
 
-* Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+* Add option to override KRB5CCNAME env var ([#4578](https://github.com/DataDog/integrations-core/pull/4578))
 
 ***Fixed***:
 
-* Fix crash in HA mode. See [#4698](https://github.com/DataDog/integrations-core/pull/4698).
+* Fix crash in HA mode ([#4698](https://github.com/DataDog/integrations-core/pull/4698))
 
 ## 1.5.0 / 2019-08-24 / Agent 6.14.0
 
 ***Added***:
 
-* Add requests wrapper to vault. See [#4259](https://github.com/DataDog/integrations-core/pull/4259).
+* Add requests wrapper to vault ([#4259](https://github.com/DataDog/integrations-core/pull/4259))
 
 ## 1.4.1 / 2019-07-31
 
 ***Fixed***:
 
-* Submit critical service check with 500 server errors. See [#4242](https://github.com/DataDog/integrations-core/pull/4242).
+* Submit critical service check with 500 server errors ([#4242](https://github.com/DataDog/integrations-core/pull/4242))
 
 ## 1.4.0 / 2019-05-14 / Agent 6.12.0
 
 ***Added***:
 
-* Adhere to code style. See [#3580](https://github.com/DataDog/integrations-core/pull/3580).
+* Adhere to code style ([#3580](https://github.com/DataDog/integrations-core/pull/3580))
 
 ## 1.3.1 / 2019-01-04 / Agent 6.9.0
 
 ***Fixed***:
 
-* Fix unsupported API version fallback. See [#2793][1].
+* Fix unsupported API version fallback ([#2793][1])
 
 ## 1.3.0 / 2018-11-30 / Agent 6.8.0
 
 ***Added***:
 
-* Support custom certificates. See [#2657][2]. Thanks [eedwards-sk][3].
+* Support custom certificates ([#2657][2]) Thanks [eedwards-sk][3].
 
 ## 1.2.0 / 2018-08-15 / Agent 6.5.0
 
 ***Added***:
 
-* Add is_leader metric. See [#2057][4].
+* Add is_leader metric ([#2057][4])
 
 ## 1.1.0 / 2018-08-08
 
 ***Changed***:
 
-* Add data files to the wheel package. See [#1727][6].
+* Add data files to the wheel package ([#1727][6])
 
 ***Added***:
 
-* Add option to disable urllib3 warnings. See [#2009][5].
+* Add option to disable urllib3 warnings ([#2009][5])
 
 ## 1.0.0 / 2018-06-19
 
 ***Added***:
 
-* Add Vault integration. See [#1759][7].
+* Add Vault integration ([#1759][7])
 
 [1]: https://github.com/DataDog/integrations-core/pull/2793
 [2]: https://github.com/DataDog/integrations-core/pull/2657

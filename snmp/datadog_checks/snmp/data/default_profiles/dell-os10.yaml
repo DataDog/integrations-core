@@ -57,14 +57,12 @@ metrics:
           name: dell.os10CardStatus
         tag: dell_os10_card_status
         mapping:
-          1: up
-          2: down
-          3: testing
-          4: unknown
-          5: dormant
-          6: not_present
-          7: lower_layer_down
-          8: failed
+          1: ready
+          2: card_mis_match
+          3: card_problem
+          4: diag_mode
+          5: card_absent
+          6: offline
   - MIB: DELLEMC-OS10-CHASSIS-MIB
     table:
       OID: 1.3.6.1.4.1.674.11000.5000.100.4.1.2.1
@@ -159,6 +157,7 @@ metrics:
           3: ipv4z
           4: ipv6z
           16: dns
+          25: l2vpn
       - column:
           OID: 1.3.6.1.4.1.674.11000.5000.200.1.1.2.1.3
           name: dell.os10bgp4V2PeerLocalAddr
@@ -174,6 +173,7 @@ metrics:
           3: ipv4z
           4: ipv6z
           16: dns
+          25: l2vpn
       - column:
           OID: 1.3.6.1.4.1.674.11000.5000.200.1.1.2.1.5
           name: dell.os10bgp4V2PeerRemoteAddr
@@ -224,13 +224,14 @@ metrics:
           4: opensent
           5: openconfirm
           6: established
-metric_tags:
-  - OID: 1.3.6.1.4.1.674.11000.5000.100.4.1.1.3.1.6
-    symbol: dell.os10ChassisHwRev
-    tag: dell_os10_chassis_hw_rev
-  - OID: 1.3.6.1.4.1.674.11000.5000.100.4.1.1.3.1.7
-    symbol: dell.os10ChassisServiceTag
-    tag: dell_os10_chassis_service_tag
-  - OID: 1.3.6.1.4.1.674.11000.5000.100.4.1.1.3.1.8
-    symbol: dell.os10ChassisExpServiceCode
-    tag: dell_os10_chassis_exp_service_code
+# Tagging by column OID is not supported at the moment. Should be a table/columns metric + tags instead.
+# metric_tags:
+#   - OID: 1.3.6.1.4.1.674.11000.5000.100.4.1.1.3.1.6
+#     symbol: dell.os10ChassisHwRev
+#     tag: dell_os10_chassis_hw_rev
+#   - OID: 1.3.6.1.4.1.674.11000.5000.100.4.1.1.3.1.7
+#     symbol: dell.os10ChassisServiceTag
+#     tag: dell_os10_chassis_service_tag
+#   - OID: 1.3.6.1.4.1.674.11000.5000.100.4.1.1.3.1.8
+#     symbol: dell.os10ChassisExpServiceCode
+#     tag: dell_os10_chassis_exp_service_code

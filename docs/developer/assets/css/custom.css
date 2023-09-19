@@ -1,4 +1,4 @@
-:root {
+:root > * {
   /* https://www.datadoghq.com/about/resources/#datadog-purple */
   --md-primary-fg-color: #632CA6;
   --md-primary-fg-color--dark: #632CA6;
@@ -20,13 +20,6 @@ code { font-family: 'Fira Code', monospace; }
   code { font-family: 'Fira Code VF', monospace; }
 }
 
-/* https://github.com/pawamoy/mkdocstrings#usage */
-div.doc-contents:not(.first) {
-  padding-left: 25px;
-  border-left: 4px solid rgba(230, 230, 230);
-  margin-bottom: 80px;
-}
-
 /* https://github.com/squidfunk/mkdocs-material/issues/1522 */
 .md-typeset h5 {
   color: var(--md-default-fg-color);
@@ -46,7 +39,7 @@ div.doc-contents:not(.first) {
 /* TODO: replace all this when there is an updated example https://github.com/facelessuser/pymdown-extensions/issues/912 */
 
 /* Normal colors */
-:root {
+:root > * {
   --md-progress-100: #00e676;
   --md-progress-80: #00e676;
   --md-progress-60: #fbc02d;

@@ -666,7 +666,7 @@
                                 },
                                 {
                                     "label": "Device performance",
-                                    "link": "https://dd.datad0g.com/dash/integration/30546/network-device-monitoring?tpl_var_snmp_device[0]={{snmp_device}}&tpl_var_snmp_host[0]={{snmp_host}}&live=true&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}"
+                                    "link": "/dash/integration/Datacenter%20Overview?tpl_var_snmp_device[0]={{snmp_device}}&tpl_var_snmp_host[0]={{snmp_host}}&live=true&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}"
                                 }
                             ],
                             "has_search_bar": "auto",
@@ -918,7 +918,7 @@
                                 },
                                 {
                                     "label": "Device performance",
-                                    "link": "https://dd.datad0g.com/dash/integration/30546/network-device-monitoring?tpl_var_snmp_device[0]={{snmp_device}}&tpl_var_snmp_host[0]={{snmp_host}}&live=true&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}"
+                                    "link": "/dash/integration/Datacenter%20Overview?tpl_var_snmp_device[0]={{snmp_device}}&tpl_var_snmp_host[0]={{snmp_host}}&live=true&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}"
                                 }
                             ],
                             "has_search_bar": "auto",
@@ -1059,7 +1059,7 @@
                                 },
                                 {
                                     "label": "Device performance",
-                                    "link": "https://dd.datad0g.com/dash/integration/30546/network-device-monitoring?tpl_var_snmp_device[0]={{snmp_device}}&tpl_var_snmp_host[0]={{snmp_host}}&live=true&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}"
+                                    "link": "/dash/integration/Datacenter%20Overview?tpl_var_snmp_device[0]={{snmp_device}}&tpl_var_snmp_host[0]={{snmp_host}}&live=true&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}"
                                 }
                             ],
                             "legend_columns": [
@@ -1210,7 +1210,7 @@
                                 },
                                 {
                                     "label": "Device performance",
-                                    "link": "https://dd.datad0g.com/dash/integration/30546/network-device-monitoring?tpl_var_snmp_device[0]={{snmp_device}}&tpl_var_snmp_host[0]={{snmp_host}}&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}"
+                                    "link": "/dash/integration/Datacenter%20Overview?tpl_var_snmp_device[0]={{snmp_device}}&tpl_var_snmp_host[0]={{snmp_host}}&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}"
                                 }
                             ],
                             "legend_columns": [

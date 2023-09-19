@@ -12,6 +12,8 @@
     "title": "Airbyte",
     "media": [],
     "classifier_tags": [
+      "Category::AI",
+      "Category::Machine Learning & LLM",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS"
@@ -31,7 +33,14 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "airbyte-cron",
+        "airbyte-metrics-reporter",
+        "airbyte-server",
+        "airbyte-workers",
+        "uvicorn connector_builder.entrypoint:app"
+      ]
     },
     "dashboards": {
         "airbyte_overview": "assets/dashboards/airbyte_overview.json"
