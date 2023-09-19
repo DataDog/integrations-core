@@ -1550,3 +1550,14 @@ def test_sanitize_url_label():
     )
     expected = "/api/v1/namespaces/%7Bnamespace%7D/configmaps"
     assert KubeletCheck._sanitize_url_label(input) == expected
+
+
+def test_kubelet_unavailable_check_can_init(monkeypatch):
+    instance = {
+        'kubelet_metrics_endpoint': 'http://10.8.0.1:10255/metrics',
+        'cadvisor_metrics_endpoint': 'http://10.8.0.1:10255/metrics/cadvisor',
+    }
+    kubelet_conn_info = {}
+    with mock.patch('datadog_checks.kubelet.kubelet.get_connection_info', return_value=kubelet_conn_info):
+        check = mock_kubelet_check(monkeypatch, [instance], kube_version=None)
+        assert check is not None
