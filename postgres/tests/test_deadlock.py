@@ -2,27 +2,24 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import threading
+import copy
+import select
 import time
 
-import psycopg
+import psycopg2
 import pytest
-from psycopg import ClientCursor
 
 from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION
 
 
-def wait_on_result(sql=None, binds=None, expected_value=None):
-    for _i in range(5):
-        with psycopg.connect(
-            host=HOST, dbname=DB_NAME, user="bob", password="bob", cursor_factory=ClientCursor
-        ) as tconn:
-            with tconn.cursor() as cursor:
-                cursor.execute(sql, binds)
-                result = cursor.fetchone()[0]
-                if result == expected_value:
-                    break
-                time.sleep(0.1)
+def wait_on_result(cursor=None, sql=None, binds=None, expected_value=None):
+    for _i in range(300):
+        cursor.execute(sql, binds)
+        result = cursor.fetchone()[0]
+        if result == expected_value:
+            break
+
+        time.sleep(0.1)
     else:
         return False
 
@@ -36,18 +33,30 @@ def wait_on_result(sql=None, binds=None, expected_value=None):
 def test_deadlock(aggregator, dd_run_check, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check._connect()
+    conn = check._new_connection(pg_instance['dbname'])
+    cursor = conn.cursor()
 
-    def execute_in_thread(q, args):
-        with psycopg.connect(
-            host=HOST, dbname=DB_NAME, user="bob", password="bob", cursor_factory=ClientCursor
-        ) as tconn:
-            with tconn.cursor() as cur:
-                # this will block, and eventually throw when
-                # the deadlock is created
-                try:
-                    cur.execute(q, args)
-                except psycopg.errors.DeadlockDetected:
-                    pass
+    def wait(conn):
+        while True:
+            state = conn.poll()
+            if state == psycopg2.extensions.POLL_OK:
+                break
+            elif state == psycopg2.extensions.POLL_WRITE:
+                select.select([], [conn.fileno()], [])
+            elif state == psycopg2.extensions.POLL_READ:
+                select.select([conn.fileno()], [], [])
+            else:
+                raise psycopg2.OperationalError("poll() returned %s" % state)
+            time.sleep(0.1)
+
+    conn_args = {'host': HOST, 'dbname': DB_NAME, 'user': "bob", 'password': "bob"}
+    conn_args_async = copy.copy(conn_args)
+    conn_args_async["async_"] = 1
+    conn1 = psycopg2.connect(**conn_args)
+    conn1.autocommit = False
+
+    conn2 = psycopg2.connect(**conn_args_async)
+    wait(conn2)
 
     appname = 'deadlock sess'
     appname1 = appname + '1'
@@ -56,30 +65,25 @@ def test_deadlock(aggregator, dd_run_check, integration_check, pg_instance):
     update_sql = "update personsdup1 set address = 'changed' where personid = %s"
 
     deadlock_count_sql = "select deadlocks from pg_stat_database where datname = %s"
-    with check._new_connection(pg_instance['dbname']).connection() as conn:
-        with conn.cursor() as cursor:
-            cursor.execute(deadlock_count_sql, (DB_NAME,))
-            deadlocks_before = cursor.fetchone()[0]
-
-    conn_args = {'host': HOST, 'dbname': DB_NAME, 'user': "bob", 'password': "bob"}
-    conn1 = psycopg.connect(**conn_args, autocommit=False, cursor_factory=ClientCursor)
+    cursor.execute(deadlock_count_sql, (DB_NAME,))
+    deadlocks_before = cursor.fetchone()[0]
 
     cur1 = conn1.cursor()
     cur1.execute(appname_sql, (appname1,))
     cur1.execute(update_sql, (1,))
 
-    args = (appname2, 2, 1)
-    query = """SET application_name=%s;
+    cur2 = conn2.cursor()
+    cur2.execute(
+        """SET application_name=%s;
 begin transaction;
 {};
 {};
 commit;
 """.format(
-        update_sql, update_sql
+            update_sql, update_sql
+        ),
+        (appname2, 2, 1),
     )
-    # ... now execute the test query in a separate thread
-    lock_task = threading.Thread(target=execute_in_thread, args=(query, args))
-    lock_task.start()
 
     lock_count_sql = """SELECT COUNT(1)
    FROM  pg_catalog.pg_locks         blocked_locks
@@ -101,7 +105,7 @@ commit;
     AND blocking_activity.application_name = %s
     AND blocked_activity.application_name = %s """
 
-    is_locked = wait_on_result(sql=lock_count_sql, binds=(appname1, appname2), expected_value=1)
+    is_locked = wait_on_result(cursor=cursor, sql=lock_count_sql, binds=(appname1, appname2), expected_value=1)
 
     if not is_locked:
         raise Exception("ERROR: Couldn't reproduce a deadlock. That can happen on an extremely overloaded system.")
@@ -109,12 +113,12 @@ commit;
     try:
         cur1.execute(update_sql, (2,))
         cur1.execute("commit")
-    except psycopg.errors.DeadlockDetected:
+    except psycopg2.errors.DeadlockDetected:
         pass
 
     dd_run_check(check)
 
-    wait_on_result(sql=deadlock_count_sql, binds=(DB_NAME,), expected_value=deadlocks_before + 1)
+    wait_on_result(cursor=cursor, sql=deadlock_count_sql, binds=(DB_NAME,), expected_value=deadlocks_before + 1)
 
     aggregator.assert_metric(
         'postgresql.deadlocks.count',
