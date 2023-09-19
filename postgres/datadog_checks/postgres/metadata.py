@@ -276,7 +276,9 @@ class PostgresMetadata(DBMAsyncJob):
         self._time_since_last_schemas_query = time.time()
         return metadata
 
-    def _query_database_information(self, cursor: psycopg2.extensions.cursor, dbname: str) -> Dict[str, Union[str, int]]:
+    def _query_database_information(
+        self, cursor: psycopg2.extensions.cursor, dbname: str
+    ) -> Dict[str, Union[str, int]]:
         """
         Collect database info. Returns
             description: str
