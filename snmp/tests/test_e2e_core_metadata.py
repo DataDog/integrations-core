@@ -94,6 +94,13 @@ def test_e2e_core_metadata_f5(dd_agent_check):
                     u'os_version': u'3.10.0-862.14.4.el7.ve.x86_64',
                 },
             ],
+            u'diagnoses': [
+                {
+                    u'diagnoses': None,
+                    u'resource_id': u'default:192.168.176.2',
+                    u'resource_type': u'device',
+                },
+            ],
             u'interfaces': [
                 {
                     u'admin_status': 1,
