@@ -12,7 +12,6 @@
     "title": "AWS IAM Access Analyzer",
     "media": [],
     "classifier_tags": [
-      "Category::Log Collection",
       "Category::Security",
       "Supported OS::Linux",
       "Supported OS::Windows",

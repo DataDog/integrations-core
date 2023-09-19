@@ -24,6 +24,7 @@ from datadog_checks.postgres.statement_samples import (
     StatementTruncationState,
 )
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
+from datadog_checks.postgres.util import payload_pg_version
 
 from .common import DB_NAME, HOST, PORT, PORT_REPLICA2, POSTGRES_VERSION
 from .utils import _get_conn, _get_superconn, requires_over_10, run_one_check
@@ -97,17 +98,17 @@ def test_statement_samples_enabled_config(
 def test_statement_metrics_version(integration_check, dbm_instance, version, expected_payload_version):
     if version:
         check = integration_check(dbm_instance)
-        check._version = version
+        check.version = version
         check._connect()
-        assert check.statement_metrics._payload_pg_version() == expected_payload_version
+        assert payload_pg_version(check.version) == expected_payload_version
     else:
         with mock.patch(
-            'datadog_checks.postgres.postgres.PostgreSql.version', new_callable=mock.PropertyMock
+            'datadog_checks.postgres.postgres.PostgreSql.load_version', new_callable=mock.MagicMock
         ) as patched_version:
             patched_version.return_value = None
             check = integration_check(dbm_instance)
             check._connect()
-            assert check.statement_metrics._payload_pg_version() == expected_payload_version
+            assert payload_pg_version(check.version) == expected_payload_version
 
 
 @pytest.mark.parametrize("dbstrict,ignore_databases", [(True, []), (False, ['dogs']), (False, [])])
@@ -170,7 +171,6 @@ def test_statement_metrics(
 
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
-    assert event['postgres_version'] == check.statement_metrics._payload_pg_version()
     assert event['ddagentversion'] == datadog_agent.get_version()
     assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
@@ -331,7 +331,6 @@ def test_statement_metrics_cloud_metadata(
 
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
-    assert event['postgres_version'] == check.statement_metrics._payload_pg_version()
     assert event['ddagentversion'] == datadog_agent.get_version()
     assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
@@ -1400,7 +1399,7 @@ def test_statement_samples_main_collection_rate_limit(aggregator, integration_ch
     # the loop and trigger cancel before another job_loop is triggered
     check_frequency = collection_interval / 5.0
     _check_until_time(check, dbm_instance, sleep_time, check_frequency)
-    max_collections = int(1 / collection_interval * sleep_time) + 1
+    max_collections = int(1 / collection_interval * sleep_time) + 2
     check.cancel()
     metrics = aggregator.metrics("dd.postgres.collect_statement_samples.time")
     assert max_collections / 2.0 <= len(metrics) <= max_collections

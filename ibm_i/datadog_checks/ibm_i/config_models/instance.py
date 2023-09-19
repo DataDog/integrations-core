@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, Sequence
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -21,21 +21,24 @@ from . import defaults, validators
 
 class MessageQueueInfo(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
-    selected_message_queues: Optional[Sequence[str]] = None
+    selected_message_queues: Optional[tuple[str, ...]] = None
 
 
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
-    exclude: Optional[Sequence[str]] = None
-    include: Optional[Sequence[str]] = None
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
 
 
 class Query(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
     name: str
@@ -44,6 +47,7 @@ class Query(BaseModel):
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
+        arbitrary_types_allowed=True,
         frozen=True,
     )
     connection_string: Optional[str] = None
@@ -56,13 +60,13 @@ class InstanceConfig(BaseModel):
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     password: Optional[str] = None
-    queries: Optional[Sequence[Query]] = None
+    queries: Optional[tuple[Query, ...]] = None
     query_timeout: Optional[int] = Field(None, gt=0)
     service: Optional[str] = None
     severity_threshold: Optional[int] = Field(None, ge=0, le=99)
     system: Optional[str] = None
     system_mq_query_timeout: Optional[int] = Field(None, gt=0)
-    tags: Optional[Sequence[str]] = None
+    tags: Optional[tuple[str, ...]] = None
     username: Optional[str] = None
 
     @model_validator(mode='before')
@@ -70,25 +74,14 @@ class InstanceConfig(BaseModel):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
     @field_validator('*', mode='before')
-    def _ensure_defaults(cls, value, info):
+    def _validate(cls, value, info):
         field = cls.model_fields[info.field_name]
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
-            return value
+            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-        return getattr(defaults, f'instance_{info.field_name}', lambda: value)()
-
-    @field_validator('*')
-    def _run_validations(cls, value, info):
-        field = cls.model_fields[info.field_name]
-        field_name = field.alias or info.field_name
-        if field_name not in info.context['configured_fields']:
-            return value
-
-        return getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
-
-    @field_validator('*', mode='after')
-    def _make_immutable(cls, value):
         return validation.utils.make_immutable(value)
 
     @model_validator(mode='after')

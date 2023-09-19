@@ -40,32 +40,60 @@ Linux: Configure the following sudoers rule for this to work:
 dd-agent ALL=NOPASSWD: /usr/sbin/conntrack -S
 ```
 
-**Kubernetes**:  
+#### Kubernetes  
 
 Conntrack metrics are available by default in Kubernetes < v1.11 or when using the `host` networking mode in Kubernetes v1.11+.  
 
-In order to collect AWS ENA metrics, use `host` network mode and if you are using Datadog [Helm Chart][11]:  
-Save the following content into a file named `daemonset-patch.yaml`:  
+In order to collect [AWS ENA metrics][12]:
+
+- Update `network` check to enable collection of AWS ENA metrics with `collect_aws_ena_metrics: true`.
+- Update Agent containers to use `host` network mode and add `NET_ADMIN` capabilities. 
+
+For Datadog [Helm Chart][11] deployment, update chart values with:
+
+```yaml
+datadog:
+ # Enable AWS ENA metrics collection for network check
+ confd:
+   network.yaml: |-
+     init_config:
+     instances:
+       - collect_aws_ena_metrics: true
+
+# Have agent containers use host network with NET_ADMIN capability
+agents:
+  useHostNetwork: true
+  containers:
+    agent:
+      securityContext:
+        capabilities:
+          add:
+            - NET_ADMIN
+
 ```
+
+For Agents manually deployed with DaemonSet, apply `datadog` DaemonSet patch:
+
+```yaml
 spec:
   template:
     spec:
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
       containers:
-      - name: agent
-        securityContext:
-          capabilities:
-            add:
+        - name: agent
+          ports:
+          - containerPort: 8125
+            hostPort: 8125
+            name: dogstatsdport
+            protocol: UDP
+          securityContext:
+            capabilities:
+              add:
               - NET_ADMIN
 ```
 
-and patch your agent deployment with:  
-```
-kubectl patch daemonset datadog --patch-file daemonset-patch.yaml
-kubectl rollout restart daemonset datadog
-```
-
-If you are using Deamonset, add the above content directly into datadog agent's manifest.
-
+**Note**: You may need to add `hostPort: 8125` for other containers in the DaemonSet as `hostNetwork: true` will apply to all containers.
 
 ### Validation
 
@@ -106,3 +134,4 @@ The Network check does not include any service checks.
 [9]: https://docs.datadoghq.com/integrations/guide/send-tcp-udp-host-metrics-to-the-datadog-api/
 [10]: https://docs.datadoghq.com/monitors/monitor_types/network/
 [11]: https://docs.datadoghq.com/containers/kubernetes/installation/?tab=helm#installation
+[12]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/monitoring-network-performance-ena.html

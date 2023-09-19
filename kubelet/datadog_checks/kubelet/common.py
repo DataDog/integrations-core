@@ -4,6 +4,8 @@
 
 import re
 
+from kubeutil import get_connection_info
+
 from datadog_checks.base.utils.tagging import tagger
 
 try:
@@ -102,6 +104,15 @@ def get_container_label(labels, l_name):
     """
     if l_name in labels:
         return labels[l_name]
+
+
+def get_prometheus_url(default_url):
+    kubelet_conn_info = get_connection_info()
+    kubelet_conn_info = {} if kubelet_conn_info is None else kubelet_conn_info
+    error = kubelet_conn_info.get("err")
+    if error:
+        log.warning(error)
+    return kubelet_conn_info.get("url", default_url)
 
 
 class PodListUtils(object):
@@ -249,4 +260,13 @@ class PodListUtils(object):
             pod_name = get_container_label(labels, "pod_name")
         if not container_name:
             container_name = get_container_label(labels, "container_name")
-        return self.get_cid_by_name_tuple((namespace, pod_name, container_name))
+        cid = self.get_cid_by_name_tuple((namespace, pod_name, container_name))
+        if cid is None:
+            # in k8s v1.25+, a change was introduced which removed the suffix from the pod name in the "pod_name"
+            # label, breaking the existing functionality. To get around this, we can try to get the pod itself by
+            # the pod_uid label, and then parse the name from the pod metadata ourselves.
+            # See: https://github.com/kubernetes/kubernetes/issues/115766
+            pod_uid = get_container_label(labels, "pod_uid")
+            pod_name = self.pods.get(pod_uid, {}).get("metadata", {}).get("name")
+            cid = self.get_cid_by_name_tuple((namespace, pod_name, container_name))
+        return cid

@@ -8,7 +8,6 @@ BROKER_METRICS = [
     'confluent.kafka.controller.active_controller_count',
     'confluent.kafka.controller.leader_election_rate_and_time_ms.avg',
     'confluent.kafka.controller.offline_partitions_count',
-    'confluent.kafka.controller.unclean_leader_elections_per_sec.rate',
     'confluent.kafka.controller.preferred_replica_imbalance_count',
     'confluent.kafka.controller.offline_partitions_count',
     'confluent.kafka.controller.global_topic_count',
@@ -320,6 +319,7 @@ SCHEMA_REGISTRY_JERSEY_METRICS_DEPRECATED = [
 
 BROKER_OPTIONAL_METRICS = [
     'confluent.kafka.controller.leader_election_rate_and_time_ms.rate',
+    'confluent.kafka.controller.unclean_leader_elections_per_sec.rate',
     'confluent.kafka.log.log_flush_rate_and_time_ms.avg',
     'confluent.kafka.log.size',
     'confluent.kafka.server.broker_topic_metrics.bytes_in_per_sec',

@@ -334,6 +334,21 @@ instances:
     #
     # dbm: false
 
+    ## Configure collection of performance_schema.global_variables. This is an alpha feature.
+    #
+    # collect_settings:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of performance_schema.global_variables. Requires `dbm: true`.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the database settings collection interval (in seconds). Each collection involves a single query to
+        ## `performance_schema.global_variables`.
+        #
+        # collection_interval: 600
+
     ## Configure collection of query metrics
     #
     # query_metrics:

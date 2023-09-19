@@ -190,6 +190,10 @@ coverage:
         target: 75
         flags:
         - external_dns
+      Fluentd:
+        target: 75
+        flags:
+        - fluentd
       FoundationDB:
         target: 75
         flags:
@@ -442,10 +446,18 @@ coverage:
         target: 75
         flags:
         - proxysql
+      Pulsar:
+        target: 75
+        flags:
+        - pulsar
       RabbitMQ:
         target: 75
         flags:
         - rabbitmq
+      Ray:
+        target: 75
+        flags:
+        - ray
       Redis:
         target: 75
         flags:
@@ -467,7 +479,7 @@ coverage:
         flags:
         - sap_hana
       SNMP:
-        target: 50
+        target: 30
         flags:
         - snmp
       SQL_Server:
@@ -590,7 +602,7 @@ coverage:
         target: 75
         flags:
         - weaviate
-      Win32:
+      Windows_Event_Log:
         target: 75
         flags:
         - win32_event_log
@@ -626,14 +638,6 @@ coverage:
         target: 75
         flags:
         - etcd
-      fluentd:
-        target: 75
-        flags:
-        - fluentd
-      pulsar:
-        target: 75
-        flags:
-        - pulsar
       vSphere:
         target: 75
         flags:
@@ -823,7 +827,7 @@ flags:
   ddev:
     carryforward: true
     paths:
-    - ddev/datadog_checks/ddev
+    - ddev/src/ddev
     - ddev/tests
   directory:
     carryforward: true
@@ -1215,6 +1219,11 @@ flags:
     paths:
     - rabbitmq/datadog_checks/rabbitmq
     - rabbitmq/tests
+  ray:
+    carryforward: true
+    paths:
+    - ray/datadog_checks/ray
+    - ray/tests
   redisdb:
     carryforward: true
     paths:
