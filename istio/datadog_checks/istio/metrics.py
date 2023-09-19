@@ -405,13 +405,13 @@ ISTIOD_METRICS = {
     'galley_validation_http_error': 'galley.validation.http.error',
     # Mixer
     # Unknown type
-    'mixer_config_rule_config_error_count': 'mixer.config.rule.config.error.count',
-    'mixer_config_rule_config_match_error_count': 'mixer.config.rule.config.match.error.count',
-    'mixer_config_unsatisfied_action_handler_count': 'mixer.config.unsatisfied.action.handler.count',
-    'mixer_config_adapter_info_config_error_count': 'mixer.config.adapter.info.config.error.count',
-    'mixer_config_handler_validation_error_count': 'mixer.config.handler.validation.error.count',
-    'mixer_config_instance_config_error_count': 'mixer.config.instance.config.error.count',
-    'mixer_handler_handler_build_failure_count': 'mixer.handler.handler.build.failure.count',
+    'mixer_config_rule_config_error_count': 'mixer.config.rule.config.errors',
+    'mixer_config_rule_config_match_error_count': 'mixer.config.rule.config.match.errors',
+    'mixer_config_unsatisfied_action_handler_count': 'mixer.config.unsatisfied.action.handlers',
+    'mixer_config_adapter_info_config_error_count': 'mixer.config.adapter.info.config.errors',
+    'mixer_config_handler_validation_error_count': 'mixer.config.handler.validation.errors',
+    'mixer_config_instance_config_error_count': 'mixer.config.instance.config.errors',
+    'mixer_handler_handler_build_failure_count': 'mixer.handler.handler.build.failures',
 }
 
 ISTIOD_VERSION = {'istio_build': {'type': 'metadata', 'label': 'tag', 'name': 'version'}}
