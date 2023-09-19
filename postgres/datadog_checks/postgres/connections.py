@@ -205,14 +205,11 @@ class MultiDatabaseConnectionPool(object):
 
         return True
 
-    def get_main_db(self) -> psycopg.Connection:
+    @contextlib.contextmanager
+    def get_main_db(self):
         """
         Returns a memoized, persistent psycopg connection to `self.dbname`.
         :return: a psycopg connection
         """
-        conn = self._get_connection_raw(
-            dbname=self._config.dbname,
-            ttl_ms=self._config.idle_connection_timeout,
-            persistent=True,
-        )
-        return conn
+        with self.get_connection(self._config.dbname, self._config.idle_connection_timeout, persistent=True) as db:
+            yield db
