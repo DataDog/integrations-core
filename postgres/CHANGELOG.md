@@ -4,6 +4,45 @@
 
 ***Added***:
 
+* Attempt to connect to the database and fail fast before trying to establish a connection pool ([#15839](https://github.com/DataDog/integrations-core/pull/15839))
+
+***Added***:
+
+* Add schema collection to Postgres integration (#15484) ([#15866](https://github.com/DataDog/integrations-core/pull/15866))
+
+***Fixed***:
+
+* Revert psycopg3 upgrade ([#15859](https://github.com/DataDog/integrations-core/pull/15859))
+
+## 14.2.4 / 2023-09-07
+
+***Fixed***:
+
+* Initialize pg_settings on Postgres check start and lazy load pg_settings if it's not set ([#15773](https://github.com/DataDog/integrations-core/pull/15773))
+
+## 14.2.3 / 2023-09-06
+
+***Fixed***:
+
+* Set lower connection timeout on connection pool to avoid long running checks ([#15768](https://github.com/DataDog/integrations-core/pull/15768))
+
+## 14.2.2 / 2023-09-05
+
+***Fixed***:
+
+* Revise postgresql.replication_delay to Function with Archive WAL-driven PostgreSQL Replica ([#15629](https://github.com/DataDog/integrations-core/pull/15629))
+* Pass timeout when connection pool closes ([#15724](https://github.com/DataDog/integrations-core/pull/15724))
+
+## 14.2.1 / 2023-08-29
+
+***Fixed***:
+
+* Return Azure AD auth token in correct format ([#15701](https://github.com/DataDog/integrations-core/pull/15701))
+
+## 14.2.0 / 2023-08-18
+
+***Added***:
+
 * Add schema collection to Postgres integration ([#15484](https://github.com/DataDog/integrations-core/pull/15484))
 * Add support for sending `database_instance` metadata ([#15559](https://github.com/DataDog/integrations-core/pull/15559))
 * Update dependencies for Agent 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
