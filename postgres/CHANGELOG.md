@@ -12,6 +12,7 @@
 
 ***Fixed***:
 
+* Restore psycopg3 upgrade with per thread connection pool ([#15870](https://github.com/DataDog/integrations-core/pull/15870))
 * Revert psycopg3 upgrade ([#15859](https://github.com/DataDog/integrations-core/pull/15859))
 
 ## 14.2.4 / 2023-09-07
