@@ -35,7 +35,7 @@
                         "id": 1295608946142416,
                         "definition": {
                             "type": "note",
-                            "content": "**Strimzi**\n\nThis dashboard provides insights into your Strimzi Kafka Kubernetes operators, such as the reconciliation status and custom resource definitions (CRDs) that each operator sees.\n\nIf you would benefit from visualizing the topology of your streaming data pipelines, or from investigating localized bottlenecks within your data streams setup, check out [Data Streams Monitoring](https://www.datadoghq.com/product/data-streams-monitoring/).\n\nFor monitoring your Kafka and Zookeeper nodes on your Strimzi cluster, please refer to the [Kafka](https://docs.datadoghq.com/integrations/kafka/?tab=host) and [Zookeeper](https://docs.datadoghq.com/integrations/zk/?tab=host) integrations, respectively. ",
+                            "content": "**Strimzi**\n\nThis dashboard provides insights into your Strimzi Kafka Kubernetes operators, such the reconciliation status and custom resource definitions (CRDs) that each operator sees.\n\nIf you would benefit from visualizing the topology of your streaming data pipelines, or from investigating localized bottlenecks within your data streams setup, check out [Data Streams Monitoring](https://www.datadoghq.com/product/data-streams-monitoring/).\n\nFor monitoring your Kafka and Zookeeper nodes on your Strimzi cluster, please refer to the [Kafka](https://docs.datadoghq.com/integrations/kafka/?tab=host) and [Zookeeper](https://docs.datadoghq.com/integrations/zk/?tab=host) integrations, respectively. ",
                             "background_color": "white",
                             "font_size": "14",
                             "text_align": "left",
@@ -134,7 +134,7 @@
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
-                                    "display_type": "area"
+                                    "display_type": "bars"
                                 }
                             ]
                         },
@@ -182,7 +182,7 @@
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
-                                    "display_type": "area"
+                                    "display_type": "bars"
                                 }
                             ]
                         },
@@ -236,7 +236,7 @@
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
-                                    "display_type": "area"
+                                    "display_type": "bars"
                                 }
                             ]
                         },
@@ -284,7 +284,7 @@
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
-                                    "display_type": "area"
+                                    "display_type": "bars"
                                 }
                             ]
                         },
@@ -338,7 +338,7 @@
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
-                                    "display_type": "area"
+                                    "display_type": "bars"
                                 }
                             ]
                         },
@@ -386,7 +386,7 @@
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
-                                    "display_type": "area"
+                                    "display_type": "bars"
                                 }
                             ]
                         },
@@ -451,7 +451,7 @@
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
-                                    "display_type": "area"
+                                    "display_type": "bars"
                                 }
                             ]
                         },
@@ -498,7 +498,7 @@
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
-                                    "display_type": "area"
+                                    "display_type": "bars"
                                 }
                             ]
                         },
@@ -545,7 +545,7 @@
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
-                                    "display_type": "area"
+                                    "display_type": "bars"
                                 }
                             ]
                         },
