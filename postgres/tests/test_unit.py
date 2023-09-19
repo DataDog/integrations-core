@@ -4,7 +4,7 @@
 import copy
 
 import mock
-import psycopg2
+import psycopg
 import pytest
 from mock import MagicMock
 from pytest import fail
@@ -93,8 +93,7 @@ def test_malformed_get_custom_queries(check):
     Test early-exit conditions for _get_custom_queries()
     """
     check.log = MagicMock()
-    db = MagicMock()
-    check.db = db
+    check.db = MagicMock()
 
     check._config.custom_queries = [{}]
 
@@ -124,7 +123,7 @@ def test_malformed_get_custom_queries(check):
     # Make sure we gracefully handle an error while performing custom queries
     malformed_custom_query_column = {}
     malformed_custom_query['columns'] = [malformed_custom_query_column]
-    db.cursor().__enter__().execute.side_effect = psycopg2.ProgrammingError('FOO')
+    check.db.cursor().__enter__().execute.side_effect = psycopg.ProgrammingError('FOO')
     check._collect_custom_queries([])
     check.log.error.assert_called_once_with(
         "Error executing query for metric_prefix %s: %s", malformed_custom_query['metric_prefix'], 'FOO'
@@ -135,8 +134,8 @@ def test_malformed_get_custom_queries(check):
     malformed_custom_query_column = {}
     malformed_custom_query['columns'] = [malformed_custom_query_column]
     query_return = ['num', 1337]
-    db.cursor().__enter__().execute.side_effect = None
-    db.cursor().__enter__().__iter__.return_value = iter([query_return])
+    check.db.cursor().__enter__().execute.side_effect = None
+    check.db.cursor().__enter__().__iter__.return_value = iter([query_return])
     check._collect_custom_queries([])
     check.log.error.assert_called_once_with(
         "query result for metric_prefix %s: expected %s columns, got %s",
@@ -147,7 +146,7 @@ def test_malformed_get_custom_queries(check):
     check.log.reset_mock()
 
     # Make sure the query does not return an empty result
-    db.cursor().__enter__().__iter__.return_value = iter([[]])
+    check.db.cursor().__enter__().__iter__.return_value = iter([[]])
     check._collect_custom_queries([])
     check.log.debug.assert_called_with(
         "query result for metric_prefix %s: returned an empty result", malformed_custom_query['metric_prefix']
@@ -156,7 +155,7 @@ def test_malformed_get_custom_queries(check):
 
     # Make sure 'name' is defined in each column
     malformed_custom_query_column['some_key'] = 'some value'
-    db.cursor().__enter__().__iter__.return_value = iter([[1337]])
+    check.db.cursor().__enter__().__iter__.return_value = iter([[1337]])
     check._collect_custom_queries([])
     check.log.error.assert_called_once_with(
         "column field `name` is required for metric_prefix `%s`", malformed_custom_query['metric_prefix']
@@ -165,7 +164,7 @@ def test_malformed_get_custom_queries(check):
 
     # Make sure 'type' is defined in each column
     malformed_custom_query_column['name'] = 'num'
-    db.cursor().__enter__().__iter__.return_value = iter([[1337]])
+    check.db.cursor().__enter__().__iter__.return_value = iter([[1337]])
     check._collect_custom_queries([])
     check.log.error.assert_called_once_with(
         "column field `type` is required for column `%s` of metric_prefix `%s`",
@@ -176,7 +175,7 @@ def test_malformed_get_custom_queries(check):
 
     # Make sure 'type' is a valid metric type
     malformed_custom_query_column['type'] = 'invalid_type'
-    db.cursor().__enter__().__iter__.return_value = iter([[1337]])
+    check.db.cursor().__enter__().__iter__.return_value = iter([[1337]])
     check._collect_custom_queries([])
     check.log.error.assert_called_once_with(
         "invalid submission method `%s` for column `%s` of metric_prefix `%s`",
@@ -190,7 +189,7 @@ def test_malformed_get_custom_queries(check):
     malformed_custom_query_column['type'] = 'gauge'
     query_return = MagicMock()
     query_return.__float__.side_effect = ValueError('Mocked exception')
-    db.cursor().__enter__().__iter__.return_value = iter([[query_return]])
+    check.db.cursor().__enter__().__iter__.return_value = iter([[query_return]])
     check._collect_custom_queries([])
     check.log.error.assert_called_once_with(
         "non-numeric value `%s` for metric column `%s` of metric_prefix `%s`",
@@ -294,9 +293,9 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
     check = integration_check(pg_instance)
     try:
         check.db_pool.get_connection(pg_instance['dbname'], 100)
-    except psycopg2.ProgrammingError as e:
+    except psycopg.ProgrammingError as e:
         fail(str(e))
-    except psycopg2.OperationalError:
+    except psycopg.OperationalError:
         # could not connect to server because there is no server running
         pass
 

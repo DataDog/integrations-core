@@ -36,12 +36,12 @@ class VersionUtils(object):
             return False
         try:
             with db.cursor() as cursor:
-                # This query will pollute PG logs in non aurora versions but is the only reliable way to detect aurora
+                # This query will pollute PG logs in non aurora versions,
+                # but is the only reliable way to detect aurora
                 cursor.execute('select AURORA_VERSION();')
                 return True
         except Exception as e:
             self.log.debug("Captured exception %s while determining if the DB is aurora. Assuming is not", str(e))
-            db.rollback()
             self._seen_aurora_exception = True
             return False
 
