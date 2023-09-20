@@ -168,7 +168,7 @@ class PostgresConfig:
         if rds_tags:
             tags.extend(rds_tags)
         return tags
-    
+
     def _get_max_connections_per_thread(self):
         """
         Returns the maximum number of connections per thread.
@@ -194,8 +194,8 @@ class PostgresConfig:
         base_conns = 1  # 4 base connections to the main db
         total_multi_db_threads = 1  # autodiscovery (main thread)
         if self.dbm_enabled:
-            base_conns += 1 # 1 additional connections for statement_metrics
-            total_multi_db_threads += 2 # statement_samples & metadata_samples
+            base_conns += 1  # 1 additional connections for statement_metrics
+            total_multi_db_threads += 2  # statement_samples & metadata_samples
         return (total_max_conns - base_conns) // total_multi_db_threads  # floor division
 
     @staticmethod
