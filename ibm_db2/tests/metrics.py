@@ -46,7 +46,6 @@ STANDARD = [
     'ibm_db2.log.utilized',
     'ibm_db2.log.reads',
     'ibm_db2.log.writes',
-    'hehe',
 ]
 
 BUFFERPOOL = [

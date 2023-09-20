@@ -8,7 +8,7 @@ from datadog_checks.ibm_db2 import IbmDb2Check
 
 from . import metrics
 
-metrics_l = metrics.STANDARD + metrics.BUFFERPOOL + metrics.TABLESPACE
+metrics_l = metrics.STANDARD + metrics.BUFFERPOOL + metrics.TABLESPACE + ['hehe'] # noqa
 
 
 @pytest.mark.integration
