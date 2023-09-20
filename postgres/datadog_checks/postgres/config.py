@@ -143,6 +143,7 @@ class PostgresConfig:
         self.log_unobfuscated_queries = is_affirmative(instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans = is_affirmative(instance.get('log_unobfuscated_plans', False))
         self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 1800)
+        self.max_connections_per_thread = self._get_max_connections_per_thread()
 
     def _build_tags(self, custom_tags):
         # Clean up tags in case there was a None entry in the instance
@@ -167,6 +168,35 @@ class PostgresConfig:
         if rds_tags:
             tags.extend(rds_tags)
         return tags
+    
+    def _get_max_connections_per_thread(self):
+        """
+        Returns the maximum number of connections per thread.
+        i.e.
+        max_connections = 30
+        When dbm_enabled = True, we have 4 threads:
+            - 1 thread for the main integration
+            - 1 thread for statement_metrics
+            - 1 thread for metadata_samples
+            - 1 thread for statement_samples
+        main thread opens 1 connection to the main db.
+        autodiscovery (part of main thread) opens multiple connections to various dbs.
+        metadata_samples opens 1 connection each to the main db.
+        statement_metrics & statement_samples opens multiple connections to various dbs to collect query plans.
+        This way we have a total of 2 connections to the main db and 3 threads share the rest of the connections.
+        When dbm_enabled = False, we have 1 thread:
+            - 1 thread for the main integration
+        main thread opens 1 connection to the main db.
+        autodiscovery (part of main thread) opens multiple connections to various dbs.
+        This way we have a total of 2 connections to the main db and 1 thread shares the rest of the connections.
+        """
+        total_max_conns = self.max_connections
+        base_conns = 1  # 4 base connections to the main db
+        total_multi_db_threads = 1  # autodiscovery (main thread)
+        if self.dbm_enabled:
+            base_conns += 1 # 1 additional connections for statement_metrics
+            total_multi_db_threads += 2 # statement_samples & metadata_samples
+        return (total_max_conns - base_conns) // total_multi_db_threads  # floor division
 
     @staticmethod
     def _get_custom_metrics(custom_metrics):

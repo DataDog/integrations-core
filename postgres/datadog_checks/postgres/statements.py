@@ -130,7 +130,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._check = check
         self._config = config
         self.db_pool = MultiDatabaseConnectionPool(
-            self._check, self._check._new_connection, self._config.max_connections
+            self._check, self._check._new_connection, 1,
         )
         self._metrics_collection_interval = collection_interval
         self._pg_stat_statements_max_warning_threshold = config.statement_metrics_config.get(
