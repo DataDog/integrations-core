@@ -29,6 +29,7 @@ def _assert_standard(aggregator):
     aggregator.assert_service_check('ibm_db2.can_connect', AgentCheck.OK)
 
     for metric in metrics.STANDARD:
+        aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag(metric, 'db:datadog')
         aggregator.assert_metric_has_tag(metric, 'foo:bar')
     aggregator.assert_all_metrics_covered()
