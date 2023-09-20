@@ -177,25 +177,37 @@ class PostgresConfig:
         When dbm_enabled = True, we have 4 threads:
             - 1 thread for the main integration
             - 1 thread for statement_metrics
-            - 1 thread for metadata_samples
-            - 1 thread for statement_samples
         main thread opens 1 connection to the main db.
-        autodiscovery (part of main thread) opens multiple connections to various dbs.
-        metadata_samples opens 1 connection each to the main db.
-        statement_metrics & statement_samples opens multiple connections to various dbs to collect query plans.
+        when autodiscovery is enabled, main thread opens multiple connections to various dbs.
+        when schema collection is enabled, metadata thread opens multiple connections to various dbs.
+        statement_samples opens multiple connections to various dbs to collect query plans.
         This way we have a total of 2 connections to the main db and 3 threads share the rest of the connections.
         When dbm_enabled = False, we have 1 thread:
             - 1 thread for the main integration
         main thread opens 1 connection to the main db.
-        autodiscovery (part of main thread) opens multiple connections to various dbs.
-        This way we have a total of 2 connections to the main db and 1 thread shares the rest of the connections.
+        when autodiscovery is enabled, main thread opens multiple connections to various dbs.
+        This way we have a total of 1 connections to the main db and multiple connections to various dbs.
         """
         total_max_conns = self.max_connections
         base_conns = 1  # 4 base connections to the main db
-        total_multi_db_threads = 1  # autodiscovery (main thread)
+        total_multi_db_threads = 0
+        if self.discovery_config['enabled']:
+            total_multi_db_threads += 1  # autodiscovery is enabled, main thread opens multiple connections
         if self.dbm_enabled:
             base_conns += 1  # 1 additional connections for statement_metrics
-            total_multi_db_threads += 2  # statement_samples & metadata_samples
+            if self.schemas_metadata_config['enabled']:
+                total_multi_db_threads += 1  # schema collection is enabled, metadata thread opens multiple connections
+            else:
+                base_conns += 1  # 1 additional connections for metadata_samples when schema collection is disabled
+            total_multi_db_threads += 1  # statement_samples
+        total_conns_to_share = total_max_conns - base_conns
+        if total_multi_db_threads == 0:
+            return total_conns_to_share
+        if total_conns_to_share <= 0:
+            raise ConfigurationError(
+                'The number of max connections per thread must be greater than 0. '
+                'Please increase the `max_connections` parameter.'
+            )
         return (total_max_conns - base_conns) // total_multi_db_threads  # floor division
 
     @staticmethod
