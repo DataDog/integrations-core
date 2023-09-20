@@ -125,7 +125,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:strimzi.cluster_operator.jvm.memory.committed_bytes{$host, $endpoint} by {area,endpoint,host,id}"
+                                            "query": "sum:strimzi.cluster_operator.jvm.memory.committed_bytes{$host, $endpoint} by {area,endpoint,host,id}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -173,7 +173,7 @@
                                         {
                                             "name": "query2",
                                             "data_source": "metrics",
-                                            "query": "avg:strimzi.cluster_operator.jvm.memory.used_bytes{$host, $endpoint} by {area,endpoint,host,id}"
+                                            "query": "sum:strimzi.cluster_operator.jvm.memory.used_bytes{$host, $endpoint} by {area,endpoint,host,id}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -227,7 +227,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:strimzi.topic_operator.jvm.memory.committed_bytes{$host,$endpoint} by {area,endpoint,host,id}"
+                                            "query": "sum:strimzi.topic_operator.jvm.memory.committed_bytes{$host,$endpoint} by {area,endpoint,host,id}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -275,7 +275,7 @@
                                         {
                                             "name": "query2",
                                             "data_source": "metrics",
-                                            "query": "avg:strimzi.topic_operator.jvm.memory.used_bytes{$host,$endpoint} by {area,endpoint,host,id}"
+                                            "query": "sum:strimzi.topic_operator.jvm.memory.used_bytes{$host,$endpoint} by {area,endpoint,host,id}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -329,7 +329,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:strimzi.user_operator.jvm.memory.committed_bytes{$host,$endpoint} by {area,endpoint,host,id}"
+                                            "query": "sum:strimzi.user_operator.jvm.memory.committed_bytes{$host,$endpoint} by {area,endpoint,host,id}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -377,7 +377,7 @@
                                         {
                                             "name": "query2",
                                             "data_source": "metrics",
-                                            "query": "avg:strimzi.user_operator.jvm.memory.used_bytes{$host,$endpoint} by {area,endpoint,host,id}"
+                                            "query": "sum:strimzi.user_operator.jvm.memory.used_bytes{$host,$endpoint} by {area,endpoint,host,id}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -442,7 +442,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:strimzi.cluster_operator.jvm.threads.states_threads{$host,$endpoint} by {endpoint,host,state}"
+                                            "query": "sum:strimzi.cluster_operator.jvm.threads.states_threads{$host,$endpoint} by {endpoint,host,state}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -489,7 +489,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:strimzi.topic_operator.jvm.threads.states_threads{$host,$endpoint} by {endpoint,host,state}"
+                                            "query": "sum:strimzi.topic_operator.jvm.threads.states_threads{$host,$endpoint} by {endpoint,host,state}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -536,7 +536,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:strimzi.user_operator.jvm.threads.states_threads{$host,$endpoint} by {endpoint,host,state}"
+                                            "query": "sum:strimzi.user_operator.jvm.threads.states_threads{$host,$endpoint} by {endpoint,host,state}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -587,7 +587,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:strimzi.cluster_operator.resources{host:$host.value, endpoint:$endpoint.value} by {endpoint,host,namespace,kind}",
+                                            "query": "sum:strimzi.cluster_operator.resources{host:$host.value, endpoint:$endpoint.value} by {endpoint,host,namespace,kind}",
                                             "aggregator": "last"
                                         }
                                     ],
@@ -631,7 +631,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:strimzi.cluster_operator.system.cpu_count{$host,$endpoint} by {endpoint,host}",
+                                            "query": "sum:strimzi.cluster_operator.system.cpu_count{$host,$endpoint} by {endpoint,host}",
                                             "aggregator": "avg"
                                         }
                                     ]
@@ -681,7 +681,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "avg:strimzi.cluster_operator.resource.state{$host,$endpoint} by {endpoint,host,kind,name,reason,resource_namespace}",
+                                            "query": "sum:strimzi.cluster_operator.resource.state{$host,$endpoint} by {endpoint,host,kind,name,reason,resource_namespace}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "avg"
@@ -711,7 +711,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:strimzi.cluster_operator.resources.paused{host:$host.value,endpoint:$endpoint.value} by {endpoint,host,kind,namespace,selector}",
+                                            "query": "sum:strimzi.cluster_operator.resources.paused{host:$host.value,endpoint:$endpoint.value} by {endpoint,host,kind,namespace,selector}",
                                             "aggregator": "avg"
                                         }
                                     ],
@@ -764,7 +764,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:strimzi.cluster_operator.reconciliations.duration_seconds.count{$host, $endpoint} by {endpoint,host,kind,namespace,selector}.as_count()"
+                                            "query": "sum:strimzi.cluster_operator.reconciliations.duration_seconds.count{$host, $endpoint} by {endpoint,host,kind,namespace,selector}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1008,7 +1008,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:strimzi.topic_operator.resources{host:$host.value,endpoint:$endpoint.value} by {endpoint,host,kind}",
+                                            "query": "sum:strimzi.topic_operator.resources{host:$host.value,endpoint:$endpoint.value} by {endpoint,host,kind}",
                                             "aggregator": "last"
                                         }
                                     ],
@@ -1052,7 +1052,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:strimzi.topic_operator.system.cpu_count{$host,$endpoint} by {endpoint,host}",
+                                            "query": "sum:strimzi.topic_operator.system.cpu_count{$host,$endpoint} by {endpoint,host}",
                                             "aggregator": "avg"
                                         }
                                     ]
@@ -1102,7 +1102,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "avg:strimzi.topic_operator.resource.state{$host,$endpoint} by {endpoint,host,kind,name,reason,resource_namespace}",
+                                            "query": "sum:strimzi.topic_operator.resource.state{$host,$endpoint} by {endpoint,host,kind,name,reason,resource_namespace}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "avg"
@@ -1132,7 +1132,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:strimzi.topic_operator.resources.paused{host:$host.value,endpoint:$endpoint.value} by {endpoint,host,kind,namespace,selector}",
+                                            "query": "sum:strimzi.topic_operator.resources.paused{host:$host.value,endpoint:$endpoint.value} by {endpoint,host,kind,namespace,selector}",
                                             "aggregator": "avg"
                                         }
                                     ],
@@ -1430,7 +1430,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:strimzi.user_operator.resources{host:$host.value,endpoint:$endpoint.value} by {endpoint,host,kind}",
+                                            "query": "sum:strimzi.user_operator.resources{host:$host.value,endpoint:$endpoint.value} by {endpoint,host,kind}",
                                             "aggregator": "last"
                                         }
                                     ],
@@ -1474,7 +1474,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:strimzi.user_operator.system.cpu_count{$host,$endpoint} by {endpoint,host}",
+                                            "query": "sum:strimzi.user_operator.system.cpu_count{$host,$endpoint} by {endpoint,host}",
                                             "aggregator": "avg"
                                         }
                                     ]
@@ -1524,7 +1524,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "avg:strimzi.user_operator.resource.state{$host,$endpoint} by {endpoint,host,kind,name,reason,resource_namespace}",
+                                            "query": "sum:strimzi.user_operator.resource.state{$host,$endpoint} by {endpoint,host,kind,name,reason,resource_namespace}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "avg"
@@ -1554,7 +1554,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:strimzi.user_operator.resources.paused{host:$host.value,endpoint:$endpoint.value} by {endpoint,host,kind,namespace,selector}",
+                                            "query": "sum:strimzi.user_operator.resources.paused{host:$host.value,endpoint:$endpoint.value} by {endpoint,host,kind,namespace,selector}",
                                             "aggregator": "avg"
                                         }
                                     ],
