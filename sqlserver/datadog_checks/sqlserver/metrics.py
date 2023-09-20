@@ -928,7 +928,7 @@ class SqlDbFileSpaceUsage(BaseSqlServerMetric):
     CUSTOM_QUERIES_AVAILABLE = False
     TABLE = 'sys.dm_db_file_space_usage'
     DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = """SELECT 
+    QUERY_BASE = """SELECT
             database_id,
             DB_NAME(database_id) as database_name,
             (SUM(unallocated_extent_page_count)*1.0/128) as free_space,
