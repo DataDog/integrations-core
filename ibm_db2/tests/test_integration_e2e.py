@@ -30,7 +30,7 @@ def test_e2e(dd_agent_check, instance):
 def _assert_standard(aggregator):
     aggregator.assert_service_check('ibm_db2.can_connect', AgentCheck.OK)
 
-    for metric in metrics.STANDARD:
+    for metric in metrics_l:
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag(metric, 'db:datadog')
         aggregator.assert_metric_has_tag(metric, 'foo:bar')
