@@ -437,7 +437,7 @@ ISTIOD_METRICS = {
 
 ISTIOD_VERSION = {'istio_build': {'type': 'metadata', 'label': 'tag', 'name': 'version'}}
 
-# These metrics have a _total affix, eventhough they're not counters and should be excluded in the
+# These metrics have a _total suffix, even though they're not counters and should be excluded in the
 # construct_metrics_config function.
 NON_CONFORMING_METRICS = [
     # Histogram
