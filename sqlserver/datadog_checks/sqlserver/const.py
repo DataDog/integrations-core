@@ -96,7 +96,7 @@ INSTANCE_METRICS = [
     # SQLServer:Transactions
     ('sqlserver.stats.version_store_size', 'Version Store Size (KB)', ''),
     ('sqlserver.stats.version_cleanup_rate', 'Version Cleanup rate (KB/s)', ''),
-    ('sqlserver.stats.version_generation_rate', 'Version Generation rate (KB/s)', '')
+    ('sqlserver.stats.version_generation_rate', 'Version Generation rate (KB/s)', ''),
     ('sqlserver.stats.longest_transaction_running_time', 'Longest Transaction Running Time', ''),
 ]
 
