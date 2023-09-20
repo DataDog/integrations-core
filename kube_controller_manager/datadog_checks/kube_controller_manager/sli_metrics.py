@@ -54,7 +54,6 @@ class SliMetricsScraperMixin(object):
             r = http_handler.head(url)
         except Exception as e:
             self.log.debug("Error querying SLIs endpoint: %s", e)
-            return False
         if r.status_code == 403:
             self.log.debug(
                 "The /metrics/slis endpoint was introduced in Kubernetes v1.26. If you expect to see SLI metrics, \
