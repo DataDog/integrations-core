@@ -64,6 +64,9 @@ git_describe_command = ["git", "describe", "--dirty", "--tags", "--long", "--mat
 [tool.hatch.build.hooks.vcs]
 version-file = "src/ddev/_version.py"
 
+[tool.hatch.build.targets.sdist]
+include = ["src"]
+
 [tool.hatch.build.targets.app]
 scripts = ["ddev"]
 
