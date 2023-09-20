@@ -4,6 +4,11 @@ base-package-features = [
     "kube",
 ]
 
+[envs.default]
+dependencies = [
+  "requests-mock==1.4.0",
+]
+
 [[envs.default.matrix]]
 python = ["2.7", "3.9"]
 
