@@ -188,10 +188,10 @@ files:
         type: array
         items:
           type: string
-    - name: include_file_space_metrics
+    - name: include_db_file_space_usage_metrics
       description: |
-        Include database file space usage metrics to information about how space is used by data files in a specific database. 
-        Note this view is especially relevant for the tempdb database because of its unique characteristics and usage patterns.
+        Include database file space usage metrics for how space is used by data files in a specific database. 
+        Note this view is especially relevant for the tempdb database.
       value:
         type: boolean
         example: false

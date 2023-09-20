@@ -146,7 +146,7 @@ INSTANCE_SQL.update(
         'include_ao_metrics': False,
         'include_master_files_metrics': True,
         'disable_generic_tags': True,
-        'include_file_space_metrics': True,
+        'include_db_file_space_usage_metrics': True,
     }
 )
 
