@@ -19,7 +19,7 @@ def wait_on_result(sql=None, binds=None, expected_value=None):
         ) as tconn:
             with tconn.cursor() as cursor:
                 cursor.execute(sql, binds)
-                result = cursor.fetchone()[0]
+                result = cursor.fetchall()[0][0]
                 if result == expected_value:
                     break
                 time.sleep(0.1)
@@ -58,7 +58,7 @@ def test_deadlock(aggregator, dd_run_check, integration_check, pg_instance):
     deadlock_count_sql = "select deadlocks from pg_stat_database where datname = %s"
     with check._new_connection(pg_instance['dbname']).cursor() as cursor:
         cursor.execute(deadlock_count_sql, (DB_NAME,))
-        deadlocks_before = cursor.fetchone()[0]
+        deadlocks_before = cursor.fetchall()[0][0]
 
     conn_args = {'host': HOST, 'dbname': DB_NAME, 'user': "bob", 'password': "bob"}
     conn1 = psycopg.connect(**conn_args, autocommit=False, cursor_factory=ClientCursor)

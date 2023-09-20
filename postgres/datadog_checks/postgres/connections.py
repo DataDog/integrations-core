@@ -104,7 +104,7 @@ class MultiDatabaseConnectionPool(object):
         self.prune_connections()
         conn = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None))
         db = conn.connection
-        if db is None or db.closed or db.info.status != psycopg.pq.ConnStatus.OK:
+        if db is None or db.closed or db.broken:
             # db.info.status checks if the connection is still active on the server
             if self.max_conns is not None:
                 # try to free space until we succeed
