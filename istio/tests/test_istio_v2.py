@@ -175,12 +175,12 @@ def test_non_conforming_metrics(aggregator, dd_run_check, mock_http_response):
     aggregator.assert_all_metrics_covered()
 
 
-def test_mock_metrics(aggregator, dd_run_check, mock_http_response):
+def test_unverified_metrics(aggregator, dd_run_check, mock_http_response):
     """
     Test non conforming metrics for V2 implementation such as histograms and gauges
     ending with `_total`
     """
-    mock_http_response(file_path=get_fixture_path(FIXTURE_DIR, 'mock-metrics.txt'))
+    mock_http_response(file_path=get_fixture_path(FIXTURE_DIR, 'unverified-metrics.txt'))
 
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_ISTIOD_INSTANCE])
     dd_run_check(check)

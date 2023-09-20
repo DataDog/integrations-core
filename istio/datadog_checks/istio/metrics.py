@@ -398,25 +398,25 @@ ISTIOD_METRICS = {
     'sidecar_injection_success_total': 'sidecar_injection.success_total',
     'sidecar_injection_failure_total': 'sidecar_injection.failure_total',
     'sidecar_injection_skip_total': 'sidecar_injection.skip_total',
-    # Unknown
+    ## Unknown
     'istio_mcp_clients_total': 'mcp.clients_total',
-    ## Pilot autodiscovery
-    # Unknown type
+    # Pilot autodiscovery
+    ## Unknown type
     'istio_mcp_request_nacks_total': 'mcp.request.nacks_total',
     'istio_mcp_request_acks_total': 'mcp.request.acks_total',
     # Galley
-    # Unknown type
+    ## Unknown type
     'galley_istio_networking_virtualservices': 'galley.istio.networking.virtualservices',
     'galley_istio_networking_destinationrules': 'galley.istio.networking.destinationrules',
     'galley_istio_networking_gateways': 'galley.istio.networking.gateways',
     'galley_istio_authentication_meshpolicies': 'galley.istio.authentication.meshpolicies',
-    # Count
+    ## Count
     'galley_source_kube_event_error_total': 'galley.source.kube.event.error_total',
     'galley_source_kube_dynamic_converter_failure_total': 'galley.source.kube.dynamic.converter.failure_total',
     'galley_validation_cert_key_update_errors': 'galley.validation.cert.key.update.errors',
     'galley_validation_http_error': 'galley.validation.http.error',
     # Mixer
-    # LastValue
+    ## LastValue in Istio can be either a gauge or a counter
     'mixer_config_rule_config_errors_total': 'mixer.config.rule.config.errors_total',
     'mixer_config_rule_config_match_error_total': 'mixer.config.rule.config.match.errors_total',
     'mixer_config_unsatisfied_action_handler_total': 'mixer.config.unsatisfied.action.handlers_total',
@@ -425,7 +425,6 @@ ISTIOD_METRICS = {
     'mixer_config_handler_validation_error_total': 'mixer.config.handler.validation.errors_total',
     'mixer_config_instance_config_errors_total': 'mixer.config.instance.config.errors_total',
     'mixer_handler_handler_build_failures_total': 'mixer.handler.handler.build.failures_total',
-    # Unknown type
     'mixer_config_rule_config_error_count': 'mixer.config.rule.config.errors',
     'mixer_config_rule_config_match_error_count': 'mixer.config.rule.config.match.errors',
     'mixer_config_unsatisfied_action_handler_count': 'mixer.config.unsatisfied.action.handlers',
