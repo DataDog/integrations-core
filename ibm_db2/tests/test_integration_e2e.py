@@ -8,6 +8,7 @@ from datadog_checks.ibm_db2 import IbmDb2Check
 
 from . import metrics
 
+metrics_l = metrics.STANDARD + metrics.BUFFERPOOL + metrics.TABLESPACE
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
