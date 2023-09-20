@@ -263,7 +263,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self._statement_metrics_query = statements_query.format(
             query_metrics_columns=', '.join(available_columns),
             query_metrics_column_sums=', '.join(['sum({}) as {}'.format(c, c) for c in available_columns]),
-            collection_interval=int(math.ceil(self.collection_interval) * 2),
             limit=self.dm_exec_query_stats_row_limit,
             proc_char_limit=PROC_CHAR_LIMIT,
         )
@@ -274,9 +273,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self.log.debug("collecting sql server statement metrics")
         statement_metrics_query = self._get_statement_metrics_query_cached(cursor)
         now = time.time()
-        query_interval = self.collection_interval
+        query_interval = self.collection_interval * 2
         if self._last_stats_query_time:
-            query_interval = now - self._last_stats_query_time
+            query_interval = max(query_interval, now - self._last_stats_query_time)
         self._last_stats_query_time = now
         params = (math.ceil(query_interval),)
         self.log.debug("Running query [%s] %s", statement_metrics_query, params)
