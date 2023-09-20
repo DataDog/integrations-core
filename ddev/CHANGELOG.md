@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 5.1.0 / 2023-09-20
+
 ***Added***:
 
 * Add color output to tests in CI ([#15774](https://github.com/DataDog/integrations-core/pull/15774))
