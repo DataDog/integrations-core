@@ -8,8 +8,6 @@ from datadog_checks.ibm_db2 import IbmDb2Check
 
 from . import metrics
 
-metrics_l = metrics.STANDARD + metrics.BUFFERPOOL + metrics.TABLESPACE + ['hehe']  # noqa
-
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
@@ -30,7 +28,7 @@ def test_e2e(dd_agent_check, instance):
 def _assert_standard(aggregator):
     aggregator.assert_service_check('ibm_db2.can_connect', AgentCheck.OK)
 
-    for metric in metrics_l:
+    for metric in metrics.STANDARD:
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag(metric, 'db:datadog')
         aggregator.assert_metric_has_tag(metric, 'foo:bar')
