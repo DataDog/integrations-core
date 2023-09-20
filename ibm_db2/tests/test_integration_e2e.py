@@ -10,6 +10,7 @@ from . import metrics
 
 metrics_l = metrics.STANDARD + metrics.BUFFERPOOL + metrics.TABLESPACE
 
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_standard(aggregator, instance):
