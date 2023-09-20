@@ -1,7 +1,7 @@
 # Default metrics collected by this check. You should not have to modify this.
 jmx_metrics:
     - include:
-        domain: Catalina
+        domain_regex: Catalina|Tomcat
         type: ThreadPool
         attribute:
           maxThreads:
@@ -14,7 +14,7 @@ jmx_metrics:
             alias: tomcat.threads.busy
             metric_type: gauge
     - include:
-        domain: Catalina
+        domain_regex: Catalina|Tomcat
         type: GlobalRequestProcessor
         attribute:
           bytesSent:
@@ -36,7 +36,7 @@ jmx_metrics:
             alias: tomcat.processing_time
             metric_type: counter
     - include:
-        domain: Catalina
+        domain_regex: Catalina|Tomcat
         j2eeType: Servlet
         attribute:
           processingTime:
@@ -51,7 +51,7 @@ jmx_metrics:
     - include:
         # Deprecated metric available in Tomcat 7
         # https://github.com/apache/tomcat/blob/7.0.x/java/org/apache/catalina/core/StandardContext.java#L5293-L5297
-        domain: Catalina
+        domain_regex: Catalina|Tomcat
         type: Cache
         attribute:
           accessCount:
@@ -61,7 +61,7 @@ jmx_metrics:
             alias: tomcat.cache.hits_count
             metric_type: counter
     - include:
-        domain: Catalina
+        domain_regex: Catalina|Tomcat
         type: StringCache
         attribute:
           accessCount:
@@ -72,7 +72,7 @@ jmx_metrics:
             metric_type: counter
     - include:
         # Example Bean: `Catalina:type=WebResourceRoot,host=localhost,context=/docs,name=Cache`
-        domain: Catalina
+        domain_regex: Catalina|Tomcat
         type: WebResourceRoot
         name: Cache
         attribute:
@@ -83,7 +83,7 @@ jmx_metrics:
             alias: tomcat.web.cache.lookup_count
             metric_type: counter
     - include:
-        domain: Catalina
+        domain_regex: Catalina|Tomcat
         type: JspMonitor
         attribute:
           jspCount:
