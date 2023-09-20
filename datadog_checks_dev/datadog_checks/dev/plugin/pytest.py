@@ -17,6 +17,7 @@ from six import PY2
 from .._env import (
     E2E_FIXTURE_NAME,
     E2E_PARENT_PYTHON,
+    E2E_RESULT_FILE,
     SKIP_ENVIRONMENT,
     TESTING_PLUGIN,
     e2e_active,
@@ -128,15 +129,22 @@ def dd_environment_runner(request):
 
     data = {'config': config, 'metadata': metadata}
 
-    message = serialize_data(data)
-
-    message = 'DDEV_E2E_START_MESSAGE {} DDEV_E2E_END_MESSAGE'.format(message)
+    message_template = 'DDEV_E2E_START_MESSAGE {} DDEV_E2E_END_MESSAGE'
 
     if testing_plugin:
-        return message
+        return message_template.format(serialize_data(data))
     else:  # no cov
         # Exit testing and pass data back up to command
-        pytest.exit(message)
+        if E2E_RESULT_FILE in os.environ:
+            # Standard `pytest.exit` requires a reason but we want an empty string for minimal output
+            from _pytest.outcomes import Exit
+
+            with open(os.environ[E2E_RESULT_FILE], 'w', encoding='utf-8') as f:
+                f.write(json.dumps(data))
+
+            Exit('', 0)
+        else:
+            pytest.exit(message_template.format(serialize_data(data)))
 
 
 @pytest.fixture

@@ -212,10 +212,9 @@ LIMIT {table_count_limit}
 }
 
 q1 = (
-    'CASE WHEN exists(SELECT * FROM pg_stat_wal_receiver) '
-    'AND (pg_last_wal_receive_lsn() IS NULL '
-    'OR pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn()) THEN 0 '
-    'ELSE GREATEST(0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END'
+    'CASE WHEN pg_last_wal_receive_lsn() IS NULL OR '
+    'pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn() THEN 0 ELSE GREATEST '
+    '(0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END'
 )
 q2 = 'abs(pg_wal_lsn_diff(pg_last_wal_receive_lsn(), pg_last_wal_replay_lsn()))'
 REPLICATION_METRICS_10 = {

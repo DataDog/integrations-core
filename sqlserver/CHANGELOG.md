@@ -5,6 +5,7 @@
 ***Changed***:
 
 * Cache performance counter type to prevent querying for the same counter multiple times (especially for the per-db counters) ([#15714](https://github.com/DataDog/integrations-core/pull/15714))
+* Add the `db` tag to every metric also using `database` or `database_name` for consistency ([#15792](https://github.com/DataDog/integrations-core/pull/15792))
 
 ***Added***:
 
@@ -12,6 +13,9 @@
 
 ***Fixed***:
 
+* Restore the logic for the lookback time in the statement metrics query. It was previously the connection interval * 2, but was removed during a refactor. ([#15857](https://github.com/DataDog/integrations-core/pull/15857))
+
+* Fix type `bytes` is not JSON serializable for dbm events ([#15763](https://github.com/DataDog/integrations-core/pull/15763))
 * Fix sqlserver file stats metrics for Azure SQL DB ([#15695](https://github.com/DataDog/integrations-core/pull/15695))
 
 ## 14.0.0 / 2023-08-18

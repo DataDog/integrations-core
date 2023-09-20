@@ -52,6 +52,16 @@ def test_explain_parameterized_queries(integration_check, dbm_instance, query, e
     assert explain_err_code == expected_explain_err_code
     assert err is None
 
+    explain_param_queries = check.statement_samples._explain_parameterized_queries
+    # check that we deallocated the prepared statement after explaining
+    rows = explain_param_queries._execute_query_and_fetch_rows(
+        DB_NAME,
+        "SELECT * FROM pg_prepared_statements WHERE name = 'dd_{query_signature}'".format(
+            query_signature=compute_sql_signature(query)
+        ),
+    )
+    assert len(rows) == 0
+
 
 @pytest.mark.parametrize(
     "query,expected_generic_values",
@@ -75,11 +85,10 @@ def test_explain_parameterized_queries_generic_params(integration_check, dbm_ins
     query_signature = compute_sql_signature(query)
 
     explain_param_queries = check.statement_samples._explain_parameterized_queries
-    with check._new_connection(DB_NAME).connection() as conn:
-        assert explain_param_queries._create_prepared_statement(conn, query, query, query_signature) is True
-        assert expected_generic_values == explain_param_queries._get_number_of_parameters_for_prepared_statement(
-            conn, query_signature
-        )
+    assert explain_param_queries._create_prepared_statement(DB_NAME, query, query, query_signature) is True
+    assert expected_generic_values == explain_param_queries._get_number_of_parameters_for_prepared_statement(
+        DB_NAME, query_signature
+    )
 
 
 @pytest.mark.parametrize(

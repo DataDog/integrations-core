@@ -9,6 +9,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
+    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     assert_extend_generic_if,
     create_e2e_core_test_config,
@@ -19,7 +20,8 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_cisco_ucs(dd_agent_check):
-    config = create_e2e_core_test_config('cisco-ucs')
+    profile = 'cisco-ucs'
+    config = create_e2e_core_test_config(profile)
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -381,7 +383,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
             'cucs_processor_unit_vendor:quaintly forward',
         ],
         [
-            'cucs_processor_unit_arch:intel_p4_c',
+            'cucs_processor_unit_arch:intel_p4c',
             'cucs_processor_unit_cores:3089744816',
             'cucs_processor_unit_cores_enabled:50511177',
             'cucs_processor_unit_dn:kept driving',
@@ -395,7 +397,7 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
             'cucs_processor_unit_vendor:driving but their driving their driving forward forward',
         ],
         [
-            'cucs_processor_unit_arch:intel_p4_c',
+            'cucs_processor_unit_arch:intel_p4c',
             'cucs_processor_unit_cores:861697837',
             'cucs_processor_unit_cores_enabled:3562772907',
             'cucs_processor_unit_dn:forward their Jaded forward kept zombies',
@@ -925,5 +927,6 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
+    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
