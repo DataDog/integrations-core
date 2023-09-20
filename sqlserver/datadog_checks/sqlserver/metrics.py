@@ -931,11 +931,11 @@ class SqlDbFileSpaceUsage(BaseSqlServerMetric):
     QUERY_BASE = """SELECT
             database_id,
             DB_NAME(database_id) as database_name,
-            (SUM(unallocated_extent_page_count)*1.0/128) as free_space,
-            (SUM(version_store_reserved_page_count)*1.0/128) as used_space_by_version_store,
-            (SUM(internal_object_reserved_page_count)*1.0/128) as used_space_by_internal_object,
-            (SUM(user_object_reserved_page_count)*1.0/128) as used_space_by_user_object,
-            (SUM(mixed_extent_page_count)*1.0/128) as mixed_extent_space
+            ISNULL(SUM(unallocated_extent_page_count)*1.0/128, 0) as free_space,
+            ISNULL(SUM(version_store_reserved_page_count)*1.0/128, 0) as used_space_by_version_store,
+            ISNULL(SUM(internal_object_reserved_page_count)*1.0/128, 0) as used_space_by_internal_object,
+            ISNULL(SUM(user_object_reserved_page_count)*1.0/128, 0) as used_space_by_user_object,
+            ISNULL(SUM(mixed_extent_page_count)*1.0/128, 0) as mixed_extent_space
         FROM {table} group by database_id""".format(
         table=TABLE
     )
