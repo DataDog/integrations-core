@@ -49,6 +49,7 @@ TESTABLE_FILE_PATTERN = re.compile(
   | metadata\.csv
   | pyproject\.toml
   | snmp/data/default_profiles/.+
+  | data/metrics.yaml
     """,
     re.VERBOSE,
 )
