@@ -1,4 +1,6 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+kubernetes_state.apiservice.count,gauge,,,,The current count of apiservices.,0,kubernetes_state_core,k8s_state.as.count,
+kubernetes_state.apiservice.condition,gauge,,,,The current condition of this apiservice. Tags:`kube_namespace` `apiservice` `condition` `status`.,0,kubernetes_state_core,k8s_state.as.condition,
 kubernetes_state.configmap.count,gauge,,,,Number of ConfigMaps. Requires ConfigMaps to be added to Cluster Agent collector. Tags: `kube_namespace`.,0,kubernetes_state_core,k8s_state.cm.count,
 kubernetes_state.daemonset.count,gauge,,,,Number of DaemonSets. Tags:`kube_namespace`.,0,kubernetes_state_core,k8s_state.ds.count,
 kubernetes_state.daemonset.scheduled,gauge,,,,The number of nodes running at least one daemon pod and are supposed to. Tags:`kube_daemon_set` `kube_namespace` (`env` `service` `version` from standard labels).,0,kubernetes_state_core,k8s_state.ds.scheduled,
@@ -138,4 +140,5 @@ kubernetes_state.service.count,gauge,,,,Number of services. Tags:`kube_namespace
 kubernetes_state.service.type,gauge,,,,Service types. Tags:`kube_namespace` `kube_service` `type`.,0,kubernetes_state_core,k8s_state.svc.type,
 kubernetes_state.ingress.count,gauge,,,,Number of ingresses. Tags:`kube_namespace`.,0,kubernetes_state_core,k8s_state.ingress.count,
 kubernetes_state.ingress.path,gauge,,,,Information about the ingress path. Tags:`kube_namespace` `kube_ingress_path` `kube_ingress` `kube_service` `kube_service_port` `kube_ingress_host` .,0,kubernetes_state_core,k8s_state.ingress.path,
-kubernetes_state.crd.count,gauge,,,,Number of crds. Tags:`kube_namespace`.,0,kubernetes_state_core,k8s_state.crd.count,
+kubernetes_state.crd.condition,gauge,,,,The current condition of this custom resource definition. Tags: `customresourcedefinition` `condition` `status`.,0,kubernetes_state_core,k8s_state.crd.condition,
+kubernetes_state.crd.count,gauge,,,,Number of custom resource definitions.,0,kubernetes_state_core,k8s_state.crd.count,
