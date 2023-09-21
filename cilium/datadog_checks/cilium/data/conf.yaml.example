@@ -46,10 +46,10 @@ init_config:
 instances:
 
     ## @param use_openmetrics - boolean - optional - default: false
-    ## Use the latest OpenMetrics V2 implementation for more features and better performance.
+    ## Use the latest OpenMetrics implementation for more features and better performance.
     ##
     ## Note: To see the configuration options for the legacy OpenMetrics implementation (Agent 7.33 or older),
-    ## https://github.com/DataDog/integrations-core/blob/7.33.x/cilium/datadog_checks/cilium/data/conf.yaml.example
+    ## see https://github.com/DataDog/integrations-core/blob/7.33.x/cilium/datadog_checks/cilium/data/conf.yaml.example
     #
   - use_openmetrics: true
 

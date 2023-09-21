@@ -923,6 +923,81 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
+# https://learn.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-file-space-usage-transact-sql?view=sql-server-ver15
+class SqlDbFileSpaceUsage(BaseSqlServerMetric):
+    CUSTOM_QUERIES_AVAILABLE = False
+    TABLE = 'sys.dm_db_file_space_usage'
+    DEFAULT_METRIC_TYPE = 'gauge'
+    QUERY_BASE = """SELECT
+            database_id,
+            DB_NAME(database_id) as database_name,
+            ISNULL(SUM(unallocated_extent_page_count)*1.0/128, 0) as free_space,
+            ISNULL(SUM(version_store_reserved_page_count)*1.0/128, 0) as used_space_by_version_store,
+            ISNULL(SUM(internal_object_reserved_page_count)*1.0/128, 0) as used_space_by_internal_object,
+            ISNULL(SUM(user_object_reserved_page_count)*1.0/128, 0) as used_space_by_user_object,
+            ISNULL(SUM(mixed_extent_page_count)*1.0/128, 0) as mixed_extent_space
+        FROM {table} group by database_id""".format(
+        table=TABLE
+    )
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+        rows = []
+        columns = []
+        if databases is None:
+            databases = []
+
+        logger.debug("%s: gathering db file space usage metrics for these databases: %s", cls.__name__, databases)
+
+        for db in databases:
+            ctx = construct_use_statement(db)
+            start = get_precise_time()
+            try:
+                logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
+                cursor.execute(ctx)
+                logger.debug("%s: fetch_all executing query: %s", cls.__name__, cls.QUERY_BASE)
+                cursor.execute(cls.QUERY_BASE)
+                data = cursor.fetchall()
+            except Exception as e:
+                logger.warning("Error when trying to query db %s - skipping.  Error: %s", db, e)
+                continue
+            elapsed = get_precise_time() - start
+
+            query_columns = [i[0] for i in cursor.description]
+            if columns:
+                if columns != query_columns:
+                    raise CheckException('Assertion error: {} != {}'.format(columns, query_columns))
+            else:
+                columns = query_columns
+
+            rows.extend(data)
+            logger.debug("%s: received %d rows for db %s, elapsed time: %.4f sec", cls.__name__, len(data), db, elapsed)
+
+        return rows, columns
+
+    def fetch_metric(self, rows, columns):
+        value_column_index = columns.index(self.column)
+        database_id_index = columns.index('database_id')
+        database_name_index = columns.index('database_name')
+
+        for row in rows:
+            database_id = row[database_id_index]
+            database_name = row[database_name_index]
+            column_val = row[value_column_index]
+
+            if database_name != self.instance:
+                continue
+
+            metric_tags = [
+                'database:{}'.format(str(database_name)),
+                'db:{}'.format(str(database_name)),
+                'database_id:{}'.format(str(database_id)),
+            ]
+            metric_tags.extend(self.tags)
+            metric_name = '{}'.format(self.datadog_name)
+            self.report_function(metric_name, column_val, tags=metric_tags)
+
+
 DEFAULT_PERFORMANCE_TABLE = "sys.dm_os_performance_counters"
 VALID_TABLES = {cls.TABLE for cls in BaseSqlServerMetric.__subclasses__() if cls.CUSTOM_QUERIES_AVAILABLE}
 TABLE_MAPPING = {
