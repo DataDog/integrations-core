@@ -47,7 +47,7 @@
     },
     "logs": {
       "source": "strimzi"
-    },
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
