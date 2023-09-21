@@ -178,7 +178,7 @@ If you encounter an issue like the following:
 
 Then it's most likely one of the following scenarios:
 - The configuration (conf.yaml) is missing a host and port configuration
-- The CLI Driver isn't able to locate the database due to the absence of db2cli.ini and db2dsdriver.cfg
+- The CLI Driver isn't able to locate the database due to the absence of `db2cli.ini` and `db2dsdriver.cfg`
 
 The agent requires the information in both of the above scenarios to figure out where to properly connect to the database. To solve this issue, you can either include a host and port parameter for every instance of the ibm_db2 check experiencing this issue, or, alternatively, if you would like to use the DSNs defined in either the db2cli.ini or db2dsdriver.cfg files, you can copy those files over to the clidriver directory that the agent uses. Under normal circumstances, that directory will be located at /opt/datadog-agent/embedded/lib/python3.9/site-packages/clidriver/cfg for Linux.
 - 
