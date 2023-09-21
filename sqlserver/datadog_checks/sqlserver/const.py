@@ -93,6 +93,11 @@ INSTANCE_METRICS = [
     # SQLServer:Plan Cache
     ('sqlserver.cache.object_counts', 'Cache Object Counts', '_Total'),
     ('sqlserver.cache.pages', 'Cache Pages', '_Total'),
+    # SQLServer:Transactions
+    ('sqlserver.stats.version_store_size', 'Version Store Size (KB)', ''),
+    ('sqlserver.stats.version_cleanup_rate', 'Version Cleanup rate (KB/s)', ''),
+    ('sqlserver.stats.version_generation_rate', 'Version Generation rate (KB/s)', ''),
+    ('sqlserver.stats.longest_transaction_running_time', 'Longest Transaction Running Time', ''),
 ]
 
 # Performance table metrics, initially configured to track at instance-level only
