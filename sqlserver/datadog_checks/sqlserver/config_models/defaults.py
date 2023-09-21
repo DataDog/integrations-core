@@ -64,6 +64,10 @@ def instance_include_ao_metrics():
     return False
 
 
+def instance_include_db_file_space_usage_metrics():
+    return False
+
+
 def instance_include_db_fragmentation_metrics():
     return False
 
