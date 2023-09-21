@@ -9,8 +9,10 @@ import math
 import os
 import re
 import time
+from collections import namedtuple
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
+from unittest.mock import ANY
 
 import mock
 import pytest
@@ -907,3 +909,30 @@ def test_statement_conditional_stored_procedure_with_temp_table(
         assert event['sqlserver']['plan_handle'] is not None
         assert event['sqlserver']['query_hash'] is not None
         assert event['sqlserver']['query_plan_hash'] is not None
+
+
+def _mock_database_list():
+    Row = namedtuple('Row', 'name')
+    fetchall_results = [
+        Row('master'),
+        Row('tempdb'),
+        Row('msdb'),
+        Row('AdventureWorks2017'),
+        Row('CaseSensitive2018'),
+        Row('Fancy2020db'),
+    ]
+    mock_cursor = mock.MagicMock()
+    mock_cursor.fetchall.return_value = iter(fetchall_results)
+    # check excluded overrides included
+    mock_cursor.fetchall.return_value = iter(fetchall_results)
+    return fetchall_results, mock_cursor
+
+
+@pytest.mark.unit
+def test_metrics_lookback_multiplier(instance_docker):
+    instance_docker['query_metrics'] = {'collection_interval': 3}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    _, mock_cursor = _mock_database_list()
+
+    check.statement_metrics._load_raw_query_metrics_rows(mock_cursor)
+    mock_cursor.execute.assert_called_with(ANY, (6,))

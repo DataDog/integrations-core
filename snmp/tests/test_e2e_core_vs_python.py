@@ -393,6 +393,9 @@ def test_e2e_profile_cisco_3850(dd_agent_check):
             'power_oper_status',
             'switch_state',
             'mac_addr',
+            'temp_state',
+            'power_source',
+            'connection_type',
         ],  # Ignore tags that have mappings
     )
 
@@ -413,6 +416,11 @@ def test_e2e_profile_cisco_asa(dd_agent_check):
             'power_oper_status',
             'switch_state',
             'mac_addr',
+            'rtt_state',
+            'rtt_type',
+            'temp_state',
+            'power_source',
+            'connection_type',
         ],  # Ignore tags that have mappings
     )
 
@@ -433,6 +441,11 @@ def test_e2e_profile_cisco_asa_5525(dd_agent_check):
             'power_oper_status',
             'switch_state',
             'mac_addr',
+            'rtt_state',
+            'rtt_type',
+            'temp_state',
+            'power_source',
+            'connection_type',
         ],  # Ignore tags that have mappings
     )
 
@@ -465,6 +478,10 @@ def test_e2e_profile_cisco_nexus(dd_agent_check):
             'power_oper_status',
             'switch_state',
             'mac_addr',
+            'temp_state',
+            'power_source',
+            'connection_type',
+            'sensor_type',
         ],  # Ignore tags that have mappings
     )
 

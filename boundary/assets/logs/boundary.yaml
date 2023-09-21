@@ -17,6 +17,11 @@ facets:
     path: http.method
     groups:
       - Web Access
+  - name: Referer
+    source: log
+    path: http.referer
+    groups:
+      - Web Access
   - name: Request ID
     source: log
     path: http.request_id

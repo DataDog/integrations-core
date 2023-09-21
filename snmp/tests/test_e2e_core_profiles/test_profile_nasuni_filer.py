@@ -9,6 +9,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
+    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     assert_extend_generic_if,
     assert_extend_generic_ucd,
@@ -20,7 +21,8 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_nasuni_filer(dd_agent_check):
-    config = create_e2e_core_test_config('nasuni-filer')
+    profile = 'nasuni-filer'
+    config = create_e2e_core_test_config(profile)
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -102,12 +104,26 @@ def test_e2e_profile_nasuni_filer(dd_agent_check):
             'volume_table_protocol:their kept but zombies kept oxen kept',
             'volume_table_provider:Jaded',
             'volume_table_status:driving their acted kept but',
+            'volume_table_is_active:true',
+            'volume_table_is_shared:true',
+            'volume_table_is_read_only:true',
+            'volume_table_is_pinned:true',
+            'volume_table_is_remote:true',
+            'volume_table_av_enabled:true',
+            'volume_table_remote_access_enabled:true',
         ],
         [
             'volume_table_description:their oxen acted but their but but',
             'volume_table_protocol:forward quaintly but',
             'volume_table_provider:driving quaintly acted Jaded quaintly kept forward Jaded',
             'volume_table_status:driving oxen Jaded',
+            'volume_table_is_active:false',
+            'volume_table_is_shared:false',
+            'volume_table_is_read_only:false',
+            'volume_table_is_pinned:false',
+            'volume_table_is_remote:false',
+            'volume_table_av_enabled:false',
+            'volume_table_remote_access_enabled:false',
         ],
     ]
     for tag_row in tag_rows:
@@ -158,5 +174,6 @@ def test_e2e_profile_nasuni_filer(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
+    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

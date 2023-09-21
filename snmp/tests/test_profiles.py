@@ -826,7 +826,12 @@ def test_meraki_cloud_controller(aggregator):
     common.assert_common_metrics(aggregator, common_tags)
 
     dev_metrics = ['devStatus', 'devClientCount']
-    dev_tags = ['device:Gymnasium', 'product:MR16-HW', 'network:L_NETWORK', 'mac_address:0x02020066f57f'] + common_tags
+    dev_tags = [
+        'device_name:Gymnasium',
+        'product:MR16-HW',
+        'network:L_NETWORK',
+        'mac_address:0x02020066f57f',
+    ] + common_tags
     for metric in dev_metrics:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=dev_tags, count=1)
 
@@ -2166,6 +2171,7 @@ def test_checkpoint(aggregator):
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:checkpoint',
         'device_vendor:checkpoint',
+        'snmp_host:checkpoint.device.name',
     ]
 
     common.assert_common_metrics(aggregator, common_tags)
@@ -2239,6 +2245,7 @@ def test_checkpoint_firewall(aggregator):
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:checkpoint-firewall',
         'device_vendor:checkpoint',
+        'snmp_host:checkpoint.device.name',
     ]
 
     common.assert_common_metrics(aggregator, common_tags)

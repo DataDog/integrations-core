@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Make JMX metrics available on both standalone and embedded Tomcat versions ([#15761](https://github.com/DataDog/integrations-core/pull/15761))
+
 ## 1.12.1 / 2023-08-18
 
 ***Fixed***:
