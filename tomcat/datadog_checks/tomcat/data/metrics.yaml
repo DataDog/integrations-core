@@ -83,7 +83,7 @@ jmx_metrics:
             alias: tomcat.web.cache.lookup_count
             metric_type: counter
     - include:
-        domain_regex: Catalina|Tomca.
+        domain_regex: Catalina|Tomcat
         type: JspMonitor
         attribute:
           jspCount:
