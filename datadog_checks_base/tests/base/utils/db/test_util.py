@@ -220,7 +220,12 @@ def test_dbm_async_job_cancel(aggregator):
     tags = ["hello:there"]
     job.run_job_loop(tags)
     job.cancel()
-    job._job_loop_future.result()
+    # When cancel is called, in-flight job will not be cancelled
+    # But _cancel_event will be set.
+    # This way cancel is not a blocking call.
+    assert job._cancel_event.isSet()
+    if not job._job_loop_future.cancelled():
+        job._job_loop_future.result()
     assert not job._job_loop_future.running(), "thread should be stopped"
     # if the thread doesn't start until after the cancel signal is set then the db connection will never
     # be created in the first place
