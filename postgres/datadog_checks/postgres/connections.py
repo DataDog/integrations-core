@@ -166,9 +166,7 @@ class MultiDatabaseConnectionPool(object):
 
     def close_all_connections(self) -> bool:
         """
-        Will block until all connections are terminated, unless the pre-configured timeout is hit
-        :param timeout:
-        :return:
+        Close all connections in the pool.
         """
         success = True
         for dbname in list(self._conns):
@@ -196,8 +194,7 @@ class MultiDatabaseConnectionPool(object):
 
         db = self._conns.pop(dbname).connection
         try:
-            if not db.closed:
-                db.close()
+            db.close()
             self._stats.connection_closed += 1
         except Exception:
             self._stats.connection_closed_failed += 1

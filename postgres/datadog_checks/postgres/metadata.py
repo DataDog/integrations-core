@@ -481,4 +481,4 @@ class PostgresMetadata(DBMAsyncJob):
 
     def cancel(self):
         super(PostgresMetadata, self).cancel()
-        self.db_pool.close()
+        self.db_pool.close_all_connections()

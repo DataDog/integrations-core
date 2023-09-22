@@ -63,11 +63,11 @@ def run_one_check(check, db_instance):
     """
     check.check(db_instance)
     check.cancel()
-    if check.statement_samples._job_loop_future is not None:
+    if check.statement_samples._job_loop_future is not None and check.statement_samples._job_loop_future.running():
         check.statement_samples._job_loop_future.result()
-    if check.statement_metrics._job_loop_future is not None:
+    if check.statement_metrics._job_loop_future is not None and check.statement_metrics._job_loop_future.running():
         check.statement_metrics._job_loop_future.result()
-    if check.metadata_samples._job_loop_future is not None:
+    if check.metadata_samples._job_loop_future is not None and check.metadata_samples._job_loop_future.running():
         check.metadata_samples._job_loop_future.result()
 
 

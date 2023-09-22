@@ -261,12 +261,13 @@ class DBMAsyncJob(object):
 
     def cancel(self):
         """
-        Send a signal to cancel the job loop asynchronously.
+        Send a signal to cancel the job loop.
         """
         self._cancel_event.set()
-        # after setting cancel event, wait for job loop to fully shutdown
         if self._job_loop_future:
-            self._job_loop_future.result()
+            # cancel the job loop future, not waiting for it to finish
+            # this is to make sure cancel is not blocking
+            self._job_loop_future.cancel()
 
     def run_job_loop(self, tags):
         """
@@ -354,3 +355,11 @@ class DBMAsyncJob(object):
 
     def run_job(self):
         raise NotImplementedError()
+
+    @classmethod
+    def shutdown(cls, wait: bool = False):
+        """
+        Shutdown the thread pool executor.
+        If wait is True, wait for all jobs to finish before returning.
+        """
+        cls.executor.shutdown(wait=wait, cancel_futures=True)
