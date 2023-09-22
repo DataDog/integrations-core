@@ -224,7 +224,6 @@ class SqlIncrFractionMetric(SqlFractionMetric):
     def report_fraction(self, value, base, metric_tags, previous_values):
         # return if nil is passed as the values cache, as this should be instantiated
         # at check instantiation
-        print("hey hey ")
         if previous_values is None:
             return
         # key is set to the metric name + the metric tags in order to support
@@ -237,10 +236,8 @@ class SqlIncrFractionMetric(SqlFractionMetric):
             try:
                 result = diff_value / float(diff_base)
                 self.report_function(self.metric_name, result, tags=metric_tags)
-                print("reporting metric with value: {}".format(result))
             except ZeroDivisionError:
                 self.log.debug("Base value is 0, won't report metric %s for tags %s", self.metric_name, metric_tags)
-                print("Base value is 0, won't report metric %s for tags %s", self.metric_name, metric_tags)
         previous_values[key] = (value, base)
 
 
