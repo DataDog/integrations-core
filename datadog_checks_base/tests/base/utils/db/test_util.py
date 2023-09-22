@@ -210,7 +210,7 @@ def test_dbm_async_job_enabled(enabled):
     if enabled:
         assert job._job_loop_future is not None
         job.cancel()
-        job._job_loop_future.result()
+        assert job._cancel_event.isSet()
     else:
         assert job._job_loop_future is None
 
