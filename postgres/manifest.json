@@ -12,9 +12,9 @@
     "title": "Postgres",
     "media": [],
     "classifier_tags": [
-      "Category::Data Store",
+      "Category::Data Stores",
       "Category::Log Collection",
-      "Category::Notification",
+      "Category::Notifications",
       "Category::Tracing",
       "Supported OS::Linux",
       "Supported OS::Windows",
@@ -39,10 +39,7 @@
       },
       "metrics": {
         "prefix": "postgresql.",
-        "check": [
-          "postgresql.connections",
-          "postgresql.max_connections"
-        ],
+        "check": ["postgresql.connections", "postgresql.max_connections"],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
