@@ -355,11 +355,3 @@ class DBMAsyncJob(object):
 
     def run_job(self):
         raise NotImplementedError()
-
-    @classmethod
-    def shutdown(cls, wait: bool = False):
-        """
-        Shutdown the thread pool executor.
-        If wait is True, wait for all jobs to finish before returning.
-        """
-        cls.executor.shutdown(wait=wait, cancel_futures=True)
