@@ -41,9 +41,7 @@ Proceed with the following steps in this guide only if you are installing the st
        GRANT CONNECT ANY DATABASE to datadog; 
    ```
 
-2. Make sure your SQL Server instance is listening on a specific fixed port. By default, named instances and SQL Server Express are configured for dynamic ports. See [Microsoft's documentation][4] for more details.
-
-3. (Required for AlwaysOn and `sys.master_files` metrics) To gather AlwaysOn and `sys.master_files` metrics, grant the following additional permission:
+2. (Required for AlwaysOn and `sys.master_files` metrics) To gather AlwaysOn and `sys.master_files` metrics, grant the following additional permission:
 
     ```SQL
         GRANT VIEW ANY DEFINITION to datadog;
@@ -71,14 +69,15 @@ To configure this check for an Agent running on a host:
        driver: SQL Server
    ```
 
-    See the [example check configuration][6] for a comprehensive description of all options, including how to use custom queries to create your own metrics.
+    If you use port autodiscovery, use `0` for `SQL_PORT`. See the [example check configuration][6] for a comprehensive description of all options, including how to use custom queries to create your own metrics.
 
     **Note**: The (default) provider `SQLOLEDB` is being deprecated. To use the newer `MSOLEDBSQL` provider, set the `adoprovider` variable to `MSOLEDBSQL` in your `sqlserver.d/conf.yaml` file after having downloaded the new provider from [Microsoft][7]. It is also possible to use the Windows Authentication and not specify the username/password with:
 
       ```yaml
       connection_string: "Trusted_Connection=yes"
       ```
-
+    
+    
 2. [Restart the Agent][8].
 
 ##### Linux
