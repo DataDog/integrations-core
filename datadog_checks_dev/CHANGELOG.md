@@ -5,6 +5,7 @@
 ***Fixed***:
 
 * Exclude psycopg2 from automatic upgrades ([#15864](https://github.com/DataDog/integrations-core/pull/15864))
+* Finalize pytest plugin logic for E2E refactor ([#15898](https://github.com/DataDog/integrations-core/pull/15898))
 
 ## 25.1.0 / 2023-09-15
 
