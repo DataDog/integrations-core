@@ -69,7 +69,11 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 
-        if PY2 or is_affirmative(instance.get('legacy_mode', True)):
+        # default to legacy mode for configuration backwards compatibility
+        init_config_legacy_mode = is_affirmative(init_config.get('legacy_mode', True))
+        # If legacy_mode is unset for an instance, default to the init_config option
+        instance_legacy_mode = is_affirmative(instance.get('legacy_mode', init_config_legacy_mode))
+        if PY2 or instance_legacy_mode:
             return Win32EventLogWMI(name, init_config, instances)
         else:
             return super(Win32EventLogCheck, cls).__new__(cls)
