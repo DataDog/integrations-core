@@ -133,12 +133,6 @@ class SqlFractionMetric(BaseSqlServerMetric):
         table=TABLE
     )
 
-    INSTANCES_QUERY = """select instance_name
-                         from {table}
-                         where counter_name=? and instance_name!='_Total';""".format(
-        table=TABLE
-    )
-
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         placeholders = ', '.join('?' for _ in counters_list)
@@ -148,70 +142,67 @@ class SqlFractionMetric(BaseSqlServerMetric):
         cursor.execute(query, counters_list)
         rows = cursor.fetchall()
         results = defaultdict(list)
+
+        # We're going to store counters by name`
         for counter_name, cntr_type, cntr_value, instance_name, object_name in rows:
-            rowlist = [cntr_type, cntr_value, instance_name.strip(), object_name.strip()]
-            logger.debug("Adding new rowlist %s", str(rowlist))
-            results[counter_name.strip()].append(rowlist)
+            counter_result = {
+                'cntr_type': cntr_type,
+                'cntr_value': cntr_value,
+                'instance_name': instance_name.strip(),
+                'object_name': object_name.strip(),
+            }
+            logger.debug("Adding new counter_result %s", str(counter_result))
+            results[counter_name.strip()].append(counter_result)
         return results, None
 
-    def set_instances(self, cursor):
-        if self.instance == ALL_INSTANCES:
-            cursor.execute(self.INSTANCES_QUERY, (self.sql_name,))
-            self.instances = [row.instance_name for row in cursor.fetchall()]
-        else:
-            self.instances = [self.instance]
-
     def fetch_metric(self, results, _):
-        """
-        Because we need to query the metrics by matching pairs, we can't query
-        all of them together without having to perform some matching based on
-        the name afterwards so instead we query instance by instance.
-        We cache the list of instance so that we don't have to look it up every time
-        """
-        if self.sql_name not in results:
-            self.log.warning("Couldn't find %s in results", self.sql_name)
+        num_counters = results.get(self.sql_name.strip())
+        base_counters = results.get(self.base_name.strip())
+
+        if not num_counters or not base_counters:
+            self.log.error(
+                'Skipping counter. Missing numerator and/or base counters \nsql_name=%s \nbase_name=%s \nresults=%s',
+                self.sql_name,
+                self.base_name,
+                str(results),
+            )
             return
 
-        results_list = results[self.sql_name]
-        done_instances = []
-        for ndx, row in enumerate(results_list):
-            ctype = row[0]
-            cval = row[1]
-            inst = row[2]
-            object_name = row[3]
+        base_by_key = {}
 
-            if inst in done_instances:
-                continue
+        # let's organize each base counter by key
+        for base in base_counters:
+            key = '{}::{}'.format(base['instance_name'], base['object_name'])
+            if base_by_key.get(key):
+                self.log.warning('Found duplicate base counters for key:%s', key)
+            base_by_key[key] = base
 
-            if (self.instance != ALL_INSTANCES and inst != self.instance and inst != self.physical_db_name) or (
-                self.object_name and object_name != self.object_name
+        for numerator in num_counters:
+            instance_name = numerator['instance_name']
+            object_name = numerator['object_name']
+            if (
+                self.instance != ALL_INSTANCES
+                and instance_name != self.instance
+                and instance_name != self.physical_db_name
             ):
-                done_instances.append(inst)
                 continue
-
-            # find the next row which has the same instance
-            cval2 = None
-            ctype2 = None
-            for second_row in results_list[: ndx + 1]:
-                if inst == second_row[2]:
-                    cval2 = second_row[1]
-                    ctype2 = second_row[0]
-
-            if cval2 is None:
-                self.log.warning("Couldn't find second value for %s", self.sql_name)
+            if self.object_name and self.object_name != object_name:
                 continue
-            done_instances.append(inst)
-            if ctype < ctype2:
-                value = cval
-                base = cval2
-            else:
-                value = cval2
-                base = cval
+            key = '{}::{}'.format(numerator['instance_name'], numerator['object_name'])
+
+            corresponding_base = base_by_key.get(key)
+
+            if not corresponding_base:
+                self.log.warning(
+                    'Could not find corresponding base counter for sql_name: %s base_name: %s',
+                    self.sql_name,
+                    self.base_name,
+                )
 
             metric_tags = list(self.tags)
             if self.instance == ALL_INSTANCES:
-                metric_tags.append('{}:{}'.format(self.tag_by, inst.strip()))
-            self.report_fraction(value, base, metric_tags)
+                metric_tags.append('{}:{}'.format(self.tag_by, instance_name))
+            self.report_fraction(numerator['cntr_value'], corresponding_base['cntr_value'], metric_tags)
 
     def report_fraction(self, value, base, metric_tags):
         try:

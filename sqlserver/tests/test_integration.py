@@ -402,6 +402,38 @@ def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+def test_custom_metrics_fraction_counters(aggregator, dd_run_check, instance_docker, caplog):
+    caplog.clear()
+    caplog.set_level(logging.DEBUG)
+    instance_docker['procedure_metrics'] = {'enabled': False}
+    sqlserver_check = SQLServer(
+        CHECK_NAME,
+        {
+            'custom_metrics': [
+                {
+                    'name': 'sqlserver.custom.plan_cache_test',
+                    'counter_name': 'Cache Hit Ratio',
+                    'instance_name': 'ALL',
+                    'object_name': 'SQLServer:Plan Cache',
+                    'tag_by': 'plan_type',
+                    'tags': ['optional_tag:tagx'],
+                },
+            ]
+        },
+        [instance_docker],
+    )
+    dd_run_check(sqlserver_check)
+    seen_plan_type = set()
+    for m in aggregator.metrics("sqlserver.custom.plan_cache_test"):
+        tags_by_key = {k: v for k, v in [t.split(':') for t in m.tags if not t.startswith('dd.internal')]}
+        seen_plan_type.add(tags_by_key['plan_type'])
+        assert tags_by_key['optional_tag'].lower() == 'tagx'
+    assert 'SQL Plans' in seen_plan_type
+    assert 'Object Plans' in seen_plan_type
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize('database_autodiscovery', [True, False])
 def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, database_autodiscovery):
     instance_docker['database_autodiscovery'] = database_autodiscovery
