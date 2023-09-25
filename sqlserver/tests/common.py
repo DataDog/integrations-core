@@ -65,11 +65,19 @@ def get_expected_file_stats_metrics():
 
 EXPECTED_FILE_STATS_METRICS = get_expected_file_stats_metrics()
 
+# SQL Server incremental sql fraction metrics require diffs in order to calculate
+# & report the metric, which means this requires a special unit/integration test coverage
+inc_perf_counter_metrics = [
+    ('sqlserver.latches.latch_wait_time', 'Average Latch Wait Time (ms)', ''),
+]
+
+EXPECTED_INSTANCE_METRICS = [metric for metric in INSTANCE_METRICS if metric not in inc_perf_counter_metrics]
+
 EXPECTED_DEFAULT_METRICS = (
     [
         m[0]
         for m in chain(
-            INSTANCE_METRICS,
+            EXPECTED_INSTANCE_METRICS,
             DBM_MIGRATED_METRICS,
             INSTANCE_METRICS_DATABASE,
             DATABASE_METRICS,
