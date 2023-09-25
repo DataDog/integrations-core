@@ -181,6 +181,15 @@ files:
       value:
         type: boolean
         example: false
+    - name: include_index_usage_metrics
+      description: |
+        Configure collection of user table index usage statistics from the sys.dm_db_index_usage_stats DMV.
+        
+        It is recommended to enable `database_autodiscovery` or set `database`, since the sys.dm_db_index_usage_stats
+        view is scoped to the current database.
+      value:
+        type: boolean
+        example: true
     - name: db_fragmentation_object_names
       description: |
         Fragmentation metrics normally emit metrics for all objects within a database.

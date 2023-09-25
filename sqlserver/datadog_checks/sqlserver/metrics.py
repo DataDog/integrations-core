@@ -820,7 +820,7 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
-    def fetch_metric(self, rows, columns):
+    def fetch_metric(self, rows, columns, values_cache=None):
         value_column_index = columns.index(self.column)
 
         resource_group_id_index = columns.index('resource_group_id')
@@ -873,7 +873,7 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
-    def fetch_metric(self, rows, columns):
+    def fetch_metric(self, rows, columns, values_cache=None):
         value_column_index = columns.index(self.column)
 
         failover_mode_desc_index = columns.index('failover_mode_desc')
@@ -986,7 +986,7 @@ class SqlDbFileSpaceUsage(BaseSqlServerMetric):
 
         return rows, columns
 
-    def fetch_metric(self, rows, columns):
+    def fetch_metric(self, rows, columns, values_cache=None):
         value_column_index = columns.index(self.column)
         database_id_index = columns.index('database_id')
         database_name_index = columns.index('database_name')
@@ -1003,6 +1003,88 @@ class SqlDbFileSpaceUsage(BaseSqlServerMetric):
                 'database:{}'.format(str(database_name)),
                 'db:{}'.format(str(database_name)),
                 'database_id:{}'.format(str(database_id)),
+            ]
+            metric_tags.extend(self.tags)
+            metric_name = '{}'.format(self.metric_name)
+            self.report_function(metric_name, column_val, tags=metric_tags)
+
+
+# https://learn.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-index-usage-stats-transact-sql?view=sql-server-ver15
+class SqlDbIndexUsageStats(BaseSqlServerMetric):
+    CUSTOM_QUERIES_AVAILABLE = False
+    TABLE = 'sys.dm_db_index_usage_stats'
+    DEFAULT_METRIC_TYPE = 'monotonic_count'
+    columns = ["user_seeks", "user_scans", "user_lookups", "user_updates"]
+    QUERY_BASE = """\
+    SELECT
+         DB_NAME(ixus.database_id) as db,
+         ind.name as index_name,
+         OBJECT_NAME(ind.object_id) as table_name,
+        {sql_columns}
+    FROM sys.indexes ind
+             INNER JOIN {table} ixus
+             ON ixus.index_id = ind.index_id AND ixus.object_id = ind.object_id
+    WHERE OBJECTPROPERTY(ind.object_id, 'IsUserTable') = 1
+    GROUP BY ixus.database_id, OBJECT_NAME(ind.object_id), ind.name, {sql_columns}
+    """.format(
+        sql_columns=','.join(f'ixus.{col}' for col in columns),
+        table=TABLE,
+    ).strip()
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+        rows = []
+        columns = []
+        if databases is None:
+            databases = []
+
+        logger.debug("%s: gathering db file space usage metrics for these databases: %s", cls.__name__, databases)
+
+        for db in databases:
+            ctx = construct_use_statement(db)
+            start = get_precise_time()
+            try:
+                logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
+                cursor.execute(ctx)
+                logger.debug("%s: fetch_all executing query: %s", cls.__name__, cls.QUERY_BASE)
+                cursor.execute(cls.QUERY_BASE)
+                data = cursor.fetchall()
+            except Exception as e:
+                logger.warning("Error when trying to query db %s - skipping.  Error: %s", db, e)
+                continue
+            elapsed = get_precise_time() - start
+
+            query_columns = [i[0] for i in cursor.description]
+            if columns:
+                if columns != query_columns:
+                    raise CheckException('Assertion error: {} != {}'.format(columns, query_columns))
+            else:
+                columns = query_columns
+
+            rows.extend(data)
+            logger.debug("%s: received %d rows for db %s, elapsed time: %.4f sec", cls.__name__, len(data), db, elapsed)
+
+        return rows, columns
+
+    def fetch_metric(self, rows, columns, values_cache=None):
+        value_column_index = columns.index(self.column)
+        database_index = columns.index('db')
+        index_name_index = columns.index('index_name')
+        table_name_index = columns.index('table_name')
+
+        for row in rows:
+            database = row[database_index]
+            index = row[index_name_index]
+            table = row[table_name_index]
+            column_val = row[value_column_index]
+
+            if database != self.instance:
+                continue
+
+            metric_tags = [
+                'db:{}'.format(str(database)),
+                'index:{}'.format(str(index)),
+                'table:{}'.format(str(table)),
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.metric_name)

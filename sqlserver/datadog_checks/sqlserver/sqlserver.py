@@ -40,6 +40,7 @@ from datadog_checks.sqlserver.const import (
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
     DATABASE_FRAGMENTATION_METRICS,
+    DATABASE_INDEX_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DATABASE_SERVICE_CHECK_NAME,
@@ -519,7 +520,10 @@ class SQLServer(AgentCheck):
                     )
 
         # Load database statistics
-        for name, table, column in DATABASE_METRICS:
+        db_stats_to_collect = list(DATABASE_METRICS)
+        if is_affirmative(self.instance.get('include_index_usage_metrics', True)):
+            db_stats_to_collect.extend(DATABASE_INDEX_METRICS)
+        for name, table, column in db_stats_to_collect:
             # include database as a filter option
             db_names = [d.name for d in self.databases] or [
                 self.instance.get('database', self.connection.DEFAULT_DATABASE)

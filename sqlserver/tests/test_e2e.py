@@ -19,6 +19,7 @@ from .common import (
     UNEXPECTED_QUERY_EXECUTOR_AO_METRICS,
     inc_perf_counter_metrics,
 )
+from datadog_checks.sqlserver.const import DATABASE_INDEX_METRICS
 from .utils import always_on, not_windows_ado, not_windows_ci
 
 try:
@@ -114,6 +115,11 @@ def test_check_docker(dd_agent_check, init_config, instance_e2e):
     ]
     for m in inc_perf_counter_metrics_to_remove:
         del aggregator._metrics[m]
+
+    # remove index usage metrics, which require extra setup & will be tested separately
+    for m in DATABASE_INDEX_METRICS:
+        if m[0] in aggregator._metrics:
+            del aggregator._metrics[m[0]]
 
     for mname in EXPECTED_METRICS_DBM_ENABLED:
         aggregator.assert_metric(mname)

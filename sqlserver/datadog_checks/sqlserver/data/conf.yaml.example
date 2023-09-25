@@ -173,6 +173,14 @@ instances:
     #
     # include_db_fragmentation_metrics: false
 
+    ## @param include_index_usage_metrics - boolean - optional - default: true
+    ## Configure collection of user table index usage statistics from the sys.dm_db_index_usage_stats DMV.
+    ##
+    ## It is recommended to enable `database_autodiscovery` or set `database`, since the sys.dm_db_index_usage_stats
+    ## view is scoped to the current database.
+    #
+    # include_index_usage_metrics: true
+
     ## @param db_fragmentation_object_names - list of strings - optional
     ## Fragmentation metrics normally emit metrics for all objects within a database.
     ## This option allows you to specify database object names to query for fragmentation metrics.

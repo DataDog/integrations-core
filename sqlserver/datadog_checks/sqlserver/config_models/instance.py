@@ -154,6 +154,7 @@ class InstanceConfig(BaseModel):
     include_ao_metrics: Optional[bool] = None
     include_db_fragmentation_metrics: Optional[bool] = None
     include_fci_metrics: Optional[bool] = None
+    include_index_usage_metrics: Optional[bool] = None
     include_instance_metrics: Optional[bool] = None
     include_master_files_metrics: Optional[bool] = None
     include_task_scheduler_metrics: Optional[bool] = None
