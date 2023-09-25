@@ -535,8 +535,8 @@ class PostgreSql(AgentCheck):
         for db in databases:
             try:
                 with self.db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
-                    with conn.cursor() as cursor:
-                        for scope in relations_scopes:
+                    for scope in relations_scopes:
+                        with conn.cursor() as cursor:
                             self._query_scope(cursor, scope, instance_tags, False, db)
             except psycopg.OperationalError:
                 self.log.warning(
@@ -619,14 +619,18 @@ class PostgreSql(AgentCheck):
                     hostname=self.resolved_hostname,
                 )
 
+        with self.db.cursor() as cursor:
             self._query_scope(cursor, bgw_instance_metrics, instance_tags, False)
+        with self.db.cursor() as cursor:
             self._query_scope(cursor, archiver_instance_metrics, instance_tags, False)
 
-            if self._config.collect_activity_metrics:
-                activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
+        if self._config.collect_activity_metrics:
+            activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
+            with self.db.cursor() as cursor:
                 self._query_scope(cursor, activity_metrics, instance_tags, False)
 
-            for scope in list(metric_scope) + self._config.custom_metrics:
+        for scope in list(metric_scope) + self._config.custom_metrics:
+            with self.db.cursor() as cursor:
                 self._query_scope(cursor, scope, instance_tags, scope in self._config.custom_metrics)
 
         if self.dynamic_queries:
@@ -920,6 +924,10 @@ class PostgreSql(AgentCheck):
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")
             self._clean_state()
+            try:
+                self.db.rollback()
+            except Exception as err:
+                self.log.warning("Unable to rollabck: %s", err)
             self.db = None
             message = u'Error establishing connection to postgres://{}:{}/{}, error is {}'.format(
                 self._config.host, self._config.port, self._config.dbname, str(e)
@@ -933,6 +941,7 @@ class PostgreSql(AgentCheck):
             )
             raise e
         else:
+            self.db.commit()
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.OK,

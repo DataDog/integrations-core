@@ -123,9 +123,7 @@ class MultiDatabaseConnectionPool(object):
             # if already in pool, retain persistence status
             persistent = conn.persistent
 
-        if db.info.transaction_status != psycopg.pq.TransactionStatus.IDLE:
-            db.rollback()
-
+        self._commit_or_rollback(db)
         deadline = datetime.datetime.now() + datetime.timedelta(milliseconds=ttl_ms)
         self._conns[dbname] = ConnectionInfo(
             connection=db,
@@ -148,6 +146,7 @@ class MultiDatabaseConnectionPool(object):
         db = self._get_connection_raw(dbname=dbname, ttl_ms=ttl_ms, timeout=timeout, persistent=persistent)
         yield db
         try:
+            self._commit_or_rollback(db)
             self._conns[dbname].active = False
         except KeyError:
             # if self._get_connection_raw hit an exception, self._conns[dbname] didn't get populated
@@ -212,3 +211,11 @@ class MultiDatabaseConnectionPool(object):
         :return: a psycopg connection
         """
         return self.get_connection(self._config.dbname, self._config.idle_connection_timeout, persistent=True)
+
+    def _commit_or_rollback(self, db: psycopg.Connection):
+        if db.info.transaction_status == psycopg.pq.TransactionStatus.INTRANS:
+            db.commit()
+        elif db.info.transaction_status == psycopg.pq.TransactionStatus.ACTIVE:
+            db.cancel()
+        elif db.info.transaction_status == psycopg.pq.TransactionStatus.INERROR:
+            db.rollback()
