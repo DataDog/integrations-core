@@ -174,7 +174,7 @@ class SqlFractionMetric(BaseSqlServerMetric):
         for base in base_counters:
             key = '{}::{}'.format(base['instance_name'], base['object_name'])
             if base_by_key.get(key):
-                self.log.warning('Found duplicate base counters for key:{}'.format(key))
+                self.log.warning('Found duplicate base counters for key:%s', key)
             base_by_key[key] = base
 
         for numerator in num_counters:
