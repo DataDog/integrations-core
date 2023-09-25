@@ -65,14 +65,13 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check_stat_replication(aggregator, expected_tags=expected_tags)
     if is_aurora is False:
         check_wal_receiver_metrics(aggregator, expected_tags=expected_tags, connected=0)
+        check_file_wal_metrics(aggregator, expected_tags=expected_tags)
     check_uptime_metrics(aggregator, expected_tags=expected_tags)
 
     check_logical_replication_slots(aggregator, expected_tags)
     check_physical_replication_slots(aggregator, expected_tags)
     check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
     check_stat_wal_metrics(aggregator, expected_tags=expected_tags)
-    check_file_wal_metrics(aggregator, expected_tags=expected_tags)
-
     aggregator.assert_all_metrics_covered()
 
 
