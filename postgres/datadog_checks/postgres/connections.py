@@ -102,8 +102,8 @@ class MultiDatabaseConnectionPool(object):
             timeout = self._config.connection_timeout
         start = datetime.datetime.now()
         self.prune_connections()
-        conn = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None))
-        db = conn.connection
+        conn = self._conns.pop(dbname, None)
+        db = conn.connection if conn else None
         if db is None or db.closed or db.broken:
             # db.info.status checks if the connection is still active on the server
             if self.max_conns is not None:
@@ -122,6 +122,9 @@ class MultiDatabaseConnectionPool(object):
         else:
             # if already in pool, retain persistence status
             persistent = conn.persistent
+
+        if db.info.transaction_status != psycopg.pq.TransactionStatus.IDLE:
+            db.rollback()
 
         deadline = datetime.datetime.now() + datetime.timedelta(milliseconds=ttl_ms)
         self._conns[dbname] = ConnectionInfo(

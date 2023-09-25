@@ -401,6 +401,7 @@ class PostgreSql(AgentCheck):
         except psycopg.errors.FeatureNotSupported as e:
             # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
+            self.db.rollback()
             self.log.debug("Disabling replication metrics")
             self.is_aurora = False
             self.metrics_cache.replication_metrics = {}
@@ -411,8 +412,10 @@ class PostgreSql(AgentCheck):
                 "A reattempt to identify the right version will happen on next agent run." % self.version
             )
             self._clean_state()
+            self.db.rollback()
         except (psycopg.ProgrammingError, psycopg.errors.QueryCanceled) as e:
             log_func("Not all metrics may be available: %s" % str(e))
+            self.db.rollback()
 
         if not results:
             return None
@@ -715,7 +718,11 @@ class PostgreSql(AgentCheck):
             self.db = None
 
         if not self.db:
-            self.db = self._new_connection(self._config.dbname)
+            self.db = self.db_pool._get_connection_raw(
+                self._config.dbname,
+                self._config.idle_connection_timeout,
+                persistent=True,
+            )
 
     # Reload pg_settings on a new connection to the main db
     def load_pg_settings(self):
@@ -777,6 +784,7 @@ class PostgreSql(AgentCheck):
                     cursor.execute(query)
                 except (psycopg.ProgrammingError, psycopg.errors.QueryCanceled) as e:
                     self.log.error("Error executing query for metric_prefix %s: %s", metric_prefix, str(e))
+                    self.db.rollback()
                     continue
 
                 for row in cursor:

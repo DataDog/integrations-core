@@ -75,10 +75,9 @@ def test_explain_parameterized_queries_generic_params(integration_check, dbm_ins
     query_signature = compute_sql_signature(query)
 
     explain_param_queries = check.statement_samples._explain_parameterized_queries
-    conn = check._new_connection(DB_NAME)
-    assert explain_param_queries._create_prepared_statement(conn, query, query, query_signature) is True
+    assert explain_param_queries._create_prepared_statement(DB_NAME, query, query, query_signature) is True
     assert expected_generic_values == explain_param_queries._get_number_of_parameters_for_prepared_statement(
-        conn, query_signature
+        DB_NAME, query_signature
     )
 
 

@@ -42,6 +42,7 @@ class VersionUtils(object):
                 return True
         except Exception as e:
             self.log.debug("Captured exception %s while determining if the DB is aurora. Assuming is not", str(e))
+            db.rollback()
             self._seen_aurora_exception = True
             return False
 
