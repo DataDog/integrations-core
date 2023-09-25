@@ -16,3 +16,4 @@ def test_invalid_message_filter_regular_expression(dd_run_check, new_check, inst
         match='Error compiling pattern for option `{}`: invalid group reference 1 at position 1'.format(option),
     ):
         dd_run_check(check)
+
