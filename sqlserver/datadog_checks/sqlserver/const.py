@@ -188,21 +188,21 @@ DATABASE_MASTER_FILES = [
 ]
 
 DATABASE_FILE_SPACE_USAGE_METRICS = [
-    ('sqlserver.database.file_space_usage.free_space', 'sys.dm_db_file_space_usage', 'free_space'),
+    ('sqlserver.tempdb.file_space_usage.free_space', 'sys.dm_db_file_space_usage', 'free_space'),
     (
-        'sqlserver.database.file_space_usage.used_space_by_version_store',
+        'sqlserver.tempdb.file_space_usage.used_space_by_version_store',
         'sys.dm_db_file_space_usage',
         'used_space_by_version_store',
     ),
     (
-        'sqlserver.database.file_space_usage.used_space_by_internal_object',
+        'sqlserver.tempdb.file_space_usage.used_space_by_internal_object',
         'sys.dm_db_file_space_usage',
         'used_space_by_internal_object',
     ),
     (
-        'sqlserver.database.file_space_usage.used_space_by_user_object',
+        'sqlserver.tempdb.file_space_usage.used_space_by_user_object',
         'sys.dm_db_file_space_usage',
         'used_space_by_user_object',
     ),
-    ('sqlserver.database.file_space_usage.mixed_extent_space', 'sys.dm_db_file_space_usage', 'mixed_extent_space'),
+    ('sqlserver.tempdb.file_space_usage.mixed_extent_space', 'sys.dm_db_file_space_usage', 'mixed_extent_space'),
 ]

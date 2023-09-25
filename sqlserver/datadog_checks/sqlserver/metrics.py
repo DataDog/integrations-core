@@ -935,34 +935,39 @@ class SqlDbFileSpaceUsage(BaseSqlServerMetric):
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         rows = []
         columns = []
-        if databases is None:
-            databases = []
 
-        logger.debug("%s: gathering db file space usage metrics for these databases: %s", cls.__name__, databases)
+        cursor.execute('select DB_NAME()')  # This can return None in some implementations, so it cannot be chained
+        data = cursor.fetchall()
+        current_db = data[0][0]
+        logger.debug("%s: current db is %s", cls.__name__, current_db)
 
-        for db in databases:
-            ctx = construct_use_statement(db)
-            start = get_precise_time()
-            try:
-                logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
-                cursor.execute(ctx)
-                logger.debug("%s: fetch_all executing query: %s", cls.__name__, cls.QUERY_BASE)
-                cursor.execute(cls.QUERY_BASE)
-                data = cursor.fetchall()
-            except Exception as e:
-                logger.warning("Error when trying to query db %s - skipping.  Error: %s", db, e)
-                continue
-            elapsed = get_precise_time() - start
+        logger.debug("%s: gathering db file space usage metrics for tempdb", cls.__name__)
+        db = 'tempdb'  # we are only interested in tempdb
+        ctx = construct_use_statement(db)
+        start = get_precise_time()
+        try:
+            logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
+            cursor.execute(ctx)
+            logger.debug("%s: fetch_all executing query: %s", cls.__name__, cls.QUERY_BASE)
+            cursor.execute(cls.QUERY_BASE)
+            data = cursor.fetchall()
+        except Exception as e:
+            logger.warning("Error when trying to query db %s - skipping.  Error: %s", db, e)
+        elapsed = get_precise_time() - start
 
-            query_columns = [i[0] for i in cursor.description]
-            if columns:
-                if columns != query_columns:
-                    raise CheckException('Assertion error: {} != {}'.format(columns, query_columns))
-            else:
-                columns = query_columns
+        query_columns = [i[0] for i in cursor.description]
+        if columns:
+            if columns != query_columns:
+                raise CheckException('Assertion error: {} != {}'.format(columns, query_columns))
+        else:
+            columns = query_columns
 
-            rows.extend(data)
-            logger.debug("%s: received %d rows for db %s, elapsed time: %.4f sec", cls.__name__, len(data), db, elapsed)
+        rows.extend(data)
+        logger.debug("%s: received %d rows for db %s, elapsed time: %.4f sec", cls.__name__, len(data), db, elapsed)
+
+        # reset back to previous db
+        logger.debug("%s: reverting cursor context via use statement to %s", cls.__name__, current_db)
+        cursor.execute(construct_use_statement(current_db))
 
         return rows, columns
 

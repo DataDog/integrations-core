@@ -152,7 +152,6 @@ class InstanceConfig(BaseModel):
     host: str
     ignore_missing_database: Optional[bool] = None
     include_ao_metrics: Optional[bool] = None
-    include_db_file_space_usage_metrics: Optional[bool] = None
     include_db_fragmentation_metrics: Optional[bool] = None
     include_fci_metrics: Optional[bool] = None
     include_instance_metrics: Optional[bool] = None
