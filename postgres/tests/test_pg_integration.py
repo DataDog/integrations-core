@@ -500,6 +500,10 @@ def test_query_timeout(integration_check, pg_instance):
 
 
 @requires_over_10
+@pytest.mark.parametrize(
+    'is_aurora',
+    [True, False],
+)
 def test_wal_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check = integration_check(pg_instance)
     check.is_aurora = is_aurora
