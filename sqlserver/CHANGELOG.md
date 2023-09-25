@@ -9,6 +9,7 @@
 
 ***Added***:
 
+* Only collect `SqlDbFileSpaceUsage` metrics for `tempdb` ([#15906](https://github.com/DataDog/integrations-core/pull/15906))
 * Add TempDB version store performance counters ([#15879](https://github.com/DataDog/integrations-core/pull/15879))
 * Add TempDB page counts metrics ([#15873](https://github.com/DataDog/integrations-core/pull/15873))
 * Add `index_name` tag to `.database.avg_fragmentation_in_percent`, `.database.fragment_count`, `.database.avg_fragment_size_in_pages` metrics. Also add a new metric `sqlserver.database.index_page_count`, tagged by `database_name`, `object_name`, `index_id` and `index_name`. ([#15721](https://github.com/DataDog/integrations-core/pull/15721))
