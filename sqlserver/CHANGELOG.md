@@ -13,12 +13,16 @@
 * Add TempDB page counts metrics ([#15873](https://github.com/DataDog/integrations-core/pull/15873))
 * Add `index_name` tag to `.database.avg_fragmentation_in_percent`, `.database.fragment_count`, `.database.avg_fragment_size_in_pages` metrics. Also add a new metric `sqlserver.database.index_page_count`, tagged by `database_name`, `object_name`, `index_id` and `index_name`. ([#15721](https://github.com/DataDog/integrations-core/pull/15721))
 
+***Added***:
+
+* Add additional SQL Server performance counter metrics ([#15818](https://github.com/DataDog/integrations-core/pull/15818))
+
 ***Fixed***:
 
 * Restore the logic for the lookback time in the statement metrics query. It was previously the connection interval * 2, but was removed during a refactor. ([#15857](https://github.com/DataDog/integrations-core/pull/15857))
-
 * Fix type `bytes` is not JSON serializable for dbm events ([#15763](https://github.com/DataDog/integrations-core/pull/15763))
 * Fix sqlserver file stats metrics for Azure SQL DB ([#15695](https://github.com/DataDog/integrations-core/pull/15695))
+* Fix calculation for performance counters that require a corresponding [base counter type](https://learn.microsoft.com/en-us/windows/win32/wmisdk/base-counter-types) which were previously emitting a constant 100% value (such as `sqlserver.buffer.cache_hit_ratio`). ([#15846](https://github.com/DataDog/integrations-core/pull/15846))
 
 ## 14.0.0 / 2023-08-18
 
