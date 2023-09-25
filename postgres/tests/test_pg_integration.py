@@ -500,8 +500,12 @@ def test_query_timeout(integration_check, pg_instance):
 
 
 @requires_over_10
-def test_wal_metrics(aggregator, integration_check, pg_instance):
+def test_wal_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check = integration_check(pg_instance)
+    check.is_aurora = is_aurora
+
+    if is_aurora is False:
+        return
     # Default PG's wal size is 16MB
     wal_size = 16777216
 
