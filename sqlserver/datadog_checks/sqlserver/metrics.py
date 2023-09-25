@@ -999,7 +999,7 @@ class SqlDbFileSpaceUsage(BaseSqlServerMetric):
                 'database_id:{}'.format(str(database_id)),
             ]
             metric_tags.extend(self.tags)
-            metric_name = '{}'.format(self.datadog_name)
+            metric_name = '{}'.format(self.metric_name)
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
