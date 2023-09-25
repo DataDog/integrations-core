@@ -300,7 +300,6 @@ files:
           This mode, by nature of the underlying technology, is significantly more resource intensive.
 
         Setting this option to `false` is only supported on Agent versions 7 and above.
-      enabled: true
       value:
         type: boolean
         display_default: true
