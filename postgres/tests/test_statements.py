@@ -1400,8 +1400,7 @@ def test_pg_settings_caching(integration_check, dbm_instance):
     check._connect()
     # pg_settings is not loaded on connect
     assert not check.pg_settings, "pg_settings should not have been initialized yet"
-    # pg_settings should now be lazy loaded
-    check.get_pg_settings()
+    check.load_pg_settings()
     assert check.pg_settings, "pg_settings should have been initialized"
     assert "track_activity_query_size" in check.pg_settings
     check.pg_settings["test_key"] = True

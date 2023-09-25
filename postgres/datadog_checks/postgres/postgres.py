@@ -753,9 +753,6 @@ class PostgreSql(AgentCheck):
             )
 
     def get_pg_settings(self):
-        if not bool(self.pg_settings):
-            # reload pg_settings if it's empty
-            self.load_pg_settings()
         return self.pg_settings
 
     def _close_db_pool(self):
@@ -903,6 +900,7 @@ class PostgreSql(AgentCheck):
             # Check version
             self._connect()
             self.load_version()  # We don't want to cache versions between runs to capture minor updates for metadata
+            self.load_pg_settings()
             if self._config.tag_replication_role:
                 replication_role_tag = "replication_role:{}".format(self._get_replication_role())
                 tags.append(replication_role_tag)
