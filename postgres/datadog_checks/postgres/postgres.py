@@ -411,13 +411,13 @@ class PostgreSql(AgentCheck):
             return None
 
         if is_custom_metrics and len(results) > MAX_CUSTOM_RESULTS:
-            self.warning(
+            self.debug(
                 "Query: %s returned more than %s results (%s). Truncating", query, MAX_CUSTOM_RESULTS, len(results)
             )
             results = results[:MAX_CUSTOM_RESULTS]
 
         if is_relations and len(results) > self._config.max_relations:
-            self.warning(
+            self.debug(
                 "Query: %s returned more than %s results (%s). "
                 "Truncating. You can edit this limit by setting the `max_relations` config option",
                 query,
