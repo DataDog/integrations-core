@@ -924,10 +924,8 @@ class PostgreSql(AgentCheck):
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")
             self._clean_state()
-            try:
-                self.db.rollback()
-            except Exception as err:
-                self.log.warning("Unable to rollabck: %s", err)
+            if self.db:
+                self.db_pool._commit_or_rollback(self.db)
             self.db = None
             message = u'Error establishing connection to postgres://{}:{}/{}, error is {}'.format(
                 self._config.host, self._config.port, self._config.dbname, str(e)
@@ -941,7 +939,7 @@ class PostgreSql(AgentCheck):
             )
             raise e
         else:
-            self.db.commit()
+            self.db_pool._commit_or_rollback(self.db)
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.OK,

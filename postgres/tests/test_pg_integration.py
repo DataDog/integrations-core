@@ -265,7 +265,9 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
 
     # Second: keep the connection open but an unexpected error happens during check run
     orig_db = check.db
-    check.db = mock.MagicMock(spec=('closed', 'status'), closed=False, status=psycopg.pq.ConnStatus.OK)
+    check.db = mock.MagicMock(
+        spec=('closed', 'status', 'info'), closed=False, status=psycopg.pq.ConnStatus.OK, info=mock.MagicMock()
+    )
     with pytest.raises(AttributeError):
         check.check(pg_instance)
     aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.CRITICAL, tags=expected_tags)
