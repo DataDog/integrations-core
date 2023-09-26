@@ -1,0 +1,14 @@
+{
+  "versions": [
+    {
+      "id": "v2.0",
+      "status": "CURRENT",
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://34.91.114.145:9696/networking/v2.0/"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "pools": [
+    {
+      "id": "d0335b34-3115-4b3b-9a1a-7e2363ebfee3",
+      "name": "pool-1",
+      "description": "",
+      "provisioning_status": "ACTIVE",
+      "operating_status": "ERROR",
+      "admin_state_up": true,
+      "protocol": "HTTP",
+      "lb_algorithm": "ROUND_ROBIN",
+      "session_persistence": null,
+      "project_id": "4762874c945945c38d820cce29fbb66e",
+      "loadbalancers": [
+        {
+          "id": "4bb7bfb1-83c2-45e8-b0e1-ed3022329115"
+        }
+      ],
+      "listeners": [
+        {
+          "id": "de81cbdc-8207-4253-8f21-3eea9870e7a9"
+        }
+      ],
+      "created_at": "2023-04-18T15:03:03",
+      "updated_at": "2023-04-20T14:03:52",
+      "healthmonitor_id": "268883b7-c057-4e85-b2c5-d8760267dad1",
+      "members": [
+        {
+          "id": "0abcafea-2ad2-44cd-957f-690644ba479c"
+        },
+        {
+          "id": "e79e1011-2eb4-486f-84c3-99d2a4aef88d"
+        }
+      ],
+      "tags": [],
+      "tls_container_ref": null,
+      "ca_tls_container_ref": null,
+      "crl_container_ref": null,
+      "tls_enabled": false,
+      "tls_ciphers": null,
+      "tls_versions": null,
+      "alpn_protocols": null,
+      "tenant_id": "4762874c945945c38d820cce29fbb66e"
+    }
+  ],
+  "pools_links": []
+}

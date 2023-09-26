@@ -1,0 +1,30 @@
+{
+  "hypervisors": [
+    {
+      "id": 1,
+      "hypervisor_hostname": "agent-integrations-openstack-default",
+      "state": "up",
+      "status": "enabled",
+      "hypervisor_type": "QEMU",
+      "hypervisor_version": 4002001,
+      "host_ip": "10.164.0.11",
+      "service": {
+        "id": 3,
+        "host": "agent-integrations-openstack-default",
+        "disabled_reason": null
+      },
+      "vcpus": 4,
+      "memory_mb": 14990,
+      "local_gb": 96,
+      "vcpus_used": 12,
+      "memory_mb_used": 3584,
+      "local_gb_used": 0,
+      "free_ram_mb": 11406,
+      "free_disk_gb": 96,
+      "current_workload": 0,
+      "running_vms": 12,
+      "disk_available_least": 59,
+      "cpu_info": "{\"arch\": \"x86_64\", \"model\": \"Westmere-IBRS\", \"vendor\": \"Intel\", \"topology\": {\"cells\": 1, \"sockets\": 1, \"cores\": 2, \"threads\": 2}, \"features\": [\"xsavec\", \"ht\", \"syscall\", \"sse\", \"smep\", \"clwb\", \"ssse3\", \"fsgsbase\", \"sse4.1\", \"fpu\", \"cx16\", \"avx512cd\", \"hle\", \"xsaves\", \"smap\", \"pse\", \"msr\", \"spec-ctrl\", \"pat\", \"cmov\", \"xgetbv1\", \"mmx\", \"invtsc\", \"sse2\", \"tsc_adjust\", \"bmi2\", \"f16c\", \"pge\", \"avx512vl\", \"clflush\", \"ssbd\", \"fma\", \"sse4.2\", \"pni\", \"pdpe1gb\", \"apic\", \"avx2\", \"avx512bw\", \"mpx\", \"ss\", \"mtrr\", \"rdrand\", \"rdtscp\", \"lahf_lm\", \"xsave\", \"rtm\", \"rdseed\", \"de\", \"pse36\", \"arat\", \"abm\", \"pcid\", \"cx8\", \"nx\", \"xsaveopt\", \"erms\", \"movbe\", \"invpcid\", \"avx\", \"lm\", \"sep\", \"pae\", \"adx\", \"arch-capabilities\", \"bmi1\", \"x2apic\", \"aes\", \"mca\", \"clflushopt\", \"pclmuldq\", \"fxsr\", \"tsc\", \"stibp\", \"3dnowprefetch\", \"avx512dq\", \"vme\", \"mce\", \"hypervisor\", \"md-clear\", \"avx512f\", \"popcnt\"]}"
+    }
+  ]
+}

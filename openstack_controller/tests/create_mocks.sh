@@ -150,7 +150,7 @@ for project_id in $(echo "$RESPONSE" | jq -r '.projects[]' | jq -r '.id'); do
 done
 process_endpoint --endpoint="/compute/v2.1/os-services"
 process_endpoint --endpoint="/compute/v2.1/os-aggregates"
-process_endpoint --endpoint="/compute/v2.1/os-hypervisors/detail?with_servers=true"
+process_endpoint --endpoint="/compute/v2.1/os-hypervisors/detail"
 num_uptime=$(echo "$RESPONSE" | jq -r '.hypervisors[] | select(.uptime != null) | length')
 if [[ $num_uptime -eq 0 ]]; then
   for hypervisor_id in $(echo "$RESPONSE" | jq -r '.hypervisors[]' | jq -r '.id'); do

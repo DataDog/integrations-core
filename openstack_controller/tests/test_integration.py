@@ -23,7 +23,7 @@ def test_connect_exception(aggregator, dd_run_check, caplog):
     }
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
-    assert 'Exception while reporting identity response time' in caplog.text
+    assert 'Error while authorizing user' in caplog.text
 
 
 def test_connect_ok(aggregator, dd_run_check, caplog):

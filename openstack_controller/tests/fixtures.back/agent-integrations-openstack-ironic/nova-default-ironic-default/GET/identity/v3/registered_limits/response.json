@@ -1,0 +1,53 @@
+{
+  "registered_limits": [
+    {
+      "id": "2984fed2ea8b4a3c98acea056123eef6",
+      "service_id": "5486b5b6aa324a1bac7f6dd990b8e1f3",
+      "region_id": "RegionOne",
+      "resource_name": "image_size_total",
+      "default_limit": 5000,
+      "description": null,
+      "links": {
+        "self": "http://10.164.0.32/identity/v3/registered_limits/2984fed2ea8b4a3c98acea056123eef6"
+      }
+    },
+    {
+      "id": "85f08c85e9d94cfcb968c5166ad13bf6",
+      "service_id": "5486b5b6aa324a1bac7f6dd990b8e1f3",
+      "region_id": "RegionOne",
+      "resource_name": "image_stage_total",
+      "default_limit": 5000,
+      "description": null,
+      "links": {
+        "self": "http://10.164.0.32/identity/v3/registered_limits/85f08c85e9d94cfcb968c5166ad13bf6"
+      }
+    },
+    {
+      "id": "6f288665fa87429a97d12a0ab39f7990",
+      "service_id": "5486b5b6aa324a1bac7f6dd990b8e1f3",
+      "region_id": "RegionOne",
+      "resource_name": "image_count_total",
+      "default_limit": 100,
+      "description": null,
+      "links": {
+        "self": "http://10.164.0.32/identity/v3/registered_limits/6f288665fa87429a97d12a0ab39f7990"
+      }
+    },
+    {
+      "id": "a6475ada848a44c298e0eead9f228870",
+      "service_id": "5486b5b6aa324a1bac7f6dd990b8e1f3",
+      "region_id": "RegionOne",
+      "resource_name": "image_count_uploading",
+      "default_limit": 100,
+      "description": null,
+      "links": {
+        "self": "http://10.164.0.32/identity/v3/registered_limits/a6475ada848a44c298e0eead9f228870"
+      }
+    }
+  ],
+  "links": {
+    "next": null,
+    "self": "http://10.164.0.32/identity/v3/registered_limits",
+    "previous": null
+  }
+}

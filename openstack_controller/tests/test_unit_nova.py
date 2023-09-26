@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+
 import logging
 
 import mock
@@ -10,580 +11,1601 @@ import pytest
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.openstack_controller import OpenStackControllerCheck
-from datadog_checks.openstack_controller.metrics import (
-    NOVA_FLAVOR_METRICS,
-    NOVA_HYPERVISOR_METRICS,
-    NOVA_LIMITS_METRICS,
-    NOVA_QUOTA_SETS_METRICS,
-    NOVA_SERVER_METRICS,
-    NOVA_SERVICE_CHECK,
-)
-
-from .common import CONFIG, CONFIG_NOVA_MICROVERSION_LATEST, MockHttp, check_microversion, is_mandatory
+from datadog_checks.openstack_controller.api.type import ApiType
+from tests.common import CONFIG_REST, CONFIG_REST_NOVA_MICROVERSION_2_93, CONFIG_SDK, CONFIG_SDK_NOVA_MICROVERSION_2_93
 
 pytestmark = [pytest.mark.unit]
 
 
-def test_exception(aggregator, dd_run_check, instance, caplog, monkeypatch):
-    http = MockHttp("agent-integrations-openstack-default", exceptions={'compute/v2.1': Exception()})
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+@pytest.mark.parametrize(
+    ('mock_http_post', 'connection_session_auth', 'instance', 'api_type'),
+    [
+        pytest.param(
+            {'replace': {'/identity/v3/auth/tokens': lambda d: {**d, **{'token': {**d['token'], **{'catalog': []}}}}}},
+            None,
+            CONFIG_REST,
+            ApiType.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            None,
+            {'catalog': []},
+            CONFIG_SDK,
+            ApiType.SDK,
+            id='api sdk',
+        ),
+    ],
+    indirect=['mock_http_post', 'connection_session_auth'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_not_in_catalog(aggregator, dd_run_check, instance, caplog, mock_http_post, connection_session_auth, api_type):
+    with caplog.at_level(logging.DEBUG):
+        check = OpenStackControllerCheck('test', {}, [instance])
+        dd_run_check(check)
 
-    check = OpenStackControllerCheck('test', {}, [instance])
-    dd_run_check(check)
-    assert 'Exception while reporting compute domain metrics' in caplog.text
-
-
-def test_endpoint_not_in_catalog(aggregator, dd_run_check, instance, monkeypatch):
-    http = MockHttp(
-        "agent-integrations-openstack-default",
-        replace={
-            'identity/v3/auth/tokens': lambda d: {
-                **d,
-                **{
-                    'token': {
-                        **d['token'],
-                        **{'catalog': d['token'].get('catalog', [])[:7] + d['token'].get('catalog', [])[8:]},
-                    }
-                },
-            }
-        },
-    )
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    check = OpenStackControllerCheck('test', {}, [instance])
-    dd_run_check(check)
-    aggregator.assert_service_check(
-        NOVA_SERVICE_CHECK,
-        status=AgentCheck.UNKNOWN,
-        tags=[
-            'domain_id:default',
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-        ],
-    )
-
-
-def test_endpoint_down(aggregator, dd_run_check, instance, monkeypatch):
-    http = MockHttp("agent-integrations-openstack-default", defaults={'compute/v2.1': MockResponse(status_code=500)})
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    check = OpenStackControllerCheck('test', {}, [instance])
-    dd_run_check(check)
-    aggregator.assert_service_check(
-        NOVA_SERVICE_CHECK,
-        status=AgentCheck.CRITICAL,
-        tags=[
-            'domain_id:default',
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-        ],
-    )
-
-
-def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
-    http = MockHttp("agent-integrations-openstack-default")
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    check = OpenStackControllerCheck('test', {}, [instance])
-    dd_run_check(check)
-    aggregator.assert_service_check(
-        NOVA_SERVICE_CHECK,
-        status=AgentCheck.OK,
-        tags=[
-            'domain_id:default',
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-        ],
-    )
     aggregator.assert_metric(
         'openstack.nova.response_time',
+        count=0,
+    )
+    aggregator.assert_service_check(
+        'openstack.nova.api.up',
+        status=AgentCheck.UNKNOWN,
+        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    )
+    args_list = []
+    for call in mock_http_post.call_args_list:
+        args, kwargs = call
+        args_list += list(args)
+    assert args_list.count('http://10.164.0.11/compute/v2.1') == 0
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_post.call_args_list:
+            args, _ = call
+            args_list += list(args)
+        assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 3
+    elif api_type == ApiType.SDK:
+        assert connection_session_auth.get_access.call_count == 3
+    assert '`compute` component not found in catalog' in caplog.text
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'instance'),
+    [
+        pytest.param(
+            {'http_error': {'/compute/v2.1': MockResponse(status_code=500)}},
+            CONFIG_REST,
+            id='api rest',
+        ),
+        pytest.param(
+            {'http_error': {'/compute/v2.1': MockResponse(status_code=500)}},
+            CONFIG_SDK,
+            id='api sdk',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_response_time_exception(aggregator, dd_run_check, instance, mock_http_get):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.nova.response_time',
+        count=0,
+    )
+    aggregator.assert_service_check(
+        'openstack.nova.api.up',
+        status=AgentCheck.CRITICAL,
+        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    )
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, _ = call
+        args_list += list(args)
+    assert args_list.count('http://10.164.0.11/compute/v2.1') == 2
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            CONFIG_REST,
+            id='api rest',
+        ),
+        pytest.param(
+            CONFIG_SDK,
+            id='api sdk',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_response_time(aggregator, dd_run_check, instance, mock_http_get):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.nova.response_time',
+        count=1,
+        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    )
+    aggregator.assert_service_check(
+        'openstack.nova.api.up',
+        status=AgentCheck.OK,
+        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    )
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, _ = call
+        args_list += list(args)
+    assert args_list.count('http://10.164.0.11/compute/v2.1') == 1
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'connection_compute', 'instance', 'api_type'),
+    [
+        pytest.param(
+            {'http_error': {'/compute/v2.1/limits': MockResponse(status_code=500)}},
+            None,
+            CONFIG_REST,
+            ApiType.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            None,
+            {'http_error': {'limits': MockResponse(status_code=500)}},
+            CONFIG_SDK,
+            ApiType.SDK,
+            id='api sdk',
+        ),
+    ],
+    indirect=['mock_http_get', 'connection_compute'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_limits_exception(aggregator, dd_run_check, instance, mock_http_get, connection_compute, api_type):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.nova.limits.absolute.max_total_instances',
+        count=0,
+    )
+    aggregator.assert_metric(
+        'openstack.nova.limits.absolute.max_total_cores',
+        count=0,
+    )
+    aggregator.assert_metric(
+        'openstack.nova.limits.absolute.max_total_ram_size',
+        count=0,
+    )
+    aggregator.assert_metric(
+        'openstack.nova.limits.absolute.max_server_meta',
+        count=0,
+    )
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, _ = call
+            args_list += list(args)
+        assert args_list.count('http://10.164.0.11/compute/v2.1/limits') == 2
+    if api_type == ApiType.SDK:
+        assert connection_compute.get_limits.call_count == 2
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            CONFIG_REST,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            CONFIG_REST_NOVA_MICROVERSION_2_93,
+            id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            CONFIG_SDK,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            CONFIG_SDK_NOVA_MICROVERSION_2_93,
+            id='api sdk microversion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_limits_metrics(aggregator, dd_run_check, instance):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.nova.limits.absolute.max_total_instances',
+        value=10,
+        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.limits.absolute.max_total_cores',
+        value=20,
+        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.limits.absolute.max_total_ram_size',
+        value=51200,
+        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.limits.absolute.max_server_meta',
+        value=128,
+        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    )
+    # aggregator.assert_metric(
+    #     'openstack.nova.limits.absolute.max_image_meta',
+    #     value=128,
+    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    # )
+    # aggregator.assert_metric(
+    #     'openstack.nova.limits.absolute.max_personality',
+    #     value=5,
+    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    # )
+    # aggregator.assert_metric(
+    #     'openstack.nova.limits.absolute.max_personality_size',
+    #     value=10240,
+    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    # )
+    # aggregator.assert_metric(
+    #     'openstack.nova.limits.absolute.max_total_keypairs',
+    #     value=100,
+    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    # )
+    # aggregator.assert_metric(
+    #     'openstack.nova.limits.absolute.max_server_groups',
+    #     value=10,
+    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    # )
+    # aggregator.assert_metric(
+    #     'openstack.nova.limits.absolute.max_server_group_members',
+    #     value=10,
+    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    # )
+    # aggregator.assert_metric(
+    #     'openstack.nova.limits.absolute.max_total_floating_ips',
+    #     value=-1,
+    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    # )
+    # aggregator.assert_metric(
+    #     'openstack.nova.limits.absolute.max_security_groups',
+    #     value=-1,
+    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    # )
+    # aggregator.assert_metric(
+    #     'openstack.nova.limits.absolute.max_security_group_rules',
+    #     value=-1,
+    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    # )
+    # aggregator.assert_metric(
+    #     'openstack.nova.limits.absolute.total_ram_used',
+    #     value=2048,
+    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    # )
+    # aggregator.assert_metric(
+    #     'openstack.nova.limits.absolute.total_cores_used',
+    #     value=8,
+    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    # )
+    # aggregator.assert_metric(
+    #     'openstack.nova.limits.absolute.total_instances_used',
+    #     value=8,
+    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    # )
+    # aggregator.assert_metric(
+    #     'openstack.nova.limits.absolute.total_floating_ips_used',
+    #     value=0,
+    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    # )
+    # aggregator.assert_metric(
+    #     'openstack.nova.limits.absolute.total_security_groups_used',
+    #     value=0,
+    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    # )
+    # aggregator.assert_metric(
+    #     'openstack.nova.limits.absolute.total_server_groups_used',
+    #     value=0,
+    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    # )
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'connection_compute', 'instance', 'api_type'),
+    [
+        pytest.param(
+            {'http_error': {'/compute/v2.1/os-services': MockResponse(status_code=500)}},
+            None,
+            CONFIG_REST,
+            ApiType.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            None,
+            {'http_error': {'services': MockResponse(status_code=500)}},
+            CONFIG_SDK,
+            ApiType.SDK,
+            id='api sdk',
+        ),
+    ],
+    indirect=['mock_http_get', 'connection_compute'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_services_exception(aggregator, dd_run_check, instance, mock_http_get, connection_compute, api_type):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.nova.service.up',
+        count=0,
+    )
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, _ = call
+            args_list += list(args)
+        assert args_list.count('http://10.164.0.11/compute/v2.1/os-services') == 2
+    if api_type == ApiType.SDK:
+        assert connection_compute.services.call_count == 2
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            CONFIG_REST,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            CONFIG_REST_NOVA_MICROVERSION_2_93,
+            id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            CONFIG_SDK,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            CONFIG_SDK_NOVA_MICROVERSION_2_93,
+            id='api sdk microversion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_services_metrics(aggregator, dd_run_check, instance):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    #     for metric in metrics:
+    #         aggregator.assert_metric(
+    #             metric['name'],
+    #             count=metric['count'],
+    #             value=metric['value'],
+    #             tags=metric['tags'],
+    #         )
+    aggregator.assert_metric(
+        'openstack.nova.service.count',
+        value=1,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'service_host:agent-integrations-openstack-default',
+            'service_id:1',
+            'service_name:nova-conductor',
+            'service_state:up',
+            'service_status:enabled',
+            'service_zone:internal',
+        ],
+    )
+
+
+#     # aggregator.assert_metric(
+#     #     'openstack.nova.service.up',
+#     #     value=1,
+#     #     tags=[
+#     #         'keystone_server:http://127.0.0.1:8080/identity',
+#     #         'service_host:agent-integrations-openstack-default',
+#     #         'service_id:1',
+#     #         'service_name:nova-conductor',
+#     #         'service_state:up',
+#     #         'service_status:enabled',
+#     #         'service_zone:internal',
+#     #     ],
+#     # )
+#     # aggregator.assert_metric(
+#     #     'openstack.nova.service.count',
+#     #     value=1,
+#     #     tags=[
+#     #         'keystone_server:http://127.0.0.1:8080/identity',
+#     #         'service_host:agent-integrations-openstack-default',
+#     #         'service_id:2',
+#     #         'service_name:nova-scheduler',
+#     #         'service_state:up',
+#     #         'service_status:enabled',
+#     #         'service_zone:internal',
+#     #     ],
+#     # )
+#     # aggregator.assert_metric(
+#     #     'openstack.nova.service.up',
+#     #     value=1,
+#     #     tags=[
+#     #         'keystone_server:http://127.0.0.1:8080/identity',
+#     #         'service_host:agent-integrations-openstack-default',
+#     #         'service_id:2',
+#     #         'service_name:nova-scheduler',
+#     #         'service_state:up',
+#     #         'service_status:enabled',
+#     #         'service_zone:internal',
+#     #     ],
+#     # )
+#     # aggregator.assert_metric(
+#     #     'openstack.nova.service.count',
+#     #     value=1,
+#     #     tags=[
+#     #         'keystone_server:http://127.0.0.1:8080/identity',
+#     #         'service_host:agent-integrations-openstack-default',
+#     #         'service_id:3',
+#     #         'service_name:nova-compute',
+#     #         'service_state:up',
+#     #         'service_status:enabled',
+#     #         'service_zone:availability-zone',
+#     #     ],
+#     # )
+#     # aggregator.assert_metric(
+#     #     'openstack.nova.service.up',
+#     #     value=1,
+#     #     tags=[
+#     #         'keystone_server:http://127.0.0.1:8080/identity',
+#     #         'service_host:agent-integrations-openstack-default',
+#     #         'service_id:3',
+#     #         'service_name:nova-compute',
+#     #         'service_state:up',
+#     #         'service_status:enabled',
+#     #         'service_zone:availability-zone',
+#     #     ],
+#     # )
+#     # aggregator.assert_metric(
+#     #     'openstack.nova.service.count',
+#     #     value=1,
+#     #     tags=[
+#     #         'keystone_server:http://127.0.0.1:8080/identity',
+#     #         'service_host:agent-integrations-openstack-default',
+#     #         'service_id:5',
+#     #         'service_name:nova-conductor',
+#     #         'service_state:up',
+#     #         'service_status:enabled',
+#     #         'service_zone:internal',
+#     #     ],
+#     # )
+#     # aggregator.assert_metric(
+#     #     'openstack.nova.service.up',
+#     #     value=1,
+#     #     tags=[
+#     #         'keystone_server:http://127.0.0.1:8080/identity',
+#     #         'service_host:agent-integrations-openstack-default',
+#     #         'service_id:5',
+#     #         'service_name:nova-conductor',
+#     #         'service_state:up',
+#     #         'service_status:enabled',
+#     #         'service_zone:internal',
+#     #     ],
+#     # )
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'connection_compute', 'instance', 'api_type'),
+    [
+        pytest.param(
+            {'http_error': {'/compute/v2.1/flavors/detail': MockResponse(status_code=500)}},
+            None,
+            CONFIG_REST,
+            ApiType.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            None,
+            {'http_error': {'flavors': MockResponse(status_code=500)}},
+            CONFIG_SDK,
+            ApiType.SDK,
+            id='api sdk',
+        ),
+    ],
+    indirect=['mock_http_get', 'connection_compute'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_flavors_exception(aggregator, dd_run_check, instance, mock_http_get, connection_compute, api_type):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        count=0,
+    )
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, _ = call
+            args_list += list(args)
+        assert args_list.count('http://10.164.0.11/compute/v2.1/flavors/detail') == 2
+    if api_type == ApiType.SDK:
+        assert connection_compute.flavors.call_count == 2
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            CONFIG_REST,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            CONFIG_REST_NOVA_MICROVERSION_2_93,
+            id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            CONFIG_SDK,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            CONFIG_SDK_NOVA_MICROVERSION_2_93,
+            id='api sdk microversion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_flavors_metrics(aggregator, dd_run_check, instance):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=1,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:1',
+            'flavor_name:m1.tiny',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=1,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:2',
+            'flavor_name:m1.small',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=2,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:3',
+            'flavor_name:m1.medium',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=4,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:4',
+            'flavor_name:m1.large',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=1,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:42',
+            'flavor_name:m1.nano',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=8,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:5',
+            'flavor_name:m1.xlarge',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=1,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:84',
+            'flavor_name:m1.micro',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=1,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:c1',
+            'flavor_name:cirros256',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=1,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:d1',
+            'flavor_name:ds512M',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=1,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:d2',
+            'flavor_name:ds1G',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=2,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:d3',
+            'flavor_name:ds2G',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=4,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:d4',
+            'flavor_name:ds4G',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:1',
+            'flavor_name:m1.tiny',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:2',
+            'flavor_name:m1.small',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:3',
+            'flavor_name:m1.medium',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:4',
+            'flavor_name:m1.large',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:42',
+            'flavor_name:m1.nano',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:5',
+            'flavor_name:m1.xlarge',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:84',
+            'flavor_name:m1.micro',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:c1',
+            'flavor_name:cirros256',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:d1',
+            'flavor_name:ds512M',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:d2',
+            'flavor_name:ds1G',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:d3',
+            'flavor_name:ds2G',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:d4',
+            'flavor_name:ds4G',
+        ],
+    )
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'connection_compute', 'instance', 'api_type'),
+    [
+        pytest.param(
+            {'http_error': {'/compute/v2.1/os-hypervisors/detail': MockResponse(status_code=500)}},
+            None,
+            CONFIG_REST,
+            ApiType.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            None,
+            {'http_error': {'hypervisors': MockResponse(status_code=500)}},
+            CONFIG_SDK,
+            ApiType.SDK,
+            id='api sdk',
+        ),
+    ],
+    indirect=['mock_http_get', 'connection_compute'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_hypervisors_exception(aggregator, dd_run_check, instance, mock_http_get, connection_compute, api_type):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.nova.hypervisor.up',
+        count=0,
+    )
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, _ = call
+            args_list += list(args)
+        assert args_list.count('http://10.164.0.11/compute/v2.1/os-hypervisors/detail') == 2
+    if api_type == ApiType.SDK:
+        assert connection_compute.hypervisors.call_count == 2
+
+
+# @pytest.mark.parametrize(
+#     ('mock_sdk_connection', 'mock_api_rest', 'instance', 'api_type'),
+#     [
+#         pytest.param(
+#             None,
+#             {
+#                 'host': 'agent-integrations-openstack-default',
+#                 'defaults': {'compute/v2.1/os-hypervisors/1/uptime': MockResponse(status_code=500)},
+#             },
+#             CONFIG_REST,
+#             ApiType.REST,
+#             id='api rest',
+#         ),
+#         pytest.param(
+#             {'compute_hypervisor_uptime': Exception()},
+#             None,
+#             CONFIG_SDK,
+#             ApiType.SDK,
+#             id='api sdk',
+#         ),
+#     ],
+#     indirect=['mock_sdk_connection', 'mock_api_rest'],
+# )
+# @pytest.mark.usefixtures('mock_sdk_connection', 'mock_api_rest')
+@pytest.mark.parametrize(
+    ('mock_http_get', 'connection_compute', 'instance', 'api_type'),
+    [
+        pytest.param(
+            {'http_error': {'/compute/v2.1/os-hypervisors/1/uptime': MockResponse(status_code=500)}},
+            None,
+            CONFIG_REST,
+            ApiType.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            None,
+            {'http_error': {'hypervisor_uptime': {1: MockResponse(status_code=500)}}},
+            CONFIG_SDK,
+            ApiType.SDK,
+            id='api sdk',
+        ),
+    ],
+    indirect=['mock_http_get', 'connection_compute'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_hypervisor_uptime_exception(aggregator, dd_run_check, instance, mock_http_get, connection_compute, api_type):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.nova.hypervisor.up',
+        value=1,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'hypervisor_id:1',
+            'hypervisor_name:agent-integrations-openstack-default',
+            'hypervisor_state:up',
+            'hypervisor_status:enabled',
+            'hypervisor_type:QEMU',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.hypervisor.load_1',
+        count=0,
+    )
+    aggregator.assert_metric(
+        'openstack.nova.hypervisor.load_5',
+        count=0,
+    )
+    aggregator.assert_metric(
+        'openstack.nova.hypervisor.load_15',
+        count=0,
+    )
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, _ = call
+            args_list += list(args)
+        assert args_list.count('http://10.164.0.11/compute/v2.1/os-hypervisors/1/uptime') == 1
+    if api_type == ApiType.SDK:
+        assert connection_compute.get_hypervisor_uptime.call_count == 1
+        assert connection_compute.get_hypervisor_uptime.call_args_list.count(mock.call(1, microversion=None)) == 1
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            CONFIG_REST,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            CONFIG_REST_NOVA_MICROVERSION_2_93,
+            id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            CONFIG_SDK,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            CONFIG_SDK_NOVA_MICROVERSION_2_93,
+            id='api sdk microversion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_hypervisors_metrics(aggregator, dd_run_check, instance):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.nova.hypervisor.up',
+        value=1,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'hypervisor_id:1',
+            'hypervisor_name:agent-integrations-openstack-default',
+            'hypervisor_state:up',
+            'hypervisor_status:enabled',
+            'hypervisor_type:QEMU',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.hypervisor.load_1',
+        value=0.29,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'hypervisor_id:1',
+            'hypervisor_name:agent-integrations-openstack-default',
+            'hypervisor_state:up',
+            'hypervisor_status:enabled',
+            'hypervisor_type:QEMU',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.hypervisor.load_5',
+        value=0.36,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'hypervisor_id:1',
+            'hypervisor_name:agent-integrations-openstack-default',
+            'hypervisor_state:up',
+            'hypervisor_status:enabled',
+            'hypervisor_type:QEMU',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.hypervisor.load_15',
+        value=0.35,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'hypervisor_id:1',
+            'hypervisor_name:agent-integrations-openstack-default',
+            'hypervisor_state:up',
+            'hypervisor_status:enabled',
+            'hypervisor_type:QEMU',
+        ],
+    )
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'connection_compute', 'instance', 'api_type'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/compute/v2.1/os-quota-sets/1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
+                    '/compute/v2.1/os-quota-sets/6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                }
+            },
+            None,
+            CONFIG_REST,
+            ApiType.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            None,
+            {
+                'http_error': {
+                    'quota_sets': {
+                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                    }
+                }
+            },
+            CONFIG_SDK,
+            ApiType.SDK,
+            id='api sdk',
+        ),
+    ],
+    indirect=['mock_http_get', 'connection_compute'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_quota_sets_exception(aggregator, dd_run_check, instance, mock_http_get, connection_compute, api_type):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.nova.quota_set.cores',
+        count=0,
+    )
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, _ = call
+            args_list += list(args)
+        assert args_list.count('http://10.164.0.11/compute/v2.1/os-quota-sets/1e6e233e637d4d55a50a62b63398ad15') == 1
+        assert args_list.count('http://10.164.0.11/compute/v2.1/os-quota-sets/6e39099cccde4f809b003d9e0dd09304') == 1
+    if api_type == ApiType.SDK:
+        assert connection_compute.get_quota_set.call_count == 2
+        assert (
+            connection_compute.get_quota_set.call_args_list.count(
+                mock.call('1e6e233e637d4d55a50a62b63398ad15', microversion=None)
+            )
+            == 1
+        )
+        assert (
+            connection_compute.get_quota_set.call_args_list.count(
+                mock.call('6e39099cccde4f809b003d9e0dd09304', microversion=None)
+            )
+            == 1
+        )
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            CONFIG_REST,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            CONFIG_REST_NOVA_MICROVERSION_2_93,
+            id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            CONFIG_SDK,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            CONFIG_SDK_NOVA_MICROVERSION_2_93,
+            id='api sdk microversion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_quota_sets_metrics(aggregator, dd_run_check, instance):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.nova.quota_set.cores',
+        value=20,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.quota_set.fixed_ips',
+        value=-1,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.quota_set.floating_ips',
+        value=-1,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.quota_set.injected_file_content_bytes',
+        value=10240,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.quota_set.injected_file_path_bytes',
+        value=255,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.quota_set.injected_files',
+        value=5,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.quota_set.cores',
+        value=20,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'quota_id:1e6e233e637d4d55a50a62b63398ad15',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.quota_set.fixed_ips',
+        value=-1,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'quota_id:1e6e233e637d4d55a50a62b63398ad15',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.quota_set.floating_ips',
+        value=-1,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'quota_id:1e6e233e637d4d55a50a62b63398ad15',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.quota_set.injected_file_content_bytes',
+        value=10240,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'quota_id:1e6e233e637d4d55a50a62b63398ad15',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.quota_set.injected_file_path_bytes',
+        value=255,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'quota_id:1e6e233e637d4d55a50a62b63398ad15',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.quota_set.injected_files',
+        value=5,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'quota_id:1e6e233e637d4d55a50a62b63398ad15',
+        ],
+    )
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'connection_compute', 'instance', 'api_type'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/compute/v2.1/servers/detail?project_id=1e6e233e637d4d55a50a62b63398ad15': MockResponse(
+                        status_code=500
+                    ),
+                    '/compute/v2.1/servers/detail?project_id=6e39099cccde4f809b003d9e0dd09304': MockResponse(
+                        status_code=500
+                    ),
+                }
+            },
+            None,
+            CONFIG_REST,
+            ApiType.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            None,
+            {
+                'http_error': {
+                    'servers': {
+                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                    }
+                }
+            },
+            CONFIG_SDK,
+            ApiType.SDK,
+            id='api sdk',
+        ),
+    ],
+    indirect=['mock_http_get', 'connection_compute'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_servers_exception(aggregator, dd_run_check, instance, mock_http_get, connection_compute, api_type):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.nova.server.count',
+        count=0,
+    )
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, _ = call
+            args_list += list(args)
+        assert (
+            args_list.count(
+                'http://10.164.0.11/compute/v2.1/servers/detail?project_id=1e6e233e637d4d55a50a62b63398ad15'
+            )
+            == 1
+        )
+        assert (
+            args_list.count(
+                'http://10.164.0.11/compute/v2.1/servers/detail?project_id=6e39099cccde4f809b003d9e0dd09304'
+            )
+            == 1
+        )
+    if api_type == ApiType.SDK:
+        assert connection_compute.servers.call_count == 2
+        assert (
+            connection_compute.servers.call_args_list.count(
+                mock.call(details=True, project_id='1e6e233e637d4d55a50a62b63398ad15', microversion=None)
+            )
+            == 1
+        )
+        assert (
+            connection_compute.servers.call_args_list.count(
+                mock.call(details=True, project_id='6e39099cccde4f809b003d9e0dd09304', microversion=None)
+            )
+            == 1
+        )
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            CONFIG_REST,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            CONFIG_REST_NOVA_MICROVERSION_2_93,
+            id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            CONFIG_SDK,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            CONFIG_SDK_NOVA_MICROVERSION_2_93,
+            id='api sdk microversion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_servers_metrics(aggregator, dd_run_check, instance):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.nova.server.count',
+        value=1,
         tags=[
             'domain_id:default',
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-        ],
-    )
-
-
-@pytest.mark.parametrize(
-    "instance",
-    [
-        pytest.param(CONFIG, id="default"),
-        pytest.param(CONFIG_NOVA_MICROVERSION_LATEST, id="latest"),
-    ],
-)
-def test_limits_metrics(aggregator, dd_run_check, monkeypatch, instance):
-    http = MockHttp("agent-integrations-openstack-default")
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    check = OpenStackControllerCheck('test', {}, [instance])
-    dd_run_check(check)
-    not_found_metrics = []
-    for key, value in NOVA_LIMITS_METRICS.items():
-        if check_microversion(instance, value):
-            if key in aggregator.metric_names:
-                aggregator.assert_metric(
-                    key,
-                    tags=[
-                        'domain_id:default',
-                        'keystone_server:{}'.format(instance["keystone_server_url"]),
-                    ],
-                )
-            elif is_mandatory(value):
-                not_found_metrics.append(key)
-    assert not_found_metrics == [], f"No nova limits metrics found: {not_found_metrics}"
-
-
-@pytest.mark.parametrize(
-    "instance",
-    [
-        pytest.param(CONFIG, id="default"),
-        pytest.param(CONFIG_NOVA_MICROVERSION_LATEST, id="latest"),
-    ],
-)
-def test_quota_set_metrics(aggregator, dd_run_check, monkeypatch, instance):
-    http = MockHttp("agent-integrations-openstack-default")
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    check = OpenStackControllerCheck('test', {}, [instance])
-    dd_run_check(check)
-    not_found_metrics = []
-    for key, value in NOVA_QUOTA_SETS_METRICS.items():
-        if check_microversion(instance, value):
-            if key in aggregator.metric_names:
-                aggregator.assert_metric(
-                    key,
-                    tags=[
-                        'domain_id:default',
-                        'keystone_server:{}'.format(instance["keystone_server_url"]),
-                        'project_id:1e6e233e637d4d55a50a62b63398ad15',
-                        'project_name:demo',
-                        'quota_id:1e6e233e637d4d55a50a62b63398ad15',
-                    ],
-                )
-                aggregator.assert_metric(
-                    key,
-                    tags=[
-                        'domain_id:default',
-                        'keystone_server:{}'.format(instance["keystone_server_url"]),
-                        'project_id:6e39099cccde4f809b003d9e0dd09304',
-                        'project_name:admin',
-                        'quota_id:6e39099cccde4f809b003d9e0dd09304',
-                    ],
-                )
-            elif is_mandatory(value):
-                not_found_metrics.append(key)
-    assert not_found_metrics == [], f"No nova quotas metrics found: {not_found_metrics}"
-
-
-@pytest.mark.parametrize(
-    "instance, has_instance_hostname",
-    [
-        pytest.param(CONFIG, False, id="default"),
-        pytest.param(CONFIG_NOVA_MICROVERSION_LATEST, True, id="latest"),
-    ],
-)
-def test_server_metrics(aggregator, dd_run_check, monkeypatch, instance, has_instance_hostname):
-    http = MockHttp("agent-integrations-openstack-default")
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    check = OpenStackControllerCheck('test', {}, [instance])
-    dd_run_check(check)
-    not_found_metrics = []
-    for key, value in NOVA_SERVER_METRICS.items():
-        if check_microversion(instance, value):
-            if key in aggregator.metric_names:
-                if key == "openstack.nova.server.count":
-                    tags = [
-                        'domain_id:default',
-                        'keystone_server:{}'.format(instance["keystone_server_url"]),
-                        'project_id:6e39099cccde4f809b003d9e0dd09304',
-                        'project_name:admin',
-                    ]
-                else:
-                    tags = [
-                        'domain_id:default',
-                        'keystone_server:{}'.format(instance["keystone_server_url"]),
-                        'project_id:6e39099cccde4f809b003d9e0dd09304',
-                        'project_name:admin',
-                        'server_id:2c653a68-b520-4582-a05d-41a68067d76c',
-                        'server_name:server',
-                        'server_status:active',
-                        'hypervisor:agent-integrations-openstack-default',
-                        'flavor_name:cirros256',
-                    ]
-                    if has_instance_hostname:
-                        tags.append('instance_hostname:server')
-
-                aggregator.assert_metric(key, tags=tags)
-            elif is_mandatory(value):
-                not_found_metrics.append(key)
-    assert not_found_metrics == [], f"No nova server metrics found: {not_found_metrics}"
-
-
-@pytest.mark.parametrize(
-    "instance",
-    [
-        pytest.param(CONFIG, id="default"),
-        pytest.param(CONFIG_NOVA_MICROVERSION_LATEST, id="latest"),
-    ],
-)
-def test_flavor_metrics(aggregator, dd_run_check, monkeypatch, instance):
-    http = MockHttp("agent-integrations-openstack-default")
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    check = OpenStackControllerCheck('test', {}, [instance])
-    dd_run_check(check)
-    not_found_metrics = []
-    for key, value in NOVA_FLAVOR_METRICS.items():
-        if check_microversion(instance, value):
-            if key in aggregator.metric_names:
-                aggregator.assert_metric(
-                    key,
-                    tags=[
-                        'domain_id:default',
-                        'keystone_server:{}'.format(instance["keystone_server_url"]),
-                        'flavor_id:1',
-                        'flavor_name:m1.tiny',
-                    ],
-                )
-            elif is_mandatory(value):
-                not_found_metrics.append(key)
-    assert not_found_metrics == [], f"No nova flavor metrics found: {not_found_metrics}"
-
-
-def test_hypervisor_service_check_up(aggregator, dd_run_check, instance, monkeypatch):
-    http = MockHttp("agent-integrations-openstack-default")
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    tags = [
-        'domain_id:default',
-        'keystone_server:{}'.format(instance["keystone_server_url"]),
-        'aggregate:my-aggregate',
-        'availability_zone:availability-zone',
-        'hypervisor:agent-integrations-openstack-default',
-        'hypervisor_id:1',
-        'status:enabled',
-        'virt_type:QEMU',
-    ]
-    check = OpenStackControllerCheck('test', {}, [instance])
-    dd_run_check(check)
-    aggregator.assert_service_check('openstack.nova.hypervisor.up', status=AgentCheck.OK, tags=tags)
-
-
-def test_hypervisor_service_check_down(aggregator, dd_run_check, instance, monkeypatch):
-    http = MockHttp(
-        "agent-integrations-openstack-default",
-        replace={
-            'compute/v2.1/os-hypervisors/detail?with_servers=true': lambda d: {
-                **d,
-                **{
-                    'hypervisors': d['hypervisors'][:0]
-                    + [{**d['hypervisors'][0], **{'state': 'down'}}]
-                    + d['hypervisors'][1:]
-                },
-            }
-        },
-    )
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    tags = [
-        'domain_id:default',
-        'keystone_server:{}'.format(instance["keystone_server_url"]),
-        'aggregate:my-aggregate',
-        'availability_zone:availability-zone',
-        'hypervisor:agent-integrations-openstack-default',
-        'hypervisor_id:1',
-        'status:enabled',
-        'virt_type:QEMU',
-    ]
-    check = OpenStackControllerCheck('test', {}, [instance])
-    dd_run_check(check)
-    aggregator.assert_service_check('openstack.nova.hypervisor.up', status=AgentCheck.CRITICAL, tags=tags)
-
-
-@pytest.mark.parametrize(
-    "instance, hypervisor_id",
-    [
-        pytest.param(CONFIG, '1', id="default"),
-        pytest.param(CONFIG_NOVA_MICROVERSION_LATEST, 'd884b51a-e464-49dc-916c-766da0237661', id="latest"),
-    ],
-)
-def test_hypervisor_metrics(aggregator, dd_run_check, instance, hypervisor_id, monkeypatch):
-    http = MockHttp("agent-integrations-openstack-default")
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    check = OpenStackControllerCheck('test', {}, [instance])
-    dd_run_check(check)
-    not_found_metrics = []
-    for key, value in NOVA_HYPERVISOR_METRICS.items():
-        if check_microversion(instance, value):
-            if key in aggregator.metric_names:
-                aggregator.assert_metric(
-                    key,
-                    tags=[
-                        'domain_id:default',
-                        'keystone_server:{}'.format(instance["keystone_server_url"]),
-                        'aggregate:my-aggregate',
-                        'availability_zone:availability-zone',
-                        'hypervisor:agent-integrations-openstack-default',
-                        'hypervisor_id:{}'.format(hypervisor_id),
-                        'status:enabled',
-                        'virt_type:QEMU',
-                    ],
-                )
-            elif is_mandatory(value):
-                not_found_metrics.append(key)
-    assert not_found_metrics == [], f"No nova hypervisor metrics found: {not_found_metrics}"
-
-
-def test_nova_metrics_ironic(aggregator, caplog, dd_run_check, instance_ironic_nova_microversion_latest, monkeypatch):
-    http = MockHttp("agent-integrations-openstack-ironic")
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    caplog.set_level(logging.DEBUG)
-    check = OpenStackControllerCheck('test', {}, [instance_ironic_nova_microversion_latest])
-    dd_run_check(check)
-
-    found = False
-    for metric in aggregator.metric_names:
-        if metric in NOVA_QUOTA_SETS_METRICS:
-            found = True
-
-    assert found, "No quota metrics found"
-
-    found = False
-    for metric in aggregator.metric_names:
-        if metric in NOVA_LIMITS_METRICS:
-            found = True
-
-    assert found, "No quota metrics found"
-
-    found = False
-    for metric in aggregator.metric_names:
-        if metric in NOVA_FLAVOR_METRICS:
-            found = True
-    assert found, "No flavor metrics found"
-
-    for metric in aggregator.metric_names:
-        if metric in NOVA_HYPERVISOR_METRICS:
-            found = True
-    assert found, "No flavor metrics found"
-
-    aggregator.assert_metric('openstack.nova.hypervisor.load_15', count=0)
-    assert "Skipping uptime metrics for bare metal hypervisor 9d72cf53-19c8-4942-9314-005fa5d2a6a0" in caplog.text
-
-
-def test_latest_service_metrics(aggregator, dd_run_check, instance_nova_microversion_latest, monkeypatch):
-    http = MockHttp("agent-integrations-openstack-default")
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    check = OpenStackControllerCheck('test', {}, [instance_nova_microversion_latest])
-    dd_run_check(check)
-
-    tags = [
-        'domain_id:default',
-        'keystone_server:{}'.format(instance_nova_microversion_latest["keystone_server_url"]),
-    ]
-
-    aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
-        value=1,
-        tags=tags
-        + [
-            'service_name:nova_compute',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-default',
-            'service_id:7bf08d7e-a939-46c3-bdae-fbe3ebfe78a4',
-            'service_status:enabled',
-            'availability_zone:availability-zone',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'server_id:5102fbbf-7156-48dc-8355-af7ab992266f',
+            'server_name:a',
+            'server_status:ACTIVE',
         ],
     )
     aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
+        'openstack.nova.server.active',
         value=1,
-        tags=tags
-        + [
-            'service_name:nova_conductor',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-default',
-            'service_id:df55f706-a60e-4d3d-8cd6-30f5b33d79ce',
-            'service_status:enabled',
-            'availability_zone:internal',
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'server_id:5102fbbf-7156-48dc-8355-af7ab992266f',
+            'server_name:a',
+            'server_status:ACTIVE',
+            # 'hypervisor:agent-integrations-openstack-default',
+            # 'instance_hostname:a',
+            # 'flavor_name:cirros256',
         ],
     )
     aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
-        value=1,
-        tags=tags
-        + [
-            'service_name:nova_conductor',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-default',
-            'service_id:aadbda65-f523-419a-b3df-c287d196a2c1',
-            'service_status:enabled',
-            'availability_zone:internal',
+        'openstack.nova.server.diagnostic.disk_details.read_bytes',
+        value=23407104,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'server_driver:libvirt',
+            'server_id:5102fbbf-7156-48dc-8355-af7ab992266f',
+            'server_name:a',
+            'server_status:ACTIVE',
+            # 'hypervisor:agent-integrations-openstack-default',
+            # 'instance_hostname:a',
+            # 'flavor_name:cirros256',
         ],
     )
     aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
-        value=1,
-        tags=tags
-        + [
-            'service_name:nova_scheduler',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-default',
-            'service_id:2ec2027d-ac70-4e2b-95ed-fb1756d24996',
-            'service_status:enabled',
-            'availability_zone:internal',
-        ],
-    )
-
-
-def test_default_service_metrics(aggregator, dd_run_check, instance, monkeypatch):
-    http = MockHttp("agent-integrations-openstack-default")
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    check = OpenStackControllerCheck('test', {}, [instance])
-    dd_run_check(check)
-
-    tags = ['domain_id:default', 'keystone_server:{}'.format(instance["keystone_server_url"])]
-
-    aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
-        value=1,
-        tags=tags
-        + [
-            'service_name:nova_compute',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-default',
-            'service_id:3',
-            'service_status:enabled',
-            'availability_zone:availability-zone',
+        'openstack.nova.server.diagnostic.disk_details.read_requests',
+        value=861,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'server_driver:libvirt',
+            'server_id:5102fbbf-7156-48dc-8355-af7ab992266f',
+            'server_name:a',
+            'server_status:ACTIVE',
+            # 'hypervisor:agent-integrations-openstack-default',
+            # 'instance_hostname:a',
+            # 'flavor_name:cirros256',
         ],
     )
     aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
-        value=1,
-        tags=tags
-        + [
-            'service_name:nova_conductor',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-default',
-            'service_id:5',
-            'service_status:enabled',
-            'availability_zone:internal',
+        'openstack.nova.server.diagnostic.disk_details.write_bytes',
+        value=42684416,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'server_driver:libvirt',
+            'server_id:5102fbbf-7156-48dc-8355-af7ab992266f',
+            'server_name:a',
+            'server_status:ACTIVE',
+            # 'hypervisor:agent-integrations-openstack-default',
+            # 'instance_hostname:a',
+            # 'flavor_name:cirros256',
         ],
     )
     aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
-        value=1,
-        tags=tags
-        + [
-            'service_name:nova_conductor',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-default',
-            'service_id:1',
-            'service_status:enabled',
-            'availability_zone:internal',
+        'openstack.nova.server.diagnostic.disk_details.write_requests',
+        value=302,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'server_driver:libvirt',
+            'server_id:5102fbbf-7156-48dc-8355-af7ab992266f',
+            'server_name:a',
+            'server_status:ACTIVE',
+            # 'hypervisor:agent-integrations-openstack-default',
+            # 'instance_hostname:a',
+            # 'flavor_name:cirros256',
         ],
     )
     aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
-        value=1,
-        tags=tags
-        + [
-            'service_name:nova_scheduler',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-default',
-            'service_id:2',
-            'service_status:enabled',
-            'availability_zone:internal',
-        ],
-    )
-
-
-def test_default_ironic_service_metrics(aggregator, dd_run_check, instance, monkeypatch):
-    http = MockHttp("agent-integrations-openstack-ironic")
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    check = OpenStackControllerCheck('test', {}, [instance])
-    dd_run_check(check)
-
-    tags = ['domain_id:default', 'keystone_server:{}'.format(instance["keystone_server_url"])]
-
-    aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
-        value=1,
-        tags=tags
-        + [
-            'service_name:nova_compute',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-ironic',
-            'service_id:3',
-            'service_status:enabled',
-            'availability_zone:nova',
+        'openstack.nova.server.diagnostic.disk_details.errors_count',
+        value=-1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'server_driver:libvirt',
+            'server_id:5102fbbf-7156-48dc-8355-af7ab992266f',
+            'server_name:a',
+            'server_status:ACTIVE',
+            # 'hypervisor:agent-integrations-openstack-default',
+            # 'instance_hostname:a',
+            # 'flavor_name:cirros256',
         ],
     )
     aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
-        value=1,
-        tags=tags
-        + [
-            'service_name:nova_conductor',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-ironic',
-            'service_id:5',
-            'service_status:enabled',
-            'availability_zone:internal',
+        'openstack.nova.server.diagnostic.cpu_details.time',
+        value=7211680000000,
+        tags=[
+            'cpu_id:0',
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'server_driver:libvirt',
+            'server_id:5102fbbf-7156-48dc-8355-af7ab992266f',
+            'server_name:a',
+            'server_status:ACTIVE',
+            # 'hypervisor:agent-integrations-openstack-default',
+            # 'instance_hostname:a',
+            # 'flavor_name:cirros256',
         ],
     )
     aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
-        value=1,
-        tags=tags
-        + [
-            'service_name:nova_conductor',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-ironic',
-            'service_id:1',
-            'service_status:enabled',
-            'availability_zone:internal',
+        'openstack.nova.server.diagnostic.nic_details.rx_octets',
+        value=73838,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'mac_address:fa:16:3e:06:5c:6f',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'server_driver:libvirt',
+            'server_id:5102fbbf-7156-48dc-8355-af7ab992266f',
+            'server_name:a',
+            'server_status:ACTIVE',
+            # 'hypervisor:agent-integrations-openstack-default',
+            # 'instance_hostname:a',
+            # 'flavor_name:cirros256',
         ],
     )
     aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
+        'openstack.nova.server.count',
         value=1,
-        tags=tags
-        + [
-            'service_name:nova_scheduler',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-ironic',
-            'service_id:2',
-            'service_status:enabled',
-            'availability_zone:internal',
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'server_id:2c653a68-b520-4582-a05d-41a68067d76c',
+            'server_name:server',
+            'server_status:ACTIVE',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.server.active',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'server_id:2c653a68-b520-4582-a05d-41a68067d76c',
+            'server_name:server',
+            'server_status:ACTIVE',
+            # 'hypervisor:agent-integrations-openstack-default',
+            # 'instance_hostname:a',
+            # 'flavor_name:cirros256',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.server.count',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'server_id:67ca710a-e73f-4801-a12f-d0c55ccb8955',
+            'server_name:demo-1',
+            'server_status:ACTIVE',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.server.active',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'server_id:67ca710a-e73f-4801-a12f-d0c55ccb8955',
+            'server_name:demo-1',
+            'server_status:ACTIVE',
+            # 'hypervisor:agent-integrations-openstack-default',
+            # 'instance_hostname:demo-1',
+            # 'flavor_name:cirros256',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.server.error',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'server_id:3b27b706-c0ad-4528-a865-7afaf7712130',
+            'server_name:demo-2',
+            'server_status:ERROR',
+            # 'hypervisor:agent-integrations-openstack-default',
+            # 'instance_hostname:demo-2',
+            # 'flavor_name:cirros256',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.server.active',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'server_id:97dec705-edab-4b3a-bbe6-b2121a85a603',
+            'server_name:demo-3',
+            'server_status:ACTIVE',
+            # 'hypervisor:agent-integrations-openstack-default',
+            # 'instance_hostname:demo-3',
+            # 'flavor_name:cirros256',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.server.active',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'server_id:cca55639-448f-44cc-ae6a-150afe0fa6b3',
+            'server_name:demo-4',
+            'server_status:ACTIVE',
+            # 'hypervisor:agent-integrations-openstack-default',
+            # 'instance_hostname:demo-4',
+            # 'flavor_name:cirros256',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.server.active',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'server_id:4caf78dc-2e5d-40a7-8d56-1c2f7f664283',
+            'server_name:demo-5',
+            'server_status:ACTIVE',
+            # 'hypervisor:agent-integrations-openstack-default',
+            # 'instance_hostname:demo-5',
+            # 'flavor_name:cirros256',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.server.active',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'server_id:7994720d-62a5-4b48-9158-f941d98db5c1',
+            'server_name:demo-6',
+            'server_status:ACTIVE',
+            # 'hypervisor:agent-integrations-openstack-default',
+            # 'instance_hostname:demo-6',
+            # 'flavor_name:cirros256',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.server.active',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'server_id:d34c4531-7cd1-4454-b39e-356463af7700',
+            'server_name:demo-7',
+            'server_status:ACTIVE',
+            # 'hypervisor:agent-integrations-openstack-default',
+            # 'instance_hostname:demo-7',
+            # 'flavor_name:cirros256',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.server.active',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'server_id:9e80aa16-5a28-4ec0-bfce-f83bf56d0c86',
+            'server_name:demo-8',
+            'server_status:ACTIVE',
+            # 'hypervisor:agent-integrations-openstack-default',
+            # 'instance_hostname:demo-8',
+            # 'flavor_name:cirros256',
         ],
     )

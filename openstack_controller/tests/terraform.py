@@ -10,7 +10,7 @@ from shutil import which
 import pytest
 
 from datadog_checks.dev.env import environment_run
-from datadog_checks.dev.fs import chdir, copy_dir_contents, copy_path, get_here, path_join
+from datadog_checks.dev.fs import chdir, copy_path, get_here, path_join
 from datadog_checks.dev.structures import LazyFunction, TempDir
 from datadog_checks.dev.subprocess import run_command
 
@@ -78,11 +78,8 @@ class TerraformUp(LazyFunction):
         with TempDir('terraform') as temp_dir:
             terraform_dir = os.path.join(temp_dir, 'terraform')
             shutil.copytree(self.directory, terraform_dir)
-            if not self.template_files:
-                copy_dir_contents(TEMPLATES_DIR, terraform_dir)
-            else:
-                for file in self.template_files:
-                    copy_path(file, terraform_dir)
+            for file in self.template_files:
+                copy_path(file, terraform_dir)
 
             with chdir(terraform_dir):
                 env = construct_env_vars()

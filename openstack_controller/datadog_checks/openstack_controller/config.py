@@ -1,7 +1,9 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from openstack.config.loader import OpenStackConfig as OpenStackSdkConfig
+
+
+from openstack.config import loader
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.openstack_controller.api.type import ApiType
@@ -20,7 +22,8 @@ class OpenstackConfig:
         self.user = instance.get("user")
         self.nova_microversion = instance.get('nova_microversion')
         self.ironic_microversion = instance.get('ironic_microversion')
-        self.use_internal_endpoints = instance.get('use_internal_endpoints', False)
+        self.endpoint_interface = instance.get('endpoint_interface', None)
+        self.endpoint_region_id = instance.get('endpoint_region_id', None)
         self.api_type = None
         self.custom_tags = instance.get("tags", [])
         self.collect_hypervisor_metrics = instance.get("collect_hypervisor_metrics", True)
@@ -98,7 +101,6 @@ class OpenstackConfig:
     def _validate_cloud_config(self):
         self.log.debug("openstack_config_file_path: %s", self.openstack_config_file_path)
         self.log.debug("openstack_cloud_name: %s", self.openstack_cloud_name)
-        config = OpenStackSdkConfig(load_envvars=False, config_files=[self.openstack_config_file_path])
+        config = loader.OpenStackConfig(load_envvars=False, config_files=[self.openstack_config_file_path])
         config.get_all_clouds()
-        config.get_one(cloud=self.openstack_cloud_name)
         self.api_type = ApiType.SDK

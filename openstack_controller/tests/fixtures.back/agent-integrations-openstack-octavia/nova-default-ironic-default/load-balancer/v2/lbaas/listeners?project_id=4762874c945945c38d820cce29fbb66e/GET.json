@@ -1,0 +1,116 @@
+{
+  "listeners": [
+    {
+      "id": "de81cbdc-8207-4253-8f21-3eea9870e7a9",
+      "name": "listener-1",
+      "description": "",
+      "provisioning_status": "ACTIVE",
+      "operating_status": "ONLINE",
+      "admin_state_up": true,
+      "protocol": "HTTP",
+      "protocol_port": 80,
+      "connection_limit": -1,
+      "default_tls_container_ref": null,
+      "sni_container_refs": [],
+      "project_id": "4762874c945945c38d820cce29fbb66e",
+      "default_pool_id": "d0335b34-3115-4b3b-9a1a-7e2363ebfee3",
+      "l7policies": [],
+      "insert_headers": {},
+      "created_at": "2023-04-18T15:01:44",
+      "updated_at": "2023-04-20T14:03:52",
+      "loadbalancers": [
+        {
+          "id": "4bb7bfb1-83c2-45e8-b0e1-ed3022329115"
+        }
+      ],
+      "timeout_client_data": 50000,
+      "timeout_member_connect": 5000,
+      "timeout_member_data": 50000,
+      "timeout_tcp_inspect": 0,
+      "tags": [],
+      "client_ca_tls_container_ref": null,
+      "client_authentication": "NONE",
+      "client_crl_container_ref": null,
+      "allowed_cidrs": null,
+      "tls_ciphers": null,
+      "tls_versions": null,
+      "alpn_protocols": null,
+      "tenant_id": "4762874c945945c38d820cce29fbb66e"
+    },
+    {
+      "id": "9da03992-77a4-4b65-b39a-0e106961f577",
+      "name": "listener-3",
+      "description": "",
+      "provisioning_status": "ACTIVE",
+      "operating_status": "ONLINE",
+      "admin_state_up": true,
+      "protocol": "TCP",
+      "protocol_port": 22,
+      "connection_limit": -1,
+      "default_tls_container_ref": null,
+      "sni_container_refs": [],
+      "project_id": "4762874c945945c38d820cce29fbb66e",
+      "default_pool_id": null,
+      "l7policies": [],
+      "insert_headers": {},
+      "created_at": "2023-04-20T13:58:48",
+      "updated_at": "2023-04-20T13:59:21",
+      "loadbalancers": [
+        {
+          "id": "4bb7bfb1-83c2-45e8-b0e1-ed3022329115"
+        }
+      ],
+      "timeout_client_data": 50000,
+      "timeout_member_connect": 5000,
+      "timeout_member_data": 50000,
+      "timeout_tcp_inspect": 0,
+      "tags": [],
+      "client_ca_tls_container_ref": null,
+      "client_authentication": "NONE",
+      "client_crl_container_ref": null,
+      "allowed_cidrs": null,
+      "tls_ciphers": null,
+      "tls_versions": null,
+      "alpn_protocols": null,
+      "tenant_id": "4762874c945945c38d820cce29fbb66e"
+    },
+    {
+      "id": "243decd9-3370-4fc1-b163-80c4155bda04",
+      "name": "listener-2",
+      "description": "",
+      "provisioning_status": "ACTIVE",
+      "operating_status": "ONLINE",
+      "admin_state_up": true,
+      "protocol": "UDP",
+      "protocol_port": 5000,
+      "connection_limit": -1,
+      "default_tls_container_ref": null,
+      "sni_container_refs": [],
+      "project_id": "4762874c945945c38d820cce29fbb66e",
+      "default_pool_id": null,
+      "l7policies": [],
+      "insert_headers": {},
+      "created_at": "2023-04-20T14:03:06",
+      "updated_at": "2023-04-20T14:04:07",
+      "loadbalancers": [
+        {
+          "id": "ae54877c-b186-4b90-b71c-d331b9e732bc"
+        }
+      ],
+      "timeout_client_data": 50000,
+      "timeout_member_connect": 5000,
+      "timeout_member_data": 50000,
+      "timeout_tcp_inspect": 0,
+      "tags": [],
+      "client_ca_tls_container_ref": null,
+      "client_authentication": "NONE",
+      "client_crl_container_ref": null,
+      "allowed_cidrs": null,
+      "tls_ciphers": null,
+      "tls_versions": null,
+      "alpn_protocols": null,
+      "tenant_id": "4762874c945945c38d820cce29fbb66e"
+    }
+  ],
+  "listeners_links": []
+}

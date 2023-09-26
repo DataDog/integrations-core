@@ -1,0 +1,24 @@
+{
+  "flavor": {
+    "id": "4",
+    "name": "m1.large",
+    "ram": 8192,
+    "disk": 80,
+    "swap": "",
+    "OS-FLV-EXT-DATA:ephemeral": 0,
+    "OS-FLV-DISABLED:disabled": false,
+    "vcpus": 4,
+    "os-flavor-access:is_public": true,
+    "rxtx_factor": 1,
+    "links": [
+      {
+        "rel": "self",
+        "href": "http://34.91.114.145/compute/v2.1/flavors/4"
+      },
+      {
+        "rel": "bookmark",
+        "href": "http://34.91.114.145/compute/flavors/4"
+      }
+    ]
+  }
+}

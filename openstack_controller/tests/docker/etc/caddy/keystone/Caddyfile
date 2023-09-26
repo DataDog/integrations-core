@@ -4,6 +4,14 @@
 }
 :80 {
     root * /usr/share/caddy/
+    @get_identity {
+        method GET
+        path /identity
+    }
+    route @get_identity {
+        rewrite /identity /identity/get.json
+        file_server
+    }
     @get_identity_v3 {
         method GET
         path /identity/v3
@@ -22,6 +30,26 @@
         header /identity/v3/auth/tokens/unscoped.json X-Subject-Token "demo_test"
         file_server
     }
+    @post_identity_v3_auth_tokens_1e6e233e637d4d55a50a62b63398ad15 {
+        method POST
+        header "X-Auth-Type" "1e6e233e637d4d55a50a62b63398ad15"
+        path /identity/v3/auth/tokens
+    }
+    route @post_identity_v3_auth_tokens_1e6e233e637d4d55a50a62b63398ad15 {
+        rewrite /identity/v3/auth/tokens /identity/v3/auth/tokens/1e6e233e637d4d55a50a62b63398ad15.json
+        header /identity/v3/auth/tokens/1e6e233e637d4d55a50a62b63398ad15.json X-Subject-Token "demo_test"
+        file_server
+    }
+    @post_identity_v3_auth_tokens_6e39099cccde4f809b003d9e0dd09304 {
+        method POST
+        header "X-Auth-Type" "6e39099cccde4f809b003d9e0dd09304"
+        path /identity/v3/auth/tokens
+    }
+    route @post_identity_v3_auth_tokens_6e39099cccde4f809b003d9e0dd09304 {
+        rewrite /identity/v3/auth/tokens /identity/v3/auth/tokens/6e39099cccde4f809b003d9e0dd09304.json
+        header /identity/v3/auth/tokens/6e39099cccde4f809b003d9e0dd09304.json X-Subject-Token "demo_test"
+        file_server
+    }
     @get_identity_v3_auth_projects {
         method GET
         header "X-Auth-Token" "demo_test"
@@ -29,16 +57,6 @@
     }
     route @get_identity_v3_auth_projects {
         rewrite /identity/v3/auth/projects /identity/v3/auth/projects/get.json
-        file_server
-    }
-    @post_identity_v3_auth_tokens_domain_default {
-        method POST
-        header "X-Auth-Type" "domain_default"
-        path /identity/v3/auth/tokens
-    }
-    route @post_identity_v3_auth_tokens_domain_default {
-        rewrite /identity/v3/auth/tokens /identity/v3/auth/tokens/domain_default.json
-        header /identity/v3/auth/tokens/domain_default.json X-Subject-Token "demo_test"
         file_server
     }
     @get_identity_v3_domains {

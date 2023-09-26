@@ -7,8 +7,16 @@ from abc import ABC, abstractmethod
 
 class Api(ABC):
     @abstractmethod
-    def get_identity_response_time(self):
-        pass  # pragma: no cover
+    def set_current_project(self, project_id):
+        pass
+
+    @abstractmethod
+    def authorize(self):
+        pass
+
+    # @abstractmethod
+    # def get_identity_response_time(self):
+    #     pass  # pragma: no cover
 
     @abstractmethod
     def get_identity_domains(self):
@@ -42,9 +50,9 @@ class Api(ABC):
     def get_auth_projects(self):
         pass  # pragma: no cover
 
-    @abstractmethod
-    def get_load_balancer_response_time(self):
-        pass  # pragma: no cover
+    # @abstractmethod
+    # def get_load_balancer_response_time(self):
+    #     pass  # pragma: no cover
 
     @abstractmethod
     def get_load_balancer_loadbalancers(self, project_id):
@@ -98,16 +106,16 @@ class Api(ABC):
     def get_load_balancer_amphora_statistics(self, project_id, loadbalancer_id):
         pass  # pragma: no cover
 
-    @abstractmethod
-    def get_compute_response_time(self, project_id):
-        pass  # pragma: no cover
+    # @abstractmethod
+    # def get_compute_response_time(self, project_id):
+    #     pass  # pragma: no cover
 
     @abstractmethod
     def get_compute_limits(self):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_compute_quota_set(self, project_id):
+    def get_compute_quota_sets(self, project_id):
         pass  # pragma: no cover
 
     @abstractmethod
@@ -130,21 +138,21 @@ class Api(ABC):
     def get_compute_os_aggregates(self, project_id):
         pass  # pragma: no cover
 
-    @abstractmethod
-    def get_network_response_time(self):
-        pass  # pragma: no cover
+    # @abstractmethod
+    # def get_network_response_time(self):
+    #     pass  # pragma: no cover
 
     @abstractmethod
     def get_network_quotas(self, project):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_network_agents(self, project_id):
+    def get_network_agents(self):
         pass  # pragma: no cover
 
-    @abstractmethod
-    def get_baremetal_response_time(self):
-        pass  # pragma: no cover
+    # @abstractmethod
+    # def get_baremetal_response_time(self):
+    #     pass  # pragma: no cover
 
     @abstractmethod
     def get_baremetal_conductors(self):

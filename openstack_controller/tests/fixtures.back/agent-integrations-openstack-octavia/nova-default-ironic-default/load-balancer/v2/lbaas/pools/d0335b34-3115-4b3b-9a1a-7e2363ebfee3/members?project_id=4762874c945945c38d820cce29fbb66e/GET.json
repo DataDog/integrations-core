@@ -1,0 +1,43 @@
+{
+  "members": [
+    {
+      "id": "0abcafea-2ad2-44cd-957f-690644ba479c",
+      "name": "amphora-042bcca4-4d97-47a9-bc04-d88c1e3a4d72",
+      "operating_status": "ERROR",
+      "provisioning_status": "ACTIVE",
+      "admin_state_up": true,
+      "address": "192.168.0.84",
+      "protocol_port": 5000,
+      "weight": 1,
+      "backup": false,
+      "subnet_id": "1f1295c2-6286-4930-8077-125f6edb6f42",
+      "project_id": "4762874c945945c38d820cce29fbb66e",
+      "created_at": "2023-04-20T14:02:47",
+      "updated_at": "2023-04-20T14:03:33",
+      "monitor_address": null,
+      "monitor_port": null,
+      "tags": [],
+      "tenant_id": "4762874c945945c38d820cce29fbb66e"
+    },
+    {
+      "id": "e79e1011-2eb4-486f-84c3-99d2a4aef88d",
+      "name": "amphora-a34dc4b7-b608-4a9d-9fbd-2a4e611475c2",
+      "operating_status": "ERROR",
+      "provisioning_status": "ACTIVE",
+      "admin_state_up": true,
+      "address": "172.24.4.50",
+      "protocol_port": 5000,
+      "weight": 1,
+      "backup": false,
+      "subnet_id": "8c23566f-624d-4b78-8056-14a9c193cf24",
+      "project_id": "4762874c945945c38d820cce29fbb66e",
+      "created_at": "2023-04-20T14:03:21",
+      "updated_at": "2023-04-20T14:03:53",
+      "monitor_address": null,
+      "monitor_port": null,
+      "tags": [],
+      "tenant_id": "4762874c945945c38d820cce29fbb66e"
+    }
+  ],
+  "members_links": []
+}

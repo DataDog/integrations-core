@@ -1,0 +1,10 @@
+{
+  "hypervisors": [
+    {
+      "id": 1,
+      "hypervisor_hostname": "agent-integrations-openstack-default",
+      "state": "up",
+      "status": "enabled"
+    }
+  ]
+}

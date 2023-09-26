@@ -1,181 +1,307 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 import logging
 
-import mock
 import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.openstack_controller import OpenStackControllerCheck
-
-from .common import MockHttp
+from datadog_checks.openstack_controller.api.type import ApiType
+from tests.common import (
+    CONFIG_REST,
+    CONFIG_REST_IRONIC_MICROVERSION_1_80,
+    CONFIG_SDK,
+    CONFIG_SDK_IRONIC_MICROVERSION_1_80,
+)
+from tests.metrics import (
+    CONDUCTORS_METRICS_IRONIC_MICROVERSION_1_80,
+    CONDUCTORS_METRICS_IRONIC_MICROVERSION_DEFAULT,
+    NODES_METRICS_IRONIC_MICROVERSION_1_80,
+    NODES_METRICS_IRONIC_MICROVERSION_DEFAULT,
+)
 
 pytestmark = [pytest.mark.unit]
 
 
-def test_exception(dd_run_check, instance, caplog, monkeypatch):
-    http = MockHttp("agent-integrations-openstack-ironic", exceptions={'baremetal': Exception()})
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+@pytest.mark.parametrize(
+    ('mock_http_post', 'connection_session_auth', 'instance', 'api_type'),
+    [
+        pytest.param(
+            {'replace': {'/identity/v3/auth/tokens': lambda d: {**d, **{'token': {**d['token'], **{'catalog': []}}}}}},
+            None,
+            CONFIG_REST,
+            ApiType.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            None,
+            {'catalog': []},
+            CONFIG_SDK,
+            ApiType.SDK,
+            id='api sdk',
+        ),
+    ],
+    indirect=['mock_http_post', 'connection_session_auth'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_not_in_catalog(aggregator, dd_run_check, instance, caplog, mock_http_post, connection_session_auth, api_type):
+    with caplog.at_level(logging.DEBUG):
+        check = OpenStackControllerCheck('test', {}, [instance])
+        dd_run_check(check)
 
-    check = OpenStackControllerCheck('test', {}, [instance])
-    dd_run_check(check)
-    assert 'Exception while reporting baremetal metrics' in caplog.text
-
-
-def test_endpoint_not_in_catalog(aggregator, dd_run_check, instance, monkeypatch):
-    http = MockHttp("agent-integrations-openstack-default")
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    check = OpenStackControllerCheck('test', {}, [instance])
-    dd_run_check(check)
-    aggregator.assert_service_check(
-        'openstack.ironic.api.up',
-        status=AgentCheck.UNKNOWN,
-        tags=[
-            'domain_id:default',
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-        ],
+    aggregator.assert_metric(
+        'openstack.ironic.response_time',
+        count=0,
     )
     aggregator.assert_service_check(
         'openstack.ironic.api.up',
         status=AgentCheck.UNKNOWN,
-        tags=[
-            'domain_id:default',
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-        ],
+        tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
+    args_list = []
+    for call in mock_http_post.call_args_list:
+        args, kwargs = call
+        args_list += list(args)
+    assert args_list.count('http://10.164.0.11/baremetal') == 0
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_post.call_args_list:
+            args, _ = call
+            args_list += list(args)
+        assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 3
+    elif api_type == ApiType.SDK:
+        assert connection_session_auth.get_access.call_count == 3
+    assert '`baremetal` component not found in catalog' in caplog.text
 
 
-def test_endpoint_down(aggregator, dd_run_check, instance, monkeypatch):
-    http = MockHttp("agent-integrations-openstack-ironic", defaults={'baremetal': MockResponse(status_code=500)})
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
+@pytest.mark.parametrize(
+    ('mock_http_get', 'instance'),
+    [
+        pytest.param(
+            {'http_error': {'/baremetal': MockResponse(status_code=500)}},
+            CONFIG_REST,
+            id='api rest',
+        ),
+        pytest.param(
+            {'http_error': {'/baremetal': MockResponse(status_code=500)}},
+            CONFIG_SDK,
+            id='api sdk',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_response_time_exception(aggregator, dd_run_check, instance, mock_http_get):
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.ironic.response_time',
+        count=0,
+    )
     aggregator.assert_service_check(
         'openstack.ironic.api.up',
         status=AgentCheck.CRITICAL,
-        tags=[
-            'domain_id:default',
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-        ],
+        tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, kwargs = call
+        args_list += list(args)
+    assert args_list.count('http://10.164.0.11/baremetal') == 2
 
 
-def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
-    http = MockHttp("agent-integrations-openstack-ironic")
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            CONFIG_REST,
+            id='api rest',
+        ),
+        pytest.param(
+            CONFIG_SDK,
+            id='api sdk',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_response_time(aggregator, dd_run_check, instance, mock_http_get):
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.ironic.response_time',
+        count=1,
+        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    )
     aggregator.assert_service_check(
         'openstack.ironic.api.up',
         status=AgentCheck.OK,
-        tags=[
-            'domain_id:default',
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-        ],
+        tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, kwargs = call
+        args_list += list(args)
+    assert args_list.count('http://10.164.0.11/baremetal') == 1
 
 
-def test_node_metrics_default(aggregator, dd_run_check, instance, monkeypatch):
-    http = MockHttp("agent-integrations-openstack-ironic")
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
+@pytest.mark.parametrize(
+    ('mock_http_get', 'connection_baremetal', 'instance', 'api_type'),
+    [
+        pytest.param(
+            {'http_error': {'/baremetal/v1/nodes/detail': MockResponse(status_code=500)}},
+            None,
+            CONFIG_REST,
+            ApiType.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            None,
+            {'http_error': {'nodes': MockResponse(status_code=500)}},
+            CONFIG_SDK,
+            ApiType.SDK,
+            id='api sdk',
+        ),
+    ],
+    indirect=['mock_http_get', 'connection_baremetal'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_nodes_exception(aggregator, dd_run_check, instance, mock_http_get, connection_baremetal, api_type):
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
-
-    base_tags = ['domain_id:default', 'keystone_server:{}'.format(instance["keystone_server_url"])]
-
-    nodes_tags = [
-        ['node_uuid:9d72cf53-19c8-4942-9314-005fa5d2a6a0', 'power_state:None'],
-        ['node_uuid:20512deb-e493-4796-a046-5d6e4e072c95', 'power_state:power on'],
-        ['node_uuid:54855e59-83ca-46f8-a78f-55d3370e0656', 'power_state:None'],
-        ['node_uuid:bd7a61bb-5fe0-4c93-9628-55e312f9ef0e', 'power_state:None'],
-    ]
-
-    for node_tags in nodes_tags:
-        tags = base_tags + node_tags
-        aggregator.assert_metric('openstack.ironic.node.count', count=1, tags=tags)
-        aggregator.assert_metric('openstack.ironic.node.up', count=1, tags=tags)
-
-    aggregator.assert_metric('openstack.ironic.node.count', count=4)
-    aggregator.assert_metric('openstack.ironic.node.up', count=4)
-
-
-def test_node_metrics_latest(aggregator, dd_run_check, instance_ironic_nova_microversion_latest, monkeypatch):
-    http = MockHttp("agent-integrations-openstack-ironic")
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    check = OpenStackControllerCheck('test', {}, [instance_ironic_nova_microversion_latest])
-    dd_run_check(check)
-
-    base_tags = ['domain_id:default', 'keystone_server:http://127.0.0.1:8080/identity']
-    nodes_tags = [
-        [
-            'node_uuid:9d72cf53-19c8-4942-9314-005fa5d2a6a0',
-            'node_name:node-0',
-            'power_state:None',
-        ],
-        [
-            'node_uuid:bd7a61bb-5fe0-4c93-9628-55e312f9ef0e',
-            'node_name:node-1',
-            'power_state:None',
-        ],
-        [
-            'node_uuid:54855e59-83ca-46f8-a78f-55d3370e0656',
-            'node_name:node-2',
-            'power_state:None',
-        ],
-        [
-            'node_uuid:20512deb-e493-4796-a046-5d6e4e072c95',
-            'node_name:test',
-            'power_state:power on',
-        ],
-    ]
-
-    for node_tags in nodes_tags:
-        tags = base_tags + node_tags
-        aggregator.assert_metric('openstack.ironic.node.count', count=1, tags=tags)
-        aggregator.assert_metric('openstack.ironic.node.up', count=1, tags=tags)
-
-    aggregator.assert_metric('openstack.ironic.node.count', count=4)
-    aggregator.assert_metric('openstack.ironic.node.up', count=4)
+    aggregator.assert_metric(
+        'openstack.ironic.node.count',
+        count=0,
+    )
+    aggregator.assert_metric(
+        'openstack.ironic.node.up',
+        count=0,
+    )
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, _ = call
+            args_list += list(args)
+        assert args_list.count('http://10.164.0.11/baremetal/v1/nodes/detail') == 2
+    elif api_type == ApiType.SDK:
+        assert connection_baremetal.nodes.call_count == 2
 
 
-def test_conductor_metrics_default(aggregator, dd_run_check, instance, monkeypatch, caplog):
-    http = MockHttp("agent-integrations-openstack-ironic")
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    caplog.set_level(logging.INFO)
+@pytest.mark.parametrize(
+    ('instance', 'metrics'),
+    [
+        pytest.param(
+            CONFIG_REST,
+            NODES_METRICS_IRONIC_MICROVERSION_DEFAULT,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            CONFIG_REST_IRONIC_MICROVERSION_1_80,
+            NODES_METRICS_IRONIC_MICROVERSION_1_80,
+            id='api rest microversion 1.80',
+        ),
+        pytest.param(
+            CONFIG_SDK,
+            NODES_METRICS_IRONIC_MICROVERSION_DEFAULT,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            CONFIG_SDK_IRONIC_MICROVERSION_1_80,
+            NODES_METRICS_IRONIC_MICROVERSION_1_80,
+            id='api sdk microversion 1.80',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_nodes_metrics(aggregator, dd_run_check, metrics, instance):
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
-    assert "Ironic conductors metrics are not available." in caplog.text
+    for metric in metrics:
+        aggregator.assert_metric(
+            metric['name'],
+            count=metric['count'],
+            value=metric['value'],
+            tags=metric['tags'],
+        )
 
-    aggregator.assert_metric('openstack.ironic.conductor.up', count=0)
 
-
-def test_conductor_metrics_latest(aggregator, dd_run_check, instance_ironic_nova_microversion_latest, monkeypatch):
-    http = MockHttp("agent-integrations-openstack-ironic")
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    check = OpenStackControllerCheck('test', {}, [instance_ironic_nova_microversion_latest])
+@pytest.mark.parametrize(
+    ('mock_http_get', 'connection_baremetal', 'instance', 'api_type'),
+    [
+        pytest.param(
+            {'http_error': {'/baremetal/v1/conductors': MockResponse(status_code=500)}},
+            None,
+            CONFIG_REST,
+            ApiType.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            None,
+            {'http_error': {'conductors': MockResponse(status_code=500)}},
+            CONFIG_SDK,
+            ApiType.SDK,
+            id='api sdk',
+        ),
+    ],
+    indirect=['mock_http_get', 'connection_baremetal'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_conductors_exception(aggregator, dd_run_check, instance, mock_http_get, connection_baremetal, api_type):
+    check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
-    base_tags = [
-        'domain_id:default',
-        'keystone_server:{}'.format(instance_ironic_nova_microversion_latest["keystone_server_url"]),
-    ]
+    aggregator.assert_metric(
+        'openstack.ironic.conductor.count',
+        count=0,
+    )
+    aggregator.assert_metric(
+        'openstack.ironic.conductor.up',
+        count=0,
+    )
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, _ = call
+            args_list += list(args)
+        assert args_list.count('http://10.164.0.11/baremetal/v1/conductors') == 2
+    elif api_type == ApiType.SDK:
+        assert connection_baremetal.conductors.call_count == 2
 
-    conductor_tags = ['conductor_hostname:agent-integrations-openstack-ironic']
 
-    aggregator.assert_metric('openstack.ironic.conductor.up', value=1, count=1, tags=conductor_tags + base_tags)
+@pytest.mark.parametrize(
+    ('instance', 'metrics'),
+    [
+        pytest.param(
+            CONFIG_REST,
+            CONDUCTORS_METRICS_IRONIC_MICROVERSION_DEFAULT,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            CONFIG_REST_IRONIC_MICROVERSION_1_80,
+            CONDUCTORS_METRICS_IRONIC_MICROVERSION_1_80,
+            id='api rest microversion 1.80',
+        ),
+        pytest.param(
+            CONFIG_SDK,
+            CONDUCTORS_METRICS_IRONIC_MICROVERSION_DEFAULT,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            CONFIG_SDK_IRONIC_MICROVERSION_1_80,
+            CONDUCTORS_METRICS_IRONIC_MICROVERSION_1_80,
+            id='api sdk microversion 1.80',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_conductors_metrics(aggregator, dd_run_check, metrics, instance):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    for metric in metrics:
+        aggregator.assert_metric(
+            metric['name'],
+            count=metric['count'],
+            value=metric['value'],
+            tags=metric['tags'],
+        )

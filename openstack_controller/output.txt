@@ -1,0 +1,2000 @@
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/util/log/log.go:580 in func1) | Registering remote process collector
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/util/log/log.go:625 in func1) | Found 'DD_PROXY_HTTP' env var, using it for the Agent proxy settings
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/util/log/log.go:585 in func1) | 'use_proxy_for_cloud_metadata' is enabled: adding cloud provider URL to the no_proxy list
+2023-09-26 13:24:52 UTC | CORE | WARN | (pkg/util/log/log.go:665 in func1) | Agent configuration relax permissions constraint on the secret backend cmd, Group can read and exec
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/util/log/log.go:580 in func1) | FIPS mode is disabled
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/util/log/log.go:625 in func1) | 0 Features detected from environment: 
+2023-09-26 13:24:52 UTC | CORE | WARN | (cmd/system-probe/config/adjust.go:142 in deprecateCustom) | configuration key `service_monitoring_config.enable_go_tls_support` is deprecated, use `service_monitoring_config.tls.go.enabled` instead
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/util/hostname/providers.go:160 in GetWithProvider) | trying to get hostname from 'configuration' provider
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/util/hostname/providers.go:171 in GetWithProvider) | hostname provider 'configuration' successfully found hostname 'COMP-KK6Y27KM0D'
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/util/hostname/providers.go:176 in GetWithProvider) | hostname provider 'configuration' succeeded, stoping here with hostname 'COMP-KK6Y27KM0D'
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/metadata/inventories/inventories.go:159 in SetAgentMetadata) | setting agent metadata 'hostname_source': 'configuration'
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/aggregator/demultiplexer_agent.go:153 in initAgentDemultiplexer) | Creating forwarders
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/epforwarder/epforwarder.go:419 in newHTTPPassthroughPipeline) | Initialized event platform forwarder pipeline. eventType=dbm-samples mainHosts=dbm-metrics-intake.datad0g.com additionalHosts= batch_max_concurrent_send=10 batch_max_content_size=10000000 batch_max_size=1000, input_chan_size=100
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/epforwarder/epforwarder.go:419 in newHTTPPassthroughPipeline) | Initialized event platform forwarder pipeline. eventType=dbm-metrics mainHosts=dbm-metrics-intake.datad0g.com additionalHosts= batch_max_concurrent_send=10 batch_max_content_size=20000000 batch_max_size=1000, input_chan_size=100
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/epforwarder/epforwarder.go:419 in newHTTPPassthroughPipeline) | Initialized event platform forwarder pipeline. eventType=dbm-metadata mainHosts=dbm-metrics-intake.datad0g.com additionalHosts= batch_max_concurrent_send=10 batch_max_content_size=20000000 batch_max_size=1000, input_chan_size=100
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/epforwarder/epforwarder.go:419 in newHTTPPassthroughPipeline) | Initialized event platform forwarder pipeline. eventType=dbm-activity mainHosts=dbm-metrics-intake.datad0g.com additionalHosts= batch_max_concurrent_send=10 batch_max_content_size=20000000 batch_max_size=1000, input_chan_size=100
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/epforwarder/epforwarder.go:419 in newHTTPPassthroughPipeline) | Initialized event platform forwarder pipeline. eventType=network-devices-metadata mainHosts=ndm-intake.datad0g.com additionalHosts= batch_max_concurrent_send=10 batch_max_content_size=5000000 batch_max_size=1000, input_chan_size=100
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/epforwarder/epforwarder.go:419 in newHTTPPassthroughPipeline) | Initialized event platform forwarder pipeline. eventType=network-devices-snmp-traps mainHosts=snmp-traps-intake.datad0g.com additionalHosts= batch_max_concurrent_send=10 batch_max_content_size=5000000 batch_max_size=1000, input_chan_size=100
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/epforwarder/epforwarder.go:419 in newHTTPPassthroughPipeline) | Initialized event platform forwarder pipeline. eventType=network-devices-netflow mainHosts=ndmflow-intake.datad0g.com additionalHosts= batch_max_concurrent_send=10 batch_max_content_size=5000000 batch_max_size=10000, input_chan_size=10000
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/epforwarder/epforwarder.go:419 in newHTTPPassthroughPipeline) | Initialized event platform forwarder pipeline. eventType=container-lifecycle mainHosts=contlcycle-intake.datad0g.com additionalHosts= batch_max_concurrent_send=10 batch_max_content_size=5000000 batch_max_size=1000, input_chan_size=100
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/epforwarder/epforwarder.go:419 in newHTTPPassthroughPipeline) | Initialized event platform forwarder pipeline. eventType=container-images mainHosts=contimage-intake.datad0g.com additionalHosts= batch_max_concurrent_send=10 batch_max_content_size=5000000 batch_max_size=1000, input_chan_size=100
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/epforwarder/epforwarder.go:419 in newHTTPPassthroughPipeline) | Initialized event platform forwarder pipeline. eventType=container-sbom mainHosts=sbom-intake.datad0g.com additionalHosts= batch_max_concurrent_send=10 batch_max_content_size=5000000 batch_max_size=1000, input_chan_size=100
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/aggregator/demultiplexer_agent.go:192 in initAgentDemultiplexer) | the Demultiplexer will use 1 pipelines
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/aggregator/time_sampler.go:52 in NewTimeSampler) | Creating TimeSampler #0
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/workloadmeta/store.go:148 in Start) | workloadmeta store initialized successfully
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/aggregator/demultiplexer_agent.go:294 in Run) | Starting forwarders
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/collector/python/init.go:321 in resolvePythonExecPath) | Using '/opt/datadog-agent/embedded' as Python home
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/collector/python/init.go:386 in Initialize) | Using '/opt/datadog-agent/embedded/bin/python3' as Python interpreter path
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/collector/python/init.go:399 in Initialize) | Initializing rtloader with Python 3 /opt/datadog-agent/embedded
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/tagger/collectors/workloadmeta_main.go:132 in stream) | workloadmeta tagger collector started
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/workloadmeta/store.go:524 in startCandidates) | workloadmeta collector "cloudfoundry-vm" could not start. error: component workloadmeta-cloudfoundry-vm is disabled: Agent is not running on CloudFoundry
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/workloadmeta/store.go:524 in startCandidates) | workloadmeta collector "ecs_fargate" could not start. error: component workloadmeta-ecs_fargate is disabled: Agent is not running on ECS Fargate
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/workloadmeta/store.go:524 in startCandidates) | workloadmeta collector "kube_metadata" could not start. error: component workloadmeta-kube_metadata is disabled: Agent is not running on Kubernetes
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/workloadmeta/store.go:524 in startCandidates) | workloadmeta collector "podman" could not start. error: component workloadmeta-podman is disabled: Podman not detected
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/workloadmeta/store.go:524 in startCandidates) | workloadmeta collector "kubelet" could not start. error: component workloadmeta-kubelet is disabled: Agent is not running on Kubernetes
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/workloadmeta/store.go:524 in startCandidates) | workloadmeta collector "process-collector" could not start. error: collector process-collector is not enabled
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/workloadmeta/store.go:524 in startCandidates) | workloadmeta collector "containerd" could not start. error: component workloadmeta-containerd is disabled: Agent is not running on containerd
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/workloadmeta/store.go:524 in startCandidates) | workloadmeta collector "docker" could not start. error: component workloadmeta-docker is disabled: Agent is not running on Docker
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/workloadmeta/store.go:524 in startCandidates) | workloadmeta collector "ecs" could not start. error: component workloadmeta-ecs is disabled: Agent is not running on ECS EC2
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/workloadmeta/store.go:524 in startCandidates) | workloadmeta collector "cloudfoundry-container" could not start. error: component workloadmeta-cloudfoundry-container is disabled: Agent is not running on CloudFoundry
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/aggregator/demultiplexer_agent.go:316 in Run) | not starting the container lifecycle forwarder
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/aggregator/demultiplexer_agent.go:325 in Run) | Forwarders started
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/aggregator/demultiplexer_agent.go:346 in flushLoop) | flushInterval set to 0: will never flush automatically
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | - | (ddyaml.py:143) | monkey patching yaml.load...
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | - | (ddyaml.py:147) | monkey patching yaml.load_all...
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | - | (ddyaml.py:151) | monkey patching yaml.dump_all... (affects all yaml dump operations)
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/collector/collector.go:60 in NewCollector) | Embedding Python 3.9.17 (main, Sep 26 2023, 12:16:27) [GCC 5.4.0 20160609]
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/collector/collector.go:61 in NewCollector) | Python Home: /opt/datadog-agent/embedded
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/collector/collector.go:62 in NewCollector) | Python path: ['/opt/datadog-agent/embedded/lib/python39.zip', '/opt/datadog-agent/embedded/lib/python3.9', '/opt/datadog-agent/embedded/lib/python3.9/lib-dynload', '/opt/datadog-agent/embedded/lib/python3.9/site-packages', '/home/openstack_controller', '/opt/datadog-agent/bin/agent/dist', '/opt/datadog-agent/checks.d', '/opt/datadog-agent/bin/agent/dist/checks.d', '/etc/datadog-agent/checks.d']
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/collector/collector.go:70 in NewCollector) | Collector up and running!
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/autodiscovery/providers/config_reader.go:171 in read) | Searching for configuration files at: /etc/datadog-agent/conf.d
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/activemq.d/metrics.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/apache.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/cassandra.d/metrics.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/cert_manager.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/cilium.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/confluent_platform.d/metrics.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/consul.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/container.d/conf.yaml.default
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/container_image.d/conf.yaml.default
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/container_lifecycle.d/conf.yaml.default
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/containerd.d/conf.yaml.default
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/coredns.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/couch.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/couchbase.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/cpu.d/conf.yaml.default
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/cri.d/conf.yaml.default
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/datadog_cluster_agent.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/disk.d/conf.yaml.default
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/docker.d/conf.yaml.default
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/ecs_fargate.d/conf.yaml.default
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/eks_fargate.d/conf.yaml.default
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/elastic.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/etcd.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/external_dns.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/file_handle.d/conf.yaml.default
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/harbor.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/hazelcast.d/metrics.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/hive.d/metrics.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/hivemq.d/metrics.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/hudi.d/metrics.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/ignite.d/metrics.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/io.d/conf.yaml.default
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/istio.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/jboss_wildfly.d/metrics.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/kafka.d/metrics.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/kube_apiserver_metrics.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/kube_controller_manager.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/kube_dns.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/kube_scheduler.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/kubelet.d/conf.yaml.default
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/kubernetes_state.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/kyototycoon.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/load.d/conf.yaml.default
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/mcache.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/memory.d/conf.yaml.default
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/network.d/conf.yaml.default
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/ntp.d/conf.yaml.default
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/openstack_controller.d/openstack_controller.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/presto.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/presto.d/metrics.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/rabbitmq.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/redisdb.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/riak.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/sbom.d/conf.yaml.default
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/snmp.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/solr.d/metrics.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/sonarqube.d/metrics.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/tomcat.d/auto_conf.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/tomcat.d/metrics.yaml
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/uptime.d/conf.yaml.default
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:295 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/weblogic.d/metrics.yaml
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/autodiscovery/providers/config_reader.go:171 in read) | Searching for configuration files at: /opt/datadog-agent/bin/agent/dist/conf.d
+2023-09-26 13:24:52 UTC | CORE | WARN | (pkg/autodiscovery/providers/config_reader.go:175 in read) | Skipping, open /opt/datadog-agent/bin/agent/dist/conf.d: no such file or directory
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/autodiscovery/providers/config_reader.go:171 in read) | Searching for configuration files at: 
+2023-09-26 13:24:52 UTC | CORE | WARN | (pkg/autodiscovery/providers/config_reader.go:175 in read) | Skipping, open : no such file or directory
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/autoconfig.go:290 in addListenerCandidates) | Listener environment was registered
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/autodiscovery/autoconfig.go:290 in addListenerCandidates) | Listener static config was registered
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/autodiscovery/autoconfig.go:304 in initListenerCandidates) | static config listener successfully started
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/autodiscovery/autoconfig.go:304 in initListenerCandidates) | environment listener successfully started
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/autodiscovery/config_poller.go:168 in collectOnce) | file provider: collected 61 new configurations, removed 0
+2023-09-26 13:24:52 UTC | CORE | INFO | (pkg/autodiscovery/autoconfig.go:198 in LoadAndRun) | Started config provider "file"
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/collector/scheduler.go:72 in InitCheckScheduler) | Added JMX Check Loader to Check Scheduler
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/collector/scheduler.go:72 in InitCheckScheduler) | Added Python Check Loader to Check Scheduler
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/collector/scheduler.go:72 in InitCheckScheduler) | Added Core Check Loader to Check Scheduler
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/collector/scheduler.go:178 in getChecks) | Loading check instance for check 'openstack_controller' using default loaders
+2023-09-26 13:24:52 UTC | CORE | DEBUG | (pkg/collector/python/loader.go:123 in Load) | Performing platform loading prep
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (ddyaml.py:87) | Unsafe loading of YAML has been disabled - using safe loader instead in <string>
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (ddyaml.py:87) | Unsafe loading of YAML has been disabled - using safe loader instead in <string>
+2023-09-26 13:24:53 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | unknown | (config.py:35) | Validating config
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | unknown | (config.py:102) | openstack_config_file_path: /home/openstack_controller/tests/fixtures/openstack_config.yaml
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | unknown | (config.py:103) | openstack_cloud_name: test_cloud
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (ddyaml.py:87) | Unsafe loading of YAML has been disabled - using safe loader instead in /home/openstack_controller/tests/fixtures/openstack_config.yaml
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (_cache.py:161) | reading /root/.cache/python-entrypoints/5e4d89cdc291fbd28394a4959ea8a4b042c0c00f0b6990bc9350cb39c0915d46
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='admin_token', value='keystoneauth1.loading._plugins.admin_token:AdminToken', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='http_basic', value='keystoneauth1.loading._plugins.http_basic:HTTPBasicAuth', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='none', value='keystoneauth1.loading._plugins.noauth:NoAuth', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='password', value='keystoneauth1.loading._plugins.identity.generic:Password', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='token', value='keystoneauth1.loading._plugins.identity.generic:Token', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v2password', value='keystoneauth1.loading._plugins.identity.v2:Password', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v2token', value='keystoneauth1.loading._plugins.identity.v2:Token', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3adfspassword', value='keystoneauth1.extras._saml2._loading:ADFSPassword', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3applicationcredential', value='keystoneauth1.loading._plugins.identity.v3:ApplicationCredential', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3fedkerb', value='keystoneauth1.extras.kerberos._loading:MappedKerberos', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3kerberos', value='keystoneauth1.extras.kerberos._loading:Kerberos', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3multifactor', value='keystoneauth1.loading._plugins.identity.v3:MultiFactor', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3oauth1', value='keystoneauth1.extras.oauth1._loading:V3OAuth1', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3oauth2clientcredential', value='keystoneauth1.loading._plugins.identity.v3:OAuth2ClientCredential', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3oauth2mtlsclientcredential', value='keystoneauth1.loading._plugins.identity.v3:OAuth2mTlsClientCredential', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3oidcaccesstoken', value='keystoneauth1.loading._plugins.identity.v3:OpenIDConnectAccessToken', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3oidcauthcode', value='keystoneauth1.loading._plugins.identity.v3:OpenIDConnectAuthorizationCode', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3oidcclientcredentials', value='keystoneauth1.loading._plugins.identity.v3:OpenIDConnectClientCredentials', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3oidcdeviceauthz', value='keystoneauth1.loading._plugins.identity.v3:OpenIDConnectDeviceAuthorization', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3oidcpassword', value='keystoneauth1.loading._plugins.identity.v3:OpenIDConnectPassword', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3password', value='keystoneauth1.loading._plugins.identity.v3:Password', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3samlpassword', value='keystoneauth1.extras._saml2._loading:Saml2Password', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3token', value='keystoneauth1.loading._plugins.identity.v3:Token', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3tokenlessauth', value='keystoneauth1.loading._plugins.identity.v3:TokenlessAuth', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3totp', value='keystoneauth1.loading._plugins.identity.v3:TOTP', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | unknown | (factory.py:18) | creating api object of type `SDK`
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | unknown | (api_sdk.py:55) | adding X-OpenStack-Nova-API-Version header to `2.93`
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | unknown | (api_sdk.py:59) | adding X-OpenStack-Ironic-API-Version header to `1.80`
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (ddyaml.py:87) | Unsafe loading of YAML has been disabled - using safe loader instead in /home/openstack_controller/tests/fixtures/openstack_config.yaml
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='admin_token', value='keystoneauth1.loading._plugins.admin_token:AdminToken', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='http_basic', value='keystoneauth1.loading._plugins.http_basic:HTTPBasicAuth', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='none', value='keystoneauth1.loading._plugins.noauth:NoAuth', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='password', value='keystoneauth1.loading._plugins.identity.generic:Password', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='token', value='keystoneauth1.loading._plugins.identity.generic:Token', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v2password', value='keystoneauth1.loading._plugins.identity.v2:Password', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v2token', value='keystoneauth1.loading._plugins.identity.v2:Token', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3adfspassword', value='keystoneauth1.extras._saml2._loading:ADFSPassword', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3applicationcredential', value='keystoneauth1.loading._plugins.identity.v3:ApplicationCredential', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3fedkerb', value='keystoneauth1.extras.kerberos._loading:MappedKerberos', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3kerberos', value='keystoneauth1.extras.kerberos._loading:Kerberos', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3multifactor', value='keystoneauth1.loading._plugins.identity.v3:MultiFactor', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3oauth1', value='keystoneauth1.extras.oauth1._loading:V3OAuth1', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3oauth2clientcredential', value='keystoneauth1.loading._plugins.identity.v3:OAuth2ClientCredential', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3oauth2mtlsclientcredential', value='keystoneauth1.loading._plugins.identity.v3:OAuth2mTlsClientCredential', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3oidcaccesstoken', value='keystoneauth1.loading._plugins.identity.v3:OpenIDConnectAccessToken', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3oidcauthcode', value='keystoneauth1.loading._plugins.identity.v3:OpenIDConnectAuthorizationCode', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3oidcclientcredentials', value='keystoneauth1.loading._plugins.identity.v3:OpenIDConnectClientCredentials', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3oidcdeviceauthz', value='keystoneauth1.loading._plugins.identity.v3:OpenIDConnectDeviceAuthorization', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3oidcpassword', value='keystoneauth1.loading._plugins.identity.v3:OpenIDConnectPassword', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3password', value='keystoneauth1.loading._plugins.identity.v3:Password', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3samlpassword', value='keystoneauth1.extras._saml2._loading:Saml2Password', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3token', value='keystoneauth1.loading._plugins.identity.v3:Token', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3tokenlessauth', value='keystoneauth1.loading._plugins.identity.v3:TokenlessAuth', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (extension.py:204) | found extension EntryPoint(name='v3totp', value='keystoneauth1.loading._plugins.identity.v3:TOTP', group='keystoneauth1.plugin')
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | unknown | (api_sdk.py:36) | interface: public
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | unknown | (api_sdk.py:37) | region_name: 
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (base.py:184) | Making authentication request to http://10.164.0.71/identity/v3/auth/tokens
+2023-09-26 13:24:53 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (1): 10.164.0.71:80
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:473) | http://10.164.0.71:80 "POST /identity/v3/auth/tokens HTTP/1.1" 201 312
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (base.py:189) | {"token": {"methods": ["password"], "user": {"domain": {"id": "default", "name": "Default"}, "id": "***************************ada6e", "name": "admin", "password_expires_at": null}, "audit_ids": ["LKwRbgMQTiu2KTQjhjmnPw"], "expires_at": "2023-09-26T14:24:53.000000Z", "issued_at": "2023-09-26T13:24:53.000000Z"}}
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | unknown | (component.py:121) | created `identity` component
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | unknown | (component.py:121) | created `compute` component
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | unknown | (component.py:121) | created `network` component
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | unknown | (component.py:121) | created `block-storage` component
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | unknown | (component.py:121) | created `baremetal` component
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | unknown | (component.py:121) | created `load-balancer` component
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/check.go:316 in Configure) | python check configure done openstack_controller
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/loader.go:217 in Load) | python loader: done loading check openstack_controller (version 4.0.0)
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/scheduler.go:189 in getChecks) | Python Check Loader: successfully loaded check 'openstack_controller'
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/check.go:88 in runCheck) | Running python check openstack_controller (version: '4.0.0', id: 'openstack_controller:e3da92c69104d131')
+2023-09-26 13:24:54 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | openstack_controller:e3da92c69104d131 | (check.py:33) | running check
+2023-09-26 13:24:54 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | openstack_controller:e3da92c69104d131 | (check.py:37) | User successfully authorized
+2023-09-26 13:24:54 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | openstack_controller:e3da92c69104d131 | (check.py:49) | reporting metrics
+2023-09-26 13:24:54 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | openstack_controller:e3da92c69104d131 | (check.py:70) | reporting global metrics
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:133) | reporting `identity` component global metrics
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:146) | `identity` component not found in catalog
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:133) | reporting `compute` component global metrics
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:146) | `compute` component not found in catalog
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:133) | reporting `network` component global metrics
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:146) | `network` component not found in catalog
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:133) | reporting `block-storage` component global metrics
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:146) | `block-storage` component not found in catalog
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:133) | reporting `baremetal` component global metrics
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:146) | `baremetal` component not found in catalog
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:133) | reporting `load-balancer` component global metrics
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:146) | `load-balancer` component not found in catalog
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (api_sdk.py:218) | getting auth projects
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (api_sdk.py:220) | auth projects endpoint: http://10.164.0.71/identity/v3/auth/projects
+2023-09-26 13:24:54 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (1): 10.164.0.71:80
+2023-09-26 13:24:55 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:473) | http://10.164.0.71:80 "GET /identity/v3/auth/projects HTTP/1.1" 200 732
+2023-09-26 13:24:55 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | openstack_controller:e3da92c69104d131 | (check.py:52) | auth_projects: [{'id': '***************************a187e', 'name': 'admin', 'domain_id': 'default', 'description': 'Bootstrap project for initializing the cloud.', 'enabled': True, 'parent_id': 'default', 'is_domain': False, 'tags': [], 'options': {}, 'links': {'self': 'http://10.164.0.71/identity/v3/projects/***************************a187e'}}, {'id': '***************************43638', 'name': 'demo', 'domain_id': 'default', 'description': '', 'enabled': True, 'parent_id': 'default', 'is_domain': False, 'tags': [], 'options': {}, 'links': {'self': 'http://10.164.0.71/identity/v3/projects/***************************43638'}}]
+2023-09-26 13:24:55 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (api_sdk.py:66) | current_project_id: None
+2023-09-26 13:24:55 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (api_sdk.py:67) | project_id: "***************************a187e"
+2023-09-26 13:24:55 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (base.py:184) | Making authentication request to http://10.164.0.71/identity/v3/auth/tokens
+2023-09-26 13:24:55 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:290) | Resetting dropped connection: 10.164.0.71
+2023-09-26 13:24:57 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:473) | http://10.164.0.71:80 "POST /identity/v3/auth/tokens HTTP/1.1" 201 2958
+2023-09-26 13:24:57 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (base.py:189) | {"token": {"methods": ["password"], "user": {"domain": {"id": "default", "name": "Default"}, "id": "***************************ada6e", "name": "admin", "password_expires_at": null}, "audit_ids": ["uf5GSrvaS3WqudTlm4VXxw"], "expires_at": "2023-09-26T14:24:57.000000Z", "issued_at": "2023-09-26T13:24:57.000000Z", "project": {"domain": {"id": "default", "name": "Default"}, "id": "***************************a187e", "name": "admin"}, "is_domain": false, "roles": [{"id": "***************************abac6", "name": "reader"}, {"id": "***************************371bf", "name": "member"}, {"id": "***************************afb93", "name": "admin"}], "catalog": [{"endpoints": [{"id": "***************************9085d", "interface": "public", "region_id": "RegionOne", "url": "http://10.164.0.71/identity", "region": "RegionOne"}], "id": "***************************8d106", "type": "identity", "name": "keystone"}, {"endpoints": [{"id": "***************************debd5", "interface": "public", "region_id": "RegionOne", "url": "http://10.164.0.71:9696/networking", "region": "RegionOne"}], "id": "***************************dd1ba", "type": "network", "name": "neutron"}, {"endpoints": [{"id": "***************************31af4", "interface": "public", "region_id": "RegionOne", "url": "http://10.164.0.71/volume/v3/***************************a187e", "region": "RegionOne"}], "id": "***************************2b6e3", "type": "volumev3", "name": "cinderv3"}, {"endpoints": [{"id": "***************************fcb30", "interface": "public", "region_id": "my-region", "url": "http://my-nova-api-url:8774/v2.1", "region": "my-region"}, {"id": "***************************7edec", "interface": "public", "region_id": "RegionOne", "url": "http://10.164.0.71/compute/v2.1", "region": "RegionOne"}], "id": "***************************f89cf", "type": "compute", "name": "nova"}, {"endpoints": [{"id": "***************************c7824", "interface": "public", "region_id": "RegionOne", "url": "http://10.164.0.71/volume/v3/***************************a187e", "region": "RegionOne"}], "id": "***************************110af", "type": "block-storage", "name": "cinder"}, {"endpoints": [{"id": "***************************edf43", "interface": "public", "region_id": "RegionOne", "url": "http://10.164.0.71/placement", "region": "RegionOne"}], "id": "***************************5adc8", "type": "placement", "name": "placement"}, {"endpoints": [{"id": "***************************18afc", "interface": "public", "region_id": "RegionOne", "url": "http://10.164.0.71/compute/v2/***************************a187e", "region": "RegionOne"}], "id": "***************************1c097", "type": "compute_legacy", "name": "nova_legacy"}, {"endpoints": [{"id": "***************************6e6e7", "interface": "public", "region_id": "RegionOne", "url": "http://10.164.0.71/image", "region": "RegionOne"}], "id": "***************************57267", "type": "image", "name": "glance"}]}}
+2023-09-26 13:24:57 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (api_sdk.py:85) | role_names: ['reader', 'member', 'admin']
+2023-09-26 13:24:57 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | openstack_controller:e3da92c69104d131 | (check.py:70) | reporting global metrics
+2023-09-26 13:24:57 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:133) | reporting `identity` component global metrics
+2023-09-26 13:24:57 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:136) | `identity` component found in catalog
+2023-09-26 13:24:57 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_response_time
+2023-09-26 13:24:57 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:62) | reporting `identity` response time
+2023-09-26 13:24:57 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (api_sdk.py:96) | access.project_id: "***************************a187e"
+2023-09-26 13:24:57 UTC | CORE | ERROR | (pkg/collector/python/datadog_agent.go:129 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:72) | Exception: 'NoneType' object has no attribute 'replace'
+2023-09-26 13:24:57 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_regions
+2023-09-26 13:24:57 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET http://10.164.0.71/identity -H "Accept: application/json" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17"
+2023-09-26 13:24:57 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:290) | Resetting dropped connection: 10.164.0.71
+2023-09-26 13:24:58 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:473) | http://10.164.0.71:80 "GET /identity HTTP/1.1" 300 270
+2023-09-26 13:24:58 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:542) | RESP: [300] Connection: close Content-Length: 270 Content-Type: application/json Date: Tue, 26 Sep 2023 13:24:57 GMT Location: http://10.164.0.71/identity/v3/ Server: Apache/2.4.41 (Ubuntu) Vary: X-Auth-Token x-openstack-request-id: req-f2db4d66-08d2-42e0-9cd5-8094db603317
+2023-09-26 13:24:58 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:574) | RESP BODY: {"versions": {"values": [{"id": "v3.14", "status": "stable", "updated": "2020-04-07T00:00:00Z", "links": [{"rel": "self", "href": "http://10.164.0.71/identity/v3/"}], "media-types": [{"base": "application/json", "type": "application/vnd.openstack.identity-v3+json"}]}]}}
+2023-09-26 13:24:58 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:956) | GET call to http://10.164.0.71/identity used request id req-f2db4d66-08d2-42e0-9cd5-8094db603317
+2023-09-26 13:24:58 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET http://10.164.0.71/identity/v3/regions -H "Accept: application/json" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}1c847a37609ffad2b44f3b1ec40a641ce1988f5b98bdd7bfb7dc326bf2dd4511"
+2023-09-26 13:24:58 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:290) | Resetting dropped connection: 10.164.0.71
+2023-09-26 13:24:58 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:473) | http://10.164.0.71:80 "GET /identity/v3/regions HTTP/1.1" 200 398
+2023-09-26 13:24:58 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:542) | RESP: [200] Connection: close Content-Length: 398 Content-Type: application/json Date: Tue, 26 Sep 2023 13:24:58 GMT Server: Apache/2.4.41 (Ubuntu) Vary: X-Auth-Token x-openstack-request-id: req-5526844c-f62e-44c1-864e-465c7b57f085
+2023-09-26 13:24:58 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:574) | RESP BODY: {"regions": [{"enabled": true, "id": "my-region", "description": "", "parent_region_id": null, "links": {"self": "http://10.164.0.71/identity/v3/regions/my-region"}}, {"id": "RegionOne", "description": "", "parent_region_id": null, "links": {"self": "http://10.164.0.71/identity/v3/regions/RegionOne"}}], "links": {"next": null, "self": "http://10.164.0.71/identity/v3/regions", "previous": null}}
+2023-09-26 13:24:58 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:946) | GET call to identity for http://10.164.0.71/identity/v3/regions used request id req-5526844c-f62e-44c1-864e-465c7b57f085
+2023-09-26 13:24:58 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:71) | data: [{'description': '', 'links': {'self': 'http://10.164.0.71/identity/v3/regions/my-region'}, 'parent_region_id': None, 'id': 'my-region', 'name': None, 'location': Munch({'cloud': '10.164.0.71', 'region_name': '', 'zone': None, 'project': Munch({'id': '***************************a187e', 'name': None, 'domain_id': None, 'domain_name': None})})}, {'description': '', 'links': {'self': 'http://10.164.0.71/identity/v3/regions/RegionOne'}, 'parent_region_id': None, 'id': 'RegionOne', 'name': None, 'location': Munch({'cloud': '10.164.0.71', 'region_name': '', 'zone': None, 'project': Munch({'id': '***************************a187e', 'name': None, 'domain_id': None, 'domain_name': None})})}]
+2023-09-26 13:24:58 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:73) | item: {'description': '', 'links': {'self': 'http://10.164.0.71/identity/v3/regions/my-region'}, 'parent_region_id': None, 'id': 'my-region', 'name': None, 'location': Munch({'cloud': '10.164.0.71', 'region_name': '', 'zone': None, 'project': Munch({'id': '***************************a187e', 'name': None, 'domain_id': None, 'domain_name': None})})}
+2023-09-26 13:24:58 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:80) | region: {'tags': ['region_id:my-region'], 'metrics': {}}
+2023-09-26 13:24:58 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:73) | item: {'description': '', 'links': {'self': 'http://10.164.0.71/identity/v3/regions/RegionOne'}, 'parent_region_id': None, 'id': 'RegionOne', 'name': None, 'location': Munch({'cloud': '10.164.0.71', 'region_name': '', 'zone': None, 'project': Munch({'id': '***************************a187e', 'name': None, 'domain_id': None, 'domain_name': None})})}
+2023-09-26 13:24:58 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:80) | region: {'tags': ['region_id:RegionOne'], 'metrics': {}}
+2023-09-26 13:24:58 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_domains
+2023-09-26 13:24:58 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET http://10.164.0.71/identity/v3/domains -H "Accept: application/json" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}1c847a37609ffad2b44f3b1ec40a641ce1988f5b98bdd7bfb7dc326bf2dd4511"
+2023-09-26 13:24:58 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:290) | Resetting dropped connection: 10.164.0.71
+2023-09-26 13:24:59 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:473) | http://10.164.0.71:80 "GET /identity/v3/domains HTTP/1.1" 200 295
+2023-09-26 13:24:59 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:542) | RESP: [200] Connection: close Content-Length: 295 Content-Type: application/json Date: Tue, 26 Sep 2023 13:24:59 GMT Server: Apache/2.4.41 (Ubuntu) Vary: X-Auth-Token x-openstack-request-id: req-46831642-c8e2-44ff-a5cb-eaab1394b482
+2023-09-26 13:24:59 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:574) | RESP BODY: {"domains": [{"id": "default", "name": "Default", "description": "The default domain", "enabled": true, "tags": [], "options": {}, "links": {"self": "http://10.164.0.71/identity/v3/domains/default"}}], "links": {"next": null, "self": "http://10.164.0.71/identity/v3/domains", "previous": null}}
+2023-09-26 13:24:59 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:946) | GET call to identity for http://10.164.0.71/identity/v3/domains used request id req-46831642-c8e2-44ff-a5cb-eaab1394b482
+2023-09-26 13:24:59 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:87) | data: [{'description': 'The default domain', 'enabled': True, 'name': 'Default', 'links': {'self': 'http://10.164.0.71/identity/v3/domains/default'}, 'id': 'default', 'location': Munch({'cloud': '10.164.0.71', 'region_name': '', 'zone': None, 'project': Munch({'id': '***************************a187e', 'name': None, 'domain_id': None, 'domain_name': None})})}]
+2023-09-26 13:24:59 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:89) | item: {'description': 'The default domain', 'enabled': True, 'name': 'Default', 'links': {'self': 'http://10.164.0.71/identity/v3/domains/default'}, 'id': 'default', 'location': Munch({'cloud': '10.164.0.71', 'region_name': '', 'zone': None, 'project': Munch({'id': '***************************a187e', 'name': None, 'domain_id': None, 'domain_name': None})})}
+2023-09-26 13:24:59 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:96) | domain: {'tags': ['domain_name:Default', 'domain_id:default'], 'metrics': {'openstack.keystone.domains.enabled': 1}}
+2023-09-26 13:24:59 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_projects
+2023-09-26 13:24:59 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET http://10.164.0.71/identity/v3/projects -H "Accept: application/json" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}1c847a37609ffad2b44f3b1ec40a641ce1988f5b98bdd7bfb7dc326bf2dd4511"
+2023-09-26 13:24:59 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:290) | Resetting dropped connection: 10.164.0.71
+2023-09-26 13:25:00 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:473) | http://10.164.0.71:80 "GET /identity/v3/projects HTTP/1.1" 200 1606
+2023-09-26 13:25:00 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:542) | RESP: [200] Connection: close Content-Length: 1606 Content-Type: application/json Date: Tue, 26 Sep 2023 13:25:00 GMT Server: Apache/2.4.41 (Ubuntu) Vary: X-Auth-Token x-openstack-request-id: req-5734c0b6-5e56-45ef-840b-74515dd863fe
+2023-09-26 13:25:00 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:574) | RESP BODY: {"projects": [{"id": "***************************c7baa", "name": "alt_demo", "domain_id": "default", "description": "", "enabled": true, "parent_id": "default", "is_domain": false, "tags": [], "options": {}, "links": {"self": "http://10.164.0.71/identity/v3/projects/***************************c7baa"}}, {"id": "***************************1f56c", "name": "invisible_to_admin", "domain_id": "default", "description": "", "enabled": true, "parent_id": "default", "is_domain": false, "tags": [], "options": {}, "links": {"self": "http://10.164.0.71/identity/v3/projects/***************************1f56c"}}, {"id": "***************************a187e", "name": "admin", "domain_id": "default", "description": "Bootstrap project for initializing the cloud.", "enabled": true, "parent_id": "default", "is_domain": false, "tags": [], "options": {}, "links": {"self": "http://10.164.0.71/identity/v3/projects/***************************a187e"}}, {"id": "***************************59427", "name": "service", "domain_id": "default", "description": "", "enabled": true, "parent_id": "default", "is_domain": false, "tags": [], "options": {}, "links": {"self": "http://10.164.0.71/identity/v3/projects/***************************59427"}}, {"id": "***************************43638", "name": "demo", "domain_id": "default", "description": "", "enabled": true, "parent_id": "default", "is_domain": false, "tags": [], "options": {}, "links": {"self": "http://10.164.0.71/identity/v3/projects/***************************43638"}}], "links": {"next": null, "self": "http://10.164.0.71/identity/v3/projects", "previous": null}}
+2023-09-26 13:25:00 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:946) | GET call to identity for http://10.164.0.71/identity/v3/projects used request id req-5734c0b6-5e56-45ef-840b-74515dd863fe
+2023-09-26 13:25:00 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:112) | project: {'tags': ['domain_id:default', 'project_id:"***************************c7baa"', 'project_name:alt_demo'], 'metrics': {'openstack.keystone.projects.enabled': 1}}
+2023-09-26 13:25:00 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:112) | project: {'tags': ['domain_id:default', 'project_id:"***************************1f56c"', 'project_name:invisible_to_admin'], 'metrics': {'openstack.keystone.projects.enabled': 1}}
+2023-09-26 13:25:00 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:112) | project: {'tags': ['domain_id:default', 'project_id:"***************************a187e"', 'project_name:admin'], 'metrics': {'openstack.keystone.projects.enabled': 1}}
+2023-09-26 13:25:00 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:112) | project: {'tags': ['domain_id:default', 'project_id:"***************************59427"', 'project_name:service'], 'metrics': {'openstack.keystone.projects.enabled': 1}}
+2023-09-26 13:25:00 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:112) | project: {'tags': ['domain_id:default', 'project_id:"***************************43638"', 'project_name:demo'], 'metrics': {'openstack.keystone.projects.enabled': 1}}
+2023-09-26 13:25:00 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_users
+2023-09-26 13:25:00 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET http://10.164.0.71/identity/v3/users -H "Accept: application/json" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}1c847a37609ffad2b44f3b1ec40a641ce1988f5b98bdd7bfb7dc326bf2dd4511"
+2023-09-26 13:25:00 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:290) | Resetting dropped connection: 10.164.0.71
+2023-09-26 13:25:01 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:473) | http://10.164.0.71:80 "GET /identity/v3/users HTTP/1.1" 200 3502
+2023-09-26 13:25:01 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:542) | RESP: [200] Connection: close Content-Length: 3502 Content-Type: application/json Date: Tue, 26 Sep 2023 13:25:00 GMT Server: Apache/2.4.41 (Ubuntu) Vary: X-Auth-Token x-openstack-request-id: req-d67ace6b-717a-4e4e-8c3c-53864b099000
+2023-09-26 13:25:01 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:574) | RESP BODY: {"users": [{"id": "***************************ada6e", "name": "admin", "domain_id": "default", "enabled": true, "password_expires_at": null, "options": {}, "links": {"self": "http://10.164.0.71/identity/v3/users/***************************ada6e"}}, {"email": "demo@example.com", "id": "***************************9d424", "name": "demo", "domain_id": "default", "enabled": true, "password_expires_at": null, "options": {}, "links": {"self": "http://10.164.0.71/identity/v3/users/***************************9d424"}}, {"email": "demo_reader@example.com", "id": "***************************188d0", "name": "demo_reader", "domain_id": "default", "enabled": true, "password_expires_at": null, "options": {}, "links": {"self": "http://10.164.0.71/identity/v3/users/***************************188d0"}}, {"email": "alt_demo@example.com", "id": "***************************ac529", "name": "alt_demo", "domain_id": "default", "enabled": true, "password_expires_at": null, "options": {}, "links": {"self": "http://10.164.0.71/identity/v3/users/***************************ac529"}}, {"email": "alt_demo_member@example.com", "id": "***************************40187", "name": "alt_demo_member", "domain_id": "default", "enabled": true, "password_expires_at": null, "options": {}, "links": {"self": "http://10.164.0.71/identity/v3/users/***************************40187"}}, {"email": "alt_demo_reader@example.com", "id": "***************************7fe90", "name": "alt_demo_reader", "domain_id": "default", "enabled": true, "password_expires_at": null, "options": {}, "links": {"self": "http://10.164.0.71/identity/v3/users/***************************7fe90"}}, {"email": "system_member@example.com", "id": "***************************4a91f", "name": "system_member", "domain_id": "default", "enabled": true, "password_expires_at": null, "options": {}, "links": {"self": "http://10.164.0.71/identity/v3/users/***************************4a91f"}}, {"email": "system_reader@example.com", "id": "***************************46150", "name": "system_reader", "domain_id": "default", "enabled": true, "password_expires_at": null, "options": {}, "links": {"self": "http://10.164.0.71/identity/v3/users/***************************46150"}}, {"id": "***************************b9e4c", "name": "nova", "domain_id": "default", "enabled": true, "password_expires_at": null, "options": {}, "links": {"self": "http://10.164.0.71/identity/v3/users/***************************b9e4c"}}, {"id": "***************************ff67a", "name": "glance", "domain_id": "default", "enabled": true, "password_expires_at": null, "options": {}, "links": {"self": "http://10.164.0.71/identity/v3/users/***************************ff67a"}}, {"id": "***************************eb5cf", "name": "cinder", "domain_id": "default", "enabled": true, "password_expires_at": null, "options": {}, "links": {"self": "http://10.164.0.71/identity/v3/users/***************************eb5cf"}}, {"id": "***************************e6b39", "name": "neutron", "domain_id": "default", "enabled": true, "password_expires_at": null, "options": {}, "links": {"self": "http://10.164.0.71/identity/v3/users/***************************e6b39"}}, {"id": "***************************4c9ba", "name": "placement", "domain_id": "default", "enabled": true, "password_expires_at": null, "options": {}, "links": {"self": "http://10.164.0.71/identity/v3/users/***************************4c9ba"}}], "links": {"next": null, "self": "http://10.164.0.71/identity/v3/users", "previous": null}}
+2023-09-26 13:25:01 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:946) | GET call to identity for http://10.164.0.71/identity/v3/users used request id req-d67ace6b-717a-4e4e-8c3c-53864b099000
+2023-09-26 13:25:01 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:128) | user: {'tags': ['domain_id:default', 'user_name:admin', 'user_id:"***************************ada6e"'], 'metrics': {'openstack.keystone.users.enabled': 1}}
+2023-09-26 13:25:01 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:128) | user: {'tags': ['domain_id:default', 'user_name:demo', 'user_id:"***************************9d424"'], 'metrics': {'openstack.keystone.users.enabled': 1}}
+2023-09-26 13:25:01 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:128) | user: {'tags': ['domain_id:default', 'user_name:demo_reader', 'user_id:"***************************188d0"'], 'metrics': {'openstack.keystone.users.enabled': 1}}
+2023-09-26 13:25:01 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:128) | user: {'tags': ['domain_id:default', 'user_name:alt_demo', 'user_id:"***************************ac529"'], 'metrics': {'openstack.keystone.users.enabled': 1}}
+2023-09-26 13:25:01 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:128) | user: {'tags': ['domain_id:default', 'user_name:alt_demo_member', 'user_id:"***************************40187"'], 'metrics': {'openstack.keystone.users.enabled': 1}}
+2023-09-26 13:25:01 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:128) | user: {'tags': ['domain_id:default', 'user_name:alt_demo_reader', 'user_id:"***************************7fe90"'], 'metrics': {'openstack.keystone.users.enabled': 1}}
+2023-09-26 13:25:01 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:128) | user: {'tags': ['domain_id:default', 'user_name:system_member', 'user_id:"***************************4a91f"'], 'metrics': {'openstack.keystone.users.enabled': 1}}
+2023-09-26 13:25:01 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:128) | user: {'tags': ['domain_id:default', 'user_name:system_reader', 'user_id:"***************************46150"'], 'metrics': {'openstack.keystone.users.enabled': 1}}
+2023-09-26 13:25:01 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:128) | user: {'tags': ['domain_id:default', 'user_name:nova', 'user_id:"***************************b9e4c"'], 'metrics': {'openstack.keystone.users.enabled': 1}}
+2023-09-26 13:25:01 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:128) | user: {'tags': ['domain_id:default', 'user_name:glance', 'user_id:"***************************ff67a"'], 'metrics': {'openstack.keystone.users.enabled': 1}}
+2023-09-26 13:25:01 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:128) | user: {'tags': ['domain_id:default', 'user_name:cinder', 'user_id:"***************************eb5cf"'], 'metrics': {'openstack.keystone.users.enabled': 1}}
+2023-09-26 13:25:01 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:128) | user: {'tags': ['domain_id:default', 'user_name:neutron', 'user_id:"***************************e6b39"'], 'metrics': {'openstack.keystone.users.enabled': 1}}
+2023-09-26 13:25:01 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:128) | user: {'tags': ['domain_id:default', 'user_name:placement', 'user_id:"***************************4c9ba"'], 'metrics': {'openstack.keystone.users.enabled': 1}}
+2023-09-26 13:25:01 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_groups
+2023-09-26 13:25:01 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET http://10.164.0.71/identity/v3/groups -H "Accept: application/json" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}1c847a37609ffad2b44f3b1ec40a641ce1988f5b98bdd7bfb7dc326bf2dd4511"
+2023-09-26 13:25:01 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:290) | Resetting dropped connection: 10.164.0.71
+2023-09-26 13:25:02 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:473) | http://10.164.0.71:80 "GET /identity/v3/groups HTTP/1.1" 200 540
+2023-09-26 13:25:02 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:542) | RESP: [200] Connection: close Content-Length: 540 Content-Type: application/json Date: Tue, 26 Sep 2023 13:25:02 GMT Server: Apache/2.4.41 (Ubuntu) Vary: X-Auth-Token x-openstack-request-id: req-79a01c47-8016-4872-8222-26aabc22744b
+2023-09-26 13:25:02 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:574) | RESP BODY: {"groups": [{"id": "***************************84d26", "name": "nonadmins", "domain_id": "default", "description": "non-admin group", "links": {"self": "http://10.164.0.71/identity/v3/groups/***************************84d26"}}, {"id": "***************************1f428", "name": "admins", "domain_id": "default", "description": "openstack admin group", "links": {"self": "http://10.164.0.71/identity/v3/groups/***************************1f428"}}], "links": {"next": null, "self": "http://10.164.0.71/identity/v3/groups", "previous": null}}
+2023-09-26 13:25:02 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:946) | GET call to identity for http://10.164.0.71/identity/v3/groups used request id req-79a01c47-8016-4872-8222-26aabc22744b
+2023-09-26 13:25:02 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:144) | group: {'tags': ['domain_id:default', 'group_name:nonadmins', 'group_id:"***************************84d26"'], 'metrics': {}}
+2023-09-26 13:25:02 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET http://10.164.0.71/identity/v3/groups/***************************84d26/users -H "Accept: application/json" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}1c847a37609ffad2b44f3b1ec40a641ce1988f5b98bdd7bfb7dc326bf2dd4511"
+2023-09-26 13:25:02 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:290) | Resetting dropped connection: 10.164.0.71
+2023-09-26 13:25:04 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:473) | http://10.164.0.71:80 "GET /identity/v3/groups/***************************84d26/users HTTP/1.1" 200 145
+2023-09-26 13:25:04 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:542) | RESP: [200] Connection: close Content-Length: 145 Content-Type: application/json Date: Tue, 26 Sep 2023 13:25:04 GMT Server: Apache/2.4.41 (Ubuntu) Vary: X-Auth-Token x-openstack-request-id: req-e5a8300b-de73-4bd3-9d12-351033b0b472
+2023-09-26 13:25:04 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:574) | RESP BODY: {"users": [], "links": {"next": null, "self": "http://10.164.0.71/identity/v3/groups/***************************84d26/users", "previous": null}}
+2023-09-26 13:25:04 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:946) | GET call to identity for http://10.164.0.71/identity/v3/groups/***************************84d26/users used request id req-e5a8300b-de73-4bd3-9d12-351033b0b472
+2023-09-26 13:25:04 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:151) | users: []
+2023-09-26 13:25:04 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:144) | group: {'tags': ['domain_id:default', 'group_name:admins', 'group_id:"***************************1f428"'], 'metrics': {}}
+2023-09-26 13:25:04 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET http://10.164.0.71/identity/v3/groups/***************************1f428/users -H "Accept: application/json" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}1c847a37609ffad2b44f3b1ec40a641ce1988f5b98bdd7bfb7dc326bf2dd4511"
+2023-09-26 13:25:04 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:290) | Resetting dropped connection: 10.164.0.71
+2023-09-26 13:25:06 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:473) | http://10.164.0.71:80 "GET /identity/v3/groups/***************************1f428/users HTTP/1.1" 200 381
+2023-09-26 13:25:06 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:542) | RESP: [200] Connection: close Content-Length: 381 Content-Type: application/json Date: Tue, 26 Sep 2023 13:25:05 GMT Server: Apache/2.4.41 (Ubuntu) Vary: X-Auth-Token x-openstack-request-id: req-6dd4a8b0-f6e2-4b68-bb29-d62657ca90d3
+2023-09-26 13:25:06 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:574) | RESP BODY: {"users": [{"id": "***************************ada6e", "name": "admin", "domain_id": "default", "enabled": true, "password_expires_at": null, "options": {}, "links": {"self": "http://10.164.0.71/identity/v3/users/***************************ada6e"}}], "links": {"next": null, "self": "http://10.164.0.71/identity/v3/groups/***************************1f428/users", "previous": null}}
+2023-09-26 13:25:06 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:946) | GET call to identity for http://10.164.0.71/identity/v3/groups/***************************1f428/users used request id req-6dd4a8b0-f6e2-4b68-bb29-d62657ca90d3
+2023-09-26 13:25:06 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:151) | users: [{'default_project_id': None, 'description': None, 'domain_id': 'default', 'email': None, 'enabled': True, 'links': {'self': 'http://10.164.0.71/identity/v3/users/***************************ada6e'}, 'name': 'admin', 'password': None, 'password_expires_at': None, 'id': '***************************ada6e', 'location': Munch({'cloud': '10.164.0.71', 'region_name': '', 'zone': None, 'project': Munch({'id': '***************************a187e', 'name': None, 'domain_id': None, 'domain_name': None})})}]
+2023-09-26 13:25:06 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_services
+2023-09-26 13:25:06 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET http://10.164.0.71/identity/v3/services -H "Accept: application/json" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}1c847a37609ffad2b44f3b1ec40a641ce1988f5b98bdd7bfb7dc326bf2dd4511"
+2023-09-26 13:25:06 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:290) | Resetting dropped connection: 10.164.0.71
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:473) | http://10.164.0.71:80 "GET /identity/v3/services HTTP/1.1" 200 1962
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:542) | RESP: [200] Connection: close Content-Length: 1962 Content-Type: application/json Date: Tue, 26 Sep 2023 13:25:07 GMT Server: Apache/2.4.41 (Ubuntu) Vary: X-Auth-Token x-openstack-request-id: req-04f5042a-2a9e-4c37-86ef-cc21f9abcba4
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:574) | RESP BODY: {"services": [{"name": "keystone", "id": "***************************8d106", "type": "identity", "enabled": true, "links": {"self": "http://10.164.0.71/identity/v3/services/***************************8d106"}}, {"name": "neutron", "description": "Neutron Service", "id": "***************************dd1ba", "type": "network", "enabled": true, "links": {"self": "http://10.164.0.71/identity/v3/services/***************************dd1ba"}}, {"name": "cinderv3", "description": "Cinder Volume Service V3", "id": "***************************2b6e3", "type": "volumev3", "enabled": true, "links": {"self": "http://10.164.0.71/identity/v3/services/***************************2b6e3"}}, {"name": "nova", "description": "Nova Compute Service", "id": "***************************f89cf", "type": "compute", "enabled": true, "links": {"self": "http://10.164.0.71/identity/v3/services/***************************f89cf"}}, {"name": "cinder", "description": "Cinder Volume Service", "id": "***************************110af", "type": "block-storage", "enabled": true, "links": {"self": "http://10.164.0.71/identity/v3/services/***************************110af"}}, {"name": "placement", "description": "Placement Service", "id": "***************************5adc8", "type": "placement", "enabled": true, "links": {"self": "http://10.164.0.71/identity/v3/services/***************************5adc8"}}, {"name": "nova_legacy", "description": "Nova Compute Service (Legacy 2.0)", "id": "***************************1c097", "type": "compute_legacy", "enabled": true, "links": {"self": "http://10.164.0.71/identity/v3/services/***************************1c097"}}, {"name": "glance", "description": "Glance Image Service", "id": "***************************57267", "type": "image", "enabled": true, "links": {"self": "http://10.164.0.71/identity/v3/services/***************************57267"}}], "links": {"next": null, "self": "http://10.164.0.71/identity/v3/services", "previous": null}}
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:946) | GET call to identity for http://10.164.0.71/identity/v3/services used request id req-04f5042a-2a9e-4c37-86ef-cc21f9abcba4
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:165) | service: {'tags': ['service_name:keystone', 'service_type:identity', 'service_id:"***************************8d106"'], 'metrics': {'openstack.keystone.services.enabled': 1}}
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:165) | service: {'tags': ['service_name:neutron', 'service_type:network', 'service_id:"***************************dd1ba"'], 'metrics': {'openstack.keystone.services.enabled': 1}}
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:165) | service: {'tags': ['service_name:cinderv3', 'service_type:volumev3', 'service_id:"***************************2b6e3"'], 'metrics': {'openstack.keystone.services.enabled': 1}}
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:165) | service: {'tags': ['service_name:nova', 'service_type:compute', 'service_id:"***************************f89cf"'], 'metrics': {'openstack.keystone.services.enabled': 1}}
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:165) | service: {'tags': ['service_name:cinder', 'service_type:block-storage', 'service_id:"***************************110af"'], 'metrics': {'openstack.keystone.services.enabled': 1}}
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:165) | service: {'tags': ['service_name:placement', 'service_type:placement', 'service_id:"***************************5adc8"'], 'metrics': {'openstack.keystone.services.enabled': 1}}
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:165) | service: {'tags': ['service_name:nova_legacy', 'service_type:compute_legacy', 'service_id:"***************************1c097"'], 'metrics': {'openstack.keystone.services.enabled': 1}}
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:165) | service: {'tags': ['service_name:glance', 'service_type:image', 'service_id:"***************************57267"'], 'metrics': {'openstack.keystone.services.enabled': 1}}
+2023-09-26 13:25:07 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_registered_limits
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET http://10.164.0.71/identity/v3/registered_limits -H "Accept: application/json" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}1c847a37609ffad2b44f3b1ec40a641ce1988f5b98bdd7bfb7dc326bf2dd4511"
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:290) | Resetting dropped connection: 10.164.0.71
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:473) | http://10.164.0.71:80 "GET /identity/v3/registered_limits HTTP/1.1" 200 1352
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:542) | RESP: [200] Connection: close Content-Length: 1352 Content-Type: application/json Date: Tue, 26 Sep 2023 13:25:07 GMT Server: Apache/2.4.41 (Ubuntu) Vary: X-Auth-Token x-openstack-request-id: req-7c34f12a-23f1-4d7a-b87f-fbd5b8709c19
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:574) | RESP BODY: {"registered_limits": [{"id": "***************************16cf3", "service_id": "***************************57267", "region_id": "RegionOne", "resource_name": "image_size_total", "default_limit": 1000, "description": null, "links": {"self": "http://10.164.0.71/identity/v3/registered_limits/***************************16cf3"}}, {"id": "***************************9627c", "service_id": "***************************57267", "region_id": "RegionOne", "resource_name": "image_stage_total", "default_limit": 1000, "description": null, "links": {"self": "http://10.164.0.71/identity/v3/registered_limits/***************************9627c"}}, {"id": "***************************bcc16", "service_id": "***************************57267", "region_id": "RegionOne", "resource_name": "image_count_total", "default_limit": 100, "description": null, "links": {"self": "http://10.164.0.71/identity/v3/registered_limits/***************************bcc16"}}, {"id": "***************************df822", "service_id": "***************************57267", "region_id": "RegionOne", "resource_name": "image_count_uploading", "default_limit": 100, "description": null, "links": {"self": "http://10.164.0.71/identity/v3/registered_limits/***************************df822"}}], "links": {"next": null, "self": "http://10.164.0.71/identity/v3/registered_limits", "previous": null}}
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:946) | GET call to identity for http://10.164.0.71/identity/v3/registered_limits used request id req-7c34f12a-23f1-4d7a-b87f-fbd5b8709c19
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:182) | registered_limit: {'tags': ['service_id:"***************************57267"', 'region_id:RegionOne', 'resource_name:image_size_total', 'limit_id:"***************************16cf3"'], 'metrics': {'openstack.keystone.limits.limit': 1000}}
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:182) | registered_limit: {'tags': ['service_id:"***************************57267"', 'region_id:RegionOne', 'resource_name:image_stage_total', 'limit_id:"***************************9627c"'], 'metrics': {'openstack.keystone.limits.limit': 1000}}
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:182) | registered_limit: {'tags': ['service_id:"***************************57267"', 'region_id:RegionOne', 'resource_name:image_count_total', 'limit_id:"***************************bcc16"'], 'metrics': {'openstack.keystone.limits.limit': 100}}
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:182) | registered_limit: {'tags': ['service_id:"***************************57267"', 'region_id:RegionOne', 'resource_name:image_count_uploading', 'limit_id:"***************************df822"'], 'metrics': {'openstack.keystone.limits.limit': 100}}
+2023-09-26 13:25:07 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_limits
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET http://10.164.0.71/identity/v3/limits -H "Accept: application/json" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}1c847a37609ffad2b44f3b1ec40a641ce1988f5b98bdd7bfb7dc326bf2dd4511"
+2023-09-26 13:25:07 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:290) | Resetting dropped connection: 10.164.0.71
+2023-09-26 13:25:08 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:473) | http://10.164.0.71:80 "GET /identity/v3/limits HTTP/1.1" 200 107
+2023-09-26 13:25:08 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:542) | RESP: [200] Connection: close Content-Length: 107 Content-Type: application/json Date: Tue, 26 Sep 2023 13:25:08 GMT Server: Apache/2.4.41 (Ubuntu) Vary: X-Auth-Token x-openstack-request-id: req-8824e0a3-3f44-4a17-879c-bbb6b38fba61
+2023-09-26 13:25:08 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:574) | RESP BODY: {"limits": [], "links": {"next": null, "self": "http://10.164.0.71/identity/v3/limits", "previous": null}}
+2023-09-26 13:25:08 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:946) | GET call to identity for http://10.164.0.71/identity/v3/limits used request id req-8824e0a3-3f44-4a17-879c-bbb6b38fba61
+2023-09-26 13:25:08 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:133) | reporting `compute` component global metrics
+2023-09-26 13:25:08 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:136) | `compute` component found in catalog
+2023-09-26 13:25:08 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_response_time
+2023-09-26 13:25:08 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (compute.py:56) | reporting `compute` response time
+2023-09-26 13:25:08 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (api_sdk.py:96) | access.project_id: "***************************a187e"
+2023-09-26 13:25:08 UTC | CORE | ERROR | (pkg/collector/python/datadog_agent.go:129 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:72) | Exception: 'NoneType' object has no attribute 'replace'
+2023-09-26 13:25:08 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_limits
+2023-09-26 13:25:08 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET http://my-nova-api-url:8774/v2.1/limits -H "OpenStack-API-Version: compute 2.93" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}1c847a37609ffad2b44f3b1ec40a641ce1988f5b98bdd7bfb7dc326bf2dd4511" -H "X-OpenStack-Nova-API-Version: 2.93"
+2023-09-26 13:25:08 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (1): my-nova-api-url:8774
+2023-09-26 13:25:08 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | - | (session.py:1041) | Failure: Unable to establish connection to http://my-nova-api-url:8774/v2.1/limits: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/limits (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff45039e20>: Failed to establish a new connection: [Errno -2] Name or service not known')). Retrying in 0.5s.
+2023-09-26 13:25:08 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (2): my-nova-api-url:8774
+2023-09-26 13:25:08 UTC | CORE | ERROR | (pkg/collector/python/datadog_agent.go:129 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:72) | Exception: Unable to establish connection to http://my-nova-api-url:8774/v2.1/limits: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/limits (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff450358b0>: Failed to establish a new connection: [Errno -2] Name or service not known'))
+2023-09-26 13:25:08 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_services
+2023-09-26 13:25:08 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET http://my-nova-api-url:8774/v2.1/os-services -H "Accept: application/json" -H "OpenStack-API-Version: compute 2.93" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}1c847a37609ffad2b44f3b1ec40a641ce1988f5b98bdd7bfb7dc326bf2dd4511" -H "X-OpenStack-Nova-API-Version: 2.93"
+2023-09-26 13:25:08 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (3): my-nova-api-url:8774
+2023-09-26 13:25:08 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | - | (session.py:1041) | Failure: Unable to establish connection to http://my-nova-api-url:8774/v2.1/os-services: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/os-services (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff45049160>: Failed to establish a new connection: [Errno -2] Name or service not known')). Retrying in 0.5s.
+2023-09-26 13:25:09 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (4): my-nova-api-url:8774
+2023-09-26 13:25:09 UTC | CORE | ERROR | (pkg/collector/python/datadog_agent.go:129 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:72) | Exception: Unable to establish connection to http://my-nova-api-url:8774/v2.1/os-services: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/os-services (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff450358e0>: Failed to establish a new connection: [Errno -2] Name or service not known'))
+2023-09-26 13:25:09 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_flavors
+2023-09-26 13:25:09 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET "http://my-nova-api-url:8774/v2.1/flavors/detail?is_public=None" -H "Accept: application/json" -H "OpenStack-API-Version: compute 2.93" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}1c847a37609ffad2b44f3b1ec40a641ce1988f5b98bdd7bfb7dc326bf2dd4511" -H "X-OpenStack-Nova-API-Version: 2.93"
+2023-09-26 13:25:09 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (5): my-nova-api-url:8774
+2023-09-26 13:25:09 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | - | (session.py:1041) | Failure: Unable to establish connection to http://my-nova-api-url:8774/v2.1/flavors/detail: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/flavors/detail?is_public=None (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff450359a0>: Failed to establish a new connection: [Errno -2] Name or service not known')). Retrying in 0.5s.
+2023-09-26 13:25:09 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (6): my-nova-api-url:8774
+2023-09-26 13:25:10 UTC | CORE | ERROR | (pkg/collector/python/datadog_agent.go:129 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:72) | Exception: Unable to establish connection to http://my-nova-api-url:8774/v2.1/flavors/detail: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/flavors/detail?is_public=None (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff4505cf10>: Failed to establish a new connection: [Errno -2] Name or service not known'))
+2023-09-26 13:25:10 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_hypervisors
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET http://my-nova-api-url:8774/v2.1/os-hypervisors/detail -H "Accept: application/json" -H "OpenStack-API-Version: compute 2.93" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}1c847a37609ffad2b44f3b1ec40a641ce1988f5b98bdd7bfb7dc326bf2dd4511" -H "X-OpenStack-Nova-API-Version: 2.93"
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (7): my-nova-api-url:8774
+2023-09-26 13:25:10 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | - | (session.py:1041) | Failure: Unable to establish connection to http://my-nova-api-url:8774/v2.1/os-hypervisors/detail: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/os-hypervisors/detail (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff44f2e7c0>: Failed to establish a new connection: [Errno -2] Name or service not known')). Retrying in 0.5s.
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (8): my-nova-api-url:8774
+2023-09-26 13:25:10 UTC | CORE | ERROR | (pkg/collector/python/datadog_agent.go:129 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:72) | Exception: Unable to establish connection to http://my-nova-api-url:8774/v2.1/os-hypervisors/detail: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/os-hypervisors/detail (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff44f2c940>: Failed to establish a new connection: [Errno -2] Name or service not known'))
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:133) | reporting `network` component global metrics
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:136) | `network` component found in catalog
+2023-09-26 13:25:10 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_response_time
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (network.py:31) | reporting `network` response time
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (api_sdk.py:96) | access.project_id: "***************************a187e"
+2023-09-26 13:25:10 UTC | CORE | ERROR | (pkg/collector/python/datadog_agent.go:129 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:72) | Exception: 'NoneType' object has no attribute 'replace'
+2023-09-26 13:25:10 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_agents
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (api_sdk.py:197) | getting network agents
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET http://10.164.0.71:9696/networking/v2.0/agents -H "Accept: application/json" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}1c847a37609ffad2b44f3b1ec40a641ce1988f5b98bdd7bfb7dc326bf2dd4511"
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (1): 10.164.0.71:9696
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:473) | http://10.164.0.71:9696 "GET /networking/v2.0/agents HTTP/1.1" 200 866
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:542) | RESP: [200] Content-Length: 866 Content-Type: application/json Date: Tue, 26 Sep 2023 13:25:10 GMT X-Openstack-Request-Id: req-0c7203e8-55cd-4a01-898d-c5e219e9996a
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:574) | RESP BODY: {"agents": [{"binary": "neutron-ovn-metadata-agent", "host": "agent-integrations-openstack-default", "heartbeat_timestamp": "2023-09-26 13:25:06", "availability_zone": "", "topic": "n/a", "description": "", "configurations": {"chassis_name": "dba5afd5-a4ce-4f98-85f9-abcb694b1107", "bridge-mappings": "public:br-ex"}, "agent_type": "OVN Metadata agent", "id": "d2eb437a-19c5-5a5f-a6ef-15d252914dd2", "alive": true, "admin_state_up": true}, {"binary": "ovn-controller", "host": "agent-integrations-openstack-default", "heartbeat_timestamp": "2023-09-26 13:25:06", "availability_zone": "", "topic": "n/a", "description": "", "configurations": {"chassis_name": "dba5afd5-a4ce-4f98-85f9-abcb694b1107", "bridge-mappings": "public:br-ex"}, "agent_type": "OVN Controller Gateway agent", "id": "dba5afd5-a4ce-4f98-85f9-abcb694b1107", "alive": true, "admin_state_up": true}]}
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:946) | GET call to network for http://10.164.0.71:9696/networking/v2.0/agents used request id req-0c7203e8-55cd-4a01-898d-c5e219e9996a
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (network.py:48) | agent: {'tags': ['agent_type:OVN Metadata agent', 'agent_availability_zone:', 'agent_name:neutron-ovn-metadata-agent', 'agent_host:agent-integrations-openstack-default', 'agent_id:d2eb437a-19c5-5a5f-a6ef-15d252914dd2'], 'metrics': {'openstack.neutron.agents.admin_state_up': 1, 'openstack.neutron.agents.alive': 1}}
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (network.py:48) | agent: {'tags': ['agent_type:OVN Controller Gateway agent', 'agent_availability_zone:', 'agent_name:ovn-controller', 'agent_host:agent-integrations-openstack-default', 'agent_id:dba5afd5-a4ce-4f98-85f9-abcb694b1107'], 'metrics': {'openstack.neutron.agents.admin_state_up': 1, 'openstack.neutron.agents.alive': 1}}
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:133) | reporting `block-storage` component global metrics
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:136) | `block-storage` component found in catalog
+2023-09-26 13:25:10 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_response_time
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (block_storage.py:23) | reporting `block-storage` response time
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (api_sdk.py:96) | access.project_id: "***************************a187e"
+2023-09-26 13:25:10 UTC | CORE | ERROR | (pkg/collector/python/datadog_agent.go:129 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:72) | Exception: 'NoneType' object has no attribute 'replace'
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:133) | reporting `baremetal` component global metrics
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:146) | `baremetal` component not found in catalog
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:133) | reporting `load-balancer` component global metrics
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:146) | `load-balancer` component not found in catalog
+2023-09-26 13:25:10 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | openstack_controller:e3da92c69104d131 | (check.py:75) | reporting project `***************************a187e` metrics
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:149) | reporting `identity` component project metrics
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:152) | `identity` component found in catalog
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:157) | `identity` component has not registered methods for project metrics
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:149) | reporting `compute` component project metrics
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:152) | `compute` component found in catalog
+2023-09-26 13:25:10 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:102) | _report_quota_sets
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (api_sdk.py:166) | getting compute quota sets for project ***************************a187e
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET "http://my-nova-api-url:8774/v2.1/os-quota-sets/***************************a187e?usage=False" -H "OpenStack-API-Version: compute 2.93" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}1c847a37609ffad2b44f3b1ec40a641ce1988f5b98bdd7bfb7dc326bf2dd4511" -H "X-OpenStack-Nova-API-Version: 2.93"
+2023-09-26 13:25:10 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (9): my-nova-api-url:8774
+2023-09-26 13:25:10 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | - | (session.py:1041) | Failure: Unable to establish connection to http://my-nova-api-url:8774/v2.1/os-quota-sets/***************************a187e: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/os-quota-sets/***************************a187e?usage=False (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff44f2c5b0>: Failed to establish a new connection: [Errno -2] Name or service not known')). Retrying in 0.5s.
+2023-09-26 13:25:11 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (10): my-nova-api-url:8774
+2023-09-26 13:25:11 UTC | CORE | ERROR | (pkg/collector/python/datadog_agent.go:129 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:72) | Exception: Unable to establish connection to http://my-nova-api-url:8774/v2.1/os-quota-sets/***************************a187e: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/os-quota-sets/***************************a187e?usage=False (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff4505cd90>: Failed to establish a new connection: [Errno -2] Name or service not known'))
+2023-09-26 13:25:11 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:102) | _report_servers
+2023-09-26 13:25:11 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (api_sdk.py:172) | getting compute servers for project ***************************a187e
+2023-09-26 13:25:11 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET "http://my-nova-api-url:8774/v2.1/servers/detail?project_id=***************************a187e" -H "Accept: application/json" -H "OpenStack-API-Version: compute 2.93" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}1c847a37609ffad2b44f3b1ec40a641ce1988f5b98bdd7bfb7dc326bf2dd4511" -H "X-OpenStack-Nova-API-Version: 2.93"
+2023-09-26 13:25:11 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (11): my-nova-api-url:8774
+2023-09-26 13:25:11 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | - | (session.py:1041) | Failure: Unable to establish connection to http://my-nova-api-url:8774/v2.1/servers/detail: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/servers/detail?project_id=***************************a187e (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff45035760>: Failed to establish a new connection: [Errno -2] Name or service not known')). Retrying in 0.5s.
+2023-09-26 13:25:11 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (12): my-nova-api-url:8774
+2023-09-26 13:25:11 UTC | CORE | ERROR | (pkg/collector/python/datadog_agent.go:129 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:72) | Exception: Unable to establish connection to http://my-nova-api-url:8774/v2.1/servers/detail: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/servers/detail?project_id=***************************a187e (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff450358b0>: Failed to establish a new connection: [Errno -2] Name or service not known'))
+2023-09-26 13:25:11 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:149) | reporting `network` component project metrics
+2023-09-26 13:25:11 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:152) | `network` component found in catalog
+2023-09-26 13:25:11 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:102) | _report_quotas
+2023-09-26 13:25:11 UTC | CORE | ERROR | (pkg/collector/python/datadog_agent.go:129 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:72) | Exception: get_quota() got an unexpected keyword argument 'project_id'
+2023-09-26 13:25:11 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:149) | reporting `block-storage` component project metrics
+2023-09-26 13:25:11 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:152) | `block-storage` component found in catalog
+2023-09-26 13:25:11 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:157) | `block-storage` component has not registered methods for project metrics
+2023-09-26 13:25:11 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:149) | reporting `baremetal` component project metrics
+2023-09-26 13:25:11 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:162) | `baremetal` component not found in catalog
+2023-09-26 13:25:11 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:149) | reporting `load-balancer` component project metrics
+2023-09-26 13:25:11 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:162) | `load-balancer` component not found in catalog
+2023-09-26 13:25:11 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (api_sdk.py:66) | current_project_id: "***************************a187e"
+2023-09-26 13:25:11 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (api_sdk.py:67) | project_id: "***************************43638"
+2023-09-26 13:25:11 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (base.py:184) | Making authentication request to http://10.164.0.71/identity/v3/auth/tokens
+2023-09-26 13:25:11 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:290) | Resetting dropped connection: 10.164.0.71
+2023-09-26 13:25:13 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:473) | http://10.164.0.71:80 "POST /identity/v3/auth/tokens HTTP/1.1" 201 2957
+2023-09-26 13:25:13 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (base.py:189) | {"token": {"methods": ["password"], "user": {"domain": {"id": "default", "name": "Default"}, "id": "***************************ada6e", "name": "admin", "password_expires_at": null}, "audit_ids": ["PyZxKT8wR8aeHgt31ho_Fg"], "expires_at": "2023-09-26T14:25:13.000000Z", "issued_at": "2023-09-26T13:25:13.000000Z", "project": {"domain": {"id": "default", "name": "Default"}, "id": "***************************43638", "name": "demo"}, "is_domain": false, "roles": [{"id": "***************************abac6", "name": "reader"}, {"id": "***************************371bf", "name": "member"}, {"id": "***************************afb93", "name": "admin"}], "catalog": [{"endpoints": [{"id": "***************************9085d", "interface": "public", "region_id": "RegionOne", "url": "http://10.164.0.71/identity", "region": "RegionOne"}], "id": "***************************8d106", "type": "identity", "name": "keystone"}, {"endpoints": [{"id": "***************************debd5", "interface": "public", "region_id": "RegionOne", "url": "http://10.164.0.71:9696/networking", "region": "RegionOne"}], "id": "***************************dd1ba", "type": "network", "name": "neutron"}, {"endpoints": [{"id": "***************************31af4", "interface": "public", "region_id": "RegionOne", "url": "http://10.164.0.71/volume/v3/***************************43638", "region": "RegionOne"}], "id": "***************************2b6e3", "type": "volumev3", "name": "cinderv3"}, {"endpoints": [{"id": "***************************fcb30", "interface": "public", "region_id": "my-region", "url": "http://my-nova-api-url:8774/v2.1", "region": "my-region"}, {"id": "***************************7edec", "interface": "public", "region_id": "RegionOne", "url": "http://10.164.0.71/compute/v2.1", "region": "RegionOne"}], "id": "***************************f89cf", "type": "compute", "name": "nova"}, {"endpoints": [{"id": "***************************c7824", "interface": "public", "region_id": "RegionOne", "url": "http://10.164.0.71/volume/v3/***************************43638", "region": "RegionOne"}], "id": "***************************110af", "type": "block-storage", "name": "cinder"}, {"endpoints": [{"id": "***************************edf43", "interface": "public", "region_id": "RegionOne", "url": "http://10.164.0.71/placement", "region": "RegionOne"}], "id": "***************************5adc8", "type": "placement", "name": "placement"}, {"endpoints": [{"id": "***************************18afc", "interface": "public", "region_id": "RegionOne", "url": "http://10.164.0.71/compute/v2/***************************43638", "region": "RegionOne"}], "id": "***************************1c097", "type": "compute_legacy", "name": "nova_legacy"}, {"endpoints": [{"id": "***************************6e6e7", "interface": "public", "region_id": "RegionOne", "url": "http://10.164.0.71/image", "region": "RegionOne"}], "id": "***************************57267", "type": "image", "name": "glance"}]}}
+2023-09-26 13:25:13 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (api_sdk.py:85) | role_names: ['reader', 'member', 'admin']
+2023-09-26 13:25:13 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | openstack_controller:e3da92c69104d131 | (check.py:70) | reporting global metrics
+2023-09-26 13:25:13 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:133) | reporting `identity` component global metrics
+2023-09-26 13:25:13 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:136) | `identity` component found in catalog
+2023-09-26 13:25:13 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_response_time
+2023-09-26 13:25:13 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (identity.py:62) | reporting `identity` response time
+2023-09-26 13:25:13 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (api_sdk.py:96) | access.project_id: "***************************43638"
+2023-09-26 13:25:13 UTC | CORE | ERROR | (pkg/collector/python/datadog_agent.go:129 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:72) | Exception: 'NoneType' object has no attribute 'replace'
+2023-09-26 13:25:13 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_regions
+2023-09-26 13:25:13 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_domains
+2023-09-26 13:25:13 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_projects
+2023-09-26 13:25:13 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_users
+2023-09-26 13:25:13 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_groups
+2023-09-26 13:25:13 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_services
+2023-09-26 13:25:13 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_registered_limits
+2023-09-26 13:25:13 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_limits
+2023-09-26 13:25:13 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:133) | reporting `compute` component global metrics
+2023-09-26 13:25:13 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:136) | `compute` component found in catalog
+2023-09-26 13:25:13 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_response_time
+2023-09-26 13:25:13 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (compute.py:56) | reporting `compute` response time
+2023-09-26 13:25:13 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (api_sdk.py:96) | access.project_id: "***************************43638"
+2023-09-26 13:25:13 UTC | CORE | ERROR | (pkg/collector/python/datadog_agent.go:129 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:72) | Exception: 'NoneType' object has no attribute 'replace'
+2023-09-26 13:25:13 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_limits
+2023-09-26 13:25:13 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET http://my-nova-api-url:8774/v2.1/limits -H "OpenStack-API-Version: compute 2.93" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}50dab3509971c62d0eb8c213e7c394c2f84f089dc3c81a2d6e68d4ebc0384ee3" -H "X-OpenStack-Nova-API-Version: 2.93"
+2023-09-26 13:25:13 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (13): my-nova-api-url:8774
+2023-09-26 13:25:13 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | - | (session.py:1041) | Failure: Unable to establish connection to http://my-nova-api-url:8774/v2.1/limits: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/limits (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff45035f10>: Failed to establish a new connection: [Errno -2] Name or service not known')). Retrying in 0.5s.
+2023-09-26 13:25:14 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (14): my-nova-api-url:8774
+2023-09-26 13:25:14 UTC | CORE | ERROR | (pkg/collector/python/datadog_agent.go:129 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:72) | Exception: Unable to establish connection to http://my-nova-api-url:8774/v2.1/limits: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/limits (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff45047df0>: Failed to establish a new connection: [Errno -2] Name or service not known'))
+2023-09-26 13:25:14 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_services
+2023-09-26 13:25:14 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET http://my-nova-api-url:8774/v2.1/os-services -H "Accept: application/json" -H "OpenStack-API-Version: compute 2.93" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}50dab3509971c62d0eb8c213e7c394c2f84f089dc3c81a2d6e68d4ebc0384ee3" -H "X-OpenStack-Nova-API-Version: 2.93"
+2023-09-26 13:25:14 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (15): my-nova-api-url:8774
+2023-09-26 13:25:14 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | - | (session.py:1041) | Failure: Unable to establish connection to http://my-nova-api-url:8774/v2.1/os-services: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/os-services (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff44eabac0>: Failed to establish a new connection: [Errno -2] Name or service not known')). Retrying in 0.5s.
+2023-09-26 13:25:14 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (16): my-nova-api-url:8774
+2023-09-26 13:25:14 UTC | CORE | ERROR | (pkg/collector/python/datadog_agent.go:129 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:72) | Exception: Unable to establish connection to http://my-nova-api-url:8774/v2.1/os-services: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/os-services (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff44f2caf0>: Failed to establish a new connection: [Errno -2] Name or service not known'))
+2023-09-26 13:25:14 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_flavors
+2023-09-26 13:25:14 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET "http://my-nova-api-url:8774/v2.1/flavors/detail?is_public=None" -H "Accept: application/json" -H "OpenStack-API-Version: compute 2.93" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}50dab3509971c62d0eb8c213e7c394c2f84f089dc3c81a2d6e68d4ebc0384ee3" -H "X-OpenStack-Nova-API-Version: 2.93"
+2023-09-26 13:25:14 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (17): my-nova-api-url:8774
+2023-09-26 13:25:14 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | - | (session.py:1041) | Failure: Unable to establish connection to http://my-nova-api-url:8774/v2.1/flavors/detail: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/flavors/detail?is_public=None (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff44f2e760>: Failed to establish a new connection: [Errno -2] Name or service not known')). Retrying in 0.5s.
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (18): my-nova-api-url:8774
+2023-09-26 13:25:15 UTC | CORE | ERROR | (pkg/collector/python/datadog_agent.go:129 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:72) | Exception: Unable to establish connection to http://my-nova-api-url:8774/v2.1/flavors/detail: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/flavors/detail?is_public=None (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff44fe6640>: Failed to establish a new connection: [Errno -2] Name or service not known'))
+2023-09-26 13:25:15 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_hypervisors
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET http://my-nova-api-url:8774/v2.1/os-hypervisors/detail -H "Accept: application/json" -H "OpenStack-API-Version: compute 2.93" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}50dab3509971c62d0eb8c213e7c394c2f84f089dc3c81a2d6e68d4ebc0384ee3" -H "X-OpenStack-Nova-API-Version: 2.93"
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (19): my-nova-api-url:8774
+2023-09-26 13:25:15 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | - | (session.py:1041) | Failure: Unable to establish connection to http://my-nova-api-url:8774/v2.1/os-hypervisors/detail: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/os-hypervisors/detail (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff4503efd0>: Failed to establish a new connection: [Errno -2] Name or service not known')). Retrying in 0.5s.
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (20): my-nova-api-url:8774
+2023-09-26 13:25:15 UTC | CORE | ERROR | (pkg/collector/python/datadog_agent.go:129 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:72) | Exception: Unable to establish connection to http://my-nova-api-url:8774/v2.1/os-hypervisors/detail: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/os-hypervisors/detail (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff450490a0>: Failed to establish a new connection: [Errno -2] Name or service not known'))
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:133) | reporting `network` component global metrics
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:136) | `network` component found in catalog
+2023-09-26 13:25:15 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_response_time
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (network.py:31) | reporting `network` response time
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (api_sdk.py:96) | access.project_id: "***************************43638"
+2023-09-26 13:25:15 UTC | CORE | ERROR | (pkg/collector/python/datadog_agent.go:129 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:72) | Exception: 'NoneType' object has no attribute 'replace'
+2023-09-26 13:25:15 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_agents
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:133) | reporting `block-storage` component global metrics
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:136) | `block-storage` component found in catalog
+2023-09-26 13:25:15 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:84) | _report_response_time
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (block_storage.py:23) | reporting `block-storage` response time
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (api_sdk.py:96) | access.project_id: "***************************43638"
+2023-09-26 13:25:15 UTC | CORE | ERROR | (pkg/collector/python/datadog_agent.go:129 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:72) | Exception: 'NoneType' object has no attribute 'replace'
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:133) | reporting `baremetal` component global metrics
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:146) | `baremetal` component not found in catalog
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:133) | reporting `load-balancer` component global metrics
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:146) | `load-balancer` component not found in catalog
+2023-09-26 13:25:15 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | openstack_controller:e3da92c69104d131 | (check.py:75) | reporting project `***************************43638` metrics
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:149) | reporting `identity` component project metrics
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:152) | `identity` component found in catalog
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:157) | `identity` component has not registered methods for project metrics
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:149) | reporting `compute` component project metrics
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:152) | `compute` component found in catalog
+2023-09-26 13:25:15 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:102) | _report_quota_sets
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (api_sdk.py:166) | getting compute quota sets for project ***************************43638
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET "http://my-nova-api-url:8774/v2.1/os-quota-sets/***************************43638?usage=False" -H "OpenStack-API-Version: compute 2.93" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}50dab3509971c62d0eb8c213e7c394c2f84f089dc3c81a2d6e68d4ebc0384ee3" -H "X-OpenStack-Nova-API-Version: 2.93"
+2023-09-26 13:25:15 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (21): my-nova-api-url:8774
+2023-09-26 13:25:15 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | - | (session.py:1041) | Failure: Unable to establish connection to http://my-nova-api-url:8774/v2.1/os-quota-sets/***************************43638: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/os-quota-sets/***************************43638?usage=False (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff44f2cc10>: Failed to establish a new connection: [Errno -2] Name or service not known')). Retrying in 0.5s.
+2023-09-26 13:25:16 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (22): my-nova-api-url:8774
+2023-09-26 13:25:16 UTC | CORE | ERROR | (pkg/collector/python/datadog_agent.go:129 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:72) | Exception: Unable to establish connection to http://my-nova-api-url:8774/v2.1/os-quota-sets/***************************43638: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/os-quota-sets/***************************43638?usage=False (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff44f2eb20>: Failed to establish a new connection: [Errno -2] Name or service not known'))
+2023-09-26 13:25:16 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:102) | _report_servers
+2023-09-26 13:25:16 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (api_sdk.py:172) | getting compute servers for project ***************************43638
+2023-09-26 13:25:16 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (session.py:511) | REQ: curl -g -i -X GET "http://my-nova-api-url:8774/v2.1/servers/detail?project_id=***************************43638" -H "Accept: application/json" -H "OpenStack-API-Version: compute 2.93" -H "User-Agent: keystoneauth1/5.3.0 python-requests/2.31.0 CPython/3.9.17" -H "X-Auth-Token: {SHA256}50dab3509971c62d0eb8c213e7c394c2f84f089dc3c81a2d6e68d4ebc0384ee3" -H "X-OpenStack-Nova-API-Version: 2.93"
+2023-09-26 13:25:16 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (23): my-nova-api-url:8774
+2023-09-26 13:25:16 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:133 in LogMessage) | - | (session.py:1041) | Failure: Unable to establish connection to http://my-nova-api-url:8774/v2.1/servers/detail: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/servers/detail?project_id=***************************43638 (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff45039e20>: Failed to establish a new connection: [Errno -2] Name or service not known')). Retrying in 0.5s.
+2023-09-26 13:25:17 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | - | (connectionpool.py:245) | Starting new HTTP connection (24): my-nova-api-url:8774
+2023-09-26 13:25:17 UTC | CORE | ERROR | (pkg/collector/python/datadog_agent.go:129 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:72) | Exception: Unable to establish connection to http://my-nova-api-url:8774/v2.1/servers/detail: SOCKSHTTPConnectionPool(host='my-nova-api-url', port=8774): Max retries exceeded with url: /v2.1/servers/detail?project_id=***************************43638 (Caused by NewConnectionError('<urllib3.contrib.socks.SOCKSConnection object at 0xffff45035ca0>: Failed to establish a new connection: [Errno -2] Name or service not known'))
+2023-09-26 13:25:17 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:149) | reporting `network` component project metrics
+2023-09-26 13:25:17 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:152) | `network` component found in catalog
+2023-09-26 13:25:17 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:131 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:102) | _report_quotas
+2023-09-26 13:25:17 UTC | CORE | ERROR | (pkg/collector/python/datadog_agent.go:129 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:72) | Exception: get_quota() got an unexpected keyword argument 'project_id'
+2023-09-26 13:25:17 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:149) | reporting `block-storage` component project metrics
+2023-09-26 13:25:17 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:152) | `block-storage` component found in catalog
+2023-09-26 13:25:17 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:157) | `block-storage` component has not registered methods for project metrics
+2023-09-26 13:25:17 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:149) | reporting `baremetal` component project metrics
+2023-09-26 13:25:17 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:162) | `baremetal` component not found in catalog
+2023-09-26 13:25:17 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:149) | reporting `load-balancer` component project metrics
+2023-09-26 13:25:17 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:135 in LogMessage) | openstack_controller:e3da92c69104d131 | (component.py:162) | `load-balancer` component not found in catalog
+=== Series ===
+[
+  {
+    "metric": "openstack.keystone.domains.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "domain_name:Default",
+      "keystone_server:http://10.164.0.71/identity"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.projects.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "project_id:6ea431787cf5418dae171ec6636c7baa",
+      "project_name:alt_demo"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:10bff187a3794cedbbcaadbbe099d424",
+      "user_name:demo"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:26c1d298647b42f1ad75315397c7fe90",
+      "user_name:alt_demo_reader"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:6e9e2b756fba44d0ae45acfd041eb5cf",
+      "user_name:cinder"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.limits.limit",
+    "points": [
+      [
+        1695734717,
+        1000
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity",
+      "limit_id:ce331d8d8fb943909620462f5ed16cf3",
+      "region_id:RegionOne",
+      "resource_name:image_size_total",
+      "service_id:fd1088efcf094161a432f700be757267"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.projects.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "project_id:e4395f36331a454796c6e74387c59427",
+      "project_name:service"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.projects.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "project_id:fe5a09a10d1d46a4a1f95c53a0b43638",
+      "project_name:demo"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:b76fd968360a450aacbdc4cf689ada6e",
+      "user_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:038ce1862f3f4f2d8c31577e0b446150",
+      "user_name:system_reader"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:1f1bea02c5e2412cbff0fc5ef304c9ba",
+      "user_name:placement"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.neutron.agents.admin_state_up",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "agent_availability_zone:",
+      "agent_host:agent-integrations-openstack-default",
+      "agent_id:dba5afd5-a4ce-4f98-85f9-abcb694b1107",
+      "agent_name:ovn-controller",
+      "agent_type:OVN Controller Gateway agent",
+      "keystone_server:http://10.164.0.71/identity"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.projects.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "project_id:8582553ab9d8461b983e54381cc1f56c",
+      "project_name:invisible_to_admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:c230c87bdb8e49c9b403d4b83d3ac529",
+      "user_name:alt_demo"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:9e64a05622db4158b74962fa1e340187",
+      "user_name:alt_demo_member"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.services.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity",
+      "service_id:54c7ac3114a84215877f5df22b9dd1ba",
+      "service_name:neutron",
+      "service_type:network"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.limits.limit",
+    "points": [
+      [
+        1695734717,
+        100
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity",
+      "limit_id:96e17e8676644713adf9f84331fbcc16",
+      "region_id:RegionOne",
+      "resource_name:image_count_total",
+      "service_id:fd1088efcf094161a432f700be757267"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.controller",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.services.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity",
+      "service_id:aeb673889c3f49a1bf365a4306f5adc8",
+      "service_name:placement",
+      "service_type:placement"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.services.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity",
+      "service_id:d276f737d6d740478e88618ed431c097",
+      "service_name:nova_legacy",
+      "service_type:compute_legacy"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:26c1d298647b42f1ad75315397c7fe90",
+      "user_name:alt_demo_reader"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:926e5b27686044a09bbb3a439924a91f",
+      "user_name:system_member"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:2da2918ee7c74d76aaa2a1fc487ff67a",
+      "user_name:glance"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.groups.users",
+    "points": [
+      [
+        1695734717,
+        0
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "group_id:d5278e81241946448ab85f914c184d26",
+      "group_name:nonadmins",
+      "keystone_server:http://10.164.0.71/identity"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.services.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity",
+      "service_id:5c0c137aee2543b6b595a47edc52b6e3",
+      "service_name:cinderv3",
+      "service_type:volumev3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.services.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity",
+      "service_id:aeb673889c3f49a1bf365a4306f5adc8",
+      "service_name:placement",
+      "service_type:placement"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:2da2918ee7c74d76aaa2a1fc487ff67a",
+      "user_name:glance"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:1f1bea02c5e2412cbff0fc5ef304c9ba",
+      "user_name:placement"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.services.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity",
+      "service_id:54c7ac3114a84215877f5df22b9dd1ba",
+      "service_name:neutron",
+      "service_type:network"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.services.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity",
+      "service_id:fd1088efcf094161a432f700be757267",
+      "service_name:glance",
+      "service_type:image"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:fe53ba531f0941478440ce52fb3e6b39",
+      "user_name:neutron"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.neutron.agents.alive",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "agent_availability_zone:",
+      "agent_host:agent-integrations-openstack-default",
+      "agent_id:d2eb437a-19c5-5a5f-a6ef-15d252914dd2",
+      "agent_name:neutron-ovn-metadata-agent",
+      "agent_type:OVN Metadata agent",
+      "keystone_server:http://10.164.0.71/identity"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.projects.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "project_id:8582553ab9d8461b983e54381cc1f56c",
+      "project_name:invisible_to_admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:bdd8da961d854009a717f18a40cb9e4c",
+      "user_name:nova"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.groups.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "group_id:d5278e81241946448ab85f914c184d26",
+      "group_name:nonadmins",
+      "keystone_server:http://10.164.0.71/identity"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.projects.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "project_id:b553ee70e4744334a3417460e25a187e",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.projects.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "project_id:e4395f36331a454796c6e74387c59427",
+      "project_name:service"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:c230c87bdb8e49c9b403d4b83d3ac529",
+      "user_name:alt_demo"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.neutron.agents.alive",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "agent_availability_zone:",
+      "agent_host:agent-integrations-openstack-default",
+      "agent_id:dba5afd5-a4ce-4f98-85f9-abcb694b1107",
+      "agent_name:ovn-controller",
+      "agent_type:OVN Controller Gateway agent",
+      "keystone_server:http://10.164.0.71/identity"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.services.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity",
+      "service_id:9bc42a6d35bf494dac9e39da32d110af",
+      "service_name:cinder",
+      "service_type:block-storage"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.limits.limit",
+    "points": [
+      [
+        1695734717,
+        1000
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity",
+      "limit_id:d1ae5e8c6cdb4aec8c0c313ff109627c",
+      "region_id:RegionOne",
+      "resource_name:image_stage_total",
+      "service_id:fd1088efcf094161a432f700be757267"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.domains.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "domain_name:Default",
+      "keystone_server:http://10.164.0.71/identity"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:9e64a05622db4158b74962fa1e340187",
+      "user_name:alt_demo_member"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:bdd8da961d854009a717f18a40cb9e4c",
+      "user_name:nova"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:fe53ba531f0941478440ce52fb3e6b39",
+      "user_name:neutron"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.services.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity",
+      "service_id:02ec8fe4ffe3495292d6a5feed08d106",
+      "service_name:keystone",
+      "service_type:identity"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.services.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity",
+      "service_id:6eaa4fcd9ba8444bb7940587801f89cf",
+      "service_name:nova",
+      "service_type:compute"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:b76fd968360a450aacbdc4cf689ada6e",
+      "user_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:6e9e2b756fba44d0ae45acfd041eb5cf",
+      "user_name:cinder"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.neutron.agents.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "agent_availability_zone:",
+      "agent_host:agent-integrations-openstack-default",
+      "agent_id:dba5afd5-a4ce-4f98-85f9-abcb694b1107",
+      "agent_name:ovn-controller",
+      "agent_type:OVN Controller Gateway agent",
+      "keystone_server:http://10.164.0.71/identity"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.groups.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "group_id:e343a44e629647b3ac358a54afb1f428",
+      "group_name:admins",
+      "keystone_server:http://10.164.0.71/identity"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.services.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity",
+      "service_id:5c0c137aee2543b6b595a47edc52b6e3",
+      "service_name:cinderv3",
+      "service_type:volumev3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.services.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity",
+      "service_id:fd1088efcf094161a432f700be757267",
+      "service_name:glance",
+      "service_type:image"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.neutron.agents.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "agent_availability_zone:",
+      "agent_host:agent-integrations-openstack-default",
+      "agent_id:d2eb437a-19c5-5a5f-a6ef-15d252914dd2",
+      "agent_name:neutron-ovn-metadata-agent",
+      "agent_type:OVN Metadata agent",
+      "keystone_server:http://10.164.0.71/identity"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.projects.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "project_id:b553ee70e4744334a3417460e25a187e",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.groups.users",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "group_id:e343a44e629647b3ac358a54afb1f428",
+      "group_name:admins",
+      "keystone_server:http://10.164.0.71/identity"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.neutron.agents.admin_state_up",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "agent_availability_zone:",
+      "agent_host:agent-integrations-openstack-default",
+      "agent_id:d2eb437a-19c5-5a5f-a6ef-15d252914dd2",
+      "agent_name:neutron-ovn-metadata-agent",
+      "agent_type:OVN Metadata agent",
+      "keystone_server:http://10.164.0.71/identity"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.regions.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity",
+      "region_id:my-region"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.regions.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity",
+      "region_id:RegionOne"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.projects.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "project_id:6ea431787cf5418dae171ec6636c7baa",
+      "project_name:alt_demo"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:ee82d6c69048439f8252116033f188d0",
+      "user_name:demo_reader"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:ee82d6c69048439f8252116033f188d0",
+      "user_name:demo_reader"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.services.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity",
+      "service_id:6eaa4fcd9ba8444bb7940587801f89cf",
+      "service_name:nova",
+      "service_type:compute"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.projects.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "project_id:fe5a09a10d1d46a4a1f95c53a0b43638",
+      "project_name:demo"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:926e5b27686044a09bbb3a439924a91f",
+      "user_name:system_member"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.services.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity",
+      "service_id:02ec8fe4ffe3495292d6a5feed08d106",
+      "service_name:keystone",
+      "service_type:identity"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.services.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity",
+      "service_id:d276f737d6d740478e88618ed431c097",
+      "service_name:nova_legacy",
+      "service_type:compute_legacy"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:10bff187a3794cedbbcaadbbe099d424",
+      "user_name:demo"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.users.count",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "domain_id:default",
+      "keystone_server:http://10.164.0.71/identity",
+      "user_id:038ce1862f3f4f2d8c31577e0b446150",
+      "user_name:system_reader"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.services.enabled",
+    "points": [
+      [
+        1695734717,
+        1
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity",
+      "service_id:9bc42a6d35bf494dac9e39da32d110af",
+      "service_name:cinder",
+      "service_type:block-storage"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.keystone.limits.limit",
+    "points": [
+      [
+        1695734717,
+        100
+      ]
+    ],
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity",
+      "limit_id:923adad55f224e62ba19c4e93b2df822",
+      "region_id:RegionOne",
+      "resource_name:image_count_uploading",
+      "service_id:fd1088efcf094161a432f700be757267"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  }
+]
+=== Service Checks ===
+[
+  {
+    "check": "openstack.ironic.api.up",
+    "host_name": "COMP-KK6Y27KM0D",
+    "timestamp": 1695734717,
+    "status": 3,
+    "message": "",
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity"
+    ]
+  },
+  {
+    "check": "openstack.octavia.api.up",
+    "host_name": "COMP-KK6Y27KM0D",
+    "timestamp": 1695734717,
+    "status": 3,
+    "message": "",
+    "tags": [
+      "keystone_server:http://10.164.0.71/identity"
+    ]
+  }
+]
+2023-09-26 13:25:17 UTC | CORE | DEBUG | (pkg/epforwarder/epforwarder.go:313 in Purge) | purged DBM channel dbm-samples: 0 events
+2023-09-26 13:25:17 UTC | CORE | DEBUG | (pkg/epforwarder/epforwarder.go:313 in Purge) | purged DBM channel dbm-activity: 0 events
+2023-09-26 13:25:17 UTC | CORE | DEBUG | (pkg/epforwarder/epforwarder.go:313 in Purge) | purged DBM channel dbm-metrics: 0 events
+2023-09-26 13:25:17 UTC | CORE | DEBUG | (pkg/config/config.go:1814 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for AWS Cloud Provider
+2023-09-26 13:25:17 UTC | CORE | DEBUG | (pkg/util/http/transport.go:137 in 1) | URL 'http://169.254.169.254/latest/meta-data/hostname' matches no_proxy list item '169.254.169.254': not using any proxy
+2023-09-26 13:25:17 UTC | CORE | DEBUG | (pkg/config/config.go:1814 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for AWS Cloud Provider
+2023-09-26 13:25:17 UTC | CORE | DEBUG | (pkg/util/http/transport.go:137 in 1) | URL 'http://169.254.169.254/latest/meta-data/instance-id' matches no_proxy list item '169.254.169.254': not using any proxy
+2023-09-26 13:25:18 UTC | CORE | DEBUG | (pkg/config/config.go:1814 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for Alibaba Cloud Provider
+2023-09-26 13:25:18 UTC | CORE | DEBUG | (pkg/config/config.go:1814 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for IBM Cloud Provider
+2023-09-26 13:25:18 UTC | CORE | DEBUG | (pkg/util/http/transport.go:137 in 1) | URL 'http://100.100.100.200/latest/meta-data/instance-id' matches no_proxy list item '100.100.100.200': not using any proxy
+2023-09-26 13:25:18 UTC | CORE | DEBUG | (pkg/config/config.go:1814 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for GCP Cloud Provider
+2023-09-26 13:25:18 UTC | CORE | DEBUG | (pkg/util/http/transport.go:137 in 1) | URL 'http://169.254.169.254/computeMetadata/v1/instance/hostname' matches no_proxy list item '169.254.169.254': not using any proxy
+2023-09-26 13:25:18 UTC | CORE | DEBUG | (pkg/config/config.go:1821 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, skipping Tencent Cloud Provider
+2023-09-26 13:25:18 UTC | CORE | DEBUG | (pkg/config/config.go:1814 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for Azure Cloud Provider
+2023-09-26 13:25:18 UTC | CORE | DEBUG | (pkg/config/config.go:1814 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for Oracle Cloud Provider
+2023-09-26 13:25:18 UTC | CORE | DEBUG | (pkg/config/config.go:1814 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for AWS Cloud Provider
+2023-09-26 13:25:18 UTC | CORE | DEBUG | (pkg/util/cloudproviders/cloudfoundry/cloudfoundry.go:29 in GetHostAliases) | cloud_foundry is not enabled in the conf: no cloudfoudry host alias
+2023-09-26 13:25:18 UTC | CORE | DEBUG | (pkg/util/cloudproviders/cloudproviders.go:134 in func1) | No kubelet Host Alias: host alias from kubelet is not valid: hostname is empty
+2023-09-26 13:25:18 UTC | CORE | DEBUG | (pkg/util/http/transport.go:137 in 1) | URL 'http://169.254.169.254/instance_identity/v1/token?version=2022-03-08' matches no_proxy list item '169.254.169.254': not using any proxy
+2023-09-26 13:25:18 UTC | CORE | DEBUG | (pkg/util/cloudproviders/cloudproviders.go:134 in func1) | No Tencent Host Alias: unable to get TencentCloud CVM instanceID: cloud provider is disabled by configuration
+2023-09-26 13:25:18 UTC | CORE | DEBUG | (pkg/util/http/transport.go:137 in 1) | URL 'http://169.254.169.254/metadata/instance/compute/vmId?api-version=2017-04-02&format=text' matches no_proxy list item '169.254.169.254': not using any proxy
+2023-09-26 13:25:18 UTC | CORE | DEBUG | (pkg/util/http/transport.go:137 in 1) | URL 'http://169.254.169.254/opc/v2/instance/id' matches no_proxy list item '169.254.169.254': not using any proxy
+2023-09-26 13:25:18 UTC | CORE | DEBUG | (pkg/util/http/transport.go:137 in 1) | URL 'http://169.254.169.254/latest/api/token' matches no_proxy list item '169.254.169.254': not using any proxy
+2023-09-26 13:25:18 UTC | CORE | DEBUG | (pkg/util/cloudproviders/cloudproviders.go:134 in func1) | No Alibaba Host Alias: Alibaba HostAliases: unable to query metadata endpoint: Get "http://100.100.100.200/latest/meta-data/instance-id": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+2023-09-26 13:25:18 UTC | CORE | DEBUG | (pkg/util/cloudproviders/cloudproviders.go:134 in func1) | No Azure Host Alias: Azure HostAliases: unable to query metadata endpoint: Get "http://169.254.169.254/metadata/instance/compute/vmId?api-version=2017-04-02&format=text": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+2023-09-26 13:25:18 UTC | CORE | DEBUG | (pkg/util/ec2/imds_helpers.go:30 in registerCloudProviderHostnameID) | instanceID from IMDSv2 '' (error: Could not fetch token from IMDSv2)
+2023-09-26 13:25:18 UTC | CORE | DEBUG | (pkg/config/config.go:1814 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for AWS Cloud Provider
+2023-09-26 13:25:18 UTC | CORE | DEBUG | (pkg/util/cloudproviders/cloudproviders.go:134 in func1) | No Oracle Host Alias: Oracle HostAliases: unable to query metadata endpoint: Get "http://169.254.169.254/opc/v2/instance/id": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+2023-09-26 13:25:18 UTC | CORE | DEBUG | (pkg/util/http/transport.go:137 in 1) | URL 'http://169.254.169.254/latest/meta-data/instance-id' matches no_proxy list item '169.254.169.254': not using any proxy
+2023-09-26 13:25:19 UTC | CORE | DEBUG | (pkg/util/ec2/ec2.go:121 in GetHostAliases) | failed to get instance ID from metadata API for Host Alias: Get "http://169.254.169.254/latest/meta-data/instance-id": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+2023-09-26 13:25:19 UTC | CORE | DEBUG | (pkg/util/ec2/ec2.go:128 in GetHostAliases) | failed to get instance ID from DMI for Host Alias: board vendor is not AWS
+2023-09-26 13:25:19 UTC | CORE | DEBUG | (pkg/util/cloudproviders/gce/gce.go:62 in GetHostAliases) | failed to get hostname to use as Host Alias: unable to retrieve hostname from GCE: GCE metadata API error: Get "http://169.254.169.254/computeMetadata/v1/instance/hostname": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+2023-09-26 13:25:19 UTC | CORE | DEBUG | (pkg/config/config.go:1814 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for GCP Cloud Provider
+2023-09-26 13:25:19 UTC | CORE | DEBUG | (pkg/util/http/transport.go:137 in 1) | URL 'http://169.254.169.254/computeMetadata/v1/instance/name' matches no_proxy list item '169.254.169.254': not using any proxy
+2023-09-26 13:25:20 UTC | CORE | DEBUG | (pkg/util/cloudproviders/gce/gce.go:68 in GetHostAliases) | failed to get Host Alias: unable to retrieve instance name and hostname from GCE: GCE metadata API error: Get "http://169.254.169.254/computeMetadata/v1/instance/name": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+2023-09-26 13:25:23 UTC | CORE | DEBUG | (pkg/util/cloudproviders/cloudproviders.go:134 in func1) | No IBM Host Alias: IBM HostAliases: unable to get a token: Put "http://169.254.169.254/instance_identity/v1/token?version=2022-03-08": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+2023-09-26 13:25:23 UTC | CORE | DEBUG | (pkg/metadata/inventories/inventories.go:177 in SetHostMetadata) | setting host metadata 'os_version': 'ubuntu 23.04'
+2023-09-26 13:25:23 UTC | CORE | DEBUG | (pkg/config/config.go:1814 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for GCP Cloud Provider
+2023-09-26 13:25:23 UTC | CORE | DEBUG | (pkg/config/config.go:1814 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for GCP Cloud Provider
+2023-09-26 13:25:23 UTC | CORE | DEBUG | (pkg/util/http/transport.go:137 in 1) | URL 'http://169.254.169.254/computeMetadata/v1/?recursive=true' matches no_proxy list item '169.254.169.254': not using any proxy
+2023-09-26 13:25:23 UTC | CORE | DEBUG | (comp/metadata/host/utils/tags.go:156 in GetHostTags) | No gce host tags, remaining attempts: 0, err: unable to get tags from gce and cache is empty: GCE metadata API error: Get "http://169.254.169.254/computeMetadata/v1/?recursive=true": dial tcp 169.254.169.254:80: connect: connection refused
+2023-09-26 13:25:23 UTC | CORE | INFO | (comp/metadata/host/utils/tags.go:158 in GetHostTags) | Unable to get host tags from source: gce - using cached host tags
+2023-09-26 13:25:23 UTC | CORE | DEBUG | (pkg/util/containers/metadata/metadata.go:42 in func1) | Unable to get docker metadata: Docker feature deactivated
+2023-09-26 13:25:23 UTC | CORE | DEBUG | (pkg/util/containers/metadata/metadata.go:42 in func1) | Unable to get kubelet metadata: kubelet feature deactivated
+2023-09-26 13:25:23 UTC | CORE | DEBUG | (pkg/util/containers/cri/util.go:129 in GetUtil) | CRI init error: temporary failure in criutil, will retry later: no cri_socket_path was set
+2023-09-26 13:25:23 UTC | CORE | DEBUG | (pkg/util/containers/metadata/metadata.go:42 in func1) | Unable to get cri metadata: temporary failure in criutil, will retry later: no cri_socket_path was set
+2023-09-26 13:25:23 UTC | CORE | DEBUG | (pkg/util/cloudproviders/network.go:38 in GetNetworkID) | GetNetworkID trying GCE
+2023-09-26 13:25:23 UTC | CORE | DEBUG | (pkg/config/config.go:1814 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for GCP Cloud Provider
+2023-09-26 13:25:23 UTC | CORE | DEBUG | (pkg/util/http/transport.go:137 in 1) | URL 'http://169.254.169.254/computeMetadata/v1/instance/network-interfaces/' matches no_proxy list item '169.254.169.254': not using any proxy
+2023-09-26 13:25:23 UTC | CORE | DEBUG | (pkg/util/cloudproviders/network.go:45 in GetNetworkID) | GetNetworkID trying EC2
+2023-09-26 13:25:23 UTC | CORE | DEBUG | (pkg/config/config.go:1814 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for AWS Cloud Provider
+2023-09-26 13:25:23 UTC | CORE | DEBUG | (pkg/util/http/transport.go:137 in 1) | URL 'http://169.254.169.254/latest/meta-data/network/interfaces/macs' matches no_proxy list item '169.254.169.254': not using any proxy
+2023-09-26 13:25:23 UTC | CORE | INFO | (pkg/metadata/host/host.go:83 in getNetworkMeta) | could not get network metadata: could not detect network ID
+2023-09-26 13:25:23 UTC | CORE | INFO | (pkg/config/utils/endpoints.go:26 in getResolvedDDUrl) | 'site' and 'dd_url' are both set in config: setting main endpoint to 'dd_url': "https://dd.datad0g.com"
+=========
+Collector
+=========
+
+  Running Checks
+  ==============
+    
+    openstack_controller (4.0.0)
+    ----------------------------
+      Instance ID: openstack_controller:e3da92c69104d131 [OK]
+      Configuration Source: file:/etc/datadog-agent/conf.d/openstack_controller.d/openstack_controller.yaml
+      Total Runs: 1
+      Metric Samples: Last Run: 71, Total: 71
+      Events: Last Run: 0, Total: 0
+      Service Checks: Last Run: 2, Total: 2
+      Average Execution Time : 22.489s
+      Last Execution Date : 2023-09-26 13:25:17 UTC (1695734717000)
+      Last Successful Execution Date : 2023-09-26 13:25:17 UTC (1695734717000)
+      
+
+Check has run only once, if some metrics are missing you can try again with --check-rate to see any other metric if available.
+Note: If some metrics are missing, you may want to try again with the -r / --rate flag for a classic integration.
