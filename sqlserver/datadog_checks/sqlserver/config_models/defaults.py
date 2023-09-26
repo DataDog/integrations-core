@@ -64,7 +64,7 @@ def instance_include_ao_metrics():
     return False
 
 
-def instance_include_db_file_space_usage_metrics():
+def instance_include_tempdb_file_space_usage_metrics():
     return True
 
 
