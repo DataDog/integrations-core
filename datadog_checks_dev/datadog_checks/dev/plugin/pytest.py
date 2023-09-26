@@ -148,8 +148,11 @@ def dd_environment_runner(request):
             pytest.exit(message_template.format(serialize_data(data)))
 
 
-# Manipulate the output if we are spinning up or down an environment
-if set_up_env() or tear_down_env():
+# Manipulate the output if we are spinning up or down an environment.
+#
+# Both of these conditions will be true during normal testing while only
+# one of them will be true when performing the logic.
+if not all([set_up_env(), tear_down_env()]):
 
     def pytest_report_teststatus(report, config):
         """
