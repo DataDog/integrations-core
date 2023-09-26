@@ -94,6 +94,13 @@ def test_e2e_core_metadata_f5(dd_agent_check):
                     u'os_version': u'3.10.0-862.14.4.el7.ve.x86_64',
                 },
             ],
+            u'diagnoses': [
+                {
+                    u'diagnoses': None,
+                    u'resource_id': device_id,
+                    u'resource_type': u'device',
+                },
+            ],
             u'interfaces': [
                 {
                     u'admin_status': 1,
@@ -773,6 +780,7 @@ def test_e2e_core_metadata_checkpoint(dd_agent_check):
         ],
         'ip_address': device_ip,
         'model': 'Check Point 3200',
+        'name': 'checkpoint.device.name',
         'os_name': 'Gaia',
         'os_version': '3.10.0',
         'product_name': 'SVN Foundation',
@@ -784,6 +792,7 @@ def test_e2e_core_metadata_checkpoint(dd_agent_check):
             'device_namespace:default',
             'device_vendor:checkpoint',
             'snmp_device:' + device_ip,
+            'snmp_host:checkpoint.device.name',
             'snmp_profile:checkpoint',
         ],
         'vendor': 'checkpoint',
@@ -816,6 +825,7 @@ def test_e2e_core_metadata_checkpoint_firewall(dd_agent_check):
         ],
         'ip_address': device_ip,
         'model': 'Check Point 3200',
+        'name': 'checkpoint.device.name',
         'os_name': 'Gaia',
         'os_version': '3.10.0',
         'product_name': 'SVN Foundation',
@@ -827,6 +837,7 @@ def test_e2e_core_metadata_checkpoint_firewall(dd_agent_check):
             'device_namespace:default',
             'device_vendor:checkpoint',
             'snmp_device:' + device_ip,
+            'snmp_host:checkpoint.device.name',
             'snmp_profile:checkpoint-firewall',
         ],
         'vendor': 'checkpoint',
@@ -1077,6 +1088,7 @@ def test_e2e_core_metadata_cisco_asr_9001(dd_agent_check):
             u'snmp_device:' + device_ip,
         ],
         u'ip_address': device_ip,
+        u'model': 'Cisco ASR9K Series',
         u'os_name': u'IOSXR',
         u'profile': u'cisco-asr',
         u'status': 1,

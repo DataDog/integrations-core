@@ -24,6 +24,9 @@ from .common import (
     generate_container_instance_config,
 )
 
+# https://docs.pytest.org/en/latest/writing_plugins.html#assertion-rewriting
+pytest.register_assert_rewrite("tests.test_e2e_core_profiles.utils")
+
 FILES = [
     "https://ddintegrations.blob.core.windows.net/snmp/cisco-3850.snmprec",
 ]

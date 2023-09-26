@@ -177,7 +177,6 @@ class InstanceConfig(BaseModel):
     collect_schemas: Optional[CollectSchemas] = None
     collect_settings: Optional[CollectSettings] = None
     collect_wal_metrics: Optional[bool] = None
-    connection_timeout: Optional[int] = None
     custom_queries: Optional[tuple[MappingProxyType[str, Any], ...]] = None
     data_directory: Optional[str] = None
     database_autodiscovery: Optional[DatabaseAutodiscovery] = None

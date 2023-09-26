@@ -39,6 +39,7 @@ from datadog_checks.sqlserver.const import (
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES,
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
+    DATABASE_FILE_SPACE_USAGE_METRICS,
     DATABASE_FRAGMENTATION_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
@@ -191,6 +192,7 @@ class SQLServer(AgentCheck):
         self._query_manager = None
         self._dynamic_queries = None
         self.server_state_queries = None
+        self.sqlserver_incr_fraction_metric_previous_values = {}
 
     def cancel(self):
         self.statement_metrics.cancel()
@@ -580,6 +582,16 @@ class SQLServer(AgentCheck):
                     }
                     metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
+        # Load DB File Space Usage metrics
+        if is_affirmative(self.instance.get('include_db_file_space_usage_metrics', False)):
+            db_names = [d.name for d in self.databases] or [
+                self.instance.get('database', self.connection.DEFAULT_DATABASE)
+            ]
+            for db_name in db_names:
+                for name, table, column in DATABASE_FILE_SPACE_USAGE_METRICS:
+                    cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags}
+                    metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+
         # Load any custom metrics from conf.d/sqlserver.yaml
         for cfg in custom_metrics:
             sql_counter_type = None
@@ -696,8 +708,8 @@ class SQLServer(AgentCheck):
             if sql_counter_type in [PERF_AVERAGE_BULK, PERF_RAW_LARGE_FRACTION]:
                 # This is an ugly hack. For certains type of metric (PERF_RAW_LARGE_FRACTION
                 # and PERF_AVERAGE_BULK), we need two metrics: the metrics specified and
-                # a base metrics to get the ratio. There is no unique schema so we generate
-                # the possible candidates and we look at which ones exist in the db.
+                # a base metrics to get the ratio. There is no unique schema, so we generate
+                # the possible candidates, and we look at which ones exist in the db.
                 candidates = (
                     counter_name + " base",
                     counter_name.replace("(ms)", "base"),
@@ -831,7 +843,6 @@ class SQLServer(AgentCheck):
                     self._make_metric_list_to_collect(self.custom_metrics)
 
                 instance_results = {}
-
                 # Execute the `fetch_all` operations first to minimize the database calls
                 for cls, metric_names in six.iteritems(self.instance_per_type_metrics):
                     if not metric_names:
@@ -850,20 +861,17 @@ class SQLServer(AgentCheck):
 
                         instance_results[cls] = rows, cols
 
-                # Using the cached data, extract and report individual metrics
                 for metric in self.instance_metrics:
-                    if type(metric) is metrics.SqlIncrFractionMetric:
-                        # special case, since it uses the same results as SqlFractionMetric
-                        key = 'SqlFractionMetric'
-                    else:
-                        key = metric.__class__.__name__
-
+                    key = metric.__class__.__name__
                     if key not in instance_results:
                         self.log.warning("No %s metrics found, skipping", str(key))
                     else:
                         rows, cols = instance_results[key]
                         if rows is not None:
-                            metric.fetch_metric(rows, cols)
+                            if key == 'SqlIncrFractionMetric':
+                                metric.fetch_metric(rows, cols, self.sqlserver_incr_fraction_metric_previous_values)
+                            else:
+                                metric.fetch_metric(rows, cols)
 
             # Neither pyodbc nor adodbapi are able to read results of a query if the number of rows affected
             # statement are returned as part of the result set, so we disable for the entire connection

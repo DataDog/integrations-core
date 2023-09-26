@@ -17,6 +17,8 @@ container.memory.oom_events,gauge,,,,The number of OOM events triggered by the c
 container.memory.working_set,gauge,,byte,,The container working set usage,0,container,mem_workingset,
 container.memory.commit,gauge,,byte,,The container commit memory usage,0,container,mem_commit,
 container.memory.commit.peak,gauge,,byte,,The container peak commit memory usage,0,container,mem_commit_peak,
+container.memory.page_faults,count,,,,Total number of page faults incurred,0,container,pgfault,
+container.memory.major_page_faults,count,,,,Number of major page faults incurred,0,container,pgmajfault,
 container.io.read,rate,,byte,,The number of bytes read from disks by this container,0,container,io_read,
 container.io.read.operations,rate,,,,The number of read operations done by this continer,0,container,io_read_ops,
 container.io.write,rate,,byte,,The number of bytes written to disks by this container,0,container,io_write,
