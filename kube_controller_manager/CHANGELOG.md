@@ -5,6 +5,8 @@
 ***Added***:
 
 * Capture node_collector_evictions_total metric in kube controller manager ([#15737](https://github.com/DataDog/integrations-core/pull/15737))
+* Add support for kube_controller_manager SLI metrics ([#15914](https://github.com/DataDog/integrations-core/pull/15914))
+
 
 ## 4.4.0 / 2023-08-10
 
