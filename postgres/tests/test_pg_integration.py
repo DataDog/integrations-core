@@ -65,12 +65,12 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check_stat_replication(aggregator, expected_tags=expected_tags)
     if is_aurora is False:
         check_wal_receiver_metrics(aggregator, expected_tags=expected_tags, connected=0)
+        check_stat_wal_metrics(aggregator, expected_tags=expected_tags)
     check_uptime_metrics(aggregator, expected_tags=expected_tags)
 
     check_logical_replication_slots(aggregator, expected_tags)
     check_physical_replication_slots(aggregator, expected_tags)
     check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
-    check_stat_wal_metrics(aggregator, expected_tags=expected_tags)
     check_file_wal_metrics(aggregator, expected_tags=expected_tags)
 
     aggregator.assert_all_metrics_covered()
@@ -457,7 +457,14 @@ def test_state_clears_on_connection_error(integration_check, pg_instance):
 
 
 @requires_over_14
-def test_wal_stats(aggregator, integration_check, pg_instance):
+@pytest.mark.parametrize(
+    'is_aurora',
+    [True, False],
+)
+def test_wal_stats(aggregator, integration_check, pg_instance, is_aurora):
+    # Querying pg_stat_wal is not currently supported on aurora
+    if is_aurora:
+        return
     conn = _get_superconn(pg_instance)
     with conn.cursor() as cur:
         cur.execute("select wal_records, wal_fpi, wal_bytes from pg_stat_wal;")
