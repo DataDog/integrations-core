@@ -28,7 +28,6 @@ def remove_service_from_catalog(d, services):
     print(x)
     return x
 
-    
 
 @pytest.mark.parametrize(
     ('mock_http_post', 'connection_session_auth', 'instance', 'api_type'),
