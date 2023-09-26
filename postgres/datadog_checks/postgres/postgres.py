@@ -233,7 +233,8 @@ class PostgreSql(AgentCheck):
         if self.version < V13:
             queries.append(SNAPSHOT_TXID_METRICS_LT_13)
         if self.version >= V14:
-            queries.append(STAT_WAL_METRICS)
+            if self.is_aurora is False:
+                queries.append(STAT_WAL_METRICS)
 
         if not queries:
             self.log.debug("no dynamic queries defined")

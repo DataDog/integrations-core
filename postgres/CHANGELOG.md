@@ -5,6 +5,7 @@
 ***Fixed***:
 
 * Set lower log level for relations metrics truncated ([#15903](https://github.com/DataDog/integrations-core/pull/15903))
+* Disable WAL metric queries if aurora platform is detected ([#15891](https://github.com/DataDog/integrations-core/pull/15891))
 
 ## 14.4.0 / 2023-09-19
 
