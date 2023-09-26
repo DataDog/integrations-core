@@ -579,6 +579,15 @@ def get_json_value_from_file(file_path):
         return json.load(file)
 
 
+def remove_service_from_catalog(d, services):
+    catalog = d.get('token', {}).get('catalog', {})
+    new_catalog = []
+    for service in catalog:
+        if service['type'] not in services:
+            new_catalog.append(service)
+    return {**d, **{'token': {**d['token'], 'catalog': new_catalog}}}
+
+
 # def responses_map(
 #     host='agent-integrations-openstack-default',
 #     nova_microversion='default',

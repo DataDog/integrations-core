@@ -15,6 +15,7 @@ from tests.common import (
     CONFIG_REST_IRONIC_MICROVERSION_1_80,
     CONFIG_SDK,
     CONFIG_SDK_IRONIC_MICROVERSION_1_80,
+    remove_service_from_catalog,
 )
 from tests.metrics import (
     CONDUCTORS_METRICS_IRONIC_MICROVERSION_1_80,
@@ -30,7 +31,7 @@ pytestmark = [pytest.mark.unit]
     ('mock_http_post', 'connection_session_auth', 'instance', 'api_type'),
     [
         pytest.param(
-            {'replace': {'/identity/v3/auth/tokens': lambda d: {**d, **{'token': {**d['token'], **{'catalog': []}}}}}},
+            {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['baremetal'])}},
             None,
             CONFIG_REST,
             ApiType.REST,

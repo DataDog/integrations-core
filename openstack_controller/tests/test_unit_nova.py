@@ -12,7 +12,13 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 from datadog_checks.openstack_controller.api.type import ApiType
-from tests.common import CONFIG_REST, CONFIG_REST_NOVA_MICROVERSION_2_93, CONFIG_SDK, CONFIG_SDK_NOVA_MICROVERSION_2_93
+from tests.common import (
+    CONFIG_REST,
+    CONFIG_REST_NOVA_MICROVERSION_2_93,
+    CONFIG_SDK,
+    CONFIG_SDK_NOVA_MICROVERSION_2_93,
+    remove_service_from_catalog,
+)
 
 pytestmark = [pytest.mark.unit]
 
@@ -21,7 +27,7 @@ pytestmark = [pytest.mark.unit]
     ('mock_http_post', 'connection_session_auth', 'instance', 'api_type'),
     [
         pytest.param(
-            {'replace': {'/identity/v3/auth/tokens': lambda d: {**d, **{'token': {**d['token'], **{'catalog': []}}}}}},
+            {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['compute'])}},
             None,
             CONFIG_REST,
             ApiType.REST,

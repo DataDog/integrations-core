@@ -12,18 +12,9 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 from datadog_checks.openstack_controller.api.type import ApiType
-from tests.common import CONFIG_REST, CONFIG_SDK
+from tests.common import CONFIG_REST, CONFIG_SDK, remove_service_from_catalog
 
 pytestmark = [pytest.mark.unit]
-
-
-def remove_service_from_catalog(d, services):
-    catalog = d.get('token', {}).get('catalog', {})
-    new_catalog = []
-    for service in catalog:
-        if service['type'] not in services:
-            new_catalog.append(service)
-    return {**d, **{'token': {**d['token'], 'catalog': new_catalog}}}
 
 
 @pytest.mark.parametrize(
