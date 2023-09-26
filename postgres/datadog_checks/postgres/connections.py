@@ -8,7 +8,7 @@ import threading
 import time
 from typing import Callable, Dict
 
-import psycopg2
+import psycopg
 
 
 class ConnectionPoolFullError(Exception):
@@ -23,7 +23,7 @@ class ConnectionPoolFullError(Exception):
 class ConnectionInfo:
     def __init__(
         self,
-        connection: psycopg2.extensions.connection,
+        connection: psycopg.Connection,
         deadline: int,
         active: bool,
         last_accessed: int,
@@ -86,9 +86,9 @@ class MultiDatabaseConnectionPool(object):
         dbname: str,
         ttl_ms: int,
         timeout: int = None,
-        startup_fn: Callable[[psycopg2.extensions.connection], None] = None,
+        startup_fn: Callable[[psycopg.Connection], None] = None,
         persistent: bool = False,
-    ) -> psycopg2.extensions.connection:
+    ) -> psycopg.Connection:
         """
         Return a connection from the pool.
         Pass a function to startup_func if there is an action needed with the connection
@@ -97,8 +97,8 @@ class MultiDatabaseConnectionPool(object):
         start = datetime.datetime.now()
         self.prune_connections()
         with self._mu:
-            conn = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None, None))
-            db = conn.connection
+            conn = self._conns.pop(dbname, None)
+            db = conn.connection if conn else None
             if db is None or db.closed:
                 if self.max_conns is not None:
                     # try to free space until we succeed
@@ -117,7 +117,7 @@ class MultiDatabaseConnectionPool(object):
                 # if already in pool, retain persistence status
                 persistent = conn.persistent
 
-            if db.status != psycopg2.extensions.STATUS_READY:
+            if db.info.transaction_status != psycopg.pq.TransactionStatus.IDLE:
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
                 db.rollback()
 
@@ -140,13 +140,16 @@ class MultiDatabaseConnectionPool(object):
         make a new connection if the max_conn limit hasn't been reached.
         Blocks until a connection can be added to the pool,
         and optionally takes a timeout in seconds.
-        Note that leaving a connection context here does NOT close the connection in psycopg2;
+        Note that leaving a connection context here does NOT close the connection in psycopg;
         connections must be manually closed by `close_all_connections()`.
         """
         try:
             with self._mu:
                 db = self._get_connection_raw(dbname, ttl_ms, timeout, persistent)
             yield db
+        except psycopg.Error:
+            db.rollback()
+            raise
         finally:
             with self._mu:
                 try:
