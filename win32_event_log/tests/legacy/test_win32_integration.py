@@ -28,6 +28,7 @@ def test_deprecation_notice(dd_run_check):
         'Set `legacy_mode` to `false` and read about the latest options, such as `query`.'
     ) in check.get_warnings()
 
+
 @pytest.mark.parametrize('shared_legacy_mode', [None, False, True])
 @pytest.mark.parametrize('instance_legacy_mode', [None, False, True])
 def test_legacy_mode_select(new_check, shared_legacy_mode, instance_legacy_mode):
@@ -70,4 +71,3 @@ def test_legacy_mode_select(new_check, shared_legacy_mode, instance_legacy_mode)
 
     # should default to true for backwards compatibility
     assert type(check) is Win32EventLogWMI
-
