@@ -19,14 +19,11 @@ pytestmark = [pytest.mark.unit]
 
 def remove_service_from_catalog(d, services):
     catalog = d.get('token', {}).get('catalog', {})
-    print(d)
     new_catalog = []
     for service in catalog:
         if service['type'] not in services:
             new_catalog.append(service)
-    x = {**d, **{'token': {**d['token'], **{'catalog': new_catalog}}}}
-    print(x)
-    return x
+    return {**d, **{'token': {**d['token'], 'catalog': new_catalog}}}
 
 
 @pytest.mark.parametrize(

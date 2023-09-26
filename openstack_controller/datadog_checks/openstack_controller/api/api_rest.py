@@ -88,8 +88,10 @@ class ApiRest(Api):
         response = self.http.post(auth_tokens_endpoint, json=data)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
+        self.log.debug("interface: %s", self.config.endpoint_interface)
+        self.log.debug("region_name: %s", self.config.endpoint_region_id)
         self._catalog = Catalog(
-            response.json().get('token', {}).get('catalog', {}),
+            response.json().get('token', {}).get('catalog', []),
             self.config.endpoint_interface,
             self.config.endpoint_region_id,
         )

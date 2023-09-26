@@ -48,7 +48,7 @@ class Identity(Component):
     def __init__(self, check):
         super(Identity, self).__init__(self, check)
 
-    # @Component.http_error()
+    @Component.http_error()
     def authorize(self):
         self.check.api.authorize()
 

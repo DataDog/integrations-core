@@ -33,8 +33,6 @@ class ApiSdk(Api):
         self._region_id = (
             self.config.endpoint_region_id if self.config.endpoint_region_id else cloud_config.get_region_name()
         )
-        self.log.debug("interface: %s", self._interface)
-        self.log.debug("region_name: %s", self._region_id)
         v3_auth = v3.Password(
             auth_url=self.cloud_auth.get('auth_url'),
             username=self.cloud_auth.get('username'),
@@ -48,6 +46,8 @@ class ApiSdk(Api):
             cloud=self.config.openstack_cloud_name, session=keystone_session, region_name=self._region_id
         )
         self._access = self.connection.session.auth.get_access(self.connection.session)
+        self.log.debug("interface: %s", self._interface)
+        self.log.debug("region_name: %s", self._region_id)
         self._catalog = Catalog(self._access.service_catalog.catalog, self._interface, self._region_id)
 
     def _add_microversion_headers(self):
@@ -79,6 +79,8 @@ class ApiSdk(Api):
                 cloud=self.config.openstack_cloud_name, session=keystone_session, region_name=self._region_id
             )
             self._access = self.connection.session.auth.get_access(self.connection.session)
+            self.log.debug("interface: %s", self._interface)
+            self.log.debug("region_name: %s", self._region_id)
             self._catalog = Catalog(self._access.service_catalog.catalog, self._interface, self._region_id)
 
     def has_admin_role(self):

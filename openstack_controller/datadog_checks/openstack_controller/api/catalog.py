@@ -19,8 +19,13 @@ class Catalog:
         for item in self.catalog:
             if item['type'] == endpoint_type:
                 for endpoint in item['endpoints']:
-                    if endpoint['interface'] == self.endpoint_interface and (
-                        self.endpoint_region_id is None or endpoint['region_id'] == self.endpoint_region_id
+                    matched_interface = (
+                        endpoint['interface'] == 'public'
+                        if not self.endpoint_interface
+                        else endpoint['interface'] == self.endpoint_interface
+                    )
+                    if matched_interface and (
+                        not self.endpoint_region_id or endpoint['region_id'] == self.endpoint_region_id
                     ):
                         return endpoint['url']
         return None
