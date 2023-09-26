@@ -96,7 +96,7 @@ To collect Windows Event Logs as Datadog events, configure channels under the `i
       filters: {}
   ```
 
-Agent versions 7.49 or later support setting `legacy_mode` in the shared `init_config` section. This sets the default for all instances and `legacy_mode` no longer needs to be set individually for each instance. The option can still be set on a per-instance basis.
+Agent versions 7.49 and later support setting `legacy_mode` in the shared `init_config` section. This sets the default for all instances and no longer requires you to set `legacy_mode` individually for each instance. However, the option can still be set on a per-instance basis.
 
   ```yaml
   init_config:
