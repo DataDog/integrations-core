@@ -45,6 +45,7 @@ CONFIG_NOVA_IRONIC_MICROVERSION_LATEST = {
     'password': 'password',
     'nova_microversion': '2.93',
     'ironic_microversion': '1.80',
+    'endpoint_region_id': 'RegionOne',
 }
 
 KEYSTONE_INSTANCE = {

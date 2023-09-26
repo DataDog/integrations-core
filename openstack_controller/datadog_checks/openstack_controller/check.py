@@ -247,6 +247,8 @@ class OpenStackControllerCheck(AgentCheck):
         tags = [
             'keystone_server:{}'.format(self.config.keystone_server_url),
         ] + self.instance.get('tags', [])
+        if self.config.endpoint_region_id is not None:
+            tags = tags + ['region_id:{}'.format(self.config.endpoint_region_id)]
         api = make_api(self.config, self.log, self.http)
         self.gauge("openstack.controller", 1, tags=tags)
         if self._report_identity_response_time(api, tags):

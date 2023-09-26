@@ -139,7 +139,7 @@ def test_node_metrics_latest(aggregator, dd_run_check, instance_ironic_nova_micr
     check = OpenStackControllerCheck('test', {}, [instance_ironic_nova_microversion_latest])
     dd_run_check(check)
 
-    base_tags = ['domain_id:default', 'keystone_server:http://127.0.0.1:8080/identity']
+    base_tags = ['domain_id:default', 'region_id:RegionOne', 'keystone_server:http://127.0.0.1:8080/identity']
     nodes_tags = [
         [
             'node_uuid:9d72cf53-19c8-4942-9314-005fa5d2a6a0',
@@ -206,6 +206,7 @@ def test_conductor_metrics_latest(aggregator, dd_run_check, instance_ironic_nova
     dd_run_check(check)
     base_tags = [
         'domain_id:default',
+        'region_id:RegionOne',
         'keystone_server:{}'.format(instance_ironic_nova_microversion_latest["keystone_server_url"]),
     ]
 
