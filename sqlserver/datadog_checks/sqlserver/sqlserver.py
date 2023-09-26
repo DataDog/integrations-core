@@ -39,7 +39,6 @@ from datadog_checks.sqlserver.const import (
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES,
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
-    TEMPDB_FILE_SPACE_USAGE_METRICS,
     DATABASE_FRAGMENTATION_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
@@ -60,6 +59,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_VERSION,
     TASK_SCHEDULER_METRICS,
+    TEMPDB_FILE_SPACE_USAGE_METRICS,
     VALID_METRIC_TYPES,
     expected_sys_databases_columns,
 )

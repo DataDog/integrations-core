@@ -12,7 +12,6 @@ from datadog_checks.sqlserver.const import (
     AO_METRICS,
     AO_METRICS_PRIMARY,
     AO_METRICS_SECONDARY,
-    TEMPDB_FILE_SPACE_USAGE_METRICS,
     DATABASE_FRAGMENTATION_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
@@ -20,6 +19,7 @@ from datadog_checks.sqlserver.const import (
     INSTANCE_METRICS,
     INSTANCE_METRICS_DATABASE,
     TASK_SCHEDULER_METRICS,
+    TEMPDB_FILE_SPACE_USAGE_METRICS,
 )
 from datadog_checks.sqlserver.queries import get_query_file_stats
 
