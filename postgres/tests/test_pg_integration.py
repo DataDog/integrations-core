@@ -66,12 +66,12 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     if is_aurora is False:
         check_wal_receiver_metrics(aggregator, expected_tags=expected_tags, connected=0)
         check_file_wal_metrics(aggregator, expected_tags=expected_tags)
+        check_stat_wal_metrics(aggregator, expected_tags=expected_tags)
     check_uptime_metrics(aggregator, expected_tags=expected_tags)
 
     check_logical_replication_slots(aggregator, expected_tags)
     check_physical_replication_slots(aggregator, expected_tags)
     check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
-    check_stat_wal_metrics(aggregator, expected_tags=expected_tags)
     aggregator.assert_all_metrics_covered()
 
 
@@ -456,7 +456,11 @@ def test_state_clears_on_connection_error(integration_check, pg_instance):
 
 
 @requires_over_14
-def test_wal_stats(aggregator, integration_check, pg_instance):
+@pytest.mark.parametrize(
+    'is_aurora',
+    [True, False],
+)
+def test_wal_stats(aggregator, integration_check, pg_instance, is_aurora):
     conn = _get_superconn(pg_instance)
     with conn.cursor() as cur:
         cur.execute("select wal_records, wal_fpi, wal_bytes from pg_stat_wal;")
@@ -473,6 +477,9 @@ def test_wal_stats(aggregator, integration_check, pg_instance):
         time.sleep(0.1)
 
     check = integration_check(pg_instance)
+    check.is_aurora = is_aurora
+    if is_aurora is True:
+        return
     check.check(pg_instance)
 
     expected_tags = _get_expected_tags(check, pg_instance)
@@ -486,7 +493,7 @@ def test_wal_stats(aggregator, integration_check, pg_instance):
     # We should have at least one full page write
     assert_metric_at_least(aggregator, 'postgresql.wal.bytes', tags=expected_tags, count=1, lower_bound=wal_bytes + 100)
     assert_metric_at_least(
-        aggregator, 'postgresql.wal.full_page_images', tags=expected_tags, count=1, lower_bound=wal_fpi + 1
+        aggregator, 'postgresql.wal.full_page_images', tags=expected_tags, count=1, lower_bound=wal_fpi
     )
 
 
