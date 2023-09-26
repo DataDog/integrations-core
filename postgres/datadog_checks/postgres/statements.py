@@ -398,7 +398,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._emit_pg_stat_statements_metrics()
         self._emit_pg_stat_statements_dealloc()
         rows = self._load_pg_stat_statements()
-        print(rows)
 
         rows = self._normalize_queries(rows)
         if not rows:

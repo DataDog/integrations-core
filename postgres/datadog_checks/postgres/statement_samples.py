@@ -657,7 +657,6 @@ class PostgresStatementSamples(DBMAsyncJob):
                     )
                     if plan:
                         return plan, DBExplainError.explained_with_prepared_statement, None
-                print(statement)
                 e = psycopg.errors.UndefinedParameter("Unable to explain parameterized query")
                 self._log.debug(
                     "Unable to collect execution plan, clients using the extended query protocol or prepared statements"

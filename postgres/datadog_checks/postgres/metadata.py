@@ -302,7 +302,6 @@ class PostgresMetadata(DBMAsyncJob):
         schemas = []
         for row in rows:
             schemas.append({"id": str(row['id']), "name": row['name'], "owner": row['owner']})
-            print(row['name'])
         return schemas
 
     def _get_table_info(self, cursor, dbname, schema_id):
