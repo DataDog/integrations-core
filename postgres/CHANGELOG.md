@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Upgrade database adapter to `psycopg3` ([#15912](https://github.com/DataDog/integrations-core/pull/15912))
+
 ***Fixed***:
 
 * Set lower log level for relations metrics truncated ([#15903](https://github.com/DataDog/integrations-core/pull/15903))
