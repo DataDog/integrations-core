@@ -153,8 +153,9 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, SliMetricsScraperMixin
 
             slis_instance = self.create_sli_prometheus_instance(instances[0])
             self.slis_scraper_config = self.get_scraper_config(slis_instance)
-            self.detect_sli_endpoint(self.get_http_handler(self.slis_scraper_config), slis_instance.get('prometheus_url'))
-
+            self.detect_sli_endpoint(
+                self.get_http_handler(self.slis_scraper_config), slis_instance.get('prometheus_url')
+            )
 
     def check(self, instance):
         # Get the configuration for this specific instance
