@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 25.1.2 / 2023-09-26
+
 ***Fixed***:
 
 * Fix test output rewrite conditional ([#15915](https://github.com/DataDog/integrations-core/pull/15915))
