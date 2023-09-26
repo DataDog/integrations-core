@@ -102,8 +102,14 @@ SELECT
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
-    sess.program_name as program_name
+    sess.program_name as program_name,
+	dbspu.user_objects_alloc_page_count as user_objects_alloc_page_count,
+    dbspu.user_objects_dealloc_page_count as user_objects_dealloc_page_count,
+    dbspu.internal_objects_alloc_page_count as internal_objects_alloc_page_count,
+    dbspu.internal_objects_dealloc_page_count as internal_objects_dealloc_page_count
 FROM sys.dm_exec_sessions sess
+	INNER JOIN sys.dm_db_session_space_usage dbspu
+           ON sess.session_id = dbspu.session_id
     INNER JOIN sys.dm_exec_connections c
         ON sess.session_id = c.session_id
     CROSS APPLY sys.dm_exec_sql_text(c.most_recent_sql_handle) lqt
