@@ -8,7 +8,6 @@ import pytest
 INSTANCE = {
     'prometheus_url': 'http://localhost:10251/metrics',
     'send_histograms_buckets': True,
-    'tags': ['custom:tag'],
 }
 
 

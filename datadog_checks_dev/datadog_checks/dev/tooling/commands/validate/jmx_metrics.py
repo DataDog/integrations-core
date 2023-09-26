@@ -88,12 +88,13 @@ def validate_jmx_metrics(check_name, saved_errors, verbose):
             return
 
         domain = include.get('domain')
+        domain_regex = include.get('domain_regex')
         beans = include.get('bean')
-        if (not domain) and (not beans):
-            # Require `domain` or `bean` to be present,
+        if (not domain) and (not domain_regex) and (not beans):
+            # Require `domain`, `domain_regex`, or `bean` to be present,
             # that helps JMXFetch to better scope the beans to retrieve
             saved_errors[(check_name, jmx_metrics_file)].append(
-                f"domain or bean attribute is missing for rule: {include_str}"
+                f"domain, domain_regex or bean attribute is missing for rule: {include_str}"
             )
 
     duplicates = duplicate_bean_check(jmx_metrics_data)

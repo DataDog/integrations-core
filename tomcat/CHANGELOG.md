@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Make JMX metrics available on both standalone and embedded Tomcat versions ([#15761](https://github.com/DataDog/integrations-core/pull/15761))
+
 ## 1.12.1 / 2023-08-18
 
 ***Fixed***:
@@ -18,7 +22,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 1.11.2 / 2023-07-10
+## 1.11.2 / 2023-07-10 / Agent 7.47.0
 
 ***Fixed***:
 

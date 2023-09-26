@@ -12,7 +12,7 @@ from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
-from datadog_checks.sqlserver.metrics import SqlMasterDatabaseFileStats
+from datadog_checks.sqlserver.metrics import SqlFractionMetric, SqlMasterDatabaseFileStats
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import Database, parse_sqlserver_major_version, set_default_driver_conf
 
@@ -248,6 +248,94 @@ def test_SqlMasterDatabaseFileStats_fetch_metric(col_val_row_1, col_val_row_2, c
         assert errors < 1
 
 
+def test_SqlFractionMetric_base(caplog):
+    Row = namedtuple('Row', ['counter_name', 'cntr_type', 'cntr_value', 'instance_name', 'object_name'])
+    fetchall_results = [
+        Row('Buffer cache hit ratio', 537003264, 33453, '', 'SQLServer:Buffer Manager'),
+        Row('Buffer cache hit ratio base', 1073939712, 33531, '', 'SQLServer:Buffer Manager'),
+        Row('some random counter', 1073939712, 1111, '', 'SQLServer:Buffer Manager'),
+        Row('some random counter base', 1073939712, 33531, '', 'SQLServer:Buffer Manager'),
+    ]
+    mock_cursor = mock.MagicMock()
+    mock_cursor.fetchall.return_value = fetchall_results
+
+    report_function = mock.MagicMock()
+    metric_obj = SqlFractionMetric(
+        cfg_instance={
+            'name': 'sqlserver.buffer.cache_hit_ratio',
+            'counter_name': 'Buffer cache hit ratio',
+            'instance_name': '',
+            'physical_db_name': None,
+            'tags': ['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname'],
+            'hostname': 'stubbed.hostname',
+        },
+        base_name='Buffer cache hit ratio base',
+        report_function=report_function,
+        column=None,
+        logger=mock.MagicMock(),
+    )
+    results_rows, results_cols = SqlFractionMetric.fetch_all_values(
+        mock_cursor, ['Buffer cache hit ratio', 'Buffer cache hit ratio base'], mock.mock.MagicMock()
+    )
+    metric_obj.fetch_metric(results_rows, results_cols)
+    report_function.assert_called_with(
+        'sqlserver.buffer.cache_hit_ratio',
+        0.9976737943992127,
+        raw=True,
+        hostname='stubbed.hostname',
+        tags=['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname'],
+    )
+
+
+def test_SqlFractionMetric_group_by_instance(caplog):
+    Row = namedtuple('Row', ['counter_name', 'cntr_type', 'cntr_value', 'instance_name', 'object_name'])
+    fetchall_results = [
+        Row('Buffer cache hit ratio', 537003264, 33453, '', 'SQLServer:Buffer Manager'),
+        Row('Buffer cache hit ratio base', 1073939712, 33531, '', 'SQLServer:Buffer Manager'),
+        Row('Foo counter', 537003264, 1, 'bar', 'SQLServer:Buffer Manager'),
+        Row('Foo counter base', 1073939712, 50, 'bar', 'SQLServer:Buffer Manager'),
+        Row('Foo counter', 537003264, 5, 'zoo', 'SQLServer:Buffer Manager'),
+        Row('Foo counter base', 1073939712, 100, 'zoo', 'SQLServer:Buffer Manager'),
+    ]
+    mock_cursor = mock.MagicMock()
+    mock_cursor.fetchall.return_value = fetchall_results
+
+    report_function = mock.MagicMock()
+    metric_obj = SqlFractionMetric(
+        cfg_instance={
+            'name': 'sqlserver.test.metric',
+            'counter_name': 'Foo counter',
+            'instance_name': 'ALL',
+            'physical_db_name': None,
+            'tags': ['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname'],
+            'hostname': 'stubbed.hostname',
+            'tag_by': 'db',
+        },
+        base_name='Foo counter base',
+        report_function=report_function,
+        column=None,
+        logger=mock.MagicMock(),
+    )
+    results_rows, results_cols = SqlFractionMetric.fetch_all_values(
+        mock_cursor, ['Foo counter base', 'Foo counter'], mock.mock.MagicMock()
+    )
+    metric_obj.fetch_metric(results_rows, results_cols)
+    report_function.assert_any_call(
+        'sqlserver.test.metric',
+        0.02,
+        raw=True,
+        hostname='stubbed.hostname',
+        tags=['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname', 'db:bar'],
+    )
+    report_function.assert_any_call(
+        'sqlserver.test.metric',
+        0.05,
+        raw=True,
+        hostname='stubbed.hostname',
+        tags=['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname', 'db:zoo'],
+    )
+
+
 def _mock_database_list():
     Row = namedtuple('Row', 'name')
     fetchall_results = [
@@ -356,5 +444,6 @@ def test_database_state(aggregator, dd_run_check, init_config, instance_docker):
         'database_recovery_model_desc:SIMPLE',
         'database_state_desc:ONLINE',
         'database:{}'.format(instance_docker['database']),
+        'db:{}'.format(instance_docker['database']),
     ]
     aggregator.assert_metric('sqlserver.database.state', tags=expected_tags, hostname=sqlserver_check.resolved_hostname)
