@@ -624,7 +624,6 @@ class PostgreSql(AgentCheck):
             if self._config.query_timeout:
                 connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
             conn = psycopg.connect(connection_string, autocommit=True, cursor_factory=psycopg.ClientCursor)
-            conn.read_only = True
         else:
             password = self._config.password
             region = self._config.cloud_metadata.get('aws', {}).get('region', None)
@@ -661,7 +660,6 @@ class PostgreSql(AgentCheck):
             if self._config.ssl_password:
                 args['sslpassword'] = self._config.ssl_password
             conn = psycopg.connect(**args, autocommit=True, cursor_factory=psycopg.ClientCursor)
-            conn.read_only = True
         return conn
 
     def _connect(self):

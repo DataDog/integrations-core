@@ -99,7 +99,7 @@ class MultiDatabaseConnectionPool(object):
         with self._mu:
             conn = self._conns.pop(dbname, None)
             db = conn.connection if conn else None
-            if db is None or db.closed:
+            if db is None or db.closed or db.broken:
                 if self.max_conns is not None:
                     # try to free space until we succeed
                     while len(self._conns) >= self.max_conns:
