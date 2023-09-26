@@ -45,13 +45,13 @@ class SliMetricsScraperMixin(object):
 
     def detect_sli_endpoint(self, http_handler, url):
         """
-        Whether the sli metrics endpoint is available (k8s 1.26+).
-        :return: false if the endpoint throws a 404 or 403, true otherwise.
+        Whether the SLI metrics endpoint is available (k8s 1.26+).
+        :return: true if the endpoint returns 200, false otherwise.
         """
         if self._slis_available is not None:
             return self._slis_available
         try:
-            r = http_handler.head(url)
+            r = http_handler.get(url, stream=True)
         except Exception as e:
             self.log.debug("Error querying SLIs endpoint: %s", e)
             return False
@@ -60,5 +60,5 @@ class SliMetricsScraperMixin(object):
                 "The /metrics/slis endpoint was introduced in Kubernetes v1.26. If you expect to see SLI metrics, \
                 please check that your permissions are configured properly."
             )
-        self._slis_available = r.status_code != 404 and r.status_code != 403
+        self._slis_available = r.status_code == 200
         return self._slis_available
