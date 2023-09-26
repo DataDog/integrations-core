@@ -180,6 +180,12 @@ instances:
     #
     # db_fragmentation_object_names: []
 
+    ## @param include_db_file_space_usage_metrics - boolean - optional - default: true
+    ## Include database file space usage metrics for how space is used by data files in a specific database. 
+    ## Note this view is especially relevant for the tempdb database.
+    #
+    # include_db_file_space_usage_metrics: true
+
     ## @param adoprovider - string - optional - default: SQLOLEDB
     ## Choose the ADO provider.  Note that the (default) provider
     ## SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL

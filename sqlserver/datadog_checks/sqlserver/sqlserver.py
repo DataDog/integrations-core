@@ -39,7 +39,7 @@ from datadog_checks.sqlserver.const import (
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES,
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
-    DATABASE_FILE_SPACE_USAGE_METRICS,
+    TEMPDB_FILE_SPACE_USAGE_METRICS,
     DATABASE_FRAGMENTATION_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
@@ -582,9 +582,10 @@ class SQLServer(AgentCheck):
                     metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load DB File Space Usage metrics
-        for name, table, column in DATABASE_FILE_SPACE_USAGE_METRICS:
-            cfg = {'name': name, 'table': table, 'column': column, 'instance_name': 'tempdb', 'tags': tags}
-            metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+        if is_affirmative(self.instance.get('include_db_file_space_usage_metrics', True)):
+            for name, table, column in TEMPDB_FILE_SPACE_USAGE_METRICS:
+                cfg = {'name': name, 'table': table, 'column': column, 'instance_name': 'tempdb', 'tags': tags}
+                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load any custom metrics from conf.d/sqlserver.yaml
         for cfg in custom_metrics:
