@@ -966,8 +966,9 @@ class SqlDbFileSpaceUsage(BaseSqlServerMetric):
         logger.debug("%s: received %d rows for db %s, elapsed time: %.4f sec", cls.__name__, len(data), db, elapsed)
 
         # reset back to previous db
-        logger.debug("%s: reverting cursor context via use statement to %s", cls.__name__, current_db)
-        cursor.execute(construct_use_statement(current_db))
+        if current_db:
+            logger.debug("%s: reverting cursor context via use statement to %s", cls.__name__, current_db)
+            cursor.execute(construct_use_statement(current_db))
 
         return rows, columns
 
