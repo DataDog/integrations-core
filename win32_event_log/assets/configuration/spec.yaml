@@ -303,7 +303,7 @@ files:
       value:
         type: boolean
         display_default: true
-        example: false
+        example: true
     - name: host
       description: |
         By default, the local machine's event logs are captured. To capture a remote
