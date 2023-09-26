@@ -28,11 +28,11 @@ instances:
     #
     # timeout: 3
 
-    ## @param expected_mode - string - optional
+    ## @param expected_mode - string or list of strings - optional
     ## If `expected_mode` is defined, a service check is sent where the
     ## status is determined by whether the current mode matches the expected.
     ##
-    ## Available options are: `leader`, `follower`, `standalone`.
+    ## Available options are: `leader`, `follower`, `standalone` or an array of one or more of these.
     #
     # expected_mode: <EXPECTED_MODE>
 
