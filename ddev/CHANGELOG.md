@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Trigger tests on JMX metrics.yaml updates ([#15877](https://github.com/DataDog/integrations-core/pull/15877))
+
+## 5.1.0 / 2023-09-20
+
 ***Added***:
 
 * Add color output to tests in CI ([#15774](https://github.com/DataDog/integrations-core/pull/15774))

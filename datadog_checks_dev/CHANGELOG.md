@@ -5,6 +5,8 @@
 ***Fixed***:
 
 * Exclude psycopg2 from automatic upgrades ([#15864](https://github.com/DataDog/integrations-core/pull/15864))
+* Upper-bound pydantic to quickly fix CI while we investigate what in the latest version breaks us. ([#15901](https://github.com/DataDog/integrations-core/pull/15901))
+* Finalize pytest plugin logic for E2E refactor ([#15898](https://github.com/DataDog/integrations-core/pull/15898))
 
 ## 25.1.0 / 2023-09-15
 
@@ -18,6 +20,7 @@
 
 ***Changed***:
 
+* Include support for `domain_regex` when validating JMX metric files ([#15761](https://github.com/DataDog/integrations-core/pull/15761))
 * Adjust template and test collection based on new team guidelines ([#15078](https://github.com/DataDog/integrations-core/pull/15078))
     * `ddev create` produces initial test file named `test_unit.py` instead of `test_<integration>.py`.
     * Our pytest collection plugin attaches labels to tests based on their location. E.g. all tests in `test_unit.py` get the `unit` label.

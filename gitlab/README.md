@@ -16,8 +16,6 @@ This OpenMetrics-based integration has a latest mode (enabled by setting `openme
 
 Metrics marked as `[OpenMetricsV1]` or `[OpenMetricsV2]` are only available using the corresponding mode of the GitLab integration. All other metrics are collected by both modes. 
 
-To use the legacy mode of Prometheus or OpenMetrics instead of the latest mode of OpenMetrics, change the `use_openmetrics` option to `use_prometheus`, and change the `openmetrics_endpoint` option to `prometheus_url`. For more information, see the [Prometheus and OpenMetrics metrics collection from a host documentation][30].
-
 ### Installation
 
 The GitLab check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your GitLab servers.
