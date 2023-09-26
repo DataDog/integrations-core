@@ -32,7 +32,7 @@ def mock_metrics():
 
 
 def test_check_metrics_slis(aggregator, mock_metrics, mock_request, instance):
-    mock_request.head('http://localhost:10251/metrics/slis', status_code=200)
+    mock_request.get('http://localhost:10251/metrics/slis', status_code=200)
     c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
@@ -57,7 +57,7 @@ def mock_request():
 
 
 def test_detect_sli_endpoint(mock_metrics, mock_request, instance):
-    mock_request.head('http://localhost:10251/metrics/slis', status_code=200)
+    mock_request.get('http://localhost:10251/metrics/slis', status_code=200)
     c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
     assert c._slis_available is True
@@ -65,7 +65,7 @@ def test_detect_sli_endpoint(mock_metrics, mock_request, instance):
 
 
 def test_detect_sli_endpoint_404(mock_metrics, mock_request, instance):
-    mock_request.head('http://localhost:10251/metrics/slis', status_code=404)
+    mock_request.get('http://localhost:10251/metrics/slis', status_code=404)
     c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
     assert c._slis_available is False
@@ -73,7 +73,7 @@ def test_detect_sli_endpoint_404(mock_metrics, mock_request, instance):
 
 
 def test_detect_sli_endpoint_403(mock_metrics, mock_request, instance):
-    mock_request.head('http://localhost:10251/metrics/slis', status_code=403)
+    mock_request.get('http://localhost:10251/metrics/slis', status_code=403)
     c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
     assert c._slis_available is False
@@ -81,7 +81,7 @@ def test_detect_sli_endpoint_403(mock_metrics, mock_request, instance):
 
 
 def test_detect_sli_endpoint_timeout(mock_metrics, mock_request, instance):
-    mock_request.head('http://localhost:10251/metrics/slis', exc=requests.exceptions.ConnectTimeout)
+    mock_request.get('http://localhost:10251/metrics/slis', exc=requests.exceptions.ConnectTimeout)
     c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
     assert c._slis_available is None
