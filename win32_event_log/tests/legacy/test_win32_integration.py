@@ -4,9 +4,10 @@
 import platform
 
 import pytest
+from six import PY2
+
 from datadog_checks.win32_event_log import Win32EventLogCheck
 from datadog_checks.win32_event_log.legacy import Win32EventLogWMI
-from six import PY2
 
 from . import common
 
