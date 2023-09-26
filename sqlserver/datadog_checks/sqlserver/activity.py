@@ -68,8 +68,8 @@ SELECT
     dbspu.internal_objects_dealloc_page_count as internal_objects_dealloc_page_count,
     {exec_request_columns}
 FROM sys.dm_exec_sessions sess
-	INNER JOIN sys.dm_db_session_space_usage dbspu
-   		ON sess.session_id = dbspu.session_id
+    INNER JOIN sys.dm_db_session_space_usage dbspu
+           ON sess.session_id = dbspu.session_id
     INNER JOIN sys.dm_exec_connections c
         ON sess.session_id = c.session_id
     INNER JOIN sys.dm_exec_requests req
