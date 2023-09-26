@@ -35,8 +35,8 @@ def _get_conn(db_instance, dbname=None, user=None, password=None, application_na
         user=user or db_instance['username'],
         password=password or db_instance['password'],
         application_name=application_name,
+        autocommit=True,
     )
-    conn.autocommit = True
     return conn
 
 

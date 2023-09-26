@@ -180,14 +180,13 @@ def test_statement_metrics(
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
     expected_dbm_metrics_tags = {'foo:bar', 'port:{}'.format(PORT)}
     assert set(event['tags']) == expected_dbm_metrics_tags
-    obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'
 
     assert len(aggregator.metrics("postgresql.pg_stat_statements.max")) != 0
     assert len(aggregator.metrics("postgresql.pg_stat_statements.count")) != 0
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
     for username, _, dbname, query, _ in SAMPLE_QUERIES:
-        expected_query = query % obfuscated_param
+        expected_query = query % '$1'
         query_signature = compute_sql_signature(expected_query)
         matching_rows = [r for r in event['postgres_rows'] if r['query_signature'] == query_signature]
         if not _should_catch_query(dbname):
