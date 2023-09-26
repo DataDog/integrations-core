@@ -23,7 +23,7 @@
 * Close and recreate a connection instead of using the `reset_connection` method ([#15413](https://github.com/DataDog/integrations-core/pull/15413))
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 3.5.0 / 2023-07-10 / Agent 7.47.0
+## 3.5.0 / 2023-07-10
 
 ***Added***:
 

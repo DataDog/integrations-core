@@ -61,6 +61,3 @@ include = [
 dev-mode-dirs = [
     ".",
 ]
-
-[tool.pytest.ini_options]
-addopts = "--capture=no --log-cli-level=debug"

@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -8,7 +9,6 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
-    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     assert_extend_generic_if,
     create_e2e_core_test_config,
@@ -19,8 +19,7 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_huawei(dd_agent_check):
-    profile = 'huawei'
-    config = create_e2e_core_test_config(profile)
+    config = create_e2e_core_test_config('huawei')
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -42,14 +41,13 @@ def test_e2e_profile_huawei(dd_agent_check):
             'huawei_hw_entity_admin_status:not_supported',
             'huawei_hw_entity_board_name:oxen but',
             'huawei_hw_entity_fault_light:not_supported',
-            'huawei_hw_entity_oper_status:absent',
             'huawei_hw_entity_standby_status:hot_standby',
         ],
         [
             'huawei_hw_entity_admin_status:not_supported',
             'huawei_hw_entity_board_name:their quaintly',
             'huawei_hw_entity_fault_light:normal',
-            'huawei_hw_entity_oper_status:enabled',
+            'huawei_hw_entity_oper_status:offline',
             'huawei_hw_entity_standby_status:not_supported',
         ],
     ]
@@ -102,47 +100,27 @@ def test_e2e_profile_huawei(dd_agent_check):
     tag_rows = [
         [
             'huawei_hw_ospfv2_nbr_gr_status:normal',
-            'huawei_hw_ospfv2_nbr_if_backup_designated_router:206.190.209.237',
-            'huawei_hw_ospfv2_nbr_if_designated_router:146.76.41.45',
             'huawei_hw_ospfv2_nbr_mode:slave',
             'huawei_hw_ospfv2_nbr_state:attempt',
-            'huawei_hw_ospfv2_neighbor_router_id:10.237.85.65',
-            'huawei_hw_ospfv2_self_if_ip_address:146.138.207.170',
             'huawei_hw_ospfv2_self_if_name:but quaintly quaintly kept Jaded',
-            'huawei_hw_ospfv2_self_router_id:162.72.182.24',
         ],
         [
             'huawei_hw_ospfv2_nbr_gr_status:normal',
-            'huawei_hw_ospfv2_nbr_if_backup_designated_router:53.213.159.224',
-            'huawei_hw_ospfv2_nbr_if_designated_router:246.21.44.22',
             'huawei_hw_ospfv2_nbr_mode:slave',
             'huawei_hw_ospfv2_nbr_state:loading',
-            'huawei_hw_ospfv2_neighbor_router_id:247.138.57.169',
-            'huawei_hw_ospfv2_self_if_ip_address:90.19.208.128',
             'huawei_hw_ospfv2_self_if_name:kept oxen acted Jaded',
-            'huawei_hw_ospfv2_self_router_id:125.55.112.183',
         ],
         [
-            'huawei_hw_ospfv2_nbr_gr_status:notsupport',
-            'huawei_hw_ospfv2_nbr_if_backup_designated_router:172.219.171.223',
-            'huawei_hw_ospfv2_nbr_if_designated_router:177.94.236.224',
+            'huawei_hw_ospfv2_nbr_gr_status:not_supported',
             'huawei_hw_ospfv2_nbr_mode:master',
             'huawei_hw_ospfv2_nbr_state:loading',
-            'huawei_hw_ospfv2_neighbor_router_id:144.138.234.234',
-            'huawei_hw_ospfv2_self_if_ip_address:147.54.130.211',
             'huawei_hw_ospfv2_self_if_name:quaintly but their zombies but zombies',
-            'huawei_hw_ospfv2_self_router_id:186.4.129.159',
         ],
         [
-            'huawei_hw_ospfv2_nbr_gr_status:notsupport',
-            'huawei_hw_ospfv2_nbr_if_backup_designated_router:180.4.54.232',
-            'huawei_hw_ospfv2_nbr_if_designated_router:24.193.97.154',
+            'huawei_hw_ospfv2_nbr_gr_status:not_supported',
             'huawei_hw_ospfv2_nbr_mode:slave',
             'huawei_hw_ospfv2_nbr_state:down',
-            'huawei_hw_ospfv2_neighbor_router_id:252.167.100.108',
-            'huawei_hw_ospfv2_self_if_ip_address:183.39.48.78',
             'huawei_hw_ospfv2_self_if_name:quaintly driving oxen kept acted kept but',
-            'huawei_hw_ospfv2_self_router_id:174.83.140.32',
         ],
     ]
     for tag_row in tag_rows:
@@ -191,8 +169,5 @@ def test_e2e_profile_huawei(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
-    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-
-    assert_all_profile_metrics_and_tags_covered('huawei', aggregator)

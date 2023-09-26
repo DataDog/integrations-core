@@ -218,10 +218,6 @@ def get_query_file_stats(sqlserver_major_version, sqlserver_engine_edition):
         sql_columns.append("fs.{}".format(column))
         metric_columns.append(column_definitions[column])
 
-    query_filter = ""
-    if sqlserver_major_version == 2022:
-        query_filter = "WHERE DB_NAME(fs.database_id) not like 'model_%'"
-
     query = """
     SELECT
         DB_NAME(fs.database_id),
@@ -232,7 +228,7 @@ def get_query_file_stats(sqlserver_major_version, sqlserver_engine_edition):
     FROM sys.dm_io_virtual_file_stats(NULL, NULL) fs
         LEFT JOIN sys.master_files mf
             ON mf.database_id = fs.database_id
-            AND mf.file_id = fs.file_id {filter};
+            AND mf.file_id = fs.file_id;
     """
 
     if sqlserver_engine_edition == ENGINE_EDITION_SQL_DATABASE:
@@ -251,7 +247,7 @@ def get_query_file_stats(sqlserver_major_version, sqlserver_engine_edition):
 
     return {
         'name': 'sys.dm_io_virtual_file_stats',
-        'query': query.strip().format(sql_columns=", ".join(sql_columns), filter=query_filter),
+        'query': query.strip().format(sql_columns=", ".join(sql_columns)),
         'columns': [
             {'name': 'db', 'type': 'tag'},
             {'name': 'state', 'type': 'tag'},

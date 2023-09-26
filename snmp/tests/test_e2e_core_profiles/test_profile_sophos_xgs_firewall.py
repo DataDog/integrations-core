@@ -9,7 +9,6 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
-    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     assert_extend_generic_if,
     create_e2e_core_test_config,
@@ -20,8 +19,7 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_sophos_xgs_firewall(dd_agent_check):
-    profile = 'sophos-xgs-firewall'
-    config = create_e2e_core_test_config(profile)
+    config = create_e2e_core_test_config('sophos-xgs-firewall')
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -60,7 +58,7 @@ def test_e2e_profile_sophos_xgs_firewall(dd_agent_check):
             'sfos_ip_sec_vpn_conn_des:oxen but forward their',
             'sfos_ip_sec_vpn_conn_mode:forward Jaded oxen oxen their forward',
             'sfos_ip_sec_vpn_conn_name:kept Jaded',
-            'sfos_ip_sec_vpn_conn_type:site-to-site',
+            'sfos_ip_sec_vpn_conn_type:site_to_site',
             'sfos_ip_sec_vpn_localgw_port:quaintly driving forward forward kept their forward',
             'sfos_ip_sec_vpn_policy_name:driving oxen forward quaintly quaintly but but',
         ],
@@ -68,7 +66,7 @@ def test_e2e_profile_sophos_xgs_firewall(dd_agent_check):
             'sfos_ip_sec_vpn_conn_des:oxen zombies acted forward kept',
             'sfos_ip_sec_vpn_conn_mode:zombies zombies kept zombies',
             'sfos_ip_sec_vpn_conn_name:but oxen acted oxen',
-            'sfos_ip_sec_vpn_conn_type:host-to-host',
+            'sfos_ip_sec_vpn_conn_type:host_to_host',
             'sfos_ip_sec_vpn_localgw_port:acted kept zombies Jaded Jaded but Jaded',
             'sfos_ip_sec_vpn_policy_name:oxen forward',
         ],
@@ -95,6 +93,5 @@ def test_e2e_profile_sophos_xgs_firewall(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
-    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

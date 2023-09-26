@@ -41,7 +41,7 @@ omit =
     ../datadog_checks_dev/datadog_checks/dev/tooling/utils.py
 
 [report]
-show_missing = True
+show_missing = ${DDEV_COV_MISSING}
 ignore_errors = True
 
 exclude_lines =

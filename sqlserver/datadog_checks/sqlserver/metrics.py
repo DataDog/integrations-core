@@ -40,7 +40,7 @@ class BaseSqlServerMetric(object):
 
     def __init__(self, cfg_instance, base_name, report_function, column, logger):
         self.cfg_instance = cfg_instance
-        self.metric_name = cfg_instance['name']
+        self.datadog_name = cfg_instance['name']
         self.sql_name = cfg_instance.get('counter_name', '')
         self.base_name = base_name
         partial_kwargs = {}
@@ -54,11 +54,12 @@ class BaseSqlServerMetric(object):
         self.tag_by = cfg_instance.get('tag_by', None)
         self.column = column
         self.instances = None
+        self.past_values = {}
         self.log = logger
 
     def __repr__(self):
         return '<{} datadog_name={!r}, sql_name={!r}, base_name={!r} column={!r}>'.format(
-            self.__class__.__name__, self.metric_name, self.sql_name, self.base_name, self.column
+            self.__class__.__name__, self.datadog_name, self.sql_name, self.base_name, self.column
         )
 
     @classmethod
@@ -82,7 +83,7 @@ class BaseSqlServerMetric(object):
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         raise NotImplementedError
 
-    def fetch_metric(self, rows, columns, values_cache=None):
+    def fetch_metric(self, rows, columns):
         raise NotImplementedError
 
 
@@ -99,7 +100,7 @@ class SqlSimpleMetric(BaseSqlServerMetric):
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, counters_list, logger)
 
-    def fetch_metric(self, rows, columns, values_cache=None):
+    def fetch_metric(self, rows, _):
         for counter_name_long, instance_name_long, object_name, cntr_value in rows:
             counter_name = counter_name_long.strip()
             instance_name = instance_name_long.strip()
@@ -117,7 +118,7 @@ class SqlSimpleMetric(BaseSqlServerMetric):
                 if matched:
                     if self.instance == ALL_INSTANCES:
                         metric_tags.append('{}:{}'.format(self.tag_by, instance_name.strip()))
-                    self.report_function(self.metric_name, cntr_value, tags=metric_tags)
+                    self.report_function(self.datadog_name, cntr_value, tags=metric_tags)
                     if self.instance != ALL_INSTANCES:
                         break
 
@@ -132,6 +133,12 @@ class SqlFractionMetric(BaseSqlServerMetric):
         table=TABLE
     )
 
+    INSTANCES_QUERY = """select instance_name
+                         from {table}
+                         where counter_name=? and instance_name!='_Total';""".format(
+        table=TABLE
+    )
+
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         placeholders = ', '.join('?' for _ in counters_list)
@@ -141,104 +148,92 @@ class SqlFractionMetric(BaseSqlServerMetric):
         cursor.execute(query, counters_list)
         rows = cursor.fetchall()
         results = defaultdict(list)
-
         for counter_name, cntr_type, cntr_value, instance_name, object_name in rows:
-            counter_result = {
-                'cntr_type': cntr_type,
-                'cntr_value': cntr_value,
-                'instance_name': instance_name.strip(),
-                'object_name': object_name.strip(),
-            }
-            logger.debug("Adding new counter_result %s", str(counter_result))
-            results[counter_name.strip()].append(counter_result)
+            rowlist = [cntr_type, cntr_value, instance_name.strip(), object_name.strip()]
+            logger.debug("Adding new rowlist %s", str(rowlist))
+            results[counter_name.strip()].append(rowlist)
         return results, None
 
-    def fetch_metric(self, results, columns, values_cache=None):
-        num_counters = results.get(self.sql_name.strip())
-        base_counters = results.get(self.base_name.strip())
-        if not num_counters or not base_counters:
-            self.log.error(
-                'Skipping counter. Missing numerator and/or base counters \nsql_name=%s \nbase_name=%s \nresults=%s',
-                self.sql_name,
-                self.base_name,
-                str(results),
-            )
+    def set_instances(self, cursor):
+        if self.instance == ALL_INSTANCES:
+            cursor.execute(self.INSTANCES_QUERY, (self.sql_name,))
+            self.instances = [row.instance_name for row in cursor.fetchall()]
+        else:
+            self.instances = [self.instance]
+
+    def fetch_metric(self, results, _):
+        """
+        Because we need to query the metrics by matching pairs, we can't query
+        all of them together without having to perform some matching based on
+        the name afterwards so instead we query instance by instance.
+        We cache the list of instance so that we don't have to look it up every time
+        """
+        if self.sql_name not in results:
+            self.log.warning("Couldn't find %s in results", self.sql_name)
             return
 
-        base_by_key = {}
+        results_list = results[self.sql_name]
+        done_instances = []
+        for ndx, row in enumerate(results_list):
+            ctype = row[0]
+            cval = row[1]
+            inst = row[2]
+            object_name = row[3]
 
-        # let's organize each base counter by key
-        for base in base_counters:
-            key = '{}::{}'.format(base['instance_name'], base['object_name'])
-            if base_by_key.get(key):
-                self.log.warning('Found duplicate base counters for key:%s', key)
-            base_by_key[key] = base
+            if inst in done_instances:
+                continue
 
-        for numerator in num_counters:
-            instance_name = numerator['instance_name']
-            object_name = numerator['object_name']
-            if (
-                self.instance != ALL_INSTANCES
-                and instance_name != self.instance
-                and instance_name != self.physical_db_name
+            if (self.instance != ALL_INSTANCES and inst != self.instance and inst != self.physical_db_name) or (
+                self.object_name and object_name != self.object_name
             ):
+                done_instances.append(inst)
                 continue
-            if self.object_name and self.object_name != object_name:
-                continue
-            key = '{}::{}'.format(numerator['instance_name'], numerator['object_name'])
-            corresponding_base = base_by_key.get(key)
 
-            if not corresponding_base:
-                self.log.warning(
-                    'Could not find corresponding base counter for sql_name: %s base_name: %s',
-                    self.sql_name,
-                    self.base_name,
-                )
+            # find the next row which has the same instance
+            cval2 = None
+            ctype2 = None
+            for second_row in results_list[: ndx + 1]:
+                if inst == second_row[2]:
+                    cval2 = second_row[1]
+                    ctype2 = second_row[0]
+
+            if cval2 is None:
+                self.log.warning("Couldn't find second value for %s", self.sql_name)
+                continue
+            done_instances.append(inst)
+            if ctype < ctype2:
+                value = cval
+                base = cval2
+            else:
+                value = cval2
+                base = cval
 
             metric_tags = list(self.tags)
             if self.instance == ALL_INSTANCES:
-                metric_tags.append('{}:{}'.format(self.tag_by, instance_name))
-            self.report_fraction(
-                numerator['cntr_value'], corresponding_base['cntr_value'], metric_tags, previous_values=values_cache
-            )
+                metric_tags.append('{}:{}'.format(self.tag_by, inst.strip()))
+            self.report_fraction(value, base, metric_tags)
 
-    def report_fraction(self, value, base, metric_tags, previous_values):
+    def report_fraction(self, value, base, metric_tags):
         try:
             result = value / float(base)
-            self.report_function(self.metric_name, result, tags=metric_tags)
+            self.report_function(self.datadog_name, result, tags=metric_tags)
         except ZeroDivisionError:
-            self.log.debug("Base value is 0, won't report metric %s for tags %s", self.metric_name, metric_tags)
+            self.log.debug("Base value is 0, won't report metric %s for tags %s", self.datadog_name, metric_tags)
 
 
 class SqlIncrFractionMetric(SqlFractionMetric):
-    """
-    Performance counters where the cntr_type column value is 1073874176 display
-    how many items are processed on average, as a ratio of the items processed
-    to the number of operations. For example, the Locks:Average Wait Time (ms)
-    counters compares the lock waits per second with the lock requests per second,
-    to display the average amount of wait time (in milliseconds) for each lock request that resulted in a wait.
-    As such, to get a snapshot-like reading of the last second only, you must compare the delta between
-    the current value and the base value (denominator) between two collection points that are one second apart.
-    """
-
-    def report_fraction(self, value, base, metric_tags, previous_values):
-        # return if nil is passed as the values cache, as this should be instantiated
-        # at check instantiation
-        if previous_values is None:
-            return
-        # key is set to the metric name + the metric tags in order to support
-        # per database instance fraction metrics
-        key = "{}:{}".format(self.metric_name, "".join(metric_tags))
-        if key in previous_values:
-            old_value, old_base = previous_values[key]
+    def report_fraction(self, value, base, metric_tags):
+        key = "key:" + "".join(metric_tags)
+        if key in self.past_values:
+            old_value, old_base = self.past_values[key]
             diff_value = value - old_value
             diff_base = base - old_base
             try:
                 result = diff_value / float(diff_base)
-                self.report_function(self.metric_name, result, tags=metric_tags)
+                self.report_function(self.datadog_name, result, tags=metric_tags)
             except ZeroDivisionError:
-                self.log.debug("Base value is 0, won't report metric %s for tags %s", self.metric_name, metric_tags)
-        previous_values[key] = (value, base)
+                self.log.debug("Base value is 0, won't report metric %s for tags %s", self.datadog_name, metric_tags)
+        self.past_values[key] = (value, base)
 
 
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-wait-stats-transact-sql
@@ -251,7 +246,7 @@ class SqlOsWaitStat(BaseSqlServerMetric):
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, counters_list, logger)
 
-    def fetch_metric(self, rows, columns, values_cache=None):
+    def fetch_metric(self, rows, columns):
         name_column_index = columns.index("wait_type")
         value_column_index = columns.index(self.column)
         value = None
@@ -264,7 +259,7 @@ class SqlOsWaitStat(BaseSqlServerMetric):
             return
 
         self.log.debug("Value for %s %s is %s", self.sql_name, self.column, value)
-        metric_name = '{}.{}'.format(self.metric_name, self.column)
+        metric_name = '{}.{}'.format(self.datadog_name, self.column)
         self.report_function(metric_name, value, tags=self.tags)
 
 
@@ -293,7 +288,7 @@ class SqlIoVirtualFileStat(BaseSqlServerMetric):
         self.fid = self.cfg_instance.get('file_id', None)
         self.pvs_vals = defaultdict(lambda: None)
 
-    def fetch_metric(self, rows, columns, values_cache=None):
+    def fetch_metric(self, rows, columns):
         # TODO - fix this function
         #  this function actually processes the change in value between two checks,
         #  but doesn't account for time differences.  This can work for some columns like `num_of_writes`, but is
@@ -322,12 +317,11 @@ class SqlIoVirtualFileStat(BaseSqlServerMetric):
             self.pvs_vals[dbid, fid] = value
             metric_tags = [
                 'database:{}'.format(str(dbname).strip()),
-                'db:{}'.format(str(dbname).strip()),
                 'database_id:{}'.format(str(dbid).strip()),
                 'file_id:{}'.format(str(fid).strip()),
             ]
             metric_tags.extend(self.tags)
-            metric_name = '{}.{}'.format(self.metric_name, self.column)
+            metric_name = '{}.{}'.format(self.datadog_name, self.column)
             self.report_function(metric_name, report_value, tags=metric_tags)
 
 
@@ -341,7 +335,7 @@ class SqlOsMemoryClerksStat(BaseSqlServerMetric):
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, counters_list, logger)
 
-    def fetch_metric(self, rows, columns, values_cache=None):
+    def fetch_metric(self, rows, columns):
         type_column_index = columns.index("type")
         value_column_index = columns.index(self.column)
         memnode_index = columns.index("memory_node_id")
@@ -358,7 +352,7 @@ class SqlOsMemoryClerksStat(BaseSqlServerMetric):
         for memory_node_id, column_val in sum_by_memory_node_id.items():
             metric_tags = ['memory_node_id:{}'.format(memory_node_id)]
             metric_tags.extend(self.tags)
-            metric_name = '{}.{}'.format(self.metric_name, self.column)
+            metric_name = '{}.{}'.format(self.datadog_name, self.column)
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
@@ -372,7 +366,7 @@ class SqlOsSchedulers(BaseSqlServerMetric):
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
-    def fetch_metric(self, rows, columns, values_cache=None):
+    def fetch_metric(self, rows, columns):
         value_column_index = columns.index(self.column)
         scheduler_index = columns.index("scheduler_id")
         parent_node_index = columns.index("parent_node_id")
@@ -384,7 +378,7 @@ class SqlOsSchedulers(BaseSqlServerMetric):
 
             metric_tags = ['scheduler_id:{}'.format(str(scheduler_id)), 'parent_node_id:{}'.format(str(parent_node_id))]
             metric_tags.extend(self.tags)
-            metric_name = '{}'.format(self.metric_name)
+            metric_name = '{}'.format(self.datadog_name)
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
@@ -408,7 +402,7 @@ class SqlOsTasks(BaseSqlServerMetric):
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
-    def fetch_metric(self, rows, columns, values_cache=None):
+    def fetch_metric(self, rows, columns):
         scheduler_id_column_index = columns.index("scheduler_id")
         value_column_index = columns.index(self.column)
 
@@ -418,7 +412,7 @@ class SqlOsTasks(BaseSqlServerMetric):
 
             metric_tags = ['scheduler_id:{}'.format(str(scheduler_id))]
             metric_tags.extend(self.tags)
-            metric_name = '{}'.format(self.metric_name)
+            metric_name = '{}'.format(self.datadog_name)
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
@@ -440,7 +434,7 @@ class SqlMasterDatabaseFileStats(BaseSqlServerMetric):
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
-    def fetch_metric(self, rows, columns, values_cache=None):
+    def fetch_metric(self, rows, columns):
         db_name = columns.index("name")
         file_id = columns.index("file_id")
         file_type = columns.index("type")
@@ -463,14 +457,13 @@ class SqlMasterDatabaseFileStats(BaseSqlServerMetric):
 
             metric_tags = [
                 'database:{}'.format(str(dbname)),
-                'db:{}'.format(str(dbname)),
                 'file_id:{}'.format(str(fileid)),
                 'file_type:{}'.format(str(filetype)),
                 'file_location:{}'.format(str(location)),
                 'database_files_state_desc:{}'.format(str(db_files_state_desc)),
             ]
             metric_tags.extend(self.tags)
-            metric_name = '{}'.format(self.metric_name)
+            metric_name = '{}'.format(self.datadog_name)
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
@@ -537,7 +530,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
 
         return rows, columns
 
-    def fetch_metric(self, rows, columns, values_cache=None):
+    def fetch_metric(self, rows, columns):
         try:
             db_name = columns.index('database')
             file_id = columns.index("file_id")
@@ -564,14 +557,13 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
 
             metric_tags = [
                 'database:{}'.format(str(self.instance)),
-                'db:{}'.format(str(self.instance)),
                 'file_id:{}'.format(str(fileid)),
                 'file_type:{}'.format(str(filetype)),
                 'file_location:{}'.format(str(location)),
                 'database_files_state_desc:{}'.format(str(db_files_state_desc)),
             ]
             metric_tags.extend(self.tags)
-            metric_name = '{}'.format(self.metric_name)
+            metric_name = '{}'.format(self.datadog_name)
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
@@ -586,7 +578,7 @@ class SqlDatabaseStats(BaseSqlServerMetric):
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
-    def fetch_metric(self, rows, columns, values_cache=None):
+    def fetch_metric(self, rows, columns):
         database_name = columns.index("name")
         db_state_desc_index = columns.index("state_desc")
         db_recovery_model_desc_index = columns.index("recovery_model_desc")
@@ -601,12 +593,11 @@ class SqlDatabaseStats(BaseSqlServerMetric):
             db_recovery_model_desc = row[db_recovery_model_desc_index]
             metric_tags = [
                 'database:{}'.format(str(self.instance)),
-                'db:{}'.format(str(self.instance)),
                 'database_state_desc:{}'.format(str(db_state_desc)),
                 'database_recovery_model_desc:{}'.format(str(db_recovery_model_desc)),
             ]
             metric_tags.extend(self.tags)
-            metric_name = '{}'.format(self.metric_name)
+            metric_name = '{}'.format(self.datadog_name)
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
@@ -631,7 +622,7 @@ class SqlDatabaseBackup(BaseSqlServerMetric):
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
-    def fetch_metric(self, rows, columns, values_cache=None):
+    def fetch_metric(self, rows, columns):
         database_name = columns.index("database_name")
         value_column_index = columns.index(self.column)
 
@@ -642,10 +633,9 @@ class SqlDatabaseBackup(BaseSqlServerMetric):
             column_val = row[value_column_index]
             metric_tags = [
                 'database:{}'.format(str(self.instance)),
-                'db:{}'.format(str(self.instance)),
             ]
             metric_tags.extend(self.tags)
-            metric_name = '{}'.format(self.metric_name)
+            metric_name = '{}'.format(self.datadog_name)
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
@@ -665,16 +655,11 @@ class SqlDbFragmentation(BaseSqlServerMetric):
     DEFAULT_METRIC_TYPE = 'gauge'
 
     QUERY_BASE = (
-        "SELECT DB_NAME(DDIPS.database_id) as database_name, "
-        "OBJECT_NAME(DDIPS.object_id, DDIPS.database_id) as object_name, "
-        "DDIPS.index_id as index_id, DDIPS.fragment_count as fragment_count, "
-        "DDIPS.avg_fragment_size_in_pages as avg_fragment_size_in_pages, "
-        "DDIPS.page_count as page_count, "
-        "DDIPS.avg_fragmentation_in_percent as avg_fragmentation_in_percent, I.name as index_name "
-        "FROM {table} (DB_ID('{{db}}'),null,null,null,null) as DDIPS "
-        "INNER JOIN sys.indexes as I ON I.object_id = DDIPS.object_id "
-        "AND DDIPS.index_id = I.index_id "
-        "WHERE DDIPS.fragment_count is not null".format(table=TABLE)
+        "select DB_NAME(database_id) as database_name, OBJECT_NAME(object_id, database_id) as object_name, "
+        "index_id, partition_number, fragment_count, avg_fragment_size_in_pages, "
+        "avg_fragmentation_in_percent "
+        "from {table} (DB_ID('{{db}}'),null,null,null,null) "
+        "where fragment_count is not null".format(table=TABLE)
     )
 
     def __init__(self, cfg_instance, base_name, report_function, column, logger):
@@ -691,13 +676,10 @@ class SqlDbFragmentation(BaseSqlServerMetric):
         logger.debug("%s: gathering fragmentation metrics for these databases: %s", cls.__name__, databases)
 
         for db in databases:
-            ctx = construct_use_statement(db)
             query = cls.QUERY_BASE.format(db=db)
+            logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
             start = get_precise_time()
             try:
-                logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
-                cursor.execute(ctx)
-                logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
                 cursor.execute(query)
                 data = cursor.fetchall()
             except Exception as e:
@@ -717,12 +699,11 @@ class SqlDbFragmentation(BaseSqlServerMetric):
 
         return rows, columns
 
-    def fetch_metric(self, rows, columns, values_cache=None):
+    def fetch_metric(self, rows, columns):
         value_column_index = columns.index(self.column)
         database_name = columns.index("database_name")
         object_name_index = columns.index("object_name")
         index_id_index = columns.index("index_id")
-        index_name_index = columns.index("index_name")
 
         for row in rows:
             if row[database_name] != self.instance:
@@ -731,7 +712,6 @@ class SqlDbFragmentation(BaseSqlServerMetric):
             column_val = row[value_column_index]
             object_name = row[object_name_index]
             index_id = row[index_id_index]
-            index_name = row[index_name_index]
 
             object_list = self.cfg_instance.get('db_fragmentation_object_names')
 
@@ -740,14 +720,12 @@ class SqlDbFragmentation(BaseSqlServerMetric):
 
             metric_tags = [
                 u'database_name:{}'.format(ensure_unicode(self.instance)),
-                u'db:{}'.format(ensure_unicode(self.instance)),
                 u'object_name:{}'.format(ensure_unicode(object_name)),
                 u'index_id:{}'.format(ensure_unicode(index_id)),
-                u'index_name:{}'.format(ensure_unicode(index_name)),
             ]
 
             metric_tags.extend(self.tags)
-            self.report_function(self.metric_name, column_val, tags=metric_tags)
+            self.report_function(self.datadog_name, column_val, tags=metric_tags)
 
 
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-hadr-database-replica-states-transact-sql?view=sql-server-ver15
@@ -766,7 +744,7 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
-    def fetch_metric(self, rows, columns, values_cache=None):
+    def fetch_metric(self, rows, columns):
         value_column_index = columns.index(self.column)
         sync_state_desc_index = columns.index('synchronization_state_desc')
         resource_group_id_index = columns.index('resource_group_id')
@@ -797,7 +775,7 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
                 'availability_group_name:{}'.format(str(resource_group_name)),
             ]
             metric_tags.extend(self.tags)
-            metric_name = '{}'.format(self.metric_name)
+            metric_name = '{}'.format(self.datadog_name)
 
             self.report_function(metric_name, column_val, tags=metric_tags)
 
@@ -843,7 +821,7 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
                 'synchronization_health_desc:{}'.format(str(sync_health_desc)),
             ]
             metric_tags.extend(self.tags)
-            metric_name = '{}'.format(self.metric_name)
+            metric_name = '{}'.format(self.datadog_name)
 
             self.report_function(metric_name, column_val, tags=metric_tags)
 
@@ -914,7 +892,6 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
                 'availability_group:{}'.format(str(resource_group_id)),
                 'availability_group_name:{}'.format(str(resource_group_name)),
                 'failover_mode_desc:{}'.format(str(failover_mode_desc)),
-                'db:{}'.format(str(database_name)),
             ]
             if is_primary_replica_index is not None:
                 is_primary_replica = row[is_primary_replica_index]
@@ -923,83 +900,8 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
                 metric_tags.append('is_primary_replica:unknown')
 
             metric_tags.extend(self.tags)
-            metric_name = '{}'.format(self.metric_name)
+            metric_name = '{}'.format(self.datadog_name)
 
-            self.report_function(metric_name, column_val, tags=metric_tags)
-
-
-# https://learn.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-file-space-usage-transact-sql?view=sql-server-ver15
-class SqlDbFileSpaceUsage(BaseSqlServerMetric):
-    CUSTOM_QUERIES_AVAILABLE = False
-    TABLE = 'sys.dm_db_file_space_usage'
-    DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = """SELECT
-            database_id,
-            DB_NAME(database_id) as database_name,
-            ISNULL(SUM(unallocated_extent_page_count)*1.0/128, 0) as free_space,
-            ISNULL(SUM(version_store_reserved_page_count)*1.0/128, 0) as used_space_by_version_store,
-            ISNULL(SUM(internal_object_reserved_page_count)*1.0/128, 0) as used_space_by_internal_object,
-            ISNULL(SUM(user_object_reserved_page_count)*1.0/128, 0) as used_space_by_user_object,
-            ISNULL(SUM(mixed_extent_page_count)*1.0/128, 0) as mixed_extent_space
-        FROM {table} group by database_id""".format(
-        table=TABLE
-    )
-
-    @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
-        rows = []
-        columns = []
-        if databases is None:
-            databases = []
-
-        logger.debug("%s: gathering db file space usage metrics for these databases: %s", cls.__name__, databases)
-
-        for db in databases:
-            ctx = construct_use_statement(db)
-            start = get_precise_time()
-            try:
-                logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
-                cursor.execute(ctx)
-                logger.debug("%s: fetch_all executing query: %s", cls.__name__, cls.QUERY_BASE)
-                cursor.execute(cls.QUERY_BASE)
-                data = cursor.fetchall()
-            except Exception as e:
-                logger.warning("Error when trying to query db %s - skipping.  Error: %s", db, e)
-                continue
-            elapsed = get_precise_time() - start
-
-            query_columns = [i[0] for i in cursor.description]
-            if columns:
-                if columns != query_columns:
-                    raise CheckException('Assertion error: {} != {}'.format(columns, query_columns))
-            else:
-                columns = query_columns
-
-            rows.extend(data)
-            logger.debug("%s: received %d rows for db %s, elapsed time: %.4f sec", cls.__name__, len(data), db, elapsed)
-
-        return rows, columns
-
-    def fetch_metric(self, rows, columns):
-        value_column_index = columns.index(self.column)
-        database_id_index = columns.index('database_id')
-        database_name_index = columns.index('database_name')
-
-        for row in rows:
-            database_id = row[database_id_index]
-            database_name = row[database_name_index]
-            column_val = row[value_column_index]
-
-            if database_name != self.instance:
-                continue
-
-            metric_tags = [
-                'database:{}'.format(str(database_name)),
-                'db:{}'.format(str(database_name)),
-                'database_id:{}'.format(str(database_id)),
-            ]
-            metric_tags.extend(self.tags)
-            metric_name = '{}'.format(self.metric_name)
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 

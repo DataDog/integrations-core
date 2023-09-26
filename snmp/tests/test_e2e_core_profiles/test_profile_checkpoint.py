@@ -9,7 +9,6 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
-    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     assert_extend_checkpoint_firewall_cpu_memory,
     assert_extend_generic_if,
@@ -24,14 +23,12 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_checkpoint(dd_agent_check):
-    profile = 'checkpoint'
-    config = create_e2e_core_test_config(profile)
+    config = create_e2e_core_test_config('checkpoint')
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
     common_tags = [
         'snmp_profile:checkpoint',
-        'snmp_host:checkpoint.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_vendor:checkpoint',
@@ -165,7 +162,6 @@ def test_e2e_profile_checkpoint(dd_agent_check):
         'id_tags': ['device_namespace:default', 'snmp_device:' + ip_address],
         'ip_address': '' + ip_address,
         'model': 'Check Point 3200',
-        'name': 'checkpoint.device.name',
         'os_name': 'Gaia',
         'os_version': '3.10.0',
         'product_name': 'SVN Foundation',
@@ -180,6 +176,5 @@ def test_e2e_profile_checkpoint(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
-    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

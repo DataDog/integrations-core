@@ -23,9 +23,7 @@ metrics:
       - name: alcatel.ind.chasEntPhysical
         constant_value_one: true
     metric_tags:
-      - # MIB: ENTITY-MIB
-        # table: entPhysicalTable
-        column:
+      - column:
           OID: 1.3.6.1.2.1.47.1.1.1.1.5
           name: alcatel.ind.entPhysicalClass
         tag: ent_physical_class
@@ -42,24 +40,15 @@ metrics:
           10: port
           11: stack
           12: cpu
-          13: energy_object
-          14: battery
-          15: storage_drive
-      - # MIB: ENTITY-MIB
-        # table: entPhysicalTable
-        column:
+      - column:
           OID: 1.3.6.1.2.1.47.1.1.1.1.7
           name: alcatel.ind.entPhysicalName
         tag: ent_physical_name
-      - # MIB: ENTITY-MIB
-        # table: entPhysicalTable
-        column:
+      - column:
           OID: 1.3.6.1.2.1.47.1.1.1.1.11
           name: alcatel.ind.entPhysicalSerialNum
         tag: ent_physical_serial_num
-      - # MIB: ENTITY-MIB
-        # table: entPhysicalTable
-        column:
+      - column:
           OID: 1.3.6.1.2.1.47.1.1.1.1.13
           name: alcatel.ind.entPhysicalModelName
         tag: ent_physical_model_name
@@ -75,8 +64,6 @@ metrics:
           5: takeover
           6: reset_all
           7: standby
-          8: reset_with_fabric
-          9: takeover_with_fabrc
       - column:
           OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.2
           name: alcatel.ind.chasEntPhysOperStatus

@@ -2,10 +2,6 @@
 
 ## Unreleased
 
-***Fixed***:
-
-* Override the default test options for some integrations ([#15779](https://github.com/DataDog/integrations-core/pull/15779))
-
 ## 4.0.0 / 2023-08-10
 
 ***Changed***:
@@ -20,7 +16,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 3.1.1 / 2023-07-10 / Agent 7.47.0
+## 3.1.1 / 2023-07-10
 
 ***Fixed***:
 

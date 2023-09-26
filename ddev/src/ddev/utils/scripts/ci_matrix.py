@@ -48,8 +48,7 @@ TESTABLE_FILE_PATTERN = re.compile(
   | hatch\.toml
   | metadata\.csv
   | pyproject\.toml
-  | datadog_checks/[^/]+/data/metrics\.yaml
-  | datadog_checks/snmp/data/default_profiles/.+
+  | snmp/data/default_profiles/.+
     """,
     re.VERBOSE,
 )

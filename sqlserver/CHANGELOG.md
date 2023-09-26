@@ -2,28 +2,9 @@
 
 ## Unreleased
 
-***Changed***:
-
-* Cache performance counter type to prevent querying for the same counter multiple times (especially for the per-db counters) ([#15714](https://github.com/DataDog/integrations-core/pull/15714))
-* Add the `db` tag to every metric also using `database` or `database_name` for consistency ([#15792](https://github.com/DataDog/integrations-core/pull/15792))
-* Updates the namespace for version store performance metrics added in ([#15879](https://github.com/DataDog/integrations-core/pull/15879)) to be `sqlserver.transactions.xyz`. ([#15904](https://github.com/DataDog/integrations-core/pull/15904))
-
-***Added***:
-
-* Add TempDB version store performance counters ([#15879](https://github.com/DataDog/integrations-core/pull/15879))
-* Add TempDB page counts metrics ([#15873](https://github.com/DataDog/integrations-core/pull/15873))
-* Add `index_name` tag to `.database.avg_fragmentation_in_percent`, `.database.fragment_count`, `.database.avg_fragment_size_in_pages` metrics. Also add a new metric `sqlserver.database.index_page_count`, tagged by `database_name`, `object_name`, `index_id` and `index_name`. ([#15721](https://github.com/DataDog/integrations-core/pull/15721))
-
-***Added***:
-
-* Add additional SQL Server performance counter metrics ([#15818](https://github.com/DataDog/integrations-core/pull/15818))
-
 ***Fixed***:
 
-* Restore the logic for the lookback time in the statement metrics query. It was previously the connection interval * 2, but was removed during a refactor. ([#15857](https://github.com/DataDog/integrations-core/pull/15857))
-* Fix type `bytes` is not JSON serializable for dbm events ([#15763](https://github.com/DataDog/integrations-core/pull/15763))
 * Fix sqlserver file stats metrics for Azure SQL DB ([#15695](https://github.com/DataDog/integrations-core/pull/15695))
-* Fix calculation for performance counters that require a corresponding [base counter type](https://learn.microsoft.com/en-us/windows/win32/wmisdk/base-counter-types) which were previously emitting a constant 100% value (such as `sqlserver.buffer.cache_hit_ratio`). ([#15846](https://github.com/DataDog/integrations-core/pull/15846))
 
 ## 14.0.0 / 2023-08-18
 
@@ -55,7 +36,7 @@
 * Allow for collection of AO metrics for azure sql db ([#15508](https://github.com/DataDog/integrations-core/pull/15508))
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 12.0.0 / 2023-07-10 / Agent 7.47.0
+## 12.0.0 / 2023-07-10
 
 ***Changed***:
 

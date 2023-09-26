@@ -2,10 +2,6 @@
 
 ## Unreleased
 
-***Changed***:
-
-* Drop Python 2 support ([#15786](https://github.com/DataDog/integrations-core/pull/15786))
-
 ## 5.0.0 / 2023-08-10
 
 ***Changed***:
@@ -20,7 +16,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 4.2.0 / 2023-07-10 / Agent 7.47.0
+## 4.2.0 / 2023-07-10
 
 ***Added***:
 

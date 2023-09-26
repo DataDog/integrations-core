@@ -12,27 +12,15 @@ Capture HAProxy activity in Datadog to:
 
 ## Setup
 
-This integration can collect metrics from a Prometheus endpoint (recommended) or from a socket-based integration through the stats endpoint (deprecated). Using the Prometheus endpoint requires HAProxy version 2 (enterprise version 1.9rc1) or later.
-
-When using the Prometheus endpoint, starting with version 4.0.0, this OpenMetrics-based integration has a latest mode (`use_openmetrics`: true) and a legacy mode (`use_openmetrics`: false and `use_prometheus`: true). To get all the most up-to-date features, Datadog recommends enabling the latest mode. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][29].
-
-To use the socket-based integration, set both `use_openmetrics` and `use_prometheus` to false and follow the [corresponding instructions](#using-the-stats-endpoint) on the Configuration section.
-
-The `use_openmetrics` option uses the latest mode of [OpenMetrics][26], which requires Agent v7.35 or later, or for you to [enable Python 3][27] in Agent v6.35 or later for metric collection. For hosts that are unable to use Python 3 or are on Agent v7.34 or earlier, use the legacy mode of OpenMetrics or the [socket-based legacy integration](#using-the-stats-endpoint). 
-
-Metrics marked as `[OpenMetrics V1]` or `[OpenMetrics V2]` are only available using the corresponding mode of the HAProxy integration. Metrics marked as `[OpenMetrics V1 and V2]` are collected by both modes.
-
 ### Installation
 
-The HAProxy check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your HAProxy server.
+The Haproxy check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Haproxy server.
 
 ### Configuration
 
 #### Using Prometheus
 
 The recommended way to set up this integration is by enabling the Prometheus endpoint on HAProxy. This endpoint is built into HAProxy starting with version 2 (enterprise version 1.9rc1). If you are using an older version, consider setting up the [HAProxy Prometheus exporter][3], or alternatively set up the legacy socket-based integration described in the next section.
-
-To use the legacy OpenMetrics mode instead of the latest one, change the `use_openmetrics` option to `use_prometheus`, and change the `openmetrics_endpoint` option to `prometheus_url`. For more information, see the [Prometheus and OpenMetrics metrics collection from a host documentation][30].
 
 #### Prepare HAProxy
 
@@ -55,13 +43,13 @@ To configure this check for an Agent running on a host:
    instances:
         
      ## @param use_openmetrics - boolean - optional - default: false
-     ## Enable to preview the new version of the check which supports HAProxy version 2 or later
+     ## Enable to preview the new version of the check which supports HAProxy version 2+
      ## or environments using the HAProxy exporter.
      ##
      ## OpenMetrics-related options take effect only when this is set to `true`. 
      ##
      ## Uses the latest OpenMetrics V2 implementation for more features and better performance.
-     ## Note: To see the configuration options for the OpenMetrics V1 implementation (Agent v7.33 or earlier),
+     ## Note: To see the configuration options for the OpenMetrics V1 implementation (Agent 7.33 or older),
      ## https://github.com/DataDog/integrations-core/blob/7.33.x/haproxy/datadog_checks/haproxy/data/conf.yaml.example
      #
    - use_openmetrics: true  # Enables OpenMetrics V2
@@ -71,8 +59,9 @@ To configure this check for an Agent running on a host:
      #
      openmetrics_endpoint: http://localhost:<PORT>/metrics
    ```
+   **Note**: The `use_openmetrics` option uses [OpenMetrics v2][26] for metric collection, which requires Agent v7.35+ or [enabling Python 3][27] in Agent v6.35+. For hosts that are unable to use Python 3 or are on Agent v7.34 and below, use the OpenMetrics v1 implementation or the [socket-based legacy integration](#using-the-stats-endpoint). 
 
-   To view configuration options for the legacy implementation, see the [sample haproxy.d/conf.yaml][25] file for Agent v7.34 or earlier.
+   To view configuration options for the legacy implementation, see the [sample haproxy.d/conf.yaml][25] file for Agent v7.34.
 
 
 3. [Restart the Agent][6].
@@ -126,7 +115,7 @@ spec:
 
 #### Using the stats endpoint
 
-This configuration strategy is provided as a reference for legacy users. If you are setting up the integration for the first time, consider using the Prometheus-based strategy described in the previous section.
+**Note**: This configuration strategy is provided as a reference for legacy users. If you are setting up the integration for the first time, consider using the Prometheus-based strategy described in the previous section.
 
 The Agent collects metrics using a stats endpoint:
 
@@ -157,7 +146,7 @@ Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 
 ##### Metric collection
 
-1. Add this configuration block to your `haproxy.d/conf.yaml` file to start gathering your [HAProxy Metrics](#metrics):
+1. Add this configuration block to your `haproxy.d/conf.yaml` file to start gathering your [Haproxy Metrics](#metrics):
 
    ```yaml
    init_config:
@@ -254,7 +243,7 @@ To configure this check for an Agent running on Kubernetes:
 
 Set [Autodiscovery Integrations Templates][12] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][13].
 
-**Annotations v1** (for Datadog Agent v7.36 or earlier)
+**Annotations v1** (for Datadog Agent < v7.36)
 
 ```yaml
 apiVersion: v1
@@ -275,7 +264,7 @@ spec:
     - name: haproxy
 ```
 
-**Annotations v2** (for Datadog Agent v7.36 or later)
+**Annotations v2** (for Datadog Agent v7.36+)
 
 ```yaml
 apiVersion: v1
@@ -348,7 +337,7 @@ Set [Autodiscovery Integrations Templates][9] as Docker labels on your applicati
 
 ##### Log collection
 
-_Available for Agent versions 6.0 or later_
+_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [ECS Log Collection][16].
 
@@ -381,7 +370,7 @@ See [metadata.csv][18] for a list of metrics provided by this integration.
 
 ### Events
 
-The HAProxy check does not include any events.
+The Haproxy check does not include any events.
 
 ### Service Checks
 
@@ -431,5 +420,3 @@ Need help? Contact [Datadog support][20].
 [26]: https://datadoghq.dev/integrations-core/base/openmetrics/
 [27]: https://docs.datadoghq.com/agent/guide/agent-v6-python-3/?tab=helm#use-python-3-with-datadog-agent-v6
 [28]: https://github.com/DataDog/integrations-core/blob/0e34b3309cc1371095762bfcaf121b0b45a4e263/haproxy/datadog_checks/haproxy/data/conf.yaml.example#L631
-[29]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations
-[30]: https://docs.datadoghq.com/integrations/guide/prometheus-host-collection/

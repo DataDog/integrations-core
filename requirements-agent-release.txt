@@ -65,7 +65,7 @@ datadog-hdfs-datanode==4.0.0; sys_platform != 'win32'
 datadog-hdfs-namenode==4.0.0; sys_platform != 'win32'
 datadog-hive==1.9.1
 datadog-hivemq==1.7.1
-datadog-http-check==9.1.0
+datadog-http-check==9.0.1
 datadog-hudi==2.2.1
 datadog-hyperv==1.10.1; sys_platform == 'win32'
 datadog-ibm-ace==2.1.0
@@ -79,7 +79,7 @@ datadog-impala==2.0.0
 datadog-istio==5.1.0
 datadog-jboss-wildfly==2.1.1
 datadog-journald==1.1.1
-datadog-kafka-consumer==4.1.2
+datadog-kafka-consumer==4.1.1
 datadog-kafka==2.14.1
 datadog-kong==3.0.0
 datadog-kube-apiserver-metrics==4.0.0
@@ -118,7 +118,7 @@ datadog-pdh-check==2.0.0; sys_platform == 'win32'
 datadog-pgbouncer==5.0.0; sys_platform != 'win32'
 datadog-php-fpm==3.0.0
 datadog-postfix==1.13.1; sys_platform != 'win32'
-datadog-postgres==14.4.0
+datadog-postgres==14.2.1
 datadog-powerdns-recursor==2.3.1
 datadog-presto==2.7.1
 datadog-process==3.0.0
@@ -135,7 +135,7 @@ datadog-scylla==2.5.0
 datadog-sidekiq==1.3.1
 datadog-silk==2.0.0
 datadog-singlestore==2.0.0
-datadog-snmp==6.2.3
+datadog-snmp==6.2.0
 datadog-snowflake==5.0.0
 datadog-solr==1.12.1
 datadog-sonarqube==3.0.0

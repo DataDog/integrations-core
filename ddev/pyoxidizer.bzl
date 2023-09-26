@@ -67,7 +67,17 @@ def make_exe_installer():
     return bundle
 
 
-def make_macos_universal_binary():
+def make_macos_app_bundle():
+    # https://gregoryszorc.com/docs/pyoxidizer/main/tugger_starlark_type_macos_application_bundle_builder.html
+    bundle = MacOsApplicationBundleBuilder(DISPLAY_NAME)
+    bundle.set_info_plist_required_keys(
+        display_name=DISPLAY_NAME,
+        identifier="com.datadoghq." + APP_NAME,
+        version=VERSION,
+        signature=APP_NAME,
+        executable=APP_NAME,
+    )
+
     # https://gregoryszorc.com/docs/pyoxidizer/main/tugger_starlark_type_apple_universal_binary.html
     universal = AppleUniversalBinary(APP_NAME)
 
@@ -76,10 +86,12 @@ def make_macos_universal_binary():
 
     m = FileManifest()
     m.add_file(universal.to_file_content())
-    return m
+    bundle.add_macos_manifest(m)
+
+    return bundle
 
 
 register_target("windows_installers", make_exe_installer, default=True)
-register_target("macos_universal_binary", make_macos_universal_binary)
+register_target("macos_app_bundle", make_macos_app_bundle)
 
 resolve_targets()

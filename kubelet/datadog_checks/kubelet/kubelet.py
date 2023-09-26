@@ -24,7 +24,6 @@ from .common import (
     CADVISOR_DEFAULT_PORT,
     PodListUtils,
     get_container_label,
-    get_prometheus_url,
     replace_container_rt_prefix,
     tags_for_docker,
 )
@@ -131,7 +130,7 @@ DEFAULT_ENABLED_GAUGES = [
 ]
 DEFAULT_POD_LEVEL_METRICS = ['network.*']
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('collector')
 
 
 class KubeletCheck(
@@ -239,7 +238,11 @@ class KubeletCheck(
         Create a copy of the instance and set default values.
         This is so the base class can create a scraper_config with the proper values.
         """
-        endpoint = get_prometheus_url("dummy_url/kubelet")
+        kubelet_conn_info = get_connection_info()
+
+        # dummy needed in case get_connection_info isn't running when the check is first accessed
+        endpoint = kubelet_conn_info.get('url') if kubelet_conn_info is not None else "dummy_url/kubelet"
+
         kubelet_instance = deepcopy(instance)
         kubelet_instance.update(
             {

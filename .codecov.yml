@@ -454,10 +454,6 @@ coverage:
         target: 75
         flags:
         - rabbitmq
-      Ray:
-        target: 75
-        flags:
-        - ray
       Redis:
         target: 75
         flags:
@@ -1219,11 +1215,6 @@ flags:
     paths:
     - rabbitmq/datadog_checks/rabbitmq
     - rabbitmq/tests
-  ray:
-    carryforward: true
-    paths:
-    - ray/datadog_checks/ray
-    - ray/tests
   redisdb:
     carryforward: true
     paths:

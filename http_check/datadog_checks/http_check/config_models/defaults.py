@@ -120,9 +120,5 @@ def instance_tls_verify():
     return False
 
 
-def instance_use_cert_from_response():
-    return True
-
-
 def instance_use_legacy_auth_encoding():
     return True

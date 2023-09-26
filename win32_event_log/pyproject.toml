@@ -64,6 +64,3 @@ include = [
 dev-mode-dirs = [
     ".",
 ]
-
-[tool.pytest.ini_options]
-testpaths = "tests"

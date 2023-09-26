@@ -9,7 +9,6 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
-    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     assert_extend_generic_entity_sensor,
     assert_extend_generic_if,
@@ -22,8 +21,7 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_avaya_media_gateway(dd_agent_check):
-    profile = 'avaya-media-gateway'
-    config = create_e2e_core_test_config(profile)
+    config = create_e2e_core_test_config('avaya-media-gateway')
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -34,7 +32,7 @@ def test_e2e_profile_avaya_media_gateway(dd_agent_check):
         'snmp_device:' + ip_address,
     ] + [
         'avaya_cmg_active_controller_address:112.163.176.135',
-        'avaya_cmg_hw_type:avaya_g250-a14',
+        'avaya_cmg_hw_type:8',
         'avaya_cmg_model_number:zombies acted',
         'avaya_cmg_serial_number:their',
     ]
@@ -57,7 +55,7 @@ def test_e2e_profile_avaya_media_gateway(dd_agent_check):
     aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
         [
-            'avaya_av_ent_phy_ch_fru_fault:mulfunction',
+            'avaya_av_ent_phy_ch_fru_fault:malfunction',
             'avaya_av_ent_phy_ch_fru_oper_stat:fault',
             'avaya_ent_physical_index:29',
         ],
@@ -68,25 +66,25 @@ def test_e2e_profile_avaya_media_gateway(dd_agent_check):
 
     tag_rows = [
         [
-            'avaya_cmg_voip_admin_state:busy-out',
+            'avaya_cmg_voip_admin_state:busy_out',
             'avaya_cmg_voip_current_ip_address:10.199.41.206',
             'avaya_cmg_voip_dsp_status:fault',
             'avaya_cmg_voip_hyperactivity:hyperactive',
         ],
         [
-            'avaya_cmg_voip_admin_state:busy-out',
+            'avaya_cmg_voip_admin_state:busy_out',
             'avaya_cmg_voip_current_ip_address:127.208.248.67',
             'avaya_cmg_voip_dsp_status:in_use',
             'avaya_cmg_voip_hyperactivity:hyperactive',
         ],
         [
-            'avaya_cmg_voip_admin_state:camp-on',
+            'avaya_cmg_voip_admin_state:camp_on',
             'avaya_cmg_voip_current_ip_address:18.213.33.254',
             'avaya_cmg_voip_dsp_status:fault',
             'avaya_cmg_voip_hyperactivity:normal',
         ],
         [
-            'avaya_cmg_voip_admin_state:camp-on',
+            'avaya_cmg_voip_admin_state:camp_on',
             'avaya_cmg_voip_current_ip_address:248.128.11.156',
             'avaya_cmg_voip_dsp_status:in_use',
             'avaya_cmg_voip_hyperactivity:normal',
@@ -117,22 +115,22 @@ def test_e2e_profile_avaya_media_gateway(dd_agent_check):
 
     tag_rows = [
         [
-            'avaya_cmg_dsp_core_admin_state:busy-out',
+            'avaya_cmg_dsp_core_admin_state:busy_out',
             'avaya_cmg_dsp_core_demand_test_result:error_code1',
             'avaya_cmg_dsp_core_status:fault',
         ],
         [
-            'avaya_cmg_dsp_core_admin_state:busy-out',
+            'avaya_cmg_dsp_core_admin_state:busy_out',
             'avaya_cmg_dsp_core_demand_test_result:error_code3',
             'avaya_cmg_dsp_core_status:in_use',
         ],
         [
-            'avaya_cmg_dsp_core_admin_state:busy-out',
+            'avaya_cmg_dsp_core_admin_state:busy_out',
             'avaya_cmg_dsp_core_demand_test_result:error_code5',
             'avaya_cmg_dsp_core_status:fault',
         ],
         [
-            'avaya_cmg_dsp_core_admin_state:camp-on',
+            'avaya_cmg_dsp_core_admin_state:camp_on',
             'avaya_cmg_dsp_core_demand_test_result:error_code2',
             'avaya_cmg_dsp_core_status:idle',
         ],
@@ -171,6 +169,5 @@ def test_e2e_profile_avaya_media_gateway(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
-    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

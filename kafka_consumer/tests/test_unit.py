@@ -15,76 +15,21 @@ pytestmark = [pytest.mark.unit]
 
 
 @pytest.mark.parametrize(
-    'legacy_config, kafka_client_config, value',
+    'extra_config, expected_http_kwargs',
     [
-        pytest.param("ssl_check_hostname", "_tls_validate_hostname", False, id='legacy validate_hostname param false'),
-        pytest.param("ssl_check_hostname", "_tls_validate_hostname", True, id='legacy validate_hostname param true'),
-        pytest.param("ssl_cafile", "_tls_ca_cert", "ca_file", id='legacy tls_ca_cert param'),
-        pytest.param("ssl_certfile", "_tls_cert", "cert", id='legacy tls_cert param'),
-        pytest.param("ssl_keyfile", "_tls_private_key", "private_key", id='legacy tls_private_key param'),
         pytest.param(
-            "ssl_password",
-            "_tls_private_key_password",
-            "private_key_password",
-            id='legacy tls_private_key_password param',
+            {'ssl_check_hostname': False}, {'tls_validate_hostname': False}, id='legacy validate_hostname param'
         ),
     ],
 )
-def test_tls_config_legacy(legacy_config, kafka_client_config, value, check):
-    kafka_consumer_check = check({legacy_config: value})
-    assert getattr(kafka_consumer_check.config, kafka_client_config) == value
-
-
-@pytest.mark.parametrize(
-    'ssl_check_hostname_value, tls_validate_hostname_value, expected_value',
-    [
-        pytest.param(True, True, True, id='Both true'),
-        pytest.param(False, False, False, id='Both false'),
-        pytest.param(False, True, True, id='only tls_validate_hostname_value true'),
-        pytest.param(True, False, False, id='only tls_validate_hostname_value false'),
-        pytest.param(False, "true", True, id='tls_validate_hostname true as string'),
-        pytest.param(False, "false", False, id='tls_validate_hostname false as string'),
-    ],
-)
-def test_tls_validate_hostname_conflict(
-    ssl_check_hostname_value, tls_validate_hostname_value, expected_value, check, kafka_instance
-):
-    kafka_instance.update(
-        {"ssl_check_hostname": ssl_check_hostname_value, "tls_validate_hostname": tls_validate_hostname_value}
-    )
+def test_tls_config_legacy(extra_config, expected_http_kwargs, check, kafka_instance):
+    kafka_instance.update(extra_config)
     kafka_consumer_check = check(kafka_instance)
-    assert kafka_consumer_check.config._tls_validate_hostname == expected_value
-
-
-@pytest.mark.parametrize(
-    'tls_verify, expected',
-    [
-        pytest.param({}, "true", id='given empty tls_verify, expect default string true'),
-        pytest.param({'tls_verify': True}, "true", id='given True tls_verify, expect string true'),
-        pytest.param(
-            {
-                'tls_verify': False,
-                "tls_cert": None,
-                "tls_ca_cert": None,
-                "tls_private_key": None,
-                "tls_private_key_password": None,
-            },
-            "false",
-            id='given False tls_verify and other TLS options none, expect string false',
-        ),
-        pytest.param(
-            {'tls_verify': False, "tls_private_key_password": "password"},
-            "true",
-            id='given False tls_verify but TLS password, expect string true',
-        ),
-    ],
-)
-def test_tls_verify_is_string(tls_verify, expected, check, kafka_instance):
-    kafka_instance.update(tls_verify)
-    kafka_consumer_check = check(kafka_instance)
-    config = kafka_consumer_check.config
-
-    assert config._tls_verify == expected
+    kafka_consumer_check.get_tls_context()
+    actual_options = {
+        k: v for k, v in kafka_consumer_check._tls_context_wrapper.config.items() if k in expected_http_kwargs
+    }
+    assert expected_http_kwargs == actual_options
 
 
 @pytest.mark.parametrize(

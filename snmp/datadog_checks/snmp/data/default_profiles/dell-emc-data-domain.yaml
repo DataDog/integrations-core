@@ -71,10 +71,10 @@ metrics:
 #        error: 5
 #        cleaning: 6
 #      TODO: enum in scalar metric is not supported yet (keep this metric and this comment in profile until it's fixed)
-  - MIB: DATA-DOMAIN-MIB
-    symbol:
-     name: datadomain.fileSystemVirtualSpace
-     OID: 1.3.6.1.4.1.19746.1.3.1.2.0
+#  - MIB: DATA-DOMAIN-MIB
+#    symbol:
+#      name: fileSystemVirtualSpace
+#      OID: 1.3.6.1.4.1.19746.1.3.1.2.0
 # TODO: octet string cannot be collected
 #  - MIB: DATA-DOMAIN-MIB
 #    symbol:
@@ -203,7 +203,7 @@ metrics:
         OID: 1.3.6.1.4.1.19746.1.3.3.1.1.8
       - name: datadomain.fileSystemTotalCompressionFactor
         OID: 1.3.6.1.4.1.19746.1.3.3.1.1.9
-      - name: datadomain.fileSystemReductionPercent1
+      - name: datadomain.fileSystemReductionPercent
         OID: 1.3.6.1.4.1.19746.1.3.3.1.1.11
     metric_tags:
       - column:
@@ -243,7 +243,7 @@ metrics:
         OID: 1.3.6.1.4.1.19746.1.5.1.1.1.14
       - name: datadomain.replInKBytesPerSecond
         OID: 1.3.6.1.4.1.19746.1.5.1.1.1.15
-      - name: datadomain.replOutKBytesPerSecond
+      - name: datadomain.relOutKBytesPerSecond
         OID: 1.3.6.1.4.1.19746.1.5.1.1.1.16
     metric_tags:
       - column:

@@ -29,6 +29,7 @@ from .console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
 # Dependencies to ignore when update dependencies
 IGNORED_DEPS = {
     'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
+    'flup',  # https://github.com/DataDog/integrations-core/pull/1997
     'dnspython',
     'pymysql',  # https://github.com/DataDog/integrations-core/pull/12612
     'foundationdb',  # Breaking datadog_checks_base tests
@@ -36,6 +37,8 @@ IGNORED_DEPS = {
     'pyasn1',  # Breaking snmp tests
     'pycryptodomex',  # Breaking snmp tests
     'pysnmp',  # Breaking snmp tests
+    'clickhouse-driver',  # Breaking clickhouse tests
+    'lz4',  # Breaking clickhouse tests
     'pyodbc',  # Breaking sqlserver tests
     'psutil',  # Breaking disk tests
     'aerospike',  # v8+ breaks agent build.
@@ -46,9 +49,6 @@ IGNORED_DEPS = {
     'pymongo',
     # We need pydantic 2.0.2 for the rpm x64 agent build (see https://github.com/DataDog/datadog-agent/pull/18303)
     'pydantic',
-    # We're not ready to switch to v3 of the postgress library, see:
-    # https://github.com/DataDog/integrations-core/pull/15859
-    'psycopg2-binary',
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others

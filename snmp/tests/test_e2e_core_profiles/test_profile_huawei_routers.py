@@ -9,7 +9,6 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
-    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     create_e2e_core_test_config,
     get_device_ip_from_config,
@@ -19,8 +18,7 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_huawei_routers(dd_agent_check):
-    profile = 'huawei-routers'
-    config = create_e2e_core_test_config(profile)
+    config = create_e2e_core_test_config('huawei-routers')
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -41,13 +39,11 @@ def test_e2e_profile_huawei_routers(dd_agent_check):
             'huawei_hw_bgp_peer_remote_addr:190.114.96.169',
             'huawei_hw_bgp_peer_state:openconfirm',
             'huawei_hw_bgp_peer_vrf_name:acted acted but Jaded but driving their',
-            'huawei_hw_bgp_peer_un_avai_reason:configuration_lead_peer_down',
         ],
         [
             'huawei_hw_bgp_peer_remote_addr:93.22.18.75',
             'huawei_hw_bgp_peer_state:active',
             'huawei_hw_bgp_peer_vrf_name:oxen quaintly their their their quaintly zombies',
-            'huawei_hw_bgp_peer_un_avai_reason:direct_connect_interface_down',
         ],
     ]
     for tag_row in tag_rows:
@@ -149,8 +145,8 @@ def test_e2e_profile_huawei_routers(dd_agent_check):
         aggregator.assert_metric('snmp.huawei.hwDnsTtl', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['huawei_hw_server_addr:90.96.69.163'],
-        ['huawei_hw_server_addr:89.239.196.92'],
+        ['huawei_hw_server_status:dynamic', 'huawei_hw_server_addr:90.96.69.163'],
+        ['huawei_hw_server_status:static', 'huawei_hw_server_addr:89.239.196.92'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -191,10 +187,12 @@ def test_e2e_profile_huawei_routers(dd_agent_check):
 
     tag_rows = [
         [
+            'huawei_hw_nat_addr_pool_ref_type:no_pat',
             'huawei_hw_nat_addr_pool_end_addr:190.109.146.4',
             'huawei_hw_nat_addr_pool_start_addr:95.201.113.165',
         ],
         [
+            'huawei_hw_nat_addr_pool_ref_type:pat',
             'huawei_hw_nat_addr_pool_end_addr:174.219.250.193',
             'huawei_hw_nat_addr_pool_start_addr:163.37.155.112',
         ],
@@ -308,6 +306,5 @@ def test_e2e_profile_huawei_routers(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
-    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

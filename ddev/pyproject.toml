@@ -27,8 +27,7 @@ classifiers = [
 ]
 dependencies = [
     "click~=8.1.6",
-    "coverage",
-    "datadog-checks-dev[cli]~=25.0",
+    "datadog-checks-dev[cli]~=24.0",
     "hatch>=1.6.3",
     "httpx",
     "jsonpointer",
@@ -64,9 +63,6 @@ git_describe_command = ["git", "describe", "--dirty", "--tags", "--long", "--mat
 [tool.hatch.build.hooks.vcs]
 version-file = "src/ddev/_version.py"
 
-[tool.hatch.build.targets.sdist]
-include = ["src"]
-
 [tool.hatch.build.targets.app]
 scripts = ["ddev"]
 
@@ -74,11 +70,11 @@ scripts = ["ddev"]
 include = '\.pyi?$'
 line-length = 120
 skip-string-normalization = true
-target-version = ["py39"]
+target-version = ["py38"]
 
 [tool.ruff]
 exclude = []
-target-version = "py39"
+target-version = "py38"
 line-length = 120
 # Rules were ported over from the legacy flake8 settings for parity
 # All the rules can be found here: https://beta.ruff.rs/docs/rules/

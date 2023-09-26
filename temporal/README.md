@@ -72,12 +72,6 @@ The Temporal integration can collect logs from the Temporal Cluster and forward 
 
 Need help? Contact [Datadog support][9].
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Monitor the health of your Temporal Server with Datadog][12]
-
 
 [1]: https://temporal.io/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -90,4 +84,3 @@ Additional helpful documentation, links, and articles:
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.temporal.io/references/configuration#prometheus
 [11]: https://docs.temporal.io/references/configuration#log
-[12]: https://www.datadoghq.com/blog/temporal-server-integration/

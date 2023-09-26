@@ -9,7 +9,6 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
-    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     assert_extend_generic_if,
     create_e2e_core_test_config,
@@ -20,8 +19,7 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_hpe_nimble(dd_agent_check):
-    profile = 'hpe-nimble'
-    config = create_e2e_core_test_config(profile)
+    config = create_e2e_core_test_config('hpe-nimble')
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -53,7 +51,7 @@ def test_e2e_profile_hpe_nimble(dd_agent_check):
     aggregator.assert_metric('snmp.nimble.ioWrites', metric_type=aggregator.COUNT, tags=common_tags)
 
     tag_rows = [
-        ['nimble_vol_name:acted their their forward but', 'nimble_vol_online:false'],
+        ['nimble_vol_name:acted their their forward but'],
         ['nimble_vol_name:driving Jaded', 'nimble_vol_online:true'],
     ]
 
@@ -83,6 +81,5 @@ def test_e2e_profile_hpe_nimble(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
-    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

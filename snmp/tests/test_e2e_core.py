@@ -396,23 +396,14 @@ def test_e2e_meraki_cloud_controller(dd_agent_check):
     aggregator.assert_metric('snmp.ifNumber', metric_type=aggregator.GAUGE, tags=common_tags)
 
     dev_metrics = ['devStatus', 'devClientCount']
-    dev_tags = [
-        'device_name:Gymnasium',
-        'product:MR16-HW',
-        'network:L_NETWORK',
-        'mac_address:02:02:00:66:f5:7f',
-    ] + common_tags
+    dev_tags = ['product:MR16-HW', 'network:L_NETWORK', 'mac_address:02:02:00:66:f5:7f'] + common_tags
     for metric in dev_metrics:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=dev_tags, count=2)
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=dev_tags, count=2, device='Gymnasium'
+        )
 
     tag_rows = [
-        [
-            'device_name:Gymnasium',
-            'mac_address:02:02:00:66:f5:7f',
-            'network:L_NETWORK',
-            'product:MR16-HW',
-            'status:online',
-        ],
+        ['mac_address:02:02:00:66:f5:7f', 'network:L_NETWORK', 'product:MR16-HW', 'status:online'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.meraki.dev', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -627,7 +618,7 @@ def test_e2e_cisco_nexus(dd_agent_check):
 
     sensors = [1, 9, 11, 12, 12, 14, 17, 26, 29, 31]
     for sensor in sensors:
-        tags = ['sensor_id:{}'.format(sensor), 'sensor_type:celsius'] + common_tags
+        tags = ['sensor_id:{}'.format(sensor), 'sensor_type:8'] + common_tags
         aggregator.assert_metric('snmp.entSensorValue', metric_type=aggregator.GAUGE, tags=tags, count=2)
 
     frus = [6, 7, 15, 16, 19, 27, 30, 31]
@@ -642,29 +633,19 @@ def test_e2e_cisco_nexus(dd_agent_check):
         for metric in metrics.CPU_METRICS:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
 
-    for index, state in [
-        (3, 'critical'),
-        (6, 'not_functioning'),
-        (8, 'not_functioning'),
-        (11, 'not_functioning'),
-        (13, 'critical'),
-        (14, 'not_functioning'),
-        (20, 'not_functioning'),
-        (21, 'shutdown'),
-        (31, 'not_present'),
-    ]:
+    for index, state in [(3, 3), (6, 6), (8, 6), (11, 6), (13, 3), (14, 6), (20, 6), (21, 4), (31, 5)]:
         aggregator.assert_metric(
             'snmp.ciscoEnvMonTemperatureStatusValue',
             metric_type=aggregator.GAUGE,
             tags=['temp_state:{}'.format(state), 'temp_index:{}'.format(index)] + common_tags,
         )
 
-    power_supply_tags = ['power_source:unknown', 'power_status_descr:Jaded driving their their their'] + common_tags
+    power_supply_tags = ['power_source:1', 'power_status_descr:Jaded driving their their their'] + common_tags
     aggregator.assert_metric('snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=power_supply_tags)
 
     power_supply_tags = [
         'cisco_env_mon_supply_state:normal',
-        'power_source:unknown',
+        'power_source:1',
         'power_status_descr:Jaded driving their their their',
     ] + common_tags
     aggregator.assert_metric('snmp.ciscoEnvMonSupplyStatus', metric_type=aggregator.GAUGE, tags=power_supply_tags)
@@ -701,14 +682,14 @@ def test_e2e_cisco_nexus(dd_agent_check):
         )
 
     tag_rows = [
-        ['fru:6', 'power_admin_status:power_cycle', 'power_oper_status:on_but_inline_power_fail'],
-        ['fru:7', 'power_admin_status:inline_on', 'power_oper_status:off_denied'],
-        ['fru:15', 'power_admin_status:inline_auto', 'power_oper_status:off_cooling'],
-        ['fru:16', 'power_admin_status:off', 'power_oper_status:off_cooling'],
-        ['fru:19', 'power_admin_status:on', 'power_oper_status:off_env_fan'],
-        ['fru:27', 'power_admin_status:inline_on', 'power_oper_status:failed'],
-        ['fru:30', 'power_admin_status:on', 'power_oper_status:off_env_fan'],
-        ['fru:31', 'power_admin_status:on', 'power_oper_status:off_denied'],
+        ['fru:6', 'power_admin_status:powerCycle', 'power_oper_status:onButInlinePowerFail'],
+        ['fru:7', 'power_admin_status:inlineOn', 'power_oper_status:offDenied'],
+        ['fru:15', 'power_admin_status:inlineAuto', 'power_oper_status:offCooling'],
+        ['fru:16', 'power_admin_status:off', 'power_oper_status:offCooling'],
+        ['fru:19', 'power_admin_status:on', 'power_oper_status:offEnvFan'],
+        ['fru:27', 'power_admin_status:inlineOn', 'power_oper_status:failed'],
+        ['fru:30', 'power_admin_status:on', 'power_oper_status:offEnvFan'],
+        ['fru:31', 'power_admin_status:on', 'power_oper_status:offDenied'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cefcFRUPowerStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -717,11 +698,11 @@ def test_e2e_cisco_nexus(dd_agent_check):
         ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_physical_name:name1', 'switch_state:progressing'],
         ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_physical_name:name2', 'switch_state:ready'],
         ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_physical_name:name3', 'switch_state:added'],
-        ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_physical_name:name4', 'switch_state:ver_mismatch'],
+        ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_physical_name:name4', 'switch_state:verMismatch'],
         ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_physical_name:name5', 'switch_state:progressing'],
-        ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_physical_name:name6', 'switch_state:sdm_mismatch'],
+        ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_physical_name:name6', 'switch_state:sdmMismatch'],
         ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_physical_name:name7', 'switch_state:provisioned'],
-        ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_physical_name:name8', 'switch_state:ver_mismatch'],
+        ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_physical_name:name8', 'switch_state:verMismatch'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cswSwitchInfo', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -739,9 +720,9 @@ def test_e2e_cisco_nexus(dd_agent_check):
 
     tag_rows = [
         ['fan_status_descr:fan_1', 'fan_state:critical', 'fan_status_index:4'],
-        ['fan_status_descr:fan_2', 'fan_state:not_functioning', 'fan_status_index:6'],
+        ['fan_status_descr:fan_2', 'fan_state:notFunctioning', 'fan_status_index:6'],
         ['fan_status_descr:fan_3', 'fan_state:critical', 'fan_status_index:7'],
-        ['fan_status_descr:fan_4', 'fan_state:not_present', 'fan_status_index:16'],
+        ['fan_status_descr:fan_4', 'fan_state:notPresent', 'fan_status_index:16'],
         ['fan_status_descr:fan_8', 'fan_state:normal', 'fan_status_index:30'],
     ]
     for tag_row in tag_rows:

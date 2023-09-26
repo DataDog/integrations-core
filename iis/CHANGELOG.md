@@ -16,7 +16,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 2.19.1 / 2023-07-13 / Agent 7.47.0
+## 2.19.1 / 2023-07-13
 
 ***Fixed***:
 

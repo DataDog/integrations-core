@@ -45,16 +45,13 @@ metrics:
         mapping:
           1: not_supported
           2: disabled
-          3: enabled
-          4: offline
+          3: offline
           11: up
           12: down
           13: connect
           15: protocol_up
           16: link_up
           17: link_down
-          18: present
-          19: absent
       - column:
           OID: 1.3.6.1.4.1.2011.5.25.31.1.1.1.1.3
           name: huawei.hwEntityStandbyStatus
@@ -103,7 +100,6 @@ metrics:
           1: auto
           2: manual
           3: unknown
-          4: silent
       - column:
           OID: 1.3.6.1.4.1.2011.5.25.31.1.1.10.1.6
           name: huawei.hwEntityFanPresent
@@ -149,14 +145,17 @@ metrics:
       - column:
           name: huawei.hwOspfv2SelfRouterId
           OID: 1.3.6.1.4.1.2011.5.25.155.6.1.3
+          format: ip_address
         tag: huawei_hw_ospfv2_self_router_id
       - column:
           name: huawei.hwOspfv2NbrRouterId
           OID: 1.3.6.1.4.1.2011.5.25.155.6.1.9
+          format: ip_address
         tag: huawei_hw_ospfv2_neighbor_router_id
       - column:
           name: huawei.hwOspfv2SelfIfIpAddress
           OID: 1.3.6.1.4.1.2011.5.25.155.6.1.4
+          format: ip_address
         tag: huawei_hw_ospfv2_self_if_ip_address
       - column:
           name: huawei.hwOspfv2SelfIfName
@@ -165,10 +164,12 @@ metrics:
       - column:
           name: huawei.hwOspfv2NbrIfDesignatedRouter
           OID: 1.3.6.1.4.1.2011.5.25.155.6.1.6
+          format: ip_address
         tag: huawei_hw_ospfv2_nbr_if_designated_router
       - column:
           name: huawei.hwOspfv2NbrIfBackupDesignatedRouter
           OID: 1.3.6.1.4.1.2011.5.25.155.6.1.7
+          format: ip_address
         tag: huawei_hw_ospfv2_nbr_if_backup_designated_router
       - column:
           OID: 1.3.6.1.4.1.2011.5.25.155.6.1.10
@@ -198,7 +199,7 @@ metrics:
           1: normal
           2: doing_gr
           3: helper
-          4: notsupport
+          4: not_supported
   - MIB: HUAWEI-DEVICE-MIB
     table:
       name: hwCpuDevTable
@@ -212,7 +213,7 @@ metrics:
   - MIB: HUAWEI-DEVICE-MIB
     table:
       name: hwMemoryDevTable
-      OID: 1.3.6.1.4.1.2011.6.3.5.1
+      OID: 1.3.6.1.4.1.2011.6.3.5
     symbols:
       - name: huawei.hwMemoryDevSize
         OID: 1.3.6.1.4.1.2011.6.3.5.1.1.2

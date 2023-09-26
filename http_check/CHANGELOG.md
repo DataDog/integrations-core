@@ -2,12 +2,6 @@
 
 ## Unreleased
 
-## 9.1.0 / 2023-09-08
-
-***Added***:
-
-* Add `use_cert_from_response` option ([#15785](https://github.com/DataDog/integrations-core/pull/15785))
-
 ## 9.0.1 / 2023-08-18
 
 ***Fixed***:
@@ -28,7 +22,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 8.3.0 / 2023-07-10 / Agent 7.47.0
+## 8.3.0 / 2023-07-10
 
 ***Added***:
 

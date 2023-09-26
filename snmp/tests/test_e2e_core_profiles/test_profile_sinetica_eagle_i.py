@@ -9,7 +9,6 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
-    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     create_e2e_core_test_config,
     get_device_ip_from_config,
@@ -19,8 +18,7 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_sinetica_eagle_i(dd_agent_check):
-    profile = 'sinetica-eagle-i'
-    config = create_e2e_core_test_config(profile)
+    config = create_e2e_core_test_config('sinetica-eagle-i')
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -33,7 +31,7 @@ def test_e2e_profile_sinetica_eagle_i(dd_agent_check):
         'hawk_i2_inv_fw_revision:oxen Jaded',
         'hawk_i2_inv_hw_revision:acted',
         'hawk_i2_inv_serial_num:Jaded',
-        'hawk_i2_ip_temp_scale_flag:celsius',
+        'hawk_i2_ip_temp_scale_flag:1',
     ]
 
     # --- TEST EXTENDED METRICS ---
@@ -53,13 +51,13 @@ def test_e2e_profile_sinetica_eagle_i(dd_agent_check):
             'hawk_i2_ip_cont_curr_state:open',
             'hawk_i2_ip_cont_locn:kept',
             'hawk_i2_ip_cont_name:driving',
-            'hawk_i2_ip_cont_norm_state:open',
+            'hawk_i2_ip_cont_norm_state:1',
         ],
         [
             'hawk_i2_ip_cont_curr_state:open',
             'hawk_i2_ip_cont_locn:kept',
             'hawk_i2_ip_cont_name:driving zombies',
-            'hawk_i2_ip_cont_norm_state:open',
+            'hawk_i2_ip_cont_norm_state:1',
         ],
     ]
     for tag_row in tag_rows:
@@ -84,20 +82,9 @@ def test_e2e_profile_sinetica_eagle_i(dd_agent_check):
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.hawk.i2.op', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
-    tag_rows = [
-        ['hawk_i2_pdu_name:oxen'],
-        ['hawk_i2_pdu_name:Jaded Jaded'],
-    ]
-    for tag_row in tag_rows:
-        aggregator.assert_metric(
-            'snmp.hawk.i2.pduRMSAmpsValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.hawk.i2.pduRMSVoltsValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.hawk.i2.pduTotalEnergyValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
+    aggregator.assert_metric('snmp.hawk.i2.pduRMSAmpsValue', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.hawk.i2.pduRMSVoltsValue', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.hawk.i2.pduTotalEnergyValue', metric_type=aggregator.GAUGE, tags=common_tags)
 
     # --- TEST METADATA ---
     device = {
@@ -115,6 +102,5 @@ def test_e2e_profile_sinetica_eagle_i(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
-    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

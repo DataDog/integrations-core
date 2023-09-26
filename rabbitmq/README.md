@@ -6,9 +6,11 @@
 
 This check monitors [RabbitMQ][2] through the Datadog Agent. It allows you to:
 
-- Track queue-based stats: queue size, consumer count, unacknowledged messages, redelivered messages, and more.
-- Track node-based stats: waiting processes, used sockets, used file descriptors, and more.
-- Monitor vhosts for aliveness and number of connections.
+- Track queue-based stats: queue size, consumer count, unacknowledged messages, redelivered messages, etc.
+- Track node-based stats: waiting processes, used sockets, used file descriptors, etc.
+- Monitor vhosts for aliveness and number of connections
+
+And more.
 
 ## Setup
 
@@ -18,15 +20,15 @@ The RabbitMQ check is included in the [Datadog Agent][3] package. No additional 
 
 ### Configuration
 
-RabbitMQ exposes metrics in two ways: the [RabbitMQ Management Plugin][4] and the [RabbitMQ Prometheus Plugin][19]. The Datadog integration supports both versions. Follow the configuration instruction in this file that pertain to the version you intend to use. The Datadog integration also comes with an out-of-the-box dashboard and monitors for each version, as labeled by the Dashboard and Monitor titles.
+RabbitMQ exposes metrics in two ways: the [RabbitMQ Management Plugin][4] and the [Rabbitmq Prometheus Plugin][19]. The Datadog integration supports both versions. Please follow the configuration instruction in this file that pertain to the version you intend to use. The metrics accessible via the Prometheus plugin version of the integration are marked with [OpenMetricsV2] in their `metadata.csv` descriptions. The Datadog integration also comes with an out-of-the-box dashboard and monitors for each version, as labelled by the Dashboard and Monitor titles.
 
 #### Prepare RabbitMQ
 
 ##### [RabbitMQ Prometheus Plugin][19].
 
-*Starting with RabbitMQ v3.8, the [RabbitMQ Prometheus Plugin][19] is enabled by default.*
+*Starting with RabbitMQ v3.8, the [RabbitMQ Prometheus Plugin][19] is enabled by default and the integration communicates with it over HTTP API using OpenMetricsV2.*
 
-*The Prometheus plugin version of RabbitMQ requires Python 3 support by the Datadog Agent, and so can only be supported by Agent v6 or later. Please ensure your agent is updated before configuring the Prometheus plugin version of the integration.*
+*The Prometheus plugin version of RabbitMQ requires Python 3 support by the Datadog agent, and so can only be supported by Agent V6 onwards. Please ensure your agent is updated before configuring the Prometheus plugin version of the integration.*
 
 Configure the `prometheus_plugin` section in your instance configuration. When using the `prometheus_plugin` option, settings related to the Management Plugin are ignored.
 
@@ -119,7 +121,7 @@ _Available for Agent versions >6.0_
 
 #### Containerized
 
-You can take advantage of Datadog's [Docker container Autodiscovery][21], see the `auto_conf.yaml` example configuration for RabbitMQ-specific settings.
+You can take advantage of Datadog's [Docker container Autodiscovery][21], see the `auto_conf.yaml` example configuration for Rabbitmq-specific settings.
 
 For container environments such as Kubernetes, see the [Autodiscovery Integration Templates][9] for guidance on applying the parameters below.
 
@@ -133,7 +135,7 @@ For container environments such as Kubernetes, see the [Autodiscovery Integratio
 
 ##### Log collection
 
-_Available for Agent v6.0 or later_
+_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][10].
 
@@ -162,6 +164,16 @@ See [service_checks.json][14] for a list of service checks provided by this inte
 
 ## Troubleshooting
 
+Need help? Contact [Datadog support][13].
+
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Key metrics for RabbitMQ monitoring][15]
+- [Collecting metrics with RabbitMQ monitoring tools][16]
+- [Monitoring RabbitMQ performance with Datadog][17]
+
 ### Migrating to Prometheus Plugin
 
 The Prometheus Plugin exposes a different set of metrics from the Management Plugin.
@@ -180,17 +192,10 @@ The Prometheus Plugin changes some tags. The table below describes the changes t
 | `rabbitmq_vhost`    | `vhost`, `exchange_vhost`, `queue_vhost` |
 | `rabbitmq_exchange` | `exchange`                               |
 
-For more information, see [Tagging RabbitMQ queues by tag family][18].
 
-Need help? Contact [Datadog support][13].
+### FAQ
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Key metrics for RabbitMQ monitoring][15]
-- [Collecting metrics with RabbitMQ monitoring tools][16]
-- [Monitoring RabbitMQ performance with Datadog][17]
+- [Tagging RabbitMQ queues by tag family][18]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/rabbitmq/images/rabbitmq_dashboard.png
 [2]: https://www.rabbitmq.com

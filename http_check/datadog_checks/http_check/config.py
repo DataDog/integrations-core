@@ -30,7 +30,6 @@ Config = namedtuple(
         'instance_ca_certs',
         'check_hostname',
         'stream',
-        'use_cert_from_response',
     ],
 )
 
@@ -69,9 +68,6 @@ def from_instance(instance, default_ca_certs=None):
     instance_ca_certs = instance.get('tls_ca_cert', instance.get('ca_certs', default_ca_certs))
     check_hostname = is_affirmative(instance.get('check_hostname', True))
     stream = is_affirmative(instance.get('stream', False))
-    use_cert_from_response = is_affirmative(instance.get('use_cert_from_response', False))
-    if use_cert_from_response:
-        stream = True
 
     return Config(
         url,
@@ -90,5 +86,4 @@ def from_instance(instance, default_ca_certs=None):
         instance_ca_certs,
         check_hostname,
         stream,
-        use_cert_from_response,
     )

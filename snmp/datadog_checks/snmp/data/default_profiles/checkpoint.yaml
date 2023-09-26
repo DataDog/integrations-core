@@ -171,8 +171,6 @@ metrics:
           OID: 1.3.6.1.4.1.2620.1.6.7.8.2.1.6
           name: fanSpeedSensorStatus
         tag: fan_speed_sensor_status
-        # mapping from description:
-        #   Sensor is out of range TRUE(1), FALSE(0), READING ERROR(2)
         mapping:
           0: false
           1: true

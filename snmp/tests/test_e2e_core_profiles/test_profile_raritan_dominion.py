@@ -9,7 +9,6 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
-    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     assert_extend_generic_if,
     create_e2e_core_test_config,
@@ -20,8 +19,7 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_raritan_dominion(dd_agent_check):
-    profile = 'raritan-dominion'
-    config = create_e2e_core_test_config(profile)
+    config = create_e2e_core_test_config('raritan-dominion')
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -51,12 +49,11 @@ def test_e2e_profile_raritan_dominion(dd_agent_check):
     tag_rows = [
         [
             'raritan_remotekvm_port_data_name:kept kept oxen acted Jaded but',
-            'raritan_remotekvm_port_data_status:inactive',
+            'raritan_remotekvm_port_data_status:available',
             'raritan_remotekvm_port_data_type:their oxen oxen acted',
         ],
         [
             'raritan_remotekvm_port_data_name:oxen oxen driving acted forward',
-            'raritan_remotekvm_port_data_status:busy',
             'raritan_remotekvm_port_data_type:but Jaded their quaintly quaintly',
         ],
     ]
@@ -81,6 +78,5 @@ def test_e2e_profile_raritan_dominion(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
-    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

@@ -25,8 +25,7 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_juniper(dd_agent_check):
-    profile = "juniper"
-    config = create_e2e_core_test_config(profile)
+    config = create_e2e_core_test_config("juniper")
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -46,6 +45,9 @@ def test_e2e_profile_juniper(dd_agent_check):
     assert_extend_generic_ospf(aggregator, common_tags)
     assert_extend_generic_bgp4(aggregator, common_tags)
     assert_extend_generic_host_resources(aggregator, common_tags)
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
     # --- TEST METADATA ---
     device = {
@@ -70,8 +72,7 @@ def test_e2e_profile_juniper(dd_agent_check):
 
 
 def test_e2e_profile_juniper_variation(dd_agent_check):
-    profile = "juniper-variation"
-    config = create_e2e_core_test_config(profile)
+    config = create_e2e_core_test_config("juniper-variation")
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -91,6 +92,9 @@ def test_e2e_profile_juniper_variation(dd_agent_check):
     assert_extend_generic_ospf(aggregator, common_tags)
     assert_extend_generic_bgp4(aggregator, common_tags)
     assert_extend_generic_host_resources(aggregator, common_tags)
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
     # --- TEST METADATA ---
     device = {
@@ -112,9 +116,3 @@ def test_e2e_profile_juniper_variation(dd_agent_check):
         "vendor": "juniper-networks",
     }
     assert_device_metadata(aggregator, device)
-
-    # --- CHECK COVERAGE ---
-    # Checked locally (needs empty juniper-variation.yaml profile)
-    # assert_all_profile_metrics_and_tags_covered(profile, aggregator)
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

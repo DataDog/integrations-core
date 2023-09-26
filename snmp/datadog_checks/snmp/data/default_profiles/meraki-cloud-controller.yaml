@@ -34,7 +34,7 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.29671.1.1.4.1.2
           name: devName
-        tag: device_name
+        tag: device
       - column:
           OID: 1.3.6.1.4.1.29671.1.1.4.1.9
           name: devProductCode
@@ -62,7 +62,7 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.29671.1.1.4.1.2
           name: devName
-        tag: device_name
+        tag: device
       - column:
           OID: 1.3.6.1.4.1.29671.1.1.4.1.9
           name: devProductCode

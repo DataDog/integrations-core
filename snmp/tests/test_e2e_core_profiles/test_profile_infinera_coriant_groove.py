@@ -9,7 +9,6 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
-    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     assert_extend_generic_if,
     create_e2e_core_test_config,
@@ -20,8 +19,7 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_infinera_coriant_groove(dd_agent_check):
-    profile = 'infinera-coriant-groove'
-    config = create_e2e_core_test_config(profile)
+    config = create_e2e_core_test_config('infinera-coriant-groove')
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -44,14 +42,11 @@ def test_e2e_profile_infinera_coriant_groove(dd_agent_check):
             'coriant_groove_shelf_alias_name:driving their acted their',
             'coriant_groove_shelf_location:oxen but zombies kept acted oxen kept',
             'coriant_groove_shelf_oper_status:down',
-            'coriant_groove_shelf_avail_status:shutdown',
         ],
         [
-            'coriant_groove_shelf_admin_status:up_no_alm',
             'coriant_groove_shelf_alias_name:Jaded kept oxen driving',
             'coriant_groove_shelf_location:forward but zombies forward',
             'coriant_groove_shelf_oper_status:down',
-            'coriant_groove_shelf_avail_status:failed',
         ],
     ]
     for tag_row in tag_rows:
@@ -70,16 +65,13 @@ def test_e2e_profile_infinera_coriant_groove(dd_agent_check):
             'coriant_groove_card_mode:regen',
             'coriant_groove_card_oper_status:down',
             'coriant_groove_card_required_type:chm1lh',
-            'coriant_groove_card_avail_status:lower_layer_down',
         ],
         [
-            'coriant_groove_card_admin_status:up_no_alm',
             'coriant_groove_card_alias_name:Jaded kept quaintly forward Jaded',
             'coriant_groove_card_equipment_name:their',
             'coriant_groove_card_mode:not_applicable',
             'coriant_groove_card_oper_status:up',
             'coriant_groove_card_required_type:chm1',
-            'coriant_groove_card_avail_status:mismatch',
         ],
     ]
     for tag_row in tag_rows:
@@ -140,6 +132,5 @@ def test_e2e_profile_infinera_coriant_groove(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
-    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

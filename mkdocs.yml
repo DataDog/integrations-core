@@ -122,9 +122,6 @@ plugins:
   - pdf-export:
       enabled_if_env: ENABLE_PDF_SITE_EXPORT
 
-hooks:
-  - docs/developer/.hooks/ddev_version.py
-
 markdown_extensions:
   # Built-in
   - markdown.extensions.abbr:

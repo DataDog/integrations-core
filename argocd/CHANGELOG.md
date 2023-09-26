@@ -2,10 +2,6 @@
 
 ## Unreleased
 
-***Added***:
-
-* Collect metrics for ArgoCD ApplicationSet ([#15308](https://github.com/DataDog/integrations-core/pull/15308))
-
 ## 2.0.0 / 2023-08-10
 
 ***Changed***:
@@ -20,7 +16,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 1.2.0 / 2023-07-10 / Agent 7.47.0
+## 1.2.0 / 2023-07-10
 
 ***Added***:
 

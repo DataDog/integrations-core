@@ -22,7 +22,7 @@
 
 * Process query rows one at a time to reduce memory footprint ([#15268](https://github.com/DataDog/integrations-core/pull/15268))
 
-## 4.5.3 / 2023-07-10 / Agent 7.47.0
+## 4.5.3 / 2023-07-10
 
 ***Fixed***:
 
