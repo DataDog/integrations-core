@@ -1,9 +1,0 @@
-clouds:
-  test_cloud:
-    auth:
-      auth_url: http://10.164.0.71/identity
-      username: admin
-      password: password
-      # project_name: admin
-      user_domain_name: Default
-      project_domain_name: Default
