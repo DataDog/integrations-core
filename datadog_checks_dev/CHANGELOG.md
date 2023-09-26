@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 25.1.1 / 2023-09-26
+
 ***Fixed***:
 
 * Exclude psycopg2 from automatic upgrades ([#15864](https://github.com/DataDog/integrations-core/pull/15864))
