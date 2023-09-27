@@ -2,15 +2,24 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime
+import json
 import os
+from urllib.parse import urlparse
+
+from packaging import version
+
+# from datadog_checks.dev.fs import get_here
+# from datadog_checks.dev.http import MockResponse
 
 CHECK_NAME = 'openstack'
 
 FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
 TEST_OPENSTACK_CONFIG_PATH = os.path.join(FIXTURES_DIR, 'openstack_config.yaml')
+TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH = os.path.join(FIXTURES_DIR, 'openstack_config_unit_tests.yaml')
+TEST_OPENSTACK_BAD_PASSWORD_CONFIG_PATH = os.path.join(FIXTURES_DIR, 'openstack_bad_password.yaml')
 TEST_OPENSTACK_NO_AUTH_CONFIG_PATH = os.path.join(FIXTURES_DIR, 'openstack_bad_config.yaml')
 
-USE_OPENSTACK_SANDBOX = os.environ.get('USE_OPENSTACK_SANDBOX')
+USE_OPENSTACK_GCP = os.environ.get('USE_OPENSTACK_GCP')
 
 ALL_IDS = ['server-1', 'server-2', 'other-1', 'other-2']
 EXCLUDED_NETWORK_IDS = ['server-1', 'other-.*']
@@ -19,13 +28,56 @@ FILTERED_NETWORK_ID = 'server-2'
 FILTERED_SERVER_ID = 'server-1'
 FILTERED_BY_PROJ_SERVER_ID = ['server-1', 'server-2']
 
-CONFIG_FILE_INSTANCE = {
-    'name': 'test_name',
-    'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}},
-    'ssl_verify': False,
-    'exclude_network_ids': EXCLUDED_NETWORK_IDS,
-    'openstack_config_file_path': TEST_OPENSTACK_CONFIG_PATH,
+CONFIG_REST = {
+    'keystone_server_url': 'http://127.0.0.1:8080/identity',
+    'username': 'admin',
+    'password': 'password',
+}
+
+CONFIG_REST_NOVA_MICROVERSION_2_93 = {
+    'keystone_server_url': 'http://127.0.0.1:8080/identity',
+    'username': 'admin',
+    'password': 'password',
+    'nova_microversion': '2.93',
+}
+
+CONFIG_NOVA_MICROVERSION_LATEST = {
+    'keystone_server_url': 'http://127.0.0.1:8080/identity',
+    'username': 'admin',
+    'password': 'password',
+    'nova_microversion': '2.93',
+}
+
+CONFIG_NOVA_IRONIC_MICROVERSION_LATEST = {
+    'keystone_server_url': 'http://127.0.0.1:8080/identity',
+    'username': 'admin',
+    'password': 'password',
+    'nova_microversion': '2.93',
+    'ironic_microversion': '1.80',
+}
+
+CONFIG_REST_IRONIC_MICROVERSION_1_80 = {
+    'keystone_server_url': 'http://127.0.0.1:8080/identity',
+    'username': 'admin',
+    'password': 'password',
+    'ironic_microversion': '1.80',
+}
+
+CONFIG_SDK = {
     'openstack_cloud_name': 'test_cloud',
+    'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,
+}
+
+CONFIG_SDK_NOVA_MICROVERSION_2_93 = {
+    'openstack_cloud_name': 'test_cloud',
+    'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,
+    'nova_microversion': '2.93',
+}
+
+CONFIG_SDK_IRONIC_MICROVERSION_1_80 = {
+    'openstack_cloud_name': 'test_cloud',
+    'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,
+    'ironic_microversion': '1.80',
 }
 
 KEYSTONE_INSTANCE = {
@@ -354,18 +406,14 @@ EXAMPLE_GET_NETWORKS_RETURN_VALUE = [
 
 DEFAULT_METRICS = [
     'openstack.controller',
-    'openstack.nova.current_workload',
-    'openstack.nova.disk_available_least',
-    'openstack.nova.free_disk_gb',
-    'openstack.nova.free_ram_mb',
-    'openstack.nova.hypervisor_load.1',
-    'openstack.nova.hypervisor_load.15',
-    'openstack.nova.hypervisor_load.5',
+    'openstack.nova.response_time',
     'openstack.nova.limits.max_image_meta',
     'openstack.nova.limits.max_personality',
     'openstack.nova.limits.max_personality_size',
     'openstack.nova.limits.max_security_group_rules',
     'openstack.nova.limits.max_security_groups',
+    'openstack.nova.limits.max_server_group_members',
+    'openstack.nova.limits.max_server_groups',
     'openstack.nova.limits.max_server_meta',
     'openstack.nova.limits.max_total_cores',
     'openstack.nova.limits.max_total_floating_ips',
@@ -377,11 +425,195 @@ DEFAULT_METRICS = [
     'openstack.nova.limits.total_instances_used',
     'openstack.nova.limits.total_ram_used',
     'openstack.nova.limits.total_security_groups_used',
-    'openstack.nova.local_gb',
-    'openstack.nova.local_gb_used',
-    'openstack.nova.memory_mb',
-    'openstack.nova.memory_mb_used',
-    'openstack.nova.running_vms',
-    'openstack.nova.vcpus',
-    'openstack.nova.vcpus_used',
+    'openstack.nova.limits.total_server_groups_used',
+    'openstack.nova.quota_set.cores',
+    'openstack.nova.quota_set.fixed_ips',
+    'openstack.nova.quota_set.floating_ips',
+    'openstack.nova.quota_set.injected_file_content_bytes',
+    'openstack.nova.quota_set.injected_file_path_bytes',
+    'openstack.nova.quota_set.injected_files',
+    'openstack.nova.quota_set.instances',
+    'openstack.nova.quota_set.key_pairs',
+    'openstack.nova.quota_set.metadata_items',
+    'openstack.nova.quota_set.ram',
+    'openstack.nova.quota_set.security_group_rules',
+    'openstack.nova.quota_set.security_groups',
+    'openstack.nova.quota_set.server_group_members',
+    'openstack.nova.quota_set.server_groups',
+    'openstack.neutron.response_time',
+    'openstack.neutron.quotas.floatingip',
+    'openstack.neutron.quotas.network',
+    'openstack.neutron.quotas.port',
+    'openstack.neutron.quotas.rbac_policy',
+    'openstack.neutron.quotas.router',
+    'openstack.neutron.quotas.security_group',
+    'openstack.neutron.quotas.security_group_rule',
+    'openstack.neutron.quotas.subnet',
+    'openstack.neutron.quotas.subnetpool',
+    'openstack.nova.flavor.disk',
+    'openstack.nova.flavor.os_flv_ext_data:ephemeral',
+    'openstack.nova.flavor.ram',
+    'openstack.nova.flavor.rxtx_factor',
+    'openstack.nova.flavor.vcpus',
 ]
+
+
+def check_microversion(instance, metric):
+    nova_microversion = version.parse(instance.get("nova_microversion", "2.1"))
+    min_version = version.parse(metric.get("min_version", "2.1"))
+    max_version = version.parse(metric.get("max_version", "2.93"))
+    return min_version <= nova_microversion <= max_version
+
+
+def is_mandatory(metric):
+    return not metric.get("optional", False)
+
+
+def get_microversion_path(headers):
+    nova_microversion_header = headers.get('X-OpenStack-Nova-API-Version')
+    ironic_microversion_header = headers.get('X-OpenStack-Ironic-API-Version')
+
+    nova_microversion = nova_microversion_header if nova_microversion_header is not None else "default"
+    ironic_microversion = ironic_microversion_header if ironic_microversion_header is not None else "default"
+    microversion_path = 'nova-{}-ironic-{}'.format(nova_microversion, ironic_microversion)
+    return microversion_path
+
+
+def get_url_path(url):
+    parsed_url = urlparse(url)
+    return parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
+
+
+# class MockHttp:
+#     def __init__(self, host, **kwargs):
+#         self._host = host
+#         self._exceptions = kwargs.get('exceptions')
+#         self._defaults = kwargs.get('defaults')
+#         self._replace = kwargs.get('replace')
+
+#     def get(self, url, *args, **kwargs):
+#         parsed_url = urlparse(url)
+#         path_and_args = parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
+#         path_parts = path_and_args.split('/')
+#         microversion_path = _get_microversion_path(kwargs['headers'])
+#         subpath = os.path.join(
+#             *path_parts,
+#         )
+#         if self._exceptions and subpath in self._exceptions:
+#             raise self._exceptions[subpath]
+#         elif self._defaults and subpath in self._defaults:
+#             return self._defaults[subpath]
+#         else:
+#             file_path = os.path.join(
+#                 get_here(),
+#                 'fixtures',
+#                 self._host,
+#                 microversion_path,
+#                 subpath,
+#                 'GET.json',
+#             )
+#             response = MockResponse(file_path=file_path, status_code=200).json()
+#             if self._replace and subpath in self._replace:
+#                 response = self._replace[subpath](response)
+#             return MockResponse(json_data=response, status_code=200)
+
+#     def post(self, url, *args, **kwargs):
+#         parsed_url = urlparse(url)
+#         path_and_args = parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
+#         path_parts = path_and_args.split('/')
+#         microversion_path = _get_microversion_path(kwargs['headers'])
+#         subpath = os.path.join(
+#             *path_parts,
+#         )
+#         if self._exceptions and subpath in self._exceptions:
+#             return self._exceptions[subpath]
+#         elif self._defaults and subpath in self._defaults:
+#             return self._defaults[subpath]
+#         elif path_and_args == '/identity/v3/auth/tokens':
+#             data = kwargs['json']
+#             scope = data.get('auth', {}).get('scope', None)
+#             if scope:
+#                 if isinstance(scope, str) and scope == "unscoped":
+#                     if self._defaults and f'{subpath}/unscoped' in self._defaults:
+#                         return self._defaults[f'{subpath}/unscoped']
+#                     file_path = os.path.join(
+#                         get_here(),
+#                         'fixtures',
+#                         self._host,
+#                         microversion_path,
+#                         *path_parts,
+#                         'unscoped.json',
+#                     )
+#                     headers = {'X-Subject-Token': 'token_test1234'}
+#                 elif isinstance(scope, dict):
+#                     project_id = scope.get('project', {}).get('id')
+#                     if project_id:
+#                         if self._defaults and f'{subpath}/project' in self._defaults:
+#                             return self._defaults[f'{subpath}/project']
+#                         file_path = os.path.join(
+#                             get_here(),
+#                             'fixtures',
+#                             self._host,
+#                             microversion_path,
+#                             *path_parts,
+#                             f'project_{project_id}.json',
+#                         )
+#                         headers = {'X-Subject-Token': f'token_{project_id}'}
+#         else:
+#             file_path = os.path.join(
+#                 get_here(),
+#                 'fixtures',
+#                 self._host,
+#                 microversion_path,
+#                 subpath,
+#                 'POST.json',
+#             )
+#         response = MockResponse(file_path=file_path, status_code=200).json()
+#         if self._replace and subpath in self._replace:
+#             response = self._replace[subpath](response)
+#         return MockResponse(json_data=response, status_code=200, headers=headers)
+
+
+def get_json_value_from_file(file_path):
+    with open(file_path, 'r') as file:
+        return json.load(file)
+
+
+def remove_service_from_catalog(d, services):
+    catalog = d.get('token', {}).get('catalog', {})
+    new_catalog = []
+    for service in catalog:
+        if service['type'] not in services:
+            new_catalog.append(service)
+    return {**d, **{'token': {**d['token'], 'catalog': new_catalog}}}
+
+
+# def responses_map(
+#     host='agent-integrations-openstack-default',
+#     nova_microversion='default',
+#     ironic_microversion='default',
+# ):
+#     microversion_folder = f'nova-{nova_microversion}-ironic-{ironic_microversion}'
+#     responses_map = {}
+#     root_dir_path = os.path.join(get_here(), 'fixtures', host, microversion_folder)
+#     subdirectories = [d for d in Path(root_dir_path).iterdir() if d.is_dir()]
+#     for subdir in subdirectories:
+#         if subdir.name not in ['GET', 'POST']:
+#             continue
+#         responses_map[subdir.name] = {}
+#         for file in subdir.rglob('*'):
+#             if file.is_file():
+#                 relative_dir_path = str(file.parent.relative_to(subdir))
+#                 print(relative_dir_path)
+#                 if relative_dir_path not in responses_map[subdir.name]:
+#                     responses_map[subdir.name][relative_dir_path] = {}
+#                 responses_map[subdir.name][relative_dir_path][file.stem] = get_json_value_from_file(file)
+#         # if directory.is_dir():
+#         #     for file_path in Path(root_dir_path).rglob('*'):
+#         #         if file_path.is_file():
+#         #             if file_path.stem not in responses_map:
+#         #                 responses_map[file_path.stem] = {}
+#         #             relative_dir_path = str(file_path.parent.relative_to(root_dir_path))
+#         #             responses_map[file_path.stem][relative_dir_path] = get_json_value_from_file(file_path)
+#     print(responses_map)
+#     return responses_map

@@ -1,0 +1,19 @@
+{
+    "limits": {
+      "rate": [],
+      "absolute": {
+        "maxTotalInstances": 10,
+        "maxTotalCores": 20,
+        "maxTotalRAMSize": 51200,
+        "maxServerMeta": 128,
+        "maxTotalKeypairs": 100,
+        "maxServerGroups": 10,
+        "maxServerGroupMembers": 10,
+        "totalRAMUsed": 2048,
+        "totalCoresUsed": 8,
+        "totalInstancesUsed": 8,
+        "totalServerGroupsUsed": 0
+      }
+    }
+  }
+  

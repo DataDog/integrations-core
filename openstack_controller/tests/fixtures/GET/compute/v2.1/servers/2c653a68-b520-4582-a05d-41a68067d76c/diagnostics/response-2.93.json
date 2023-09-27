@@ -1,0 +1,46 @@
+{
+  "state": "running",
+  "driver": "libvirt",
+  "hypervisor": "qemu",
+  "hypervisor_os": "linux",
+  "uptime": 3016853,
+  "config_drive": false,
+  "num_cpus": 1,
+  "num_nics": 1,
+  "num_disks": 1,
+  "disk_details": [
+    {
+      "read_bytes": 23407104,
+      "read_requests": 861,
+      "write_bytes": 43921408,
+      "write_requests": 409,
+      "errors_count": -1
+    }
+  ],
+  "cpu_details": [
+    {
+      "id": 0,
+      "time": 18614820000000,
+      "utilisation": null
+    }
+  ],
+  "nic_details": [
+    {
+      "mac_address": "fa:16:3e:fe:84:d5",
+      "rx_octets": 179152,
+      "rx_errors": 0,
+      "rx_drop": 0,
+      "rx_packets": 3095,
+      "rx_rate": null,
+      "tx_octets": 409609,
+      "tx_errors": 0,
+      "tx_drop": 0,
+      "tx_packets": 9144,
+      "tx_rate": null
+    }
+  ],
+  "memory_details": {
+    "maximum": 0,
+    "used": 0
+  }
+}
