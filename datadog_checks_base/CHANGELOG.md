@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Changed***:
+
+* Upgrade to openstacksdk==1.5.0 ([#15919](https://github.com/DataDog/integrations-core/pull/15919))
+
 ***Added***:
 
 * Upgrade clickhouse-driver to 0.2.6 on Python 3 ([#15726](https://github.com/DataDog/integrations-core/pull/15726))
