@@ -68,6 +68,7 @@ from datadog_checks.sqlserver.queries import (
     QUERY_AO_FAILOVER_CLUSTER,
     QUERY_AO_FAILOVER_CLUSTER_MEMBER,
     QUERY_FAILOVER_CLUSTER_INSTANCE,
+    QUERY_TEMPDB_DIMENSIONS_USAGE,
     QUERY_SERVER_STATIC_INFO,
     get_query_ao_availability_groups,
     get_query_file_stats,
@@ -799,7 +800,7 @@ class SQLServer(AgentCheck):
         if not major_version and not is_azure_database(engine_edition):
             self.log.warning("missing major_version, cannot initialize dynamic queries")
             return None
-        queries = [get_query_file_stats(major_version, engine_edition)]
+        queries = [get_query_file_stats(major_version, engine_edition), QUERY_TEMPDB_DIMENSIONS_USAGE]
 
         if is_affirmative(self.instance.get('include_ao_metrics', False)):
             if major_version > 2012 or is_azure_database(engine_edition):

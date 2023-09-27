@@ -98,6 +98,37 @@ QUERY_FAILOVER_CLUSTER_INSTANCE = {
 }
 
 
+QUERY_TEMPDB_DIMENSIONS_USAGE = {
+    'name': 'tempdb_usage_dimensions',
+    'query': """
+        SELECT
+           sess.program_name as program_name,
+           sess.login_name as "user",
+           DB_NAME(sess.database_id) as dbname,
+           SUM(user_objects_alloc_page_count) as user_objects_alloc_page_count,
+           SUM(user_objects_dealloc_page_count) as user_objects_dealloc_page_count,
+           SUM(internal_objects_alloc_page_count) as internal_objects_alloc_page_count,
+           SUM(internal_objects_dealloc_page_count) as internal_objects_dealloc_page_count
+        FROM sys.dm_exec_sessions sess
+        INNER JOIN sys.dm_db_session_space_usage dbspu
+           ON sess.session_id = dbspu.session_id
+        INNER JOIN sys.dm_exec_connections c
+           ON sess.session_id = c.session_id
+        WHERE sess.session_id != @@spid
+        GROUP BY sess.database_id, sess.program_name, sess.login_name
+    """.strip(),
+    'columns': [
+        {'name': 'program_name', 'type': 'tag'},
+        {'name': 'user', 'type': 'tag'},
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'tempdb.usage.user_alloc_pages', 'type': 'gauge'},
+        {'name': 'tempdb.usage.user_dealloc_pages', 'type': 'gauge'},
+        {'name': 'tempdb.usage.internal_alloc_page', 'type': 'gauge'},
+        {'name': 'tempdb.usage.internal_dealloc_page', 'type': 'gauge'},
+    ],
+}
+
+
 def get_query_ao_availability_groups(sqlserver_major_version):
     """
     Construct the sys.availability_groups QueryExecutor configuration based on the SQL Server major version
