@@ -112,8 +112,6 @@ QUERY_TEMPDB_DIMENSIONS_USAGE = {
         FROM sys.dm_exec_sessions sess
         INNER JOIN sys.dm_db_session_space_usage dbspu
            ON sess.session_id = dbspu.session_id
-        INNER JOIN sys.dm_exec_connections c
-           ON sess.session_id = c.session_id
         WHERE sess.session_id != @@spid
         GROUP BY sess.database_id, sess.program_name, sess.login_name
     """.strip(),
