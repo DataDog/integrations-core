@@ -436,9 +436,7 @@ def test_activity_metadata(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_activity_tempdb_alloc(
-    aggregator, instance_docker, dd_run_check, dbm_instance, datadog_agent
-):
+def test_activity_tempdb_alloc(aggregator, instance_docker, dd_run_check, dbm_instance, datadog_agent):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     TABLE_NAME = "##LockTest{}".format(str(int(time.time() * 1000)))
 
@@ -504,7 +502,13 @@ def test_activity_tempdb_alloc(
     assert dbm_activity, "should have collected at least one activity"
     rows = dbm_activity[0]['sqlserver_activity']
     assert any(activity['user_objects_alloc_page_count'] for activity in rows)
-    assert all('user_objects_alloc_page_count' in activity and 'user_objects_dealloc_page_count' in activity and 'internal_objects_alloc_page_count' in activity and 'internal_objects_dealloc_page_count' in activity for activity in rows)
+    assert all(
+        'user_objects_alloc_page_count' in activity
+        and 'user_objects_dealloc_page_count' in activity
+        and 'internal_objects_alloc_page_count' in activity
+        and 'internal_objects_dealloc_page_count' in activity
+        for activity in rows
+    )
 
 
 @pytest.mark.integration
