@@ -129,7 +129,14 @@ class MultiDatabaseConnectionPool(object):
             return db
 
     @contextlib.contextmanager
-    def get_connection(self, dbname: str, ttl_ms: int, timeout: int = None, persistent: bool = False):
+    def get_connection(
+        self,
+        dbname: str,
+        ttl_ms: int,
+        timeout: int = None,
+        startup_fn: Callable[[psycopg.Connection], None] = None,
+        persistent: bool = False,
+    ):
         """
         Grab a connection from the pool if the database is already connected.
         If max_conns is specified, and the database isn't already connected,
@@ -139,9 +146,9 @@ class MultiDatabaseConnectionPool(object):
         Note that leaving a connection context here does NOT close the connection in psycopg;
         connections must be manually closed by `close_all_connections()`.
         """
+        with self._mu:
+            db = self._get_connection_raw(dbname, ttl_ms, timeout, startup_fn, persistent)
         try:
-            with self._mu:
-                db = self._get_connection_raw(dbname, ttl_ms, timeout, persistent)
             yield db
         except psycopg.Error:
             db.rollback()

@@ -363,19 +363,20 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
 
     check = integration_check(dbm_instance)
     check._connect()
-    cursor = check.db.cursor()
 
     # Execute the query once to begin tracking it. Execute again between checks to track the difference.
     # This should result in a single metric for that query_signature having a value of 2
-    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
-        mock_agent.side_effect = obfuscate_sql
-        cursor.execute(query, (['app1', 'app2'],))
-        cursor.execute(query, (['app1', 'app2', 'app3'],))
-        run_one_check(check, dbm_instance)
+    with check._get_main_db() as conn:
+        with conn.cursor() as cursor:
+            with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+                mock_agent.side_effect = obfuscate_sql
+                cursor.execute(query, (['app1', 'app2'],))
+                cursor.execute(query, (['app1', 'app2', 'app3'],))
+                run_one_check(check, dbm_instance)
 
-        cursor.execute(query, (['app1', 'app2'],))
-        cursor.execute(query, (['app1', 'app2', 'app3'],))
-        run_one_check(check, dbm_instance)
+                cursor.execute(query, (['app1', 'app2'],))
+                cursor.execute(query, (['app1', 'app2', 'app3'],))
+                run_one_check(check, dbm_instance)
 
     events = aggregator.get_event_platform_events("dbm-metrics")
     assert len(events) == 1
@@ -1372,20 +1373,21 @@ def test_load_pg_settings(aggregator, integration_check, dbm_instance, db_user):
     dbm_instance["dbname"] = "postgres"
     check = integration_check(dbm_instance)
     check._connect()
-    check._load_pg_settings(check.db)
-    if db_user == 'datadog_no_catalog':
-        aggregator.assert_metric(
-            "dd.postgres.error",
-            tags=_expected_dbm_instance_tags(dbm_instance)
-            + [
-                'error:load-pg-settings',
-                'agent_hostname:stubbed.hostname',
-                'dd.internal.resource:database_instance:stubbed.hostname',
-            ],
-            hostname='stubbed.hostname',
-        )
-    else:
-        assert len(aggregator.metrics("dd.postgres.error")) == 0
+    with check._get_main_db() as conn:
+        check._load_pg_settings(conn)
+        if db_user == 'datadog_no_catalog':
+            aggregator.assert_metric(
+                "dd.postgres.error",
+                tags=_expected_dbm_instance_tags(dbm_instance)
+                + [
+                    'error:load-pg-settings',
+                    'agent_hostname:stubbed.hostname',
+                    'dd.internal.resource:database_instance:stubbed.hostname',
+                ],
+                hostname='stubbed.hostname',
+            )
+        else:
+            assert len(aggregator.metrics("dd.postgres.error")) == 0
 
 
 def test_pg_settings_caching(aggregator, integration_check, dbm_instance):
@@ -1647,6 +1649,24 @@ def test_statement_samples_config_invalid_number(integration_check, pg_instance,
         integration_check(pg_instance)
 
 
+class Diagnostic(psycopg.errors.Diagnostic):
+    """
+    A fake Diagnostic that allows returning the expected err msg
+    """
+
+    def __init__(self, message):
+        self._message = message
+
+    def __getattribute__(self, attr):
+        if attr == 'message_primary':
+            return self._message
+        else:
+            return super(Diagnostic, self).__getattribute__(attr)
+
+    def __str__(self):
+        return self._message
+
+
 class ObjectNotInPrerequisiteState(psycopg.errors.ObjectNotInPrerequisiteState):
     """
     A fake ObjectNotInPrerequisiteState that allows setting pg_error on construction since ObjectNotInPrerequisiteState
@@ -1657,8 +1677,8 @@ class ObjectNotInPrerequisiteState(psycopg.errors.ObjectNotInPrerequisiteState):
         self.pg_error = pg_error
 
     def __getattribute__(self, attr):
-        if attr == 'pgerror':
-            return self.pg_error
+        if attr == 'diag':
+            return Diagnostic(message=self.pg_error)
         else:
             return super(ObjectNotInPrerequisiteState, self).__getattribute__(attr)
 
@@ -1676,8 +1696,8 @@ class UndefinedTable(psycopg.errors.UndefinedTable):
         self.pg_error = pg_error
 
     def __getattribute__(self, attr):
-        if attr == 'pgerror':
-            return self.pg_error
+        if attr == 'diag':
+            return Diagnostic(message=self.pg_error)
         else:
             return super(UndefinedTable, self).__getattribute__(attr)
 

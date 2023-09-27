@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import contextlib
 import copy
 
 import mock
@@ -94,7 +95,12 @@ def test_malformed_get_custom_queries(check):
     """
     check.log = MagicMock()
     db = MagicMock()
-    check.db = db
+
+    @contextlib.contextmanager
+    def mock_get_main_db():
+        yield db
+
+    check._get_main_db = mock_get_main_db
 
     check._config.custom_queries = [{}]
 
