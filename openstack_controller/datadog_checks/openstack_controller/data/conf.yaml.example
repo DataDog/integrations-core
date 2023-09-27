@@ -72,6 +72,17 @@ instances:
     #
     # domain_id: default
 
+    ## @param endpoint_region_id - string - optional
+    ## The Openstack Region ID to collect data from. If not specified, the check will
+    ## use the first available Region ID
+    #
+    # endpoint_region_id: <REGION>
+
+    ## @param endpoint_interface - string - optional - default: public
+    ## The interface used to connect to all endpoints. If not specified, the check will connect to public endpoints
+    #
+    # endpoint_interface: internal
+
     ## @param whitelist_project_names - list of strings - optional - default: []
     ## IDs of projects to whitelist for monitoring (by default the agent collects limit metrics from all projects)
     ## Regex expressions for the project names are supported.

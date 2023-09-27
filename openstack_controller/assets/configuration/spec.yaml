@@ -43,6 +43,20 @@ files:
               domain:
                 id: <DOMAIN_ID>
             type: object
+        - name: endpoint_region_id
+          description: |
+           The Openstack Region ID to collect data from. If not specified, the check will
+           use the first available Region ID
+          value:
+            example: "<REGION>"
+            type: string
+        - name: endpoint_interface
+          description: |
+           The interface used to connect to all endpoints. If not specified, the check will connect to public endpoints
+          value:
+            example: "internal"
+            display_default: "public"
+            type: string
         - name: whitelist_project_names
           description: |
            IDs of projects to whitelist for monitoring (by default the agent collects limit metrics from all projects)
