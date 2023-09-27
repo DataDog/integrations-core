@@ -1088,6 +1088,7 @@ def test_e2e_core_metadata_cisco_asr_9001(dd_agent_check):
             u'snmp_device:' + device_ip,
         ],
         u'ip_address': device_ip,
+        u'model': 'Cisco ASR9K Series',
         u'os_name': u'IOSXR',
         u'profile': u'cisco-asr',
         u'status': 1,

@@ -225,15 +225,16 @@ class PostgreSql(AgentCheck):
             # ERROR:  Function pg_stat_get_wal_receiver() is currently not supported in Aurora
             if self.is_aurora is False:
                 queries.append(QUERY_PG_STAT_WAL_RECEIVER)
+                queries.append(WAL_FILE_METRICS)
             queries.append(QUERY_PG_REPLICATION_SLOTS)
-            queries.append(WAL_FILE_METRICS)
 
         if self.version >= V13:
             queries.append(SNAPSHOT_TXID_METRICS)
         if self.version < V13:
             queries.append(SNAPSHOT_TXID_METRICS_LT_13)
         if self.version >= V14:
-            queries.append(STAT_WAL_METRICS)
+            if self.is_aurora is False:
+                queries.append(STAT_WAL_METRICS)
 
         if not queries:
             self.log.debug("no dynamic queries defined")
@@ -411,13 +412,13 @@ class PostgreSql(AgentCheck):
             return None
 
         if is_custom_metrics and len(results) > MAX_CUSTOM_RESULTS:
-            self.warning(
+            self.log.debug(
                 "Query: %s returned more than %s results (%s). Truncating", query, MAX_CUSTOM_RESULTS, len(results)
             )
             results = results[:MAX_CUSTOM_RESULTS]
 
         if is_relations and len(results) > self._config.max_relations:
-            self.warning(
+            self.log.debug(
                 "Query: %s returned more than %s results (%s). "
                 "Truncating. You can edit this limit by setting the `max_relations` config option",
                 query,

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Prevent Postgres integration from collecting WAL metrics from Aurora instances that cannot be collected ([#15896](https://github.com/DataDog/integrations-core/pull/15896))
+* Set lower log level for relations metrics truncated ([#15903](https://github.com/DataDog/integrations-core/pull/15903))
+
 ## 14.4.0 / 2023-09-19
 
 ***Added***:
