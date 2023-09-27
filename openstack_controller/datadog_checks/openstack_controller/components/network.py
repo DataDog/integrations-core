@@ -19,21 +19,22 @@ from datadog_checks.openstack_controller.metrics import (
 
 
 class Network(Component):
-    component_type = Component.Type.NETWORK
+    component_id = Component.Id.NETWORK
+    component_types = Component.Types.NETWORK
     service_check_id = NEUTRON_SERVICE_CHECK
 
     def __init__(self, check):
         super(Network, self).__init__(self, check)
 
-    @Component.register_global_metrics(Component.Type.NETWORK)
+    @Component.register_global_metrics(Component.Id.NETWORK)
     @Component.http_error(service_check=True)
     def _report_response_time(self, tags):
-        self.check.log.debug("reporting `%s` response time", Component.Type.NETWORK.value)
-        response_time = self.check.api.get_response_time(Component.Type.NETWORK)
-        self.check.log.debug("`%s` response time: %s", Component.Type.NETWORK.value, response_time)
+        self.check.log.debug("reporting `%s` response time", Component.Id.NETWORK.value)
+        response_time = self.check.api.get_response_time(Component.Id.NETWORK, Component.Types.NETWORK.value)
+        self.check.log.debug("`%s` response time: %s", Component.Id.NETWORK.value, response_time)
         self.check.gauge(NEUTRON_RESPONSE_TIME, response_time, tags=tags)
 
-    @Component.register_global_metrics(Component.Type.NETWORK)
+    @Component.register_global_metrics(Component.Id.NETWORK)
     @Component.http_error()
     def _report_agents(self, tags):
         data = self.check.api.get_network_agents()
@@ -50,7 +51,7 @@ class Network(Component):
             for metric, value in agent['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + agent['tags'])
 
-    @Component.register_project_metrics(Component.Type.NETWORK)
+    @Component.register_project_metrics(Component.Id.NETWORK)
     @Component.http_error()
     def _report_quotas(self, project_id, tags):
         item = self.check.api.get_network_quotas(project_id)

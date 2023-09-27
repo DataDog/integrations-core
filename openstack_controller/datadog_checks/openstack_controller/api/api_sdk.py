@@ -87,17 +87,16 @@ class ApiSdk(Api):
         self.log.debug("role_names: %s", self._access.role_names)
         return 'admin' in self._access.role_names
 
-    def component_in_catalog(self, component_type):
-        return self._catalog.has_component(component_type)
+    def component_in_catalog(self, component_types):
+        return self._catalog.has_component(component_types)
 
     def authorize(self):
         self.connection.authorize()
         self.http.options['headers']['X-Auth-Token'] = self.connection.session.auth.get_token(self.connection.session)
 
-    def get_response_time(self, endpoint_type):
-        self.log.debug("access.project_id: %s", self._access.project_id)
-        endpoint = self._catalog.get_endpoint_by_type(endpoint_type).replace(self._access.project_id, "")
-        self.log.debug("%s endpoint: %s", endpoint_type.value, endpoint)
+    def get_response_time(self, id, endpoint_types):
+        endpoint = self._catalog.get_endpoint_by_type(endpoint_types).replace(self._access.project_id, "")
+        self.log.debug("%s endpoint: %s", id.value, endpoint)
         response = self.http.get(endpoint)
         response.raise_for_status()
         return response.elapsed.total_seconds() * 1000

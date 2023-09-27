@@ -9,15 +9,15 @@ class Catalog:
         self.endpoint_interface = endpoint_interface
         self.endpoint_region_id = endpoint_region_id
 
-    def has_component(self, component_type):
+    def has_component(self, component_types):
         for service in self.catalog:
-            if service['type'] == component_type:
+            if service['type'] in component_types:
                 return True
         return False
 
-    def get_endpoint_by_type(self, endpoint_type):
+    def get_endpoint_by_type(self, endpoint_types):
         for item in self.catalog:
-            if item['type'] == endpoint_type:
+            if item['type'] in endpoint_types:
                 for endpoint in item['endpoints']:
                     matched_interface = (
                         endpoint['interface'] == 'public'

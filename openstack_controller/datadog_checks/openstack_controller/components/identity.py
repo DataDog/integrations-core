@@ -42,7 +42,8 @@ from datadog_checks.openstack_controller.metrics import (
 
 
 class Identity(Component):
-    component_type = Component.Type.IDENTITY
+    component_id = Component.Id.IDENTITY
+    component_types = Component.Types.IDENTITY
     service_check_id = KEYSTONE_SERVICE_CHECK
 
     def __init__(self, check):
@@ -56,15 +57,15 @@ class Identity(Component):
     def get_auth_projects(self):
         return self.check.api.get_auth_projects()
 
-    @Component.register_global_metrics(Component.Type.IDENTITY)
+    @Component.register_global_metrics(Component.Id.IDENTITY)
     @Component.http_error(service_check=True)
     def _report_response_time(self, tags):
-        self.check.log.debug("reporting `%s` response time", Component.Type.IDENTITY.value)
-        response_time = self.check.api.get_response_time(Component.Type.IDENTITY)
-        self.check.log.debug("`%s` response time: %s", Component.Type.IDENTITY.value, response_time)
+        self.check.log.debug("reporting `%s` response time", Component.Id.IDENTITY.value)
+        response_time = self.check.api.get_response_time(Component.Id.IDENTITY, Component.Types.IDENTITY.value)
+        self.check.log.debug("`%s` response time: %s", Component.Id.IDENTITY.value, response_time)
         self.check.gauge(KEYSTONE_RESPONSE_TIME, response_time, tags=tags)
 
-    @Component.register_global_metrics(Component.Type.IDENTITY)
+    @Component.register_global_metrics(Component.Id.IDENTITY)
     @Component.http_error()
     def _report_regions(self, tags):
         data = self.check.api.get_identity_regions()
@@ -80,7 +81,7 @@ class Identity(Component):
             self.check.log.debug("region: %s", region)
             self.check.gauge(KEYSTONE_REGIONS_COUNT, 1, tags=tags + region['tags'])
 
-    @Component.register_global_metrics(Component.Type.IDENTITY)
+    @Component.register_global_metrics(Component.Id.IDENTITY)
     @Component.http_error()
     def _report_domains(self, tags):
         data = self.check.api.get_identity_domains()
@@ -98,7 +99,7 @@ class Identity(Component):
             for metric, value in domain['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + domain['tags'])
 
-    @Component.register_global_metrics(Component.Type.IDENTITY)
+    @Component.register_global_metrics(Component.Id.IDENTITY)
     @Component.http_error()
     def _report_projects(self, tags):
         data = self.check.api.get_identity_projects()
@@ -114,7 +115,7 @@ class Identity(Component):
             for metric, value in project['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + project['tags'])
 
-    @Component.register_global_metrics(Component.Type.IDENTITY)
+    @Component.register_global_metrics(Component.Id.IDENTITY)
     @Component.http_error()
     def _report_users(self, tags):
         data = self.check.api.get_identity_users()
@@ -130,7 +131,7 @@ class Identity(Component):
             for metric, value in user['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + user['tags'])
 
-    @Component.register_global_metrics(Component.Type.IDENTITY)
+    @Component.register_global_metrics(Component.Id.IDENTITY)
     @Component.http_error()
     def _report_groups(self, tags):
         data = self.check.api.get_identity_groups()
@@ -151,7 +152,7 @@ class Identity(Component):
         self.check.log.debug("users: %s", users)
         self.check.gauge(KEYSTONE_GROUPS_USERS, len(users), tags=tags)
 
-    @Component.register_global_metrics(Component.Type.IDENTITY)
+    @Component.register_global_metrics(Component.Id.IDENTITY)
     @Component.http_error()
     def _report_services(self, tags):
         data = self.check.api.get_identity_services()
@@ -167,7 +168,7 @@ class Identity(Component):
             for metric, value in service['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + service['tags'])
 
-    @Component.register_global_metrics(Component.Type.IDENTITY)
+    @Component.register_global_metrics(Component.Id.IDENTITY)
     @Component.http_error()
     def _report_registered_limits(self, tags):
         data = self.check.api.get_identity_registered_limits()
@@ -183,7 +184,7 @@ class Identity(Component):
             for metric, value in registered_limit['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + registered_limit['tags'])
 
-    @Component.register_global_metrics(Component.Type.IDENTITY)
+    @Component.register_global_metrics(Component.Id.IDENTITY)
     @Component.http_error()
     def _report_limits(self, tags):
         data = self.check.api.get_identity_limits()

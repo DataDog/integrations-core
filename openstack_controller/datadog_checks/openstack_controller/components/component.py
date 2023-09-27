@@ -40,13 +40,22 @@ class Component:
     registered_project_metric_methods = {}
 
     @unique
-    class Type(str, Enum):
+    class Id(str, Enum):
         IDENTITY = 'identity'
         COMPUTE = 'compute'
         NETWORK = 'network'
         BLOCK_STORAGE = 'block-storage'
         BAREMETAL = 'baremetal'
         LOAD_BALANCER = 'load-balancer'
+
+    @unique
+    class Types(str, Enum):
+        IDENTITY = ['identity']
+        COMPUTE = ['compute']
+        NETWORK = ['network']
+        BLOCK_STORAGE = ['block-storage', 'volumev3']
+        BAREMETAL = ['baremetal']
+        LOAD_BALANCER = ['load-balancer']
 
     def http_error(service_check=False, error_message=None):
         def decorator_http_error(func):
@@ -77,7 +86,7 @@ class Component:
         return decorator_http_error
 
     @classmethod
-    def register_global_metrics(cls, component_type):
+    def register_global_metrics(cls, component_id):
         def decorator_register_metrics_method(func):
             @wraps(func)  # Preserve function metadata
             def wrapper(self, *args, **kwargs):
@@ -87,15 +96,15 @@ class Component:
                     if func(self, *args, **kwargs):
                         self.reported_global_metrics.append(func_hash)
 
-            if component_type not in cls.registered_global_metric_methods:
-                cls.registered_global_metric_methods[component_type] = []
-            cls.registered_global_metric_methods[component_type].append(wrapper)
+            if component_id not in cls.registered_global_metric_methods:
+                cls.registered_global_metric_methods[component_id] = []
+            cls.registered_global_metric_methods[component_id].append(wrapper)
             return wrapper
 
         return decorator_register_metrics_method
 
     @classmethod
-    def register_project_metrics(cls, component_type):
+    def register_project_metrics(cls, component_id):
         def decorator_register_metrics_method(func):
             @wraps(func)  # Preserve function metadata
             def wrapper(self, *args, **kwargs):
@@ -105,9 +114,9 @@ class Component:
                     if func(self, *args, **kwargs):
                         self.reported_project_metrics.append(func_hash)
 
-            if component_type not in cls.registered_project_metric_methods:
-                cls.registered_project_metric_methods[component_type] = []
-            cls.registered_project_metric_methods[component_type].append(wrapper)
+            if component_id not in cls.registered_project_metric_methods:
+                cls.registered_project_metric_methods[component_id] = []
+            cls.registered_project_metric_methods[component_id].append(wrapper)
             return wrapper
 
         return decorator_register_metrics_method
@@ -118,7 +127,7 @@ class Component:
         self.found_in_catalog = False
         self.reported_global_metrics = []
         self.reported_project_metrics = []
-        self.check.log.debug("created `%s` component", self.derived_class.component_type.value)
+        self.check.log.debug("created `%s` component", self.derived_class.component_id.value)
 
     def start_report(self):
         self.found_in_catalog = False
@@ -130,33 +139,34 @@ class Component:
             self.check.service_check(self.derived_class.service_check_id, AgentCheck.UNKNOWN, tags=tags)
 
     def report_global_metrics(self, tags):
-        self.check.log.debug("reporting `%s` component global metrics", self.derived_class.component_type.value)
-        if self.check.api.component_in_catalog(self.derived_class.component_type):
+        self.check.log.debug("reporting `%s` component global metrics", self.derived_class.component_id.value)
+        self.check.log.debug("self.derived_class.component_types: %s", self.derived_class.component_types.value)
+        if self.check.api.component_in_catalog(self.derived_class.component_types.value):
             self.found_in_catalog = True
-            self.check.log.debug("`%s` component found in catalog", self.derived_class.component_type.value)
-            if self.derived_class.component_type in Component.registered_global_metric_methods:
-                for registered_method in Component.registered_global_metric_methods[self.derived_class.component_type]:
+            self.check.log.debug("`%s` component found in catalog", self.derived_class.component_id.value)
+            if self.derived_class.component_id in Component.registered_global_metric_methods:
+                for registered_method in Component.registered_global_metric_methods[self.derived_class.component_id]:
                     registered_method(self, tags)
             else:
                 self.check.log.debug(
                     "`%s` component has not registered methods for global metrics",
-                    self.derived_class.component_type.value,
+                    self.derived_class.component_id.value,
                 )
         else:
-            self.check.log.debug("`%s` component not found in catalog", self.derived_class.component_type.value)
+            self.check.log.debug("`%s` component not found in catalog", self.derived_class.component_id.value)
 
     def report_project_metrics(self, project_id, tags):
-        self.check.log.debug("reporting `%s` component project metrics", self.derived_class.component_type.value)
-        if self.check.api.component_in_catalog(self.derived_class.component_type):
+        self.check.log.debug("reporting `%s` component project metrics", self.derived_class.component_id.value)
+        if self.check.api.component_in_catalog(self.derived_class.component_types.value):
             self.found_in_catalog = True
-            self.check.log.debug("`%s` component found in catalog", self.derived_class.component_type.value)
-            if self.derived_class.component_type in Component.registered_project_metric_methods:
-                for registered_method in Component.registered_project_metric_methods[self.derived_class.component_type]:
+            self.check.log.debug("`%s` component found in catalog", self.derived_class.component_id.value)
+            if self.derived_class.component_id in Component.registered_project_metric_methods:
+                for registered_method in Component.registered_project_metric_methods[self.derived_class.component_id]:
                     registered_method(self, project_id, tags)
             else:
                 self.check.log.debug(
                     "`%s` component has not registered methods for project metrics",
-                    self.derived_class.component_type.value,
+                    self.derived_class.component_id.value,
                 )
         else:
-            self.check.log.debug("`%s` component not found in catalog", self.derived_class.component_type.value)
+            self.check.log.debug("`%s` component not found in catalog", self.derived_class.component_id.value)

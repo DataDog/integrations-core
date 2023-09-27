@@ -813,30 +813,6 @@ def test_hypervisors_exception(aggregator, dd_run_check, instance, mock_http_get
         assert connection_compute.hypervisors.call_count == 2
 
 
-# @pytest.mark.parametrize(
-#     ('mock_sdk_connection', 'mock_api_rest', 'instance', 'api_type'),
-#     [
-#         pytest.param(
-#             None,
-#             {
-#                 'host': 'agent-integrations-openstack-default',
-#                 'defaults': {'compute/v2.1/os-hypervisors/1/uptime': MockResponse(status_code=500)},
-#             },
-#             CONFIG_REST,
-#             ApiType.REST,
-#             id='api rest',
-#         ),
-#         pytest.param(
-#             {'compute_hypervisor_uptime': Exception()},
-#             None,
-#             CONFIG_SDK,
-#             ApiType.SDK,
-#             id='api sdk',
-#         ),
-#     ],
-#     indirect=['mock_sdk_connection', 'mock_api_rest'],
-# )
-# @pytest.mark.usefixtures('mock_sdk_connection', 'mock_api_rest')
 @pytest.mark.parametrize(
     ('mock_http_get', 'connection_compute', 'instance', 'api_type'),
     [

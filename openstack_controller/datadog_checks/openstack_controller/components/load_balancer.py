@@ -23,21 +23,24 @@ from datadog_checks.openstack_controller.metrics import (
 
 
 class LoadBalancer(Component):
-    component_type = Component.Type.LOAD_BALANCER
+    component_id = Component.Id.LOAD_BALANCER
+    component_types = Component.Types.LOAD_BALANCER
     service_check_id = OCTAVIA_SERVICE_CHECK
 
     def __init__(self, check):
         super(LoadBalancer, self).__init__(self, check)
 
-    @Component.register_global_metrics(Component.Type.LOAD_BALANCER)
+    @Component.register_global_metrics(Component.Id.LOAD_BALANCER)
     @Component.http_error(service_check=True)
     def _report_response_time(self, tags):
-        self.check.log.debug("reporting `%s` response time", Component.Type.LOAD_BALANCER.value)
-        response_time = self.check.api.get_response_time(Component.Type.LOAD_BALANCER)
-        self.check.log.debug("`%s` response time: %s", Component.Type.LOAD_BALANCER.value, response_time)
+        self.check.log.debug("reporting `%s` response time", Component.Id.LOAD_BALANCER.value)
+        response_time = self.check.api.get_response_time(
+            Component.Id.LOAD_BALANCER, Component.Types.LOAD_BALANCER.value
+        )
+        self.check.log.debug("`%s` response time: %s", Component.Id.LOAD_BALANCER.value, response_time)
         self.check.gauge(OCTAVIA_RESPONSE_TIME, response_time, tags=tags)
 
-    @Component.register_project_metrics(Component.Type.LOAD_BALANCER)
+    @Component.register_project_metrics(Component.Id.LOAD_BALANCER)
     @Component.http_error()
     def _report_loadbalancers(self, project_id, tags):
         data = self.check.api.get_load_balancer_loadbalancers(project_id)
@@ -69,7 +72,7 @@ class LoadBalancer(Component):
         for metric, value in loadbalancer_stats['metrics'].items():
             self.check.gauge(metric, value, tags=tags + loadbalancer_stats['tags'])
 
-    @Component.register_project_metrics(Component.Type.LOAD_BALANCER)
+    @Component.register_project_metrics(Component.Id.LOAD_BALANCER)
     @Component.http_error()
     def _report_listeners(self, project_id, tags):
         data = self.check.api.get_load_balancer_listeners(project_id)

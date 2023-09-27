@@ -18,7 +18,11 @@ pytestmark = [pytest.mark.unit]
     ('mock_http_post', 'connection_session_auth', 'instance', 'api_type'),
     [
         pytest.param(
-            {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['block-storage'])}},
+            {
+                'replace': {
+                    '/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['block-storage', 'volumev3'])
+                }
+            },
             None,
             CONFIG_REST,
             ApiType.REST,
@@ -102,20 +106,60 @@ def test_response_time_exception(aggregator, dd_run_check, instance, mock_http_g
 
 
 @pytest.mark.parametrize(
-    ('instance'),
+    ('mock_http_post', 'instance'),
     [
         pytest.param(
+            {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['volumev3'])}},
             CONFIG_REST,
             id='api rest',
         ),
         pytest.param(
+            None,
             CONFIG_SDK,
             id='api sdk',
         ),
     ],
+    indirect=['mock_http_post'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_response_time(aggregator, dd_run_check, instance, mock_http_get):
+def test_response_time_block_storage(aggregator, dd_run_check, instance, mock_http_get):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.cinder.response_time',
+        count=1,
+        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    )
+    aggregator.assert_service_check(
+        'openstack.cinder.api.up',
+        status=AgentCheck.OK,
+        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    )
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, kwargs = call
+        args_list += list(args)
+    assert args_list.count('http://10.164.0.11/volume/v3/') == 1
+
+
+@pytest.mark.parametrize(
+    ('mock_http_post', 'instance'),
+    [
+        pytest.param(
+            {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['block-storage'])}},
+            CONFIG_REST,
+            id='api rest',
+        ),
+        pytest.param(
+            None,
+            CONFIG_SDK,
+            id='api sdk',
+        ),
+    ],
+    indirect=['mock_http_post'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_response_time_volumev3(aggregator, dd_run_check, instance, mock_http_get):
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
     aggregator.assert_metric(

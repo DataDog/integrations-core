@@ -44,21 +44,22 @@ from datadog_checks.openstack_controller.metrics import (
 
 
 class Compute(Component):
-    component_type = Component.Type.COMPUTE
+    component_id = Component.Id.COMPUTE
+    component_types = Component.Types.COMPUTE
     service_check_id = NOVA_SERVICE_CHECK
 
     def __init__(self, check):
         super(Compute, self).__init__(self, check)
 
-    @Component.register_global_metrics(Component.Type.COMPUTE)
+    @Component.register_global_metrics(Component.Id.COMPUTE)
     @Component.http_error(service_check=True)
     def _report_response_time(self, tags):
-        self.check.log.debug("reporting `%s` response time", Component.Type.COMPUTE.value)
-        response_time = self.check.api.get_response_time(Component.Type.COMPUTE)
-        self.check.log.debug("`%s` response time: %s", Component.Type.COMPUTE.value, response_time)
+        self.check.log.debug("reporting `%s` response time", Component.Id.COMPUTE.value)
+        response_time = self.check.api.get_response_time(Component.Id.COMPUTE, Component.Types.COMPUTE.value)
+        self.check.log.debug("`%s` response time: %s", Component.Id.COMPUTE.value, response_time)
         self.check.gauge(NOVA_RESPONSE_TIME, response_time, tags=tags)
 
-    @Component.register_global_metrics(Component.Type.COMPUTE)
+    @Component.register_global_metrics(Component.Id.COMPUTE)
     @Component.http_error()
     def _report_limits(self, tags):
         item = self.check.api.get_compute_limits()
@@ -72,7 +73,7 @@ class Compute(Component):
         for metric, value in limits['metrics'].items():
             self.check.gauge(metric, value, tags=tags + limits['tags'])
 
-    @Component.register_global_metrics(Component.Type.COMPUTE)
+    @Component.register_global_metrics(Component.Id.COMPUTE)
     @Component.http_error()
     def _report_services(self, tags):
         data = self.check.api.get_compute_services()
@@ -92,7 +93,7 @@ class Compute(Component):
             for metric, value in service['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + service['tags'])
 
-    @Component.register_global_metrics(Component.Type.COMPUTE)
+    @Component.register_global_metrics(Component.Id.COMPUTE)
     @Component.http_error()
     def _report_flavors(self, tags):
         data = self.check.api.get_compute_flavors()
@@ -107,7 +108,7 @@ class Compute(Component):
             for metric, value in flavor['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + flavor['tags'])
 
-    @Component.register_global_metrics(Component.Type.COMPUTE)
+    @Component.register_global_metrics(Component.Id.COMPUTE)
     @Component.http_error()
     def _report_hypervisors(self, tags):
         data = self.check.api.get_compute_hypervisors()
@@ -154,7 +155,7 @@ class Compute(Component):
         for metric, value in uptime_metrics_and_tags['metrics'].items():
             self.check.gauge(metric, value, tags=tags + uptime_metrics_and_tags['tags'])
 
-    @Component.register_project_metrics(Component.Type.COMPUTE)
+    @Component.register_project_metrics(Component.Id.COMPUTE)
     @Component.http_error()
     def _report_quota_sets(self, project_id, tags):
         item = self.check.api.get_compute_quota_sets(project_id)
@@ -168,7 +169,7 @@ class Compute(Component):
         for metric, value in quota_set['metrics'].items():
             self.check.gauge(metric, value, tags=tags + quota_set['tags'])
 
-    @Component.register_project_metrics(Component.Type.COMPUTE)
+    @Component.register_project_metrics(Component.Id.COMPUTE)
     @Component.http_error()
     def _report_servers(self, project_id, tags):
         data = self.check.api.get_compute_servers(project_id)
