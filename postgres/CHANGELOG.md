@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Revise postgresql.replication_delay to Function with Archive WAL-driven PostgreSQL Replica ([#15925](https://github.com/DataDog/integrations-core/pull/15925))
+
 ***Changed***:
 
 * Update `ssl` default configuration to 'allow' ([#15917](https://github.com/DataDog/integrations-core/pull/15917))
@@ -12,7 +16,6 @@
 
 ***Fixed***:
 
-* Revise postgresql.replication_delay to Function with Archive WAL-driven PostgreSQL Replica ([#15925](https://github.com/DataDog/integrations-core/pull/15925))
 * Prevent Postgres integration from collecting WAL metrics from Aurora instances that cannot be collected ([#15896](https://github.com/DataDog/integrations-core/pull/15896))
 * Set lower log level for relations metrics truncated ([#15903](https://github.com/DataDog/integrations-core/pull/15903))
 
