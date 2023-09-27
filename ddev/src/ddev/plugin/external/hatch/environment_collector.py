@@ -86,7 +86,6 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         return f'python -m pip install --disable-pip-version-check {{verbosity:flag:-1}} {" ".join(args)}'
 
     def finalize_config(self, config):
-
         for env_name, env_config in config.items():
             is_template_env = env_name == 'default'
             is_test_env = env_config.setdefault('test-env', is_template_env)
