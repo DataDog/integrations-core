@@ -360,7 +360,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             'timestamp': time.time() * 1000,
             'min_collection_interval': self.collection_interval,
             'tags': self.tags,
-            'payload_type': 'query_metrics',
+            'kind': 'query_metrics',
             'cloud_metadata': self.check.cloud_metadata,
             'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
             'sqlserver_version': self.check.static_info_cache.get(STATIC_INFO_VERSION, ""),

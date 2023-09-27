@@ -152,7 +152,7 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
             'min_collection_interval': self.collection_interval,
             'tags': self.tags,
             'cloud_metadata': self.check.cloud_metadata,
-            'payload_type': 'procedure_metrics',
+            'kind': 'procedure_metrics',
             'sqlserver_rows': rows,
             'sqlserver_version': self.check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self.check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
