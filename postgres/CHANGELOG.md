@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Changed***:
+
+* Update `ssl` default configuration to 'allow' ([#15917](https://github.com/DataDog/integrations-core/pull/15917))
+
 ***Fixed***:
 
 * Set lower log level for relations metrics truncated ([#15903](https://github.com/DataDog/integrations-core/pull/15903))
