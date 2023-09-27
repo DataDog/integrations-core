@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Update dependencies ([#15922](https://github.com/DataDog/integrations-core/pull/15922))
+
 ***Fixed***:
 
 * Set lower log level for relations metrics truncated ([#15903](https://github.com/DataDog/integrations-core/pull/15903))
