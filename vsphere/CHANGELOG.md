@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Decouple resource groups and collection type ([#15670](https://github.com/DataDog/integrations-core/pull/15670))
+
 ***Fixed***:
 
 * Add ability to filter property metrics ([#15474](https://github.com/DataDog/integrations-core/pull/15474))
