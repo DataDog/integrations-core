@@ -203,7 +203,7 @@ def write_option(option, writer, indent='', start_list=False):
             example = option.get('example', [] if option.get('multiple', False) else {})
             option_yaml = construct_yaml({option_name: example})
 
-            example_indent = '  ' if type(example) is list and example else ''
+            example_indent = '  ' if isinstance(example, list) and example else ''
             for i, line in enumerate(option_yaml.splitlines()):
                 if not option_enabled(option):
                     writer.write(indent, '# ')

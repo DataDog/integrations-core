@@ -88,7 +88,6 @@ class BaseManifestValidator(object):
 
 
 class MaintainerValidator(BaseManifestValidator):
-
     MAINTAINER_PATH = {V1: '/maintainer', V2: '/author/support_email'}
 
     def validate(self, check_name, decoded, fix):
@@ -112,7 +111,6 @@ class MaintainerValidator(BaseManifestValidator):
 
 
 class MetricsMetadataValidator(BaseManifestValidator):
-
     METADATA_PATH = {V1: "/assets/metrics_metadata", V2: "/assets/integration/metrics/metadata_path"}
 
     def validate(self, check_name, decoded, fix):

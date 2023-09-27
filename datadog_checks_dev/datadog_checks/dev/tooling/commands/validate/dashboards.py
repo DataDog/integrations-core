@@ -43,7 +43,6 @@ def _is_dashboard_format(payload):
 def check_widgets(decoded, filename, app_uuid, fix, file_fixed, file_failed, display_queue):
     """Recursively check the decoded dashboard object for widget references and validate the app_id inside."""
     for widget in decoded.get('widgets', []):
-
         if widget.get('definition', {}).get('widgets'):
             decoded = {'widgets': widget['definition']['widgets']}
             file_fixed, file_failed = check_widgets(

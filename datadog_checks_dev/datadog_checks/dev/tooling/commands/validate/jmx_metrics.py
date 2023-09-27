@@ -111,7 +111,7 @@ def duplicate_bean_check(bean_list):
     duplicate_bean = defaultdict(list)
     for beans in bean_list:
         bean = beans.get("include").get("bean")
-        if type(bean) == list:
+        if isinstance(bean, list):
             for b in bean:
                 for attr in beans.get("include").get("attribute", {}).keys():
                     if attr in bean_dict[b]:

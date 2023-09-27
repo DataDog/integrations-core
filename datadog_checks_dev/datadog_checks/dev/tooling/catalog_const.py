@@ -21,7 +21,6 @@ DASHBOARD_NOT_POSSIBLE = {
     'windows_service',  # No metrics
     'win32_event_log',  # No metrics
     'wmi_check',  # No default metrics
-    'windows_service',  # No metrics
     'cloud_foundry_api',  # only one standard metric
     'dns_check',  # only one standard metric
     'docker_daemon',  # agent 5 only

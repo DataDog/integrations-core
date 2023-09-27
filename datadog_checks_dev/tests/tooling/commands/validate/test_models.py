@@ -25,7 +25,6 @@ def test_generate_new_files_check_licenses(repo, expect_licenses):
     runner = CliRunner()
 
     with runner.isolated_filesystem():
-
         # Generate the check structure
         working_repo = 'integrations-{}'.format(repo)
         shutil.copytree(

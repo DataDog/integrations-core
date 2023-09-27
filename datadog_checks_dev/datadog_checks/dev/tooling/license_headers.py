@@ -56,7 +56,6 @@ def validate_license_headers(
     ignoreset = set(ignore or [])
 
     def walk_recursively(path, gitignore_matcher):
-
         for child in path.iterdir():
             # Skip gitignored files
             if gitignore_matcher.match(child):

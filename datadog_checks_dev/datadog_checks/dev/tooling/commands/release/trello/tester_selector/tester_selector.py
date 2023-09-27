@@ -42,7 +42,6 @@ class TesterSelector:
         github: Github,
         inactivity_date: datetime,
     ):
-
         self.__teams: Dict[str, TesterSelectorTeam] = {}
         self.__trello_user_from_github_login: Dict[str, TrelloUser] = {}
 

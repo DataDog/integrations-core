@@ -113,7 +113,6 @@ CATEGORIES_TO_CLASSIFIER_TAGS = {
 
 
 def migrate_manifest(repo_name, integration, to_version):
-
     loaded_manifest = JSONDict(load_manifest(integration))
     manifest_version = loaded_manifest.get_path("/manifest_version")
 
