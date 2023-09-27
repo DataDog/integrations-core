@@ -10,13 +10,13 @@ from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.__about__ import __version__
 from datadog_checks.sqlserver.connection import SQLConnectionError
 from datadog_checks.sqlserver.const import (
+    DATABASE_INDEX_METRICS,
     ENGINE_EDITION_SQL_DATABASE,
     ENGINE_EDITION_STANDARD,
     INSTANCE_METRICS_DATABASE,
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_VERSION,
-    DATABASE_INDEX_METRICS,
 )
 
 from .common import CHECK_NAME, CUSTOM_METRICS, EXPECTED_DEFAULT_METRICS, assert_metrics

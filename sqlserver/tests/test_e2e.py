@@ -5,6 +5,7 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.const import DATABASE_INDEX_METRICS
 
 from .common import (
     CUSTOM_METRICS,
@@ -19,7 +20,6 @@ from .common import (
     UNEXPECTED_QUERY_EXECUTOR_AO_METRICS,
     inc_perf_counter_metrics,
 )
-from datadog_checks.sqlserver.const import DATABASE_INDEX_METRICS
 from .utils import always_on, not_windows_ado, not_windows_ci
 
 try:
