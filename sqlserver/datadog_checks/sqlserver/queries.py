@@ -101,28 +101,49 @@ QUERY_FAILOVER_CLUSTER_INSTANCE = {
 QUERY_TEMPDB_DIMENSIONS_USAGE = {
     'name': 'tempdb_usage_dimensions',
     'query': """
+        WITH
+            TDBAlloc
+            AS
+            (
+                SELECT
+                    SessionId						= dspu.session_id ,
+                    UserObjectsAllocPageCount		= dspu.user_objects_alloc_page_count + SUM (dbtsu.user_objects_alloc_page_count) ,
+                    UserObjectsDeallocPageCount		= dspu.user_objects_dealloc_page_count + SUM (dbtsu.user_objects_dealloc_page_count) ,
+                    InternalObjectsAllocPageCount	= dspu.internal_objects_alloc_page_count + SUM (dbtsu.internal_objects_alloc_page_count) ,
+                    InternalObjectsDeallocPageCount	= dspu.internal_objects_dealloc_page_count + SUM (dbtsu.internal_objects_dealloc_page_count)
+                FROM
+                    sys.dm_db_session_space_usage AS dspu
+                    INNER JOIN
+                    sys.dm_db_task_space_usage AS dbtsu
+                    ON
+            dspu.session_id = dbtsu.session_id
+                GROUP BY
+            dspu.session_id ,
+            dspu.user_objects_alloc_page_count ,
+            dspu.user_objects_dealloc_page_count ,
+            dspu.internal_objects_alloc_page_count ,
+            dspu.internal_objects_dealloc_page_count
+            )
+
         SELECT
-           sess.program_name as program_name,
-           sess.login_name as "user",
-           DB_NAME(sess.database_id) as dbname,
-           SUM(user_objects_alloc_page_count) as user_objects_alloc_page_count,
-           SUM(user_objects_dealloc_page_count) as user_objects_dealloc_page_count,
-           SUM(internal_objects_alloc_page_count) as internal_objects_alloc_page_count,
-           SUM(internal_objects_dealloc_page_count) as internal_objects_dealloc_page_count
-        FROM sys.dm_exec_sessions sess
-        INNER JOIN sys.dm_db_session_space_usage dbspu
-           ON sess.session_id = dbspu.session_id
-        WHERE sess.session_id != @@spid
-        GROUP BY sess.database_id, sess.program_name, sess.login_name
+            sess.program_name as program_name,
+            sess.login_name as "user",
+            DB_NAME(sess.database_id) as db,
+            TDBAlloc.UserObjectsAllocPageCount*1.0/128 as user_objects_allocation,
+            TDBAlloc.UserObjectsDeallocPageCount*1.0/128 as user_objects_deallocation,
+            TDBAlloc.InternalObjectsAllocPageCount*1.0/128 as internal_objects_allocation,
+            TDBAlloc.InternalObjectsDeallocPageCount*1.0/128 as internal_objects_deallocation
+        FROM sys.dm_Exec_sessions as sess
+            INNER JOIN TDBAlloc ON TDBAlloc.sessionId = sess.session_id
     """.strip(),
     'columns': [
         {'name': 'program_name', 'type': 'tag'},
         {'name': 'user', 'type': 'tag'},
         {'name': 'db', 'type': 'tag'},
-        {'name': 'tempdb.usage.user_alloc_pages', 'type': 'gauge'},
-        {'name': 'tempdb.usage.user_dealloc_pages', 'type': 'gauge'},
-        {'name': 'tempdb.usage.internal_alloc_page', 'type': 'gauge'},
-        {'name': 'tempdb.usage.internal_dealloc_page', 'type': 'gauge'},
+        {'name': 'tempdb.usage.user_alloc_space', 'type': 'gauge'},
+        {'name': 'tempdb.usage.user_dealloc_space', 'type': 'gauge'},
+        {'name': 'tempdb.usage.internal_alloc_space', 'type': 'gauge'},
+        {'name': 'tempdb.usage.internal_dealloc_space', 'type': 'gauge'},
     ],
 }
 
