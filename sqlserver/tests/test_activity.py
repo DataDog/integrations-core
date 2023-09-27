@@ -436,6 +436,79 @@ def test_activity_metadata(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+def test_activity_tempdb_alloc(
+    aggregator, instance_docker, dd_run_check, dbm_instance, datadog_agent
+):
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    TABLE_NAME = "##LockTest{}".format(str(int(time.time() * 1000)))
+
+    QUERIES_SETUP = (
+        """
+        CREATE TABLE {}
+        (
+            id int,
+            name varchar(10),
+            city varchar(20)
+        )""".format(
+            TABLE_NAME
+        ),
+        "INSERT INTO {} VALUES (1001, 'tire', 'sfo')".format(TABLE_NAME),
+        "INSERT INTO {} VALUES (1002, 'wisth', 'nyc')".format(TABLE_NAME),
+        "INSERT INTO {} VALUES (1003, 'tire', 'aus')".format(TABLE_NAME),
+        "COMMIT",
+    )
+
+    QUERY1 = """UPDATE {} SET [name] = 'west' WHERE [id] = 1001""".format(TABLE_NAME)
+    QUERY2 = """UPDATE {} SET [name] = 'fast' WHERE [id] = 1001""".format(TABLE_NAME)
+
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    conn1 = _get_conn_for_user(instance_docker, "fred", _autocommit=False)
+    conn2 = _get_conn_for_user(instance_docker, "bob", _autocommit=False)
+
+    close_conns = threading.Event()
+
+    def run_queries(conn, queries):
+        cur = conn.cursor()
+        cur.execute("USE {}".format("datadog_test"))
+        cur.execute("BEGIN TRANSACTION")
+        for q in queries:
+            try:
+                cur.execute(q)
+            except pyodbc.OperationalError:
+                # This is expected since the query (might be) blocked
+                pass
+        # Do not allow the conn to be garbage collected and closed until the global lock is released
+        while not close_conns.is_set():
+            time.sleep(0.1)
+        cur.execute("COMMIT")
+
+    # Setup
+    cur = conn1.cursor()
+    for q in QUERIES_SETUP:
+        cur.execute(q)
+
+    # Transaction 1
+    t1 = threading.Thread(target=run_queries, args=(conn1, [QUERY1]))
+    # Transaction 2
+    t2 = threading.Thread(target=run_queries, args=(conn2, [QUERY2]))
+
+    t1.start()
+    time.sleep(0.3)
+    t2.start()
+
+    try:
+        dd_run_check(check)
+        dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    finally:
+        close_conns.set()  # Release the threads
+    assert dbm_activity, "should have collected at least one activity"
+    rows = dbm_activity[0]['sqlserver_activity']
+    assert any(activity['user_objects_alloc_page_count'] for activity in rows)
+    assert all('user_objects_alloc_page_count' in activity and 'user_objects_dealloc_page_count' in activity and 'internal_objects_alloc_page_count' in activity and 'internal_objects_dealloc_page_count' in activity for activity in rows)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
     "reported_hostname,expected_hostname",
     [
