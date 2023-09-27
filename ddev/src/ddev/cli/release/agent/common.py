@@ -3,7 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Union
+
+from packaging.version import Version
 
 if TYPE_CHECKING:
     from ddev.repo.core import Repository
@@ -13,7 +15,7 @@ if TYPE_CHECKING:
 DATADOG_PACKAGE_PREFIX = 'datadog-'
 
 
-def get_agent_tags(repo: Repository, since: str, to: str) -> list[str]:
+def get_agent_tags(repo: Repository, since: Union[str, Version], to: Union[str, Version]) -> list[str]:
     """
     Return a list of tags from integrations-core representing an Agent release,
     sorted by more recent first.
@@ -37,7 +39,7 @@ def get_agent_tags(repo: Repository, since: str, to: str) -> list[str]:
     return [str(t) for t in reversed(agent_tags)]
 
 
-def get_changes_per_agent(repo: Repository, since: str, to: str) -> AgentChangelog:
+def get_changes_per_agent(repo: Repository, since: Union[str, Version], to: Union[str, Version]) -> AgentChangelog:
     """
     Return integration versions groups by Agent versions.
     For each version, we also get a boolean indicating if the version has breaking changes.
@@ -101,7 +103,7 @@ def normalize_catalog(catalog: dict[str, str]) -> dict[str, str]:
     return {normalize_package_name(k): v for k, v in catalog.items()}
 
 
-def normalize_package_name(name: str) -> str:
+def normalize_package_name(name: Union[str, Any]) -> str:
     """
     Given a Python package name for a check, return the corresponding folder
     name in the git repo.
