@@ -6,6 +6,10 @@
 
 * Update `ssl` default configuration to 'allow' ([#15917](https://github.com/DataDog/integrations-core/pull/15917))
 
+***Added***:
+
+* Update dependencies ([#15922](https://github.com/DataDog/integrations-core/pull/15922))
+
 ***Fixed***:
 
 * Prevent Postgres integration from collecting WAL metrics from Aurora instances that cannot be collected ([#15896](https://github.com/DataDog/integrations-core/pull/15896))
