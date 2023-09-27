@@ -148,13 +148,6 @@ files:
             example: https://<KEYSTONE_ENDPOINT>:<PORT>/
             type: string
             display_default: null
-        - name: use_internal_endpoints
-          description: |
-           Whether the integration hits internal endpoints and not public endpoints.
-          value:
-            example: true
-            display_default: false
-            type: boolean
         - name: ironic_microversion
           description: |
            The microversion of the Ironic (Bare Metal) API to call.

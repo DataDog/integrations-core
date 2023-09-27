@@ -128,11 +128,6 @@ instances:
     #
     # paginated_limit: 1000
 
-    ## @param use_internal_endpoints - boolean - optional - default: false
-    ## Whether the integration hits internal endpoints and not public endpoints.
-    #
-    # use_internal_endpoints: true
-
     ## @param ironic_microversion - string - optional - default: 1.8
     ## The microversion of the Ironic (Bare Metal) API to call.
     ## It is recommended to set this parameter to the latest Ironic microversion supported by your Openstack version.

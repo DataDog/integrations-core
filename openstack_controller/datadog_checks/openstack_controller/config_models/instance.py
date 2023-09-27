@@ -106,7 +106,6 @@ class InstanceConfig(BaseModel):
     tls_use_host_header: Optional[bool]
     tls_verify: Optional[bool]
     use_agent_proxy: Optional[bool]
-    use_internal_endpoints: Optional[bool]
     use_legacy_auth_encoding: Optional[bool]
     use_shortname: Optional[bool]
     user: Optional[Mapping[str, Any]]

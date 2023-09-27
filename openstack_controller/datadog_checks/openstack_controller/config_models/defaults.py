@@ -258,10 +258,6 @@ def instance_use_agent_proxy(field, value):
     return True
 
 
-def instance_use_internal_endpoints(field, value):
-    return False
-
-
 def instance_use_legacy_auth_encoding(field, value):
     return True
 
