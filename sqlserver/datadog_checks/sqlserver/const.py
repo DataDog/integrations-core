@@ -112,10 +112,10 @@ INSTANCE_METRICS = [
     ('sqlserver.replica.transaction_delay', 'Transaction Delay', '_Total'),
     ('sqlserver.replica.flow_control_sec', 'Flow Control/sec', '_Total'),
     # SQLServer:Transactions
-    ('sqlserver.stats.version_store_size', 'Version Store Size (KB)', ''),
-    ('sqlserver.stats.version_cleanup_rate', 'Version Cleanup rate (KB/s)', ''),
-    ('sqlserver.stats.version_generation_rate', 'Version Generation rate (KB/s)', ''),
-    ('sqlserver.stats.longest_transaction_running_time', 'Longest Transaction Running Time', ''),
+    ('sqlserver.transactions.version_store_size', 'Version Store Size (KB)', ''),
+    ('sqlserver.transactions.version_cleanup_rate', 'Version Cleanup rate (KB/s)', ''),
+    ('sqlserver.transactions.version_generation_rate', 'Version Generation rate (KB/s)', ''),
+    ('sqlserver.transactions.longest_transaction_running_time', 'Longest Transaction Running Time', ''),
 ]
 
 # Performance table metrics, initially configured to track at instance-level only
