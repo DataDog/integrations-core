@@ -117,10 +117,6 @@ class MultiDatabaseConnectionPool(object):
                 # if already in pool, retain persistence status
                 persistent = conn.persistent
 
-            if db.info.transaction_status != psycopg.pq.TransactionStatus.IDLE:
-                # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
-                db.rollback()
-
             deadline = datetime.datetime.now() + datetime.timedelta(milliseconds=ttl_ms)
             self._conns[dbname] = ConnectionInfo(
                 connection=db,
@@ -150,6 +146,8 @@ class MultiDatabaseConnectionPool(object):
         except psycopg.Error:
             db.rollback()
             raise
+        else:
+            db.commit()
         finally:
             with self._mu:
                 try:
