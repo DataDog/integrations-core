@@ -2,13 +2,13 @@
 
 ## Unreleased
 
-***Added***:
-
-* Update dependencies ([#15922](https://github.com/DataDog/integrations-core/pull/15922))
-
 ***Changed***:
 
 * Update `ssl` default configuration to 'allow' ([#15917](https://github.com/DataDog/integrations-core/pull/15917))
+
+***Added***:
+
+* Update dependencies ([#15922](https://github.com/DataDog/integrations-core/pull/15922))
 
 ***Fixed***:
 
