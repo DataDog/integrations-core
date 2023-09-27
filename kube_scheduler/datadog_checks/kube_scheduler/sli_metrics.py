@@ -61,4 +61,5 @@ class SliMetricsScraperMixin(object):
                 please check that your permissions are configured properly."
             )
         self._slis_available = r.status_code == 200
+        print(r.status_code, self._slis_available)
         return self._slis_available

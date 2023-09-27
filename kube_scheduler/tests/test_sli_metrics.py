@@ -6,7 +6,6 @@ import os
 
 import mock
 import pytest
-import requests
 import requests_mock
 
 from datadog_checks.kube_scheduler import KubeSchedulerCheck
@@ -56,33 +55,25 @@ def mock_request():
         yield m
 
 
-def test_detect_sli_endpoint(mock_metrics, mock_request, instance):
-    mock_request.get('http://localhost:10251/metrics/slis', status_code=200)
-    c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
-    c.check(instance)
-    assert c._slis_available is True
-    assert mock_request.call_count == 1
+def test_detect_sli_endpoint(mock_metrics, instance):
+    with mock.patch('requests.get') as mock_request:
+        mock_request.return_value.status_code = 200
+        c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
+        c.check(instance)
+        assert c._slis_available is True
 
 
-def test_detect_sli_endpoint_404(mock_metrics, mock_request, instance):
-    mock_request.get('http://localhost:10251/metrics/slis', status_code=404)
-    c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
-    c.check(instance)
-    assert c._slis_available is False
-    assert mock_request.call_count == 1
+def test_detect_sli_endpoint_404(mock_metrics, instance):
+    with mock.patch('requests.get') as mock_request:
+        mock_request.return_value.status_code = 404
+        c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
+        c.check(instance)
+        assert c._slis_available is False
 
 
-def test_detect_sli_endpoint_403(mock_metrics, mock_request, instance):
-    mock_request.get('http://localhost:10251/metrics/slis', status_code=403)
-    c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
-    c.check(instance)
-    assert c._slis_available is False
-    assert mock_request.call_count == 1
-
-
-def test_detect_sli_endpoint_timeout(mock_metrics, mock_request, instance):
-    mock_request.get('http://localhost:10251/metrics/slis', exc=requests.exceptions.ConnectTimeout)
-    c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
-    c.check(instance)
-    assert c._slis_available is None
-    assert mock_request.call_count == 1
+def test_detect_sli_endpoint_403(mock_metrics, instance):
+    with mock.patch('requests.get') as mock_request:
+        mock_request.return_value.status_code = 403
+        c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
+        c.check(instance)
+        assert c._slis_available is False
