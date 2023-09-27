@@ -4,7 +4,7 @@
 
 ***Added***:
 
-* Update Cryptography dependency ([#15921]https://github.com/DataDog/integrations-core/pull/15921)
+* Update Cryptography dependency ([#15922]https://github.com/DataDog/integrations-core/pull/15922)
 
 ## 2.12.1 / 2023-08-18
 

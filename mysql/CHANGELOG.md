@@ -4,7 +4,7 @@
 
 ***Added***:
 
-* Update Cryptography to 41.0.4 ([#15921]https://github.com/DataDog/integrations-core/pull/15921)
+* Update Cryptography to 41.0.4 ([#15922]https://github.com/DataDog/integrations-core/pull/15922)
 
 ## 11.1.0 / 2023-08-18
 

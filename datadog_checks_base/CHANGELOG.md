@@ -6,7 +6,7 @@
 
 * Upgrade clickhouse-driver to 0.2.6 on Python 3 ([#15726](https://github.com/DataDog/integrations-core/pull/15726))
 * Upgrade lz4 to 4.3.2 on Python 3 ([#15746](https://github.com/DataDog/integrations-core/pull/15746))
-* Update dependencies ([#15921]https://github.com/DataDog/integrations-core/pull/15921)
+* Update dependencies ([#15922]https://github.com/DataDog/integrations-core/pull/15922)
 
 ***Fixed***:
 
