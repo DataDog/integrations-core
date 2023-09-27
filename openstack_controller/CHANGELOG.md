@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Openstack Controller [ironic and octavia] ([#15918](https://github.com/DataDog/integrations-core/pull/15918))
+
 ## 4.0.0 / 2023-08-10
 
 ***Changed***:
