@@ -1,6 +1,6 @@
-# (C) Datadog, Inc. 2018-present
+# (C) Datadog, Inc. 2023-present
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
 NOVA_ENDPOINTS = [
     '^/compute/v2\\.1/limits$',
