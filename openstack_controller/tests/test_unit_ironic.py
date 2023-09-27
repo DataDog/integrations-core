@@ -66,7 +66,7 @@ def test_not_in_catalog(aggregator, dd_run_check, instance, caplog, mock_http_po
     for call in mock_http_post.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://10.164.0.11/baremetal') == 0
+    assert args_list.count('http://127.0.0.1:6385/baremetal') == 0
     if api_type == ApiType.REST:
         args_list = []
         for call in mock_http_post.call_args_list:
@@ -111,7 +111,7 @@ def test_response_time_exception(aggregator, dd_run_check, instance, mock_http_g
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://10.164.0.11/baremetal') == 2
+    assert args_list.count('http://127.0.0.1:6385/baremetal') == 2
 
 
 @pytest.mark.parametrize(
@@ -145,7 +145,7 @@ def test_response_time(aggregator, dd_run_check, instance, mock_http_get):
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://10.164.0.11/baremetal') == 1
+    assert args_list.count('http://127.0.0.1:6385/baremetal') == 1
 
 
 @pytest.mark.parametrize(
@@ -185,7 +185,7 @@ def test_nodes_exception(aggregator, dd_run_check, instance, mock_http_get, conn
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://10.164.0.11/baremetal/v1/nodes/detail') == 2
+        assert args_list.count('http://127.0.0.1:6385/baremetal/v1/nodes/detail') == 2
     elif api_type == ApiType.SDK:
         assert connection_baremetal.nodes.call_count == 2
 
@@ -265,7 +265,7 @@ def test_conductors_exception(aggregator, dd_run_check, instance, mock_http_get,
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://10.164.0.11/baremetal/v1/conductors') == 2
+        assert args_list.count('http://127.0.0.1:6385/baremetal/v1/conductors') == 2
     elif api_type == ApiType.SDK:
         assert connection_baremetal.conductors.call_count == 2
 

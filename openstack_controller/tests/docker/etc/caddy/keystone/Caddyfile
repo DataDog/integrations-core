@@ -4,31 +4,112 @@
 }
 :80 {
     root * /usr/share/caddy/
-    @post_auth_tokens {
+    @post_identity_v3_auth_tokens {
         method POST
+        header_regexp authType X-Auth-Type ^(?P<token_id>[a-zA-Z0-9_-]+)$
         path /identity/v3/auth/tokens
     }
-    route @post_auth_tokens {
-        rewrite /identity/v3/auth/tokens /identity/v3/auth/tokens/post.json
-        header /identity/v3/auth/tokens/post.json X-Subject-Token "demo_test"
+    route @post_identity_v3_auth_tokens {
+        rewrite * /POST{http.request.uri.path}/{http.regexp.authType.token_id}.json
+        header * X-Subject-Token "demo_test"
         file_server
     }
-    @get_auth_projects {
+    @get_identity_v3_auth_projects {
         method GET
-        header X-Auth-Token "demo_test"
+        header "X-Auth-Token" "demo_test"
         path /identity/v3/auth/projects
     }
-    route @get_auth_projects {
-        rewrite /identity/v3/auth/projects /identity/v3/auth/projects/get.json
+    route @get_identity_v3_auth_projects {
+        rewrite * /GET{http.request.uri.path}/response.json
         file_server
     }
-    @get_projects {
+    @get_identity {
         method GET
-        header X-Auth-Token "demo_test"
+        path /identity
+    }
+    route @get_identity {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+    @get_identity_v3_regions {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /identity/v3/regions
+    }
+    route @get_identity_v3_regions {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+    @get_identity_v3_domains {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /identity/v3/domains
+    }
+    route @get_identity_v3_domains {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+    @get_identity_v3_projects {
+        method GET
+        header "X-Auth-Token" "demo_test"
         path /identity/v3/projects
     }
-    route @get_projects {
-        rewrite /identity/v3/projects /identity/v3/projects/get.json
+    route @get_identity_v3_projects {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+    @get_identity_v3_groups {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /identity/v3/groups
+    }
+    route @get_identity_v3_groups {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+    @get_identity_v3_users {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /identity/v3/users
+    }
+    route @get_identity_v3_users {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+    @get_identity_v3_groups_users {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /identity/v3/groups/*/users
+    }
+    route @get_identity_v3_groups_users {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+    @get_identity_v3_services {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /identity/v3/services
+    }
+    route @get_identity_v3_services {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+    @get_identity_v3_registered_limits {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /identity/v3/registered_limits
+    }
+    route @get_identity_v3_registered_limits {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+    @get_identity_v3_limits {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /identity/v3/limits
+    }
+    route @get_identity_v3_limits {
+        rewrite * /GET{http.request.uri.path}/response.json
         file_server
     }
     file_server browse

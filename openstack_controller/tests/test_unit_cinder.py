@@ -57,7 +57,7 @@ def test_not_in_catalog(aggregator, dd_run_check, instance, caplog, mock_http_po
     for call in mock_http_post.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://10.164.0.11/volume/v3/') == 0
+    assert args_list.count('http://127.0.0.1:8776/volume/v3/') == 0
     if api_type == ApiType.REST:
         args_list = []
         for call in mock_http_post.call_args_list:
@@ -102,7 +102,7 @@ def test_response_time_exception(aggregator, dd_run_check, instance, mock_http_g
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://10.164.0.11/volume/v3/') == 2
+    assert args_list.count('http://127.0.0.1:8776/volume/v3/') == 2
 
 
 @pytest.mark.parametrize(
@@ -139,7 +139,7 @@ def test_response_time_block_storage(aggregator, dd_run_check, instance, mock_ht
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://10.164.0.11/volume/v3/') == 1
+    assert args_list.count('http://127.0.0.1:8776/volume/v3/') == 1
 
 
 @pytest.mark.parametrize(
@@ -176,4 +176,4 @@ def test_response_time_volumev3(aggregator, dd_run_check, instance, mock_http_ge
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://10.164.0.11/volume/v3/') == 1
+    assert args_list.count('http://127.0.0.1:8776/volume/v3/') == 1

@@ -54,7 +54,7 @@ def test_not_in_catalog(aggregator, dd_run_check, instance, caplog, mock_http_po
     for call in mock_http_post.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://10.164.0.11/networking') == 0
+    assert args_list.count('http://127.0.0.1:9696/networking') == 0
     if api_type == ApiType.REST:
         args_list = []
         for call in mock_http_post.call_args_list:
@@ -99,7 +99,7 @@ def test_response_time_exception(aggregator, dd_run_check, instance, mock_http_g
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://10.164.0.11:9696/networking') == 2
+    assert args_list.count('http://127.0.0.1:9696/networking') == 2
 
 
 @pytest.mark.parametrize(
@@ -133,7 +133,7 @@ def test_response_time(aggregator, dd_run_check, instance, mock_http_get):
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://10.164.0.11:9696/networking') == 1
+    assert args_list.count('http://127.0.0.1:9696/networking') == 1
 
 
 @pytest.mark.parametrize(
@@ -169,7 +169,7 @@ def test_agents_exception(aggregator, dd_run_check, instance, mock_http_get, con
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://10.164.0.11:9696/networking/v2.0/agents') == 2
+        assert args_list.count('http://127.0.0.1:9696/networking/v2.0/agents') == 2
     if api_type == ApiType.SDK:
         assert connection_network.agents.call_count == 2
 
@@ -318,8 +318,8 @@ def test_quotas_exception(aggregator, dd_run_check, instance, mock_http_get, con
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://10.164.0.11:9696/networking/v2.0/quotas/1e6e233e637d4d55a50a62b63398ad15') == 1
-        assert args_list.count('http://10.164.0.11:9696/networking/v2.0/quotas/6e39099cccde4f809b003d9e0dd09304') == 1
+        assert args_list.count('http://127.0.0.1:9696/networking/v2.0/quotas/1e6e233e637d4d55a50a62b63398ad15') == 1
+        assert args_list.count('http://127.0.0.1:9696/networking/v2.0/quotas/6e39099cccde4f809b003d9e0dd09304') == 1
     if api_type == ApiType.SDK:
         assert connection_network.get_quota.call_count == 2
         assert (

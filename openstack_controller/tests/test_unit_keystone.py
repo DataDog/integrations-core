@@ -66,7 +66,7 @@ def test_not_in_catalog(aggregator, dd_run_check, instance, caplog, mock_http_po
     for call in mock_http_post.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://10.164.0.11/identity') == 0
+    assert args_list.count('http://127.0.0.1:8080/identity') == 0
     if api_type == ApiType.REST:
         args_list = []
         for call in mock_http_post.call_args_list:
@@ -121,7 +121,7 @@ def test_response_time_exception(aggregator, dd_run_check, instance, mock_http_g
     for call in mock_http_get.call_args_list:
         args, _ = call
         args_list += list(args)
-    assert args_list.count('http://10.164.0.11/identity') == 2
+    assert args_list.count('http://127.0.0.1:8080/identity') == 2
 
 
 @pytest.mark.parametrize(
@@ -165,7 +165,7 @@ def test_response_time(aggregator, dd_run_check, instance, mock_http_get):
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://10.164.0.11/identity') == 1
+    assert args_list.count('http://127.0.0.1:8080/identity') == 1
 
 
 @pytest.mark.parametrize(
@@ -205,7 +205,7 @@ def test_regions_exception(aggregator, dd_run_check, instance, mock_http_get, co
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://10.164.0.11/identity/v3/regions') == 2
+        assert args_list.count('http://127.0.0.1:8080/identity/v3/regions') == 2
     if api_type == ApiType.SDK:
         assert connection_identity.regions.call_count == 2
 
@@ -282,7 +282,7 @@ def test_domains_exception(aggregator, dd_run_check, instance, mock_http_get, co
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://10.164.0.11/identity/v3/domains') == 2
+        assert args_list.count('http://127.0.0.1:8080/identity/v3/domains') == 2
     if api_type == ApiType.SDK:
         assert connection_identity.domains.call_count == 2
 
@@ -379,7 +379,7 @@ def test_projects_exception(aggregator, dd_run_check, instance, mock_http_get, c
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://10.164.0.11/identity/v3/projects') == 2
+        assert args_list.count('http://127.0.0.1:8080/identity/v3/projects') == 2
     if api_type == ApiType.SDK:
         assert connection_identity.projects.call_count == 2
 
@@ -536,7 +536,7 @@ def test_users_exception(aggregator, dd_run_check, instance, mock_http_get, conn
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://10.164.0.11/identity/v3/users') == 2
+        assert args_list.count('http://127.0.0.1:8080/identity/v3/users') == 2
     if api_type == ApiType.SDK:
         assert connection_identity.users.call_count == 2
 
@@ -733,7 +733,7 @@ def test_groups_exception(aggregator, dd_run_check, instance, mock_http_get, con
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://10.164.0.11/identity/v3/groups') == 2
+        assert args_list.count('http://127.0.0.1:8080/identity/v3/groups') == 2
     if api_type == ApiType.SDK:
         assert connection_identity.groups.call_count == 2
 
@@ -811,8 +811,8 @@ def test_group_users_exception(aggregator, dd_run_check, instance, mock_http_get
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://10.164.0.11/identity/v3/groups/89b36a4c32c44b0ea8856b6357f101ea/users') == 1
-        assert args_list.count('http://10.164.0.11/identity/v3/groups/9acda6caf16e4828935f4f681ee8b3e5/users') == 1
+        assert args_list.count('http://127.0.0.1:8080/identity/v3/groups/89b36a4c32c44b0ea8856b6357f101ea/users') == 1
+        assert args_list.count('http://127.0.0.1:8080/identity/v3/groups/9acda6caf16e4828935f4f681ee8b3e5/users') == 1
     if api_type == ApiType.SDK:
         assert connection_identity.group_users.call_count == 2
         assert connection_identity.group_users.call_args_list.count(mock.call('89b36a4c32c44b0ea8856b6357f101ea')) == 1
@@ -911,7 +911,7 @@ def test_services_exception(aggregator, dd_run_check, instance, mock_http_get, c
         for call in mock_http_get.call_args_list:
             args, kwargs = call
             args_list += list(args)
-        assert args_list.count('http://10.164.0.11/identity/v3/services') == 2
+        assert args_list.count('http://127.0.0.1:8080/identity/v3/services') == 2
     if api_type == ApiType.SDK:
         assert connection_identity.services.call_count == 2
 
@@ -1065,7 +1065,7 @@ def test_registered_limits_exception(aggregator, dd_run_check, instance, mock_ht
         for call in mock_http_get.call_args_list:
             args, kwargs = call
             args_list += list(args)
-        assert args_list.count('http://10.164.0.11/identity/v3/registered_limits') == 2
+        assert args_list.count('http://127.0.0.1:8080/identity/v3/registered_limits') == 2
     if api_type == ApiType.SDK:
         assert connection_identity.registered_limits.call_count == 2
 
@@ -1110,7 +1110,7 @@ def test_limits_exception(aggregator, dd_run_check, instance, mock_http_get, con
         for call in mock_http_get.call_args_list:
             args, kwargs = call
             args_list += list(args)
-        assert args_list.count('http://10.164.0.11/identity/v3/limits') == 2
+        assert args_list.count('http://127.0.0.1:8080/identity/v3/limits') == 2
     if api_type == ApiType.SDK:
         assert connection_identity.limits.call_count == 2
 

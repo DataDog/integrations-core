@@ -412,6 +412,7 @@ def mock_responses():
 
     def method(method, url, file='response', headers=None, microversion=None):
         filename = file
+        url = url.replace("?", "/")
         if any(re.search(pattern, url) for pattern in NOVA_ENDPOINTS):
             microversion = (
                 microversion if microversion else headers.get('X-OpenStack-Nova-API-Version') if headers else None

@@ -54,7 +54,7 @@ def test_not_in_catalog(aggregator, dd_run_check, instance, caplog, mock_http_po
     for call in mock_http_post.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://10.164.0.11/load-balancer') == 0
+    assert args_list.count('http://127.0.0.1:9876/load-balancer') == 0
     if api_type == ApiType.REST:
         args_list = []
         for call in mock_http_post.call_args_list:
@@ -99,7 +99,7 @@ def test_response_time_exception(aggregator, dd_run_check, instance, mock_http_g
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://10.164.0.11/load-balancer') == 2
+    assert args_list.count('http://127.0.0.1:9876/load-balancer') == 2
 
 
 @pytest.mark.parametrize(
@@ -133,7 +133,7 @@ def test_response_time(aggregator, dd_run_check, instance, mock_http_get):
     for call in mock_http_get.call_args_list:
         args, _ = call
         args_list += list(args)
-    assert args_list.count('http://10.164.0.11/load-balancer') == 1
+    assert args_list.count('http://127.0.0.1:9876/load-balancer') == 1
 
 
 @pytest.mark.parametrize(
@@ -187,13 +187,13 @@ def test_loadbalancers_exception(aggregator, dd_run_check, instance, mock_http_g
             args_list += list(args)
         assert (
             args_list.count(
-                'http://10.164.0.11/load-balancer/v2/lbaas/loadbalancers?project_id=1e6e233e637d4d55a50a62b63398ad15'
+                'http://127.0.0.1:9876/load-balancer/v2/lbaas/loadbalancers?project_id=1e6e233e637d4d55a50a62b63398ad15'
             )
             == 1
         )
         assert (
             args_list.count(
-                'http://10.164.0.11/load-balancer/v2/lbaas/loadbalancers?project_id=6e39099cccde4f809b003d9e0dd09304'
+                'http://127.0.0.1:9876/load-balancer/v2/lbaas/loadbalancers?project_id=6e39099cccde4f809b003d9e0dd09304'
             )
             == 1
         )
