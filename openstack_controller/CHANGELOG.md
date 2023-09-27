@@ -1,5 +1,8 @@
 # CHANGELOG - Openstack_controller
 
+## 4.0.0-beta.10 / 2023-09-27
+
+
 ## 3.0.0 / 2023-03-07
 
 * [Changed] Upgrade openstacksdk dependency and drop py2. See [#14109](https://github.com/DataDog/integrations-core/pull/14109).
