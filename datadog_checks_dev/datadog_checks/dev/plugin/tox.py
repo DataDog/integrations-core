@@ -19,8 +19,8 @@ FIX_DEFAULT_ENVDIR_FLAG = 'ensure_default_envdir'
 
 # Style deps:
 # We pin deps in order to make CI more stable/reliable.
-BLACK_DEP = 'black==22.12.0'
-RUFF_DEP = 'ruff==0.0.257'
+BLACK_DEP = 'black==23.9.1'
+RUFF_DEP = 'ruff==0.0.291'
 # TODO: remove extra when we drop Python 2
 MYPY_DEP = 'mypy[python2]==0.910'
 # TODO: when we drop Python 2 and replace with --install-types --non-interactive
