@@ -4,7 +4,7 @@
 
 ***Fixed***:
 
-* Revise postgresql.replication_delay to Function with Archive WAL-driven PostgreSQL Replica ([#15925](https://github.com/DataDog/integrations-core/pull/15925))
+* Revise `postgresql.replication_delay` to function with archive WAL-driven replica ([#15925](https://github.com/DataDog/integrations-core/pull/15925))
 
 ***Changed***:
 
