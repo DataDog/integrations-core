@@ -9,7 +9,6 @@ from datadog_checks.base import AgentCheck  # noqa: F401
 
 
 class {check_class}(AgentCheck):
-
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = '{check_name}'
 
