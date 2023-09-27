@@ -13,7 +13,7 @@
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
-      "Category::Data Store",
+      "Category::Data Stores",
       "Category::Log Collection"
     ]
   },
@@ -41,10 +41,7 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": [
-        "glusterd",
-        "gluster"
-      ]
+      "process_signatures": ["glusterd", "gluster"]
     },
     "dashboards": {
       "Red Hat Gluster Storage": "assets/dashboards/red_hat_gluster_storage.json"

@@ -13,7 +13,7 @@
     "media": [],
     "classifier_tags": [
       "Category::Azure",
-      "Category::IOT",
+      "Category::IoT",
       "Category::Log Collection",
       "Category::Network",
       "Supported OS::Linux",

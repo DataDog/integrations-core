@@ -63,7 +63,7 @@ instances:
     #   - rdsadmin
     #   - azure_maintenance
 
-    ## @param ssl - string - optional - default: disable
+    ## @param ssl - string - optional - default: allow
     ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
     ## is negotiated with the server. There are six modes:
     ## - `disable`: Only tries a non-SSL connection.
@@ -78,7 +78,7 @@ instances:
     ##
     ## For a detailed description of how these options work see https://www.postgresql.org/docs/current/libpq-ssl.html
     #
-    # ssl: disable
+    # ssl: allow
 
     ## @param ssl_root_cert - string - optional
     ## The path to the ssl root certificate.

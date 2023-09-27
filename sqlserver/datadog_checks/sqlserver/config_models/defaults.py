@@ -64,10 +64,6 @@ def instance_include_ao_metrics():
     return False
 
 
-def instance_include_db_file_space_usage_metrics():
-    return False
-
-
 def instance_include_db_fragmentation_metrics():
     return False
 
@@ -86,6 +82,10 @@ def instance_include_master_files_metrics():
 
 def instance_include_task_scheduler_metrics():
     return False
+
+
+def instance_include_tempdb_file_space_usage_metrics():
+    return True
 
 
 def instance_log_unobfuscated_plans():
