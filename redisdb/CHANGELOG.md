@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+***Added***:
+
+* Update Redis to 5.0.1 ([#15921]https://github.com/DataDog/integrations-core/pull/15921)
+
+
 ## 5.1.0 / 2023-08-18
 
 ***Added***:
