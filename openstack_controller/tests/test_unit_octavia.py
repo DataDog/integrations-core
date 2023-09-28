@@ -933,4 +933,3 @@ def test_listeners_metrics(aggregator, dd_run_check, instance):
             'provisioning_status:ACTIVE',
         ],
     )
-
