@@ -743,6 +743,18 @@ def connection_network(request, mock_responses):
             for agent in mock_responses('GET', '/networking/v2.0/agents')['agents']
         ]
 
+    def networks(project_id):
+        if http_error and 'networks' in http_error and project_id in http_error['networks']:
+            raise requests.exceptions.HTTPError(response=http_error['networks'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=network,
+                )
+            )
+            for network in mock_responses('GET', f'/networking/v2.0/networks?project_id={project_id}')['networks']
+        ]
+
     def get_quota(project_id, details):
         if http_error and 'quotas' in http_error and project_id in http_error['quotas']:
             raise requests.exceptions.HTTPError(response=http_error['quotas'][project_id])
@@ -754,6 +766,7 @@ def connection_network(request, mock_responses):
 
     return mock.MagicMock(
         agents=mock.MagicMock(side_effect=agents),
+        networks=mock.MagicMock(side_effect=networks),
         get_quota=mock.MagicMock(side_effect=get_quota),
     )
 

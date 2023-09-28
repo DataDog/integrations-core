@@ -1,0 +1,32 @@
+{
+  "networks": [
+    {
+      "id": "ebdfddd9-14b8-46bd-98d6-10205d13038c",
+      "name": "private",
+      "tenant_id": "6e39099cccde4f809b003d9e0dd09304",
+      "admin_state_up": true,
+      "mtu": 1442,
+      "status": "ACTIVE",
+      "subnets": [
+        "bc959cd1-c0c6-4c55-8c49-f958ad0a9013",
+        "eaedbccc-a393-4e97-a69a-d0643abca64e"
+      ],
+      "shared": false,
+      "availability_zone_hints": [],
+      "availability_zones": [],
+      "ipv4_address_scope": null,
+      "ipv6_address_scope": null,
+      "router:external": false,
+      "description": "",
+      "port_security_enabled": true,
+      "tags": [],
+      "created_at": "2023-09-02T11:22:00Z",
+      "updated_at": "2023-09-02T11:22:06Z",
+      "revision_number": 3,
+      "project_id": "6e39099cccde4f809b003d9e0dd09304",
+      "provider:network_type": "geneve",
+      "provider:physical_network": null,
+      "provider:segmentation_id": 54733
+    }
+  ]
+}

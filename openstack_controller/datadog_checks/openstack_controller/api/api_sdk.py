@@ -195,10 +195,14 @@ class ApiSdk(Api):
         )
 
     def get_network_agents(self):
-        self.log.debug("getting network agents")
         return [agent.to_dict(original_names=True) for agent in self.connection.network.agents()]
 
-    def get_network_quotas(self, project_id):
+    def get_network_networks(self, project_id):
+        return [
+            network.to_dict(original_names=True) for network in self.connection.network.networks(project_id=project_id)
+        ]
+
+    def get_network_quota(self, project_id):
         return self.connection.network.get_quota(details=True, project_id=project_id).to_dict(original_names=True)
 
     def get_baremetal_nodes(self):
@@ -282,10 +286,4 @@ class ApiSdk(Api):
         pass  # pragma: no cover
 
     def get_compute_os_aggregates(self, project_id):
-        pass  # pragma: no cover
-
-    def get_network_response_time(self):
-        pass  # pragma: no cover
-
-    def get_baremetal_response_time(self):
         pass  # pragma: no cover

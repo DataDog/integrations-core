@@ -330,7 +330,17 @@ class ApiRest(Api):
         response.raise_for_status()
         return response.json().get('agents', [])
 
-    def get_network_quotas(self, project_id):
+    def get_network_networks(self, project_id):
+        self.log.debug("getting network networks")
+        endpoint = '{}/v2.0/networks?project_id={}'.format(
+            self._catalog.get_endpoint_by_type(Component.Types.NETWORK.value), project_id
+        )
+        self.log.debug("network networks endpoint: %s", endpoint)
+        response = self.http.get(endpoint)
+        response.raise_for_status()
+        return response.json().get('networks', [])
+
+    def get_network_quota(self, project_id):
         self.log.debug("getting network quotas")
         endpoint = '{}/v2.0/quotas/{}'.format(
             self._catalog.get_endpoint_by_type(Component.Types.NETWORK.value), project_id

@@ -271,6 +271,306 @@ def test_agents_metrics(aggregator, dd_run_check, instance):
         pytest.param(
             {
                 'http_error': {
+                    '/networking/v2.0/networks?project_id=1e6e233e637d4d55a50a62b63398ad15': MockResponse(
+                        status_code=500
+                    ),
+                    '/networking/v2.0/networks?project_id=6e39099cccde4f809b003d9e0dd09304': MockResponse(
+                        status_code=500
+                    ),
+                }
+            },
+            None,
+            CONFIG_REST,
+            ApiType.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            None,
+            {
+                'http_error': {
+                    'networks': {
+                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                    }
+                }
+            },
+            CONFIG_SDK,
+            ApiType.SDK,
+            id='api sdk',
+        ),
+    ],
+    indirect=['mock_http_get', 'connection_network'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_networks_exception(aggregator, dd_run_check, instance, mock_http_get, connection_network, api_type):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.neutron.networks.count',
+        count=0,
+    )
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, _ = call
+            args_list += list(args)
+        assert (
+            args_list.count(
+                'http://127.0.0.1:9696/networking/v2.0/networks?project_id=1e6e233e637d4d55a50a62b63398ad15'
+            )
+            == 1
+        )
+        assert (
+            args_list.count(
+                'http://127.0.0.1:9696/networking/v2.0/networks?project_id=6e39099cccde4f809b003d9e0dd09304'
+            )
+            == 1
+        )
+    if api_type == ApiType.SDK:
+        assert connection_network.networks.call_count == 2
+        assert (
+            connection_network.networks.call_args_list.count(mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15'))
+            == 1
+        )
+        assert (
+            connection_network.networks.call_args_list.count(mock.call(project_id='6e39099cccde4f809b003d9e0dd09304'))
+            == 1
+        )
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            CONFIG_REST,
+            id='api rest',
+        ),
+        pytest.param(
+            CONFIG_SDK,
+            id='api sdk',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_networks_metrics(aggregator, dd_run_check, instance):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.neutron.networks.count',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ec38babc-37e8-4bd7-9de0-03009304b2e4',
+            'network_name:public',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.networks.admin_state_up',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ec38babc-37e8-4bd7-9de0-03009304b2e4',
+            'network_name:public',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.networks.mtu',
+        value=1500,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ec38babc-37e8-4bd7-9de0-03009304b2e4',
+            'network_name:public',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.networks.port_security_enabled',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ec38babc-37e8-4bd7-9de0-03009304b2e4',
+            'network_name:public',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.networks.shared',
+        value=0,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ec38babc-37e8-4bd7-9de0-03009304b2e4',
+            'network_name:public',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.networks.is_default',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ec38babc-37e8-4bd7-9de0-03009304b2e4',
+            'network_name:public',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.networks.count',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:f7b6adc8-24ea-490c-9537-5c4eae015cd8',
+            'network_name:shared',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.networks.admin_state_up',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:f7b6adc8-24ea-490c-9537-5c4eae015cd8',
+            'network_name:shared',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.networks.mtu',
+        value=1442,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:f7b6adc8-24ea-490c-9537-5c4eae015cd8',
+            'network_name:shared',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.networks.port_security_enabled',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:f7b6adc8-24ea-490c-9537-5c4eae015cd8',
+            'network_name:shared',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.networks.shared',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:f7b6adc8-24ea-490c-9537-5c4eae015cd8',
+            'network_name:shared',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.networks.count',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ebdfddd9-14b8-46bd-98d6-10205d13038c',
+            'network_name:private',
+            'network_status:ACTIVE',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.networks.admin_state_up',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ebdfddd9-14b8-46bd-98d6-10205d13038c',
+            'network_name:private',
+            'network_status:ACTIVE',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.networks.mtu',
+        value=1442,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ebdfddd9-14b8-46bd-98d6-10205d13038c',
+            'network_name:private',
+            'network_status:ACTIVE',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.networks.port_security_enabled',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ebdfddd9-14b8-46bd-98d6-10205d13038c',
+            'network_name:private',
+            'network_status:ACTIVE',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.networks.shared',
+        value=0,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ebdfddd9-14b8-46bd-98d6-10205d13038c',
+            'network_name:private',
+            'network_status:ACTIVE',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'connection_network', 'instance', 'api_type'),
+    [
+        pytest.param(
+            {
+                'http_error': {
                     '/networking/v2.0/quotas/1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
                     '/networking/v2.0/quotas/6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
                 }

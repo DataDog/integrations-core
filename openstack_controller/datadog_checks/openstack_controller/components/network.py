@@ -9,6 +9,10 @@ from datadog_checks.openstack_controller.metrics import (
     NEUTRON_AGENTS_METRICS,
     NEUTRON_AGENTS_METRICS_PREFIX,
     NEUTRON_AGENTS_TAGS,
+    NEUTRON_NETWORKS_COUNT,
+    NEUTRON_NETWORKS_METRICS,
+    NEUTRON_NETWORKS_METRICS_PREFIX,
+    NEUTRON_NETWORKS_TAGS,
     NEUTRON_QUOTAS_METRICS,
     NEUTRON_QUOTAS_METRICS_PREFIX,
     NEUTRON_QUOTAS_TAGS,
@@ -53,8 +57,24 @@ class Network(Component):
 
     @Component.register_project_metrics(Component.Id.NETWORK)
     @Component.http_error()
+    def _report_networks(self, project_id, tags):
+        data = self.check.api.get_network_networks(project_id)
+        for item in data:
+            network = get_metrics_and_tags(
+                item,
+                tags=NEUTRON_NETWORKS_TAGS,
+                prefix=NEUTRON_NETWORKS_METRICS_PREFIX,
+                metrics=NEUTRON_NETWORKS_METRICS,
+            )
+            self.check.log.debug("network: %s", network)
+            self.check.gauge(NEUTRON_NETWORKS_COUNT, 1, tags=tags + network['tags'])
+            for metric, value in network['metrics'].items():
+                self.check.gauge(metric, value, tags=tags + network['tags'])
+
+    @Component.register_project_metrics(Component.Id.NETWORK)
+    @Component.http_error()
     def _report_quotas(self, project_id, tags):
-        item = self.check.api.get_network_quotas(project_id)
+        item = self.check.api.get_network_quota(project_id)
         quota = get_metrics_and_tags(
             item,
             tags=NEUTRON_QUOTAS_TAGS,
