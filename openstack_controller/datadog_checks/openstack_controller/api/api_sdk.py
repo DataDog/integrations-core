@@ -250,7 +250,17 @@ class ApiSdk(Api):
         return self.connection.load_balancer.get_listener_statistics(listener_id).to_dict(original_names=True)
 
     def get_load_balancer_pools(self, project_id):
-        pass  # pragma: no cover
+        self.log.debug("getting load balancer pools for project `%s`", project_id)
+        return [
+            pool.to_dict(original_names=True) for pool in self.connection.load_balancer.pools(project_id=project_id)
+        ]
+
+    def get_load_balancer_pool_members(self, pool_id, project_id):
+        self.log.debug("getting load balancer pool members for pool %s project `%s`", pool_id, project_id)
+        return [
+            member.to_dict(original_names=True)
+            for member in self.connection.load_balancer.members(pool_id, project_id=project_id)
+        ]
 
     def get_load_balancer_members_by_pool(self, project_id, pool_id):
         pass  # pragma: no cover

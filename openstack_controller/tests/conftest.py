@@ -59,7 +59,7 @@ def dd_environment():
             ip = outputs['ip']['value']
             private_key = outputs['ssh_private_key']['value']
             instance = {
-                'keystone_server_url': 'http://{}/identity'.format(ip),
+                'keystone_server_url': 'http://{}/identity'.format(private_key),
                 'username': 'admin',
                 'password': 'password',
                 'ssl_verify': False,
@@ -862,11 +862,39 @@ def connection_load_balancer(request, mock_responses):
             )
         )
 
+    def pools(project_id):
+        if http_error and 'pools' in http_error and project_id in http_error['pools']:
+            raise requests.exceptions.HTTPError(response=http_error['pools'][project_id])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=pool,
+                )
+            )
+            for pool in mock_responses('GET', f'/load-balancer/v2/lbaas/pools?project_id={project_id}')['pools']
+        ]
+
+    def members(pool_id, project_id):
+        if http_error and 'pool_members' in http_error and pool_id in http_error['pool_members']:
+            raise requests.exceptions.HTTPError(response=http_error['pool_members'][pool_id])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=member,
+                )
+            )
+            for member in mock_responses(
+                'GET', f'/load-balancer/v2/lbaas/pools/{pool_id}/members?project_id={project_id}'
+            )['members']
+        ]
+
     return mock.MagicMock(
         load_balancers=mock.MagicMock(side_effect=load_balancers),
         get_load_balancer_statistics=mock.MagicMock(side_effect=get_load_balancer_statistics),
         listeners=mock.MagicMock(side_effect=listeners),
         get_listener_statistics=mock.MagicMock(side_effect=get_listener_statistics),
+        pools=mock.MagicMock(side_effect=pools),
+        members=mock.MagicMock(side_effect=members),
     )
 
 

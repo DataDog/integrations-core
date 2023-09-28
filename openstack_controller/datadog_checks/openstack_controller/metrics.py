@@ -367,9 +367,9 @@ OCTAVIA_METRICS_PREFIX = "openstack.octavia"
 OCTAVIA_SERVICE_CHECK = f"{OCTAVIA_METRICS_PREFIX}.api.up"
 OCTAVIA_RESPONSE_TIME = f"{OCTAVIA_METRICS_PREFIX}.response_time"
 
-OCTAVIA_LOAD_BALANCER_METRICS_PREFIX = f"{OCTAVIA_METRICS_PREFIX}.loadbalancers"
-OCTAVIA_LOAD_BALANCER_COUNT = f"{OCTAVIA_LOAD_BALANCER_METRICS_PREFIX}.count"
-OCTAVIA_LOAD_BALANCER_TAGS = {
+OCTAVIA_LOAD_BALANCERS_METRICS_PREFIX = f"{OCTAVIA_METRICS_PREFIX}.loadbalancers"
+OCTAVIA_LOAD_BALANCERS_COUNT = f"{OCTAVIA_LOAD_BALANCERS_METRICS_PREFIX}.count"
+OCTAVIA_LOAD_BALANCERS_TAGS = {
     'id': 'loadbalancer_id',
     'name': 'loadbalancer_name',
     'provisioning_status': 'provisioning_status',
@@ -378,11 +378,11 @@ OCTAVIA_LOAD_BALANCER_TAGS = {
         'id': 'listener_id',
     },
 }
-OCTAVIA_LOAD_BALANCER_METRICS = {
-    f"{OCTAVIA_LOAD_BALANCER_METRICS_PREFIX}.admin_state_up": {},
+OCTAVIA_LOAD_BALANCERS_METRICS = {
+    f"{OCTAVIA_LOAD_BALANCERS_METRICS_PREFIX}.admin_state_up": {},
 }
 
-OCTAVIA_LOAD_BALANCER_STATS_METRICS_PREFIX = f"{OCTAVIA_LOAD_BALANCER_METRICS_PREFIX}.stats"
+OCTAVIA_LOAD_BALANCER_STATS_METRICS_PREFIX = f"{OCTAVIA_LOAD_BALANCERS_METRICS_PREFIX}.stats"
 OCTAVIA_LOAD_BALANCER_STATS_METRICS = {
     f"{OCTAVIA_LOAD_BALANCER_STATS_METRICS_PREFIX}.active_connections": {},
     f"{OCTAVIA_LOAD_BALANCER_STATS_METRICS_PREFIX}.bytes_in": {},
@@ -390,9 +390,9 @@ OCTAVIA_LOAD_BALANCER_STATS_METRICS = {
     f"{OCTAVIA_LOAD_BALANCER_STATS_METRICS_PREFIX}.request_errors": {},
     f"{OCTAVIA_LOAD_BALANCER_STATS_METRICS_PREFIX}.total_connections": {},
 }
-OCTAVIA_LISTENER_METRICS_PREFIX = f"{OCTAVIA_METRICS_PREFIX}.listeners"
-OCTAVIA_LISTENER_COUNT = f"{OCTAVIA_LISTENER_METRICS_PREFIX}.count"
-OCTAVIA_LISTENER_TAGS = {
+OCTAVIA_LISTENERS_METRICS_PREFIX = f"{OCTAVIA_METRICS_PREFIX}.listeners"
+OCTAVIA_LISTENERS_COUNT = f"{OCTAVIA_LISTENERS_METRICS_PREFIX}.count"
+OCTAVIA_LISTENERS_TAGS = {
     'id': 'listener_id',
     'name': 'listener_name',
     'provisioning_status': 'provisioning_status',
@@ -401,20 +401,57 @@ OCTAVIA_LISTENER_TAGS = {
         'id': 'loadbalancer_id',
     },
 }
-OCTAVIA_LISTENER_METRICS = {
-    f"{OCTAVIA_LISTENER_METRICS_PREFIX}.connection_limit": {},
-    f"{OCTAVIA_LISTENER_METRICS_PREFIX}.timeout_client_data": {},
-    f"{OCTAVIA_LISTENER_METRICS_PREFIX}.timeout_member_connect": {},
-    f"{OCTAVIA_LISTENER_METRICS_PREFIX}.timeout_member_data": {},
-    f"{OCTAVIA_LISTENER_METRICS_PREFIX}.timeout_tcp_inspect": {},
+OCTAVIA_LISTENERS_METRICS = {
+    f"{OCTAVIA_LISTENERS_METRICS_PREFIX}.connection_limit": {},
+    f"{OCTAVIA_LISTENERS_METRICS_PREFIX}.timeout_client_data": {},
+    f"{OCTAVIA_LISTENERS_METRICS_PREFIX}.timeout_member_connect": {},
+    f"{OCTAVIA_LISTENERS_METRICS_PREFIX}.timeout_member_data": {},
+    f"{OCTAVIA_LISTENERS_METRICS_PREFIX}.timeout_tcp_inspect": {},
 }
-OCTAVIA_LISTENER_STATS_METRICS_PREFIX = f"{OCTAVIA_LISTENER_METRICS_PREFIX}.stats"
+OCTAVIA_LISTENER_STATS_METRICS_PREFIX = f"{OCTAVIA_LISTENERS_METRICS_PREFIX}.stats"
 OCTAVIA_LISTENER_STATS_METRICS = {
-    f"{OCTAVIA_LISTENER_METRICS_PREFIX}.stats.active_connections": {},
-    f"{OCTAVIA_LISTENER_METRICS_PREFIX}.stats.bytes_in": {},
-    f"{OCTAVIA_LISTENER_METRICS_PREFIX}.stats.bytes_out": {},
-    f"{OCTAVIA_LISTENER_METRICS_PREFIX}.stats.request_errors": {},
-    f"{OCTAVIA_LISTENER_METRICS_PREFIX}.stats.total_connections": {},
+    f"{OCTAVIA_LISTENER_STATS_METRICS_PREFIX}.active_connections": {},
+    f"{OCTAVIA_LISTENER_STATS_METRICS_PREFIX}.bytes_in": {},
+    f"{OCTAVIA_LISTENER_STATS_METRICS_PREFIX}.bytes_out": {},
+    f"{OCTAVIA_LISTENER_STATS_METRICS_PREFIX}.request_errors": {},
+    f"{OCTAVIA_LISTENER_STATS_METRICS_PREFIX}.total_connections": {},
+}
+
+OCTAVIA_POOLS_METRICS_PREFIX = f"{OCTAVIA_METRICS_PREFIX}.pools"
+OCTAVIA_POOLS_COUNT = f"{OCTAVIA_POOLS_METRICS_PREFIX}.count"
+OCTAVIA_POOLS_TAGS = {
+    'id': 'pool_id',
+    'name': 'pool_name',
+    'provisioning_status': 'provisioning_status',
+    'operating_status': 'operating_status',
+    'loadbalancers': {
+        'id': 'loadbalancer_id',
+    },
+    'listeners': {
+        'id': 'listener_id',
+    },
+}
+OCTAVIA_POOLS_METRICS = {
+    f"{OCTAVIA_POOLS_METRICS_PREFIX}.admin_state_up": {},
+}
+
+OCTAVIA_POOL_MEMBERS_METRICS_PREFIX = f"{OCTAVIA_METRICS_PREFIX}.members"
+OCTAVIA_POOL_MEMBERS_COUNT = f"{OCTAVIA_POOL_MEMBERS_METRICS_PREFIX}.count"
+OCTAVIA_POOL_MEMBERS_TAGS = {
+    'id': 'member_id',
+    'name': 'member_name',
+    'provisioning_status': 'provisioning_status',
+    'operating_status': 'operating_status',
+    'loadbalancers': {
+        'id': 'loadbalancer_id',
+    },
+    'listeners': {
+        'id': 'listener_id',
+    },
+}
+OCTAVIA_POOL_MEMBERS_METRICS = {
+    f"{OCTAVIA_POOL_MEMBERS_METRICS_PREFIX}.admin_state_up": {},
+    f"{OCTAVIA_POOL_MEMBERS_METRICS_PREFIX}.weight": {},
 }
 
 
