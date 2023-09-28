@@ -146,17 +146,30 @@ class MultiDatabaseConnectionPool(object):
         Note that leaving a connection context here does NOT close the connection in psycopg;
         connections must be manually closed by `close_all_connections()`.
         """
+        interrupted_error_occurred = False
+
         with self._mu:
             db = self._get_connection_raw(dbname, ttl_ms, timeout, startup_fn, persistent)
         try:
             yield db
-        finally:
+        except InterruptedError:
+            # if the thread is interrupted, we don't want to mark the connection as inactive
+            # instead we want to take it out of the pool so it can be closed
+            interrupted_error_occurred = True
             with self._mu:
-                try:
-                    self._conns[dbname].active = False
-                except KeyError:
-                    # if self._get_connection_raw hit an exception, self._conns[dbname] didn't get populated
-                    pass
+                self._terminate_connection_unsafe(dbname)
+            raise
+        else:
+            if not interrupted_error_occurred:
+                with self._mu:
+                    if db.broken:
+                        self._terminate_connection_unsafe(dbname)
+                    else:
+                        try:
+                            self._conns[dbname].active = False
+                        except KeyError:
+                            # if self._get_connection_raw hit an exception, self._conns[dbname] didn't get populated
+                            pass
 
     def prune_connections(self):
         """
@@ -198,7 +211,10 @@ class MultiDatabaseConnectionPool(object):
             return None
 
     def _terminate_connection_unsafe(self, dbname: str):
-        db = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None, None)).connection
+        if dbname not in self._conns:
+            return True
+
+        db = self._conns.pop(dbname).connection
         if db is not None:
             try:
                 self._stats.connection_closed += 1

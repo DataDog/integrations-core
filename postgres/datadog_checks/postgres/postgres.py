@@ -522,8 +522,8 @@ class PostgreSql(AgentCheck):
         databases = self.autodiscovery.get_items()
         for db in databases:
             with self.db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
-                with conn.cursor() as cursor:
-                    for scope in relations_scopes:
+                for scope in relations_scopes:
+                    with conn.cursor() as cursor:
                         self._query_scope(cursor, scope, instance_tags, False, db)
         elapsed_ms = (time() - start_time) * 1000
         self.histogram(
@@ -599,18 +599,23 @@ class PostgreSql(AgentCheck):
                         hostname=self.resolved_hostname,
                     )
 
+            with conn.cursor() as cursor:
                 self._query_scope(cursor, bgw_instance_metrics, instance_tags, False)
+
+            with conn.cursor() as cursor:
                 self._query_scope(cursor, archiver_instance_metrics, instance_tags, False)
 
+            with conn.cursor() as cursor:
                 if self._config.collect_activity_metrics:
                     activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
                     self._query_scope(cursor, activity_metrics, instance_tags, False)
 
-                for scope in list(metric_scope) + self._config.custom_metrics:
+            for scope in list(metric_scope) + self._config.custom_metrics:
+                with conn.cursor() as cursor:
                     self._query_scope(cursor, scope, instance_tags, scope in self._config.custom_metrics)
 
-                if self.dynamic_queries:
-                    self.dynamic_queries.execute()
+        if self.dynamic_queries:
+            self.dynamic_queries.execute()
 
     def _new_connection(self, dbname):
         if self._config.host == 'localhost' and self._config.password == '':
