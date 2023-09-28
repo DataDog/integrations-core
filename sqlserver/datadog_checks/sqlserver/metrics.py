@@ -1018,7 +1018,10 @@ class SqlDbIndexUsageStats(BaseSqlServerMetric):
     QUERY_BASE = """\
     SELECT
          DB_NAME(ixus.database_id) as db,
-         ind.name as index_name,
+         CASE
+            WHEN ind.name IS NULL THEN 'HeapIndex_' + OBJECT_NAME(ind.object_id)
+            ELSE ind.name
+         END AS index_name,
          OBJECT_NAME(ind.object_id) as table_name,
         {sql_columns}
     FROM sys.indexes ind
@@ -1083,7 +1086,7 @@ class SqlDbIndexUsageStats(BaseSqlServerMetric):
 
             metric_tags = [
                 'db:{}'.format(str(database)),
-                'index:{}'.format(str(index)),
+                'index_name:{}'.format(str(index)),
                 'table:{}'.format(str(table)),
             ]
             metric_tags.extend(self.tags)

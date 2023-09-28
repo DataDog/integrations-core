@@ -710,7 +710,7 @@ def test_index_usage_statistics(aggregator, dd_run_check, instance_docker, datab
     expected_tags = instance_docker.get('tags', []) + [
         'db:datadog_test',
         'table:ϑings',
-        'index:thingsindex',
+        'index_name:thingsindex',
     ]
     for m in DATABASE_INDEX_METRICS:
         aggregator.assert_metric(m[0], tags=expected_tags, count=1)
