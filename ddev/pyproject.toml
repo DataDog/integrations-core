@@ -37,7 +37,9 @@ dependencies = [
     "tomli; python_version < '3.11'",
     "tomli-w",
     "tomlkit",
-    "towncrier",
+    # When https://github.com/twisted/towncrier/pull/548 gets merged
+    # switch this to appropriate towncrier version requirement.
+    "git+https://github.com/iliakur/towncrier.git@1conf2rulethemall",
     "tqdm",
 ]
 dynamic = ["version"]
