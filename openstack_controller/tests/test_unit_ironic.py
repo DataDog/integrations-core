@@ -73,7 +73,7 @@ def test_not_in_catalog(aggregator, dd_run_check, instance, caplog, mock_http_po
             args, _ = call
             args_list += list(args)
         assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 3
-    elif api_type == ApiType.SDK:
+    if api_type == ApiType.SDK:
         assert connection_session_auth.get_access.call_count == 3
     assert '`baremetal` component not found in catalog' in caplog.text
 
@@ -186,7 +186,7 @@ def test_nodes_exception(aggregator, dd_run_check, instance, mock_http_get, conn
             args, _ = call
             args_list += list(args)
         assert args_list.count('http://127.0.0.1:6385/baremetal/v1/nodes/detail') == 2
-    elif api_type == ApiType.SDK:
+    if api_type == ApiType.SDK:
         assert connection_baremetal.nodes.call_count == 2
 
 
@@ -266,7 +266,7 @@ def test_conductors_exception(aggregator, dd_run_check, instance, mock_http_get,
             args, _ = call
             args_list += list(args)
         assert args_list.count('http://127.0.0.1:6385/baremetal/v1/conductors') == 2
-    elif api_type == ApiType.SDK:
+    if api_type == ApiType.SDK:
         assert connection_baremetal.conductors.call_count == 2
 
 

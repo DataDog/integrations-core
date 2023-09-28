@@ -61,7 +61,7 @@ def test_not_in_catalog(aggregator, dd_run_check, instance, caplog, mock_http_po
             args, _ = call
             args_list += list(args)
         assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 3
-    elif api_type == ApiType.SDK:
+    if api_type == ApiType.SDK:
         assert connection_session_auth.get_access.call_count == 3
     assert '`network` component not found in catalog' in caplog.text
 
