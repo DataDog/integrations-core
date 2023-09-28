@@ -192,7 +192,7 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, SliMetricsScraperMixin
 
         if self._slis_available:
             self.log.debug('Processing kube controller manager SLI metrics')
-            self.process(self.slis_scraper_config)
+            self.process(self.slis_scraper_config, metric_transformers=self.sli_transformers)
 
     def _ignore_deprecated_metric(self, metric, scraper_config):
         return metric.documentation.startswith("(Deprecated)")

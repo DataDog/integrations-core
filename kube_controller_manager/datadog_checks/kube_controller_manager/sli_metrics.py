@@ -5,18 +5,17 @@ from __future__ import division
 
 from copy import deepcopy
 
+from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
+
 SLI_METRICS_PATH = '/slis'
 
-SLI_GAUGES = {
+SLI_METRICS_MAP = {
     'kubernetes_healthcheck': 'kubernetes_healthcheck',
-}
-
-SLI_COUNTERS = {
     'kubernetes_healthchecks_total': 'kubernetes_healthchecks_total',
 }
 
 
-class SliMetricsScraperMixin(object):
+class SliMetricsScraperMixin(OpenMetricsBaseCheck):
     """
     This class scrapes metrics for the kube controller manager "/metrics/sli" prometheus endpoint and submits them on
     behalf of a check.
@@ -25,6 +24,10 @@ class SliMetricsScraperMixin(object):
     def __init__(self, *args, **kwargs):
         super(SliMetricsScraperMixin, self).__init__(*args, **kwargs)
         self._slis_available = None
+        self.sli_transformers = {
+            'kubernetes_healthcheck': self.sli_metrics_transformer,
+            'kubernetes_healthchecks_total': self.sli_metrics_transformer,
+        }
 
     def create_sli_prometheus_instance(self, instance):
         """
@@ -38,7 +41,6 @@ class SliMetricsScraperMixin(object):
             {
                 'namespace': KUBE_CONTROLLER_MANAGER_SLI_NAMESPACE,
                 'prometheus_url': instance.get('prometheus_url') + SLI_METRICS_PATH,
-                'metrics': [SLI_GAUGES, SLI_COUNTERS],
             }
         )
         return sli_instance
@@ -62,3 +64,20 @@ class SliMetricsScraperMixin(object):
             )
         self._slis_available = r.status_code == 200
         return self._slis_available
+
+    def sli_metrics_transformer(self, metric, scraper_config):
+        modified_metric = deepcopy(metric)
+        modified_metric.samples = []
+
+        for sample in metric.samples:
+            metric_type = sample[self.SAMPLE_LABELS]["type"]
+            if metric_type == "healthz":
+                self._rename_sli_tag(sample, "sli_name", "name")
+                modified_metric.samples.append(sample)
+            else:
+                self.log.debug("Skipping metric with type `%s`", metric_type)
+        self.submit_openmetric(SLI_METRICS_MAP[modified_metric.name], modified_metric, scraper_config)
+
+    def _rename_sli_tag(self, sample, new_tag_name, old_tag_name):
+        sample[self.SAMPLE_LABELS][new_tag_name] = sample[self.SAMPLE_LABELS][old_tag_name]
+        del sample[self.SAMPLE_LABELS][old_tag_name]
