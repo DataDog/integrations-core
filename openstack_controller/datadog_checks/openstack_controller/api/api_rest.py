@@ -168,13 +168,6 @@ class ApiRest(Api):
         response.raise_for_status()
         return response.json().get('projects', [])
 
-    def get_load_balancer_pools(self, project_id):
-        self.log.debug("getting load-balancer pools")
-        component = self._get_component(Component.Types.LOAD_BALANCER.value)
-        if component:
-            return component.get_pools(project_id)
-        return None
-
     def get_load_balancer_members_by_pool(self, project_id, pool_id):
         self.log.debug("getting load-balancer members by pool")
         component = self._get_component(Component.Types.LOAD_BALANCER.value)
@@ -423,6 +416,26 @@ class ApiRest(Api):
         response = self.http.get(endpoint)
         response.raise_for_status()
         return response.json().get('stats', {})
+
+    def get_load_balancer_pools(self, project_id):
+        self.log.debug("getting load balancer pools for project `%s`", project_id)
+        endpoint = '{}/v2/lbaas/pools?project_id={}'.format(
+            self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value), project_id
+        )
+        self.log.debug("load balancer pools endpoint: %s", endpoint)
+        response = self.http.get(endpoint)
+        response.raise_for_status()
+        return response.json().get('pools', [])
+
+    def get_load_balancer_pool_members(self, pool_id, project_id):
+        self.log.debug("getting load balancer pools for project `%s`", project_id)
+        endpoint = '{}/v2/lbaas/pools/{}/members?project_id={}'.format(
+            self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value), pool_id, project_id
+        )
+        self.log.debug("load balancer pool members endpoint: %s", endpoint)
+        response = self.http.get(endpoint)
+        response.raise_for_status()
+        return response.json().get('members', [])
 
     def get_compute_os_aggregates(self):
         self.log.debug("getting compute os-aggregates")
