@@ -440,16 +440,12 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
     sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
     dd_run_check(sqlserver_check)
     seen_databases = set()
-    for m in aggregator.metrics("sqlserver.database.file_space_usage.free_space"):
+    for m in aggregator.metrics("sqlserver.tempdb.file_space_usage.free_space"):
         tags_by_key = {k: v for k, v in [t.split(':') for t in m.tags if not t.startswith('dd.internal')]}
         seen_databases.add(tags_by_key['database'])
         assert tags_by_key['database_id']
 
-    assert 'master' in seen_databases
-
-    if database_autodiscovery:
-        assert 'datadog_test' in seen_databases
-        assert 'tempdb' in seen_databases
+    assert 'tempdb' in seen_databases
 
 
 @pytest.mark.integration

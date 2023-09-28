@@ -13,7 +13,7 @@
     "media": [],
     "classifier_tags": [
       "Category::Caching",
-      "Category::Data Store",
+      "Category::Data Stores",
       "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::Windows",

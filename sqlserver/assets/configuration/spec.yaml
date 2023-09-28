@@ -190,13 +190,12 @@ files:
         type: array
         items:
           type: string
-    - name: include_db_file_space_usage_metrics
+    - name: include_tempdb_file_space_usage_metrics
       description: |
-        Include database file space usage metrics for how space is used by data files in a specific database. 
-        Note this view is especially relevant for the tempdb database.
+        Include tempdb file space usage metrics for how space is used in tempdb data files. 
       value:
         type: boolean
-        example: false
+        example: true
     - name: adoprovider
       description: |
         Choose the ADO provider.  Note that the (default) provider

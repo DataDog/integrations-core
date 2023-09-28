@@ -13,7 +13,7 @@
     "media": [],
     "classifier_tags": [
       "Category::Network",
-      "Category::Notification",
+      "Category::Notifications",
       "Category::SNMP",
       "Supported OS::Linux",
       "Supported OS::Windows",
