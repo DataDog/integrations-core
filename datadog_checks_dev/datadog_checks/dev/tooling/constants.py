@@ -37,12 +37,12 @@ REPO_CHOICES = {
 }
 
 VERSION_BUMP = {
-    'Added': semver.bump_minor,
-    'Changed': semver.bump_major,
-    'Deprecated': semver.bump_minor,
-    'Fixed': semver.bump_patch,
-    'Removed': semver.bump_major,
-    'Security': semver.bump_minor,
+    'added': semver.bump_minor,
+    'changed': semver.bump_major,
+    'deprecated': semver.bump_minor,
+    'fixed': semver.bump_patch,
+    'removed': semver.bump_major,
+    'security': semver.bump_minor,
     'major': semver.bump_major,
     'minor': semver.bump_minor,
     'patch': semver.bump_patch,

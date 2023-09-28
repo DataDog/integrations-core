@@ -5,7 +5,6 @@ import os
 
 import click
 
-from .....fs import stream_file_lines
 from ....constants import get_root
 from ....utils import complete_valid_checks, get_valid_checks, get_version_string
 from ...console import (
@@ -46,26 +45,7 @@ def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization, since, e
             'following SemVer and matches the provided tag_prefix and/or tag_pattern.'
         )
 
-    if check:
-        changelog_path = os.path.join(get_root(), check, 'CHANGELOG.md')
-    else:
-        changelog_path = os.path.join(get_root(), 'CHANGELOG.md')
-    log = list(stream_file_lines(changelog_path))
-
-    header_index = 2
-    for index in range(2, len(log)):
-        if log[index].startswith("##") and "## Unreleased" not in log[index]:
-            header_index = index
-            break
-
-    if header_index == 4:
-        abort('There are no changes for this integration')
-
-    unreleased = log[4:header_index]
-    applicable_changelog_types = []
-
-    for line in unreleased:
-        if line.startswith('***'):
-            applicable_changelog_types.append(line[3:-5])
-
+    applicable_changelog_types = list(
+        {fname.split(".")[1] for fname in os.listdir(os.path.join(get_root(), check, 'changelog.d'))}
+    )
     return cur_version, applicable_changelog_types
