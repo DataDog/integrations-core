@@ -10,9 +10,6 @@ from typing import Callable, Dict
 
 import psycopg
 
-from datadog_checks.base.log import CheckLoggingAdapter
-from datadog_checks.postgres.config import PostgresConfig
-
 
 class ConnectionPoolFullError(Exception):
     def __init__(self, size, timeout):
@@ -39,7 +36,6 @@ class ConnectionInfo:
         self.last_accessed = last_accessed
         self.thread = thread
         self.persistent = persistent
-        self._lock = threading.Lock()
 
 
 class MultiDatabaseConnectionPool(object):
@@ -70,11 +66,8 @@ class MultiDatabaseConnectionPool(object):
         def reset(self):
             self.__init__()
 
-    def __init__(self, log: CheckLoggingAdapter, config: PostgresConfig, connect_fn: Callable[[str], None]):
-        self._log = log
-        self._config = config
-        self.max_conns: int = self._config.max_connections
-        self.connection_timeout = 5  # FIXME: make configurable
+    def __init__(self, connect_fn: Callable[[str], None], max_conns: int = None):
+        self.max_conns: int = max_conns
         self._stats = self.Stats()
         self._mu = threading.RLock()
         self._conns: Dict[str, ConnectionInfo] = {}
@@ -95,15 +88,12 @@ class MultiDatabaseConnectionPool(object):
         timeout: int = None,
         startup_fn: Callable[[psycopg.Connection], None] = None,
         persistent: bool = False,
-    ) -> ConnectionInfo:
+    ) -> psycopg.Connection:
         """
         Return a connection from the pool.
         Pass a function to startup_func if there is an action needed with the connection
         when re-establishing it.
         """
-        if timeout is None:
-            timeout = self.connection_timeout
-
         start = datetime.datetime.now()
         self.prune_connections()
         with self._mu:
@@ -127,15 +117,16 @@ class MultiDatabaseConnectionPool(object):
                 # if already in pool, retain persistence status
                 persistent = conn.persistent
 
+            deadline = datetime.datetime.now() + datetime.timedelta(milliseconds=ttl_ms)
             self._conns[dbname] = ConnectionInfo(
                 connection=db,
-                deadline=datetime.datetime.now() + datetime.timedelta(milliseconds=ttl_ms),
+                deadline=deadline,
                 active=True,
                 last_accessed=datetime.datetime.now(),
                 thread=threading.current_thread(),
                 persistent=persistent,
             )
-            return self._conns[dbname]
+            return db
 
     @contextlib.contextmanager
     def get_connection(
@@ -155,31 +146,22 @@ class MultiDatabaseConnectionPool(object):
         Note that leaving a connection context here does NOT close the connection in psycopg;
         connections must be manually closed by `close_all_connections()`.
         """
+        with self._mu:
+            db = self._get_connection_raw(dbname, ttl_ms, timeout, startup_fn, persistent)
         try:
-            # _get_connection_raw is protected by RLock, so we don't need to reacquire
-            conn = self._get_connection_raw(dbname, ttl_ms, timeout, startup_fn, persistent)
-        except Exception as e:
-            self._log.exception("Error getting connection to %s, err: %s", dbname, e)
+            yield db
+        except psycopg.Error:
+            db.rollback()
             raise
         else:
-            with conn._lock:
-                # When a connection is retrieved from the pool
-                # we want to lock it to prevent concurrent use
+            db.commit()
+        finally:
+            with self._mu:
                 try:
-                    # reset active, deadline, and last_accessed on the connection
-                    conn.active = True
-                    conn.deadline = datetime.datetime.now() + datetime.timedelta(milliseconds=ttl_ms)
-                    conn.last_accessed = datetime.datetime.now()
-                    conn.thread = threading.current_thread()
-                    yield conn.connection
-                except Exception as e:
-                    self._log.exception("Unexpected error using connection to %s, err: %s", dbname, e)
-                    raise
-                finally:
-                    if not conn.connection.broken:
-                        conn.active = False
-                    else:
-                        self._terminate_connection_unsafe(dbname)
+                    self._conns[dbname].active = False
+                except KeyError:
+                    # if self._get_connection_raw hit an exception, self._conns[dbname] didn't get populated
+                    pass
 
     def prune_connections(self):
         """
@@ -221,10 +203,7 @@ class MultiDatabaseConnectionPool(object):
             return None
 
     def _terminate_connection_unsafe(self, dbname: str):
-        if dbname not in self._conns:
-            return True
-
-        db = self._conns.pop(dbname).connection
+        db = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None, None)).connection
         if db is not None:
             try:
                 self._stats.connection_closed += 1

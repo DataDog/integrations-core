@@ -26,17 +26,17 @@ def test_conn_pool(pg_instance):
     """
     check = PostgreSql('postgres', {}, [pg_instance])
 
-    pool = MultiDatabaseConnectionPool(check.log, check._config, check._new_connection)
-    with pool.get_connection('postgres', 1) as db:
-        assert pool._stats.connection_opened == 1
-        pool.prune_connections()
-        assert len(pool._conns) == 1
-        assert pool._stats.connection_closed == 0
+    pool = MultiDatabaseConnectionPool(check._new_connection)
+    db = pool._get_connection_raw('postgres', 1)
+    assert pool._stats.connection_opened == 1
+    pool.prune_connections()
+    assert len(pool._conns) == 1
+    assert pool._stats.connection_closed == 0
 
-        with db.cursor() as cursor:
-            cursor.execute("select 1")
-            rows = cursor.fetchall()
-            assert len(rows) == 1 and rows[0][0] == 1
+    with db.cursor() as cursor:
+        cursor.execute("select 1")
+        rows = cursor.fetchall()
+        assert len(rows) == 1 and rows[0][0] == 1
 
     time.sleep(0.001)
     pool.prune_connections()
@@ -45,9 +45,9 @@ def test_conn_pool(pg_instance):
     assert pool._stats.connection_closed_failed == 0
     assert pool._stats.connection_pruned == 1
 
-    with pool.get_connection('postgres', 999 * 1000) as db:
-        assert len(pool._conns) == 1
-        assert pool._stats.connection_opened == 2
+    db = pool._get_connection_raw('postgres', 999 * 1000)
+    assert len(pool._conns) == 1
+    assert pool._stats.connection_opened == 2
     success = pool.close_all_connections()
     assert success
     assert len(pool._conns) == 0
@@ -66,18 +66,15 @@ def test_conn_pool_no_leaks_on_close(pg_instance):
 
     check = PostgreSql('postgres', {}, [pg_instance])
     check._config.application_name = unique_id
-    check._config.max_connections = None
 
     # Used to make verification queries
     pool2 = MultiDatabaseConnectionPool(
-        check.log,
-        check._config,
-        lambda dbname: psycopg.connect(host=HOST, dbname=dbname, user=USER_ADMIN, password=PASSWORD_ADMIN),
+        lambda dbname: psycopg.connect(host=HOST, dbname=dbname, user=USER_ADMIN, password=PASSWORD_ADMIN)
     )
 
     # Iterate in the test many times to detect flakiness
     for _ in range(20):
-        pool = MultiDatabaseConnectionPool(check.log, check._config, check._new_connection)
+        pool = MultiDatabaseConnectionPool(check._new_connection)
 
         def get_activity():
             """
@@ -96,12 +93,12 @@ def test_conn_pool_no_leaks_on_close(pg_instance):
         conn_count = 100
         for i in range(0, conn_count):
             dbname = 'dogs_{}'.format(i)
-            with pool.get_connection(dbname, 10 * 1000) as db:
-                with db.cursor() as cursor:
-                    cursor.execute("select current_database()")
-                    rows = cursor.fetchall()
-                    assert len(rows) == 1
-                    assert rows[0][0] == dbname
+            db = pool._get_connection_raw(dbname, 10 * 1000)
+            with db.cursor() as cursor:
+                cursor.execute("select current_database()")
+                rows = cursor.fetchall()
+                assert len(rows) == 1
+                assert rows[0][0] == dbname
 
         assert pool._stats.connection_opened == conn_count
         assert len(get_activity()) == conn_count
@@ -134,14 +131,11 @@ def test_conn_pool_no_leaks_on_prune(pg_instance):
 
     check = PostgreSql('postgres', {}, [pg_instance])
     check._config.application_name = unique_id
-    check._config.max_connections = None
 
-    pool = MultiDatabaseConnectionPool(check.log, check._config, check._new_connection)
+    pool = MultiDatabaseConnectionPool(check._new_connection)
     # Used to make verification queries
     pool2 = MultiDatabaseConnectionPool(
-        check.log,
-        check._config,
-        lambda dbname: psycopg.connect(host=HOST, dbname=dbname, user=USER_ADMIN, password=PASSWORD_ADMIN),
+        lambda dbname: psycopg.connect(host=HOST, dbname=dbname, user=USER_ADMIN, password=PASSWORD_ADMIN)
     )
     ttl_long = 90 * 1000
     ttl_short = 1
@@ -166,12 +160,12 @@ def test_conn_pool_no_leaks_on_prune(pg_instance):
         """
         for i in range(0, count):
             dbname = 'dogs_{}'.format(i)
-            with pool.get_connection(dbname, ttl) as db:
-                with db.cursor() as cursor:
-                    cursor.execute("select current_database()")
-                    rows = cursor.fetchall()
-                    assert len(rows) == 1
-                    assert rows[0][0] == dbname
+            db = pool._get_connection_raw(dbname, ttl)
+            with db.cursor() as cursor:
+                cursor.execute("select current_database()")
+                rows = cursor.fetchall()
+                assert len(rows) == 1
+                assert rows[0][0] == dbname
 
     pool.close_all_connections()
 
@@ -262,7 +256,7 @@ def test_conn_pool_single_context(pg_instance):
     """
     check = PostgreSql('postgres', {}, [pg_instance])
 
-    pool = MultiDatabaseConnectionPool(check.log, check._config, check._new_connection)
+    pool = MultiDatabaseConnectionPool(check._new_connection)
     with pool.get_connection("dogs_0", 1000):
         pass
 
@@ -291,9 +285,8 @@ def test_conn_pool_context_managed(pg_instance):
 
     limit = 30
     check = PostgreSql('postgres', {}, [pg_instance])
-    check._config.max_connections = limit
 
-    pool = MultiDatabaseConnectionPool(check.log, check._config, check._new_connection)
+    pool = MultiDatabaseConnectionPool(check._new_connection, limit)
     threadpool = []
     for i in range(limit):
         thread = threading.Thread(target=pretend_to_run_query, args=(pool, 'dogs_{}'.format(i)))

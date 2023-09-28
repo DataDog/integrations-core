@@ -97,7 +97,7 @@ class PostgreSql(AgentCheck):
         self.set_resource_tags()
         self.pg_settings = {}
         self._warnings_by_code = {}
-        self.db_pool = MultiDatabaseConnectionPool(self.log, self._config, self._new_connection)
+        self.db_pool = MultiDatabaseConnectionPool(self._new_connection, self._config.max_connections)
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
         self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
