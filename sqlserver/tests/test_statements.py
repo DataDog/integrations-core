@@ -56,6 +56,7 @@ def stop_orphaned_threads():
 def dbm_instance(instance_docker):
     instance_docker['dbm'] = True
     instance_docker['min_collection_interval'] = 1
+    instance_docker['procedure_metrics'] = {'enabled': False}
     # set a very small collection interval so the tests go fast
     instance_docker['query_metrics'] = {
         'enabled': True,
@@ -329,7 +330,7 @@ def test_statement_metrics_and_plans(
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
-    payload = dbm_metrics[0]
+    payload = next((n for n in dbm_metrics if n.get('kind') == 'query_metrics'), None)
     # host metadata
     assert payload['sqlserver_version'].startswith("Microsoft SQL Server"), "invalid version"
     assert payload['host'] == "stubbed.hostname", "wrong hostname"
@@ -467,14 +468,10 @@ def test_statement_metrics_limit(
     bob_conn.execute_with_retries(query, (), database=database)
     dd_run_check(check)
 
-    instance_tags = dbm_instance.get('tags', [])
-    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
-    expected_instance_tags | {"db:{}".format(database)}
-
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
-    payload = dbm_metrics[0]
+    payload = next((n for n in dbm_metrics if n.get('kind') == 'query_metrics'), None)
     # metrics rows
     sqlserver_rows = payload.get('sqlserver_rows', [])
     assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
@@ -651,7 +648,7 @@ def test_statement_cloud_metadata(
 
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(dbm_metrics) == 1, "should have collected exactly one metrics payload"
-    payload = dbm_metrics[0]
+    payload = next((n for n in dbm_metrics if n.get('kind') == 'query_metrics'), None)
     # host metadata
     assert payload['sqlserver_version'].startswith("Microsoft SQL Server"), "invalid version"
     assert payload['host'] == "stubbed.hostname", "wrong hostname"

@@ -58,6 +58,7 @@ def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, da
     # no need to assert metrics that are emitted from the dbm portion of the
     # integration in this check as they are all internal
     instance_docker['query_metrics'] = {'enabled': False}
+    instance_docker['procedure_metrics'] = {'enabled': False}
     instance_docker['query_activity'] = {'enabled': False}
     autodiscovery_dbs = ['master', 'msdb', 'datadog_test']
     if database_autodiscovery:
@@ -347,6 +348,7 @@ def test_autodiscovery_multiple_instances(aggregator, dd_run_check, instance_aut
 def test_custom_queries(aggregator, dd_run_check, instance_docker, custom_query, assert_metrics):
     instance = copy(instance_docker)
     instance['custom_queries'] = [custom_query]
+    instance['procedure_metrics'] = {'enabled': False}
 
     check = SQLServer(CHECK_NAME, {}, [instance])
     dd_run_check(check)
@@ -616,6 +618,15 @@ def test_resolved_hostname_set(
         for k, v in cloud_metadata.items():
             instance_docker[k] = v
     instance_docker['dbm'] = dbm_enabled
+    instance_docker['procedure_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
+    instance_docker['query_metrics'] = {
+        'enabled': True,
+        'run_sync': True,
+        'collection_interval': 1,
+        # in tests sometimes things can slow down so we don't want this short deadline causing some events
+        # to fail to be collected on time
+        'enforce_collection_interval_deadline': False,
+    }
     if database:
         instance_docker['database'] = database
     if reported_hostname:

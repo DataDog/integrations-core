@@ -52,6 +52,7 @@ def dbm_instance(instance_docker):
     }
     # do not need query_metrics for these tests
     instance_docker['query_metrics'] = {'enabled': False}
+    instance_docker['procedure_metrics'] = {'enabled': False}
     return copy(instance_docker)
 
 
@@ -145,7 +146,6 @@ def test_collect_load_activity(
     assert event['ddagentversion'], "missing ddagentversion"
     assert set(event['ddtags']) == expected_instance_tags, "wrong instance tags activity"
     assert type(event['collection_interval']) in (float, int), "invalid collection_interval"
-
     assert len(event['sqlserver_activity']) == 2, "should have collected exactly two activity rows"
     event['sqlserver_activity'].sort(key=lambda r: r.get('blocking_session_id', 0))
     # the second query should be fred's, which is currently blocked on
