@@ -598,7 +598,8 @@ class PostgresStatementSamples(DBMAsyncJob):
                         explain_function=self._explain_function, statement=statement
                     )
                 )
-                result = cursor.fetchone()
+                results = cursor.fetchall()
+                result = results[0] if results else None
                 self._check.histogram(
                     "dd.postgres.run_explain.time",
                     (time.time() - start_time) * 1000,

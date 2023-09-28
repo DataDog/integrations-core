@@ -150,11 +150,6 @@ class MultiDatabaseConnectionPool(object):
             db = self._get_connection_raw(dbname, ttl_ms, timeout, startup_fn, persistent)
         try:
             yield db
-        except psycopg.Error:
-            db.rollback()
-            raise
-        else:
-            db.commit()
         finally:
             with self._mu:
                 try:
