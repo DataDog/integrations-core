@@ -85,7 +85,7 @@ sqlserver.files.size_on_disk,gauge,,byte,,"Number of bytes used on the disk for 
 sqlserver.index.user_seeks,count,,seeks,,"Number of seeks by user queries. Tags: `db`, `table`, `index_name`",-1,sql_server,seeks by user queries,
 sqlserver.index.user_scans,count,,scans,,"Number of scans by user queries that did not use 'seek' predicate. Tags: `db`, `table`, `index_name`",-1,sql_server,scans by user queries,
 sqlserver.index.user_lookups,count,,lookups,,"Number of bookmark lookups by user queries. Tags: `db`, `table`, `index_name`",-1,sql_server,lookups by user queries,
-sqlserver.index.user_updates,count,,updates,,"Number of updates by user queries. This includes Insert, Delete, and Updates representing number of operations done not the actual rows affected. Tags: `db`, `table`, `index_name`",-1,sql_server,updates by user queries,
+sqlserver.index.user_updates,count,,updates,,"Number of updates by user queries. This includes Insert, Delete, and Updates representing the number of operations done, not the actual rows affected. Tags: `db`, `table`, `index_name`",-1,sql_server,updates by user queries,
 sqlserver.memory.sql_cache,gauge,,kibibyte,,Specifies the total amount of dynamic memory the server is using for the dynamic SQL cache.,0,sql_server,sql cache,
 sqlserver.memory.memory_grants_pending,gauge,,,,Specifies the total number of processes waiting for a workspace memory grant,0,sql_server,memory grant pending,
 sqlserver.memory.grants_outstanding,gauge,,,,Specifies the total number of processes that have successfully acquired a workspace memory grant.,0,sql_server,memory grant outstanding,
