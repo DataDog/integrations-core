@@ -12,7 +12,6 @@ from datadog_checks.sqlserver.const import (
     AO_METRICS,
     AO_METRICS_PRIMARY,
     AO_METRICS_SECONDARY,
-    DATABASE_FILE_SPACE_USAGE_METRICS,
     DATABASE_FRAGMENTATION_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
@@ -20,6 +19,7 @@ from datadog_checks.sqlserver.const import (
     INSTANCE_METRICS,
     INSTANCE_METRICS_DATABASE,
     TASK_SCHEDULER_METRICS,
+    TEMPDB_FILE_SPACE_USAGE_METRICS,
 )
 from datadog_checks.sqlserver.queries import get_query_file_stats
 
@@ -65,14 +65,23 @@ def get_expected_file_stats_metrics():
 
 EXPECTED_FILE_STATS_METRICS = get_expected_file_stats_metrics()
 
+# SQL Server incremental sql fraction metrics require diffs in order to calculate
+# & report the metric, which means this requires a special unit/integration test coverage
+inc_perf_counter_metrics = [
+    ('sqlserver.latches.latch_wait_time', 'Average Latch Wait Time (ms)', ''),
+]
+
+EXPECTED_INSTANCE_METRICS = [metric for metric in INSTANCE_METRICS if metric not in inc_perf_counter_metrics]
+
 EXPECTED_DEFAULT_METRICS = (
     [
         m[0]
         for m in chain(
-            INSTANCE_METRICS,
+            EXPECTED_INSTANCE_METRICS,
             DBM_MIGRATED_METRICS,
             INSTANCE_METRICS_DATABASE,
             DATABASE_METRICS,
+            TEMPDB_FILE_SPACE_USAGE_METRICS,
         )
     ]
     + SERVER_METRICS
@@ -86,7 +95,6 @@ EXPECTED_METRICS = (
             TASK_SCHEDULER_METRICS,
             DATABASE_FRAGMENTATION_METRICS,
             DATABASE_MASTER_FILES,
-            DATABASE_FILE_SPACE_USAGE_METRICS,
         )
     ]
     + CUSTOM_METRICS
@@ -146,7 +154,6 @@ INSTANCE_SQL.update(
         'include_ao_metrics': False,
         'include_master_files_metrics': True,
         'disable_generic_tags': True,
-        'include_db_file_space_usage_metrics': True,
     }
 )
 

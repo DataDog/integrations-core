@@ -43,6 +43,7 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
     aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.datadomain.fileSystemVirtualSpace', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
         ['datadomain_power_module_description:kept acted kept acted Jaded', 'datadomain_power_module_status:ok'],
         ['datadomain_power_module_description:oxen acted but Jaded zombies', 'datadomain_power_module_status:faulty'],

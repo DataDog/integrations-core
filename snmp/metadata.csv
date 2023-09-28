@@ -588,6 +588,7 @@ snmp.datadomain.fileSystemSpaceCleanable,gauge,,,,"[DATA-DOMAIN-MIB] Amount of c
 snmp.datadomain.fileSystemSpaceSize,gauge,,,,"[DATA-DOMAIN-MIB] Size of the file system resource in gigabytes",0,snmp,,
 snmp.datadomain.fileSystemSpaceUsed,gauge,,,,"[DATA-DOMAIN-MIB] Amount of used space within the file system resource in gigabytes",0,snmp,,
 snmp.datadomain.fileSystemTotalCompressionFactor,gauge,,,,"[DATA-DOMAIN-MIB] File system Total compression factor",0,snmp,,
+snmp.datadomain.fileSystemVirtualSpace,gauge,,,,"[DATA-DOMAIN-MIB] Amount of Uncompressed data that has been backed up by the system",0,snmp,,
 snmp.datadomain.nfsIdlePercentage,gauge,,,,"[DATA-DOMAIN-MIB] Percentage of time NFS was Idle",0,snmp,,
 snmp.datadomain.nfsOpsPerSecond,gauge,,,,"[DATA-DOMAIN-MIB] Number of NFS Operations performed per second",0,snmp,,
 snmp.datadomain.nfsProcPercentage,gauge,,,,"[DATA-DOMAIN-MIB] Percentage of time NFS was processing",0,snmp,,

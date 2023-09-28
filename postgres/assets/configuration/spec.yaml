@@ -86,7 +86,8 @@ files:
         For a detailed description of how these options work see https://www.postgresql.org/docs/current/libpq-ssl.html
       value:
         type: string
-        example: "disable"
+        example: 'allow'
+        default: 'allow'
     - name: ssl_root_cert
       description: |
         The path to the ssl root certificate.
