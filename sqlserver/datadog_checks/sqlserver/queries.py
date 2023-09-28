@@ -133,7 +133,7 @@ QUERY_TEMPDB_DIMENSIONS_USAGE = {
             TDBAlloc.UserObjectsDeallocPageCount*1.0/128 as user_objects_deallocation,
             TDBAlloc.InternalObjectsAllocPageCount*1.0/128 as internal_objects_allocation,
             TDBAlloc.InternalObjectsDeallocPageCount*1.0/128 as internal_objects_deallocation
-        FROM sys.dm_Exec_sessions as sess
+        FROM sys.dm_exec_sessions as sess
             INNER JOIN TDBAlloc ON TDBAlloc.sessionId = sess.session_id
     """.strip(),
     'columns': [
