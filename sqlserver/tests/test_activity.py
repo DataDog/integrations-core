@@ -53,6 +53,7 @@ def dbm_instance(instance_docker):
     # do not need query_metrics for these tests
     instance_docker['query_metrics'] = {'enabled': False}
     instance_docker['procedure_metrics'] = {'enabled': False}
+    instance_docker['collect_settings'] = {'enabled': False}
     return copy(instance_docker)
 
 
