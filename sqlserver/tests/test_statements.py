@@ -58,7 +58,7 @@ def dbm_instance(instance_docker):
     instance_docker['min_collection_interval'] = 1
     instance_docker['procedure_metrics'] = {'enabled': False}
     instance_docker['collect_settings'] = {'enabled': False}
-    dbm_instance['query_activity'] = {'enabled': False}
+    instance_docker['query_activity'] = {'enabled': False}
     # set a very small collection interval so the tests go fast
     instance_docker['query_metrics'] = {
         'enabled': True,
