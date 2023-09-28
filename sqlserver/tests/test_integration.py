@@ -10,6 +10,7 @@ from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.__about__ import __version__
 from datadog_checks.sqlserver.connection import SQLConnectionError
 from datadog_checks.sqlserver.const import (
+    DATABASE_INDEX_METRICS,
     ENGINE_EDITION_SQL_DATABASE,
     ENGINE_EDITION_STANDARD,
     INSTANCE_METRICS_DATABASE,
@@ -19,6 +20,7 @@ from datadog_checks.sqlserver.const import (
 )
 
 from .common import CHECK_NAME, CUSTOM_METRICS, EXPECTED_DEFAULT_METRICS, assert_metrics
+from .conftest import DEFAULT_TIMEOUT
 from .utils import not_windows_ci, windows_ci
 
 try:
@@ -684,3 +686,42 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_docker, d
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
     assert event is None
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('database_autodiscovery', [True, False])
+def test_index_usage_statistics(aggregator, dd_run_check, instance_docker, database_autodiscovery):
+    instance_docker['database_autodiscovery'] = database_autodiscovery
+    if not database_autodiscovery:
+        instance_docker['database'] = "datadog_test"
+    # currently the `thingsindex` index on the `name` column in the ϑings table
+    # in order to generate user seeks, scans, updates and lookups we can run a variety
+    # of queries against this table
+    conn_str = 'DRIVER={};Server={};Database=datadog_test;UID={};PWD={};'.format(
+        instance_docker['driver'], instance_docker['host'], "bob", "Password12!"
+    )
+    conn = pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=True)
+    queries = {
+        "INSERT INTO dbo.ϑings (name) VALUES (?);": ("NewName",),
+        "SELECT * FROM dbo.ϑings WHERE name LIKE '%NewName%';": (),
+        "SELECT * FROM dbo.ϑings;": (),
+        "SELECT id, name FROM ϑings WHERE name = ?;": ("NewName",),
+    }
+
+    def execute_query(query, params):
+        cursor = conn.cursor()
+        cursor.execute(query, params)
+
+    for query, params in queries.items():
+        execute_query(query, params)
+
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    dd_run_check(check)
+    expected_tags = instance_docker.get('tags', []) + [
+        'db:datadog_test',
+        'table:ϑings',
+        'index_name:thingsindex',
+    ]
+    for m in DATABASE_INDEX_METRICS:
+        aggregator.assert_metric(m[0], tags=expected_tags, count=1)

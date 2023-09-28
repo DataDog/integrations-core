@@ -13,6 +13,7 @@ from datadog_checks.sqlserver.const import (
     AO_METRICS_PRIMARY,
     AO_METRICS_SECONDARY,
     DATABASE_FRAGMENTATION_METRICS,
+    DATABASE_INDEX_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DBM_MIGRATED_METRICS,
@@ -232,6 +233,12 @@ def assert_metrics(
     # as they are emitted from the DBM backend
     if dbm_enabled:
         expected_metrics = [m for m in expected_metrics if m not in DBM_MIGRATED_METRICS_NAMES]
+
+    # remove index usage metrics, which require extra setup & will be tested separately
+    for m in DATABASE_INDEX_METRICS:
+        if m[0] in aggregator._metrics:
+            del aggregator._metrics[m[0]]
+
     if database_autodiscovery:
         # when autodiscovery is enabled, we should not double emit metrics,
         # so we should assert for these separately with the proper tags

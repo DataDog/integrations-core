@@ -12,7 +12,7 @@ from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
-from datadog_checks.sqlserver.metrics import SqlFractionMetric, SqlMasterDatabaseFileStats
+from datadog_checks.sqlserver.metrics import SqlDbIndexUsageStats, SqlFractionMetric, SqlMasterDatabaseFileStats
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import Database, parse_sqlserver_major_version, set_default_driver_conf
 
@@ -238,6 +238,45 @@ def test_SqlMasterDatabaseFileStats_fetch_metric(col_val_row_1, col_val_row_2, c
     )
     with mock.patch.object(
         SqlMasterDatabaseFileStats, 'fetch_metric', wraps=mock_metric_obj.fetch_metric
+    ) as mock_fetch_metric:
+        errors = 0
+        try:
+            mock_fetch_metric(mock_rows, mock_cols)
+        except Exception as e:
+            errors += 1
+            raise AssertionError('{}'.format(e))
+        assert errors < 1
+
+
+@pytest.mark.parametrize(
+    'col_val_row_1, col_val_row_2, col_val_row_3',
+    [
+        pytest.param(256, 1024, 1720, id='Valid column value 0'),
+        pytest.param(0, None, 1024, id='NoneType column value 1, should not raise error'),
+        pytest.param(512, 0, 256, id='Valid column value 2'),
+        pytest.param(None, 256, 0, id='NoneType column value 3, should not raise error'),
+    ],
+)
+def test_SqlDbIndexUsageStats_fetch_metric(col_val_row_1, col_val_row_2, col_val_row_3):
+    Row = namedtuple(
+        'Row', ['db', 'index_name', 'table_name', "user_seeks", "user_scans", "user_lookups", "user_updates"]
+    )
+    mock_rows = [
+        Row('foo_db', "my-index", "table_a", 23, col_val_row_1, 12453, 1234),
+        Row('foo_db', "foo-index", "table_a", 23, col_val_row_2, 12, 1234),
+        Row('foo_db', "bar-index", "table_b", 23, col_val_row_3, 123, 1234),
+    ]
+    mock_cols = ['db', 'index_name', 'table_name', "user_seeks", "user_scans", "user_lookups", "user_updates"]
+    report_function = mock.MagicMock()
+    mock_metric_obj = SqlDbIndexUsageStats(
+        cfg_instance=mock.MagicMock(dict),
+        base_name=None,
+        report_function=report_function,
+        column='user_scans',
+        logger=None,
+    )
+    with mock.patch.object(
+        SqlDbIndexUsageStats, 'fetch_metric', wraps=mock_metric_obj.fetch_metric
     ) as mock_fetch_metric:
         errors = 0
         try:

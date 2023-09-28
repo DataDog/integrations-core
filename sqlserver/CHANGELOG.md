@@ -20,6 +20,10 @@
 
 * Add additional SQL Server performance counter metrics ([#15818](https://github.com/DataDog/integrations-core/pull/15818))
 
+***Added***:
+
+* Add Index Usage Metrics for SQL Server ([#15905](https://github.com/DataDog/integrations-core/pull/15905))
+
 ***Fixed***:
 
 * Restore the logic for the lookback time in the statement metrics query. It was previously the connection interval * 2, but was removed during a refactor. ([#15857](https://github.com/DataDog/integrations-core/pull/15857))
