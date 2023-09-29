@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.2.0 / 2023-09-29
+
 ***Added***:
 
 * Update Boto3 dependency to 1.28.55 ([#15922](https://github.com/DataDog/integrations-core/pull/15922))
