@@ -11,6 +11,7 @@ from ....utils import complete_valid_checks, get_valid_checks, get_version_strin
 from ...console import (
     CONTEXT_SETTINGS,
     abort,
+    echo_failure,
     validate_check_arg,
 )
 
@@ -59,7 +60,8 @@ def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization, since, e
             break
 
     if header_index == 4:
-        abort('There are no changes for this integration')
+        echo_failure('There are no changes for this integration')
+        return cur_version, []
 
     unreleased = log[4:header_index]
     applicable_changelog_types = []
