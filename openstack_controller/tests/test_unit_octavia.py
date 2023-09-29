@@ -1209,3 +1209,181 @@ def test_pool_members_metrics(aggregator, dd_run_check, instance):
             'provisioning_status:ACTIVE',
         ],
     )
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'connection_load_balancer', 'instance', 'api_type'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/load-balancer/v2/lbaas/healthmonitors?project_id=1e6e233e637d4d55a50a62b63398ad15': MockResponse(
+                        status_code=500
+                    ),
+                    '/load-balancer/v2/lbaas/healthmonitors?project_id=6e39099cccde4f809b003d9e0dd09304': MockResponse(
+                        status_code=500
+                    ),
+                }
+            },
+            None,
+            CONFIG_REST,
+            ApiType.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            None,
+            {
+                'http_error': {
+                    'healthmonitors': {
+                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                    }
+                }
+            },
+            CONFIG_SDK,
+            ApiType.SDK,
+            id='api sdk',
+        ),
+    ],
+    indirect=['mock_http_get', 'connection_load_balancer'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_healthmonitors_exception(
+    aggregator, dd_run_check, instance, mock_http_get, connection_load_balancer, api_type
+):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.octavia.healthmonitors.count',
+        count=0,
+    )
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, _ = call
+            args_list += list(args)
+        assert (
+            args_list.count(
+                'http://127.0.0.1:9876/load-balancer/v2/lbaas/healthmonitors?project_id=1e6e233e637d4d55a50a62b63398ad15'
+            )
+            == 1
+        )
+        assert (
+            args_list.count(
+                'http://127.0.0.1:9876/load-balancer/v2/lbaas/healthmonitors?project_id=6e39099cccde4f809b003d9e0dd09304'
+            )
+            == 1
+        )
+    if api_type == ApiType.SDK:
+        assert connection_load_balancer.load_balancers.call_count == 2
+        assert (
+            connection_load_balancer.health_monitors.call_args_list.count(
+                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15')
+            )
+            == 1
+        )
+        assert (
+            connection_load_balancer.health_monitors.call_args_list.count(
+                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304')
+            )
+            == 1
+        )
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            CONFIG_REST,
+            id='api rest',
+        ),
+        pytest.param(
+            CONFIG_SDK,
+            id='api sdk',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_healthmonitors_metrics(aggregator, dd_run_check, instance):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.octavia.healthmonitors.count',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'healthmonitor_id:268883b7-c057-4e85-b2c5-d8760267dad1',
+            'healthmonitor_name:healthmonitor-1',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'operating_status:ONLINE',
+            'pool_id:d0335b34-3115-4b3b-9a1a-7e2363ebfee3',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'provisioning_status:ACTIVE',
+            'type:HTTP',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.healthmonitors.delay',
+        value=5,
+        tags=[
+            'domain_id:default',
+            'healthmonitor_id:268883b7-c057-4e85-b2c5-d8760267dad1',
+            'healthmonitor_name:healthmonitor-1',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'operating_status:ONLINE',
+            'pool_id:d0335b34-3115-4b3b-9a1a-7e2363ebfee3',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'provisioning_status:ACTIVE',
+            'type:HTTP',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.healthmonitors.timeout',
+        value=5,
+        tags=[
+            'domain_id:default',
+            'healthmonitor_id:268883b7-c057-4e85-b2c5-d8760267dad1',
+            'healthmonitor_name:healthmonitor-1',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'operating_status:ONLINE',
+            'pool_id:d0335b34-3115-4b3b-9a1a-7e2363ebfee3',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'provisioning_status:ACTIVE',
+            'type:HTTP',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.healthmonitors.max_retries',
+        value=3,
+        tags=[
+            'domain_id:default',
+            'healthmonitor_id:268883b7-c057-4e85-b2c5-d8760267dad1',
+            'healthmonitor_name:healthmonitor-1',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'operating_status:ONLINE',
+            'pool_id:d0335b34-3115-4b3b-9a1a-7e2363ebfee3',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'provisioning_status:ACTIVE',
+            'type:HTTP',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.healthmonitors.max_retries_down',
+        value=3,
+        tags=[
+            'domain_id:default',
+            'healthmonitor_id:268883b7-c057-4e85-b2c5-d8760267dad1',
+            'healthmonitor_name:healthmonitor-1',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'operating_status:ONLINE',
+            'pool_id:d0335b34-3115-4b3b-9a1a-7e2363ebfee3',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'provisioning_status:ACTIVE',
+            'type:HTTP',
+        ],
+    )

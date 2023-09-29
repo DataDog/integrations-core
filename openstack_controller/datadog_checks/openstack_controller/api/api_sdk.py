@@ -261,10 +261,14 @@ class ApiSdk(Api):
             for member in self.connection.load_balancer.members(pool_id, project_id=project_id)
         ]
 
-    def get_load_balancer_members_by_pool(self, project_id, pool_id):
-        pass  # pragma: no cover
-
     def get_load_balancer_healthmonitors(self, project_id):
+        self.log.debug("getting load balancer healthmonitors for project `%s`", project_id)
+        return [
+            healthmonitor.to_dict(original_names=True)
+            for healthmonitor in self.connection.load_balancer.health_monitors(project_id=project_id)
+        ]
+
+    def get_load_balancer_members_by_pool(self, project_id, pool_id):
         pass  # pragma: no cover
 
     def get_load_balancer_loadbalancer_statistics(self, project_id, loadbalancer_id):

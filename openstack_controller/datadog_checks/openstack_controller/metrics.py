@@ -455,6 +455,27 @@ OCTAVIA_POOL_MEMBERS_METRICS = {
 }
 
 
+OCTAVIA_HEALTHMONITORS_METRICS_PREFIX = f"{OCTAVIA_METRICS_PREFIX}.healthmonitors"
+OCTAVIA_HEALTHMONITORS_COUNT = f"{OCTAVIA_HEALTHMONITORS_METRICS_PREFIX}.count"
+OCTAVIA_HEALTHMONITORS_TAGS = {
+    'id': 'healthmonitor_id',
+    'name': 'healthmonitor_name',
+    'provisioning_status': 'provisioning_status',
+    'operating_status': 'operating_status',
+    'type': 'type',
+    'pools': {
+        'id': 'pool_id',
+    },
+}
+OCTAVIA_HEALTHMONITORS_METRICS = {
+    f"{OCTAVIA_HEALTHMONITORS_METRICS_PREFIX}.admin_state_up": {},
+    f"{OCTAVIA_HEALTHMONITORS_METRICS_PREFIX}.delay": {},
+    f"{OCTAVIA_HEALTHMONITORS_METRICS_PREFIX}.timeout": {},
+    f"{OCTAVIA_HEALTHMONITORS_METRICS_PREFIX}.max_retries": {},
+    f"{OCTAVIA_HEALTHMONITORS_METRICS_PREFIX}.max_retries_down": {},
+}
+
+
 def get_normalized_key(key):
     return re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower().replace("-", "_")
 

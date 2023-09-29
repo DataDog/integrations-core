@@ -4,6 +4,10 @@
 
 from datadog_checks.openstack_controller.components.component import Component
 from datadog_checks.openstack_controller.metrics import (
+    OCTAVIA_HEALTHMONITORS_COUNT,
+    OCTAVIA_HEALTHMONITORS_METRICS,
+    OCTAVIA_HEALTHMONITORS_METRICS_PREFIX,
+    OCTAVIA_HEALTHMONITORS_TAGS,
     OCTAVIA_LISTENER_STATS_METRICS,
     OCTAVIA_LISTENER_STATS_METRICS_PREFIX,
     OCTAVIA_LISTENERS_COUNT,
@@ -143,3 +147,20 @@ class LoadBalancer(Component):
             self.check.gauge(OCTAVIA_POOL_MEMBERS_COUNT, 1, tags=tags + pool['tags'])
             for metric, value in pool['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + pool['tags'])
+
+    @Component.register_project_metrics(ID)
+    @Component.http_error()
+    def _report_healthmonitors(self, project_id, tags):
+        data = self.check.api.get_load_balancer_healthmonitors(project_id)
+        self.check.log.debug("data: %s", data)
+        for item in data:
+            healthmonitor = get_metrics_and_tags(
+                item,
+                tags=OCTAVIA_HEALTHMONITORS_TAGS,
+                prefix=OCTAVIA_HEALTHMONITORS_METRICS_PREFIX,
+                metrics=OCTAVIA_HEALTHMONITORS_METRICS,
+            )
+            self.check.log.debug("healthmonitor: %s", healthmonitor)
+            self.check.gauge(OCTAVIA_HEALTHMONITORS_COUNT, 1, tags=tags + healthmonitor['tags'])
+            for metric, value in healthmonitor['metrics'].items():
+                self.check.gauge(metric, value, tags=tags + healthmonitor['tags'])

@@ -366,9 +366,12 @@ class ApiRest(Api):
         response.raise_for_status()
         return response.json().get('members', [])
 
-    def get_compute_os_aggregates(self):
-        self.log.debug("getting compute os-aggregates")
-        component = self._get_component(Component.Types.COMPUTE.value)
-        if component:
-            return component.get_os_aggregates()
-        return None
+    def get_load_balancer_healthmonitors(self, project_id):
+        self.log.debug("getting load balancer healthmonitors for project `%s`", project_id)
+        endpoint = '{}/v2/lbaas/healthmonitors?project_id={}'.format(
+            self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value), project_id
+        )
+        self.log.debug("load balancer healthmonitors endpoint: %s", endpoint)
+        response = self.http.get(endpoint)
+        response.raise_for_status()
+        return response.json().get('healthmonitors', [])

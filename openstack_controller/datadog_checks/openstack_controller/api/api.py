@@ -79,10 +79,6 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_compute_os_aggregates(self, project_id):
-        pass  # pragma: no cover
-
-    @abstractmethod
     def get_network_quota(self, project):
         pass  # pragma: no cover
 

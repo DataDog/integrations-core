@@ -12,7 +12,7 @@
       "url_path": "/",
       "expected_codes": "200",
       "admin_state_up": true,
-      "project_id": "4762874c945945c38d820cce29fbb66e",
+      "project_id": "1e6e233e637d4d55a50a62b63398ad15",
       "pools": [
         {
           "id": "d0335b34-3115-4b3b-9a1a-7e2363ebfee3"
@@ -25,7 +25,7 @@
       "tags": [],
       "http_version": null,
       "domain_name": null,
-      "tenant_id": "4762874c945945c38d820cce29fbb66e"
+      "tenant_id": "1e6e233e637d4d55a50a62b63398ad15"
     }
   ],
   "healthmonitors_links": []

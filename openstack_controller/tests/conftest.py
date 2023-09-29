@@ -888,6 +888,20 @@ def connection_load_balancer(request, mock_responses):
             )['members']
         ]
 
+    def health_monitors(project_id):
+        if http_error and 'health_monitors' in http_error and project_id in http_error['health_monitors']:
+            raise requests.exceptions.HTTPError(response=http_error['health_monitors'][project_id])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=pool,
+                )
+            )
+            for pool in mock_responses('GET', f'/load-balancer/v2/lbaas/healthmonitors?project_id={project_id}')[
+                'healthmonitors'
+            ]
+        ]
+
     return mock.MagicMock(
         load_balancers=mock.MagicMock(side_effect=load_balancers),
         get_load_balancer_statistics=mock.MagicMock(side_effect=get_load_balancer_statistics),
@@ -895,6 +909,7 @@ def connection_load_balancer(request, mock_responses):
         get_listener_statistics=mock.MagicMock(side_effect=get_listener_statistics),
         pools=mock.MagicMock(side_effect=pools),
         members=mock.MagicMock(side_effect=members),
+        health_monitors=mock.MagicMock(side_effect=health_monitors),
     )
 
 
