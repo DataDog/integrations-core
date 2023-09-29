@@ -57,9 +57,10 @@ def dd_environment():
     if USE_OPENSTACK_GCP:
         with terraform_run(os.path.join(get_here(), 'terraform')) as outputs:
             ip = outputs['ip']['value']
+            internal_ip = outputs['internal_ip']['value']
             private_key = outputs['ssh_private_key']['value']
             instance = {
-                'keystone_server_url': 'http://{}/identity'.format(private_key),
+                'keystone_server_url': 'http://{}/identity'.format(internal_ip),
                 'username': 'admin',
                 'password': 'password',
                 'ssl_verify': False,
@@ -77,7 +78,6 @@ def dd_environment():
             ) as socks:
                 socks_ip, socks_port = socks
                 agent_config = {'proxy': {'http': 'socks5://{}:{}'.format(socks_ip, socks_port)}}
-                # agent_config = {'proxy': {'http': 'http://{}:80'.format(ip)}}
                 yield instance, agent_config
     else:
         compose_file = os.path.join(get_here(), 'docker', 'docker-compose.yaml')
@@ -902,6 +902,18 @@ def connection_load_balancer(request, mock_responses):
             ]
         ]
 
+    def quotas(project_id):
+        if http_error and 'quotas' in http_error and project_id in http_error['quotas']:
+            raise requests.exceptions.HTTPError(response=http_error['quotas'][project_id])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=pool,
+                )
+            )
+            for pool in mock_responses('GET', f'/load-balancer/v2/lbaas/quotas?project_id={project_id}')['quotas']
+        ]
+
     return mock.MagicMock(
         load_balancers=mock.MagicMock(side_effect=load_balancers),
         get_load_balancer_statistics=mock.MagicMock(side_effect=get_load_balancer_statistics),
@@ -910,6 +922,7 @@ def connection_load_balancer(request, mock_responses):
         pools=mock.MagicMock(side_effect=pools),
         members=mock.MagicMock(side_effect=members),
         health_monitors=mock.MagicMock(side_effect=health_monitors),
+        quotas=mock.MagicMock(side_effect=quotas),
     )
 
 

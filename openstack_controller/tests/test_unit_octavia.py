@@ -1387,3 +1387,299 @@ def test_healthmonitors_metrics(aggregator, dd_run_check, instance):
             'type:HTTP',
         ],
     )
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'connection_load_balancer', 'instance', 'api_type'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/load-balancer/v2/lbaas/healthmonitors?project_id=1e6e233e637d4d55a50a62b63398ad15': MockResponse(
+                        status_code=500
+                    ),
+                    '/load-balancer/v2/lbaas/healthmonitors?project_id=6e39099cccde4f809b003d9e0dd09304': MockResponse(
+                        status_code=500
+                    ),
+                }
+            },
+            None,
+            CONFIG_REST,
+            ApiType.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            None,
+            {
+                'http_error': {
+                    'health_monitors': {
+                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                    }
+                }
+            },
+            CONFIG_SDK,
+            ApiType.SDK,
+            id='api sdk',
+        ),
+    ],
+    indirect=['mock_http_get', 'connection_load_balancer'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_quotas_exception(aggregator, dd_run_check, instance, mock_http_get, connection_load_balancer, api_type):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.octavia.quota.count',
+        count=0,
+    )
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, _ = call
+            args_list += list(args)
+        assert (
+            args_list.count(
+                'http://127.0.0.1:9876/load-balancer/v2/lbaas/quotas?project_id=1e6e233e637d4d55a50a62b63398ad15'
+            )
+            == 1
+        )
+        assert (
+            args_list.count(
+                'http://127.0.0.1:9876/load-balancer/v2/lbaas/quotas?project_id=6e39099cccde4f809b003d9e0dd09304'
+            )
+            == 1
+        )
+    if api_type == ApiType.SDK:
+        assert connection_load_balancer.quotas.call_count == 2
+        assert (
+            connection_load_balancer.quotas.call_args_list.count(
+                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15')
+            )
+            == 1
+        )
+        assert (
+            connection_load_balancer.quotas.call_args_list.count(
+                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304')
+            )
+            == 1
+        )
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            CONFIG_REST,
+            id='api rest',
+        ),
+        pytest.param(
+            CONFIG_SDK,
+            id='api sdk',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_quotas_metrics(aggregator, dd_run_check, instance):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.octavia.quotas.count',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.quotas.count',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.quotas.loadbalancer',
+        value=10,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.quotas.loadbalancer',
+        value=-1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.quotas.load_balancer',
+        value=10,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.quotas.load_balancer',
+        value=-1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.quotas.listener',
+        value=20,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.quotas.listener',
+        value=-1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.quotas.member',
+        value=-1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.quotas.member',
+        value=-1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.quotas.pool',
+        value=20,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.quotas.pool',
+        value=-1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.quotas.healthmonitor',
+        value=10,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.quotas.healthmonitor',
+        value=-1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.quotas.health_monitor',
+        value=10,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.quotas.health_monitor',
+        value=-1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.quotas.l7policy',
+        value=-1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.quotas.l7policy',
+        value=-1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.quotas.l7rule',
+        value=-1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.quotas.l7rule',
+        value=-1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )

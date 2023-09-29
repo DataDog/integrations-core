@@ -476,6 +476,22 @@ OCTAVIA_HEALTHMONITORS_METRICS = {
 }
 
 
+OCTAVIA_QUOTAS_METRICS_PREFIX = f"{OCTAVIA_METRICS_PREFIX}.quotas"
+OCTAVIA_QUOTAS_COUNT = f"{OCTAVIA_QUOTAS_METRICS_PREFIX}.count"
+OCTAVIA_QUOTAS_TAGS = {}
+OCTAVIA_QUOTAS_METRICS = {
+    f"{OCTAVIA_QUOTAS_METRICS_PREFIX}.loadbalancer": {},
+    f"{OCTAVIA_QUOTAS_METRICS_PREFIX}.load_balancer": {},
+    f"{OCTAVIA_QUOTAS_METRICS_PREFIX}.listener": {},
+    f"{OCTAVIA_QUOTAS_METRICS_PREFIX}.member": {},
+    f"{OCTAVIA_QUOTAS_METRICS_PREFIX}.pool": {},
+    f"{OCTAVIA_QUOTAS_METRICS_PREFIX}.healthmonitor": {},
+    f"{OCTAVIA_QUOTAS_METRICS_PREFIX}.health_monitor": {},
+    f"{OCTAVIA_QUOTAS_METRICS_PREFIX}.l7policy": {},
+    f"{OCTAVIA_QUOTAS_METRICS_PREFIX}.l7rule": {},
+}
+
+
 def get_normalized_key(key):
     return re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower().replace("-", "_")
 

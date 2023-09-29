@@ -375,3 +375,13 @@ class ApiRest(Api):
         response = self.http.get(endpoint)
         response.raise_for_status()
         return response.json().get('healthmonitors', [])
+
+    def get_load_balancer_quotas(self, project_id):
+        self.log.debug("getting load balancer quotas for project `%s`", project_id)
+        endpoint = '{}/v2/lbaas/quotas?project_id={}'.format(
+            self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value), project_id
+        )
+        self.log.debug("load balancer quotas endpoint: %s", endpoint)
+        response = self.http.get(endpoint)
+        response.raise_for_status()
+        return response.json().get('quotas', [])

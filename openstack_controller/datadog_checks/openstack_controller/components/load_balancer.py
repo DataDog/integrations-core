@@ -28,6 +28,10 @@ from datadog_checks.openstack_controller.metrics import (
     OCTAVIA_POOLS_METRICS,
     OCTAVIA_POOLS_METRICS_PREFIX,
     OCTAVIA_POOLS_TAGS,
+    OCTAVIA_QUOTAS_COUNT,
+    OCTAVIA_QUOTAS_METRICS,
+    OCTAVIA_QUOTAS_METRICS_PREFIX,
+    OCTAVIA_QUOTAS_TAGS,
     OCTAVIA_RESPONSE_TIME,
     OCTAVIA_SERVICE_CHECK,
     get_metrics_and_tags,
@@ -164,3 +168,21 @@ class LoadBalancer(Component):
             self.check.gauge(OCTAVIA_HEALTHMONITORS_COUNT, 1, tags=tags + healthmonitor['tags'])
             for metric, value in healthmonitor['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + healthmonitor['tags'])
+
+    @Component.register_project_metrics(ID)
+    @Component.http_error()
+    def _report_quotas(self, project_id, tags):
+        data = self.check.api.get_load_balancer_quotas(project_id)
+        self.check.log.debug("data: %s", data)
+        for item in data:
+            quota = get_metrics_and_tags(
+                item,
+                tags=OCTAVIA_QUOTAS_TAGS,
+                prefix=OCTAVIA_QUOTAS_METRICS_PREFIX,
+                metrics=OCTAVIA_QUOTAS_METRICS,
+                lambda_value=lambda key, value, item=item: -1 if value is None else value,
+            )
+            self.check.log.debug("quota: %s", quota)
+            self.check.gauge(OCTAVIA_QUOTAS_COUNT, 1, tags=tags + quota['tags'])
+            for metric, value in quota['metrics'].items():
+                self.check.gauge(metric, value, tags=tags + quota['tags'])

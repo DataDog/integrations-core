@@ -270,7 +270,9 @@ class ApiSdk(Api):
 
     def get_load_balancer_quotas(self, project_id):
         self.log.debug("getting load balancer quotas for project `%s`", project_id)
-        return self.connection.load_balancer.get_quota(project_id)
+        return [
+            quota.to_dict(original_names=True) for quota in self.connection.load_balancer.quotas(project_id=project_id)
+        ]
 
     def get_load_balancer_members_by_pool(self, project_id, pool_id):
         pass  # pragma: no cover
