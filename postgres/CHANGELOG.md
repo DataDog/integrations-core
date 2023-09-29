@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 15.0.0 / 2023-09-29
+
 ***Changed***:
 
 * Update `ssl` default configuration to 'allow' ([#15917](https://github.com/DataDog/integrations-core/pull/15917))
