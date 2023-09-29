@@ -73,6 +73,7 @@ class SliMetricsScraperMixin(OpenMetricsBaseCheck):
             metric_type = sample[self.SAMPLE_LABELS]["type"]
             if metric_type == "healthz":
                 self._rename_sli_tag(sample, "sli_name", "name")
+                self._remove_tag(sample, "type")
                 modified_metric.samples.append(sample)
             else:
                 self.log.debug("Skipping metric with type `%s`", metric_type)
@@ -81,3 +82,6 @@ class SliMetricsScraperMixin(OpenMetricsBaseCheck):
     def _rename_sli_tag(self, sample, new_tag_name, old_tag_name):
         sample[self.SAMPLE_LABELS][new_tag_name] = sample[self.SAMPLE_LABELS][old_tag_name]
         del sample[self.SAMPLE_LABELS][old_tag_name]
+
+    def _remove_tag(self, sample, tag_name):
+        del sample[self.SAMPLE_LABELS][tag_name]

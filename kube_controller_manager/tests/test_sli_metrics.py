@@ -43,118 +43,116 @@ def test_check_metrics_slis(aggregator, mock_metrics, mock_request, instance):
         'slis.kubernetes_healthcheck',
         value=1,
         metric_type=aggregator.GAUGE,
-        tags=['sli_name:attachdetach', 'type:healthz'],
+        tags=['sli_name:attachdetach'],
     )
     assert_metric(
         'slis.kubernetes_healthcheck',
         value=1,
         metric_type=aggregator.GAUGE,
-        tags=['sli_name:bootstrapsigner', 'type:healthz'],
+        tags=['sli_name:bootstrapsigner'],
     )
     assert_metric(
         'slis.kubernetes_healthcheck',
         value=1,
         metric_type=aggregator.GAUGE,
-        tags=['sli_name:clusterrole-aggregation', 'type:healthz'],
+        tags=['sli_name:clusterrole-aggregation'],
     )
+    assert_metric('slis.kubernetes_healthcheck', value=1, metric_type=aggregator.GAUGE, tags=['sli_name:cronjob'])
     assert_metric(
-        'slis.kubernetes_healthcheck', value=1, metric_type=aggregator.GAUGE, tags=['sli_name:cronjob', 'type:healthz']
+        'slis.kubernetes_healthcheck',
+        value=1,
+        metric_type=aggregator.GAUGE,
+        tags=['sli_name:csrapproving'],
     )
     assert_metric(
         'slis.kubernetes_healthcheck',
         value=1,
         metric_type=aggregator.GAUGE,
-        tags=['sli_name:csrapproving', 'type:healthz'],
+        tags=['sli_name:csrcleaner'],
     )
     assert_metric(
         'slis.kubernetes_healthcheck',
         value=1,
         metric_type=aggregator.GAUGE,
-        tags=['sli_name:csrcleaner', 'type:healthz'],
+        tags=['sli_name:csrsigning'],
     )
     assert_metric(
         'slis.kubernetes_healthcheck',
         value=1,
         metric_type=aggregator.GAUGE,
-        tags=['sli_name:csrsigning', 'type:healthz'],
+        tags=['sli_name:daemonset'],
     )
     assert_metric(
         'slis.kubernetes_healthcheck',
         value=1,
         metric_type=aggregator.GAUGE,
-        tags=['sli_name:daemonset', 'type:healthz'],
+        tags=['sli_name:deployment'],
     )
     assert_metric(
         'slis.kubernetes_healthcheck',
         value=1,
         metric_type=aggregator.GAUGE,
-        tags=['sli_name:deployment', 'type:healthz'],
-    )
-    assert_metric(
-        'slis.kubernetes_healthcheck',
-        value=1,
-        metric_type=aggregator.GAUGE,
-        tags=['sli_name:disruption', 'type:healthz'],
+        tags=['sli_name:disruption'],
     )
     assert_metric(
         'slis.kubernetes_healthchecks_total',
         metric_type=aggregator.MONOTONIC_COUNT,
         value=423,
-        tags=['sli_name:attachdetach', 'status:success', 'type:healthz'],
+        tags=['sli_name:attachdetach', 'status:success'],
     )
     assert_metric(
         'slis.kubernetes_healthchecks_total',
         metric_type=aggregator.MONOTONIC_COUNT,
         value=423,
-        tags=['sli_name:bootstrapsigner', 'status:success', 'type:healthz'],
+        tags=['sli_name:bootstrapsigner', 'status:success'],
     )
     assert_metric(
         'slis.kubernetes_healthchecks_total',
         metric_type=aggregator.MONOTONIC_COUNT,
         value=423,
-        tags=['sli_name:clusterrole-aggregation', 'status:success', 'type:healthz'],
+        tags=['sli_name:clusterrole-aggregation', 'status:success'],
     )
     assert_metric(
         'slis.kubernetes_healthchecks_total',
         metric_type=aggregator.MONOTONIC_COUNT,
         value=423,
-        tags=['sli_name:cronjob', 'status:success', 'type:healthz'],
+        tags=['sli_name:cronjob', 'status:success'],
     )
     assert_metric(
         'slis.kubernetes_healthchecks_total',
         metric_type=aggregator.MONOTONIC_COUNT,
         value=423,
-        tags=['sli_name:csrapproving', 'status:success', 'type:healthz'],
+        tags=['sli_name:csrapproving', 'status:success'],
     )
     assert_metric(
         'slis.kubernetes_healthchecks_total',
         metric_type=aggregator.MONOTONIC_COUNT,
         value=423,
-        tags=['sli_name:csrcleaner', 'status:success', 'type:healthz'],
+        tags=['sli_name:csrcleaner', 'status:success'],
     )
     assert_metric(
         'slis.kubernetes_healthchecks_total',
         metric_type=aggregator.MONOTONIC_COUNT,
         value=423,
-        tags=['sli_name:csrsigning', 'status:success', 'type:healthz'],
+        tags=['sli_name:csrsigning', 'status:success'],
     )
     assert_metric(
         'slis.kubernetes_healthchecks_total',
         metric_type=aggregator.MONOTONIC_COUNT,
         value=423,
-        tags=['sli_name:daemonset', 'status:success', 'type:healthz'],
+        tags=['sli_name:daemonset', 'status:success'],
     )
     assert_metric(
         'slis.kubernetes_healthchecks_total',
         metric_type=aggregator.MONOTONIC_COUNT,
         value=423,
-        tags=['sli_name:deployment', 'status:success', 'type:healthz'],
+        tags=['sli_name:deployment', 'status:success'],
     )
     assert_metric(
         'slis.kubernetes_healthchecks_total',
         metric_type=aggregator.MONOTONIC_COUNT,
         value=423,
-        tags=['sli_name:disruption', 'status:success', 'type:healthz'],
+        tags=['sli_name:disruption', 'status:success'],
     )
     aggregator.assert_all_metrics_covered()
 
@@ -169,14 +167,12 @@ def test_check_metrics_slis_transform(aggregator, mock_metrics, mock_request, in
         aggregator.assert_metric("{}.{}".format(CHECK_NAME, name), **kwargs)
 
     # Check that no metrics with `name` tag come through
-    assert_metric(
-        'slis.kubernetes_healthcheck', count=0, metric_type=aggregator.GAUGE, tags=['name:attachdetach', 'type:healthz']
-    )
+    assert_metric('slis.kubernetes_healthcheck', count=0, metric_type=aggregator.GAUGE, tags=['name:attachdetach'])
     assert_metric(
         'slis.kubernetes_healthchecks_total',
         metric_type=aggregator.MONOTONIC_COUNT,
         count=0,
-        tags=['name:attachdetach', 'status:success', 'type:healthz'],
+        tags=['name:attachdetach', 'status:success'],
     )
 
 
