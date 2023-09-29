@@ -15,17 +15,19 @@ class Catalog:
                 return True
         return False
 
-    def get_endpoint_by_type(self, endpoint_types):
-        for item in self.catalog:
-            if item['type'] in endpoint_types:
-                for endpoint in item['endpoints']:
-                    matched_interface = (
-                        endpoint['interface'] == 'public'
-                        if not self.endpoint_interface
-                        else endpoint['interface'] == self.endpoint_interface
-                    )
-                    if matched_interface and (
-                        not self.endpoint_region_id or endpoint['region_id'] == self.endpoint_region_id
-                    ):
-                        return endpoint['url']
+    def get_endpoint_by_type(self, service_types):
+        for service_type in service_types:
+            for service in self.catalog:
+                if service.get('type') == service_type:
+                    for endpoint in service.get('endpoints', []):
+                        endpoint_interface = endpoint.get('interface')
+                        endpoint_region_id = endpoint.get('region_id')
+                        matched_interface = (
+                            endpoint_interface == 'public'
+                            if not self.endpoint_interface
+                            else endpoint_interface == self.endpoint_interface
+                        )
+                        matched_region_id = not self.endpoint_region_id or endpoint_region_id == self.endpoint_region_id
+                        if matched_interface and matched_region_id:
+                            return endpoint['url']
         return None
