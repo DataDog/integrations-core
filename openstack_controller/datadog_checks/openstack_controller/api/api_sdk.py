@@ -10,6 +10,7 @@ from openstack.config import loader
 
 from datadog_checks.openstack_controller.api.api import Api
 from datadog_checks.openstack_controller.api.catalog import Catalog
+from datadog_checks.openstack_controller.components.component import Component
 
 
 class ApiSdk(Api):
@@ -274,35 +275,19 @@ class ApiSdk(Api):
             quota.to_dict(original_names=True) for quota in self.connection.load_balancer.quotas(project_id=project_id)
         ]
 
-    def get_load_balancer_members_by_pool(self, project_id, pool_id):
-        pass  # pragma: no cover
-
-    def get_load_balancer_loadbalancer_statistics(self, project_id, loadbalancer_id):
-        pass  # pragma: no cover
-
-    def get_load_balancer_listener_statistics(self, project_id, listener_id):
-        pass  # pragma: no cover
-
-    def get_load_balancer_listeners_by_loadbalancer(self, project_id, loadbalancer_id):
-        pass  # pragma: no cover
-
-    def get_load_balancer_pools_by_loadbalancer(self, project_id, loadbalancer_id):
-        pass  # pragma: no cover
-
-    def get_load_balancer_healthmonitors_by_pool(self, project_id, pool_id):
-        pass  # pragma: no cover
-
     def get_load_balancer_amphorae(self, project_id):
-        pass  # pragma: no cover
+        self.log.debug("getting load balancer amphorae for project `%s`", project_id)
+        return [
+            amphora.to_dict(original_names=True)
+            for amphora in self.connection.load_balancer.amphorae(project_id=project_id)
+        ]
 
-    def get_load_balancer_amphorae_by_loadbalancer(self, project_id, loadbalancer_id):
-        pass  # pragma: no cover
-
-    def get_load_balancer_amphora_statistics(self, project_id, loadbalancer_id):
-        pass  # pragma: no cover
-
-    def get_compute_response_time(self, project_id):
-        pass  # pragma: no cover
-
-    def get_compute_os_aggregates(self, project_id):
-        pass  # pragma: no cover
+    def get_load_balancer_amphora_stats(self, amphora_id):
+        self.log.debug("getting load balancer `%s` amphora stats", amphora_id)
+        endpoint = '{}/v2/octavia/amphorae/{}/stats'.format(
+            self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value), amphora_id
+        )
+        self.log.debug("load balancer amphora stats endpoint: %s", endpoint)
+        response = self.http.get(endpoint)
+        response.raise_for_status()
+        return response.json().get('amphora_stats', [])

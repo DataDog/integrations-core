@@ -385,3 +385,23 @@ class ApiRest(Api):
         response = self.http.get(endpoint)
         response.raise_for_status()
         return response.json().get('quotas', [])
+
+    def get_load_balancer_amphorae(self, project_id):
+        self.log.debug("getting load balancer amphorae for project `%s`", project_id)
+        endpoint = '{}/v2/octavia/amphorae?project_id={}'.format(
+            self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value), project_id
+        )
+        self.log.debug("load balancer amphorae endpoint: %s", endpoint)
+        response = self.http.get(endpoint)
+        response.raise_for_status()
+        return response.json().get('amphorae', [])
+
+    def get_load_balancer_amphora_stats(self, amphora_id):
+        self.log.debug("getting load balancer amphora stats")
+        endpoint = '{}/v2/octavia/amphorae/{}/stats'.format(
+            self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value), amphora_id
+        )
+        self.log.debug("load balancer amphora stats endpoint: %s", endpoint)
+        response = self.http.get(endpoint)
+        response.raise_for_status()
+        return response.json().get('amphora_stats', [])

@@ -1395,10 +1395,10 @@ def test_healthmonitors_metrics(aggregator, dd_run_check, instance):
         pytest.param(
             {
                 'http_error': {
-                    '/load-balancer/v2/lbaas/healthmonitors?project_id=1e6e233e637d4d55a50a62b63398ad15': MockResponse(
+                    '/load-balancer/v2/lbaas/quotas?project_id=1e6e233e637d4d55a50a62b63398ad15': MockResponse(
                         status_code=500
                     ),
-                    '/load-balancer/v2/lbaas/healthmonitors?project_id=6e39099cccde4f809b003d9e0dd09304': MockResponse(
+                    '/load-balancer/v2/lbaas/quotas?project_id=6e39099cccde4f809b003d9e0dd09304': MockResponse(
                         status_code=500
                     ),
                 }
@@ -1412,7 +1412,7 @@ def test_healthmonitors_metrics(aggregator, dd_run_check, instance):
             None,
             {
                 'http_error': {
-                    'health_monitors': {
+                    'quotas': {
                         '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
                         '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
                     }
@@ -1430,7 +1430,7 @@ def test_quotas_exception(aggregator, dd_run_check, instance, mock_http_get, con
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.octavia.quota.count',
+        'openstack.octavia.quotas.count',
         count=0,
     )
     if api_type == ApiType.REST:
@@ -1681,5 +1681,320 @@ def test_quotas_metrics(aggregator, dd_run_check, instance):
             'keystone_server:http://127.0.0.1:8080/identity',
             'project_id:6e39099cccde4f809b003d9e0dd09304',
             'project_name:admin',
+        ],
+    )
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'connection_load_balancer', 'instance', 'api_type'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/load-balancer/v2/octavia/amphorae?project_id=1e6e233e637d4d55a50a62b63398ad15': MockResponse(
+                        status_code=500
+                    ),
+                    '/load-balancer/v2/octavia/amphorae?project_id=6e39099cccde4f809b003d9e0dd09304': MockResponse(
+                        status_code=500
+                    ),
+                }
+            },
+            None,
+            CONFIG_REST,
+            ApiType.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            None,
+            {
+                'http_error': {
+                    'amphorae': {
+                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                    }
+                }
+            },
+            CONFIG_SDK,
+            ApiType.SDK,
+            id='api sdk',
+        ),
+    ],
+    indirect=['mock_http_get', 'connection_load_balancer'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_amphorae_exception(aggregator, dd_run_check, instance, mock_http_get, connection_load_balancer, api_type):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.octavia.amphorae.count',
+        count=0,
+    )
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, _ = call
+            args_list += list(args)
+        assert (
+            args_list.count(
+                'http://127.0.0.1:9876/load-balancer/v2/octavia/amphorae?project_id=1e6e233e637d4d55a50a62b63398ad15'
+            )
+            == 1
+        )
+        assert (
+            args_list.count(
+                'http://127.0.0.1:9876/load-balancer/v2/octavia/amphorae?project_id=6e39099cccde4f809b003d9e0dd09304'
+            )
+            == 1
+        )
+    if api_type == ApiType.SDK:
+        assert connection_load_balancer.quotas.call_count == 2
+        assert (
+            connection_load_balancer.amphorae.call_args_list.count(
+                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15')
+            )
+            == 1
+        )
+        assert (
+            connection_load_balancer.amphorae.call_args_list.count(
+                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304')
+            )
+            == 1
+        )
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            CONFIG_REST,
+            id='api rest',
+        ),
+        pytest.param(
+            CONFIG_SDK,
+            id='api sdk',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_amphorae_metrics(aggregator, dd_run_check, instance):
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.octavia.amphorae.count',
+        value=1,
+        tags=[
+            'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.amphorae.stats.active_connections',
+        value=0,
+        tags=[
+            'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'listener_id:de81cbdc-8207-4253-8f21-3eea9870e7a9',
+            'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.amphorae.stats.bytes_in',
+        value=0,
+        tags=[
+            'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'listener_id:de81cbdc-8207-4253-8f21-3eea9870e7a9',
+            'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.amphorae.stats.bytes_out',
+        value=0,
+        tags=[
+            'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'listener_id:de81cbdc-8207-4253-8f21-3eea9870e7a9',
+            'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.amphorae.stats.request_errors',
+        value=0,
+        tags=[
+            'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'listener_id:de81cbdc-8207-4253-8f21-3eea9870e7a9',
+            'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.amphorae.stats.total_connections',
+        value=0,
+        tags=[
+            'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'listener_id:de81cbdc-8207-4253-8f21-3eea9870e7a9',
+            'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.amphorae.stats.active_connections',
+        value=0,
+        tags=[
+            'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'listener_id:9da03992-77a4-4b65-b39a-0e106961f577',
+            'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.amphorae.stats.bytes_in',
+        value=0,
+        tags=[
+            'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'listener_id:9da03992-77a4-4b65-b39a-0e106961f577',
+            'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.amphorae.stats.bytes_out',
+        value=0,
+        tags=[
+            'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'listener_id:9da03992-77a4-4b65-b39a-0e106961f577',
+            'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.amphorae.stats.request_errors',
+        value=0,
+        tags=[
+            'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'listener_id:9da03992-77a4-4b65-b39a-0e106961f577',
+            'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.amphorae.stats.total_connections',
+        value=0,
+        tags=[
+            'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'listener_id:9da03992-77a4-4b65-b39a-0e106961f577',
+            'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.amphorae.count',
+        value=1,
+        tags=[
+            'amphora_id:042bcca4-4d97-47a9-bc04-d88c1e3a4d72',
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'loadbalancer_id:ae54877c-b186-4b90-b71c-d331b9e732bc',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.amphorae.stats.active_connections',
+        value=0,
+        tags=[
+            'amphora_id:042bcca4-4d97-47a9-bc04-d88c1e3a4d72',
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'listener_id:243decd9-3370-4fc1-b163-80c4155bda04',
+            'loadbalancer_id:ae54877c-b186-4b90-b71c-d331b9e732bc',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.amphorae.stats.bytes_in',
+        value=0,
+        tags=[
+            'amphora_id:042bcca4-4d97-47a9-bc04-d88c1e3a4d72',
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'listener_id:243decd9-3370-4fc1-b163-80c4155bda04',
+            'loadbalancer_id:ae54877c-b186-4b90-b71c-d331b9e732bc',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.amphorae.stats.bytes_out',
+        value=0,
+        tags=[
+            'amphora_id:042bcca4-4d97-47a9-bc04-d88c1e3a4d72',
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'listener_id:243decd9-3370-4fc1-b163-80c4155bda04',
+            'loadbalancer_id:ae54877c-b186-4b90-b71c-d331b9e732bc',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.amphorae.stats.request_errors',
+        value=0,
+        tags=[
+            'amphora_id:042bcca4-4d97-47a9-bc04-d88c1e3a4d72',
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'listener_id:243decd9-3370-4fc1-b163-80c4155bda04',
+            'loadbalancer_id:ae54877c-b186-4b90-b71c-d331b9e732bc',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.octavia.amphorae.stats.total_connections',
+        value=0,
+        tags=[
+            'amphora_id:042bcca4-4d97-47a9-bc04-d88c1e3a4d72',
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'listener_id:243decd9-3370-4fc1-b163-80c4155bda04',
+            'loadbalancer_id:ae54877c-b186-4b90-b71c-d331b9e732bc',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
         ],
     )

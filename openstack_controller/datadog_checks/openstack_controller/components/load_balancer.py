@@ -4,6 +4,13 @@
 
 from datadog_checks.openstack_controller.components.component import Component
 from datadog_checks.openstack_controller.metrics import (
+    OCTAVIA_AMPHORA_STATS_METRICS,
+    OCTAVIA_AMPHORA_STATS_METRICS_PREFIX,
+    OCTAVIA_AMPHORA_STATS_TAGS,
+    OCTAVIA_AMPHORAE_COUNT,
+    OCTAVIA_AMPHORAE_METRICS,
+    OCTAVIA_AMPHORAE_METRICS_PREFIX,
+    OCTAVIA_AMPHORAE_TAGS,
     OCTAVIA_HEALTHMONITORS_COUNT,
     OCTAVIA_HEALTHMONITORS_METRICS,
     OCTAVIA_HEALTHMONITORS_METRICS_PREFIX,
@@ -186,3 +193,37 @@ class LoadBalancer(Component):
             self.check.gauge(OCTAVIA_QUOTAS_COUNT, 1, tags=tags + quota['tags'])
             for metric, value in quota['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + quota['tags'])
+
+    @Component.register_project_metrics(ID)
+    @Component.http_error()
+    def _report_amphorae(self, project_id, tags):
+        data = self.check.api.get_load_balancer_amphorae(project_id)
+        self.check.log.debug("data: %s", data)
+        for item in data:
+            amphora = get_metrics_and_tags(
+                item,
+                tags=OCTAVIA_AMPHORAE_TAGS,
+                prefix=OCTAVIA_AMPHORAE_METRICS_PREFIX,
+                metrics=OCTAVIA_AMPHORAE_METRICS,
+                lambda_value=lambda key, value, item=item: -1 if value is None else value,
+            )
+            self.check.log.debug("amphora: %s", amphora)
+            self.check.gauge(OCTAVIA_AMPHORAE_COUNT, 1, tags=tags + amphora['tags'])
+            for metric, value in amphora['metrics'].items():
+                self.check.gauge(metric, value, tags=tags + amphora['tags'])
+            self._report_amphora_stats(item['id'], tags + amphora['tags'])
+
+    @Component.http_error()
+    def _report_amphora_stats(self, amphora_id, tags):
+        data = self.check.api.get_load_balancer_amphora_stats(amphora_id)
+        self.check.log.debug("data: %s", data)
+        for item in data:
+            amphora_stat = get_metrics_and_tags(
+                item,
+                tags=OCTAVIA_AMPHORA_STATS_TAGS,
+                prefix=OCTAVIA_AMPHORA_STATS_METRICS_PREFIX,
+                metrics=OCTAVIA_AMPHORA_STATS_METRICS,
+            )
+            self.check.log.debug("amphora_stat: %s", amphora_stat)
+            for metric, value in amphora_stat['metrics'].items():
+                self.check.gauge(metric, value, tags=tags + amphora_stat['tags'])

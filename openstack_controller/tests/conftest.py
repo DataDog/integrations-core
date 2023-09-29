@@ -914,6 +914,20 @@ def connection_load_balancer(request, mock_responses):
             for pool in mock_responses('GET', f'/load-balancer/v2/lbaas/quotas?project_id={project_id}')['quotas']
         ]
 
+    def amphorae(project_id):
+        if http_error and 'amphorae' in http_error and project_id in http_error['amphorae']:
+            raise requests.exceptions.HTTPError(response=http_error['amphorae'][project_id])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=amphora,
+                )
+            )
+            for amphora in mock_responses('GET', f'/load-balancer/v2/octavia/amphorae?project_id={project_id}')[
+                'amphorae'
+            ]
+        ]
+
     return mock.MagicMock(
         load_balancers=mock.MagicMock(side_effect=load_balancers),
         get_load_balancer_statistics=mock.MagicMock(side_effect=get_load_balancer_statistics),
@@ -923,6 +937,7 @@ def connection_load_balancer(request, mock_responses):
         members=mock.MagicMock(side_effect=members),
         health_monitors=mock.MagicMock(side_effect=health_monitors),
         quotas=mock.MagicMock(side_effect=quotas),
+        amphorae=mock.MagicMock(side_effect=amphorae),
     )
 
 
