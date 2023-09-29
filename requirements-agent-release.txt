@@ -127,7 +127,7 @@ datadog-proxysql==5.0.0
 datadog-pulsar==2.0.0
 datadog-rabbitmq==5.0.0
 datadog-ray==1.0.0
-datadog-redisdb==5.1.0
+datadog-redisdb==5.2.0
 datadog-rethinkdb==3.0.0
 datadog-riak==3.3.1
 datadog-riakcs==2.10.1
