@@ -6,6 +6,12 @@
 
 * Exclude psycopg2 from automatic upgrades ([#15864](https://github.com/DataDog/integrations-core/pull/15864))
 
+## 25.1.1 / 2023-10-02
+
+***Changed***:
+
+* Update eula validation to only occur if it is present in the manifest for marketplace prs to support private-offer-only listings ([#15935](https://github.com/DataDog/integrations-core/pull/15935))
+
 ## 25.1.0 / 2023-09-15
 
 ***Added***:
