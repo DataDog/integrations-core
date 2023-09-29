@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 15.0.0 / 2023-09-29
+
 ***Changed***:
 
 * Cache performance counter type to prevent querying for the same counter multiple times (especially for the per-db counters) ([#15714](https://github.com/DataDog/integrations-core/pull/15714))
