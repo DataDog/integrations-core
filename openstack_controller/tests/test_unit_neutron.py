@@ -624,13 +624,13 @@ def test_quotas_exception(aggregator, dd_run_check, instance, mock_http_get, con
         assert connection_network.get_quota.call_count == 2
         assert (
             connection_network.get_quota.call_args_list.count(
-                mock.call(details=True, project_id='1e6e233e637d4d55a50a62b63398ad15')
+                mock.call('1e6e233e637d4d55a50a62b63398ad15', details=True)
             )
             == 1
         )
         assert (
             connection_network.get_quota.call_args_list.count(
-                mock.call(details=True, project_id='6e39099cccde4f809b003d9e0dd09304')
+                mock.call('6e39099cccde4f809b003d9e0dd09304', details=True)
             )
             == 1
         )

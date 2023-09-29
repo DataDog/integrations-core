@@ -202,7 +202,7 @@ class ApiSdk(Api):
         ]
 
     def get_network_quota(self, project_id):
-        return self.connection.network.get_quota(details=True, project_id=project_id).to_dict(original_names=True)
+        return self.connection.network.get_quota(project_id, details=True).to_dict(original_names=True)
 
     def get_baremetal_nodes(self):
         self.log.debug("getting baremetal nodes")
@@ -267,6 +267,10 @@ class ApiSdk(Api):
             healthmonitor.to_dict(original_names=True)
             for healthmonitor in self.connection.load_balancer.health_monitors(project_id=project_id)
         ]
+
+    def get_load_balancer_quotas(self, project_id):
+        self.log.debug("getting load balancer quotas for project `%s`", project_id)
+        return self.connection.load_balancer.get_quota(project_id)
 
     def get_load_balancer_members_by_pool(self, project_id, pool_id):
         pass  # pragma: no cover
