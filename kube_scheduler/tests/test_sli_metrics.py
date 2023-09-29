@@ -39,11 +39,11 @@ def test_check_metrics_slis(aggregator, mock_metrics, mock_request, instance):
         # Wrapper to keep assertions < 120 chars
         aggregator.assert_metric("{}.{}".format(CHECK_NAME, name), **kwargs)
 
-    assert_metric('slis.kubernetes_healthcheck', value=1, tags=['sli_name:ping', 'type:healthz'])
+    assert_metric('slis.kubernetes_healthcheck', value=1, tags=['sli_name:ping'])
     assert_metric(
         'slis.kubernetes_healthchecks_total',
         value=2450,
-        tags=['sli_name:ping', 'status:success', 'type:healthz'],
+        tags=['sli_name:ping', 'status:success'],
     )
 
     aggregator.assert_all_metrics_covered()
@@ -59,14 +59,12 @@ def test_check_metrics_slis_transform(aggregator, mock_metrics, mock_request, in
         aggregator.assert_metric("{}.{}".format(CHECK_NAME, name), **kwargs)
 
     # Check that no metrics with `name` tag come through
-    assert_metric(
-        'slis.kubernetes_healthcheck', count=0, metric_type=aggregator.GAUGE, tags=['name:attachdetach', 'type:healthz']
-    )
+    assert_metric('slis.kubernetes_healthcheck', count=0, metric_type=aggregator.GAUGE, tags=['name:attachdetach'])
     assert_metric(
         'slis.kubernetes_healthchecks_total',
         metric_type=aggregator.MONOTONIC_COUNT,
         count=0,
-        tags=['name:attachdetach', 'status:success', 'type:healthz'],
+        tags=['name:attachdetach', 'status:success'],
     )
 
 
