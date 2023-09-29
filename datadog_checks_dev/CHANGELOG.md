@@ -15,6 +15,7 @@
 * Exclude psycopg2 from automatic upgrades ([#15864](https://github.com/DataDog/integrations-core/pull/15864))
 * Upper-bound pydantic to quickly fix CI while we investigate what in the latest version breaks us. ([#15901](https://github.com/DataDog/integrations-core/pull/15901))
 * Finalize pytest plugin logic for E2E refactor ([#15898](https://github.com/DataDog/integrations-core/pull/15898))
+* Fix `ddev release make all` so that it won't stop on the first unchanged integration ([#15932](https://github.com/DataDog/integrations-core/pull/15932))
 
 ## 25.1.0 / 2023-09-15
 
