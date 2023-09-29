@@ -97,7 +97,7 @@ class PostgreSql(AgentCheck):
         self.set_resource_tags()
         self.pg_settings = {}
         self._warnings_by_code = {}
-        self.db_pool = MultiDatabaseConnectionPool(self._new_connection, self._config.max_connections)
+        self.db_pool = MultiDatabaseConnectionPool(self._config, self._new_connection)
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
         self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
@@ -627,7 +627,12 @@ class PostgreSql(AgentCheck):
             )
             if self._config.query_timeout:
                 connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
-            conn = psycopg.connect(connection_string, autocommit=True, cursor_factory=psycopg.ClientCursor)
+            conn = psycopg.connect(
+                connection_string,
+                autocommit=True,
+                cursor_factory=psycopg.ClientCursor,
+                connect_timeout=self._config.connection_timeout,
+            )
         else:
             password = self._config.password
             region = self._config.cloud_metadata.get('aws', {}).get('region', None)
@@ -663,7 +668,12 @@ class PostgreSql(AgentCheck):
                 args['sslkey'] = self._config.ssl_key
             if self._config.ssl_password:
                 args['sslpassword'] = self._config.ssl_password
-            conn = psycopg.connect(**args, autocommit=True, cursor_factory=psycopg.ClientCursor)
+            conn = psycopg.connect(
+                **args,
+                autocommit=True,
+                cursor_factory=psycopg.ClientCursor,
+                connect_timeout=self._config.connection_timeout
+            )
         return conn
 
     def _connect(self):

@@ -9,10 +9,9 @@ import uuid
 
 import psycopg
 import pytest
-from psycopg.rows import dict_row
-
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.connections import ConnectionPoolFullError, MultiDatabaseConnectionPool
+from psycopg.rows import dict_row
 
 from .common import HOST, PASSWORD_ADMIN, USER_ADMIN
 
@@ -26,7 +25,7 @@ def test_conn_pool(pg_instance):
     """
     check = PostgreSql('postgres', {}, [pg_instance])
 
-    pool = MultiDatabaseConnectionPool(check._new_connection)
+    pool = MultiDatabaseConnectionPool(check._config, check._new_connection)
     db = pool._get_connection_raw('postgres', 1)
     assert pool._stats.connection_opened == 1
     pool.prune_connections()
@@ -66,15 +65,17 @@ def test_conn_pool_no_leaks_on_close(pg_instance):
 
     check = PostgreSql('postgres', {}, [pg_instance])
     check._config.application_name = unique_id
+    check._config.max_connections = None
 
     # Used to make verification queries
     pool2 = MultiDatabaseConnectionPool(
-        lambda dbname: psycopg.connect(host=HOST, dbname=dbname, user=USER_ADMIN, password=PASSWORD_ADMIN)
+        check._config,
+        lambda dbname: psycopg.connect(host=HOST, dbname=dbname, user=USER_ADMIN, password=PASSWORD_ADMIN),
     )
 
     # Iterate in the test many times to detect flakiness
     for _ in range(20):
-        pool = MultiDatabaseConnectionPool(check._new_connection)
+        pool = MultiDatabaseConnectionPool(check._config, check._new_connection)
 
         def get_activity():
             """
@@ -131,11 +132,13 @@ def test_conn_pool_no_leaks_on_prune(pg_instance):
 
     check = PostgreSql('postgres', {}, [pg_instance])
     check._config.application_name = unique_id
+    check._config.max_connections = None
 
-    pool = MultiDatabaseConnectionPool(check._new_connection)
+    pool = MultiDatabaseConnectionPool(check._config, check._new_connection)
     # Used to make verification queries
     pool2 = MultiDatabaseConnectionPool(
-        lambda dbname: psycopg.connect(host=HOST, dbname=dbname, user=USER_ADMIN, password=PASSWORD_ADMIN)
+        check._config,
+        lambda dbname: psycopg.connect(host=HOST, dbname=dbname, user=USER_ADMIN, password=PASSWORD_ADMIN),
     )
     ttl_long = 90 * 1000
     ttl_short = 1
@@ -256,7 +259,7 @@ def test_conn_pool_single_context(pg_instance):
     """
     check = PostgreSql('postgres', {}, [pg_instance])
 
-    pool = MultiDatabaseConnectionPool(check._new_connection)
+    pool = MultiDatabaseConnectionPool(check._config, check._new_connection)
     with pool.get_connection("dogs_0", 1000):
         pass
 
@@ -285,8 +288,9 @@ def test_conn_pool_context_managed(pg_instance):
 
     limit = 30
     check = PostgreSql('postgres', {}, [pg_instance])
+    check._config.max_connections = limit
 
-    pool = MultiDatabaseConnectionPool(check._new_connection, limit)
+    pool = MultiDatabaseConnectionPool(check._config, check._new_connection)
     threadpool = []
     for i in range(limit):
         thread = threading.Thread(target=pretend_to_run_query, args=(pool, 'dogs_{}'.format(i)))

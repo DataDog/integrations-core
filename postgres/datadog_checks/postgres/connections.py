@@ -7,6 +7,7 @@ import inspect
 import threading
 import time
 from typing import Callable, Dict
+from datadog_checks.postgres.config import PostgresConfig
 
 import psycopg
 
@@ -66,8 +67,9 @@ class MultiDatabaseConnectionPool(object):
         def reset(self):
             self.__init__()
 
-    def __init__(self, connect_fn: Callable[[str], None], max_conns: int = None):
-        self.max_conns: int = max_conns
+    def __init__(self, config: PostgresConfig, connect_fn: Callable[[str], None]):
+        self.connection_timeout: int = config.connection_timeout  # in seconds
+        self.max_conns: int = config.max_connections
         self._stats = self.Stats()
         self._mu = threading.RLock()
         self._conns: Dict[str, ConnectionInfo] = {}
@@ -94,6 +96,9 @@ class MultiDatabaseConnectionPool(object):
         Pass a function to startup_func if there is an action needed with the connection
         when re-establishing it.
         """
+        if timeout is None:
+            timeout = self.connection_timeout
+
         start = datetime.datetime.now()
         self.prune_connections()
         with self._mu:
