@@ -125,11 +125,7 @@ def mock_cursor_for_replica_stats():
             while data:
                 yield data.pop()
 
-        def cursor_fetchone():
-            return data.pop()
-
         cursor.__enter__().execute = cursor_execute
         cursor.__enter__().fetchall = cursor_fetchall
-        cursor.__enter__().fetchone = cursor_fetchone
 
         yield

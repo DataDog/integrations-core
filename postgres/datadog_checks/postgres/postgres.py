@@ -809,7 +809,9 @@ class PostgreSql(AgentCheck):
                         else:
                             for info in metric_info:
                                 metric, value, method = info
-                                getattr(self, method)(metric, value, tags=set(query_tags), hostname=self.resolved_hostname)
+                                getattr(self, method)(
+                                    metric, value, tags=set(query_tags), hostname=self.resolved_hostname
+                                )
 
     def record_warning(self, code, message):
         # type: (DatabaseConfigurationError, str) -> None

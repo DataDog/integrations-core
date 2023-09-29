@@ -243,23 +243,33 @@ def test_resolved_hostname_metadata(check, test_case):
 @pytest.mark.usefixtures('mock_cursor_for_replica_stats')
 def test_replication_stats(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
-    check.check(pg_instance)
-    base_tags = ['foo:bar', 'port:5432', 'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname)]
-    app1_tags = base_tags + [
-        'wal_sync_state:async',
-        'wal_state:streaming',
-        'wal_app_name:app1',
-        'wal_client_addr:1.1.1.1',
-    ]
-    app2_tags = base_tags + ['wal_sync_state:sync', 'wal_state:backup', 'wal_app_name:app2', 'wal_client_addr:1.1.1.1']
+    with mock.patch("datadog_checks.postgres.version_utils.VersionUtils.get_raw_version", return_value="10.15"):
+        check.check(pg_instance)
+        base_tags = [
+            'foo:bar',
+            'port:5432',
+            'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+        ]
+        app1_tags = base_tags + [
+            'wal_sync_state:async',
+            'wal_state:streaming',
+            'wal_app_name:app1',
+            'wal_client_addr:1.1.1.1',
+        ]
+        app2_tags = base_tags + [
+            'wal_sync_state:sync',
+            'wal_state:backup',
+            'wal_app_name:app2',
+            'wal_client_addr:1.1.1.1',
+        ]
 
-    aggregator.assert_metric('postgresql.db.count', 0, base_tags)
-    for suffix in ('wal_write_lag', 'wal_flush_lag', 'wal_replay_lag', 'backend_xmin_age'):
-        metric_name = 'postgresql.replication.{}'.format(suffix)
-        aggregator.assert_metric(metric_name, 12, app1_tags)
-        aggregator.assert_metric(metric_name, 13, app2_tags)
+        aggregator.assert_metric('postgresql.db.count', 0, base_tags)
+        for suffix in ('wal_write_lag', 'wal_flush_lag', 'wal_replay_lag', 'backend_xmin_age'):
+            metric_name = 'postgresql.replication.{}'.format(suffix)
+            aggregator.assert_metric(metric_name, 12, app1_tags)
+            aggregator.assert_metric(metric_name, 13, app2_tags)
 
-    aggregator.assert_all_metrics_covered()
+        aggregator.assert_all_metrics_covered()
 
 
 def test_replication_tag(aggregator, integration_check, pg_instance):
