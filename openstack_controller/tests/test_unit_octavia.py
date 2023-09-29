@@ -1234,7 +1234,7 @@ def test_pool_members_metrics(aggregator, dd_run_check, instance):
             None,
             {
                 'http_error': {
-                    'healthmonitors': {
+                    'health_monitors': {
                         '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
                         '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
                     }
