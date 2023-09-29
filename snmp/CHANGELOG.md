@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 7.0.0 / 2023-09-29
+
 ***Changed***:
 
 * Add `assert_all_profile_metrics_and_tags_covered` and fix mappings in profiles ([#15720](https://github.com/DataDog/integrations-core/pull/15720))
