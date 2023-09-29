@@ -49,7 +49,7 @@ class Component:
         LOAD_BALANCER = 'load-balancer'
 
     @unique
-    class Types(str, Enum):
+    class Types(list, Enum):
         IDENTITY = ['identity']
         COMPUTE = ['compute']
         NETWORK = ['network']
@@ -57,28 +57,24 @@ class Component:
         BAREMETAL = ['baremetal']
         LOAD_BALANCER = ['load-balancer']
 
-    def http_error(service_check=False, error_message=None):
+    def http_error(report_service_check=False):
         def decorator_http_error(func):
             @wraps(func)  # Preserve function metadata
             def wrapper(self, *args, **kwargs):
-                if service_check:
+                if report_service_check:
                     tags = argument_value('tags', func, *args, **kwargs)
                 try:
                     result = func(self, *args, **kwargs)
-                    if service_check:
+                    if report_service_check:
                         tags = argument_value('tags', func, *args, **kwargs)
-                        self.check.service_check(self.derived_class.service_check_id, AgentCheck.OK, tags=tags)
+                        self.check.service_check(self.SERVICE_CHECK, AgentCheck.OK, tags=tags)
                     return result if result is not None else True
                 except HTTPError as e:
-                    self.check.log.error("%s: %s", error_message if error_message else "HTTPError", e.response)
-                    if service_check:
-                        self.check.service_check(
-                            self.derived_class.service_check_id,
-                            AgentCheck.CRITICAL,
-                            tags=tags,
-                        )
+                    self.check.log.error("HTTPError: %s", e.response)
+                    if report_service_check:
+                        self.check.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags)
                 except Exception as e:
-                    self.check.log.error("%s: %s", error_message if error_message else "Exception", e)
+                    self.check.log.error("Exception: %s", e)
                 return None
 
             return wrapper
@@ -121,13 +117,12 @@ class Component:
 
         return decorator_register_metrics_method
 
-    def __init__(self, derived_class, check):
-        self.derived_class = derived_class
+    def __init__(self, check):
         self.check = check
         self.found_in_catalog = False
         self.reported_global_metrics = []
         self.reported_project_metrics = []
-        self.check.log.debug("created `%s` component", self.derived_class.component_id.value)
+        self.check.log.debug("created `%s` component", self.ID.value)
 
     def start_report(self):
         self.found_in_catalog = False
@@ -136,37 +131,36 @@ class Component:
 
     def finish_report(self, tags):
         if not self.found_in_catalog:
-            self.check.service_check(self.derived_class.service_check_id, AgentCheck.UNKNOWN, tags=tags)
+            self.check.service_check(self.SERVICE_CHECK, AgentCheck.UNKNOWN, tags=tags)
 
     def report_global_metrics(self, tags):
-        self.check.log.debug("reporting `%s` component global metrics", self.derived_class.component_id.value)
-        self.check.log.debug("self.derived_class.component_types: %s", self.derived_class.component_types.value)
-        if self.check.api.component_in_catalog(self.derived_class.component_types.value):
+        self.check.log.debug("reporting `%s` component global metrics", self.ID.value)
+        if self.check.api.component_in_catalog(self.TYPES.value):
             self.found_in_catalog = True
-            self.check.log.debug("`%s` component found in catalog", self.derived_class.component_id.value)
-            if self.derived_class.component_id in Component.registered_global_metric_methods:
-                for registered_method in Component.registered_global_metric_methods[self.derived_class.component_id]:
+            self.check.log.debug("`%s` component found in catalog", self.ID.value)
+            if self.ID in Component.registered_global_metric_methods:
+                for registered_method in Component.registered_global_metric_methods[self.ID]:
                     registered_method(self, tags)
             else:
                 self.check.log.debug(
                     "`%s` component has not registered methods for global metrics",
-                    self.derived_class.component_id.value,
+                    self.ID.value,
                 )
         else:
-            self.check.log.debug("`%s` component not found in catalog", self.derived_class.component_id.value)
+            self.check.log.debug("`%s` component not found in catalog", self.ID.value)
 
     def report_project_metrics(self, project_id, tags):
-        self.check.log.debug("reporting `%s` component project metrics", self.derived_class.component_id.value)
-        if self.check.api.component_in_catalog(self.derived_class.component_types.value):
+        self.check.log.debug("reporting `%s` component project metrics", self.ID.value)
+        if self.check.api.component_in_catalog(self.TYPES.value):
             self.found_in_catalog = True
-            self.check.log.debug("`%s` component found in catalog", self.derived_class.component_id.value)
-            if self.derived_class.component_id in Component.registered_project_metric_methods:
-                for registered_method in Component.registered_project_metric_methods[self.derived_class.component_id]:
+            self.check.log.debug("`%s` component found in catalog", self.ID.value)
+            if self.ID in Component.registered_project_metric_methods:
+                for registered_method in Component.registered_project_metric_methods[self.ID]:
                     registered_method(self, project_id, tags)
             else:
                 self.check.log.debug(
                     "`%s` component has not registered methods for project metrics",
-                    self.derived_class.component_id.value,
+                    self.ID.value,
                 )
         else:
-            self.check.log.debug("`%s` component not found in catalog", self.derived_class.component_id.value)
+            self.check.log.debug("`%s` component not found in catalog", self.ID.value)

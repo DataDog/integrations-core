@@ -19,22 +19,22 @@ from datadog_checks.openstack_controller.metrics import (
 
 
 class BareMetal(Component):
-    component_id = Component.Id.BAREMETAL
-    component_types = Component.Types.BAREMETAL
-    service_check_id = IRONIC_SERVICE_CHECK
+    ID = Component.Id.BAREMETAL
+    TYPES = Component.Types.BAREMETAL
+    SERVICE_CHECK = IRONIC_SERVICE_CHECK
 
     def __init__(self, check):
-        super(BareMetal, self).__init__(self, check)
+        super(BareMetal, self).__init__(check)
 
-    @Component.register_global_metrics(Component.Id.BAREMETAL)
-    @Component.http_error(service_check=True)
+    @Component.register_global_metrics(ID)
+    @Component.http_error(report_service_check=True)
     def _report_response_time(self, tags):
-        self.check.log.debug("reporting `%s` response time", Component.Id.BAREMETAL.value)
-        response_time = self.check.api.get_response_time(Component.Id.BAREMETAL, Component.Types.BAREMETAL.value)
-        self.check.log.debug("`%s` response time: %s", Component.Id.BAREMETAL.value, response_time)
+        self.check.log.debug("reporting `%s` response time", BareMetal.ID.value)
+        response_time = self.check.api.get_response_time(BareMetal.TYPES.value)
+        self.check.log.debug("`%s` response time: %s", BareMetal.ID.value, response_time)
         self.check.gauge(IRONIC_RESPONSE_TIME, response_time, tags=tags)
 
-    @Component.register_global_metrics(Component.Id.BAREMETAL)
+    @Component.register_global_metrics(ID)
     @Component.http_error()
     def _report_nodes(self, tags):
         data = self.check.api.get_baremetal_nodes()
@@ -56,7 +56,7 @@ class BareMetal(Component):
             for metric, value in node['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + node['tags'])
 
-    @Component.register_global_metrics(Component.Id.BAREMETAL)
+    @Component.register_global_metrics(ID)
     @Component.http_error()
     def _report_conductors(self, tags):
         data = self.check.api.get_baremetal_conductors()

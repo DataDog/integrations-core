@@ -33,9 +33,8 @@ class ApiRest(Api):
     def component_in_catalog(self, component_types):
         return self._catalog.has_component(component_types)
 
-    def get_response_time(self, id, endpoint_types):
+    def get_response_time(self, endpoint_types):
         endpoint = self._catalog.get_endpoint_by_type(endpoint_types).replace(self._current_project_id, "")
-        self.log.debug("%s endpoint: %s", id.value, endpoint)
         response = self.http.get(endpoint)
         response.raise_for_status()
         return response.elapsed.total_seconds() * 1000
@@ -167,76 +166,6 @@ class ApiRest(Api):
         response = self.http.get(endpoint)
         response.raise_for_status()
         return response.json().get('projects', [])
-
-    def get_load_balancer_members_by_pool(self, project_id, pool_id):
-        self.log.debug("getting load-balancer members by pool")
-        component = self._get_component(Component.Types.LOAD_BALANCER.value)
-        if component:
-            return component.get_members_by_pool(pool_id, project_id)
-        return None
-
-    def get_load_balancer_healthmonitors(self, project_id):
-        self.log.debug("getting load-balancer healthmonitors")
-        component = self._get_component(Component.Types.LOAD_BALANCER.value)
-        if component:
-            return component.get_healthmonitors(project_id)
-        return None
-
-    def get_load_balancer_loadbalancer_statistics(self, project_id, loadbalancer_id):
-        self.log.debug("getting load-balancer loadbalancer statistics")
-        component = self._get_component(Component.Types.LOAD_BALANCER.value)
-        if component:
-            return component.get_loadbalancer_statistics(loadbalancer_id)
-        return None
-
-    def get_load_balancer_listener_statistics(self, project_id, listener_id):
-        self.log.debug("getting load-balancer listener statistics")
-        component = self._get_component(Component.Types.LOAD_BALANCER.value)
-        if component:
-            return component.get_listener_statistics(listener_id)
-        return None
-
-    def get_load_balancer_listeners_by_loadbalancer(self, project_id, loadbalancer_id):
-        self.log.debug("getting load-balancer listeners by loadbalancer")
-        component = self._get_component(Component.Types.LOAD_BALANCER.value)
-        if component:
-            return component.get_listeners_by_loadbalancer(loadbalancer_id, project_id)
-        return None
-
-    def get_load_balancer_pools_by_loadbalancer(self, project_id, loadbalancer_id):
-        self.log.debug("getting load-balancer pools by loadbalancer")
-        component = self._get_component(Component.Types.LOAD_BALANCER.value)
-        if component:
-            return component.get_pools_by_loadbalancer(loadbalancer_id, project_id)
-        return None
-
-    def get_load_balancer_healthmonitors_by_pool(self, project_id, pool_id):
-        self.log.debug("getting load-balancer healthmonitors by pool")
-        component = self._get_component(Component.Types.LOAD_BALANCER.value)
-        if component:
-            return component.get_healthmonitors_by_pool(pool_id, project_id)
-        return None
-
-    def get_load_balancer_amphorae(self, project_id):
-        self.log.debug("getting load-balancer amphorae")
-        component = self._get_component(Component.Types.LOAD_BALANCER.value)
-        if component:
-            return component.get_amphorae()
-        return None
-
-    def get_load_balancer_amphorae_by_loadbalancer(self, project_id, loadbalancer_id):
-        self.log.debug("getting load-balancer amphorae by loadbalancer")
-        component = self._get_component(Component.Types.LOAD_BALANCER.value)
-        if component:
-            return component.get_amphorae_by_loadbalancer(loadbalancer_id)
-        return None
-
-    def get_load_balancer_amphora_statistics(self, project_id, amphora_id):
-        self.log.debug("getting load-balancer amphora statistics")
-        component = self._get_component(Component.Types.LOAD_BALANCER.value)
-        if component:
-            return component.get_amphora_statistics(amphora_id)
-        return None
 
     def get_compute_limits(self):
         self.log.debug("getting compute limits")

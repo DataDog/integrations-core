@@ -94,9 +94,8 @@ class ApiSdk(Api):
         self.connection.authorize()
         self.http.options['headers']['X-Auth-Token'] = self.connection.session.auth.get_token(self.connection.session)
 
-    def get_response_time(self, id, endpoint_types):
+    def get_response_time(self, endpoint_types):
         endpoint = self._catalog.get_endpoint_by_type(endpoint_types).replace(self._access.project_id, "")
-        self.log.debug("%s endpoint: %s", id.value, endpoint)
         response = self.http.get(endpoint)
         response.raise_for_status()
         return response.elapsed.total_seconds() * 1000
