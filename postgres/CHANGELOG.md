@@ -2,9 +2,52 @@
 
 ## Unreleased
 
+***Changed***:
+
+* Update `ssl` default configuration to 'allow' ([#15917](https://github.com/DataDog/integrations-core/pull/15917))
+
+***Added***:
+
+* Update dependencies ([#15922](https://github.com/DataDog/integrations-core/pull/15922))
+
 ***Fixed***:
 
-* Revise postgresql.replication_delay to Function with Archive WAL-driven PostgreSQL Replica ([#15629](https://github.com/DataDog/integrations-core/pull/15629))
+* Revise `postgresql.replication_delay` to function with archive WAL-driven replica ([#15925](https://github.com/DataDog/integrations-core/pull/15925))
+* Prevent Postgres integration from collecting WAL metrics from Aurora instances that cannot be collected ([#15896](https://github.com/DataDog/integrations-core/pull/15896))
+* Set lower log level for relations metrics truncated ([#15903](https://github.com/DataDog/integrations-core/pull/15903))
+
+## 14.4.0 / 2023-09-19
+
+***Added***:
+
+* Add schema collection to Postgres integration (#15484) ([#15866](https://github.com/DataDog/integrations-core/pull/15866))
+
+## 14.3.0 / 2023-09-19
+
+***Added***:
+
+* Attempt to connect to the database and fail fast before trying to establish a connection pool ([#15839](https://github.com/DataDog/integrations-core/pull/15839))
+
+***Fixed***:
+
+* Revert psycopg3 upgrade ([#15859](https://github.com/DataDog/integrations-core/pull/15859))
+
+## 14.2.4 / 2023-09-07
+
+***Fixed***:
+
+* Initialize pg_settings on Postgres check start and lazy load pg_settings if it's not set ([#15773](https://github.com/DataDog/integrations-core/pull/15773))
+
+## 14.2.3 / 2023-09-06
+
+***Fixed***:
+
+* Set lower connection timeout on connection pool to avoid long running checks ([#15768](https://github.com/DataDog/integrations-core/pull/15768))
+
+## 14.2.2 / 2023-09-05
+
+***Fixed***:
+
 * Pass timeout when connection pool closes ([#15724](https://github.com/DataDog/integrations-core/pull/15724))
 
 ## 14.2.1 / 2023-08-29

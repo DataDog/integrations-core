@@ -71,6 +71,30 @@ GO
 GRANT EXECUTE on multiQueryProc to bob;
 GO
 
+-- test procedure with IF ELSE branches and temp tables
+CREATE PROCEDURE conditionalPlanTest
+ @Switch INTEGER
+AS
+BEGIN
+ SET NOCOUNT ON
+ CREATE TABLE #Ids (Id INTEGER PRIMARY KEY)
+
+ IF (@Switch > 0)
+  BEGIN
+   INSERT INTO #Ids (Id) VALUES (1)
+  END 
+
+ IF (@Switch > 1)
+  BEGIN
+   INSERT #Ids (Id) VALUES (2)
+  END
+
+ SELECT * FROM #Ids
+END
+GO
+GRANT EXECUTE on conditionalPlanTest to bob;
+GO
+
 -- Create test database for integration tests.
 -- Only bob and fred have read/write access to this database.
 CREATE DATABASE datadog_test;
@@ -124,6 +148,7 @@ GO
 -- correctly support unicode throughout the integration.
 CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));
 INSERT INTO datadog_test.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
+CREATE CLUSTERED INDEX thingsindex ON datadog_test.dbo.ϑings (name);
 
 -- Table variables
 DECLARE @table_prefix VARCHAR(100) = 'CREATE TABLE datadog_test.dbo.'

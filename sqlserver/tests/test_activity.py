@@ -20,7 +20,7 @@ from dateutil import parser
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.sqlserver import SQLServer
-from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS
+from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS, _hash_to_hex
 from datadog_checks.sqlserver.utils import extract_sql_comments, is_statement_proc
 
 from .common import CHECK_NAME
@@ -52,6 +52,8 @@ def dbm_instance(instance_docker):
     }
     # do not need query_metrics for these tests
     instance_docker['query_metrics'] = {'enabled': False}
+    instance_docker['procedure_metrics'] = {'enabled': False}
+    instance_docker['collect_settings'] = {'enabled': False}
     return copy(instance_docker)
 
 
@@ -145,7 +147,6 @@ def test_collect_load_activity(
     assert event['ddagentversion'], "missing ddagentversion"
     assert set(event['ddtags']) == expected_instance_tags, "wrong instance tags activity"
     assert type(event['collection_interval']) in (float, int), "invalid collection_interval"
-
     assert len(event['sqlserver_activity']) == 2, "should have collected exactly two activity rows"
     event['sqlserver_activity'].sort(key=lambda r: r.get('blocking_session_id', 0))
     # the second query should be fred's, which is currently blocked on
@@ -342,6 +343,11 @@ def test_activity_nested_blocking_transactions(
     assert tx3["query_start"]
     assert tx3["query_hash"]
     assert tx3["query_plan_hash"]
+
+    assert isinstance(tx2["query_hash"], str)
+    assert isinstance(tx2["query_plan_hash"], str)
+    assert isinstance(tx3["query_hash"], str)
+    assert isinstance(tx3["query_plan_hash"], str)
 
     for t in [t1, t2, t3]:
         t.join()
@@ -866,6 +872,19 @@ def test_async_job_enabled(dd_run_check, dbm_instance, activity_enabled):
         check.activity._job_loop_future.result()
     else:
         assert check.activity._job_loop_future is None
+
+
+@pytest.mark.parametrize(
+    "input,expected",
+    [
+        (b'0xBA61D813C4878164', '307842413631443831334334383738313634'),
+        (b'0x0000000000000000', '307830303030303030303030303030303030'),
+    ],
+)
+def test_hash_to_hex(input, expected):
+    output = _hash_to_hex(input)
+    assert output == expected
+    assert type(output) == str
 
 
 @pytest.mark.integration

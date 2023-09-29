@@ -15,7 +15,7 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Store",
+      "Category::Data Stores",
       "Category::Log Collection"
     ]
   },
@@ -37,10 +37,7 @@
       },
       "metrics": {
         "prefix": "foundationdb.",
-        "check": [
-          "foundationdb.processes",
-          "foundationdb.instances"
-        ],
+        "check": ["foundationdb.processes", "foundationdb.instances"],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {

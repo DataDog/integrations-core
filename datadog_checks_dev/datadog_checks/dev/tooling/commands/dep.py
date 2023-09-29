@@ -46,6 +46,9 @@ IGNORED_DEPS = {
     'pymongo',
     # We need pydantic 2.0.2 for the rpm x64 agent build (see https://github.com/DataDog/datadog-agent/pull/18303)
     'pydantic',
+    # We're not ready to switch to v3 of the postgress library, see:
+    # https://github.com/DataDog/integrations-core/pull/15859
+    'psycopg2-binary',
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others

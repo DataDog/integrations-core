@@ -9,6 +9,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
+    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     create_e2e_core_test_config,
     get_device_ip_from_config,
@@ -18,7 +19,8 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_chatsworth_pdu(dd_agent_check):
-    config = create_e2e_core_test_config('chatsworth_pdu')
+    profile = 'chatsworth_pdu'
+    config = create_e2e_core_test_config(profile)
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -155,11 +157,11 @@ def test_e2e_profile_chatsworth_pdu(dd_agent_check):
         aggregator.assert_metric('snmp.cpiPduLockStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['eas_status:inactive', 'lock_id:1', 'lock_status:closed', 'door_status:open'],
-        ['eas_status:ready', 'lock_id:2', 'lock_status:closed', 'door_status:closed'],
+        ['eas_status:inactive', 'lock_id:front', 'lock_status:closed', 'door_status:open'],
+        ['eas_status:ready', 'lock_id:rear', 'lock_status:closed', 'door_status:closed'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cpiPduEas', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cpiEas', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         ['sensor_index:20', 'sensor_name:sensor2', 'sensor_type:1'],
@@ -235,5 +237,6 @@ def test_e2e_profile_chatsworth_pdu(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
+    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

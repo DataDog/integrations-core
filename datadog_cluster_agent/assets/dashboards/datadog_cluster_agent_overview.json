@@ -1685,6 +1685,112 @@
                 "x": 8,
                 "y": 18
             }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "auto",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "on_right_yaxis": false,
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:datadog.cluster_agent.admission_webhooks.library_injection_attempts{$cluster, $namespace} by {injected}.as_count()"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": true,
+                "title": "Library injection attempts by injected state",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 2296693691691567,
+            "layout": {
+                "height": 2,
+                "width": 4,
+                "x": 4,
+                "y": 18
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "auto",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "on_right_yaxis": false,
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:datadog.cluster_agent.admission_webhooks.library_injection_errors{$cluster, $namespace} by {reason}.as_count()"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": true,
+                "title": "Library injection errors by reason",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 6764287346346728,
+            "layout": {
+                "height": 2,
+                "width": 4,
+                "x": 8,
+                "y": 20
+            }
         }
     ]
 }

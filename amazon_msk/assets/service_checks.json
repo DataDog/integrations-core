@@ -30,7 +30,7 @@
             "region_name"
         ],
         "name": "Amazon Kafka prometheus health",
-        "description": "Returns `CRITICAL` if the check cannot access a metrics endpoint. Otherwise, returns `OK`."
+        "description": "Returns `CRITICAL` if the check cannot access a Metrics endpoint. Otherwise, returns `OK`."
     },
     {
         "agent_version": "7.29.0",

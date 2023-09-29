@@ -26,7 +26,7 @@ CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));
 INSERT INTO datadog_test.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
 CREATE USER bob FOR LOGIN bob;
 CREATE USER fred FOR LOGIN fred;
-CREATE INDEX thingsindex ON datadog_test.dbo.ϑings (name);
+CREATE CLUSTERED INDEX thingsindex ON datadog_test.dbo.ϑings (name);
 GO
 
 EXEC sp_addrolemember 'db_datareader', 'bob'
@@ -119,4 +119,28 @@ BEGIN
 END;
 GO
 GRANT EXECUTE on multiQueryProc to bob;
+GO
+
+-- test procedure with IF ELSE branches and temp tables
+CREATE PROCEDURE conditionalPlanTest
+ @Switch INTEGER
+AS
+BEGIN
+ SET NOCOUNT ON
+ CREATE TABLE #Ids (Id INTEGER PRIMARY KEY)
+
+ IF (@Switch > 0)
+  BEGIN
+   INSERT INTO #Ids (Id) VALUES (1)
+  END 
+
+ IF (@Switch > 1)
+  BEGIN
+   INSERT #Ids (Id) VALUES (2)
+  END
+
+ SELECT * FROM #Ids
+END
+GO
+GRANT EXECUTE on conditionalPlanTest to bob;
 GO

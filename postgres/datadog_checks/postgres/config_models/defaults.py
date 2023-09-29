@@ -113,7 +113,7 @@ def instance_query_timeout():
 
 
 def instance_ssl():
-    return 'disable'
+    return 'allow'
 
 
 def instance_table_count_limit():

@@ -37,8 +37,8 @@ metrics:
           OID: 1.3.6.1.4.1.1718.4.1.2.2.1.7
         tag: servertech_sentry4_st4_unit_type
         mapping:
-          0: primary
-          1: link
+          0: master_pdu
+          1: link_pdu
           2: controller
           3: emcu
       - column:

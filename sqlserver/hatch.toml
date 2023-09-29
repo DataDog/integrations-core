@@ -4,7 +4,7 @@ base-package-features = ["deps", "db", "json"]
 [[envs.default.matrix]]
 python = ["3.9"]
 os = ["linux"]
-version = ["2017", "2019"]
+version = ["2017", "2019", "2022"]
 setup = ["single", "ha"]
 
 # test the full combination of python-version/driver against a the latest sql server version
@@ -18,13 +18,16 @@ driver = ["SQLOLEDB", "SQLNCLI11", "MSOLEDBSQL", "odbc"]
 version = ["2019"]
 setup = ["single"]
 
-# temporarily exclude high cardinality windows env. to be fixed in a follow-up PR
-[[envs.default.matrix]]
-python = ["3.9"]
-os = ["linux"]
-driver = ["odbc"]
-version = ["2019"]
-case = ["high-cardinality"]
+# The high cardinality environment is meant to be used for local dev/testing
+# for example, when we want to do performance testing on local changes to the metrics
+# query, we can do that by uncommenting this env setup. Note, you should make sure to set you
+# DD_API_KEY in order to send the related metrics to staging for evaluation.
+#[[envs.default.matrix]]
+#python = ["3.9"]
+#os = ["linux"]
+#driver = ["odbc"]
+#version = ["2019", "2022"]
+#case = ["high-cardinality"]
 
 [envs.default.env-vars]
 ODBCSYSINI = "{root}{/}tests{/}odbc"
@@ -53,10 +56,12 @@ matrix.version.env-vars = [
   { key = "SQLSERVER_ENGINE_EDITION" },
   { key = "SQLSERVER_IMAGE_TAG", value = "2017-CU24-ubuntu-16.04", if = ["2017"], platform = ["linux"] },
   { key = "SQLSERVER_IMAGE_TAG", value = "2019-CU11-ubuntu-16.04", if = ["2019"], platform = ["linux"] },
+  { key = "SQLSERVER_IMAGE_TAG", value = "2022-preview-ubuntu-22.04", if = ["2022"], platform = ["linux"] },
   { key = "SQLSERVER_BASE_IMAGE", value = "datadog/docker-library:sqlserver_{matrix:version}", platform = ["windows"] },
 ]
 matrix.driver.env-vars = [
   { key = "WINDOWS_SQLSERVER_DRIVER", platform = ["windows"] },
 ]
 name.linux-odbc-2019-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality"
+name.linux-odbc-2022-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality"
 name.windows-odbc-2019-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality-windows"
