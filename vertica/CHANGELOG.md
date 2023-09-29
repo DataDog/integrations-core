@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.2.0 / 2023-09-29
+
 ***Added***:
 
 * Update Vertica dependency to 1.3.5 ([#15922](https://github.com/DataDog/integrations-core/pull/15922))

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 34.0.0 / 2023-09-29
+
 ***Changed***:
 
 * Upgrade to openstacksdk version 1.5.0 ([#15919](https://github.com/DataDog/integrations-core/pull/15919))
