@@ -62,6 +62,7 @@ def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, da
     instance_docker['query_metrics'] = {'enabled': False}
     instance_docker['procedure_metrics'] = {'enabled': False}
     instance_docker['query_activity'] = {'enabled': False}
+    instance_docker['collect_settings'] = {'enabled': False}
     autodiscovery_dbs = ['master', 'msdb', 'datadog_test']
     if database_autodiscovery:
         instance_docker['autodiscovery_include'] = autodiscovery_dbs
@@ -620,15 +621,12 @@ def test_resolved_hostname_set(
         for k, v in cloud_metadata.items():
             instance_docker[k] = v
     instance_docker['dbm'] = dbm_enabled
-    instance_docker['procedure_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
-    instance_docker['query_metrics'] = {
-        'enabled': True,
-        'run_sync': True,
-        'collection_interval': 1,
-        # in tests sometimes things can slow down so we don't want this short deadline causing some events
-        # to fail to be collected on time
-        'enforce_collection_interval_deadline': False,
-    }
+    if dbm_enabled:
+        # set a very small collection interval so the tests go fast
+        instance_docker['procedure_metrics'] = {'collection_interval': 0.1}
+        instance_docker['collect_settings'] = {'collection_interval': 0.1}
+        instance_docker['query_activity'] = {'collection_interval': 0.1}
+        instance_docker['query_metrics'] = {'collection_interval': 0.1}
     if database:
         instance_docker['database'] = database
     if reported_hostname:
@@ -660,6 +658,12 @@ def test_resolved_hostname_set(
 @pytest.mark.usefixtures('dd_environment')
 def test_database_instance_metadata(aggregator, dd_run_check, instance_docker, dbm_enabled, reported_hostname):
     instance_docker['dbm'] = dbm_enabled
+    if dbm_enabled:
+        # set a very small collection interval so the tests go fast
+        instance_docker['procedure_metrics'] = {'collection_interval': 0.1}
+        instance_docker['collect_settings'] = {'collection_interval': 0.1}
+        instance_docker['query_activity'] = {'collection_interval': 0.1}
+        instance_docker['query_metrics'] = {'collection_interval': 0.1}
     if reported_hostname:
         instance_docker['reported_hostname'] = reported_hostname
     expected_host = reported_hostname if reported_hostname else 'stubbed.hostname'

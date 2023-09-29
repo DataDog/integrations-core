@@ -57,6 +57,8 @@ def dbm_instance(instance_docker):
     instance_docker['dbm'] = True
     instance_docker['min_collection_interval'] = 1
     instance_docker['procedure_metrics'] = {'enabled': False}
+    instance_docker['collect_settings'] = {'enabled': False}
+    instance_docker['query_activity'] = {'enabled': False}
     # set a very small collection interval so the tests go fast
     instance_docker['query_metrics'] = {
         'enabled': True,
@@ -298,6 +300,7 @@ def test_statement_metrics_and_plans(
     caplog.set_level(logging.INFO)
     if disable_secondary_tags:
         dbm_instance['query_metrics']['disable_secondary_tags'] = True
+    dbm_instance['query_activity'] = {'enabled': True, 'collection_interval': 2}
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     # the check must be run three times:
