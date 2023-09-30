@@ -26,14 +26,12 @@ class ConnectionInfo:
         self,
         connection: psycopg.Connection,
         deadline: int,
-        active: bool,
         last_accessed: int,
         thread: threading.Thread,
         persistent: bool,
     ):
         self.connection = connection
         self.deadline = deadline
-        self.active = active
         self.last_accessed = last_accessed
         self.thread = thread
         self.persistent = persistent
@@ -126,7 +124,6 @@ class MultiDatabaseConnectionPool(object):
             self._conns[dbname] = ConnectionInfo(
                 connection=db,
                 deadline=deadline,
-                active=True,
                 last_accessed=datetime.datetime.now(),
                 thread=threading.current_thread(),
                 persistent=persistent,
@@ -166,15 +163,9 @@ class MultiDatabaseConnectionPool(object):
             raise
         else:
             if not interrupted_error_occurred:
-                with self._mu:
-                    if db.broken:
+                if db.broken:
+                    with self._mu:
                         self._terminate_connection_unsafe(dbname)
-                    else:
-                        try:
-                            self._conns[dbname].active = False
-                        except KeyError:
-                            # if self._get_connection_raw hit an exception, self._conns[dbname] didn't get populated
-                            pass
 
     def prune_connections(self):
         """
@@ -187,7 +178,10 @@ class MultiDatabaseConnectionPool(object):
         with self._mu:
             now = datetime.datetime.now()
             for dbname, conn in list(self._conns.items()):
-                if conn.deadline < now:
+                if (
+                    conn.deadline < now
+                    and conn.connection.info.transaction_status != psycopg.pq.TransactionStatus.ACTIVE
+                ) or conn.connection.broken:
                     self._stats.connection_pruned += 1
                     self._terminate_connection_unsafe(dbname)
 
@@ -207,10 +201,13 @@ class MultiDatabaseConnectionPool(object):
         """
         with self._mu:
             sorted_conns = sorted(self._conns.items(), key=lambda i: i[1].last_accessed)
-            for name, conn_info in sorted_conns:
-                if not conn_info.active and not conn_info.persistent:
-                    self._terminate_connection_unsafe(name)
-                    return name
+            for dbname, conn in sorted_conns:
+                if (
+                    not conn.persistent
+                    and conn.connection.info.transaction_status != psycopg.pq.TransactionStatus.ACTIVE
+                ) or conn.connection.broken:
+                    self._terminate_connection_unsafe(dbname)
+                    return dbname
 
             # Could not evict a candidate; return None
             return None
