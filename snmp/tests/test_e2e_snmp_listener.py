@@ -44,7 +44,9 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
 
     from .common import ACTIVE_ENV_NAME
 
-    raise Exception(run_command(['docker', 'logs', 'dd_snmp_{}'.format(ACTIVE_ENV_NAME)], capture=True).stdout)
+    raise Exception(
+        run_command(['docker', 'exec', 'dd_snmp_{}'.format(ACTIVE_ENV_NAME), 'agent', 'status'], capture=True).stdout
+    )
 
     snmp_device = _build_device_ip(container_ip)
     subnet_prefix = ".".join(container_ip.split('.')[:3])
