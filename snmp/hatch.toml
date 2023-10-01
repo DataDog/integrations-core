@@ -10,12 +10,8 @@ mypy-args = [
 ]
 
 [[envs.default.matrix]]
-python = ["2.7"]
-snmplistener = ["false"]
-
-[[envs.default.matrix]]
 python = ["3.9"]
-snmplistener = ["false", "true"]
+snmplistener = ["true"]
 
 [envs.default.overrides]
 matrix.snmplistener.env-vars = "SNMP_LISTENER_ENV"
