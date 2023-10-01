@@ -410,7 +410,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
         available_columns = set(rows[0].keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
-        rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
+        rows = self._compute_derivative_rows(rows, metric_columns, key=_row_key)
         self._check.gauge(
             'dd.postgres.queries.query_rows_raw',
             len(rows),
@@ -419,7 +419,11 @@ class PostgresStatementMetrics(DBMAsyncJob):
         )
         return rows
 
-    @tracked_method(agent_check_getter=agent_check_getter)
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
+    def _compute_derivative_rows(self, rows, metric_columns, key):
+        return self._state.compute_derivative_rows(rows, metric_columns, key=key)
+
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _normalize_queries(self, rows):
         normalized_rows = []
         for row in rows:
