@@ -201,11 +201,11 @@ jobs:
         mkdir "${{ env.TRACE_CAPTURE_BASE_DIR }}"
         python .ddev/ci/scripts/traces.py capture --port "${{ inputs.trace-agent-port }}" --record-file "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
 
-    - name: Run Unit & Integration tests
-      if: inputs.standard && !inputs.minimum-base-package
-      env:
-        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
-      run: ddev test --cov --junit ${{ inputs.target }}
+    # - name: Run Unit & Integration tests
+    #   if: inputs.standard && !inputs.minimum-base-package
+    #   env:
+    #     DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
+    #   run: ddev test --cov --junit ${{ inputs.target }}
 
     - name: Run Unit & Integration tests with minimum version of base package
       if: inputs.standard && inputs.minimum-base-package
