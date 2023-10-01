@@ -277,6 +277,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._time_since_last_schemas_query = time.time()
         return metadata
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _query_database_information(self, cursor: psycopg.Cursor, dbname: str) -> Dict[str, Union[str, int]]:
         """
         Collect database info. Returns
@@ -290,6 +291,7 @@ class PostgresMetadata(DBMAsyncJob):
         row = cursor.fetchall()[0]
         return row
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _query_schema_information(self, cursor: psycopg.Cursor, dbname: str) -> Dict[str, str]:
         """
         Collect user schemas. Returns
@@ -304,6 +306,7 @@ class PostgresMetadata(DBMAsyncJob):
             schemas.append({"id": str(row['id']), "name": row['name'], "owner": row['owner']})
         return schemas
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _get_table_info(self, cursor, dbname, schema_id):
         """
         Tables will be sorted by the number of total accesses (index_rel_scans + seq_scans) and truncated to
@@ -367,6 +370,7 @@ class PostgresMetadata(DBMAsyncJob):
         table_info = sorted(table_info, key=sort_tables, reverse=True)
         return table_info[:limit]
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _query_table_information_for_schema(
         self, cursor: psycopg.Cursor, schema_id: str, dbname: str
     ) -> List[Dict[str, Union[str, Dict]]]:
@@ -439,6 +443,7 @@ class PostgresMetadata(DBMAsyncJob):
 
         return table_payloads
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_metadata_for_database(self, dbname):
         metadata = {}
         with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:

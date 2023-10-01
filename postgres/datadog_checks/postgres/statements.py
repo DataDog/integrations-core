@@ -348,6 +348,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
             return []
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _emit_pg_stat_statements_dealloc(self):
         if self._check.version < V14:
             return
@@ -418,6 +419,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         )
         return rows
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _normalize_queries(self, rows):
         normalized_rows = []
         for row in rows:

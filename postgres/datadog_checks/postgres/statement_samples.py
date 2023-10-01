@@ -587,6 +587,7 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         return db_explain_error, err
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
         with self.db_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms) as conn:
