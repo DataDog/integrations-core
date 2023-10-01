@@ -203,6 +203,7 @@ class RootConfig(LazilyParsedConfig):
 
                 self._field_orgs = orgs
             else:
+                raise Exception(len(os.getenv('DD_API_KEY', '')))
                 self._field_orgs = self.raw_data['orgs'] = {
                     'default': {
                         'api_key': os.getenv('DD_API_KEY', ''),
