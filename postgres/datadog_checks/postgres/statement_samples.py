@@ -793,6 +793,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         return None
 
     def _collect_plans(self, rows):
+        start_time = time.time()
         events = []
         for row in rows:
             try:
@@ -811,6 +812,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     tags=self.tags + ["error:collect-plan-for-statement-crash"] + self._check._get_debug_tags(),
                     hostname=self._check.resolved_hostname,
                 )
+        self._report_check_hist_metrics(start_time, len(events), "collect_plans")
         return events
 
     def _create_activity_event(self, rows, active_connections):
