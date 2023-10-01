@@ -40,6 +40,12 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
     The assertions match `snmp_listener` configuration in `datadog.yaml`.
     See `dd_environment` setup in `conftest.py`.
     """
+    from datadog_checks.dev import run_command
+
+    from .common import SNMP_CONTAINER_NAME
+
+    raise Exception(run_command(['docker', 'logs', 'dd_snmp_{}'.format(ACTIVE_ENV_NAME)], capture=True).stdout)
+
     snmp_device = _build_device_ip(container_ip)
     subnet_prefix = ".".join(container_ip.split('.')[:3])
 
