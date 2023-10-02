@@ -48,6 +48,7 @@ class TestKubeAPIServerMetrics:
         'request_duration_seconds.count',
         'process_resident_memory_bytes',
         'process_virtual_memory_bytes',
+        'etcd.db.total_size',
         'etcd_request_duration_seconds.sum',
         'etcd_request_duration_seconds.count',
         'watch_events_sizes.sum',
