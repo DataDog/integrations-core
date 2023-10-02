@@ -65,7 +65,7 @@ A dashboard that follows best practices helps users consume data quickly. Best p
    ![Use legends](../assets/images/use_legends.png)
 - [x] Adjacent graphs have aligned x-axes. If one graph is showing a legend and the other isn't, the x-axes won't align—make sure they either both show a legend or both do not.
    ![X axes alignment](../assets/images/x_axes_alignment.png)
-- [x] For timeseries, base the display type on the type of metric
+- [x] For timeseries, base the display type on the type of metric.
     | Types of metric | Display type |
     | - | - |
     | Volume (e.g. Number of connections) | `area` |
