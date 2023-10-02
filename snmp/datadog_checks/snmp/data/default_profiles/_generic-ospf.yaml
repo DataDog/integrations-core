@@ -8,8 +8,6 @@ metrics:
         name: ospfNbrState
       - OID: 1.3.6.1.2.1.14.10.1.7
         name: ospfNbrEvents
-        metric_type: monotonic_count
-        forced_type: monotonic_count
       - OID: 1.3.6.1.2.1.14.10.1.8
         name: ospfNbrLsRetransQLen
     metric_tags:

@@ -40,7 +40,7 @@ def test_e2e_profile_generic_ospf(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.ospfNbr', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ospfNbrEvents', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ospfNbrEvents', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.ospfNbrLsRetransQLen', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.ospfNbrState', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 

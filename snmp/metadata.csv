@@ -1662,7 +1662,7 @@ snmp.ospfIfLsaCount,gauge,,,,[Arista] [Aruba] [Generic router] [Cisco c3850] [Ci
 snmp.ospfIfRetransInterval,gauge,,second,,"[Arista] [Aruba] [Generic router] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] [Palo Alto] [F5 BIG-IP] The number of seconds between link state advertisement retransmissions, for adjacencies belonging to this interface.",0,snmp,,
 snmp.ospfIfState,gauge,,,,[Arista] [Aruba] [Generic router] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] [Palo Alto] [F5 BIG-IP] The OSPF Interface State.,0,snmp,,
 snmp.ospfNbr,gauge,,,,"The number of OSPF neighbors by state.",0,snmp,,
-snmp.ospfNbrEvents,count,,,,[Arista] [Aruba] [Generic router] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] [Palo Alto] [F5 BIG-IP] The number of times this neighbor relationship has changed state or an error has occurred.,0,snmp,,
+snmp.ospfNbrEvents,gauge,,,,[Arista] [Aruba] [Generic router] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] [Palo Alto] [F5 BIG-IP] The number of times this neighbor relationship has changed state or an error has occurred.,0,snmp,,
 snmp.ospfNbrLsRetransQLen,gauge,,,,[Arista] [Aruba] [Generic router] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] [Palo Alto] [F5 BIG-IP] The current length of the retransmission queue.,0,snmp,,
 snmp.ospfNbrState,gauge,,,,[Arista] [Aruba] [Generic router] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] [Palo Alto] [F5 BIG-IP] The state of the relationship with this neighbor.,0,snmp,,
 snmp.ospfVirtIf,gauge,,,,"The number of OSPF virtual interfaces by state.",0,snmp,,

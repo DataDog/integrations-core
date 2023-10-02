@@ -789,7 +789,7 @@ def test_cisco_3850(aggregator):
             aggregator.assert_metric('snmp.{}'.format(mem_metrics), metric_type=aggregator.GAUGE, tags=tags)
 
     neighbor_metrics = [
-        ('ospfNbrEvents', aggregator.COUNT),
+        ('ospfNbrEvents', aggregator.RATE),
         ('ospfNbrState', aggregator.GAUGE),
         ('ospfNbrLsRetransQLen', aggregator.GAUGE),
     ]
