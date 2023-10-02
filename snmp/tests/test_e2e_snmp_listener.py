@@ -46,10 +46,17 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
 
     command = ['docker', 'exec', 'dd_snmp_{}'.format(ACTIVE_ENV_NAME)]
     output = (
-        run_command([*command, 'agent', 'status'], capture=True).stdout
+        '/// Agent status ///\n'
+        + run_command([*command, 'agent', 'status'], capture=True).stdout
+        + '/// Agent configcheck ///\n'
         + run_command([*command, 'agent', 'configcheck'], capture=True).stdout
+        + '/// /etc/datadog-agent/datadog.yaml ///\n'
         + run_command([*command, 'cat', '/etc/datadog-agent/datadog.yaml'], capture=True).stdout
+        + '/// /etc/datadog-agent/conf.d/snmp.d/snmp.yaml ///\n'
         + run_command([*command, 'cat', '/etc/datadog-agent/conf.d/snmp.d/snmp.yaml'], capture=True).stdout
+        + '/// /etc/datadog-agent/conf.d/snmp.d/auto_conf.yaml ///\n'
+        + run_command([*command, 'cat', '/etc/datadog-agent/conf.d/snmp.d/auto_conf.yaml'], capture=True).stdout
+        + '/// Agent logs ///\n'
         + run_command([command[0], 'logs', command[2]], capture=True).stdout
     )
 
