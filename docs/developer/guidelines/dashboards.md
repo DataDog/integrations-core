@@ -68,7 +68,7 @@ A dashboard that follows best practices helps users consume data quickly. Best p
 - [x] For timeseries, base the display type on the type of metric.
     | Types of metric | Display type |
     | - | - |
-    | Volume (e.g. Number of connections) | `area` |
+    | Volume (e.g. number of connections) | `area` |
     | Counts (e.g. Number of errors) | `bars` |
     | Multiple groups or default | `lines` |
 
