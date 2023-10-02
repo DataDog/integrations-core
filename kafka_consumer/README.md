@@ -110,6 +110,26 @@ sudo systemctl restart datadog-agent.service
 sudo service datadog-agent restart
 ```
 
+**Zero metrics sampled**
+If your check experiences 0 metrics sampled:
+
+  ```
+    kafka_consumer (4.1.2)
+    ----------------------
+      Instance ID: kafka_consumer:2677a0cdef1373a9 [OK]
+      Configuration Source: file:/etc/datadog-agent/conf.d/kafka_consumer.d/kafka_consumer.yaml
+      Total Runs: 1
+      Metric Samples: Last Run: 0, Total: 0
+      Events: Last Run: 0, Total: 0
+      Service Checks: Last Run: 0, Total: 0
+      Average Execution Time : 30.055s
+      Last Execution Date : 2023-10-02 18:07:51 UTC (1696270071000)
+      Last Successful Execution Date : 2023-10-02 18:07:51 UTC (1696270071000)
+  ```
+
+This may be caused by an invalid configuration, like setting `sasl_mechanism` to `PLAINTEXT` instead of `SSL`. You can use the [following test script][17] to attempt a connection to Kafka without the Datadog Agent to confirm that your configurations are correct.
+
+
 ## Further Reading
 
 - [Monitoring Kafka performance metrics][13]
@@ -131,3 +151,4 @@ sudo service datadog-agent restart
 [14]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
 [15]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
 [16]: https://www.datadoghq.com/product/data-streams-monitoring/
+[17]: https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/tests/python_client/script.py
