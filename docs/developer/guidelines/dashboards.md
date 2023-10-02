@@ -151,7 +151,7 @@ A dashboard that follows best practices helps users consume data quickly. Best p
     b. _(close enough)_
        ![Symmetrical example 2](../assets/images/symmetrical_example_2.png)
 
-1. Timeseries widgets should be at least 4 columns wide in order not to appear squashed on smaller displays
+1. Timeseries widgets should be at least 4 columns wide in order not to appear squashed on smaller displays.
 
 1. Stream widgets should be at least 6 columns wide (half the dashboard width) for readability. You should place them at the end of a dashboard so they don't "trap" scrolling. It's useful to put stream widgets in a group by themselves so they can be collapsed. Add an event stream only if the service monitored by the dashboard is reporting events. Use `sources:service_name`.
    ![Stream widgets](../assets/images/stream_widgets.png)
