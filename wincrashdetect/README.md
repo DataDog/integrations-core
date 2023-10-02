@@ -51,4 +51,4 @@ Need help? Contact [Datadog support][5].
 [3]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/wincrashdetect.d/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/help/
-[6]: https://github.com/DataDog/integrations-core/blob/master/wincrashdetect/metadata.csv
+[6]: https://docs.datadoghq.com/agent/basic_agent_usage/windows/?tab=gui#agent-status-and-information
