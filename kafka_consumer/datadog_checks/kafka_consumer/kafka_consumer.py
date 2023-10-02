@@ -26,6 +26,11 @@ class KafkaCheck(AgentCheck):
         consumer_offsets = {}
 
         try:
+            self.client.request_metadata_update()
+        except:
+            raise Exception("Unable to connect to the AdminClient. This is likely due to an error in the configuration.")
+
+        try:
             # Fetch consumer offsets
             # Expected format: {(consumer_group, topic, partition): offset}
             consumer_offsets = self.client.get_consumer_offsets()
