@@ -14,7 +14,7 @@ The Windows Crash Detection integration is included in the [Datadog Agent][1] pa
 
 ### Configuration
 
-1. Edit the `wincrashdetect.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to set 'enabled: true'. See the [sample wincrashdetect.d/conf.yaml.example][3] for all available configuration options.
+1. Edit the `wincrashdetect.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to set `enabled: true`. See the [sample wincrashdetect.d/conf.yaml.example][3] for all available configuration options.
 
 2. Enable the Windows Crash Detection module in `C:\ProgramData\Datadog\system-probe.yaml` by setting the enabled flag to 'true':
 
