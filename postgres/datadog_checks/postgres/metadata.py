@@ -221,6 +221,7 @@ class PostgresMetadata(DBMAsyncJob):
     def report_postgres_metadata(self):
         # Only query for settings if configured to do so &&
         # don't report more often than the configured collection interval
+        start_time = time.time()
         elapsed_s = time.time() - self._time_since_last_settings_query
         if elapsed_s >= self.pg_settings_collection_interval and self._collect_pg_settings_enabled:
             self._pg_settings_cached = self._collect_postgres_settings()
@@ -257,6 +258,13 @@ class PostgresMetadata(DBMAsyncJob):
             self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
             self._check.database_monitoring_metadata(json_event)
 
+        self._check.histogram(
+            "dd.postgres.report_postgres_metadata.time",
+            (time.time() - start_time) * 1000,
+            tags=self.tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
+
     def _payload_pg_version(self):
         version = self._check.version
         if not version:
@@ -264,6 +272,7 @@ class PostgresMetadata(DBMAsyncJob):
         return 'v{major}.{minor}.{patch}'.format(major=version.major, minor=version.minor, patch=version.patch)
 
     def _collect_schema_info(self):
+        start_time = time.time()
         databases = []
         if self._check.autodiscovery:
             databases = self._check.autodiscovery.get_items()
@@ -275,6 +284,12 @@ class PostgresMetadata(DBMAsyncJob):
             metadata.append(self._collect_metadata_for_database(database))
 
         self._time_since_last_schemas_query = time.time()
+        self._check.histogram(
+            "dd.postgres.collect_schema_info.time",
+            (time.time() - start_time) * 1000,
+            tags=self.tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
         return metadata
 
     @tracked_method(agent_check_getter=agent_check_getter)
@@ -469,6 +484,7 @@ class PostgresMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):
+        start_time = time.time()
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 self._log.debug("Running query [%s]", PG_SETTINGS_QUERY)
@@ -476,4 +492,10 @@ class PostgresMetadata(DBMAsyncJob):
                 cursor.execute(PG_SETTINGS_QUERY)
                 rows = cursor.fetchall()
                 self._log.debug("Loaded %s rows from pg_settings", len(rows))
+                self._check.histogram(
+                    "dd.postgres.collect_postgres_settings.time",
+                    (time.time() - start_time) * 1000,
+                    tags=self.tags + self._check._get_debug_tags(),
+                    hostname=self._check.resolved_hostname,
+                )
                 return [dict(row) for row in rows]

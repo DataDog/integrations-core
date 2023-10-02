@@ -189,6 +189,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         # all databases on the host. For metrics the "db" tag is added during ingestion based on which database
         # each query came from.
         try:
+            start_time = time.time()
             rows = self._collect_metrics_rows()
             if not rows:
                 return
@@ -206,6 +207,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 "ddagenthostname": self._check.agent_hostname,
             }
             self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
+            self._check.histogram(
+                "dd.postgres.collect_per_statement_metrics.time",
+                (time.time() - start_time) * 1000,
+                tags=self.tags + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
         except Exception:
             self._log.exception('Unable to collect statement metrics due to an error')
             return []
@@ -213,6 +220,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _load_pg_stat_statements(self):
         try:
+            start_time = time.time()
             available_columns = set(self._get_pg_stat_statements_columns())
             missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - available_columns
             if len(missing_columns) > 0:
@@ -346,6 +354,13 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 hostname=self._check.resolved_hostname,
             )
 
+            self._check.histogram(
+                "dd.postgres.load_pg_stat_statements.time",
+                (time.time() - start_time) * 1000,
+                tags=self.tags + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
+
             return []
 
     @tracked_method(agent_check_getter=agent_check_getter)
@@ -400,6 +415,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _collect_metrics_rows(self):
+        start_time = time.time()
         self._emit_pg_stat_statements_metrics()
         self._emit_pg_stat_statements_dealloc()
         rows = self._load_pg_stat_statements()
@@ -414,6 +430,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._check.gauge(
             'dd.postgres.queries.query_rows_raw',
             len(rows),
+            tags=self.tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
+        self._check.histogram(
+            "dd.postgres.collect_metrics_rows.time",
+            (time.time() - start_time) * 1000,
             tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
