@@ -84,7 +84,7 @@ sqlserver.procedures.logical_reads,count,,read,,"Total number of logical reads p
 sqlserver.procedures.logical_writes,count,,write,,"Total number of logical writes performed by executed stored procedures per procedure (DBM only). Tags: `db`, `procedure_name`.",0,sql_server,stored procedure logical writes,
 sqlserver.procedures.physical_reads,count,,read,,"Total number of physical reads performed by executed stored procedures per procedure (DBM only). Tags: `db`, `procedure_name`.",0,sql_server,stored procedure physical reads,
 sqlserver.procedures.spills,count,,,,"The total number of pages spilled by execution of this stored procedure per procedure (DBM only). Tags: `db`, `procedure_name`.",0,sql_server,stored procedure spills,
-sqlserver.procedures.time,count,,nanosecond,,"Total elapsed time for executed stored procedures per procedure (DBM only),0,sql_server,stored procedure time,
+sqlserver.procedures.time,count,,nanosecond,,"Total elapsed time for executed stored procedures per procedure (DBM only)",0,sql_server,stored procedure time,
 sqlserver.procedures.worker_time,count,,nanosecond,,"Total CPU time consumed by executed stored procedures per procedure (DBM only). Tags: `db`, `procedure_name`.",0,sql_server,stored procedure worker time,
 sqlserver.queries.clr_time,count,,nanosecond,,Total time consumed inside Microsoft .NET Framework common language runtime (CLR) objects for executed queries per query (DBM only),0,sql_server,query clr time,
 sqlserver.queries.columnstore_segment_reads,count,,segment,,Total columnstore segments read by executed queries per query (DBM only),0,sql_server,query columnstore segment reads,
