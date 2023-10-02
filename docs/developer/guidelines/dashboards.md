@@ -63,7 +63,7 @@ A dashboard that follows best practices helps users consume data quickly. Best p
        ![Header color usage](../assets/images/header_color_usage.png)
 - [x] Legends for each graph. Legends make it easy to read a graph without having to hover over each series or maximize the widget. Make sure you use aliases so the legend is easy to read. Automatic mode for legends is a great option that hides legends when space is tight and shows them when there's room.
    ![Use legends](../assets/images/use_legends.png)
-- [x] Adjascent graphs have aligned x-axes. If one graph is showing a legend and the other isn't, the x-axes won't align - make sure they either both show a legend or both do not.
+- [x] Adjacent graphs have aligned x-axes. If one graph is showing a legend and the other isn't, the x-axes won't align—make sure they either both show a legend or both do not.
    ![X axes alignment](../assets/images/x_axes_alignment.png)
 - [x] For timeseries, base the display type on the type of metric
     | Types of metric | Display type |
