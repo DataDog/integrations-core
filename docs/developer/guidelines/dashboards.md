@@ -76,7 +76,7 @@ A dashboard that follows best practices helps users consume data quickly. Best p
 
 1. After selecting *New Dashboard*, you will have the option to choose from: *Dashboard, Screenboard*, and *Timeboard*. *Dashboard* is recommended.
 
-1. Add a logo to the dashboard header. The integration logo will automatically appear in the header if the icon exists [here](http://app.datadoghq.com/internal/styleguide/logos/logo-gallery?variant=avatar) and the `integration_id` matches the icon name. That means it will only appear when the dashboard you're working on is made into the official integration board.
+1. Add a logo to the dashboard header. The integration logo will automatically appear in the header if the icon exists [here](https://druids.datadoghq.com/logos/logo-gallery) and the `integration_id` matches the icon name. That means it will only appear when the dashboard you're working on is made into the official integration board.
    ![Logo in header](../assets/images/logo_header.png)
 
 1. Include the integration name in the dashboard title. (e.g. "Elasticsearch Overview Dashboard"). 
