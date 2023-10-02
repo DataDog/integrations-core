@@ -24,15 +24,6 @@ The Windows Crash Detection integration is included in the [Datadog Agent][1] pa
     ```
 3. [Restart the Agent][4].
 
-    For PowerShell (`powershell.exe`):
-    ```shell
-    restart-service -f datadogagent
-    ```
-    For Command Prompt (`cmd.exe`):
-    ```shell
-    net /y stop datadogagent && net start datadogagent
-    ```
-
 ### Validation
 
 [Run the Agent's status subcommand][6] and look for `wincrashdetect` under the Checks section.
