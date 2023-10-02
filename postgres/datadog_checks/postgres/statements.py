@@ -443,10 +443,19 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _compute_derivative_rows(self, rows, metric_columns, key):
-        return self._state.compute_derivative_rows(rows, metric_columns, key=key)
+        start_time = time.time()
+        rows = self._state.compute_derivative_rows(rows, metric_columns, key=key)
+        self._check.histogram(
+            "dd.postgres.compute_derivative_rows.time",
+            (time.time() - start_time) * 1000,
+            tags=self.tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
+        return rows
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _normalize_queries(self, rows):
+        start_time = time.time()
         normalized_rows = []
         for row in rows:
             normalized_row = dict(copy.copy(row))
@@ -466,6 +475,13 @@ class PostgresStatementMetrics(DBMAsyncJob):
             normalized_row['dd_tables'] = metadata.get('tables', None)
             normalized_row['dd_commands'] = metadata.get('commands', None)
             normalized_rows.append(normalized_row)
+
+        self._check.histogram(
+            "dd.postgres.normalize_queries.time",
+            (time.time() - start_time) * 1000,
+            tags=self.tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
 
         return normalized_rows
 
