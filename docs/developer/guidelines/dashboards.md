@@ -57,7 +57,7 @@ A dashboard that follows best practices helps users consume data quickly. Best p
 - [x] Well formatted, concise notes explaining the value or purpose of data in each group. Try the presets "caption", "annotation", or "header", or pick your own combination of styles. Avoid using the smallest font size for notes that are long or include complex formatting, like bulleted lists or code blocks.
 - [x] All widgets are placed within a group based on thematic organization, rather than directly on the background of the dashboard
    ![Group titles](../assets/images/group_titles.png)
-- [x] *Query value* widgets have a Timeseries background (e.g. "Bars") instead of being blank
+- [x] *Query value* widgets have a timeseries background (e.g. "Bars") instead of being blank
 - [x] Visualizations with obvious thresholds or zones use semantic formatting for graphs or custom red/green/yellow text formatting for query values. 
 - [x] Color coordination between group headers, notes within groups, and graphs within groups (e.g. all group headers or note widgets the same color). If you've applied a vivid green to all group headers, try making its notes light green.
        ![Header color usage](../assets/images/header_color_usage.png)
