@@ -69,7 +69,7 @@ A dashboard that follows best practices helps users consume data quickly. Best p
     | Types of metric | Display type |
     | - | - |
     | Volume (e.g. number of connections) | `area` |
-    | Counts (e.g. Number of errors) | `bars` |
+    | Counts (e.g. number of errors) | `bars` |
     | Multiple groups or default | `lines` |
 
 ### Creating a New Dashboard
