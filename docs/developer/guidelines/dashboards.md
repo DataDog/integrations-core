@@ -59,7 +59,7 @@ A dashboard that follows best practices helps users consume data quickly. Best p
    ![Group titles](../assets/images/group_titles.png)
 - [x] *Query value* widgets have a Timeseries background (e.g. "Bars") instead of being blank
 - [x] Visualizations with obvious thresholds or zones use semantic formatting for graphs or custom red/green/yellow text formatting for query values. 
-- [x] Color coordination between group headers, notes within groups, and graphs within groups (e.g. all group headers or note widgets the same colour). If you've applied a vivid green to all group headers, try making its notes light green as well.
+- [x] Color coordination between group headers, notes within groups, and graphs within groups (e.g. all group headers or note widgets the same color). If you've applied a vivid green to all group headers, try making its notes light green.
        ![Header color usage](../assets/images/header_color_usage.png)
 - [x] Legends for each graph. Legends make it easy to read a graph without having to hover over each series or maximize the widget. Make sure you use aliases so the legend is easy to read. Automatic mode for legends is a great option that hides legends when space is tight and shows them when there's room.
    ![Use legends](../assets/images/use_legends.png)
