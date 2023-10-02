@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 2.4.0 / 2023-09-29
+
+***Added***:
+
+* Update Cryptography to 41.0.4 ([#15922](https://github.com/DataDog/integrations-core/pull/15922))
+
 ## 2.3.1 / 2023-08-18
 
 ***Fixed***:

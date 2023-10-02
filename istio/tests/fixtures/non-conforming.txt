@@ -1,0 +1,32 @@
+# HELP galley_runtime_state_type_instances_total The number of type instances per type URL
+# TYPE galley_runtime_state_type_instances_total gauge
+galley_runtime_state_type_instances_total{collection="istio/authentication/v1alpha1/meshpolicies"} 1
+galley_runtime_state_type_instances_total{collection="istio/authentication/v1alpha1/policies"} 1
+galley_runtime_state_type_instances_total{collection="istio/config/v1alpha2/legacy/kuberneteses"} 1
+galley_runtime_state_type_instances_total{collection="istio/config/v1alpha2/legacy/logentries"} 2
+galley_runtime_state_type_instances_total{collection="istio/config/v1alpha2/legacy/metrics"} 8
+galley_runtime_state_type_instances_total{collection="istio/networking/v1alpha3/destinationrules"} 2
+galley_runtime_state_type_instances_total{collection="istio/networking/v1alpha3/gateways"} 1
+galley_runtime_state_type_instances_total{collection="istio/networking/v1alpha3/virtualservices"} 1
+galley_runtime_state_type_instances_total{collection="istio/policy/v1beta1/attributemanifests"} 2
+galley_runtime_state_type_instances_total{collection="istio/policy/v1beta1/handlers"} 3
+galley_runtime_state_type_instances_total{collection="istio/policy/v1beta1/rules"} 8
+# HELP galley_runtime_processor_snapshot_events_total The number of events per snapshot
+# TYPE galley_runtime_processor_snapshot_events_total histogram
+galley_runtime_processor_snapshot_events_total_bucket{le="0"} 0
+galley_runtime_processor_snapshot_events_total_bucket{le="1"} 0
+galley_runtime_processor_snapshot_events_total_bucket{le="2"} 0
+galley_runtime_processor_snapshot_events_total_bucket{le="4"} 1
+galley_runtime_processor_snapshot_events_total_bucket{le="8"} 1
+galley_runtime_processor_snapshot_events_total_bucket{le="16"} 1
+galley_runtime_processor_snapshot_events_total_bucket{le="32"} 2
+galley_runtime_processor_snapshot_events_total_bucket{le="64"} 2
+galley_runtime_processor_snapshot_events_total_bucket{le="128"} 2
+galley_runtime_processor_snapshot_events_total_bucket{le="256"} 2
+galley_runtime_processor_snapshot_events_total_bucket{le="+Inf"} 2
+galley_runtime_processor_snapshot_events_total_sum 30
+galley_runtime_processor_snapshot_events_total_count 2
+# HELP mixer_handler_daemons_total The current number of active daemon routines in a given adapter environment.
+# TYPE mixer_handler_daemons_total gauge
+mixer_handler_daemons_total{handler="kubernetesenv.istio-system",initConfigID="1"} 4
+mixer_handler_daemons_total{handler="prometheus.istio-system",initConfigID="1"} 1

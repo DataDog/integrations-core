@@ -12,8 +12,10 @@ from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
 from datadog_checks.base.types import InitConfigType  # noqa: F401
 from datadog_checks.vsphere.constants import (
+    ALL_RESOURCES_WITH_METRICS,
     ALLOWED_FILTER_PROPERTIES,
     ALLOWED_FILTER_TYPES,
+    BOTH,
     DEFAULT_BATCH_COLLECTOR_SIZE,
     DEFAULT_MAX_QUERY_METRICS,
     DEFAULT_METRICS_PER_QUERY,
@@ -24,13 +26,14 @@ from datadog_checks.vsphere.constants import (
     DEFAULT_VSPHERE_ATTR_PREFIX,
     DEFAULT_VSPHERE_TAG_PREFIX,
     EXTRA_FILTER_PROPERTIES_FOR_VMS,
-    HISTORICAL_RESOURCES,
+    HISTORICAL,
     MOR_TYPE_AS_STRING,
     OBJECT_PROPERTIES_BY_RESOURCE_TYPE,
     PROPERTY_METRICS_BY_RESOURCE_TYPE,
-    REALTIME_RESOURCES,
+    REALTIME,
     SIMPLE_PROPERTIES_BY_RESOURCE_TYPE,
 )
+from datadog_checks.vsphere.metrics import RESOURCES_WITH_HISTORICAL_METRICS, RESOURCES_WITH_REALTIME_METRICS
 from datadog_checks.vsphere.resource_filters import ResourceFilter, create_resource_filter  # noqa: F401
 from datadog_checks.vsphere.types import (  # noqa: F401
     InstanceConfig,
@@ -104,12 +107,15 @@ class VSphereConfig(object):
             self.should_collect_events = True
 
         # Utility
-        if self.collection_type == 'both':
-            self.collected_resource_types = REALTIME_RESOURCES + HISTORICAL_RESOURCES
-        elif self.collection_type == 'historical':
-            self.collected_resource_types = HISTORICAL_RESOURCES
+        if self.collection_type == BOTH:
+            self.collected_resource_types = ALL_RESOURCES_WITH_METRICS
+            self.collected_metric_types = [REALTIME, HISTORICAL]
+        elif self.collection_type == HISTORICAL:
+            self.collected_resource_types = RESOURCES_WITH_HISTORICAL_METRICS
+            self.collected_metric_types = [HISTORICAL]
         else:
-            self.collected_resource_types = REALTIME_RESOURCES
+            self.collected_resource_types = RESOURCES_WITH_REALTIME_METRICS
+            self.collected_metric_types = [REALTIME]
 
         # Filters
         self.resource_filters = self._parse_resource_filters(instance.get("resource_filters", []))
@@ -125,7 +131,7 @@ class VSphereConfig(object):
 
     def is_historical(self):
         # type: () -> bool
-        return self.collection_type in ('historical', 'both')
+        return self.collection_type in (HISTORICAL, BOTH)
 
     def validate_config(self):
         # type: () -> None
@@ -137,7 +143,7 @@ class VSphereConfig(object):
                 "disabling ssl verification."
             )
 
-        if self.collection_type not in ('realtime', 'historical', 'both'):
+        if self.collection_type not in (REALTIME, HISTORICAL, BOTH):
             raise ConfigurationError(
                 "Your configuration is incorrectly attempting to "
                 "set the `collection_type` to {}. It should be either "

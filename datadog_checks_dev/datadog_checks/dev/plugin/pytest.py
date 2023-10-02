@@ -28,6 +28,8 @@ from .._env import (
     replay_check_run,
     save_state,
     serialize_data,
+    set_up_env,
+    tear_down_env,
 )
 
 __aggregator = None
@@ -136,15 +138,29 @@ def dd_environment_runner(request):
     else:  # no cov
         # Exit testing and pass data back up to command
         if E2E_RESULT_FILE in os.environ:
-            # Standard `pytest.exit` requires a reason but we want an empty string for minimal output
-            from _pytest.outcomes import Exit
-
             with open(os.environ[E2E_RESULT_FILE], 'w', encoding='utf-8') as f:
                 f.write(json.dumps(data))
 
-            Exit('', 0)
+            # Rather than exiting we skip every test to avoid the following output:
+            # !!!!!!!!!! _pytest.outcomes.Exit: !!!!!!!!!!
+            pytest.skip()
         else:
             pytest.exit(message_template.format(serialize_data(data)))
+
+
+# Manipulate the output if we are spinning up or down an environment.
+#
+# Both of these conditions will be true during normal testing while only
+# one of them will be true when performing the logic.
+if not all([set_up_env(), tear_down_env()]):
+
+    def pytest_report_teststatus(report, config):
+        """
+        https://docs.pytest.org/en/stable/reference/reference.html#pytest.hookspec.pytest_report_teststatus
+        """
+        # Skipping every test displays an `s` for each even when using
+        # the minimum verbosity so we force zero output
+        return 'skipped', '', ''
 
 
 @pytest.fixture

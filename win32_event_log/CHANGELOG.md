@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 3.1.0 / 2023-09-29
+
+***Added***:
+
+* Add `legacy_mode` option to init_config ([#15907](https://github.com/DataDog/integrations-core/pull/15907))
+
 ***Fixed***:
 
 * Run all the tests on py3 ([#15798](https://github.com/DataDog/integrations-core/pull/15798))

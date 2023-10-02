@@ -2,10 +2,17 @@
 
 ## Unreleased
 
+## 34.0.0 / 2023-09-29
+
+***Changed***:
+
+* Upgrade to openstacksdk version 1.5.0 ([#15919](https://github.com/DataDog/integrations-core/pull/15919))
+
 ***Added***:
 
 * Upgrade clickhouse-driver to 0.2.6 on Python 3 ([#15726](https://github.com/DataDog/integrations-core/pull/15726))
 * Upgrade lz4 to 4.3.2 on Python 3 ([#15746](https://github.com/DataDog/integrations-core/pull/15746))
+* Update dependencies ([#15922](https://github.com/DataDog/integrations-core/pull/15922))
 
 ***Fixed***:
 

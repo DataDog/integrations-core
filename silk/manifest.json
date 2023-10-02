@@ -16,7 +16,7 @@
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Cloud",
-      "Category::Data Store",
+      "Category::Data Stores",
       "Category::Provisioning"
     ]
   },

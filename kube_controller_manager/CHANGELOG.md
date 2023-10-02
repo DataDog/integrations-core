@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.5.0 / 2023-09-29
+
 ***Added***:
 
 * Capture node_collector_evictions_total metric in kube controller manager ([#15737](https://github.com/DataDog/integrations-core/pull/15737))
