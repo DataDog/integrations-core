@@ -74,7 +74,7 @@ A dashboard that follows best practices helps users consume data quickly. Best p
 
 ### Creating a New Dashboard
 
-1. After selecting *New Dashboard*, you will have the option to choose between: *Dashboard, Screenboard*, and *Timeboard*. *Dashboard* is recommended.
+1. After selecting *New Dashboard*, you will have the option to choose from: *Dashboard, Screenboard*, and *Timeboard*. *Dashboard* is recommended.
 
 1. Add a logo to the dashboard header. The integration logo will automatically appear in the header if the icon exists [here](http://app.datadoghq.com/internal/styleguide/logos/logo-gallery?variant=avatar) and the `integration_id` matches the icon name. That means it will only appear when the dashboard you're working on is made into the official integration board.
    ![Logo in header](../assets/images/logo_header.png)
