@@ -8,7 +8,7 @@
 
 * Update Vertica dependency to 1.3.5 ([#15922](https://github.com/DataDog/integrations-core/pull/15922))
 
-## 4.1.0 / 2023-08-18
+## 4.1.0 / 2023-08-18 / Agent 7.48.0
 
 ***Added***:
 

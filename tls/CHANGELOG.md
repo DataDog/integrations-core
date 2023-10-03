@@ -8,7 +8,7 @@
 
 * Update Cryptography dependency ([#15922](https://github.com/DataDog/integrations-core/pull/15922))
 
-## 2.12.1 / 2023-08-18
+## 2.12.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:
 
