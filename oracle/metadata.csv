@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
-oracle.buffer_cachehit_ratio,gauge,,percentagesabc,,Ratio of buffer cache hits,1,oracle_database,buff cache hit ratio,
+oracle.buffer_cachehit_ratio,gauge,,percentagesabcd,,Ratio of buffer cache hits,1,oracle_database,buff cache hit ratio,
 oracle.cursor_cachehit_ratio,gauge,,percent,,Ratio of cursor cache hits,1,oracle_database,cursor cache hit ratio,
 oracle.library_cachehit_ratio,gauge,,percent,,Ratio of library cache hits,1,oracle_database,lib cache hit ratio,
 oracle.shared_pool_free,gauge,,percent,,shared pool free memory %,0,oracle_database,shared pool free,
