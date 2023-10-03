@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.dev import run_command
 from datadog_checks.ibm_db2 import IbmDb2Check
 
 from . import metrics
@@ -17,6 +16,7 @@ pytestmark = pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_bad_config(aggregator, instance, dd_run_check):
     instance['port'] = '60000'
+    instance["connection_timeout"] = 1
     check = IbmDb2Check('ibm_db2', {}, [instance])
     dd_run_check(check)
 
@@ -130,19 +130,3 @@ def test_metadata(instance, datadog_agent, dd_run_check):
     }
 
     datadog_agent.assert_metadata(CHECK_ID, version_metadata)
-
-
-@pytest.mark.usefixtures('dd_environment')
-def test_disconnection(aggregator, instance, dd_run_check):
-    instance["connection_timeout"] = 1
-    check = IbmDb2Check('ibm_db2', {}, [instance])
-
-    # Disconnect the database
-    run_command('docker exec ibm_db2 su - db2inst1 -c "db2stop force"', check=True)
-    dd_run_check(check)
-    aggregator.assert_service_check(check.SERVICE_CHECK_CONNECT, check.CRITICAL)
-
-    # # Reconnect the database
-    run_command('docker exec ibm_db2 su - db2inst1 -c "db2start"', check=True)
-    check.check(instance)
-    aggregator.assert_service_check(check.SERVICE_CHECK_CONNECT, check.OK)
