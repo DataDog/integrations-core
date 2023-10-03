@@ -207,14 +207,13 @@ files:
         example: true
     - name: adoprovider
       description: |
-        Choose the ADO provider.  Note that the (default) provider
-        SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
-        provider, set the adoprovider to "MSOLEDBSQL" below or "MSOLEDBSQL19" for version 19 of the driver.
-        You will also need to download the new provider from
+        Choose the ADO provider. The (default) provider is MSOLEDBSQL.
+        Set the adoprovider to "MSOLEDBSQL19" for version 19 of the driver. Note that the provider SQLOLEDB is being deprecated.
+        You can download the provider from
         https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017
       value:
         type: string
-        example: SQLOLEDB
+        example: MSOLEDBSQL
     - name: connector
       description: |
         Change the connection method from adodbapi (the default) to
