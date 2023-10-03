@@ -6,7 +6,7 @@
 
 ***Changed***:
 
-* Upgrade PostgreSQL adapter `psycopg2` to `v2.9.8` ([#15949](https://github.com/DataDog/integrations-core/pull/15949))
+* Upgrade `psycopg2-binary` to `v2.9.8` ([#15949](https://github.com/DataDog/integrations-core/pull/15949))
 * Update `ssl` default configuration to 'allow' ([#15917](https://github.com/DataDog/integrations-core/pull/15917))
 
 ***Added***:
