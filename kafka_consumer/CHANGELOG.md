@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Attempt client connection before fetching consumer offsets ([#15951](https://github.com/DataDog/integrations-core/pull/15951))
+
 ## 4.1.2 / 2023-09-04
 
 ***Fixed***:
