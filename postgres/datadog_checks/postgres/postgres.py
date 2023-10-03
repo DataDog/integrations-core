@@ -278,7 +278,7 @@ class PostgreSql(AgentCheck):
     def _get_replication_role(self):
         with self.db.cursor() as cursor:
             cursor.execute('SELECT pg_is_in_recovery();')
-            role = cursor.fetchone()[0]
+            role = cursor.fetchall()[0][0]
             # value fetched for role is of <type 'bool'>
             return "standby" if role else "master"
 
@@ -749,7 +749,7 @@ class PostgreSql(AgentCheck):
                     self.db.rollback()
                     continue
 
-                for row in cursor:
+                for row in cursor.fetchall():
                     if not row:
                         self.log.debug("query result for metric_prefix %s: returned an empty result", metric_prefix)
                         continue

@@ -327,6 +327,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     pg_stat_activity_view=self._config.pg_stat_activity_view
                 )
             )
+            cursor.fetchall()
             all_columns = {i[0] for i in cursor.description}
             available_columns = [c for c in all_expected_columns if c in all_columns]
             missing_columns = set(all_expected_columns) - set(available_columns)
@@ -594,7 +595,8 @@ class PostgresStatementSamples(DBMAsyncJob):
                         explain_function=self._explain_function, statement=statement
                     )
                 )
-                result = cursor.fetchone()
+                results = cursor.fetchall()
+                result = results[0] if results else None
                 self._check.histogram(
                     "dd.postgres.run_explain.time",
                     (time.time() - start_time) * 1000,

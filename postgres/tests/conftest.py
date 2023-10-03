@@ -118,18 +118,12 @@ def mock_cursor_for_replica_stats():
             if "FROM pg_stat_replication" in query:
                 data.appendleft(['app1', 'streaming', 'async', '1.1.1.1', 12, 12, 12, 12])
                 data.appendleft(['app2', 'backup', 'sync', '1.1.1.1', 13, 13, 13, 13])
-            elif query == 'SHOW SERVER_VERSION;':
-                data.appendleft(['10.15'])
 
         def cursor_fetchall():
             while data:
                 yield data.pop()
 
-        def cursor_fetchone():
-            return data.pop()
-
         cursor.__enter__().execute = cursor_execute
         cursor.__enter__().fetchall = cursor_fetchall
-        cursor.__enter__().fetchone = cursor_fetchone
 
         yield
