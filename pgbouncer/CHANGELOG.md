@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Changed***:
+
+* Upgrade `psycopg2-binary` to `v2.9.8` ([#15949](https://github.com/DataDog/integrations-core/pull/15949))
+
 ## 5.0.0 / 2023-08-10
 
 ***Changed***:
