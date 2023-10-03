@@ -62,7 +62,7 @@ sqlserver.files.write_io_stall_queued,count,,millisecond,,"Total latency from IO
 sqlserver.files.write_io_stall,count,,millisecond,,"Total time that users waited for writes on the file. Tags: `logical_name`, `file_location`, `db`, `state`",-1,sql_server,write wait time on database file,
 sqlserver.files.writes,count,,write,second,"Number of writes issued on the file. Tags: `logical_name`, `file_location`, `db`, `state`",0,sql_server,writes on database file,
 sqlserver.files.written_bytes,count,,byte,second,"Bytes written to the file. Tags: `logical_name`, `file_location`, `db`, `state`",0,sql_server,bytes written to the database file,
-sqlserver.index.user_lookups,count,,lookups,,"Number of bookmark lookups by user queries. Tags: `db`, `table`, `index_name`",-1,sql_server,lookups by user queries,
+sqlserver.index.user_lookups,count,,occurrence,,"Number of bookmark lookups by user queries. Tags: `db`, `table`, `index_name`",-1,sql_server,lookups by user queries,
 sqlserver.index.user_scans,count,,scans,,"Number of scans by user queries that did not use 'seek' predicate. Tags: `db`, `table`, `index_name`",-1,sql_server,scans by user queries,
 sqlserver.index.user_seeks,count,,seeks,,"Number of seeks by user queries. Tags: `db`, `table`, `index_name`",-1,sql_server,seeks by user queries,
 sqlserver.index.user_updates,count,,updates,,"Number of updates by user queries. This includes Insert, Delete, and Updates representing the number of operations done, not the actual rows affected. Tags: `db`, `table`, `index_name`",-1,sql_server,updates by user queries,
