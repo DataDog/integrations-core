@@ -12,9 +12,9 @@ from mock import ANY
 from requests.exceptions import HTTPError
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.openstack_controller.legacy.openstack_controller_legacy import OpenStackControllerLegacyCheck
 from datadog_checks.openstack_controller.legacy.api import AbstractApi, Authenticator, SimpleApi
 from datadog_checks.openstack_controller.legacy.exceptions import IncompleteConfig, KeystoneUnreachable
+from datadog_checks.openstack_controller.legacy.openstack_controller_legacy import OpenStackControllerLegacyCheck
 
 from . import common
 
@@ -110,7 +110,9 @@ def test_populate_servers_cache_with_project_name_none(servers_detail, aggregato
     assert 'other-2' in servers
 
 
-@mock.patch('datadog_checks.openstack_controller.legacy.api.ApiFactory.create', return_value=mock.MagicMock(AbstractApi))
+@mock.patch(
+    'datadog_checks.openstack_controller.legacy.api.ApiFactory.create', return_value=mock.MagicMock(AbstractApi)
+)
 def test_check(mock_api, aggregator):
     check = OpenStackControllerLegacyCheck("test", {'ssl_verify': False}, [common.KEYSTONE_INSTANCE])
 
@@ -122,7 +124,9 @@ def test_check(mock_api, aggregator):
     mock_api.assert_called_with(ANY, common.KEYSTONE_INSTANCE, ANY)
 
 
-@mock.patch('datadog_checks.openstack_controller.legacy.api.ApiFactory.create', return_value=mock.MagicMock(AbstractApi))
+@mock.patch(
+    'datadog_checks.openstack_controller.legacy.api.ApiFactory.create', return_value=mock.MagicMock(AbstractApi)
+)
 def test_check_with_config_file(mock_api, aggregator):
     check = OpenStackControllerLegacyCheck("test", {'ssl_verify': False}, [common.CONFIG_FILE_INSTANCE])
 

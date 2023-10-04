@@ -179,7 +179,8 @@ def test_from_config(requests_wrapper):
         'datadog_checks.openstack_controller.legacy.api.Authenticator._post_auth_token', return_value=mock_response
     ):
         with mock.patch(
-            'datadog_checks.openstack_controller.legacy.api.Authenticator._get_auth_projects', return_value=PROJECTS_RESPONSE
+            'datadog_checks.openstack_controller.legacy.api.Authenticator._get_auth_projects',
+            return_value=PROJECTS_RESPONSE,
         ):
             cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'], requests_wrapper)
             assert isinstance(cred, Credential)
@@ -204,7 +205,8 @@ def test_from_config_with_admin(requests_wrapper):
         'datadog_checks.openstack_controller.legacy.api.Authenticator._post_auth_token', return_value=mock_response
     ):
         with mock.patch(
-            'datadog_checks.openstack_controller.legacy.api.Authenticator._get_auth_projects', return_value=PROJECTS_RESPONSE
+            'datadog_checks.openstack_controller.legacy.api.Authenticator._get_auth_projects',
+            return_value=PROJECTS_RESPONSE,
         ):
             cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'], requests_wrapper)
             assert isinstance(cred, Credential)

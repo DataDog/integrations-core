@@ -13,7 +13,6 @@ from datadog_checks.dev.fs import get_here
 from datadog_checks.dev.ssh_tunnel import socks_proxy
 from datadog_checks.dev.terraform import terraform_run
 from datadog_checks.openstack_controller.legacy.openstack_controller_legacy import OpenStackControllerLegacyCheck
-
 from tests.legacy.common import CHECK_NAME, CONFIG_FILE_INSTANCE, USE_OPENSTACK_SANDBOX
 
 

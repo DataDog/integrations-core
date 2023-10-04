@@ -342,7 +342,8 @@ def test_get_endpoint():
     assert api.get_neutron_endpoint() == u'http://10.0.3.44:5000/v3/endpoints/408fbfd00abf4bd1a71044f4849abf66'
 
     with mock.patch(
-        'datadog_checks.openstack_controller.legacy.api.OpenstackSDKApi._get_service', return_value={u'id': 'invalid_id'}
+        'datadog_checks.openstack_controller.legacy.api.OpenstackSDKApi._get_service',
+        return_value={u'id': 'invalid_id'},
     ):
         api.endpoints = {}
         with pytest.raises(KeystoneUnreachable):

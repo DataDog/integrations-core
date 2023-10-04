@@ -8,9 +8,8 @@ import os
 import mock
 import pytest
 
-from datadog_checks.openstack_controller.legacy.openstack_controller_legacy import OpenStackControllerLegacyCheck
-
 import tests.legacy.common as common
+from datadog_checks.openstack_controller.legacy.openstack_controller_legacy import OpenStackControllerLegacyCheck
 
 
 def make_request_responses(url, params=None, timeout=None):
@@ -171,7 +170,9 @@ class MockHTTPResponse(object):
         return self.response_dict
 
 
-@mock.patch('datadog_checks.openstack_controller.legacy.api.SimpleApi._make_request', side_effect=make_request_responses)
+@mock.patch(
+    'datadog_checks.openstack_controller.legacy.api.SimpleApi._make_request', side_effect=make_request_responses
+)
 def test_scenario(make_request, aggregator):
     instance = common.MOCK_CONFIG["instances"][0]
     init_config = common.MOCK_CONFIG['init_config']
@@ -189,7 +190,8 @@ def test_scenario(make_request, aggregator):
         auth_projects_response = json.loads(f.read())
 
     with mock.patch(
-        'datadog_checks.openstack_controller.legacy.api.Authenticator._post_auth_token', return_value=auth_tokens_response
+        'datadog_checks.openstack_controller.legacy.api.Authenticator._post_auth_token',
+        return_value=auth_tokens_response,
     ):
         with mock.patch(
             'datadog_checks.openstack_controller.legacy.api.Authenticator._get_auth_projects',
@@ -7131,7 +7133,9 @@ def test_scenario(make_request, aggregator):
         pytest.param('auth_tokens_no_role_response.json', id='no roles'),
     ],
 )
-@mock.patch('datadog_checks.openstack_controller.legacy.api.SimpleApi._make_request', side_effect=make_request_responses)
+@mock.patch(
+    'datadog_checks.openstack_controller.legacy.api.SimpleApi._make_request', side_effect=make_request_responses
+)
 def test_auth_tokens(make_request, aggregator, auth_tokens_path):
     # Ensure that the check can collect data when multiple or no roles are defined
     instance = common.MOCK_CONFIG["instances"][0]
@@ -7150,7 +7154,8 @@ def test_auth_tokens(make_request, aggregator, auth_tokens_path):
         auth_projects_response = json.loads(f.read())
 
     with mock.patch(
-        'datadog_checks.openstack_controller.legacy.api.Authenticator._post_auth_token', return_value=auth_tokens_response
+        'datadog_checks.openstack_controller.legacy.api.Authenticator._post_auth_token',
+        return_value=auth_tokens_response,
     ):
         with mock.patch(
             'datadog_checks.openstack_controller.legacy.api.Authenticator._get_auth_projects',
