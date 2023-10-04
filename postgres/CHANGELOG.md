@@ -10,6 +10,7 @@
 
 ***Added***:
 
+* Establish main db connection from pool to ensure connection is valid ([#15962](https://github.com/DataDog/integrations-core/pull/15962))
 * Update dependencies ([#15922](https://github.com/DataDog/integrations-core/pull/15922))
 
 ***Fixed***:
