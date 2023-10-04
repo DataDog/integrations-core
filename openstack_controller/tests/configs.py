@@ -6,6 +6,9 @@ import os
 
 CONFIG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config')
 TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH = os.path.join(CONFIG_DIR, 'openstack_config_unit_tests.yaml')
+TEST_OPENSTACK_CONFIG_E2E_PATH = os.path.join(CONFIG_DIR, 'openstack_config.yaml')
+TEST_OPENSTACK_UPDATED_CONFIG_E2E_PATH = os.path.join(CONFIG_DIR, 'openstack_config_updated.yaml')
+TEST_OPENSTACK_BAD_CONFIG_PATH = os.path.join(CONFIG_DIR, 'openstack_bad_config.yaml')
 
 REST = {
     'keystone_server_url': 'http://127.0.0.1:8080/identity',

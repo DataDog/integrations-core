@@ -9,8 +9,6 @@ import pytest
 import tests.configs as configs
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 
-from .common import TEST_OPENSTACK_NO_AUTH_CONFIG_PATH
-
 pytestmark = [pytest.mark.unit]
 
 
@@ -38,7 +36,7 @@ pytestmark = [pytest.mark.unit]
             {
                 'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}},
                 'openstack_cloud_name': 'test_cloud',
-                'openstack_config_file_path': TEST_OPENSTACK_NO_AUTH_CONFIG_PATH,
+                'openstack_config_file_path': configs.TEST_OPENSTACK_BAD_CONFIG_PATH,
             },
             re.escape('__init__() got an unexpected keyword argument \'auth_type\''),
             id='invalid openstack_config_file',

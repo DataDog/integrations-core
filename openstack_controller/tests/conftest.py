@@ -2,29 +2,24 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import json
 import os
 import re
-
-# import tempfile
 from pathlib import Path
+from urllib.parse import urlparse
 
 import mock
 import pytest
 import requests
 import yaml
 
+import tests.configs as configs
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.fs import get_here
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 
-from .common import (
-    TEST_OPENSTACK_CONFIG_PATH,
-    TEST_OPENSTACK_UPDATED_CONFIG_PATH,
-    get_json_value_from_file,
-    get_url_path,
-)
 from .endpoints import IRONIC_ENDPOINTS, NOVA_ENDPOINTS
 from .ssh_tunnel import socks_proxy
 from .terraform import terraform_run
@@ -43,14 +38,14 @@ def dd_environment():
             return os.environ.get(var_name, match.group(0))
 
         # Read the YAML file
-        with open(TEST_OPENSTACK_CONFIG_PATH, 'r') as file:
+        with open(configs.TEST_OPENSTACK_CONFIG_E2E_PATH, 'r') as file:
             content = file.read()
             # Replace environment variable placeholders
             content = re.sub(r'\$\{([^}]+)\}', replace_env_vars, content)
         # Parse the YAML with substituted values
         data = yaml.safe_load(content)
         # Write the modified content back to a file:
-        with open(TEST_OPENSTACK_UPDATED_CONFIG_PATH, 'w') as file:
+        with open(configs.TEST_OPENSTACK_UPDATED_CONFIG_E2E_PATH, 'w') as file:
             yaml.dump(data, file)
 
         with terraform_run(os.path.join(get_here(), 'terraform')) as outputs:
@@ -105,6 +100,11 @@ def openstack_controller_check():
 @pytest.fixture
 def check(instance):
     return OpenStackControllerCheck('openstack', {}, [instance])
+
+
+def get_json_value_from_file(file_path):
+    with open(file_path, 'r') as file:
+        return json.load(file)
 
 
 @pytest.fixture
@@ -695,6 +695,11 @@ def openstack_connection(
 
     with mock.patch('openstack.connection.Connection', side_effect=connection) as mock_connection:
         yield mock_connection
+
+
+def get_url_path(url):
+    parsed_url = urlparse(url)
+    return parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
 
 
 @pytest.fixture

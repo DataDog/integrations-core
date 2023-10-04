@@ -1,0 +1,8 @@
+clouds:
+  test_cloud:
+    auth:
+      auth_url: http://${TF_VAR_network_ip}/identity
+      username: admin
+      password: password
+      user_domain_id: default
+      
