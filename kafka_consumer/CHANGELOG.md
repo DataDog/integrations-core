@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.1.3-beta.1 / 2023-10-04
+
 ***Fixed***:
 
 * Add ability to cache offsets and close admin client ([#15960](https://github.com/DataDog/integrations-core/pull/15960))
