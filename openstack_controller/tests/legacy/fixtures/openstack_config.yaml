@@ -11,7 +11,7 @@ clouds:
       flavor_name: m1.small
       network_name: private
   rackspace:
-    cloud: rackspace
+    profile: rackspace
     auth:
       username: joe
       password: joes-password

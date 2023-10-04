@@ -846,7 +846,7 @@ class OpenStackControllerLegacyCheck(AgentCheck):
             raise IncompleteConfig("Either keystone_server_url or openstack_config_file_path need to be provided")
 
         openstack_cloud_name = instance_config.get("openstack_cloud_name")
-        openstack_config = OpenStackConfig(config_files=[openstack_config_file_path])
+        openstack_config = OpenStackConfig(load_envvars=False, config_files=[openstack_config_file_path])
         cloud = openstack_config.get_one(cloud=openstack_cloud_name)
         cloud_auth = cloud.get_auth()
         if not cloud_auth or not cloud_auth.auth_url:

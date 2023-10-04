@@ -104,8 +104,6 @@ class OpenstackSDKApi(AbstractApi):
         if openstack_sdk_config_file_path is not None:
             # Set the environment variable to the path of the config file for openstacksdk to find it
             environ["OS_CLIENT_CONFIG_FILE"] = openstack_sdk_config_file_path
-        self.logger.debug("aaaaaaaaaaaaaa %s", openstack_sdk_config_file_path)
-
         self.connection = connection.Connection(cloud=openstack_sdk_cloud_name)
         # Raise error if the connection failed
         self.connection.authorize()
