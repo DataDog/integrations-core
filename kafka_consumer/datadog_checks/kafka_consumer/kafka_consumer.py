@@ -148,6 +148,7 @@ class KafkaCheck(AgentCheck):
                 self.log.warning(msg, consumer_group, topic, partition)
                 self.client.request_metadata_update()  # force metadata update on next poll()
         self.log.debug('%s consumer offsets reported', reported_contexts)
+        self.client.close_admin_client()
 
     def send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
         """Emit an event to the Datadog Event Stream."""
