@@ -1,9 +1,11 @@
-# (C) Datadog, Inc. 2023-present
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
-# Licensed under a 3-clause BSD style license (see LICENSE)
+# Licensed under Simplified BSD License (see LICENSE)
 
 
-from datadog_checks.base import AgentCheck
+from typing import Any, Dict, List, Type  # noqa: F401
+
+from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.openstack_controller.api.factory import make_api
 from datadog_checks.openstack_controller.components.bare_metal import BareMetal
 from datadog_checks.openstack_controller.components.block_storage import BlockStorage
@@ -15,6 +17,19 @@ from datadog_checks.openstack_controller.config import OpenstackConfig
 
 
 class OpenStackControllerCheck(AgentCheck):
+    def __new__(cls, name, init_config, instances):
+        # type: (Type[OpenStackControllerCheck], str, Dict[str, Any], List[Dict[str, Any]]) -> OpenStackControllerCheck
+        """For backward compatibility reasons, there are two side-by-side implementations of OpenStackControllerCheck.
+        Instantiating this class will return an instance of the legacy integration for existing users and
+        an instance of the new implementation for new users."""
+        if is_affirmative(instances[0].get('use_legacy_check_version', True)):
+            from datadog_checks.openstack_controller.legacy.openstack_controller_legacy import (
+                OpenStackControllerLegacyCheck,
+            )
+
+            return OpenStackControllerLegacyCheck(name, init_config, instances)  # type: ignore
+        return super(OpenStackControllerCheck, cls).__new__(cls)
+
     def __init__(self, name, init_config, instances):
         super(OpenStackControllerCheck, self).__init__(name, init_config, instances)
         self.config = OpenstackConfig(self.log, self.instance)

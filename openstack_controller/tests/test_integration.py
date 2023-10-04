@@ -20,6 +20,7 @@ def test_connect_exception(aggregator, dd_run_check, caplog):
         'keystone_server_url': 'http://10.0.0.0/identity',
         'username': 'admin',
         'password': 'password',
+        'use_legacy_check_version': False,
     }
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
@@ -31,6 +32,7 @@ def test_connect_ok(aggregator, dd_run_check, caplog):
         'keystone_server_url': 'http://127.0.0.1:8080/identity',
         'username': 'admin',
         'password': 'password',
+        'use_legacy_check_version': False,
     }
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
