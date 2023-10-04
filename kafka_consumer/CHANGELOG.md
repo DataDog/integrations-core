@@ -2,6 +2,8 @@
 
 ## 3.1.3 / 2023-08-14
 
+## 3.1.4-beta.1 / 2023-10-04
+
 ***Fixed***:
 
 * Optimize highwater offset collection. See [#15285](https://github.com/DataDog/integrations-core/pull/15285).
