@@ -6,11 +6,11 @@ import logging
 import mock
 import pytest
 
+import tests.configs as configs
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
-from datadog_checks.openstack_controller import OpenStackControllerCheck
 from datadog_checks.openstack_controller.api.type import ApiType
-from tests.common import CONFIG_REST, CONFIG_SDK, remove_service_from_catalog
+from tests.common import remove_service_from_catalog
 
 pytestmark = [pytest.mark.unit]
 
@@ -21,14 +21,14 @@ pytestmark = [pytest.mark.unit]
         pytest.param(
             {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['network'])}},
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
         pytest.param(
             None,
             {'catalog': []},
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -36,9 +36,8 @@ pytestmark = [pytest.mark.unit]
     indirect=['mock_http_post', 'connection_session_auth'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_not_in_catalog(aggregator, dd_run_check, instance, caplog, mock_http_post, connection_session_auth, api_type):
+def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, connection_session_auth, api_type):
     with caplog.at_level(logging.DEBUG):
-        check = OpenStackControllerCheck('test', {}, [instance])
         dd_run_check(check)
 
     aggregator.assert_metric(
@@ -71,20 +70,19 @@ def test_not_in_catalog(aggregator, dd_run_check, instance, caplog, mock_http_po
     [
         pytest.param(
             {'http_error': {'/networking': MockResponse(status_code=500)}},
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
             {'http_error': {'/networking': MockResponse(status_code=500)}},
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
     indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_response_time_exception(aggregator, dd_run_check, instance, mock_http_get):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.neutron.response_time',
@@ -106,18 +104,17 @@ def test_response_time_exception(aggregator, dd_run_check, instance, mock_http_g
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_response_time(aggregator, dd_run_check, instance, mock_http_get):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_response_time(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.neutron.response_time',
@@ -142,14 +139,14 @@ def test_response_time(aggregator, dd_run_check, instance, mock_http_get):
         pytest.param(
             {'http_error': {'/networking/v2.0/agents': MockResponse(status_code=500)}},
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
         pytest.param(
             None,
             {'http_error': {'agents': MockResponse(status_code=500)}},
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -157,8 +154,7 @@ def test_response_time(aggregator, dd_run_check, instance, mock_http_get):
     indirect=['mock_http_get', 'connection_network'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_agents_exception(aggregator, dd_run_check, instance, mock_http_get, connection_network, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_agents_exception(aggregator, check, dd_run_check, mock_http_get, connection_network, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.neutron.agents.count',
@@ -178,18 +174,17 @@ def test_agents_exception(aggregator, dd_run_check, instance, mock_http_get, con
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_agents_metrics(aggregator, dd_run_check, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_agents_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.neutron.agents.count',
@@ -280,7 +275,7 @@ def test_agents_metrics(aggregator, dd_run_check, instance):
                 }
             },
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
@@ -294,7 +289,7 @@ def test_agents_metrics(aggregator, dd_run_check, instance):
                     }
                 }
             },
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -302,8 +297,7 @@ def test_agents_metrics(aggregator, dd_run_check, instance):
     indirect=['mock_http_get', 'connection_network'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_networks_exception(aggregator, dd_run_check, instance, mock_http_get, connection_network, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_networks_exception(aggregator, check, dd_run_check, mock_http_get, connection_network, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.neutron.networks.count',
@@ -342,18 +336,17 @@ def test_networks_exception(aggregator, dd_run_check, instance, mock_http_get, c
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_networks_metrics(aggregator, dd_run_check, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_networks_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.neutron.networks.count',
@@ -576,7 +569,7 @@ def test_networks_metrics(aggregator, dd_run_check, instance):
                 }
             },
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
@@ -590,7 +583,7 @@ def test_networks_metrics(aggregator, dd_run_check, instance):
                     }
                 }
             },
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -598,8 +591,7 @@ def test_networks_metrics(aggregator, dd_run_check, instance):
     indirect=['mock_http_get', 'connection_network'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_quotas_exception(aggregator, dd_run_check, instance, mock_http_get, connection_network, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_quotas_exception(aggregator, check, dd_run_check, mock_http_get, connection_network, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.nova.quotas.floatingip',
@@ -640,19 +632,18 @@ def test_quotas_exception(aggregator, dd_run_check, instance, mock_http_get, con
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
     indirect=[],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_quotas_metrics(aggregator, dd_run_check, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_quotas_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.neutron.quotas.floatingip',

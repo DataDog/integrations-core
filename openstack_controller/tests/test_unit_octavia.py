@@ -6,11 +6,11 @@ import logging
 import mock
 import pytest
 
+import tests.configs as configs
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
-from datadog_checks.openstack_controller import OpenStackControllerCheck
 from datadog_checks.openstack_controller.api.type import ApiType
-from tests.common import CONFIG_REST, CONFIG_SDK, remove_service_from_catalog
+from tests.common import remove_service_from_catalog
 
 pytestmark = [pytest.mark.unit]
 
@@ -21,14 +21,14 @@ pytestmark = [pytest.mark.unit]
         pytest.param(
             {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['load-balancer'])}},
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
         pytest.param(
             None,
             {'catalog': []},
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -36,9 +36,8 @@ pytestmark = [pytest.mark.unit]
     indirect=['mock_http_post', 'connection_session_auth'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_not_in_catalog(aggregator, dd_run_check, instance, caplog, mock_http_post, connection_session_auth, api_type):
+def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, connection_session_auth, api_type):
     with caplog.at_level(logging.DEBUG):
-        check = OpenStackControllerCheck('test', {}, [instance])
         dd_run_check(check)
 
     aggregator.assert_metric(
@@ -71,20 +70,19 @@ def test_not_in_catalog(aggregator, dd_run_check, instance, caplog, mock_http_po
     [
         pytest.param(
             {'http_error': {'/load-balancer': MockResponse(status_code=500)}},
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
             {'http_error': {'/load-balancer': MockResponse(status_code=500)}},
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
     indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_response_time_exception(aggregator, dd_run_check, instance, mock_http_get):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.octavia.response_time',
@@ -106,18 +104,17 @@ def test_response_time_exception(aggregator, dd_run_check, instance, mock_http_g
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_response_time(aggregator, dd_run_check, instance, mock_http_get):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_response_time(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.octavia.response_time',
@@ -151,7 +148,7 @@ def test_response_time(aggregator, dd_run_check, instance, mock_http_get):
                 }
             },
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
@@ -165,7 +162,7 @@ def test_response_time(aggregator, dd_run_check, instance, mock_http_get):
                     }
                 }
             },
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -173,8 +170,7 @@ def test_response_time(aggregator, dd_run_check, instance, mock_http_get):
     indirect=['mock_http_get', 'connection_load_balancer'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_loadbalancers_exception(aggregator, dd_run_check, instance, mock_http_get, connection_load_balancer, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_loadbalancers_exception(aggregator, check, dd_run_check, mock_http_get, connection_load_balancer, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.octavia.loadbalancers.count',
@@ -217,18 +213,17 @@ def test_loadbalancers_exception(aggregator, dd_run_check, instance, mock_http_g
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_loadbalancers_metrics(aggregator, dd_run_check, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_loadbalancers_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.octavia.loadbalancers.count',
@@ -359,7 +354,7 @@ def test_loadbalancers_metrics(aggregator, dd_run_check, instance):
                 }
             },
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
@@ -373,7 +368,7 @@ def test_loadbalancers_metrics(aggregator, dd_run_check, instance):
                     }
                 }
             },
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -381,8 +376,7 @@ def test_loadbalancers_metrics(aggregator, dd_run_check, instance):
     indirect=['mock_http_get', 'connection_load_balancer'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_listeners_exception(aggregator, dd_run_check, instance, mock_http_get, connection_load_balancer, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_listeners_exception(aggregator, check, dd_run_check, mock_http_get, connection_load_balancer, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.octavia.listeners.count',
@@ -425,18 +419,17 @@ def test_listeners_exception(aggregator, dd_run_check, instance, mock_http_get, 
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_listeners_metrics(aggregator, dd_run_check, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_listeners_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.octavia.listeners.count',
@@ -950,7 +943,7 @@ def test_listeners_metrics(aggregator, dd_run_check, instance):
                 }
             },
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
@@ -964,7 +957,7 @@ def test_listeners_metrics(aggregator, dd_run_check, instance):
                     }
                 }
             },
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -972,8 +965,7 @@ def test_listeners_metrics(aggregator, dd_run_check, instance):
     indirect=['mock_http_get', 'connection_load_balancer'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_pools_exception(aggregator, dd_run_check, instance, mock_http_get, connection_load_balancer, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_pools_exception(aggregator, dd_run_check, check, mock_http_get, connection_load_balancer, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.octavia.pools.count',
@@ -1016,18 +1008,17 @@ def test_pools_exception(aggregator, dd_run_check, instance, mock_http_get, conn
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_pools_metrics(aggregator, dd_run_check, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_pools_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.octavia.pools.count',
@@ -1058,7 +1049,7 @@ def test_pools_metrics(aggregator, dd_run_check, instance):
                 }
             },
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
@@ -1071,7 +1062,7 @@ def test_pools_metrics(aggregator, dd_run_check, instance):
                     }
                 }
             },
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -1079,8 +1070,7 @@ def test_pools_metrics(aggregator, dd_run_check, instance):
     indirect=['mock_http_get', 'connection_load_balancer'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_pool_members_exception(aggregator, dd_run_check, instance, mock_http_get, connection_load_balancer, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_pool_members_exception(aggregator, check, dd_run_check, mock_http_get, connection_load_balancer, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.octavia.members.count',
@@ -1112,18 +1102,17 @@ def test_pool_members_exception(aggregator, dd_run_check, instance, mock_http_ge
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_pool_members_metrics(aggregator, dd_run_check, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_pool_members_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.octavia.members.count',
@@ -1226,7 +1215,7 @@ def test_pool_members_metrics(aggregator, dd_run_check, instance):
                 }
             },
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
@@ -1240,7 +1229,7 @@ def test_pool_members_metrics(aggregator, dd_run_check, instance):
                     }
                 }
             },
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -1248,10 +1237,7 @@ def test_pool_members_metrics(aggregator, dd_run_check, instance):
     indirect=['mock_http_get', 'connection_load_balancer'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_healthmonitors_exception(
-    aggregator, dd_run_check, instance, mock_http_get, connection_load_balancer, api_type
-):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_healthmonitors_exception(aggregator, check, dd_run_check, mock_http_get, connection_load_balancer, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.octavia.healthmonitors.count',
@@ -1294,18 +1280,17 @@ def test_healthmonitors_exception(
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_healthmonitors_metrics(aggregator, dd_run_check, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_healthmonitors_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.octavia.healthmonitors.count',
@@ -1404,7 +1389,7 @@ def test_healthmonitors_metrics(aggregator, dd_run_check, instance):
                 }
             },
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
@@ -1418,7 +1403,7 @@ def test_healthmonitors_metrics(aggregator, dd_run_check, instance):
                     }
                 }
             },
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -1426,8 +1411,7 @@ def test_healthmonitors_metrics(aggregator, dd_run_check, instance):
     indirect=['mock_http_get', 'connection_load_balancer'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_quotas_exception(aggregator, dd_run_check, instance, mock_http_get, connection_load_balancer, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_quotas_exception(aggregator, check, dd_run_check, mock_http_get, connection_load_balancer, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.octavia.quotas.count',
@@ -1470,18 +1454,17 @@ def test_quotas_exception(aggregator, dd_run_check, instance, mock_http_get, con
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_quotas_metrics(aggregator, dd_run_check, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_quotas_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.octavia.quotas.count',
@@ -1700,7 +1683,7 @@ def test_quotas_metrics(aggregator, dd_run_check, instance):
                 }
             },
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
@@ -1714,7 +1697,7 @@ def test_quotas_metrics(aggregator, dd_run_check, instance):
                     }
                 }
             },
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -1722,8 +1705,7 @@ def test_quotas_metrics(aggregator, dd_run_check, instance):
     indirect=['mock_http_get', 'connection_load_balancer'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_amphorae_exception(aggregator, dd_run_check, instance, mock_http_get, connection_load_balancer, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_amphorae_exception(aggregator, check, dd_run_check, mock_http_get, connection_load_balancer, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.octavia.amphorae.count',
@@ -1766,18 +1748,17 @@ def test_amphorae_exception(aggregator, dd_run_check, instance, mock_http_get, c
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_amphorae_metrics(aggregator, dd_run_check, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_amphorae_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.octavia.amphorae.count',

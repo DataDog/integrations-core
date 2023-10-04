@@ -6,67 +6,59 @@ import logging
 
 import pytest
 
+import tests.configs as configs
 from datadog_checks.dev.http import MockResponse
-from datadog_checks.openstack_controller import OpenStackControllerCheck
-from datadog_checks.openstack_controller.api.type import ApiType
-from tests.common import CONFIG_REST, CONFIG_SDK
 
 pytestmark = [pytest.mark.unit]
 
 
 @pytest.mark.parametrize(
-    ('mock_http_post', 'connection_authorize', 'instance', 'api_type'),
+    ('mock_http_post', 'connection_authorize', 'instance'),
     [
         pytest.param(
             {'exception': {'/identity/v3/auth/tokens': Exception()}},
             None,
-            CONFIG_REST,
-            ApiType.REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
             None,
             {'exception': Exception()},
-            CONFIG_SDK,
-            ApiType.SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
     indirect=['mock_http_post', 'connection_authorize'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_auth_exception(dd_run_check, caplog, instance, mock_http_post, connection_authorize, api_type):
+def test_auth_exception(check, dd_run_check, caplog):
     caplog.set_level(logging.INFO)
-    check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
     assert 'Error while authorizing user' in caplog.text
     assert 'User successfully authorized' not in caplog.text
 
 
 @pytest.mark.parametrize(
-    ('mock_http_post', 'connection_authorize', 'instance', 'api_type'),
+    ('mock_http_post', 'connection_authorize', 'instance'),
     [
         pytest.param(
             {'http_error': {'/identity/v3/auth/tokens': MockResponse(status_code=500)}},
             None,
-            CONFIG_REST,
-            ApiType.REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
             None,
             {'http_error': MockResponse(status_code=500)},
-            CONFIG_SDK,
-            ApiType.SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
     indirect=['mock_http_post', 'connection_authorize'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_auth_http_error(dd_run_check, caplog, instance, mock_http_post, connection_authorize, api_type):
+def test_auth_http_error(check, dd_run_check, caplog):
     caplog.set_level(logging.INFO)
-    check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
     assert 'Error while authorizing user' in caplog.text
     assert 'User successfully authorized' not in caplog.text
@@ -76,19 +68,18 @@ def test_auth_http_error(dd_run_check, caplog, instance, mock_http_post, connect
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_auth_ok(dd_run_check, caplog, instance):
+def test_auth_ok(check, dd_run_check, caplog):
     caplog.set_level(logging.INFO)
-    check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
     assert 'Error while authorizing user' not in caplog.text
     assert 'User successfully authorized' in caplog.text

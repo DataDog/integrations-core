@@ -8,11 +8,11 @@ import logging
 import mock
 import pytest
 
+import tests.configs as configs
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
-from datadog_checks.openstack_controller import OpenStackControllerCheck
 from datadog_checks.openstack_controller.api.type import ApiType
-from tests.common import CONFIG_REST, CONFIG_SDK, remove_service_from_catalog
+from tests.common import remove_service_from_catalog
 
 pytestmark = [pytest.mark.unit]
 
@@ -23,14 +23,14 @@ pytestmark = [pytest.mark.unit]
         pytest.param(
             {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['identity'])}},
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
         pytest.param(
             None,
             {'catalog': []},
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -38,9 +38,8 @@ pytestmark = [pytest.mark.unit]
     indirect=['mock_http_post', 'connection_session_auth'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_not_in_catalog(aggregator, dd_run_check, instance, caplog, mock_http_post, connection_session_auth, api_type):
+def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, connection_session_auth, api_type):
     with caplog.at_level(logging.DEBUG):
-        check = OpenStackControllerCheck('test', {}, [instance])
         dd_run_check(check)
 
     aggregator.assert_metric(
@@ -83,20 +82,19 @@ def test_not_in_catalog(aggregator, dd_run_check, instance, caplog, mock_http_po
     [
         pytest.param(
             {'http_error': {'/identity': MockResponse(status_code=500)}},
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
             {'http_error': {'/identity': MockResponse(status_code=500)}},
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
     indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_response_time_exception(aggregator, dd_run_check, instance, mock_http_get):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.response_time',
@@ -128,18 +126,17 @@ def test_response_time_exception(aggregator, dd_run_check, instance, mock_http_g
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_response_time(aggregator, dd_run_check, instance, mock_http_get):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_response_time(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_service_check(
         'openstack.keystone.api.up',
@@ -174,14 +171,14 @@ def test_response_time(aggregator, dd_run_check, instance, mock_http_get):
         pytest.param(
             {'http_error': {'/identity/v3/regions': MockResponse(status_code=500)}},
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
         pytest.param(
             None,
             {'http_error': {'regions': MockResponse(status_code=500)}},
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -189,8 +186,7 @@ def test_response_time(aggregator, dd_run_check, instance, mock_http_get):
     indirect=['mock_http_get', 'connection_identity'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_regions_exception(aggregator, dd_run_check, instance, mock_http_get, connection_identity, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_regions_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.regions.count',
@@ -214,18 +210,17 @@ def test_regions_exception(aggregator, dd_run_check, instance, mock_http_get, co
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_regions_metrics(aggregator, dd_run_check, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_regions_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.regions.count',
@@ -251,14 +246,14 @@ def test_regions_metrics(aggregator, dd_run_check, instance):
         pytest.param(
             {'http_error': {'/identity/v3/domains': MockResponse(status_code=500)}},
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
         pytest.param(
             None,
             {'http_error': {'domains': MockResponse(status_code=500)}},
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -266,8 +261,7 @@ def test_regions_metrics(aggregator, dd_run_check, instance):
     indirect=['mock_http_get', 'connection_identity'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_domains_exception(aggregator, dd_run_check, instance, mock_http_get, connection_identity, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_domains_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.domains.count',
@@ -291,18 +285,17 @@ def test_domains_exception(aggregator, dd_run_check, instance, mock_http_get, co
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_domains_metrics(aggregator, dd_run_check, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_domains_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.domains.count',
@@ -348,14 +341,14 @@ def test_domains_metrics(aggregator, dd_run_check, instance):
         pytest.param(
             {'http_error': {'/identity/v3/projects': MockResponse(status_code=500)}},
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
         pytest.param(
             None,
             {'http_error': {'projects': MockResponse(status_code=500)}},
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -363,8 +356,7 @@ def test_domains_metrics(aggregator, dd_run_check, instance):
     indirect=['mock_http_get', 'connection_identity'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_projects_exception(aggregator, dd_run_check, instance, mock_http_get, connection_identity, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_projects_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.projects.count',
@@ -388,18 +380,17 @@ def test_projects_exception(aggregator, dd_run_check, instance, mock_http_get, c
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_projects_metrics(aggregator, dd_run_check, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_projects_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.projects.count',
@@ -509,14 +500,14 @@ def test_projects_metrics(aggregator, dd_run_check, instance):
         pytest.param(
             {'http_error': {'/identity/v3/users': MockResponse(status_code=500)}},
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
         pytest.param(
             None,
             {'http_error': {'users': MockResponse(status_code=500)}},
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -524,8 +515,7 @@ def test_projects_metrics(aggregator, dd_run_check, instance):
     indirect=['mock_http_get', 'connection_identity'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_users_exception(aggregator, dd_run_check, instance, mock_http_get, connection_identity, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_users_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.users.count',
@@ -545,18 +535,17 @@ def test_users_exception(aggregator, dd_run_check, instance, mock_http_get, conn
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_users_metrics(aggregator, dd_run_check, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_users_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.users.count',
@@ -706,14 +695,14 @@ def test_users_metrics(aggregator, dd_run_check, instance):
         pytest.param(
             {'http_error': {'/identity/v3/groups': MockResponse(status_code=500)}},
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
         pytest.param(
             None,
             {'http_error': {'groups': MockResponse(status_code=500)}},
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -721,8 +710,7 @@ def test_users_metrics(aggregator, dd_run_check, instance):
     indirect=['mock_http_get', 'connection_identity'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_groups_exception(aggregator, dd_run_check, instance, mock_http_get, connection_identity, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_groups_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.groups.count',
@@ -748,14 +736,14 @@ def test_groups_exception(aggregator, dd_run_check, instance, mock_http_get, con
                 }
             },
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
         pytest.param(
             None,
             {'http_error': {'group_users': {'89b36a4c32c44b0ea8856b6357f101ea': MockResponse(status_code=500)}}},
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -763,8 +751,7 @@ def test_groups_exception(aggregator, dd_run_check, instance, mock_http_get, con
     indirect=['mock_http_get', 'connection_identity'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_group_users_exception(aggregator, dd_run_check, instance, mock_http_get, connection_identity, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_group_users_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.groups.count',
@@ -823,18 +810,17 @@ def test_group_users_exception(aggregator, dd_run_check, instance, mock_http_get
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_groups_metrics(aggregator, dd_run_check, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_groups_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.groups.count',
@@ -884,14 +870,14 @@ def test_groups_metrics(aggregator, dd_run_check, instance):
         pytest.param(
             {'http_error': {'/identity/v3/services': MockResponse(status_code=500)}},
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
         pytest.param(
             None,
             {'http_error': {'services': MockResponse(status_code=500)}},
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -899,8 +885,7 @@ def test_groups_metrics(aggregator, dd_run_check, instance):
     indirect=['mock_http_get', 'connection_identity'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_services_exception(aggregator, dd_run_check, instance, mock_http_get, connection_identity, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_services_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.services.count',
@@ -920,18 +905,17 @@ def test_services_exception(aggregator, dd_run_check, instance, mock_http_get, c
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_services_metrics(aggregator, dd_run_check, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_services_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.services.count',
@@ -1031,14 +1015,14 @@ def test_services_metrics(aggregator, dd_run_check, instance):
         pytest.param(
             {'http_error': {'/identity/v3/registered_limits': MockResponse(status_code=500)}},
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
         pytest.param(
             None,
             {'http_error': {'registered_limits': MockResponse(status_code=500)}},
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -1046,8 +1030,7 @@ def test_services_metrics(aggregator, dd_run_check, instance):
     indirect=['mock_http_get', 'connection_identity'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_registered_limits_exception(aggregator, dd_run_check, instance, mock_http_get, connection_identity, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_registered_limits_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.limits.limit',
@@ -1076,14 +1059,14 @@ def test_registered_limits_exception(aggregator, dd_run_check, instance, mock_ht
         pytest.param(
             {'http_error': {'/identity/v3/limits': MockResponse(status_code=500)}},
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
         pytest.param(
             None,
             {'http_error': {'limits': MockResponse(status_code=500)}},
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -1091,8 +1074,7 @@ def test_registered_limits_exception(aggregator, dd_run_check, instance, mock_ht
     indirect=['mock_http_get', 'connection_identity'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_limits_exception(aggregator, dd_run_check, instance, mock_http_get, connection_identity, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_limits_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.limits.limit',
@@ -1119,18 +1101,17 @@ def test_limits_exception(aggregator, dd_run_check, instance, mock_http_get, con
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_limits_metrics(aggregator, dd_run_check, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_limits_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.limits.limit',

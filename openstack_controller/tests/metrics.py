@@ -692,6 +692,76 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93 = [
     },
 ]
 
+COMPUTE_SERVERS_NO_DIAGNOSTICS_NOVA_MICROVERSION_DEFAULT = [
+    {
+        'name': 'openstack.nova.server.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'server_id:5102fbbf-7156-48dc-8355-af7ab992266f',
+            'server_name:a',
+            'server_status:ACTIVE',
+        ],
+    },
+    {
+        'name': 'openstack.nova.server.active',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'server_id:5102fbbf-7156-48dc-8355-af7ab992266f',
+            'server_name:a',
+            'server_status:ACTIVE',
+        ],
+    },
+    {
+        'name': 'openstack.nova.server.diagnostic.cpu0_time',
+        'count': 0,
+    },
+]
+
+COMPUTE_SERVERS_NO_DIAGNOSTICS_NOVA_MICROVERSION_2_93 = [
+    {
+        'name': 'openstack.nova.server.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'server_id:5102fbbf-7156-48dc-8355-af7ab992266f',
+            'server_name:a',
+            'server_status:ACTIVE',
+        ],
+    },
+    {
+        'name': 'openstack.nova.server.active',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'server_id:5102fbbf-7156-48dc-8355-af7ab992266f',
+            'server_name:a',
+            'server_status:ACTIVE',
+        ],
+    },
+    {
+        'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
+        'count': 0,
+    },
+]
+
 NODES_METRICS_IRONIC_MICROVERSION_DEFAULT = [
     {
         'name': 'openstack.ironic.node.count',

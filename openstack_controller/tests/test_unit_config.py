@@ -6,9 +6,10 @@ import re
 
 import pytest
 
+import tests.configs as configs
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 
-from .common import TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH, TEST_OPENSTACK_NO_AUTH_CONFIG_PATH
+from .common import TEST_OPENSTACK_NO_AUTH_CONFIG_PATH
 
 pytestmark = [pytest.mark.unit]
 
@@ -20,7 +21,7 @@ pytestmark = [pytest.mark.unit]
             {
                 'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}},
                 'openstack_cloud_name': 'test',
-                'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,
+                'openstack_config_file_path': configs.TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,
             },
             'Cloud test was not found.',
             id='bad openstack_cloud_name',

@@ -5,11 +5,11 @@ import logging
 
 import pytest
 
+import tests.configs as configs
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
-from datadog_checks.openstack_controller import OpenStackControllerCheck
 from datadog_checks.openstack_controller.api.type import ApiType
-from tests.common import CONFIG_REST, CONFIG_SDK, remove_service_from_catalog
+from tests.common import remove_service_from_catalog
 
 pytestmark = [pytest.mark.unit]
 
@@ -24,14 +24,14 @@ pytestmark = [pytest.mark.unit]
                 }
             },
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
         pytest.param(
             None,
             {'catalog': []},
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -39,9 +39,8 @@ pytestmark = [pytest.mark.unit]
     indirect=['mock_http_post', 'connection_session_auth'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_not_in_catalog(aggregator, dd_run_check, instance, caplog, mock_http_post, connection_session_auth, api_type):
+def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, connection_session_auth, api_type):
     with caplog.at_level(logging.DEBUG):
-        check = OpenStackControllerCheck('test', {}, [instance])
         dd_run_check(check)
 
     aggregator.assert_metric(
@@ -74,20 +73,19 @@ def test_not_in_catalog(aggregator, dd_run_check, instance, caplog, mock_http_po
     [
         pytest.param(
             {'http_error': {'/volume/v3/': MockResponse(status_code=500)}},
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
             {'http_error': {'/volume/v3/': MockResponse(status_code=500)}},
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
     indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_response_time_exception(aggregator, dd_run_check, instance, mock_http_get):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.cinder.response_time',
@@ -110,20 +108,19 @@ def test_response_time_exception(aggregator, dd_run_check, instance, mock_http_g
     [
         pytest.param(
             {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['volumev3'])}},
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
             None,
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
     indirect=['mock_http_post'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_response_time_block_storage(aggregator, dd_run_check, instance, mock_http_get):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_response_time_block_storage(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.cinder.response_time',
@@ -147,20 +144,19 @@ def test_response_time_block_storage(aggregator, dd_run_check, instance, mock_ht
     [
         pytest.param(
             {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['block-storage'])}},
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
             None,
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
     indirect=['mock_http_post'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_response_time_volumev3(aggregator, dd_run_check, instance, mock_http_get):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_response_time_volumev3(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.cinder.response_time',

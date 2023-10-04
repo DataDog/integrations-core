@@ -8,27 +8,12 @@ import logging
 import mock
 import pytest
 
+import tests.configs as configs
+import tests.metrics as metrics
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
-from datadog_checks.openstack_controller import OpenStackControllerCheck
 from datadog_checks.openstack_controller.api.type import ApiType
-from tests.common import (
-    CONFIG_REST,
-    CONFIG_REST_NOVA_MICROVERSION_2_93,
-    CONFIG_SDK,
-    CONFIG_SDK_NOVA_MICROVERSION_2_93,
-    remove_service_from_catalog,
-)
-from tests.metrics import (
-    COMPUTE_HYPERVISORS_NOVA_MICROVERSION_2_93,
-    COMPUTE_HYPERVISORS_NOVA_MICROVERSION_DEFAULT,
-    COMPUTE_QUOTA_SETS_NOVA_MICROVERSION_2_93,
-    COMPUTE_QUOTA_SETS_NOVA_MICROVERSION_DEFAULT,
-    COMPUTE_SERVERS_NOVA_MICROVERSION_2_93,
-    COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT,
-    COMPUTE_SERVICES_NOVA_MICROVERSION_2_93,
-    COMPUTE_SERVICES_NOVA_MICROVERSION_DEFAULT,
-)
+from tests.common import remove_service_from_catalog
 
 pytestmark = [pytest.mark.unit]
 
@@ -39,14 +24,14 @@ pytestmark = [pytest.mark.unit]
         pytest.param(
             {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['compute'])}},
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
         pytest.param(
             None,
             {'catalog': []},
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -54,9 +39,8 @@ pytestmark = [pytest.mark.unit]
     indirect=['mock_http_post', 'connection_session_auth'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_not_in_catalog(aggregator, dd_run_check, instance, caplog, mock_http_post, connection_session_auth, api_type):
+def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, connection_session_auth, api_type):
     with caplog.at_level(logging.DEBUG):
-        check = OpenStackControllerCheck('test', {}, [instance])
         dd_run_check(check)
 
     aggregator.assert_metric(
@@ -89,20 +73,19 @@ def test_not_in_catalog(aggregator, dd_run_check, instance, caplog, mock_http_po
     [
         pytest.param(
             {'http_error': {'/compute/v2.1': MockResponse(status_code=500)}},
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
             {'http_error': {'/compute/v2.1': MockResponse(status_code=500)}},
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
     indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_response_time_exception(aggregator, dd_run_check, instance, mock_http_get):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.nova.response_time',
@@ -124,18 +107,17 @@ def test_response_time_exception(aggregator, dd_run_check, instance, mock_http_g
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_response_time(aggregator, dd_run_check, instance, mock_http_get):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_response_time(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.nova.response_time',
@@ -160,14 +142,14 @@ def test_response_time(aggregator, dd_run_check, instance, mock_http_get):
         pytest.param(
             {'http_error': {'/compute/v2.1/limits': MockResponse(status_code=500)}},
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
         pytest.param(
             None,
             {'http_error': {'limits': MockResponse(status_code=500)}},
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -175,8 +157,7 @@ def test_response_time(aggregator, dd_run_check, instance, mock_http_get):
     indirect=['mock_http_get', 'connection_compute'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_limits_exception(aggregator, dd_run_check, instance, mock_http_get, connection_compute, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_limits_exception(aggregator, check, dd_run_check, mock_http_get, connection_compute, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.nova.limits.absolute.max_total_instances',
@@ -208,26 +189,25 @@ def test_limits_exception(aggregator, dd_run_check, instance, mock_http_get, con
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest no microversion',
         ),
         pytest.param(
-            CONFIG_REST_NOVA_MICROVERSION_2_93,
+            configs.REST_NOVA_MICROVERSION_2_93,
             id='api rest microversion 2.93',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk no microversion',
         ),
         pytest.param(
-            CONFIG_SDK_NOVA_MICROVERSION_2_93,
+            configs.SDK_NOVA_MICROVERSION_2_93,
             id='api sdk microversion 2.93',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_limits_metrics(aggregator, dd_run_check, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_limits_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.nova.limits.absolute.max_total_instances',
@@ -332,14 +312,14 @@ def test_limits_metrics(aggregator, dd_run_check, instance):
         pytest.param(
             {'http_error': {'/compute/v2.1/os-services': MockResponse(status_code=500)}},
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
         pytest.param(
             None,
             {'http_error': {'services': MockResponse(status_code=500)}},
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -347,8 +327,7 @@ def test_limits_metrics(aggregator, dd_run_check, instance):
     indirect=['mock_http_get', 'connection_compute'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_services_exception(aggregator, dd_run_check, instance, mock_http_get, connection_compute, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_services_exception(aggregator, check, dd_run_check, mock_http_get, connection_compute, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.nova.service.up',
@@ -368,37 +347,36 @@ def test_services_exception(aggregator, dd_run_check, instance, mock_http_get, c
     ('instance', 'metrics'),
     [
         pytest.param(
-            CONFIG_REST,
-            COMPUTE_SERVICES_NOVA_MICROVERSION_DEFAULT,
+            configs.REST,
+            metrics.COMPUTE_SERVICES_NOVA_MICROVERSION_DEFAULT,
             id='api rest no microversion',
         ),
         pytest.param(
-            CONFIG_REST_NOVA_MICROVERSION_2_93,
-            COMPUTE_SERVICES_NOVA_MICROVERSION_2_93,
+            configs.REST_NOVA_MICROVERSION_2_93,
+            metrics.COMPUTE_SERVICES_NOVA_MICROVERSION_2_93,
             id='api rest microversion 2.93',
         ),
         pytest.param(
-            CONFIG_SDK,
-            COMPUTE_SERVICES_NOVA_MICROVERSION_DEFAULT,
+            configs.SDK,
+            metrics.COMPUTE_SERVICES_NOVA_MICROVERSION_DEFAULT,
             id='api sdk no microversion',
         ),
         pytest.param(
-            CONFIG_SDK_NOVA_MICROVERSION_2_93,
-            COMPUTE_SERVICES_NOVA_MICROVERSION_2_93,
+            configs.SDK_NOVA_MICROVERSION_2_93,
+            metrics.COMPUTE_SERVICES_NOVA_MICROVERSION_2_93,
             id='api sdk microversion 2.93',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_services_metrics(aggregator, dd_run_check, metrics, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_services_metrics(aggregator, check, dd_run_check, metrics):
     dd_run_check(check)
     for metric in metrics:
         aggregator.assert_metric(
             metric['name'],
-            count=metric['count'],
-            value=metric['value'],
-            tags=metric['tags'],
+            count=metric.get('count'),
+            value=metric.get('value'),
+            tags=metric.get('tags'),
         )
 
 
@@ -408,14 +386,14 @@ def test_services_metrics(aggregator, dd_run_check, metrics, instance):
         pytest.param(
             {'http_error': {'/compute/v2.1/flavors/detail': MockResponse(status_code=500)}},
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
         pytest.param(
             None,
             {'http_error': {'flavors': MockResponse(status_code=500)}},
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -423,8 +401,7 @@ def test_services_metrics(aggregator, dd_run_check, metrics, instance):
     indirect=['mock_http_get', 'connection_compute'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_flavors_exception(aggregator, dd_run_check, instance, mock_http_get, connection_compute, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_flavors_exception(aggregator, check, dd_run_check, mock_http_get, connection_compute, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.nova.flavor.vcpus',
@@ -444,26 +421,25 @@ def test_flavors_exception(aggregator, dd_run_check, instance, mock_http_get, co
     ('instance'),
     [
         pytest.param(
-            CONFIG_REST,
+            configs.REST,
             id='api rest no microversion',
         ),
         pytest.param(
-            CONFIG_REST_NOVA_MICROVERSION_2_93,
+            configs.REST_NOVA_MICROVERSION_2_93,
             id='api rest microversion 2.93',
         ),
         pytest.param(
-            CONFIG_SDK,
+            configs.SDK,
             id='api sdk no microversion',
         ),
         pytest.param(
-            CONFIG_SDK_NOVA_MICROVERSION_2_93,
+            configs.SDK_NOVA_MICROVERSION_2_93,
             id='api sdk microversion 2.93',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_flavors_metrics(aggregator, dd_run_check, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_flavors_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.nova.flavor.vcpus',
@@ -689,14 +665,14 @@ def test_flavors_metrics(aggregator, dd_run_check, instance):
         pytest.param(
             {'http_error': {'/compute/v2.1/os-hypervisors/detail': MockResponse(status_code=500)}},
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
         pytest.param(
             None,
             {'http_error': {'hypervisors': MockResponse(status_code=500)}},
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -704,8 +680,7 @@ def test_flavors_metrics(aggregator, dd_run_check, instance):
     indirect=['mock_http_get', 'connection_compute'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_hypervisors_exception(aggregator, dd_run_check, instance, mock_http_get, connection_compute, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_hypervisors_exception(aggregator, check, dd_run_check, mock_http_get, connection_compute, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.nova.hypervisor.up',
@@ -727,14 +702,14 @@ def test_hypervisors_exception(aggregator, dd_run_check, instance, mock_http_get
         pytest.param(
             {'http_error': {'/compute/v2.1/os-hypervisors/1/uptime': MockResponse(status_code=500)}},
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
         pytest.param(
             None,
             {'http_error': {'hypervisor_uptime': {1: MockResponse(status_code=500)}}},
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -742,8 +717,7 @@ def test_hypervisors_exception(aggregator, dd_run_check, instance, mock_http_get
     indirect=['mock_http_get', 'connection_compute'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_hypervisor_uptime_exception(aggregator, dd_run_check, instance, mock_http_get, connection_compute, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_hypervisor_uptime_exception(aggregator, check, dd_run_check, mock_http_get, connection_compute, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.nova.hypervisor.up',
@@ -784,37 +758,36 @@ def test_hypervisor_uptime_exception(aggregator, dd_run_check, instance, mock_ht
     ('instance', 'metrics'),
     [
         pytest.param(
-            CONFIG_REST,
-            COMPUTE_HYPERVISORS_NOVA_MICROVERSION_DEFAULT,
+            configs.REST,
+            metrics.COMPUTE_HYPERVISORS_NOVA_MICROVERSION_DEFAULT,
             id='api rest no microversion',
         ),
         pytest.param(
-            CONFIG_REST_NOVA_MICROVERSION_2_93,
-            COMPUTE_HYPERVISORS_NOVA_MICROVERSION_2_93,
+            configs.REST_NOVA_MICROVERSION_2_93,
+            metrics.COMPUTE_HYPERVISORS_NOVA_MICROVERSION_2_93,
             id='api rest microversion 2.93',
         ),
         pytest.param(
-            CONFIG_SDK,
-            COMPUTE_HYPERVISORS_NOVA_MICROVERSION_DEFAULT,
+            configs.SDK,
+            metrics.COMPUTE_HYPERVISORS_NOVA_MICROVERSION_DEFAULT,
             id='api sdk no microversion',
         ),
         pytest.param(
-            CONFIG_SDK_NOVA_MICROVERSION_2_93,
-            COMPUTE_HYPERVISORS_NOVA_MICROVERSION_2_93,
+            configs.SDK_NOVA_MICROVERSION_2_93,
+            metrics.COMPUTE_HYPERVISORS_NOVA_MICROVERSION_2_93,
             id='api sdk microversion 2.93',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_hypervisors_metrics(aggregator, dd_run_check, metrics, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_hypervisors_metrics(aggregator, check, dd_run_check, metrics):
     dd_run_check(check)
     for metric in metrics:
         aggregator.assert_metric(
             metric['name'],
-            count=metric['count'],
-            value=metric['value'],
-            tags=metric['tags'],
+            count=metric.get('count'),
+            value=metric.get('value'),
+            tags=metric.get('tags'),
         )
 
 
@@ -829,7 +802,7 @@ def test_hypervisors_metrics(aggregator, dd_run_check, metrics, instance):
                 }
             },
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
@@ -843,7 +816,7 @@ def test_hypervisors_metrics(aggregator, dd_run_check, metrics, instance):
                     }
                 }
             },
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -851,8 +824,7 @@ def test_hypervisors_metrics(aggregator, dd_run_check, metrics, instance):
     indirect=['mock_http_get', 'connection_compute'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_quota_sets_exception(aggregator, dd_run_check, instance, mock_http_get, connection_compute, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_quota_sets_exception(aggregator, check, dd_run_check, mock_http_get, connection_compute, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.nova.quota_set.cores',
@@ -885,37 +857,36 @@ def test_quota_sets_exception(aggregator, dd_run_check, instance, mock_http_get,
     ('instance', 'metrics'),
     [
         pytest.param(
-            CONFIG_REST,
-            COMPUTE_QUOTA_SETS_NOVA_MICROVERSION_DEFAULT,
+            configs.REST,
+            metrics.COMPUTE_QUOTA_SETS_NOVA_MICROVERSION_DEFAULT,
             id='api rest no microversion',
         ),
         pytest.param(
-            CONFIG_REST_NOVA_MICROVERSION_2_93,
-            COMPUTE_QUOTA_SETS_NOVA_MICROVERSION_2_93,
+            configs.REST_NOVA_MICROVERSION_2_93,
+            metrics.COMPUTE_QUOTA_SETS_NOVA_MICROVERSION_2_93,
             id='api rest microversion 2.93',
         ),
         pytest.param(
-            CONFIG_SDK,
-            COMPUTE_QUOTA_SETS_NOVA_MICROVERSION_DEFAULT,
+            configs.SDK,
+            metrics.COMPUTE_QUOTA_SETS_NOVA_MICROVERSION_DEFAULT,
             id='api sdk no microversion',
         ),
         pytest.param(
-            CONFIG_SDK_NOVA_MICROVERSION_2_93,
-            COMPUTE_QUOTA_SETS_NOVA_MICROVERSION_2_93,
+            configs.SDK_NOVA_MICROVERSION_2_93,
+            metrics.COMPUTE_QUOTA_SETS_NOVA_MICROVERSION_2_93,
             id='api sdk microversion 2.93',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_quota_sets_metrics(aggregator, dd_run_check, metrics, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_quota_sets_metrics(aggregator, check, dd_run_check, metrics):
     dd_run_check(check)
     for metric in metrics:
         aggregator.assert_metric(
             metric['name'],
-            count=metric['count'],
-            value=metric['value'],
-            tags=metric['tags'],
+            count=metric.get('count'),
+            value=metric.get('value'),
+            tags=metric.get('tags'),
         )
 
 
@@ -934,7 +905,7 @@ def test_quota_sets_metrics(aggregator, dd_run_check, metrics, instance):
                 }
             },
             None,
-            CONFIG_REST,
+            configs.REST,
             ApiType.REST,
             id='api rest',
         ),
@@ -948,7 +919,7 @@ def test_quota_sets_metrics(aggregator, dd_run_check, metrics, instance):
                     }
                 }
             },
-            CONFIG_SDK,
+            configs.SDK,
             ApiType.SDK,
             id='api sdk',
         ),
@@ -956,8 +927,7 @@ def test_quota_sets_metrics(aggregator, dd_run_check, metrics, instance):
     indirect=['mock_http_get', 'connection_compute'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_servers_exception(aggregator, dd_run_check, instance, mock_http_get, connection_compute, api_type):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_servers_exception(aggregator, check, dd_run_check, mock_http_get, connection_compute, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.nova.server.count',
@@ -1000,35 +970,73 @@ def test_servers_exception(aggregator, dd_run_check, instance, mock_http_get, co
     ('instance', 'metrics'),
     [
         pytest.param(
-            CONFIG_REST,
-            COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT,
+            configs.REST,
+            metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT,
             id='api rest no microversion',
         ),
         pytest.param(
-            CONFIG_REST_NOVA_MICROVERSION_2_93,
-            COMPUTE_SERVERS_NOVA_MICROVERSION_2_93,
+            configs.REST_NOVA_MICROVERSION_2_93,
+            metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_2_93,
             id='api rest microversion 2.93',
         ),
         pytest.param(
-            CONFIG_SDK,
-            COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT,
+            configs.SDK,
+            metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT,
             id='api sdk no microversion',
         ),
         pytest.param(
-            CONFIG_SDK_NOVA_MICROVERSION_2_93,
-            COMPUTE_SERVERS_NOVA_MICROVERSION_2_93,
+            configs.SDK_NOVA_MICROVERSION_2_93,
+            metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_2_93,
             id='api sdk microversion 2.93',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_servers_metrics(aggregator, dd_run_check, metrics, instance):
-    check = OpenStackControllerCheck('test', {}, [instance])
+def test_servers_metrics(aggregator, check, dd_run_check, metrics):
     dd_run_check(check)
     for metric in metrics:
         aggregator.assert_metric(
             metric['name'],
-            count=metric['count'],
-            value=metric['value'],
-            tags=metric['tags'],
+            count=metric.get('count'),
+            value=metric.get('value'),
+            tags=metric.get('tags'),
+        )
+
+
+@pytest.mark.parametrize(
+    ('instance', 'metrics'),
+    [
+        pytest.param(
+            configs.REST,
+            metrics.COMPUTE_SERVERS_NO_DIAGNOSTICS_NOVA_MICROVERSION_DEFAULT,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            configs.REST_NOVA_MICROVERSION_2_93,
+            metrics.COMPUTE_SERVERS_NO_DIAGNOSTICS_NOVA_MICROVERSION_2_93,
+            id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.SDK,
+            metrics.COMPUTE_SERVERS_NO_DIAGNOSTICS_NOVA_MICROVERSION_DEFAULT,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            configs.SDK_NOVA_MICROVERSION_2_93,
+            metrics.COMPUTE_SERVERS_NO_DIAGNOSTICS_NOVA_MICROVERSION_2_93,
+            id='api sdk microversion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_servers_no_diagnostics_metrics(aggregator, openstack_controller_check, dd_run_check, instance, metrics):
+    instance['collect_server_diagnostic_metrics'] = False
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    for metric in metrics:
+        aggregator.assert_metric(
+            metric['name'],
+            count=metric.get('count'),
+            value=metric.get('value'),
+            tags=metric.get('tags'),
         )

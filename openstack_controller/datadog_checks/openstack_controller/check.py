@@ -17,8 +17,8 @@ from datadog_checks.openstack_controller.config import OpenstackConfig
 class OpenStackControllerCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(OpenStackControllerCheck, self).__init__(name, init_config, instances)
-        self._config = OpenstackConfig(self.log, self.instance)
-        self.api = make_api(self._config, self.log, self.http)
+        self.config = OpenstackConfig(self.log, self.instance)
+        self.api = make_api(self.config, self.log, self.http)
         self.identity = Identity(self)
         self.components = [
             self.identity,

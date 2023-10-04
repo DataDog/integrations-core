@@ -1,21 +1,18 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
+
 import os
 import re
 
 # import tempfile
-from copy import deepcopy
 from pathlib import Path
-from urllib.parse import urlparse
 
 import mock
 import pytest
 import requests
+import yaml
 
-# from keystoneauth1 import access
-from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.fs import get_here
@@ -23,38 +20,39 @@ from datadog_checks.dev.http import MockResponse
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 
 from .common import (
-    CHECK_NAME,
-    CONFIG_NOVA_IRONIC_MICROVERSION_LATEST,
-    CONFIG_NOVA_MICROVERSION_LATEST,
-    CONFIG_REST,
-    CONFIG_SDK,
-    # TEST_OPENSTACK_CONFIG_PATH,
-    USE_OPENSTACK_GCP,
-    # MockHttp,
+    TEST_OPENSTACK_CONFIG_PATH,
+    TEST_OPENSTACK_UPDATED_CONFIG_PATH,
     get_json_value_from_file,
-    # get_microversion_path,
     get_url_path,
 )
 from .endpoints import IRONIC_ENDPOINTS, NOVA_ENDPOINTS
 from .ssh_tunnel import socks_proxy
 from .terraform import terraform_run
 
-
-def mock_endpoint_response_time(endpoint):
-    mock_total_seconds = mock.MagicMock(return_value=3)
-    mock_elapsed = mock.MagicMock()
-    mock_elapsed.total_seconds = mock_total_seconds
-    mock_endpoint = MockResponse(
-        file_path=os.path.join(get_here(), endpoint),
-        status_code=200,
-    )
-    mock_endpoint.elapsed = mock_elapsed
-    return mock_endpoint
+USE_OPENSTACK_GCP = os.environ.get('USE_OPENSTACK_GCP')
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
     if USE_OPENSTACK_GCP:
+
+        def replace_env_vars(match):
+            # Extract variable name from the matched string
+            var_name = match.group(1)
+            # Return the environment variable value or the original string if not found
+            return os.environ.get(var_name, match.group(0))
+
+        # Read the YAML file
+        with open(TEST_OPENSTACK_CONFIG_PATH, 'r') as file:
+            content = file.read()
+            # Replace environment variable placeholders
+            content = re.sub(r'\$\{([^}]+)\}', replace_env_vars, content)
+        # Parse the YAML with substituted values
+        data = yaml.safe_load(content)
+        # Write the modified content back to a file:
+        with open(TEST_OPENSTACK_UPDATED_CONFIG_PATH, 'w') as file:
+            yaml.dump(data, file)
+
         with terraform_run(os.path.join(get_here(), 'terraform')) as outputs:
             ip = outputs['ip']['value']
             internal_ip = outputs['internal_ip']['value']
@@ -67,7 +65,7 @@ def dd_environment():
                 'nova_microversion': '2.93',
                 'ironic_microversion': '1.80',
                 'openstack_cloud_name': 'test_cloud',
-                'openstack_config_file_path': '/home/openstack_controller/tests/fixtures/openstack_config.yaml',
+                'openstack_config_file_path': '/home/openstack_controller/tests/fixtures/openstack_config_updated.yaml',
                 'endpoint_region_id': 'RegionOne',
             }
             env = dict(os.environ)
@@ -84,8 +82,10 @@ def dd_environment():
         conditions = [
             CheckDockerLogs(identifier='openstack-keystone', patterns=['server running']),
             CheckDockerLogs(identifier='openstack-nova', patterns=['server running']),
+            CheckDockerLogs(identifier='openstack-cinder', patterns=['server running']),
             CheckDockerLogs(identifier='openstack-neutron', patterns=['server running']),
             CheckDockerLogs(identifier='openstack-ironic', patterns=['server running']),
+            CheckDockerLogs(identifier='openstack-octavia', patterns=['server running']),
         ]
         with docker_run(compose_file, conditions=conditions):
             instance = {
@@ -98,285 +98,13 @@ def dd_environment():
 
 
 @pytest.fixture
-def instance_rest():
-    return deepcopy(CONFIG_REST)
-
-
-@pytest.fixture
-def instance_nova_microversion_latest():
-    return deepcopy(CONFIG_NOVA_MICROVERSION_LATEST)
-
-
-@pytest.fixture
-def instance_ironic_nova_microversion_latest():
-    return deepcopy(CONFIG_NOVA_IRONIC_MICROVERSION_LATEST)
-
-
-@pytest.fixture
-def instance_sdk():
-    return deepcopy(CONFIG_SDK)
+def openstack_controller_check():
+    return lambda instance: OpenStackControllerCheck('openstack', {}, [instance])
 
 
 @pytest.fixture
 def check(instance):
-    return OpenStackControllerCheck(CHECK_NAME, {}, [instance])
-
-
-@pytest.fixture
-def requests_wrapper():
-    instance = {'timeout': 10, 'ssl_verify': False}
-    yield RequestsWrapper(instance, {})
-
-
-@pytest.fixture
-def mock_http_exception():
-    with mock.patch('datadog_checks.openstack_controller.check.OpenStackControllerCheck.http') as http:
-        http.get.side_effect = [Exception()]
-        yield http
-
-
-@pytest.fixture
-def mock_http_error():
-    with mock.patch('datadog_checks.openstack_controller.check.OpenStackControllerCheck.http') as http:
-        http.get.side_effect = [MockResponse(status_code=500)]
-        yield http
-
-
-@pytest.fixture
-def mock_http_nova_down():
-    with mock.patch('datadog_checks.openstack_controller.check.OpenStackControllerCheck.http') as http:
-        http.get.side_effect = [
-            MockResponse(
-                file_path=os.path.join(get_here(), 'fixtures/identity/v3/get.json'),
-                status_code=200,
-            ),
-            MockResponse(
-                file_path=os.path.join(get_here(), 'fixtures/identity/v3/auth/projects/get.json'),
-                status_code=200,
-            ),
-            MockResponse(status_code=500),
-            mock_endpoint_response_time('fixtures/networking/get.json'),
-            MockResponse(
-                file_path=os.path.join(
-                    get_here(),
-                    'fixtures/networking/v2.0/quotas/1e6e233e637d4d55a50a62b63398ad15/get.json',
-                ),
-                status_code=200,
-            ),
-            MockResponse(status_code=500),
-            mock_endpoint_response_time('fixtures/networking/get.json'),
-            MockResponse(
-                file_path=os.path.join(
-                    get_here(),
-                    'fixtures/networking/v2.0/quotas/6e39099cccde4f809b003d9e0dd09304/get.json',
-                ),
-                status_code=200,
-            ),
-        ]
-        http.post.side_effect = [
-            MockResponse(
-                file_path=os.path.join(get_here(), 'fixtures/identity/v3/auth/tokens/os_token.json'),
-                status_code=200,
-                headers={'X-Subject-Token': 'token_test1234'},
-            ),
-            MockResponse(
-                file_path=os.path.join(
-                    get_here(), 'fixtures/identity/v3/auth/tokens/1e6e233e637d4d55a50a62b63398ad15_token.json'
-                ),
-                status_code=200,
-                headers={'X-Subject-Token': 'token_project_1'},
-            ),
-            MockResponse(
-                file_path=os.path.join(
-                    get_here(), 'fixtures/identity/v3/auth/tokens/6e39099cccde4f809b003d9e0dd09304_token.json'
-                ),
-                status_code=200,
-                headers={'X-Subject-Token': 'token_project_2'},
-            ),
-        ]
-        yield http
-
-
-@pytest.fixture
-def mock_http_latest():
-    with mock.patch('datadog_checks.openstack_controller.check.OpenStackControllerCheck.http') as http:
-        http.get.side_effect = [
-            MockResponse(
-                file_path=os.path.join(get_here(), 'fixtures/identity/v3/get.json'),
-                status_code=200,
-            ),
-            MockResponse(
-                file_path=os.path.join(get_here(), 'fixtures/identity/v3/auth/projects/get.json'),
-                status_code=200,
-            ),
-            mock_endpoint_response_time('fixtures/compute/latest/v2.1/get.json'),
-            MockResponse(
-                file_path=os.path.join(
-                    get_here(),
-                    'fixtures/compute/latest/v2.1/limits?tenant_id=1e6e233e637d4d55a50a62b63398ad15/get.json',
-                ),
-                status_code=200,
-            ),
-            MockResponse(
-                file_path=os.path.join(
-                    get_here(),
-                    'fixtures/compute/latest/v2.1/os-quota-sets/1e6e233e637d4d55a50a62b63398ad15/get.json',
-                ),
-                status_code=200,
-            ),
-            MockResponse(
-                file_path=os.path.join(
-                    get_here(),
-                    'fixtures/compute/latest/v2.1/servers/detail?project_id=1e6e233e637d4d55a50a62b63398ad15/get.json',
-                ),
-                status_code=200,
-            ),
-            MockResponse(
-                file_path=os.path.join(
-                    get_here(),
-                    'fixtures/compute/latest/v2.1/flavors/detail/get.json',
-                ),
-                status_code=200,
-            ),
-            MockResponse(
-                file_path=os.path.join(
-                    get_here(),
-                    'fixtures/compute/latest/v2.1/os-hypervisors/detail?with_servers=true/get.json',
-                ),
-                status_code=200,
-            ),
-            MockResponse(
-                file_path=os.path.join(
-                    get_here(),
-                    'fixtures/compute/latest/v2.1/os-aggregates/get.json',
-                ),
-                status_code=200,
-            ),
-            mock_endpoint_response_time('fixtures/networking/get.json'),
-            MockResponse(
-                file_path=os.path.join(
-                    get_here(),
-                    'fixtures/networking/v2.0/quotas/1e6e233e637d4d55a50a62b63398ad15/get.json',
-                ),
-                status_code=200,
-            ),
-            mock_endpoint_response_time('fixtures/compute/latest/v2.1/get.json'),
-            MockResponse(
-                file_path=os.path.join(
-                    get_here(),
-                    'fixtures/compute/latest/v2.1/limits?tenant_id=6e39099cccde4f809b003d9e0dd09304/get.json',
-                ),
-                status_code=200,
-            ),
-            MockResponse(
-                file_path=os.path.join(
-                    get_here(),
-                    'fixtures/compute/latest/v2.1/os-quota-sets/6e39099cccde4f809b003d9e0dd09304/get.json',
-                ),
-                status_code=200,
-            ),
-            MockResponse(
-                file_path=os.path.join(
-                    get_here(),
-                    'fixtures/compute/latest/v2.1/servers/detail?project_id=6e39099cccde4f809b003d9e0dd09304/get.json',
-                ),
-                status_code=200,
-            ),
-            MockResponse(
-                file_path=os.path.join(
-                    get_here(),
-                    'fixtures/compute/latest/v2.1/servers/2c653a68-b520-4582-a05d-41a68067d76c/diagnostics/get.json',
-                ),
-                status_code=200,
-            ),
-            MockResponse(
-                file_path=os.path.join(
-                    get_here(),
-                    'fixtures/compute/latest/v2.1/flavors/detail/get.json',
-                ),
-                status_code=200,
-            ),
-            MockResponse(
-                file_path=os.path.join(
-                    get_here(),
-                    'fixtures/compute/latest/v2.1/os-hypervisors/detail?with_servers=true/get.json',
-                ),
-                status_code=200,
-            ),
-            MockResponse(
-                file_path=os.path.join(
-                    get_here(),
-                    'fixtures/compute/latest/v2.1/os-aggregates/get.json',
-                ),
-                status_code=200,
-            ),
-            mock_endpoint_response_time('fixtures/networking/get.json'),
-            MockResponse(
-                file_path=os.path.join(
-                    get_here(),
-                    'fixtures/networking/v2.0/quotas/6e39099cccde4f809b003d9e0dd09304/get.json',
-                ),
-                status_code=200,
-            ),
-        ]
-        http.post.side_effect = [
-            MockResponse(
-                file_path=os.path.join(get_here(), 'fixtures/identity/v3/auth/tokens/os_token.json'),
-                status_code=200,
-                headers={'X-Subject-Token': 'token_test1234'},
-            ),
-            MockResponse(
-                file_path=os.path.join(
-                    get_here(), 'fixtures/identity/v3/auth/tokens/1e6e233e637d4d55a50a62b63398ad15_token.json'
-                ),
-                status_code=200,
-                headers={'X-Subject-Token': 'token_project_1'},
-            ),
-            MockResponse(
-                file_path=os.path.join(
-                    get_here(), 'fixtures/identity/v3/auth/tokens/6e39099cccde4f809b003d9e0dd09304_token.json'
-                ),
-                status_code=200,
-                headers={'X-Subject-Token': 'token_project_2'},
-            ),
-        ]
-        yield http
-
-
-def mock_post(url, *args, **kwargs):
-    path = urlparse(url).path
-    path_parts = path.split('/')
-    nova_microversion_header = kwargs['headers'].get('X-OpenStack-Nova-API-Version')
-    if path == '/identity/v3/auth/tokens':
-        data = json.loads(kwargs['data'])
-        project_id = data.get('auth', {}).get('scope', {}).get('project', {}).get('id')
-        if project_id:
-            file_path = os.path.join(
-                get_here(),
-                'fixtures',
-                nova_microversion_header if nova_microversion_header is not None else "default",
-                *path_parts,
-                f'{project_id}.json',
-            )
-            headers = {'X-Subject-Token': f'token_{project_id}'}
-        else:
-            file_path = os.path.join(
-                get_here(),
-                'fixtures',
-                nova_microversion_header if nova_microversion_header is not None else "default",
-                *path_parts,
-                'unscoped.json',
-            )
-            headers = {'X-Subject-Token': 'token_test1234'}
-    else:
-        file_path = os.path.join(
-            get_here(),
-            'fixtures',
-            nova_microversion_header if nova_microversion_header is not None else "default",
-            *path_parts,
-            'post.json',
-        )
-    return MockResponse(file_path=file_path, status_code=200, headers=headers)
+    return OpenStackControllerCheck('openstack', {}, [instance])
 
 
 @pytest.fixture
@@ -1018,10 +746,3 @@ def mock_http_post(request, monkeypatch, mock_http_call):
     mock_post = mock.MagicMock(side_effect=post)
     monkeypatch.setattr('requests.post', mock_post)
     return mock_post
-
-
-@pytest.fixture
-def mock_api_rest(request, monkeypatch, mock_http_get, mock_http_post):
-    pass
-    # monkeypatch.setattr('requests.get', mock_http_get)
-    # monkeypatch.setattr('requests.post', mock_http_post)
