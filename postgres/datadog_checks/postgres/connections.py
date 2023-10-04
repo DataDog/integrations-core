@@ -97,8 +97,8 @@ class MultiDatabaseConnectionPool(object):
         start = datetime.datetime.now()
         self.prune_connections()
         with self._mu:
-            conn = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None, None))
-            db = conn.connection
+            conn = self._conns.pop(dbname, None)
+            db = conn.connection if conn else None
             if db is None or db.closed:
                 if self.max_conns is not None:
                     # try to free space until we succeed
@@ -133,7 +133,14 @@ class MultiDatabaseConnectionPool(object):
             return db
 
     @contextlib.contextmanager
-    def get_connection(self, dbname: str, ttl_ms: int, timeout: int = None, persistent: bool = False):
+    def get_connection(
+        self,
+        dbname: str,
+        ttl_ms: int,
+        timeout: int = None,
+        startup_fn: Callable[[psycopg2.extensions.connection], None] = None,
+        persistent: bool = False,
+    ):
         """
         Grab a connection from the pool if the database is already connected.
         If max_conns is specified, and the database isn't already connected,
@@ -143,17 +150,25 @@ class MultiDatabaseConnectionPool(object):
         Note that leaving a connection context here does NOT close the connection in psycopg2;
         connections must be manually closed by `close_all_connections()`.
         """
+        interrupted_error_seen = False
+
+        with self._mu:
+            db = self._get_connection_raw(dbname, ttl_ms, timeout, startup_fn, persistent)
         try:
-            with self._mu:
-                db = self._get_connection_raw(dbname, ttl_ms, timeout, persistent)
             yield db
+        except InterruptedError:
+            interrupted_error_seen = True
+            with self._mu:
+                self._terminate_connection_unsafe(dbname)
+            raise
         finally:
             with self._mu:
-                try:
-                    self._conns[dbname].active = False
-                except KeyError:
-                    # if self._get_connection_raw hit an exception, self._conns[dbname] didn't get populated
-                    pass
+                if not interrupted_error_seen and not db.closed:
+                    try:
+                        self._conns[dbname].active = False
+                    except KeyError:
+                        # if self._get_connection_raw hit an exception, self._conns[dbname] didn't get populated
+                        pass
 
     def prune_connections(self):
         """
