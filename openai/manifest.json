@@ -48,7 +48,7 @@
       },
       "metrics": {
         "prefix": "openai.",
-        "check": "openai.request.duration",
+        "check": ["openai.request.duration", "openai.api.usage.n_requests"],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
