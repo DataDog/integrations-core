@@ -156,7 +156,7 @@ class KafkaClient:
     def get_partitions_for_topic(self, topic):
         if self.topics_cache.get(topic):
             return self.topics_cache.get(topic)
-        
+
         try:
             cluster_metadata = self.kafka_client.list_topics(topic, timeout=self.config._request_timeout)
         except KafkaException as e:
