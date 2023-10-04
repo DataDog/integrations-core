@@ -5,17 +5,27 @@ import re
 
 import pywintypes
 import win32service
+import ctypes
 from six import raise_from
 
 from datadog_checks.base import AgentCheck
 
 SERVICE_PATTERN_FLAGS = re.IGNORECASE
 
+SERVICE_CONFIG_TRIGGER_INFO = 8
+
+class TriggerInfo(ctypes.Structure):
+    _fields_ = [
+        ("triggerCount", ctypes.c_uint32),
+        ("pTriggers", ctypes.c_void_p),
+        ("pReserved", ctypes.c_char_p)
+    ]
 
 class ServiceFilter(object):
-    def __init__(self, name=None, startup_type=None):
+    def __init__(self, name=None, startup_type=None, trigger_start=None):
         self.name = name
         self.startup_type = startup_type
+        self.trigger_start = trigger_start
 
         self._init_patterns()
 
@@ -34,6 +44,9 @@ class ServiceFilter(object):
         if self.startup_type is not None:
             if self.startup_type.lower() != service_view.startup_type_string().lower():
                 return False
+        if self.trigger_start is not None:
+            if not self.trigger_start and service_view.trigger_count > 0:
+                return False
         return True
 
     def __str__(self):
@@ -42,6 +55,8 @@ class ServiceFilter(object):
             vals.append('name={}'.format(self._name_re.pattern))
         if self.startup_type is not None:
             vals.append('startup_type={}'.format(self.startup_type))
+        if self.trigger_start is not None:
+            vals.append('trigger_start={}'.format(self.trigger_start))
         # Example:
         #   - ServiceFilter(name=EventLog)
         #   - ServiceFilter(startup_type=automatic)
@@ -75,7 +90,8 @@ class ServiceFilter(object):
             if name is not None and wmi_compat:
                 name = cls._wmi_compat_name(name)
             startup_type = item.get('startup_type', None)
-            obj = cls(name=name, startup_type=startup_type)
+            trigger_start = item.get('trigger_start', None)
+            obj = cls(name=name, startup_type=startup_type, trigger_start=trigger_start)
         else:
             raise Exception("Invalid type '{}' for service".format(type(item).__name__))
         return obj
@@ -99,6 +115,7 @@ class ServiceView(object):
         self._startup_type = None
         self._service_config = None
         self._is_delayed_auto = None
+        self._trigger_count = None
 
     @property
     def hSvc(self):
@@ -125,6 +142,23 @@ class ServiceView(object):
                 self.hSvc, win32service.SERVICE_CONFIG_DELAYED_AUTO_START_INFO
             )
         return self._is_delayed_auto
+
+    @property
+    def trigger_count(self):
+        if self._trigger_count is None:
+            # find out how many bytes to allocate for buffer
+            bytesneeded = ctypes.c_uint32(0)
+            ctypes.windll.advapi32.QueryServiceConfig2W(ctypes.c_void_p(self.hSvc.handle), SERVICE_CONFIG_TRIGGER_INFO, None, 0, ctypes.byref(bytesneeded))
+            
+            # allocate buffer and get trigger info
+            bytesBuffer = ctypes.create_string_buffer(bytes(bytesneeded.value), bytesneeded.value)
+            ctypes.windll.advapi32.QueryServiceConfig2W(ctypes.c_void_p(self.hSvc.handle), SERVICE_CONFIG_TRIGGER_INFO, ctypes.byref(bytesBuffer), bytesneeded, ctypes.byref(bytesneeded))
+            
+            # converting returned buffer into TriggerInfo to get trigger count
+            triggerStruct = TriggerInfo.from_buffer(bytesBuffer)
+            self._trigger_count = triggerStruct.triggerCount
+        
+        return self._trigger_count
 
     def startup_type_string(self):
         startup_type_string = ''
@@ -186,6 +220,7 @@ class WindowsService(AgentCheck):
             if 'ALL' not in services:
                 for service_filter in service_filters:
                     self.log.debug('Service Short Name: %s and Filter: %s', short_name, service_filter)
+                    self.log.debug('Trigger count for %s is %d', short_name, service_view.trigger_count)
                     try:
                         if service_filter.match(service_view):
                             services_unseen.discard(service_filter.name)
