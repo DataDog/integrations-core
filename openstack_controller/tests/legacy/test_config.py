@@ -50,7 +50,6 @@ def test_config_invalid(instance, exception_msg, dd_run_check):
         pytest.param(
             {
                 'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}},
-                'openstack_cloud_name': 'test_cloud',
                 'openstack_config_file_path': 'test',
                 'name': 'test',
             },
