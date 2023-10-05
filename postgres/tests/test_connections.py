@@ -9,11 +9,11 @@ import uuid
 
 import psycopg2
 import pytest
-
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.connections import ConnectionPoolFullError, MultiDatabaseConnectionPool
 
 from .common import HOST, PASSWORD_ADMIN, USER_ADMIN
+from .utils import _get_superconn
 
 
 @pytest.mark.integration
@@ -313,3 +313,44 @@ def test_conn_pool_context_managed(pg_instance):
     # close the rest
     pool.close_all_connections()
     assert pool._stats.connection_closed == limit + 1
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_conn_terminated_prematurely(pg_instance):
+    """
+    Test db connection terminated prematurely
+    """
+
+    def _terminate_connection(conn, dbname):
+        # function to abruptly terminate a connection
+        with conn.cursor() as cursor:
+            print(dbname)
+            cursor.execute(
+                "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid <> pg_backend_pid() AND datname = %s",
+                (dbname,),
+            )
+
+    check = PostgreSql('postgres', {}, [pg_instance])
+    conn = _get_superconn(pg_instance)
+
+    check.check(pg_instance)
+    assert check._db is not None
+    assert not check._db.closed
+
+    _terminate_connection(conn, pg_instance['dbname'])
+    time.sleep(1)
+
+    assert check._db is not None
+
+    # the connection is terminated on the server, psycopg has no way of knowing
+    # this check run will fail but the connection status should be updated
+    with pytest.raises(psycopg2.Error):
+        check.check(pg_instance)
+
+    # connection status is updated to closed
+    assert check._db is not None
+    assert check._db.closed
+
+    # new check run will re-open connection
+    check.check(pg_instance)
