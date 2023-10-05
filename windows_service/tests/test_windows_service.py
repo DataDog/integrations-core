@@ -254,6 +254,33 @@ def test_invalid_pattern_regex(aggregator, check, instance_basic_dict):
     with pytest.raises(Exception, match=r"Regular expression syntax error in '\(foo':"):
         c.check(instance_basic_dict)
 
+def test_trigger_start(aggregator, check, instance_trigger_start):
+    c = check(instance_trigger_start)
+    c.check(instance_trigger_start)
+    aggregator.assert_service_check(
+        WindowsService.SERVICE_CHECK_NAME,
+        status=WindowsService.UNKNOWN,
+        tags=['windows_service:eventlog', 'optional:tag1'],
+        count=1,
+    )
+
+    aggregator.assert_service_check(
+        WindowsService.SERVICE_CHECK_NAME,
+        status=WindowsService.UNKNOWN,
+        tags=['windows_service:dnscache', 'optional:tag1'],
+        count=1,
+    )
+
+def test_trigger_count_failure(aggregator, check, instance_trigger_start):
+    c = check(instance_trigger_start)
+
+    with patch('ctypes.GetLastError', return_value=1):
+        with pytest.raises(OSError):
+            c.check(instance_trigger_start)
+    
+    with patch('ctypes.windll.advapi32.QueryServiceConfig2W', return_value=0):
+        with pytest.raises(OSError):
+            c.check(instance_trigger_start)
 
 @pytest.mark.e2e
 def test_basic_e2e(dd_agent_check, check, instance_basic):
@@ -275,23 +302,5 @@ def test_basic_e2e(dd_agent_check, check, instance_basic):
         WindowsService.SERVICE_CHECK_NAME,
         status=WindowsService.UNKNOWN,
         tags=['service:NonExistentService', 'windows_service:NonExistentService', 'optional:tag1'],
-        count=1,
-    )
-
-@pytest.mark.e2e
-def test_trigger_count_e2e(dd_agent_check, check, instance_trigger_start):
-    aggregator = dd_agent_check(instance_trigger_start)
-
-    aggregator.assert_service_check(
-        WindowsService.SERVICE_CHECK_NAME,
-        status=WindowsService.OK,
-        tags=['windows_service:EventLog', 'optional:tag1'],
-        count=1,
-    )
-
-    aggregator.assert_service_check(
-        WindowsService.SERVICE_CHECK_NAME,
-        status=WindowsService.UNKNOWN,
-        tags=['windows_service:dnscache', 'optional:tag1'],
         count=1,
     )
