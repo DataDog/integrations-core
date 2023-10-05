@@ -75,6 +75,7 @@ include = '\.pyi?$'
 line-length = 120
 skip-string-normalization = true
 target-version = ["py39"]
+extend-exclude = "src/ddev/_version.py"
 
 [tool.ruff]
 exclude = []
