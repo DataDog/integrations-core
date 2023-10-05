@@ -150,25 +150,17 @@ class MultiDatabaseConnectionPool(object):
         Note that leaving a connection context here does NOT close the connection in psycopg2;
         connections must be manually closed by `close_all_connections()`.
         """
-        interrupted_error_seen = False
-
-        with self._mu:
-            db = self._get_connection_raw(dbname, ttl_ms, timeout, startup_fn, persistent)
         try:
-            yield db
-        except InterruptedError:
-            interrupted_error_seen = True
             with self._mu:
-                self._terminate_connection_unsafe(dbname)
-            raise
+                db = self._get_connection_raw(dbname, ttl_ms, timeout, startup_fn, persistent)
+            yield db
         finally:
             with self._mu:
-                if not interrupted_error_seen and not db.closed:
-                    try:
-                        self._conns[dbname].active = False
-                    except KeyError:
-                        # if self._get_connection_raw hit an exception, self._conns[dbname] didn't get populated
-                        pass
+                try:
+                    self._conns[dbname].active = False
+                except KeyError:
+                    # if self._get_connection_raw hit an exception, self._conns[dbname] didn't get populated
+                    pass
 
     def prune_connections(self):
         """
