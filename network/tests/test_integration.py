@@ -41,7 +41,7 @@ def test_check_linux(aggregator, check, instance_blacklist):
     #   even if this metric is missing. The logic to check for conntrack metric
     #   is similar for rest of them as well, so the core conntrack metric
     #   collection logic is not compromised by removing one metric
-    metrics_to_check = common.CONNTRACK_METRICS.copy()
+    metrics_to_check = common.CONNTRACK_METRICS[:]
     metrics_to_check.remove('system.net.conntrack.helper')
 
     for metric in metrics_to_check:
