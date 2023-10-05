@@ -4,7 +4,7 @@
 
 ***Added***:
 
-* It is now possible to specify multiple expected modes ([#15909](https://github.com/DataDog/integrations-core/pull/15909))
+* Allow multiple expected modes to be specified ([#15909](https://github.com/DataDog/integrations-core/pull/15909))
 
 ## 4.3.1 / 2023-08-18
 
