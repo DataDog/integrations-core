@@ -38,7 +38,8 @@ class VersionUtils(object):
         try:
             with db as conn:
                 with conn.cursor() as cursor:
-                    # This query will pollute PG logs in non aurora versions but is the only reliable way to detect aurora
+                    # This query will pollute PG logs in non aurora versions,
+                    # but is the only reliable way to detect aurora
                     cursor.execute('select AURORA_VERSION();')
                     return True
         except Exception as e:
