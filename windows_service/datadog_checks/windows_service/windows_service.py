@@ -13,6 +13,7 @@ from datadog_checks.base import AgentCheck
 SERVICE_PATTERN_FLAGS = re.IGNORECASE
 
 SERVICE_CONFIG_TRIGGER_INFO = 8
+ERROR_INSUFFICIENT_BUFFER = 122
 
 class TriggerInfo(ctypes.Structure):
     _fields_ = [
@@ -46,6 +47,8 @@ class ServiceFilter(object):
                 return False
         if self.trigger_start is not None:
             if not self.trigger_start and service_view.trigger_count > 0:
+                return False
+            elif self.trigger_start and service_view.trigger_count == 0:
                 return False
         return True
 
@@ -146,13 +149,18 @@ class ServiceView(object):
     @property
     def trigger_count(self):
         if self._trigger_count is None:
-            # find out how many bytes to allocate for buffer
+            # find out how many bytes to allocate for buffer, raise error if the error code is not ERROR_INSUFFICIENT_BUFFER
             bytesneeded = ctypes.c_uint32(0)
             ctypes.windll.advapi32.QueryServiceConfig2W(ctypes.c_void_p(self.hSvc.handle), SERVICE_CONFIG_TRIGGER_INFO, None, 0, ctypes.byref(bytesneeded))
+            err = ctypes.GetLastError()
+            if err != ERROR_INSUFFICIENT_BUFFER:
+                raise ctypes.WinError(err)
             
-            # allocate buffer and get trigger info
+            # allocate buffer and get trigger info, raise error if function returns 0
             bytesBuffer = ctypes.create_string_buffer(bytes(bytesneeded.value), bytesneeded.value)
-            ctypes.windll.advapi32.QueryServiceConfig2W(ctypes.c_void_p(self.hSvc.handle), SERVICE_CONFIG_TRIGGER_INFO, ctypes.byref(bytesBuffer), bytesneeded, ctypes.byref(bytesneeded))
+            if ctypes.windll.advapi32.QueryServiceConfig2W(ctypes.c_void_p(self.hSvc.handle), SERVICE_CONFIG_TRIGGER_INFO, ctypes.byref(bytesBuffer), bytesneeded, ctypes.byref(bytesneeded)) == 0:
+                err = ctypes.GetLastError()
+                raise ctypes.WinError(err)
             
             # converting returned buffer into TriggerInfo to get trigger count
             triggerStruct = TriggerInfo.from_buffer(bytesBuffer)
@@ -223,7 +231,7 @@ class WindowsService(AgentCheck):
                     try:
                         if service_filter.match(service_view):
                             services_unseen.discard(service_filter.name)
-                            if (service_filter.trigger_start):
+                            if (service_filter.trigger_start != None):
                                 self.log.debug('Trigger count for %s is %d', short_name, service_view.trigger_count)
                             break
                     except pywintypes.error as e:
