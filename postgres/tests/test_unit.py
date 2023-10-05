@@ -97,10 +97,10 @@ def test_malformed_get_custom_queries(check):
     db = MagicMock()
 
     @contextlib.contextmanager
-    def mock_get_main_db():
+    def mock_db():
         yield db
 
-    check._get_main_db = mock_get_main_db
+    check.db = mock_db
 
     check._config.custom_queries = [{}]
 

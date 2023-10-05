@@ -364,7 +364,7 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
 
     # Execute the query once to begin tracking it. Execute again between checks to track the difference.
     # This should result in a single metric for that query_signature having a value of 2
-    with check._get_main_db() as conn:
+    with check.db() as conn:
         with conn.cursor() as cursor:
             with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
                 mock_agent.side_effect = obfuscate_sql

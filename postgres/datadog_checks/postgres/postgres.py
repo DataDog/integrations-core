@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import contextlib
 import copy
 import os
 from time import time
@@ -79,6 +80,7 @@ class PostgreSql(AgentCheck):
         super(PostgreSql, self).__init__(name, init_config, instances)
         self._resolved_hostname = None
         self._agent_hostname = None
+        self._db = None
         self.version = None
         self.is_aurora = None
         self._version_utils = VersionUtils()
@@ -179,11 +181,39 @@ class PostgreSql(AgentCheck):
         )
 
     def execute_query_raw(self, query):
-        with self._get_main_db() as conn:
+        with self.db() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(query)
                 rows = cursor.fetchall()
                 return rows
+
+    @contextlib.contextmanager
+    def db(self):
+        """
+        db context manager that yields a healthy connection to the main database
+        """
+        if not self._db or self._db.closed:
+            # if the connection is closed, we need to reinitialize the connection
+            self._db = self._new_connection(self._config.dbname)
+            # once the connection is reinitialized, we need to reload the pg_settings
+            self._load_pg_settings(self._db)
+        if self._db.status != psycopg2.extensions.STATUS_READY:
+            self._db.rollback()
+        try:
+            yield self._db
+        except (psycopg2.InterfaceError, InterruptedError):
+            # if we get an interface error or an interrupted error,
+            # we gracefully close the connection
+            try:
+                self._db.close()
+            except Exception:
+                pass
+            finally:
+                self._db = None
+            raise
+        except Exception:
+            self.log.exception("Unhandled exception while using database connection %s", self._config.dbname)
+            raise
 
     @property
     def dynamic_queries(self):
@@ -276,7 +306,7 @@ class PostgreSql(AgentCheck):
         return list(service_check_tags)
 
     def _get_replication_role(self):
-        with self._get_main_db() as conn:
+        with self.db() as conn:
             with conn.cursor() as cursor:
                 cursor.execute('SELECT pg_is_in_recovery();')
                 role = cursor.fetchone()[0]
@@ -327,14 +357,14 @@ class PostgreSql(AgentCheck):
         return oldest_file_age
 
     def load_version(self):
-        raw_version = self._version_utils.get_raw_version(self._get_main_db())
+        raw_version = self._version_utils.get_raw_version(self.db())
         self.version = self._version_utils.parse_version(raw_version)
         self.set_metadata('version', raw_version)
         return self.version
 
     def initialize_is_aurora(self):
         if self.is_aurora is None:
-            self.is_aurora = self._version_utils.is_aurora(self._get_main_db())
+            self.is_aurora = self._version_utils.is_aurora(self.db())
         return self.is_aurora
 
     @property
@@ -589,7 +619,7 @@ class PostgreSql(AgentCheck):
         if replication_stats_metrics:
             metric_scope.append(replication_stats_metrics)
 
-        with self._get_main_db() as conn:
+        with self.db() as conn:
             with conn.cursor() as cursor:
                 results_len = self._query_scope(cursor, db_instance_metrics, instance_tags, False)
                 if results_len is not None:
@@ -674,7 +704,7 @@ class PostgreSql(AgentCheck):
         The connection created here will be persistent. It will not be automatically
         evicted from the connection pool.
         """
-        with self._get_main_db(startup_fn=self._load_pg_settings):
+        with self.db():
             pass
 
     # Reload pg_settings on a new connection to the main db
@@ -700,7 +730,7 @@ class PostgreSql(AgentCheck):
                 hostname=self.resolved_hostname,
             )
 
-    def _get_main_db(self, startup_fn=None):
+    def _get_main_db(self):
         """
         Returns a memoized, persistent psycopg2 connection to `self.dbname`.
         Threadsafe as long as no transactions are used
@@ -710,7 +740,7 @@ class PostgreSql(AgentCheck):
         return self.db_pool.get_connection(
             self._config.dbname,
             self._config.idle_connection_timeout,
-            startup_fn=startup_fn,
+            startup_fn=self._load_pg_settings,
             persistent=True,
         )
 
@@ -738,7 +768,7 @@ class PostgreSql(AgentCheck):
                 self.log.error("custom query field `columns` is required for metric_prefix `%s`", metric_prefix)
                 continue
 
-            with self._get_main_db() as conn:
+            with self.db() as conn:
                 with conn.cursor() as cursor:
                     try:
                         self.log.debug("Running query: %s", query)
@@ -810,7 +840,9 @@ class PostgreSql(AgentCheck):
                         else:
                             for info in metric_info:
                                 metric, value, method = info
-                                getattr(self, method)(metric, value, tags=set(query_tags), hostname=self.resolved_hostname)
+                                getattr(self, method)(
+                                    metric, value, tags=set(query_tags), hostname=self.resolved_hostname
+                                )
 
     def record_warning(self, code, message):
         # type: (DatabaseConfigurationError, str) -> None
