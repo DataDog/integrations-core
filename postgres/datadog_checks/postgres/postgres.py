@@ -204,6 +204,9 @@ class PostgreSql(AgentCheck):
         except (psycopg2.InterfaceError, InterruptedError):
             # if we get an interface error or an interrupted error,
             # we gracefully close the connection
+            self.log.warning(
+                "Connection to the database %s has been interrupted, closing connection", self._config.dbname
+            )
             try:
                 self._db.close()
             except Exception:
