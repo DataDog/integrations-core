@@ -635,14 +635,14 @@ class PostgreSql(AgentCheck):
             with conn.cursor() as cursor:
                 self._query_scope(cursor, archiver_instance_metrics, instance_tags, False)
 
-                if self._config.collect_activity_metrics:
-                    activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
-                    with conn.cursor() as cursor:
-                        self._query_scope(cursor, activity_metrics, instance_tags, False)
+            if self._config.collect_activity_metrics:
+                activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
+                with conn.cursor() as cursor:
+                    self._query_scope(cursor, activity_metrics, instance_tags, False)
 
-                for scope in list(metric_scope) + self._config.custom_metrics:
-                    with conn.cursor() as cursor:
-                        self._query_scope(cursor, scope, instance_tags, scope in self._config.custom_metrics)
+            for scope in list(metric_scope) + self._config.custom_metrics:
+                with conn.cursor() as cursor:
+                    self._query_scope(cursor, scope, instance_tags, scope in self._config.custom_metrics)
 
         if self.dynamic_queries:
             self.dynamic_queries.execute()
