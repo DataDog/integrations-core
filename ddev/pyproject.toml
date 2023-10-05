@@ -39,7 +39,7 @@ dependencies = [
     "tomlkit",
     # When https://github.com/twisted/towncrier/pull/548 gets merged
     # switch this to appropriate towncrier version requirement.
-    "git+https://github.com/iliakur/towncrier.git@1conf2rulethemall",
+    "towncrier @ git+https://github.com/iliakur/towncrier.git@1conf2rulethemall",
     "tqdm",
 ]
 dynamic = ["version"]
