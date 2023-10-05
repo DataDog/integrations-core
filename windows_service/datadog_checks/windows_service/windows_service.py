@@ -220,10 +220,11 @@ class WindowsService(AgentCheck):
             if 'ALL' not in services:
                 for service_filter in service_filters:
                     self.log.debug('Service Short Name: %s and Filter: %s', short_name, service_filter)
-                    self.log.debug('Trigger count for %s is %d', short_name, service_view.trigger_count)
                     try:
                         if service_filter.match(service_view):
                             services_unseen.discard(service_filter.name)
+                            if (service_filter.trigger_start):
+                                self.log.debug('Trigger count for %s is %d', short_name, service_view.trigger_count)
                             break
                     except pywintypes.error as e:
                         self.log.exception("Exception at service match for %s", service_filter)

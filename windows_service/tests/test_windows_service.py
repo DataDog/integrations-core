@@ -277,3 +277,21 @@ def test_basic_e2e(dd_agent_check, check, instance_basic):
         tags=['service:NonExistentService', 'windows_service:NonExistentService', 'optional:tag1'],
         count=1,
     )
+
+@pytest.mark.e2e
+def test_trigger_count_e2e(dd_agent_check, check, instance_trigger_start):
+    aggregator = dd_agent_check(instance_trigger_start)
+
+    aggregator.assert_service_check(
+        WindowsService.SERVICE_CHECK_NAME,
+        status=WindowsService.OK,
+        tags=['windows_service:EventLog', 'optional:tag1'],
+        count=1,
+    )
+
+    aggregator.assert_service_check(
+        WindowsService.SERVICE_CHECK_NAME,
+        status=WindowsService.UNKNOWN,
+        tags=['windows_service:dnscache', 'optional:tag1'],
+        count=1,
+    )
