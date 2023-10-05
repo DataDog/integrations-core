@@ -101,16 +101,18 @@ def test_conflicts_lock(aggregator, integration_check, pg_instance, pg_replica_i
     expected_tags = _get_expected_tags(check, pg_replica_instance2, db=DB_NAME)
 
     replica_con = _get_superconn(pg_replica_instance2)
+    replica_con.set_session(autocommit=False)
     replica_cur = replica_con.cursor()
     replica_cur.execute('BEGIN;')
     replica_cur.execute('select * from persons;')
-    replica_cur.fetchall()
 
-    with _get_superconn(pg_instance) as conn:
-        conn.autocommit = True
-        with conn.cursor() as cur:
-            cur.execute('update persons SET personid = 1 where personid = 1;')
-            cur.execute('vacuum full persons')
+    conn = _get_superconn(pg_instance)
+    conn.set_session(autocommit=True)
+    cur = conn.cursor()
+    cur.execute('update persons SET personid = 1 where personid = 1;')
+    cur.execute('vacuum full persons;')
+    time.sleep(0.2)
+
     _wait_for_value(
         pg_replica_instance2,
         lower_threshold=0,
@@ -120,6 +122,9 @@ def test_conflicts_lock(aggregator, integration_check, pg_instance, pg_replica_i
     check.check(pg_replica_instance2)
     aggregator.assert_metric('postgresql.conflicts.lock', value=1, tags=expected_tags)
 
+    replica_con.close()
+    conn.close()
+
 
 @requires_over_10
 def test_conflicts_snapshot(aggregator, integration_check, pg_instance, pg_replica_instance2):
@@ -127,16 +132,18 @@ def test_conflicts_snapshot(aggregator, integration_check, pg_instance, pg_repli
     expected_tags = _get_expected_tags(check, pg_replica_instance2, db=DB_NAME)
 
     replica2_con = _get_superconn(pg_replica_instance2)
+    replica2_con.set_session(autocommit=False)
     replica2_cur = replica2_con.cursor()
     replica2_cur.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;')
     replica2_cur.execute('select * from persons;')
 
-    with _get_superconn(pg_instance) as conn:
-        conn.autocommit = True
-        with conn.cursor() as cur:
-            cur.execute('update persons SET personid = 1 where personid = 1;')
-            time.sleep(0.2)
-            cur.execute('vacuum verbose persons;')
+    conn = _get_superconn(pg_instance)
+    conn.set_session(autocommit=True)
+    cur = conn.cursor()
+    cur.execute('update persons SET personid = 1 where personid = 1;')
+    time.sleep(0.2)
+    cur.execute('vacuum verbose persons;')
+    time.sleep(0.2)
 
     _wait_for_value(
         pg_replica_instance2,
@@ -145,6 +152,9 @@ def test_conflicts_snapshot(aggregator, integration_check, pg_instance, pg_repli
     )
     check.check(pg_replica_instance2)
     aggregator.assert_metric('postgresql.conflicts.snapshot', value=1, tags=expected_tags)
+
+    replica2_con.close()
+    conn.close()
 
 
 @pytest.mark.skip(reason="Failing on master")

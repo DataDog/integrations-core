@@ -288,7 +288,7 @@ class PostgresMetadata(DBMAsyncJob):
             owner: str
         """
         cursor.execute(DATABASE_INFORMATION_QUERY.format(dbname=dbname))
-        row = cursor.fetchone()
+        row = cursor.fetchall()[0]
         return row
 
     def _query_schema_information(self, cursor: psycopg2.extensions.cursor, dbname: str) -> Dict[str, str]:
@@ -362,7 +362,7 @@ class PostgresMetadata(DBMAsyncJob):
             else:
                 # get activity
                 cursor.execute(PARTITION_ACTIVITY_QUERY.format(parent_oid=info['id']))
-                row = cursor.fetchone()
+                row = cursor.fetchall()[0]
                 return row['total_activity']
 
         # if relation metrics are enabled, sorted based on last activity information
@@ -410,11 +410,11 @@ class PostgresMetadata(DBMAsyncJob):
             if VersionUtils.transform_version(str(self._check.version))['version.major'] != "9":
                 if table['has_partitions']:
                     cursor.execute(PARTITION_KEY_QUERY.format(parent=name))
-                    row = cursor.fetchone()
+                    row = cursor.fetchall()[0]
                     this_payload.update({'partition_key': row['partition_key']})
 
                     cursor.execute(NUM_PARTITIONS_QUERY.format(parent_oid=table_id))
-                    row = cursor.fetchone()
+                    row = cursor.fetchall()[0]
                     this_payload.update({'num_partitions': row['num_partitions']})
 
             if table['toast_table'] is not None:
@@ -422,7 +422,7 @@ class PostgresMetadata(DBMAsyncJob):
 
             # Get foreign keys
             cursor.execute(PG_CHECK_FOR_FOREIGN_KEY.format(oid=table_id))
-            row = cursor.fetchone()
+            row = cursor.fetchall()[0]
             if row['count'] > 0:
                 cursor.execute(PG_CONSTRAINTS_QUERY.format(oid=table_id))
                 rows = cursor.fetchall()
