@@ -9,6 +9,7 @@ import uuid
 
 import psycopg2
 import pytest
+
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.connections import ConnectionPoolFullError, MultiDatabaseConnectionPool
 
