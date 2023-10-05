@@ -3,6 +3,14 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 
+import os
+
+import pytest
+
+OPENSTACK_E2E_LEGACY = os.environ.get('OPENSTACK_E2E_LEGACY') == 'true'
+not_openstack_e2e_legacy = pytest.mark.skipif(OPENSTACK_E2E_LEGACY, reason='Not Legacy E2E test')
+
+
 def remove_service_from_catalog(d, services):
     catalog = d.get('token', {}).get('catalog', {})
     new_catalog = []

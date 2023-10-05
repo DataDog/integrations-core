@@ -5,8 +5,10 @@
 import pytest
 
 from datadog_checks.base import AgentCheck
+from tests.common import not_openstack_e2e_legacy
 
 
+@not_openstack_e2e_legacy
 @pytest.mark.e2e
 def test_connect_ok(dd_agent_check):
     aggregator = dd_agent_check()

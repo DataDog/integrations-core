@@ -9,6 +9,7 @@ from datadog_checks.base import AgentCheck
 from . import common
 
 
+@common.openstack_e2e_legacy
 @pytest.mark.e2e
 def test_check(dd_agent_check):
     aggregator = dd_agent_check()

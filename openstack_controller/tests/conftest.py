@@ -25,6 +25,7 @@ from .ssh_tunnel import socks_proxy
 from .terraform import terraform_run
 
 USE_OPENSTACK_GCP = os.environ.get('USE_OPENSTACK_GCP')
+OPENSTACK_E2E_LEGACY = os.environ.get('OPENSTACK_E2E_LEGACY')
 
 
 @pytest.fixture(scope='session')
@@ -72,6 +73,22 @@ def dd_environment():
                 socks_ip, socks_port = socks
                 agent_config = {'proxy': {'http': 'socks5://{}:{}'.format(socks_ip, socks_port)}}
                 yield instance, agent_config
+    elif OPENSTACK_E2E_LEGACY:
+        compose_file = os.path.join(get_here(), 'legacy', 'docker', 'docker-compose.yaml')
+        conditions = [
+            CheckDockerLogs(identifier='openstack-keystone', patterns=['server running']),
+            CheckDockerLogs(identifier='openstack-nova', patterns=['server running']),
+            CheckDockerLogs(identifier='openstack-neutron', patterns=['server running']),
+            CheckDockerLogs(identifier='openstack-ironic', patterns=['server running']),
+        ]
+        with docker_run(compose_file, conditions=conditions):
+            instance = {
+                'name': 'test',
+                'keystone_server_url': 'http://127.0.0.1:8080/identity/v3',
+                'user': {'name': 'admin', 'password': 'labstack', 'domain': {'id': 'default'}},
+                'ssl_verify': False,
+            }
+            yield instance
     else:
         compose_file = os.path.join(get_here(), 'docker', 'docker-compose.yaml')
         conditions = [
@@ -88,6 +105,7 @@ def dd_environment():
                 'username': 'admin',
                 'password': 'password',
                 'ssl_verify': False,
+                'use_legacy_check_version': False,
             }
             yield instance
 
