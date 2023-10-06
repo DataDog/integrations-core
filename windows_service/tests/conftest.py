@@ -59,6 +59,7 @@ def instance_all():
 def instance_startup_type_filter():
     return deepcopy(common.INSTANCE_STARTUP_TYPE_FILTER)
 
+
 @pytest.fixture
 def instance_trigger_start():
     return deepcopy(common.INSTANCE_TRIGGER_START)
