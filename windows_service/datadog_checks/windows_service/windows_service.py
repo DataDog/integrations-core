@@ -179,10 +179,7 @@ class ServiceView(object):
             
             # allocate buffer and get trigger info, raise error if function returns 0
             bytesBuffer = ctypes.create_string_buffer(bytesneeded.value)
-            try: 
-                QueryServiceConfig2W(ctypes.c_void_p(self.hSvc.handle), SERVICE_CONFIG_TRIGGER_INFO, ctypes.byref(bytesBuffer), bytesneeded, ctypes.byref(bytesneeded))
-            except OSError as e:
-                raise 
+            QueryServiceConfig2W(ctypes.c_void_p(self.hSvc.handle), SERVICE_CONFIG_TRIGGER_INFO, ctypes.byref(bytesBuffer), bytesneeded, ctypes.byref(bytesneeded)) 
             
             # converting returned buffer into TriggerInfo to get trigger count
             triggerStruct = TriggerInfo.from_buffer(bytesBuffer)
