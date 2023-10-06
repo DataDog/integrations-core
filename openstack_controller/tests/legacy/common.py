@@ -5,8 +5,6 @@
 import datetime
 import os
 
-import pytest
-
 CHECK_NAME = 'openstack'
 
 FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
@@ -21,9 +19,6 @@ EXCLUDED_SERVER_IDS = ['server-2', 'other-.*']
 FILTERED_NETWORK_ID = 'server-2'
 FILTERED_SERVER_ID = 'server-1'
 FILTERED_BY_PROJ_SERVER_ID = ['server-1', 'server-2']
-
-OPENSTACK_E2E_LEGACY = os.environ.get('OPENSTACK_E2E_LEGACY') == 'true'
-openstack_e2e_legacy = pytest.mark.skipif(not OPENSTACK_E2E_LEGACY, reason='Legacy E2E test')
 
 CONFIG_FILE_INSTANCE = {
     'name': 'test_name',

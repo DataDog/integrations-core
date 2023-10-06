@@ -3,11 +3,22 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import copy
+import os
 import time
+
+import pytest
 
 from datadog_checks.openstack_controller.legacy.retry import BackOffRetry
 
 from . import common
+
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.skipif(
+        os.environ.get('OPENSTACK_E2E_LEGACY') is None or os.environ.get('OPENSTACK_E2E_LEGACY') == 'false',
+        reason='Legacy test',
+    ),
+]
 
 
 def test_retry():

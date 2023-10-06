@@ -4,6 +4,7 @@
 
 import copy
 import logging
+import os
 from copy import deepcopy
 
 import mock
@@ -18,7 +19,13 @@ from datadog_checks.openstack_controller.legacy.openstack_controller_legacy impo
 
 from . import common
 
-pytestmark = pytest.mark.unit
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.skipif(
+        os.environ.get('OPENSTACK_E2E_LEGACY') is None or os.environ.get('OPENSTACK_E2E_LEGACY') == 'false',
+        reason='Legacy test',
+    ),
+]
 
 
 def test_parse_uptime_string(aggregator):

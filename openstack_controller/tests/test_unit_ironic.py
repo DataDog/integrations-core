@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
+import os
 
 import pytest
 
@@ -18,7 +19,10 @@ from tests.metrics import (
     NODES_METRICS_IRONIC_MICROVERSION_DEFAULT,
 )
 
-pytestmark = [pytest.mark.unit]
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.skipif(os.environ.get('OPENSTACK_E2E_LEGACY') == 'true', reason='Not Legacy test'),
+]
 
 
 @pytest.mark.parametrize(

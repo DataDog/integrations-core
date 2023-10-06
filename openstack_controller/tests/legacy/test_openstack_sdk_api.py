@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import os
+
 import mock
 import pytest
 from openstack.exceptions import SDKException
@@ -15,6 +17,14 @@ from datadog_checks.openstack_controller.legacy.exceptions import (
 )
 
 from . import common
+
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.skipif(
+        os.environ.get('OPENSTACK_E2E_LEGACY') is None or os.environ.get('OPENSTACK_E2E_LEGACY') == 'false',
+        reason='Legacy test',
+    ),
+]
 
 EXAMPLE_PROJECTS_VALUE = [
     {

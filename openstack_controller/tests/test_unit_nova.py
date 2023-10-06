@@ -4,6 +4,7 @@
 
 
 import logging
+import os
 
 import mock
 import pytest
@@ -15,7 +16,10 @@ from datadog_checks.dev.http import MockResponse
 from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 
-pytestmark = [pytest.mark.unit]
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.skipif(os.environ.get('OPENSTACK_E2E_LEGACY') == 'true', reason='Not Legacy test'),
+]
 
 
 @pytest.mark.parametrize(

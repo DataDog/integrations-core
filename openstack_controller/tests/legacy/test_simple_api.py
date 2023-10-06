@@ -4,6 +4,7 @@
 
 import copy
 import logging
+import os
 
 import mock
 import pytest
@@ -23,6 +24,15 @@ from datadog_checks.openstack_controller.legacy.exceptions import (
 from . import common
 
 log = logging.getLogger('test_openstack_controller')
+
+
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.skipif(
+        os.environ.get('OPENSTACK_E2E_LEGACY') is None or os.environ.get('OPENSTACK_E2E_LEGACY') == 'false',
+        reason='Legacy test',
+    ),
+]
 
 
 def test_get_roles():

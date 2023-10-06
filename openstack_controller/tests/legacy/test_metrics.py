@@ -11,6 +11,14 @@ import pytest
 import tests.legacy.common as common
 from datadog_checks.openstack_controller.legacy.openstack_controller_legacy import OpenStackControllerLegacyCheck
 
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.skipif(
+        os.environ.get('OPENSTACK_E2E_LEGACY') is None or os.environ.get('OPENSTACK_E2E_LEGACY') == 'false',
+        reason='Legacy test',
+    ),
+]
+
 
 def make_request_responses(url, params=None, timeout=None):
     if url == "http://10.0.2.15:5000/v3/projects":

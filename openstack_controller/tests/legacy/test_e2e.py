@@ -2,20 +2,27 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import os
+
 import pytest
 
 from datadog_checks.base import AgentCheck
+from tests.legacy.common import DEFAULT_METRICS
 
-from . import common
+pytestmark = [
+    pytest.mark.e2e,
+    pytest.mark.skipif(
+        os.environ.get('OPENSTACK_E2E_LEGACY') is None or os.environ.get('OPENSTACK_E2E_LEGACY') == 'false',
+        reason='Legacy test',
+    ),
+]
 
 
-@common.openstack_e2e_legacy
-@pytest.mark.e2e
 def test_check(dd_agent_check):
     aggregator = dd_agent_check()
 
     # assert default metrics
-    for metric in common.DEFAULT_METRICS:
+    for metric in DEFAULT_METRICS:
         aggregator.assert_metric(metric)
     aggregator.assert_all_metrics_covered()
 

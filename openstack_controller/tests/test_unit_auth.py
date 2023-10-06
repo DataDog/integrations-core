@@ -3,13 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
+import os
 
 import pytest
 
 import tests.configs as configs
 from datadog_checks.dev.http import MockResponse
 
-pytestmark = [pytest.mark.unit]
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.skipif(os.environ.get('OPENSTACK_E2E_LEGACY') == 'true', reason='Not Legacy test'),
+]
 
 
 @pytest.mark.parametrize(
