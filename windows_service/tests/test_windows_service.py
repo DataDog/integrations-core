@@ -6,6 +6,7 @@ import pywintypes
 import ctypes
 import winerror
 from mock import patch
+from six import PY2
 
 from datadog_checks.windows_service import WindowsService
 
@@ -279,7 +280,10 @@ def test_trigger_count_failure(aggregator, check, instance_trigger_start, caplog
     with patch('datadog_checks.windows_service.windows_service.QueryServiceConfig2W', side_effect=[ctypes.WinError(winerror.ERROR_INSUFFICIENT_BUFFER), ctypes.WinError(1)]*2):
         c.check(instance_trigger_start)
     
-    assert 'OSError: [WinError 1] Incorrect function' in caplog.text                                                                                              
+    if PY2:
+        assert 'WindowsError: [Error 1] Incorrect function' in caplog.text
+    else:
+        assert 'OSError: [WinError 1] Incorrect function' in caplog.text                                                                                              
 
 @pytest.mark.e2e
 def test_basic_e2e(dd_agent_check, check, instance_basic):
