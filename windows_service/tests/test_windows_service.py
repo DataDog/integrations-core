@@ -5,7 +5,7 @@ import pytest
 import pywintypes
 import ctypes
 import winerror
-from mock import patch, DEFAULT
+from mock import patch
 
 from datadog_checks.windows_service import WindowsService
 
