@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 15.0.1 / 2023-10-06
+
 ***Fixed***
 
 * Set stored procedure collection to `run_sync=False`, fixing the delay in collection of other SQLServer telemetry. ([#15967](https://github.com/DataDog/integrations-core/pull/15967))
