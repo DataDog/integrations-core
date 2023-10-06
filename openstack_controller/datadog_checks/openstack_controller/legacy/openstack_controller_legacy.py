@@ -661,6 +661,11 @@ class OpenStackControllerLegacyCheck(AgentCheck):
             raise IncompleteConfig("Could not initialise Openstack API")
 
     def check(self, instance):
+        self.warning(
+            "DEPRECATION NOTICE: You are using a deprecated version of the Openstack_controller integration. "
+            "To use the newer version, please update your configuration file based on the provided example. "
+            "Look for the `use_legacy_check_version` configuration option."
+        )
         # Initialize global variable that are per instances
         self.external_host_tags = {}
         self.instance_name = instance.get('name')
