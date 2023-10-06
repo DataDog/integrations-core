@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 15.1.0 / 2023-10-06
+
 ***Added***:
 
 * Establish a dedicated main db connection to prevent the main thread db from closing prematurely ([#15962](https://github.com/DataDog/integrations-core/pull/15962))
