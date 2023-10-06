@@ -49,20 +49,18 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
             BareMetal(self),
             LoadBalancer(self),
         ]
-        config_projects_include = normalize_discover_config_include(
-            self.config.projects if self.config.projects else {'include': list(self.config.whitelist_project_names)}
-        )
-        if config_projects_include:
-            self.projects_discovery = Discovery(
-                lambda: self.identity.get_auth_projects(),
-                limit=self.config.projects.limit if self.config.projects else None,
-                include=config_projects_include,
-                exclude=self.config.projects.exclude if self.config.projects else self.config.blacklist_project_names,
-                interval=self.config.projects.interval if self.config.projects else None,
-                key=lambda project: project.get('name'),
-            )
-        else:
-            self.projects_discovery = None
+        self.projects_discovery = None
+        if self.config.projects:
+            config_projects_include = normalize_discover_config_include(self.config.projects)
+            if config_projects_include:
+                self.projects_discovery = Discovery(
+                    lambda: self.identity.get_auth_projects(),
+                    limit=self.config.projects.limit,
+                    include=config_projects_include,
+                    exclude=self.config.projects.exclude,
+                    interval=self.config.projects.interval,
+                    key=lambda project: project.get('name'),
+                )
 
     def check(self, _instance):
         self.log.info("running check")

@@ -28,15 +28,6 @@ REST_EXCLUDING_DEMO_PROJECT = {
     },
 }
 
-REST_EXCLUDING_DEMO_PROJECT_LEGACY = {
-    'keystone_server_url': 'http://127.0.0.1:8080/identity',
-    'username': 'admin',
-    'password': 'password',
-    'use_legacy_check_version': False,
-    'whitelist_project_names': ['.*'],
-    'blacklist_project_names': ['^demo.*'],
-}
-
 REST_NOVA_MICROVERSION_2_93 = {
     'keystone_server_url': 'http://127.0.0.1:8080/identity',
     'username': 'admin',
@@ -55,16 +46,6 @@ REST_NOVA_MICROVERSION_2_93_EXCLUDING_DEMO_PROJECT = {
         'include': ['.*'],
         'exclude': ['^demo.*'],
     },
-}
-
-REST_NOVA_MICROVERSION_2_93_EXCLUDING_DEMO_PROJECT_LEGACY = {
-    'keystone_server_url': 'http://127.0.0.1:8080/identity',
-    'username': 'admin',
-    'password': 'password',
-    'nova_microversion': '2.93',
-    'use_legacy_check_version': False,
-    'whitelist_project_names': ['.*'],
-    'blacklist_project_names': ['^demo.*'],
 }
 
 REST_IRONIC_MICROVERSION_1_80 = {
@@ -91,14 +72,6 @@ SDK_EXCLUDING_DEMO_PROJECT = {
     },
 }
 
-SDK_EXCLUDING_DEMO_PROJECT_LEGACY = {
-    'openstack_cloud_name': 'test_cloud',
-    'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,
-    'use_legacy_check_version': False,
-    'whitelist_project_names': ['.*'],
-    'blacklist_project_names': ['^demo.*'],
-}
-
 SDK_NOVA_MICROVERSION_2_93 = {
     'openstack_cloud_name': 'test_cloud',
     'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,
@@ -115,15 +88,6 @@ SDK_NOVA_MICROVERSION_2_93_EXCLUDING_DEMO_PROJECT = {
         'include': ['.*'],
         'exclude': ['^demo.*'],
     },
-}
-
-SDK_NOVA_MICROVERSION_2_93_EXCLUDING_DEMO_PROJECT_LEGACY = {
-    'openstack_cloud_name': 'test_cloud',
-    'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,
-    'nova_microversion': '2.93',
-    'use_legacy_check_version': False,
-    'whitelist_project_names': ['.*'],
-    'blacklist_project_names': ['^demo.*'],
 }
 
 SDK_IRONIC_MICROVERSION_1_80 = {

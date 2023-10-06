@@ -932,43 +932,6 @@ def test_quota_sets_metrics_excluding_demo_project(aggregator, check, dd_run_che
 
 
 @pytest.mark.parametrize(
-    ('instance', 'metrics'),
-    [
-        pytest.param(
-            configs.REST_EXCLUDING_DEMO_PROJECT_LEGACY,
-            metrics.COMPUTE_QUOTA_SETS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_DEFAULT,
-            id='api rest no microversion',
-        ),
-        pytest.param(
-            configs.REST_NOVA_MICROVERSION_2_93_EXCLUDING_DEMO_PROJECT_LEGACY,
-            metrics.COMPUTE_QUOTA_SETS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_93,
-            id='api rest microversion 2.93',
-        ),
-        pytest.param(
-            configs.SDK_EXCLUDING_DEMO_PROJECT_LEGACY,
-            metrics.COMPUTE_QUOTA_SETS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_DEFAULT,
-            id='api sdk no microversion',
-        ),
-        pytest.param(
-            configs.SDK_NOVA_MICROVERSION_2_93_EXCLUDING_DEMO_PROJECT_LEGACY,
-            metrics.COMPUTE_QUOTA_SETS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_93,
-            id='api sdk microversion 2.93',
-        ),
-    ],
-)
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_quota_sets_metrics_excluding_demo_project_legacy(aggregator, check, dd_run_check, metrics):
-    dd_run_check(check)
-    for metric in metrics:
-        aggregator.assert_metric(
-            metric['name'],
-            count=metric.get('count'),
-            value=metric.get('value'),
-            tags=metric.get('tags'),
-        )
-
-
-@pytest.mark.parametrize(
     ('mock_http_get', 'connection_compute', 'instance', 'api_type'),
     [
         pytest.param(

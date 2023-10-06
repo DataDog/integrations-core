@@ -14,13 +14,6 @@ files:
             service.hidden: true
     - template: instances
       options:
-        - name: name
-          description: |
-            Unique identifier for this instance.
-          value:
-            example: <INSTANCE_NAME>
-            type: string
-          enabled: true
         - name: user
           description: |
            Password authentication is the only auth method supported
@@ -36,32 +29,6 @@ files:
                 id: <DOMAIN_ID>
             type: object
           enabled: true
-        - name: whitelist_project_names
-          description: |
-           IDs of projects to whitelist for monitoring (by default the agent collects limit metrics from all projects)
-           Regex expressions for the project names are supported.
-           Blacklist takes precedence over whitelist in case of overlap.
-          value:
-            example:
-              - <PROJECT_NAME>
-              - <PROJECT_PREFIX>*
-            display_default: []
-            type: array
-            items:
-              type: string
-        - name: blacklist_project_names
-          description: |
-           IDs of projects to blacklist for monitoring (by default the agent collects limit metrics from all projects)
-           Regex expressions for the project names are supported.
-           Blacklist takes precedence over whitelist in case of overlap.
-          value:
-            example:
-              - <PROJECT_NAME>
-              - <PROJECT_PREFIX>*
-            display_default: []
-            type: array
-            items:
-              type: string
         - name: exclude_server_ids
           description: |
            IDs of servers to exclude from monitoring. (by default the agent collects metrics from all guest servers)

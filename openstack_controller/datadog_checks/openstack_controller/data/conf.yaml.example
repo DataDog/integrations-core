@@ -33,11 +33,6 @@ init_config:
 #
 instances:
 
-    ## @param name - string - optional
-    ## Unique identifier for this instance.
-    #
-  - name: <INSTANCE_NAME>
-
     ## @param user - mapping - optional
     ## Password authentication is the only auth method supported
     ## User expects username, password, and user domain id
@@ -45,29 +40,11 @@ instances:
     ## {'password': '<PASSWORD>', 'name': '<USER_NAME>', 'domain': {'id': '<DOMAIN_ID>'}}
     ## The check uses the Unscoped token method to collect information about all available projects to the user.
     #
-    user:
+  - user:
       password: <PASSWORD>
       name: <USER_NAME>
       domain:
         id: <DOMAIN_ID>
-
-    ## @param whitelist_project_names - list of strings - optional - default: []
-    ## IDs of projects to whitelist for monitoring (by default the agent collects limit metrics from all projects)
-    ## Regex expressions for the project names are supported.
-    ## Blacklist takes precedence over whitelist in case of overlap.
-    #
-    # whitelist_project_names:
-    #   - <PROJECT_NAME>
-    #   - <PROJECT_PREFIX>*
-
-    ## @param blacklist_project_names - list of strings - optional - default: []
-    ## IDs of projects to blacklist for monitoring (by default the agent collects limit metrics from all projects)
-    ## Regex expressions for the project names are supported.
-    ## Blacklist takes precedence over whitelist in case of overlap.
-    #
-    # blacklist_project_names:
-    #   - <PROJECT_NAME>
-    #   - <PROJECT_PREFIX>*
 
     ## @param exclude_server_ids - list of strings - optional - default: []
     ## IDs of servers to exclude from monitoring. (by default the agent collects metrics from all guest servers)
