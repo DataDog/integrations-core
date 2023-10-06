@@ -270,7 +270,7 @@ class SqlserverActivity(DBMAsyncJob):
     def _obfuscate_and_sanitize_row(self, row):
         row = self._remove_null_vals(row)
         if 'statement_text' not in row:
-            return row
+            return self._sanitize_row(row)
         try:
             statement = obfuscate_sql_with_metadata(row['statement_text'], self.check.obfuscator_options)
             procedure_statement = None
@@ -305,10 +305,11 @@ class SqlserverActivity(DBMAsyncJob):
         return {key: val for key, val in row.items() if val is not None}
 
     @staticmethod
-    def _sanitize_row(row, obfuscated_statement):
+    def _sanitize_row(row, obfuscated_statement=None):
         # rename the statement_text field to 'text' because that
         # is what our backend is expecting
-        row['text'] = obfuscated_statement
+        if obfuscated_statement:
+            row['text'] = obfuscated_statement
         if 'query_hash' in row:
             row['query_hash'] = _hash_to_hex(row['query_hash'])
         if 'query_plan_hash' in row:
@@ -355,12 +356,7 @@ class SqlserverActivity(DBMAsyncJob):
                 rows = self._get_activity(cursor, request_cols)
                 normalized_rows = self._normalize_queries_and_filter_rows(rows, MAX_PAYLOAD_BYTES)
                 event = self._create_activity_event(normalized_rows, connections)
-                try:
-                    payload = json.dumps(event, default=default_json_event_encoding)
-                except (UnicodeDecodeError, TypeError) as err:
-                    self.log.error("Failed to serialize activity event to JSON, event %s", event)
-                    self.log.error("Activity rows: %s", rows)
-                    raise err
+                payload = json.dumps(event, default=default_json_event_encoding)
                 self._check.database_monitoring_query_activity(payload)
 
         self.check.histogram(
