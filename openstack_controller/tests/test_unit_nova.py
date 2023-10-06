@@ -66,9 +66,9 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
         for call in mock_http_post.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 3
+        assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
     if api_type == ApiType.SDK:
-        assert connection_session_auth.get_access.call_count == 3
+        assert connection_session_auth.get_access.call_count == 4
     assert '`compute` component not found in catalog' in caplog.text
 
 

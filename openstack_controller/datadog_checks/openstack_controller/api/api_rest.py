@@ -14,18 +14,20 @@ class ApiRest(Api):
         self.log = logger
         self.config = config
         self.http = http
-        self._catalog = None
-        self._role_names = []
-        self._components = {}
-        self._endpoints = {}
         self._add_microversion_headers()
+
+        self._interface = (
+            self.config.endpoint_interface
+            if self.config.endpoint_interface
+            else 'public'
+        )
+        self._region_id = self.config.endpoint_region_id
+        self._catalog = None
         self._current_project_id = None
+        self._role_names = None
 
     def auth_url(self):
         return self.config.keystone_server_url
-
-    def set_current_project(self, project_id):
-        self._current_project_id = project_id
 
     def has_admin_role(self):
         return 'admin' in self._role_names
@@ -39,10 +41,7 @@ class ApiRest(Api):
         response.raise_for_status()
         return response.elapsed.total_seconds() * 1000
 
-    def authorize(self):
-        self._components = {}
-        self._endpoints = {}
-        scope = {"project": {"id": self._current_project_id}} if self._current_project_id else "unscoped"
+    def authorize_user(self):
         data = {
             "auth": {
                 "identity": {
@@ -55,25 +54,66 @@ class ApiRest(Api):
                         }
                     },
                 },
-                "scope": scope,
             }
         }
         # Testing purposes (we need this header to redirect requests correctly with caddy)
-        self.http.options['headers']['X-Auth-Type'] = (
-            f"{self._current_project_id}" if self._current_project_id else "unscoped"
-        )
+        self.http.options['headers']['X-Auth-Type'] = "unscoped"
+        self._authorize_data(data)
+        self._current_project_id = None
+
+    def authorize_system(self):
+        data = {
+            "auth": {
+                "identity": {
+                    "methods": ["password"],
+                    "password": {
+                        "user": {
+                            "name": self.config.username,
+                            "password": self.config.password,
+                            "domain": {"id": self.config.domain_id},
+                        }
+                    },
+                },
+                "scope": {"system": {"all": True}},
+            }
+        }
+        # Testing purposes (we need this header to redirect requests correctly with caddy)
+        self.http.options['headers']['X-Auth-Type'] = "system"
+        self._authorize_data(data)
+        self._current_project_id = None
+
+    def authorize_project(self, project_id):
+        data = {
+            "auth": {
+                "identity": {
+                    "methods": ["password"],
+                    "password": {
+                        "user": {
+                            "name": self.config.username,
+                            "password": self.config.password,
+                            "domain": {"id": self.config.domain_id},
+                        }
+                    },
+                },
+                "scope": {"project": {"id": project_id}},
+            }
+        }
+        # Testing purposes (we need this header to redirect requests correctly with caddy)
+        self.http.options['headers']['X-Auth-Type'] = project_id
+        self._authorize_data(data)
+        self._current_project_id = project_id
+
+    def _authorize_data(self, data):
         auth_tokens_endpoint = '{}/v3/auth/tokens'.format(self.config.keystone_server_url)
         self.log.debug("auth_tokens_endpoint: %s", auth_tokens_endpoint)
         self.log.debug("data: %s", data)
         response = self.http.post(auth_tokens_endpoint, json=data)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
-        self.log.debug("interface: %s", self.config.endpoint_interface)
-        self.log.debug("region_name: %s", self.config.endpoint_region_id)
         self._catalog = Catalog(
             response.json().get('token', {}).get('catalog', []),
-            self.config.endpoint_interface,
-            self.config.endpoint_region_id,
+            self._interface,
+            self._region_id,
         )
         self._role_names = [role.get('name') for role in response.json().get('token', {}).get('roles', [])]
         self.http.options['headers']['X-Auth-Token'] = response.headers['X-Subject-Token']

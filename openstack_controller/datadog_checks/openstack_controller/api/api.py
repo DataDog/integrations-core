@@ -11,16 +11,20 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def set_current_project(self, project_id):
-        pass  # pragma: no cover
-
-    @abstractmethod
     def has_admin_role(self):
         pass  # pragma: no cover
 
     @abstractmethod
-    def authorize(self):
-        pass
+    def authorize_user(self):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def authorize_system(self):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def authorize_project(self, project_id):
+        pass  # pragma: no cover
 
     @abstractmethod
     def get_identity_domains(self):

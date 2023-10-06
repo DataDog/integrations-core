@@ -50,8 +50,16 @@ class Identity(Component):
         super(Identity, self).__init__(check)
 
     @Component.http_error()
-    def authorize(self):
-        self.check.api.authorize()
+    def authorize_user(self):
+        self.check.api.authorize_user()
+
+    @Component.http_error()
+    def authorize_system(self):
+        self.check.api.authorize_system()
+
+    @Component.http_error()
+    def authorize_project(self, project_id):
+        self.check.api.authorize_project(project_id)
 
     @Component.http_error()
     def get_auth_projects(self):

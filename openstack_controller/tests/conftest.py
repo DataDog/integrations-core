@@ -61,8 +61,9 @@ def dd_environment():
                 'nova_microversion': '2.93',
                 'ironic_microversion': '1.80',
                 'openstack_cloud_name': 'test_cloud',
-                'openstack_config_file_path': '/home/openstack_controller/tests/fixtures/openstack_config_updated.yaml',
+                'openstack_config_file_path': '/home/openstack_controller/tests/config/openstack_config_updated.yaml',
                 'endpoint_region_id': 'RegionOne',
+                'use_legacy_check_version': False,
             }
             env = dict(os.environ)
             with socks_proxy(
@@ -754,12 +755,11 @@ def mock_http_post(request, monkeypatch, mock_http_call):
             raise requests.exceptions.HTTPError(response=http_error[url])
         if url == '/identity/v3/auth/tokens':
             data = kwargs['json']
-            scope = data.get('auth', {}).get('scope', None)
-            if scope:
-                if isinstance(scope, dict):
-                    scope = scope.get('project', {}).get('id')
-                json_data = mock_http_call(method, url, scope, headers=kwargs.get('headers'))
-                headers = {'X-Subject-Token': f'token_{scope}'}
+            scope = data.get('auth', {}).get('scope', 'unscoped')
+            if isinstance(scope, dict):
+                scope = scope.get('project', {}).get('id')
+            json_data = mock_http_call(method, url, scope, headers=kwargs.get('headers'))
+            headers = {'X-Subject-Token': f'token_{scope}'}
         else:
             json_data = mock_http_call(method, url)
         if replace and url in replace:

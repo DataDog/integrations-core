@@ -17,39 +17,29 @@ class ApiSdk(Api):
     def __init__(self, config, logger, http):
         super(ApiSdk, self).__init__()
         self.log = logger
-        self.http = http
         self.config = config
+        self.http = http
         self._add_microversion_headers()
-        if self.config.openstack_config_file_path is not None:
-            # Set the environment variable to the path of the config file for openstacksdk to find it
-            environ["OS_CLIENT_CONFIG_FILE"] = self.config.openstack_config_file_path
-        cloud_config = loader.OpenStackConfig(config_files=[self.config.openstack_config_file_path]).get_one_cloud(
+
+        # Set the environment variable to the path of the config file for openstacksdk to find it
+        environ["OS_CLIENT_CONFIG_FILE"] = self.config.openstack_config_file_path
+        self.cloud_config = loader.OpenStackConfig(config_files=[self.config.openstack_config_file_path]).get_one_cloud(
             cloud=self.config.openstack_cloud_name
         )
-        self.cloud_auth = cloud_config.get_auth_args()
-        self._auth_url = self.cloud_auth.get('auth_url')
         self._interface = (
-            self.config.endpoint_interface if self.config.endpoint_interface else cloud_config.get_interface()
+            self.config.endpoint_interface
+            if self.config.endpoint_interface
+            else self.cloud_config.get_auth_args().get('interface', 'public')
         )
         self._region_id = (
-            self.config.endpoint_region_id if self.config.endpoint_region_id else cloud_config.get_region_name()
+            self.config.endpoint_region_id
+            if self.config.endpoint_region_id
+            else self.cloud_config.get_auth_args().get('region_name')
         )
-        v3_auth = v3.Password(
-            auth_url=self.cloud_auth.get('auth_url'),
-            username=self.cloud_auth.get('username'),
-            password=self.cloud_auth.get('password'),
-            project_name=self.cloud_auth.get('project_name'),
-            project_domain_name=self.cloud_auth.get('project_domain_name', 'default'),
-            user_domain_name=self.cloud_auth.get('user_domain_name', 'default'),
-        )
-        keystone_session = session.Session(auth=v3_auth, session=self.http.session)
-        self.connection = connection.Connection(
-            cloud=self.config.openstack_cloud_name, session=keystone_session, region_name=self._region_id
-        )
-        self._access = self.connection.session.auth.get_access(self.connection.session)
-        self.log.debug("interface: %s", self._interface)
-        self.log.debug("region_name: %s", self._region_id)
-        self._catalog = Catalog(self._access.service_catalog.catalog, self._interface, self._region_id)
+
+        self.connection = None
+        self._access = None
+        self._catalog = None
 
     def _add_microversion_headers(self):
         if self.config.nova_microversion:
@@ -61,28 +51,7 @@ class ApiSdk(Api):
             self.http.options['headers']['X-OpenStack-Ironic-API-Version'] = self.config.ironic_microversion
 
     def auth_url(self):
-        return self._auth_url
-
-    def set_current_project(self, project_id):
-        self.log.debug("current_project_id: %s", self._access.project_id)
-        self.log.debug("project_id: %s", project_id)
-        if self._access.project_id != project_id:
-            v3_auth = v3.Password(
-                auth_url=self.cloud_auth.get('auth_url'),
-                username=self.cloud_auth.get('username'),
-                password=self.cloud_auth.get('password'),
-                project_id=project_id,
-                project_domain_name=self.cloud_auth.get('project_domain_name', 'default'),
-                user_domain_name=self.cloud_auth.get('user_domain_name', 'default'),
-            )
-            keystone_session = session.Session(auth=v3_auth, session=self.http.session)
-            self.connection = connection.Connection(
-                cloud=self.config.openstack_cloud_name, session=keystone_session, region_name=self._region_id
-            )
-            self._access = self.connection.session.auth.get_access(self.connection.session)
-            self.log.debug("interface: %s", self._interface)
-            self.log.debug("region_name: %s", self._region_id)
-            self._catalog = Catalog(self._access.service_catalog.catalog, self._interface, self._region_id)
+        return self.cloud_config.get_auth_args().get('auth_url')
 
     def has_admin_role(self):
         self.log.debug("role_names: %s", self._access.role_names)
@@ -91,12 +60,63 @@ class ApiSdk(Api):
     def component_in_catalog(self, component_types):
         return self._catalog.has_component(component_types)
 
-    def authorize(self):
+    def authorize_user(self):
+        v3_auth = v3.Password(
+            auth_url=self.cloud_config.get_auth_args().get('auth_url'),
+            username=self.cloud_config.get_auth_args().get('username'),
+            password=self.cloud_config.get_auth_args().get('password'),
+            user_domain_name=self.cloud_config.get_auth_args().get('user_domain_name', 'default'),
+        )
+        keystone_session = session.Session(auth=v3_auth, session=self.http.session)
+        self.connection = connection.Connection(
+            cloud=self.config.openstack_cloud_name, session=keystone_session, region_name=self._region_id
+        )
+        self._access = self.connection.session.auth.get_access(self.connection.session)
+        self._catalog = Catalog(self._access.service_catalog.catalog, self._interface, self._region_id)
+        self.log.debug("catalog: %s", self._catalog.catalog)
+        self.connection.authorize()
+        self.http.options['headers']['X-Auth-Token'] = self.connection.session.auth.get_token(self.connection.session)
+
+    def authorize_system(self):
+        v3_auth = v3.Password(
+            auth_url=self.cloud_config.get_auth_args().get('auth_url'),
+            username=self.cloud_config.get_auth_args().get('username'),
+            password=self.cloud_config.get_auth_args().get('password'),
+            user_domain_name=self.cloud_config.get_auth_args().get('user_domain_name', 'default'),
+            system_scope="all",
+        )
+        keystone_session = session.Session(auth=v3_auth, session=self.http.session)
+        self.connection = connection.Connection(
+            cloud=self.config.openstack_cloud_name, session=keystone_session, region_name=self._region_id
+        )
+        self._access = self.connection.session.auth.get_access(self.connection.session)
+        self._catalog = Catalog(self._access.service_catalog.catalog, self._interface, self._region_id)
+        self.log.debug("catalog: %s", self._catalog.catalog)
+        self.connection.authorize()
+        self.http.options['headers']['X-Auth-Token'] = self.connection.session.auth.get_token(self.connection.session)
+
+    def authorize_project(self, project_id):
+        v3_auth = v3.Password(
+            auth_url=self.cloud_config.get_auth_args().get('auth_url'),
+            username=self.cloud_config.get_auth_args().get('username'),
+            password=self.cloud_config.get_auth_args().get('password'),
+            user_domain_name=self.cloud_config.get_auth_args().get('user_domain_name', 'default'),
+            project_id=project_id,
+            project_domain_name=self.cloud_config.get_auth_args().get('project_domain_name', 'default'),
+        )
+        keystone_session = session.Session(auth=v3_auth, session=self.http.session)
+        self.connection = connection.Connection(
+            cloud=self.config.openstack_cloud_name, session=keystone_session, region_name=self._region_id
+        )
+        self._access = self.connection.session.auth.get_access(self.connection.session)
+        self._catalog = Catalog(self._access.service_catalog.catalog, self._interface, self._region_id)
+        self.log.debug("catalog: %s", self._catalog.catalog)
         self.connection.authorize()
         self.http.options['headers']['X-Auth-Token'] = self.connection.session.auth.get_token(self.connection.session)
 
     def get_response_time(self, endpoint_types):
-        endpoint = self._catalog.get_endpoint_by_type(endpoint_types).replace(self._access.project_id, "")
+        endpoint = self._catalog.get_endpoint_by_type(endpoint_types)
+        endpoint = endpoint.replace(self._access.project_id, "") if self._access.project_id else endpoint
         response = self.http.get(endpoint)
         response.raise_for_status()
         return response.elapsed.total_seconds() * 1000
@@ -221,7 +241,7 @@ class ApiSdk(Api):
 
     def get_auth_projects(self):
         self.log.debug("getting auth projects")
-        endpoint = '{}/v3/auth/projects'.format(self._auth_url)
+        endpoint = '{}/v3/auth/projects'.format(self.cloud_config.get_auth_args().get('auth_url'))
         self.log.debug("auth projects endpoint: %s", endpoint)
         response = self.http.get(endpoint)
         response.raise_for_status()

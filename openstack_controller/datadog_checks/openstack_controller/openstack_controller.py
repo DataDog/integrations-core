@@ -48,7 +48,7 @@ class OpenStackControllerCheck(AgentCheck):
         self.log.info("running check")
         tags = ['keystone_server:{}'.format(self.api.auth_url())] + self.instance.get('tags', [])
         self.gauge("openstack.controller", 1, tags=tags)
-        if self.identity.authorize():
+        if self.identity.authorize_user():
             self.log.info("User successfully authorized")
             self._start_report()
             self._report_metrics(tags)
@@ -62,20 +62,19 @@ class OpenStackControllerCheck(AgentCheck):
 
     def _report_metrics(self, tags):
         self.log.info("reporting metrics")
-        self._report_global_metrics(tags)
+        if self.identity.authorize_system():
+            self._report_global_metrics(tags)
         auth_projects = self.identity.get_auth_projects()
         self.log.info("auth_projects: %s", auth_projects)
         for project in auth_projects:
-            self.api.set_current_project(project['id'])
-            self.identity.authorize()
-            if self.api.has_admin_role():
+            if self.identity.authorize_project(project['id']):
                 self._report_global_metrics(tags)
-            project_tags = tags + [
-                f"domain_id:{project['domain_id']}",
-                f"project_id:{project['id']}",
-                f"project_name:{project['name']}",
-            ]
-            self._report_project_metrics(project['id'], project_tags)
+                project_tags = tags + [
+                    f"domain_id:{project['domain_id']}",
+                    f"project_id:{project['id']}",
+                    f"project_name:{project['name']}",
+                ]
+                self._report_project_metrics(project['id'], project_tags)
 
     def _finish_report(self, tags):
         for component in self.components:

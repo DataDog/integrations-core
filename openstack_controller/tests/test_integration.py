@@ -12,6 +12,7 @@ pytestmark = [
     pytest.mark.integration,
     pytest.mark.usefixtures('dd_environment'),
     pytest.mark.skipif(os.environ.get('OPENSTACK_E2E_LEGACY') == 'true', reason='Not Legacy test'),
+    pytest.mark.skipif(os.environ.get('USE_OPENSTACK_GCP') == 'true', reason='Not GCP test'),
 ]
 
 
