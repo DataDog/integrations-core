@@ -6,6 +6,7 @@
 from typing import Any, Dict, List, Type  # noqa: F401
 
 from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.openstack_controller.api.factory import make_api
 from datadog_checks.openstack_controller.components.bare_metal import BareMetal
 from datadog_checks.openstack_controller.components.block_storage import BlockStorage
@@ -13,10 +14,12 @@ from datadog_checks.openstack_controller.components.compute import Compute
 from datadog_checks.openstack_controller.components.identity import Identity
 from datadog_checks.openstack_controller.components.load_balancer import LoadBalancer
 from datadog_checks.openstack_controller.components.network import Network
-from datadog_checks.openstack_controller.config import OpenstackConfig
+from datadog_checks.openstack_controller.config import OpenstackConfig, normalize_discover_config_include
+
+from .config_models import ConfigMixin
 
 
-class OpenStackControllerCheck(AgentCheck):
+class OpenStackControllerCheck(AgentCheck, ConfigMixin):
     def __new__(cls, name, init_config, instances):
         # type: (Type[OpenStackControllerCheck], str, Dict[str, Any], List[Dict[str, Any]]) -> OpenStackControllerCheck
         """For backward compatibility reasons, there are two side-by-side implementations of OpenStackControllerCheck.
@@ -32,8 +35,11 @@ class OpenStackControllerCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(OpenStackControllerCheck, self).__init__(name, init_config, instances)
-        self.config = OpenstackConfig(self.log, self.instance)
-        self.api = make_api(self.config, self.log, self.http)
+        self.check_initializations.append(self.init)
+
+    def init(self):
+        self.openstack_config = OpenstackConfig(self.log, self.instance)
+        self.api = make_api(self.openstack_config, self.log, self.http)
         self.identity = Identity(self)
         self.components = [
             self.identity,
@@ -43,6 +49,21 @@ class OpenStackControllerCheck(AgentCheck):
             BareMetal(self),
             LoadBalancer(self),
         ]
+        config_projects_include = normalize_discover_config_include(
+            self.log,
+            self.config.projects if self.config.projects else {'include': list(self.config.whitelist_project_names)},
+        )
+        if config_projects_include:
+            self.projects_discovery = Discovery(
+                lambda: self.identity.get_auth_projects(),
+                limit=self.config.projects.limit if self.config.projects else None,
+                include=config_projects_include,
+                exclude=self.config.projects.exclude if self.config.projects else self.config.blacklist_project_names,
+                interval=self.config.projects.interval if self.config.projects else None,
+                key=lambda project: project.get('name'),
+            )
+        else:
+            self.projects_discovery = None
 
     def check(self, _instance):
         self.log.info("running check")
@@ -64,9 +85,13 @@ class OpenStackControllerCheck(AgentCheck):
         self.log.info("reporting metrics")
         if self.identity.authorize_system():
             self._report_global_metrics(tags)
-        auth_projects = self.identity.get_auth_projects()
-        self.log.info("auth_projects: %s", auth_projects)
-        for project in auth_projects:
+        if self.projects_discovery:
+            discovered_projects = list(self.projects_discovery.get_items())
+        else:
+            discovered_projects = [
+                (None, project.get('name'), project, None) for project in self.identity.get_auth_projects()
+            ]
+        for _pattern, _project_name, project, _project_config in discovered_projects:
             if self.identity.authorize_project(project['id']):
                 self._report_global_metrics(tags)
                 project_tags = tags + [

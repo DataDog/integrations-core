@@ -145,9 +145,9 @@ pytestmark = [
         ),
     ],
 )
-def test_config_exceptions(instance, exception_msg):
+def test_config_exceptions(check, dd_run_check, exception_msg):
     with pytest.raises(Exception, match=exception_msg):
-        OpenStackControllerCheck('test', {}, [instance])
+        dd_run_check(check)
 
 
 @pytest.mark.parametrize(
@@ -185,10 +185,9 @@ def test_config_exceptions(instance, exception_msg):
         ),
     ],
 )
-def test_config_warnings(instance, warning_msg, caplog):
-    caplog.set_level(logging.WARNING)
-
-    OpenStackControllerCheck('test', {}, [instance])
+def test_config_warnings(check, dd_run_check, caplog, warning_msg):
+    with caplog.at_level(logging.DEBUG):
+        dd_run_check(check)
     assert warning_msg in caplog.text
 
 

@@ -5,7 +5,9 @@
 
 class CatalogEndPointFailure(Exception):
     def __init__(self, service_types, interface, region_id):
-        self.message = f'No endpoint found in catalog for services={service_types} interface={interface} region_id={region_id}'
+        self.message = (
+            f'No endpoint found in catalog for services={service_types} interface={interface} region_id={region_id}'
+        )
         super().__init__(self.message)
 
 

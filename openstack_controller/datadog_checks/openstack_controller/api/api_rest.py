@@ -16,11 +16,7 @@ class ApiRest(Api):
         self.http = http
         self._add_microversion_headers()
 
-        self._interface = (
-            self.config.endpoint_interface
-            if self.config.endpoint_interface
-            else 'public'
-        )
+        self._interface = self.config.endpoint_interface if self.config.endpoint_interface else 'public'
         self._region_id = self.config.endpoint_region_id
         self._catalog = None
         self._current_project_id = None

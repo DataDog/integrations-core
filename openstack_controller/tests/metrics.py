@@ -351,6 +351,18 @@ COMPUTE_QUOTA_SETS_NOVA_MICROVERSION_DEFAULT = [
         'tags': [
             'keystone_server:http://127.0.0.1:8080/identity',
             'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'quota_id:1e6e233e637d4d55a50a62b63398ad15',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.cores',
+        'count': 1,
+        'value': 20,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
             'project_id:6e39099cccde4f809b003d9e0dd09304',
             'project_name:admin',
             'quota_id:6e39099cccde4f809b003d9e0dd09304',
@@ -522,6 +534,18 @@ COMPUTE_QUOTA_SETS_NOVA_MICROVERSION_2_93 = [
         'tags': [
             'keystone_server:http://127.0.0.1:8080/identity',
             'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'quota_id:1e6e233e637d4d55a50a62b63398ad15',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.cores',
+        'count': 1,
+        'value': 20,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
             'project_id:6e39099cccde4f809b003d9e0dd09304',
             'project_name:admin',
             'quota_id:6e39099cccde4f809b003d9e0dd09304',
@@ -600,6 +624,287 @@ COMPUTE_QUOTA_SETS_NOVA_MICROVERSION_2_93 = [
         ],
     },
 ]
+
+COMPUTE_QUOTA_SETS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_DEFAULT = [
+    {
+        'name': 'openstack.nova.quota_set.cores',
+        'count': 0,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'quota_id:1e6e233e637d4d55a50a62b63398ad15',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.cores',
+        'count': 1,
+        'value': 20,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.fixed_ips',
+        'count': 1,
+        'value': -1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.floating_ips',
+        'count': 1,
+        'value': -1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.injected_file_content_bytes',
+        'count': 1,
+        'value': 10240,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.injected_file_path_bytes',
+        'count': 1,
+        'value': 255,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.injected_files',
+        'count': 1,
+        'value': 5,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.instances',
+        'count': 1,
+        'value': 5,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.key_pairs',
+        'count': 1,
+        'value': 100,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.metadata_items',
+        'count': 1,
+        'value': 128,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.ram',
+        'count': 1,
+        'value': 51200,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.security_group_rules',
+        'count': 1,
+        'value': -1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.security_groups',
+        'count': 1,
+        'value': -1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.server_group_members',
+        'count': 1,
+        'value': 10,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.server_groups',
+        'count': 1,
+        'value': 10,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    },
+]
+
+COMPUTE_QUOTA_SETS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_93 = [
+    {
+        'name': 'openstack.nova.quota_set.cores',
+        'count': 0,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'quota_id:1e6e233e637d4d55a50a62b63398ad15',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.cores',
+        'count': 1,
+        'value': 20,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.instances',
+        'count': 1,
+        'value': 5,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.key_pairs',
+        'count': 1,
+        'value': 100,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.metadata_items',
+        'count': 1,
+        'value': 128,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.ram',
+        'count': 1,
+        'value': 51200,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.server_group_members',
+        'count': 1,
+        'value': 10,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    },
+    {
+        'name': 'openstack.nova.quota_set.server_groups',
+        'count': 1,
+        'value': 10,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'quota_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    },
+]
+
 
 COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT = [
     {

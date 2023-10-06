@@ -181,21 +181,76 @@ files:
             example: false
             display_default: false
             type: boolean
-        - template: instances/default
-          overrides:
-            service.hidden: true
-            min_collection_interval.hidden: true
-            empty_default_hostname.hidden: true
-        - template: instances/http
-          overrides:
-            tls_use_host_header.hidden: true
-            auth_type.hidden: true
-            use_legacy_auth_encoding.hidden: true
-            auth_token.hidden: true
-            aws_region.hidden: true
-            aws_host.hidden: true
-            aws_service.hidden: true
-            extra_headers.hidden: true
+        - name: projects
+          description: |
+            Optional configuration to indicate the projects that we want to be processed. If not configured,
+            all projects will be processed.
+
+            The 'include' key will indicate the regular expressions of the projects for which metrics are to be reported
+            and the configuration to be applied to each of them. If no configuration associated with the key is indicated
+            with the regular expression, they will be processed with the default configuration.
+            The projects will be processed in the order indicated in the 'include'.
+            If a projects is matched on an 'include' key, it will only be processed there and not in a later 'include'
+            that it might match on.
+
+            The 'exclude' key will indicate the regular expressions of those projects for which metrics
+            are not to be reported.
+            The excludes will have priority over the includes, that is, if a projects matches an exclude, it will not be
+            processed even if it matches an include.
+
+            The 'limit' key will allow limiting the number of projects processed to avoid a combinatorial explosion of tags
+            associated with a metric.
+
+            The 'interval' key will indicate the validity time of the last list of projects obtained through the endpoint.
+            If 'interval' is not indicated, the list of projects will be obtained each time the check is executed
+            and will not be cached.
+
+            In the following example, all projects will be processed except those whose name begins with 'tmp_'
+            up to a maximum of 10 projects.
+            Furthermore, the cache will be valid for 1 minute.
+
+              projects:
+                limit: 10
+                include:
+                  - '.*'
+                exclude:
+                  - 'tmp_.*'
+                interval: 60
+          value:
+            type: object
+            properties:
+              - name: limit
+                description: |
+                  Maximum number of clusters to be processed.
+                type: integer
+              - name: include
+                type: array
+                items:
+                  anyOf:
+                    - type: string
+                    - type: object
+              - name: exclude
+                type: array
+                items:
+                  type: string
+              - name: interval
+                type: integer
+            example: {}
+    - template: instances/default
+      overrides:
+        service.hidden: true
+        min_collection_interval.hidden: true
+        empty_default_hostname.hidden: true
+    - template: instances/http
+      overrides:
+        tls_use_host_header.hidden: true
+        auth_type.hidden: true
+        use_legacy_auth_encoding.hidden: true
+        auth_token.hidden: true
+        aws_region.hidden: true
+        aws_host.hidden: true
+        aws_service.hidden: true
+        extra_headers.hidden: true
     - template: logs
       example:
       - type: file
