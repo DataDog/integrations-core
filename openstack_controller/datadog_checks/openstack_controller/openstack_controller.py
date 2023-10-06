@@ -50,8 +50,7 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
             LoadBalancer(self),
         ]
         config_projects_include = normalize_discover_config_include(
-            self.log,
-            self.config.projects if self.config.projects else {'include': list(self.config.whitelist_project_names)},
+            self.config.projects if self.config.projects else {'include': list(self.config.whitelist_project_names)}
         )
         if config_projects_include:
             self.projects_discovery = Discovery(
