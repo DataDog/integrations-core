@@ -359,6 +359,7 @@ class SqlserverActivity(DBMAsyncJob):
                     payload = json.dumps(event, default=default_json_event_encoding)
                 except (UnicodeDecodeError, TypeError) as err:
                     self.log.error("Failed to serialize activity event to JSON, event %s", event)
+                    self.log.error("Activity rows: %s", rows)
                     raise err
                 self._check.database_monitoring_query_activity(payload)
 
