@@ -1,12 +1,12 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import ctypes
 import re
 
 import pywintypes
 import win32service
 import winerror
-import ctypes
 from six import raise_from
 
 from datadog_checks.base import AgentCheck
@@ -15,19 +15,18 @@ SERVICE_PATTERN_FLAGS = re.IGNORECASE
 
 SERVICE_CONFIG_TRIGGER_INFO = 8
 
+
 def QueryServiceConfig2W(*args):
-        """
-        ctypes wrapper for info types not supported by pywin32
-        """
-        if ctypes.windll.advapi32.QueryServiceConfig2W(*args) == 0:
-            raise ctypes.WinError()
+    """
+    ctypes wrapper for info types not supported by pywin32
+    """
+    if ctypes.windll.advapi32.QueryServiceConfig2W(*args) == 0:
+        raise ctypes.WinError()
+
 
 class TriggerInfo(ctypes.Structure):
-    _fields_ = [
-        ("triggerCount", ctypes.c_uint32),
-        ("pTriggers", ctypes.c_void_p),
-        ("pReserved", ctypes.c_char_p)
-    ]
+    _fields_ = [("triggerCount", ctypes.c_uint32), ("pTriggers", ctypes.c_void_p), ("pReserved", ctypes.c_char_p)]
+
 
 class ServiceFilter(object):
     def __init__(self, name=None, startup_type=None, trigger_start=None):
@@ -169,23 +168,32 @@ class ServiceView(object):
     @property
     def trigger_count(self):
         if self._trigger_count is None:
-            # find out how many bytes to allocate for buffer, raise error if the error code is not ERROR_INSUFFICIENT_BUFFER
+            # find out how many bytes to allocate for buffer
+            # raise error if the error code is not ERROR_INSUFFICIENT_BUFFER
             bytesneeded = ctypes.c_uint32(0)
             try:
-                QueryServiceConfig2W(ctypes.c_void_p(self.hSvc.handle), SERVICE_CONFIG_TRIGGER_INFO, None, 0, ctypes.byref(bytesneeded))
+                QueryServiceConfig2W(
+                    ctypes.c_void_p(self.hSvc.handle), SERVICE_CONFIG_TRIGGER_INFO, None, 0, ctypes.byref(bytesneeded)
+                )
             except OSError as e:
                 if e.winerror != winerror.ERROR_INSUFFICIENT_BUFFER:
                     raise
-            
+
             # allocate buffer and get trigger info, raise error if function returns 0
             bytesBuffer = ctypes.create_string_buffer(bytesneeded.value)
-            QueryServiceConfig2W(ctypes.c_void_p(self.hSvc.handle), SERVICE_CONFIG_TRIGGER_INFO, ctypes.byref(bytesBuffer), bytesneeded, ctypes.byref(bytesneeded)) 
-            
+            QueryServiceConfig2W(
+                ctypes.c_void_p(self.hSvc.handle),
+                SERVICE_CONFIG_TRIGGER_INFO,
+                ctypes.byref(bytesBuffer),
+                bytesneeded,
+                ctypes.byref(bytesneeded),
+            )
+
             # converting returned buffer into TriggerInfo to get trigger count
             triggerStruct = TriggerInfo.from_buffer(bytesBuffer)
             self._trigger_count = triggerStruct.triggerCount
-        
-        return self._trigger_count     
+
+        return self._trigger_count
 
     def startup_type_string(self):
         startup_type_string = ''
