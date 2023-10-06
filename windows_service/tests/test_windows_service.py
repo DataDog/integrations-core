@@ -3,7 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 import pywintypes
-from mock import patch
+import ctypes
+import winerror
+from mock import patch, DEFAULT
 
 from datadog_checks.windows_service import WindowsService
 
@@ -259,8 +261,8 @@ def test_trigger_start(aggregator, check, instance_trigger_start):
     c.check(instance_trigger_start)
     aggregator.assert_service_check(
         WindowsService.SERVICE_CHECK_NAME,
-        status=WindowsService.UNKNOWN,
-        tags=['windows_service:eventlog', 'optional:tag1'],
+        status=WindowsService.OK,
+        tags=['windows_service:EventLog', 'optional:tag1'],
         count=1,
     )
 
@@ -271,16 +273,13 @@ def test_trigger_start(aggregator, check, instance_trigger_start):
         count=1,
     )
 
-def test_trigger_count_failure(aggregator, check, instance_trigger_start):
+def test_trigger_count_failure(aggregator, check, instance_trigger_start, caplog):
     c = check(instance_trigger_start)
 
-    with patch('ctypes.GetLastError', return_value=1):
-        with pytest.raises(OSError):
-            c.check(instance_trigger_start)
+    with patch('datadog_checks.windows_service.windows_service.QueryServiceConfig2W', side_effect=[ctypes.WinError(winerror.ERROR_INSUFFICIENT_BUFFER), ctypes.WinError(1)]*2):
+        c.check(instance_trigger_start)
     
-    with patch('ctypes.windll.advapi32.QueryServiceConfig2W', return_value=0):
-        with pytest.raises(OSError):
-            c.check(instance_trigger_start)
+    assert 'OSError: [WinError 1] Incorrect function' in caplog.text                                                                                              
 
 @pytest.mark.e2e
 def test_basic_e2e(dd_agent_check, check, instance_basic):
