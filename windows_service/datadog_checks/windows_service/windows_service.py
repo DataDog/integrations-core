@@ -5,6 +5,7 @@ import re
 
 import pywintypes
 import win32service
+import winerror
 import ctypes
 from six import raise_from
 
@@ -13,7 +14,13 @@ from datadog_checks.base import AgentCheck
 SERVICE_PATTERN_FLAGS = re.IGNORECASE
 
 SERVICE_CONFIG_TRIGGER_INFO = 8
-ERROR_INSUFFICIENT_BUFFER = 122
+
+def QueryServiceConfig2W(*args):
+        """
+        ctypes wrapper for info types not supported by pywin32
+        """
+        if ctypes.windll.advapi32.QueryServiceConfig2W(*args) == 0:
+            raise ctypes.WinError()
 
 class TriggerInfo(ctypes.Structure):
     _fields_ = [
@@ -120,6 +127,19 @@ class ServiceView(object):
         self._is_delayed_auto = None
         self._trigger_count = None
 
+    def __str__(self):
+        vals = []
+        if self.name is not None:
+            vals.append('name={}'.format(self.name))
+        if self._startup_type is not None:
+            vals.append('startup_type={}'.format(self.startup_type_string()))
+        if self._trigger_count is not None:
+            vals.append('trigger_count={}'.format(self._trigger_count))
+        # Example:
+        #   - ServiceView(name=EventLog)
+        #   - ServiceView(name=Dnscache,startup_type=automatic,trigger_count=1)
+        return '{}({})'.format("Service", ', '.join(vals))
+
     @property
     def hSvc(self):
         if self._hSvc is None:
@@ -151,22 +171,24 @@ class ServiceView(object):
         if self._trigger_count is None:
             # find out how many bytes to allocate for buffer, raise error if the error code is not ERROR_INSUFFICIENT_BUFFER
             bytesneeded = ctypes.c_uint32(0)
-            ctypes.windll.advapi32.QueryServiceConfig2W(ctypes.c_void_p(self.hSvc.handle), SERVICE_CONFIG_TRIGGER_INFO, None, 0, ctypes.byref(bytesneeded))
-            err = ctypes.GetLastError()
-            if err != ERROR_INSUFFICIENT_BUFFER:
-                raise ctypes.WinError(err)
+            try:
+                QueryServiceConfig2W(ctypes.c_void_p(self.hSvc.handle), SERVICE_CONFIG_TRIGGER_INFO, None, 0, ctypes.byref(bytesneeded))
+            except OSError as e:
+                if e.winerror != winerror.ERROR_INSUFFICIENT_BUFFER:
+                    raise
             
             # allocate buffer and get trigger info, raise error if function returns 0
-            bytesBuffer = ctypes.create_string_buffer(bytes(bytesneeded.value), bytesneeded.value)
-            if ctypes.windll.advapi32.QueryServiceConfig2W(ctypes.c_void_p(self.hSvc.handle), SERVICE_CONFIG_TRIGGER_INFO, ctypes.byref(bytesBuffer), bytesneeded, ctypes.byref(bytesneeded)) == 0:
-                err = ctypes.GetLastError()
-                raise ctypes.WinError(err)
+            bytesBuffer = ctypes.create_string_buffer(bytesneeded.value)
+            try: 
+                QueryServiceConfig2W(ctypes.c_void_p(self.hSvc.handle), SERVICE_CONFIG_TRIGGER_INFO, ctypes.byref(bytesBuffer), bytesneeded, ctypes.byref(bytesneeded))
+            except OSError as e:
+                raise 
             
             # converting returned buffer into TriggerInfo to get trigger count
             triggerStruct = TriggerInfo.from_buffer(bytesBuffer)
             self._trigger_count = triggerStruct.triggerCount
         
-        return self._trigger_count
+        return self._trigger_count     
 
     def startup_type_string(self):
         startup_type_string = ''
@@ -227,14 +249,14 @@ class WindowsService(AgentCheck):
 
             if 'ALL' not in services:
                 for service_filter in service_filters:
-                    self.log.debug('Service Short Name: %s and Filter: %s', short_name, service_filter)
                     try:
                         if service_filter.match(service_view):
+                            self.log.debug('Matched %s with %s', service_view, service_filter)
                             services_unseen.discard(service_filter.name)
-                            if (service_filter.trigger_start != None):
-                                self.log.debug('Trigger count for %s is %d', short_name, service_view.trigger_count)
                             break
-                    except pywintypes.error as e:
+                        else:
+                            self.log.debug('Did not match %s with %s', service_view, service_filter)
+                    except (pywintypes.error, OSError) as e:
                         self.log.exception("Exception at service match for %s", service_filter)
                         self.warning(
                             "Failed to query %s service config for filter %s: %s", short_name, service_filter, str(e)
