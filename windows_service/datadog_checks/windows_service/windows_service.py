@@ -136,8 +136,8 @@ class ServiceView(object):
         if self._trigger_count is not None:
             vals.append('trigger_count={}'.format(self._trigger_count))
         # Example:
-        #   - ServiceView(name=EventLog)
-        #   - ServiceView(name=Dnscache,startup_type=automatic,trigger_count=1)
+        #   - Service(name=EventLog)
+        #   - Service(name=Dnscache, startup_type=automatic, trigger_count=1)
         return '{}({})'.format("Service", ', '.join(vals))
 
     @property
