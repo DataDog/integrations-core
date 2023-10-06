@@ -11,7 +11,7 @@ from pyVmomi import vim
 
 from datadog_checks.base import ensure_unicode
 
-from .constants import SOURCE_TYPE
+from .constants import MOR_TYPE_AS_STRING, SOURCE_TYPE
 
 EXCLUDE_FILTERS = {
     'AlarmStatusChangedEvent': [r'Gray to Green', r'Green to Gray'],
@@ -148,14 +148,17 @@ class VSphereEvent(object):
                 md5(alarm_event.alarm.name.encode('utf-8')).hexdigest()[:10],
             )
 
+        host_name = None
         # Get the entity type/name
-        if self.raw_event.entity.entity.__class__ == vim.VirtualMachine:
-            host_type = 'VM'
-        elif self.raw_event.entity.entity.__class__ == vim.HostSystem:
-            host_type = 'host'
-        else:
+        entity_name = self.raw_event.entity.entity.__class__
+        self.host_type = MOR_TYPE_AS_STRING.get(entity_name, None)
+        # for backwards compatibility, vm host type is capitalized
+        if entity_name == vim.VirtualMachine:
+            self.host_type = 'VM'
+        if entity_name == vim.VirtualMachine or entity_name == vim.HostSystem:
+            host_name = self.raw_event.entity.name
+        if self.host_type is None:
             return None
-        host_name = self.raw_event.entity.name
 
         # Need a getattr because from is a reserved keyword...
         trans_before = getattr(self.raw_event, 'from')  # noqa: B009
@@ -168,7 +171,7 @@ class VSphereEvent(object):
         self.payload['msg_title'] = u"[{transition}] {monitor} on {host_type} {host_name} is now {status}".format(
             transition=transition,
             monitor=self.raw_event.alarm.name,
-            host_type=host_type,
+            host_type=self.host_type,
             host_name=host_name,
             status=trans_after,
         )
@@ -179,7 +182,8 @@ class VSphereEvent(object):
         ] = "vCenter monitor status changed on this alarm, " "it was {before} and it's now {after}.".format(
             before=trans_before, after=trans_after
         )
-        self.payload['host'] = host_name
+        if host_name is not None:
+            self.payload['host'] = host_name
         return self.payload
 
     def transform_vmmessageevent(self):
