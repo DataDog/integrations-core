@@ -13,8 +13,28 @@ services:
     volumes:
       - ${DD_LOG_1}:/usr/local/hadoop/logs/yarn-root-nodemanager-yarn-container.log
       - ${DD_LOG_2}:/usr/local/hadoop/logs/yarn--resourcemanager-yarn-container.log
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+      start_interval: 5s
   nodemanager:
-      image: apache/hadoop:${YARN_VERSION}
-      command: ["yarn", "nodemanager"]
-      env_file:
-        - ./hadoop_config.env
+    image: apache/hadoop:${YARN_VERSION}
+    command: ["yarn", "nodemanager"]
+    env_file:
+      - ./hadoop_config.env
+    depends_on:
+      resourcemanager:
+        condition: service_healthy
+        restart: true
+    ports:
+      - "8042:8042"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8042"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+      start_interval: 5s
