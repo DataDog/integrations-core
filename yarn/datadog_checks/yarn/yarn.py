@@ -80,6 +80,7 @@ YARN_CLUSTER_METRICS = {
     'lostNodes': ('yarn.metrics.lost_nodes', GAUGE),
     'unhealthyNodes': ('yarn.metrics.unhealthy_nodes', GAUGE),
     'decommissionedNodes': ('yarn.metrics.decommissioned_nodes', GAUGE),
+    'decommissioningNodes': ('yarn.metrics.decommissioning_nodes', GAUGE),
     'rebootedNodes': ('yarn.metrics.rebooted_nodes', GAUGE),
 }
 
