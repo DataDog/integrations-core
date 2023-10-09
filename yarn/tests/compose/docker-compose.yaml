@@ -19,7 +19,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-      start_interval: 5s
   nodemanager:
     image: apache/hadoop:${YARN_VERSION}
     command: ["yarn", "nodemanager"]
@@ -28,7 +27,6 @@ services:
     depends_on:
       resourcemanager:
         condition: service_healthy
-        restart: true
     ports:
       - "8042:8042"
     healthcheck:
@@ -37,4 +35,3 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-      start_interval: 5s
