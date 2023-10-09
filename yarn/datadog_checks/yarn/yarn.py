@@ -341,7 +341,7 @@ class YarnCheck(AgentCheck):
                 tags.extend(addl_tags)
 
                 self._set_yarn_metrics_from_json(tags, node_json, YARN_NODE_METRICS)
-                version = node_json.get('version')
+                version = node_json.get('version', node_json.get('hadoopVersion'))
                 if not version_set and version:
                     self.set_metadata('version', version)
                     version_set = True
