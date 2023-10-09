@@ -1185,7 +1185,9 @@ def test_servers_metrics_excluding_dev_servers(aggregator, check, dd_run_check, 
     indirect=['mock_http_get', 'connection_compute'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_server_diagnostics_exception(aggregator, check, dd_run_check, mock_http_get, connection_compute, metrics, api_type, microversion):
+def test_server_diagnostics_exception(
+    aggregator, check, dd_run_check, mock_http_get, connection_compute, metrics, api_type, microversion
+):
     dd_run_check(check)
     for metric in metrics:
         aggregator.assert_metric(
