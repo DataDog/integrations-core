@@ -9,7 +9,6 @@
 ***Added***:
 
 * Add `yarn.metrics.decommissioning_nodes` metric ([#15979](https://github.com/DataDog/integrations-core/pull/15979))
-* Add `yarn.node.last_update_time` metric ([#15979](https://github.com/DataDog/integrations-core/pull/15979))
 
 ## 5.0.0 / 2023-08-10
 

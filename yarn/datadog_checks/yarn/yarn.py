@@ -111,8 +111,7 @@ DEPRECATED_YARN_APP_METRICS = {
 
 # Node metrics for YARN
 YARN_NODE_METRICS = {
-    'lastHealthUpdate': ('yarn.node.last_health_update', GAUGE),  # Replaced by lastNodeUpdateTime in yarn 3+
-    'lastNodeUpdateTime': ('yarn.node.last_update_time', GAUGE),  # Only in yarn 3+
+    'lastHealthUpdate': ('yarn.node.last_health_update', GAUGE),
     'usedMemoryMB': ('yarn.node.used_memory_mb', GAUGE),
     'availMemoryMB': ('yarn.node.avail_memory_mb', GAUGE),
     'usedVirtualCores': ('yarn.node.used_virtual_cores', GAUGE),

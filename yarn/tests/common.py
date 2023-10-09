@@ -86,6 +86,7 @@ EXPECTED_METRICS = [
     "yarn.queue.max_capacity",
     "yarn.queue.max_applications",
     "yarn.queue.max_applications_per_user",
+    "yarn.node.last_health_update",
     "yarn.node.used_memory_mb",
     "yarn.node.avail_memory_mb",
     "yarn.node.used_virtual_cores",
