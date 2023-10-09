@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add etcd.db.total_size for Kubernetes 1.26, 1.27, and 1.28 ([#15940](https://github.com/DataDog/integrations-core/pull/15940))
+
 ## 4.0.0 / 2023-08-10
 
 ***Changed***:
