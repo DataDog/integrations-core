@@ -259,6 +259,8 @@ class DockerAgent(AgentInterface):
 
         for command in (
             ['docker', 'stop', '-t', '0', self._container_name],
+            # Remove manually rather than using the `--rm` flag of the `run` command to allow for
+            # debugging issues that caused the Agent container to stop
             ['docker', 'rm', self._container_name],
         ):
             process = self._captured_process(command)
