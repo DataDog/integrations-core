@@ -41,7 +41,7 @@ def dd_environment():
         compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
         mount_logs=True,
         conditions=conditions,
-        sleep=30 
+        sleep=30, 
     ):
         yield INSTANCE_INTEGRATION
 
