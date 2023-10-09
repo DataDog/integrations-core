@@ -450,9 +450,9 @@ def connection_compute(request, mock_responses):
             )['servers']
         ]
 
-    def server_diagnostics(server_id, microversion):
-        if http_error and 'server_diagnostics' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['server_diagnostics'])
+    def get_server_diagnostics(server_id, microversion):
+        if http_error and 'server_diagnostics' in http_error and server_id in http_error['server_diagnostics']:
+            raise requests.exceptions.HTTPError(response=http_error['server_diagnostics'][server_id])
         return mock.MagicMock(
             to_dict=mock.MagicMock(
                 return_value=mock_responses(
@@ -469,7 +469,7 @@ def connection_compute(request, mock_responses):
         get_hypervisor_uptime=mock.MagicMock(side_effect=get_hypervisor_uptime),
         get_quota_set=mock.MagicMock(side_effect=get_quota_set),
         servers=mock.MagicMock(side_effect=servers),
-        get_server_diagnostics=mock.MagicMock(side_effect=server_diagnostics),
+        get_server_diagnostics=mock.MagicMock(side_effect=get_server_diagnostics),
     )
 
 

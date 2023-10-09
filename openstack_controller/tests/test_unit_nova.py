@@ -1116,3 +1116,100 @@ def test_servers_metrics_excluding_dev_servers(aggregator, check, dd_run_check, 
             value=metric.get('value'),
             tags=metric.get('tags'),
         )
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'connection_compute', 'instance', 'metrics', 'api_type', 'microversion'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/compute/v2.1/servers/5102fbbf-7156-48dc-8355-af7ab992266f/diagnostics': MockResponse(
+                        status_code=500
+                    ),
+                }
+            },
+            None,
+            configs.REST,
+            metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_SERVER_DIAGNOSTICS_EXCEPTION,
+            ApiType.REST,
+            None,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            {
+                'http_error': {
+                    '/compute/v2.1/servers/5102fbbf-7156-48dc-8355-af7ab992266f/diagnostics': MockResponse(
+                        status_code=500
+                    ),
+                }
+            },
+            None,
+            configs.REST_NOVA_MICROVERSION_2_93,
+            metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_SERVER_DIAGNOSTICS_EXCEPTION,
+            ApiType.REST,
+            '2.93',
+            id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            None,
+            {
+                'http_error': {
+                    'server_diagnostics': {
+                        '5102fbbf-7156-48dc-8355-af7ab992266f': MockResponse(status_code=500),
+                    }
+                }
+            },
+            configs.SDK,
+            metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_SERVER_DIAGNOSTICS_EXCEPTION,
+            ApiType.SDK,
+            None,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            None,
+            {
+                'http_error': {
+                    'server_diagnostics': {
+                        '5102fbbf-7156-48dc-8355-af7ab992266f': MockResponse(status_code=500),
+                    }
+                }
+            },
+            configs.SDK_NOVA_MICROVERSION_2_93,
+            metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_SERVER_DIAGNOSTICS_EXCEPTION,
+            ApiType.SDK,
+            '2.93',
+            id='api sdk microversion 2.93',
+        ),
+    ],
+    indirect=['mock_http_get', 'connection_compute'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_server_diagnostics_exception(aggregator, check, dd_run_check, mock_http_get, connection_compute, metrics, api_type, microversion):
+    dd_run_check(check)
+    for metric in metrics:
+        aggregator.assert_metric(
+            metric['name'],
+            count=metric.get('count'),
+            value=metric.get('value'),
+            tags=metric.get('tags'),
+        )
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, _ = call
+            args_list += list(args)
+        assert (
+            args_list.count(
+                'http://127.0.0.1:8774/compute/v2.1/servers/5102fbbf-7156-48dc-8355-af7ab992266f/diagnostics'
+            )
+            == 1
+        )
+    if api_type == ApiType.SDK:
+        assert connection_compute.get_server_diagnostics.call_count == 11
+        assert (
+            connection_compute.get_server_diagnostics.call_args_list.count(
+                mock.call('5102fbbf-7156-48dc-8355-af7ab992266f', microversion=microversion)
+            )
+            == 1
+        )
