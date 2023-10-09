@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+***Changed***:
+
+* Change short name of `yarn.metrics.decommissioned_nodes` from `nds decomm` to `nds decommed` ([#15980](https://github.com/DataDog/integrations-core/pull/15980))
+
+***Added***:
+
+* Add `yarn.metrics.decommissioning_nodes` metric ([#15980](https://github.com/DataDog/integrations-core/pull/15979))
+
 ## 5.0.0 / 2023-08-10
 
 ***Changed***:
