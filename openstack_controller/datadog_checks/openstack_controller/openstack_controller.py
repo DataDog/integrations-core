@@ -51,7 +51,8 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
         ]
         self.projects_discovery = None
         if self.config.projects:
-            config_projects_include = normalize_discover_config_include(self.config.projects)
+            config_projects_include = normalize_discover_config_include(self.config.projects, ["name"])
+            self.log.info("config_projects_include: %s", config_projects_include)
             if config_projects_include:
                 self.projects_discovery = Discovery(
                     lambda: self.identity.get_auth_projects(),
@@ -88,7 +89,8 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
             discovered_projects = [
                 (None, project.get('name'), project, None) for project in self.identity.get_auth_projects()
             ]
-        for _pattern, _project_name, project, _project_config in discovered_projects:
+        for _pattern, project_name, project, project_config in discovered_projects:
+            self.log.info("reporting metrics for project: %s", project_name)
             if self.identity.authorize_project(project['id']):
                 self._report_global_metrics(tags)
                 project_tags = tags + [
@@ -96,7 +98,7 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
                     f"project_id:{project['id']}",
                     f"project_name:{project['name']}",
                 ]
-                self._report_project_metrics(project['id'], project_tags)
+                self._report_project_metrics(project['id'], project_tags, project_config)
 
     def _finish_report(self, tags):
         for component in self.components:
@@ -107,7 +109,6 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
         for component in self.components:
             component.report_global_metrics(tags)
 
-    def _report_project_metrics(self, project_id, tags):
-        self.log.info("reporting project `%s` metrics", project_id)
+    def _report_project_metrics(self, project_id, tags, project_config):
         for component in self.components:
-            component.report_project_metrics(project_id, tags)
+            component.report_project_metrics(project_id, tags, project_config)

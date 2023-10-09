@@ -149,14 +149,14 @@ class Component:
         else:
             self.check.log.debug("`%s` component not found in catalog", self.ID.value)
 
-    def report_project_metrics(self, project_id, tags):
+    def report_project_metrics(self, project_id, tags, project_config):
         self.check.log.debug("reporting `%s` component project metrics", self.ID.value)
         if self.check.api.component_in_catalog(self.TYPES.value):
             self.found_in_catalog = True
             self.check.log.debug("`%s` component found in catalog", self.ID.value)
             if self.ID in Component.registered_project_metric_methods:
                 for registered_method in Component.registered_project_metric_methods[self.ID]:
-                    registered_method(self, project_id, tags)
+                    registered_method(self, project_id, tags, project_config)
             else:
                 self.check.log.debug(
                     "`%s` component has not registered methods for project metrics",

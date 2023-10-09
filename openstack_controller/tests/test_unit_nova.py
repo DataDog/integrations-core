@@ -1042,3 +1042,77 @@ def test_servers_metrics(aggregator, check, dd_run_check, metrics):
             value=metric.get('value'),
             tags=metric.get('tags'),
         )
+
+
+@pytest.mark.parametrize(
+    ('instance', 'metrics'),
+    [
+        pytest.param(
+            configs.REST_EXCLUDING_DEMO_PROJECT,
+            metrics.COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_DEFAULT,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            configs.REST_NOVA_MICROVERSION_2_93_EXCLUDING_DEMO_PROJECT,
+            metrics.COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_93,
+            id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.SDK_EXCLUDING_DEMO_PROJECT,
+            metrics.COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_DEFAULT,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            configs.SDK_NOVA_MICROVERSION_2_93_EXCLUDING_DEMO_PROJECT,
+            metrics.COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_93,
+            id='api sdk microversion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_servers_metrics_excluding_demo_project(aggregator, check, dd_run_check, metrics):
+    dd_run_check(check)
+    for metric in metrics:
+        aggregator.assert_metric(
+            metric['name'],
+            count=metric.get('count'),
+            value=metric.get('value'),
+            tags=metric.get('tags'),
+        )
+
+
+@pytest.mark.parametrize(
+    ('instance', 'metrics'),
+    [
+        pytest.param(
+            configs.REST_EXCLUDING_DEV_SERVERS,
+            metrics.COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_DEFAULT,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            configs.REST_NOVA_MICROVERSION_2_93_EXCLUDING_DEV_SERVERS,
+            metrics.COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_2_93,
+            id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.SDK_EXCLUDING_DEV_SERVERS,
+            metrics.COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_DEFAULT,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            configs.SDK_NOVA_MICROVERSION_2_93_EXCLUDING_DEV_SERVERS,
+            metrics.COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_2_93,
+            id='api sdk microversion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_servers_metrics_excluding_dev_servers(aggregator, check, dd_run_check, metrics):
+    dd_run_check(check)
+    for metric in metrics:
+        aggregator.assert_metric(
+            metric['name'],
+            count=metric.get('count'),
+            value=metric.get('value'),
+            tags=metric.get('tags'),
+        )

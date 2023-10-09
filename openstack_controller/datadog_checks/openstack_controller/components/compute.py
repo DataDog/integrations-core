@@ -3,7 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.openstack_controller.components.component import Component
+from datadog_checks.openstack_controller.config import normalize_discover_config_include
 from datadog_checks.openstack_controller.metrics import (
     NOVA_FLAVORS_METRICS,
     NOVA_FLAVORS_METRICS_PREFIX,
@@ -157,7 +159,7 @@ class Compute(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_quota_sets(self, project_id, tags):
+    def _report_quota_sets(self, project_id, tags, project_config):
         item = self.check.api.get_compute_quota_sets(project_id)
         quota_set = get_metrics_and_tags(
             item,
@@ -171,10 +173,31 @@ class Compute(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_servers(self, project_id, tags):
-        data = self.check.api.get_compute_servers(project_id)
-        for item in data:
+    def _report_servers(self, project_id, tags, project_config):
+        config_servers = project_config.get(Compute.ID, {}).get('servers', {}) if project_config else {}
+        self.check.log.debug("config_servers: %s", config_servers)
+        servers_discovery = None
+        if config_servers:
+            config_servers_include = normalize_discover_config_include(config_servers, ["name"])
+            self.check.log.debug("config_servers_include: %s", config_servers_include)
+            if config_servers_include:
+                servers_discovery = Discovery(
+                    lambda: self.check.api.get_compute_servers(project_id),
+                    limit=config_servers.get('limit'),
+                    include=config_servers_include,
+                    exclude=config_servers.get('exclude'),
+                    interval=config_servers.get('interval'),
+                    key=lambda server: server.get('name'),
+                )
+        if servers_discovery:
+            discovered_servers = list(servers_discovery.get_items())
+        else:
+            discovered_servers = [
+                (None, server.get('name'), server, None) for server in self.check.api.get_compute_servers(project_id)
+            ]
+        for _pattern, _item_name, item, item_config in discovered_servers:
             self.check.log.debug("item: %s", item)
+            self.check.log.debug("item_config: %s", item_config)
             server = get_metrics_and_tags(
                 item,
                 tags=NOVA_SERVER_TAGS,

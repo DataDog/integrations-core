@@ -11,7 +11,7 @@ from datadog_checks.openstack_controller.api.type import ApiType
 
 
 # Discovery class requires 'include' to be a dict, so this function is needed to normalize the config
-def normalize_discover_config_include(config):
+def normalize_discover_config_include(config, item_keys):
     normalized_config = {}
     include_list = config.get('include') if isinstance(config, dict) else copy_raw(config.include) if config else []
     if not isinstance(include_list, list):
@@ -20,8 +20,13 @@ def normalize_discover_config_include(config):
         if isinstance(entry, str):
             normalized_config[entry] = None
         elif isinstance(entry, dict):
-            for key, value in entry.items():
-                normalized_config[key] = value.copy()
+            dict_key = None
+            for key in item_keys:
+                if key in entry.keys():
+                    normalized_config[entry[key]] = entry
+                    break
+            if dict_key:
+                normalized_config[dict_key] = entry
         else:
             raise TypeError('`include` entries must be a map or a string')
     return normalized_config

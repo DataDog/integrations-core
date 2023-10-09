@@ -57,7 +57,7 @@ class Network(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_networks(self, project_id, tags):
+    def _report_networks(self, project_id, tags, project_config):
         data = self.check.api.get_network_networks(project_id)
         for item in data:
             network = get_metrics_and_tags(
@@ -73,7 +73,7 @@ class Network(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_quotas(self, project_id, tags):
+    def _report_quotas(self, project_id, tags, project_config):
         item = self.check.api.get_network_quota(project_id)
         quota = get_metrics_and_tags(
             item,

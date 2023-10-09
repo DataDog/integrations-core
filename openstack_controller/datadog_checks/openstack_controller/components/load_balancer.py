@@ -63,7 +63,7 @@ class LoadBalancer(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_loadbalancers(self, project_id, tags):
+    def _report_loadbalancers(self, project_id, tags, project_config):
         data = self.check.api.get_load_balancer_loadbalancers(project_id)
         self.check.log.debug("data: %s", data)
         for item in data:
@@ -95,7 +95,7 @@ class LoadBalancer(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_listeners(self, project_id, tags):
+    def _report_listeners(self, project_id, tags, project_config):
         data = self.check.api.get_load_balancer_listeners(project_id)
         self.check.log.debug("data: %s", data)
         for item in data:
@@ -127,7 +127,7 @@ class LoadBalancer(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_pools(self, project_id, tags):
+    def _report_pools(self, project_id, tags, project_config):
         data = self.check.api.get_load_balancer_pools(project_id)
         self.check.log.debug("data: %s", data)
         for item in data:
@@ -161,7 +161,7 @@ class LoadBalancer(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_healthmonitors(self, project_id, tags):
+    def _report_healthmonitors(self, project_id, tags, project_config):
         data = self.check.api.get_load_balancer_healthmonitors(project_id)
         self.check.log.debug("data: %s", data)
         for item in data:
@@ -178,7 +178,7 @@ class LoadBalancer(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_quotas(self, project_id, tags):
+    def _report_quotas(self, project_id, tags, project_config):
         data = self.check.api.get_load_balancer_quotas(project_id)
         self.check.log.debug("data: %s", data)
         for item in data:
@@ -196,7 +196,7 @@ class LoadBalancer(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_amphorae(self, project_id, tags):
+    def _report_amphorae(self, project_id, tags, project_config):
         data = self.check.api.get_load_balancer_amphorae(project_id)
         self.check.log.debug("data: %s", data)
         for item in data:
