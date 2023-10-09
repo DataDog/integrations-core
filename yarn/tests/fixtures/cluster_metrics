@@ -21,6 +21,7 @@
     "lostNodes": 0,
     "unhealthyNodes": 0,
     "decommissionedNodes": 0,
+    "decommissioningNodes": 0,
     "rebootedNodes": 0,
     "activeNodes": 1
   }
