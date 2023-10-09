@@ -2,7 +2,7 @@
   "servers": [
     {
       "id": "5102fbbf-7156-48dc-8355-af7ab992266f",
-      "name": "a",
+      "name": "admin-1",
       "status": "ACTIVE",
       "tenant_id": "6e39099cccde4f809b003d9e0dd09304",
       "user_id": "78205c506b534738bc851d3e189a00c3",
@@ -68,7 +68,7 @@
     },
     {
       "id": "954441a8-552a-476c-985e-6564e6fe93d6",
-      "name": "test",
+      "name": "admin-2",
       "status": "ACTIVE",
       "tenant_id": "6e39099cccde4f809b003d9e0dd09304",
       "user_id": "78205c506b534738bc851d3e189a00c3",
@@ -134,7 +134,7 @@
     },
     {
       "id": "2c653a68-b520-4582-a05d-41a68067d76c",
-      "name": "server",
+      "name": "dev-1",
       "status": "ACTIVE",
       "tenant_id": "6e39099cccde4f809b003d9e0dd09304",
       "user_id": "78205c506b534738bc851d3e189a00c3",
