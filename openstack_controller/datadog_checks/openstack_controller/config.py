@@ -14,21 +14,22 @@ from datadog_checks.openstack_controller.api.type import ApiType
 def normalize_discover_config_include(config, item_keys):
     normalized_config = {}
     include_list = config.get('include') if isinstance(config, dict) else copy_raw(config.include) if config else []
-    if not isinstance(include_list, list):
-        raise TypeError('Setting `include` must be an array')
-    for entry in include_list:
-        if isinstance(entry, str):
-            normalized_config[entry] = None
-        elif isinstance(entry, dict):
-            dict_key = None
-            for key in item_keys:
-                if key in entry.keys():
-                    normalized_config[entry[key]] = entry
-                    break
-            if dict_key:
-                normalized_config[dict_key] = entry
-        else:
-            raise TypeError('`include` entries must be a map or a string')
+    if include_list:
+        if not isinstance(include_list, list):
+            raise TypeError('Setting `include` must be an array')
+        for entry in include_list:
+            if isinstance(entry, str):
+                normalized_config[entry] = None
+            elif isinstance(entry, dict):
+                dict_key = None
+                for key in item_keys:
+                    if key in entry.keys():
+                        normalized_config[entry[key]] = entry
+                        break
+                if dict_key:
+                    normalized_config[dict_key] = entry
+            else:
+                raise TypeError('`include` entries must be a map or a string')
     return normalized_config
 
 

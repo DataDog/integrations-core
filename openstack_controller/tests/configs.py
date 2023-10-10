@@ -53,6 +53,28 @@ REST_EXCLUDING_DEV_SERVERS = {
     },
 }
 
+REST_DEMO_SERVERS_COLLECT_FALSE = {
+    'keystone_server_url': 'http://127.0.0.1:8080/identity',
+    'username': 'admin',
+    'password': 'password',
+    'use_legacy_check_version': False,
+    "projects": {
+        "include": [
+            {
+                "name": "^admin.*",
+            },
+            {
+                "name": "^demo.*",
+                "compute": {
+                    "servers": {
+                        "collect": False,
+                    },
+                },
+            },
+        ],
+    },
+}
+
 REST_NOVA_MICROVERSION_2_93 = {
     'keystone_server_url': 'http://127.0.0.1:8080/identity',
     'username': 'admin',
@@ -143,6 +165,27 @@ SDK_EXCLUDING_DEV_SERVERS = {
                 },
             },
             "^demo.*",
+        ],
+    },
+}
+
+SDK_DEMO_SERVERS_COLLECT_FALSE = {
+    'openstack_cloud_name': 'test_cloud',
+    'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,
+    'use_legacy_check_version': False,
+    "projects": {
+        "include": [
+            {
+                "name": "^admin.*",
+            },
+            {
+                "name": "^demo.*",
+                "compute": {
+                    "servers": {
+                        "collect": False,
+                    },
+                },
+            },
         ],
     },
 }

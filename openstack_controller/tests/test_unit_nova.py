@@ -1008,6 +1008,83 @@ def test_servers_exception(aggregator, check, dd_run_check, mock_http_get, conne
 
 
 @pytest.mark.parametrize(
+    ('instance', 'api_type'),
+    [
+        pytest.param(
+            configs.REST_DEMO_SERVERS_COLLECT_FALSE,
+            ApiType.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            configs.SDK_DEMO_SERVERS_COLLECT_FALSE,
+            ApiType.SDK,
+            id='api sdk',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_servers_disable_call(aggregator, check, dd_run_check, mock_http_get, connection_compute, api_type):
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.nova.server.count',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'server_id:5102fbbf-7156-48dc-8355-af7ab992266f',
+            'server_name:admin-1',
+            'server_status:ACTIVE',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.server.count',
+        count=0,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'server_id:67ca710a-e73f-4801-a12f-d0c55ccb8955',
+            'server_name:demo-1',
+            'server_status:ACTIVE',
+        ],
+    ),
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, _ = call
+            args_list += list(args)
+        assert (
+            args_list.count(
+                'http://127.0.0.1:8774/compute/v2.1/servers/detail?project_id=1e6e233e637d4d55a50a62b63398ad15'
+            )
+            == 0
+        )
+        assert (
+            args_list.count(
+                'http://127.0.0.1:8774/compute/v2.1/servers/detail?project_id=6e39099cccde4f809b003d9e0dd09304'
+            )
+            == 1
+        )
+    if api_type == ApiType.SDK:
+        assert connection_compute.servers.call_count == 1
+        assert (
+            connection_compute.servers.call_args_list.count(
+                mock.call(details=True, project_id='1e6e233e637d4d55a50a62b63398ad15', microversion=None)
+            )
+            == 0
+        )
+        assert (
+            connection_compute.servers.call_args_list.count(
+                mock.call(details=True, project_id='6e39099cccde4f809b003d9e0dd09304', microversion=None)
+            )
+            == 1
+        )
+
+
+@pytest.mark.parametrize(
     ('instance', 'metrics'),
     [
         pytest.param(

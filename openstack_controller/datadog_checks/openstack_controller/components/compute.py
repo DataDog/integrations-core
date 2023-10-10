@@ -176,48 +176,51 @@ class Compute(Component):
     def _report_servers(self, project_id, tags, project_config):
         config_servers = project_config.get(Compute.ID, {}).get('servers', {}) if project_config else {}
         self.check.log.debug("config_servers: %s", config_servers)
-        servers_discovery = None
-        if config_servers:
-            config_servers_include = normalize_discover_config_include(config_servers, ["name"])
-            self.check.log.debug("config_servers_include: %s", config_servers_include)
-            if config_servers_include:
-                servers_discovery = Discovery(
-                    lambda: self.check.api.get_compute_servers(project_id),
-                    limit=config_servers.get('limit'),
-                    include=config_servers_include,
-                    exclude=config_servers.get('exclude'),
-                    interval=config_servers.get('interval'),
-                    key=lambda server: server.get('name'),
+        collect_servers = config_servers.get('collect', True)
+        if collect_servers:
+            servers_discovery = None
+            if config_servers:
+                config_servers_include = normalize_discover_config_include(config_servers, ["name"])
+                self.check.log.debug("config_servers_include: %s", config_servers_include)
+                if config_servers_include:
+                    servers_discovery = Discovery(
+                        lambda: self.check.api.get_compute_servers(project_id),
+                        limit=config_servers.get('limit'),
+                        include=config_servers_include,
+                        exclude=config_servers.get('exclude'),
+                        interval=config_servers.get('interval'),
+                        key=lambda server: server.get('name'),
+                    )
+            if servers_discovery:
+                discovered_servers = list(servers_discovery.get_items())
+            else:
+                discovered_servers = [
+                    (None, server.get('name'), server, None)
+                    for server in self.check.api.get_compute_servers(project_id)
+                ]
+            for _pattern, _item_name, item, item_config in discovered_servers:
+                self.check.log.debug("item: %s", item)
+                self.check.log.debug("item_config: %s", item_config)
+                server = get_metrics_and_tags(
+                    item,
+                    tags=NOVA_SERVER_TAGS,
+                    prefix=NOVA_SERVER_METRICS_PREFIX,
+                    metrics=NOVA_SERVER_METRICS,
+                    lambda_name=lambda key, item=item: 'active'
+                    if key == 'status' and item['status'] == 'ACTIVE'
+                    else 'error'
+                    if key == 'status' and item['status'] == 'ERROR'
+                    else key,
+                    lambda_value=lambda key, value, item=item: 1
+                    if key == 'status' and (item['status'] == 'ACTIVE' or item['status'] == 'ERROR')
+                    else value,
                 )
-        if servers_discovery:
-            discovered_servers = list(servers_discovery.get_items())
-        else:
-            discovered_servers = [
-                (None, server.get('name'), server, None) for server in self.check.api.get_compute_servers(project_id)
-            ]
-        for _pattern, _item_name, item, item_config in discovered_servers:
-            self.check.log.debug("item: %s", item)
-            self.check.log.debug("item_config: %s", item_config)
-            server = get_metrics_and_tags(
-                item,
-                tags=NOVA_SERVER_TAGS,
-                prefix=NOVA_SERVER_METRICS_PREFIX,
-                metrics=NOVA_SERVER_METRICS,
-                lambda_name=lambda key, item=item: 'active'
-                if key == 'status' and item['status'] == 'ACTIVE'
-                else 'error'
-                if key == 'status' and item['status'] == 'ERROR'
-                else key,
-                lambda_value=lambda key, value, item=item: 1
-                if key == 'status' and (item['status'] == 'ACTIVE' or item['status'] == 'ERROR')
-                else value,
-            )
-            self.check.log.debug("server: %s", server)
-            self.check.gauge(NOVA_SERVER_COUNT, 1, tags=tags + server['tags'])
-            for metric, value in server['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + server['tags'])
-            self._report_server_flavor(item.get('flavor', {}).get('id'), tags + server['tags'])
-            self._report_server_diagnostics(item['id'], tags + server['tags'])
+                self.check.log.debug("server: %s", server)
+                self.check.gauge(NOVA_SERVER_COUNT, 1, tags=tags + server['tags'])
+                for metric, value in server['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + server['tags'])
+                self._report_server_flavor(item.get('flavor', {}).get('id'), tags + server['tags'])
+                self._report_server_diagnostics(item['id'], tags + server['tags'])
 
     @Component.http_error()
     def _report_server_flavor(self, flavor_id, tags):
