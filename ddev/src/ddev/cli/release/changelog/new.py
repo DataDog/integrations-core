@@ -28,7 +28,7 @@ def new(app: Application, entry_type: str | None, targets: tuple[str], message: 
     By default, changelog entries will be created for all integrations that have changed code. To create
     entries only for specific targets, you may pass them as additional arguments after the entry type.
     """
-    from datadog_checks.dev.tooling.commands.console import run_or_abort
+    from datadog_checks.dev.tooling.commands.release.changelog import towncrier
 
     from ddev.release.constants import ENTRY_TYPES
 
@@ -48,18 +48,14 @@ def new(app: Application, entry_type: str | None, targets: tuple[str], message: 
     else:
         entry_type = click.prompt('Entry type?', type=click.Choice(ENTRY_TYPES, case_sensitive=False))
 
-    towncrier_base_cmd = [
-        "towncrier",
+    create_cmd = [
         "create",
-        "--config",
-        "towncrier.toml",
         "--content",
         message or click.edit(text=message_based_on_git, require_save=False) or message_based_on_git,
         f"{pr_number}.{entry_type}",
     ]
     edited = 0
     for check in app.repo.integrations.iter_changed_code(targets):
-        towncrier_cmd = towncrier_base_cmd + ["--dir", check.name]
-        run_or_abort(towncrier_cmd)
+        towncrier(check.path, *create_cmd)
         edited += 1
     app.display_success(f'Added {edited} changelog entr{"ies" if edited > 1 else "y"}')

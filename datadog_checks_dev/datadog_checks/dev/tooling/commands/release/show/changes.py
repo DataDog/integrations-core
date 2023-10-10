@@ -10,16 +10,12 @@ from ....utils import complete_valid_checks, get_valid_checks, get_version_strin
 from ...console import (
     CONTEXT_SETTINGS,
     abort,
-    echo_failure,
-    echo_info,
-    echo_success,
     validate_check_arg,
 )
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Show all the pending PRs for a given check.')
 @click.argument('check', shell_complete=complete_valid_checks, callback=validate_check_arg)
-@click.option('--organization', '-r', default='DataDog', help="The Github organization the repository belongs to")
 @click.option(
     '--tag-pattern',
     default=None,
@@ -32,10 +28,7 @@ from ...console import (
 @click.option(
     '--since', default=None, help="The git ref to use instead of auto-detecting the tag to view changes since"
 )
-@click.option('--end')
-@click.option('--exclude-branch', default=None, help="Exclude changes comming from a specific branch")
-@click.pass_context
-def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization, since, end, exclude_branch):
+def changes(check, tag_pattern, tag_prefix, dry_run, since):
     """Show all the pending PRs for a given check."""
     if not dry_run and check and check not in get_valid_checks():
         abort(f'Check `{check}` is not an Agent-based Integration')

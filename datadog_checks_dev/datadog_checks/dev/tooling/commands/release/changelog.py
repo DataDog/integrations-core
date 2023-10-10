@@ -1,10 +1,13 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 from collections import namedtuple
 
 import click
 from semver import VersionInfo
+
+from datadog_checks.dev.tooling.constants import get_root
 
 from ...utils import complete_testable_checks, get_valid_checks, get_version_string
 from ..console import CONTEXT_SETTINGS, abort, echo_info, run_or_abort, validate_check_arg
@@ -12,36 +15,34 @@ from ..console import CONTEXT_SETTINGS, abort, echo_info, run_or_abort, validate
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
 
 
+def towncrier(target_dir, cmd, *cmd_args):
+    '''
+    Run towncrier command with its arguments in target_dir.
+    '''
+    run_or_abort(
+        ["towncrier", cmd, "--config", os.path.join(get_root(), "towncrier.toml"), "--dir", target_dir, *cmd_args]
+    )
+
+
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Update the changelog for a check')
 @click.argument('check', shell_complete=complete_testable_checks, callback=validate_check_arg)
 @click.argument('version')
 @click.argument('old_version', required=False)
-@click.option('--end')
-@click.option('--initial', is_flag=True)
-@click.option('--organization', '-r', default='DataDog')
 @click.option('--quiet', '-q', is_flag=True)
 @click.option('--dry-run', '-n', is_flag=True)
 @click.option('--output-file', '-o', default='CHANGELOG.md', show_default=True)
 @click.option('--tag-pattern', default=None, hidden=True)
 @click.option('--tag-prefix', '-tp', default='v', show_default=True)
 @click.option('--no-semver', '-ns', default=False, is_flag=True)
-@click.option('--exclude-branch', default=None, help="Exclude changes comming from a specific branch")
-@click.pass_context
 def changelog(
-    ctx,
     check,
     version,
     old_version,
-    end,
-    initial,
     quiet,
     dry_run,
-    output_file,
     tag_pattern,
     tag_prefix,
     no_semver,
-    organization,
-    exclude_branch,
 ):
     """Perform the operations needed to update the changelog.
 
@@ -66,4 +67,7 @@ def changelog(
     if not quiet:
         echo_info(f'Current version of check {check}: {cur_version}, bumping to: {version}')
 
-    run_or_abort(["towncrier", "build", "--dir", check, "--config", "towncrier.toml", "--version", version])
+    build_args = ["--version", version]
+    if dry_run:
+        build_args.append("--draft")
+    towncrier(os.path.join(get_root(), check), "build", *build_args)
