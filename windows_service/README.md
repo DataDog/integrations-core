@@ -57,7 +57,7 @@ The possible values for `startup_type` are:
 Beginning with Agent version 7.50, the check can select which services to monitor based on whether they have a [Service Trigger assigned][17].
 Below are some examples showing possible configurations.
 ```yaml
-# Matches all services that does not have a trigger
+# Matches all services that do not have a trigger
 services:
   - trigger_start: false
 
