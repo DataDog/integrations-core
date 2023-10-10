@@ -8,7 +8,7 @@
 
 ***Added***:
 
-* Add `yarn.metrics.decommissioning_nodes` metric ([#15980](https://github.com/DataDog/integrations-core/pull/15979))
+* Add `yarn.metrics.decommissioning_nodes` metric ([#15980](https://github.com/DataDog/integrations-core/pull/15980))
 
 ## 5.0.0 / 2023-08-10
 
