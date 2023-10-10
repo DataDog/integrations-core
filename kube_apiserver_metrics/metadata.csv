@@ -7,6 +7,8 @@ kube_apiserver.go_goroutines,gauge,,,,The number of goroutines that currently ex
 kube_apiserver.APIServiceRegistrationController_depth,gauge,,,,The current depth of workqueue: APIServiceRegistrationController,0,kubernetes_api_server_metrics,service registration controller depth,
 kube_apiserver.etcd_request_duration_seconds.sum,gauge,,second,,Etcd request latencies for each operation and object type (alpha),0,kubernetes_api_server_metrics,etcd latency,
 kube_apiserver.etcd_request_duration_seconds.count,count,,,,Etcd request latencies count for each operation and object type (alpha),0,kubernetes_api_server_metrics,etcd latency,
+kube_apiserver.etcd_request_errors_total,count,,request,,Etcd failed request counts for each operation and object type,0,kubernetes_api_server_metrics,etcd request errors total,
+kube_apiserver.etcd_requests_total,count,,request,,Etcd request counts for each operation and object type,0,kubernetes_api_server_metrics,etcd requests total,
 kube_apiserver.etcd_object_counts,gauge,,object,,The number of stored objects at the time of last check split by kind (alpha; deprecated in Kubernetes 1.22),0,kubernetes_api_server_metrics,etcd object counts,
 kube_apiserver.etcd.db.total_size,gauge,,byte,,The total size of the etcd database file physically allocated in bytes (alpha; Kubernetes 1.19+),0,kubernetes_api_server_metrics,etcd db total size,
 kube_apiserver.storage_objects,gauge,,object,,The number of stored objects at the time of last check split by kind (Kubernetes 1.21+; replaces etcd_object_counts),0,kubernetes_api_server_metrics,storage objects,
