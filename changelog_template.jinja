@@ -1,9 +1,9 @@
 {% if sections[""] %}
 {% for category, val in definitions.items() if category in sections[""] %}
-**{{ definitions[category]['name'] }}**:
+***{{ definitions[category]['name'] }}***:
 
 {% for text, values in sections[""][category].items() %}
-- {{ text }} {{ values|join(', ') }}
+* {{ text }} {{ values|join(', ') }}
 {% endfor %}
 
 {% endfor %}
