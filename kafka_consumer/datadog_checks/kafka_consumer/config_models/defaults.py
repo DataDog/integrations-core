@@ -12,6 +12,10 @@ def shared_kafka_timeout():
     return 5
 
 
+def instance_close_admin_client():
+    return True
+
+
 def instance_consumer_queued_max_messages_kbytes():
     return 1024
 

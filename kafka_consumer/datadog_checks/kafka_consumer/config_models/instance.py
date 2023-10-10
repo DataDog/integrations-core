@@ -45,6 +45,7 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    close_admin_client: Optional[bool] = None
     consumer_groups: Optional[MappingProxyType[str, Any]] = None
     consumer_groups_regex: Optional[MappingProxyType[str, Any]] = None
     consumer_queued_max_messages_kbytes: Optional[int] = None

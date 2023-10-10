@@ -112,6 +112,14 @@ instances:
     #
     # consumer_queued_max_messages_kbytes: 1024
 
+    ## @param close_admin_client - boolean - optional - default: true
+    ## Release AdminClient at the end of execution for garbage collection. Originally, we kept the same AdminClient 
+    ## running over the entire life of the check. By deallocating the AdminClient after the check run, we should free 
+    ## up any memory used in the client, although the performance of the check run would be slower (since we will 
+    ## need to reconnect with a new client). Set this config option to false to improve performance.
+    #
+    # close_admin_client: true
+
     ## @param monitor_all_broker_highwatermarks - boolean - optional - default: false
     ## Setting monitor_all_broker_highwatermarks to `true` tells the check to
     ## discover and fetch the broker highwater mark offsets for all kafka topics in
