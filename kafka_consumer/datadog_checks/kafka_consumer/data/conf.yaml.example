@@ -104,6 +104,14 @@ instances:
     #
     # monitor_unlisted_consumer_groups: false
 
+    ## @param consumer_queued_max_messages_kbytes - integer - optional - default: 1024
+    ## The consumer very aggressively caches messages in the background (is tuned for very high throughput).
+    ## To reduce memory usage, tune down queued.max.messages.kbytes (which is the maximum cache size per partition).
+    ## By default it is 1Gb by Kafka client, override this kafka default to 1MB for integration check to optimize
+    ## memory consumption which if not done could potentially lead to out of memory (OOM) kill.
+    #
+    # consumer_queued_max_messages_kbytes: 1024
+
     ## @param monitor_all_broker_highwatermarks - boolean - optional - default: false
     ## Setting monitor_all_broker_highwatermarks to `true` tells the check to
     ## discover and fetch the broker highwater mark offsets for all kafka topics in
