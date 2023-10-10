@@ -46,8 +46,8 @@
 
 ***Fixed***:
 
-* Port Kafka consumer improvements to 7.47.x. See [#15565](https://github.com/DataDog/integrations-core/pull/15565).
-* Do not check consumer_groups if the offset is invalid. See [#15237](https://github.com/DataDog/integrations-core/pull/15237).
+* Optimize highwater offset collection. See [#15285](https://github.com/DataDog/integrations-core/pull/15285).
+* Reduce number of consumer creations. See [#15476](https://github.com/DataDog/integrations-core/pull/15476).
 
 ## 3.1.2 / 2023-07-13
 

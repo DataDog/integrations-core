@@ -105,10 +105,10 @@ instances:
     # monitor_unlisted_consumer_groups: false
 
     ## @param consumer_queued_max_messages_kbytes - integer - optional - default: 1024
-    ## The consumer very aggressively caches messages in the background (is tuned for very high throughput).
-    ## To reduce memory usage, tune down queued.max.messages.kbytes (which is the maximum cache size per partition).
-    ## By default it is 1Gb by Kafka client, override this kafka default to 1MB for integration check to optimize
-    ## memory consumption which if not done could potentially lead to out of memory (OOM) kill.
+    ## The consumer very aggressively caches messages in the background (tuned for very high throughput).
+    ## To reduce memory usage, tune down queued.max.messages.kbytes (maximum cache size per partition).
+    ## Override the kafka default to 1MB for the integration check to optimize
+    ## memory consumption to avoid potential out of memory (OOM) kill. (Default setting is 1GB per Kafka client)
     #
     # consumer_queued_max_messages_kbytes: 1024
 
