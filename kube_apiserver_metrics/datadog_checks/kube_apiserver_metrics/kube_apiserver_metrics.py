@@ -77,6 +77,9 @@ METRICS = {
     'apiserver_flowcontrol_request_concurrency_limit': 'flowcontrol_request_concurrency_limit',
     'apiserver_flowcontrol_current_executing_requests': 'flowcontrol_current_executing_requests',
     'apiserver_flowcontrol_rejected_requests_total': 'flowcontrol_rejected_requests_total',
+    'apiserver_storage_db_total_size_in_bytes': 'etcd.db.total_size',
+    # For Kubernetes >= 1.28
+    'apiserver_storage_size_bytes': 'etcd.db.total_size',
 }
 
 

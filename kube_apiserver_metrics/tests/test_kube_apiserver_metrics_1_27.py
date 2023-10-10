@@ -7,7 +7,7 @@ from datadog_checks.kube_apiserver_metrics import KubeAPIServerMetricsCheck
 
 from .common import HERE
 
-OM_RESPONSE_FIXTURES = os.path.join(HERE, 'fixtures', 'metrics_1.26.0.txt')
+OM_RESPONSE_FIXTURES = os.path.join(HERE, 'fixtures', 'metrics_1.27.0.txt')
 
 customtag = "custom:tag"
 
