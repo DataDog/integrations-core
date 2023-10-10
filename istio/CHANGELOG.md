@@ -8,7 +8,7 @@
 
 * Add additional Istio metrics ([#15820](https://github.com/DataDog/integrations-core/pull/15820))
 
-## 5.1.0 / 2023-08-18
+## 5.1.0 / 2023-08-18 / Agent 7.48.0
 
 ***Added***:
 

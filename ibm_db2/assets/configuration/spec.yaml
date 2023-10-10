@@ -56,6 +56,13 @@ files:
           has to be accessible and readable by the agent user.
         value:
           type: string
+      - name: connection_timeout
+        description: |
+          Connection timeout in seconds
+        value:
+          type: integer
+          example: 10
+
       - template: instances/db
         overrides:
           custom_queries.description: |
