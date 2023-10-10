@@ -61,7 +61,7 @@ Below are some examples showing possible configurations.
 services:
   - trigger_start: false
 
-# Matches all services with an automatic startup type and has a trigger
+# Matches all services with an automatic startup type and excludes services with triggers
 services:
   - startup_type: automatic
     trigger_start: false
