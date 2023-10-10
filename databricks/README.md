@@ -434,6 +434,8 @@ The Databricks integration does not include any events.
 
 ## Troubleshooting
 
+You can troubleshoot issues yourself by enabling the [Databricks web terminal][18] or by using a [Databricks Notebook][19]. Consult the [Agent Troubleshooting][20] documentation for information on useful troubleshooting steps. 
+
 Need help? Contact [Datadog support][10].
 
 ## Further Reading
@@ -455,3 +457,6 @@ Need help? Contact [Datadog support][10].
 [15]: https://docs.datadoghq.com/getting_started/site/
 [16]: https://docs.databricks.com/clusters/init-scripts.html#global-init-scripts
 [17]: https://docs.databricks.com/clusters/init-scripts.html#cluster-scoped-init-scripts
+[18]: https://docs.databricks.com/en/clusters/web-terminal.html
+[19]: https://docs.databricks.com/en/notebooks/index.html
+[20]: https://docs.datadoghq.com/agent/troubleshooting/

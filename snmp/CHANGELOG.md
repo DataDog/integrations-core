@@ -18,7 +18,7 @@
 * Add comment for fanSpeedSensorStatus ([#15804](https://github.com/DataDog/integrations-core/pull/15804))
 * Update Cisco model metadata regex ([#15908](https://github.com/DataDog/integrations-core/pull/15908))
 
-## 6.2.3 / 2023-09-13
+## 6.2.3 / 2023-09-13 / Agent 7.48.0
 
 ***Fixed***:
 

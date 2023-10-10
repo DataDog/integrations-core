@@ -81,7 +81,7 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
         self.collection_interval = collection_interval
         super(SqlserverProcedureMetrics, self).__init__(
             check,
-            run_sync=is_affirmative(check.procedure_metrics_config.get('run_sync', True)),
+            run_sync=is_affirmative(check.procedure_metrics_config.get('run_sync', False)),
             enabled=is_affirmative(check.procedure_metrics_config.get('enabled', True)),
             expected_db_exceptions=(),
             min_collection_interval=check.min_collection_interval,
