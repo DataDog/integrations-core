@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.0.1 / 2023-10-10
+
 ***Fixed***:
 
 * Add the log section in the configuration file ([#15978](https://github.com/DataDog/integrations-core/pull/15978))
