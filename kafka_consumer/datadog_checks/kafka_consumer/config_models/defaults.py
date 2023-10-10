@@ -12,6 +12,10 @@ def shared_kafka_timeout():
     return 5
 
 
+def instance_consumer_queued_max_messages_kbytes():
+    return 1024
+
+
 def instance_disable_generic_tags():
     return False
 
