@@ -169,13 +169,17 @@ NOVA_SERVER_TAGS = {
 NOVA_SERVER_METRICS = {
     f"{NOVA_SERVER_METRICS_PREFIX}.active": {"optional": True},
     f"{NOVA_SERVER_METRICS_PREFIX}.error": {"optional": True},
-    f"{NOVA_SERVER_METRICS_PREFIX}.flavor.vcpus": {},
-    f"{NOVA_SERVER_METRICS_PREFIX}.flavor.ram": {},
-    f"{NOVA_SERVER_METRICS_PREFIX}.flavor.disk": {},
-    f"{NOVA_SERVER_METRICS_PREFIX}.flavor.os_flv_ext_data:ephemeral": {"optional": True},
-    f"{NOVA_SERVER_METRICS_PREFIX}.flavor.ephemeral": {"min_version": "2.47"},
-    f"{NOVA_SERVER_METRICS_PREFIX}.flavor.swap": {"optional": True},
-    f"{NOVA_SERVER_METRICS_PREFIX}.flavor.rxtx_factor": {"optional": True},
+}
+NOVA_SERVER_FLAVOR_METRICS_PREFIX = f"{NOVA_SERVER_METRICS_PREFIX}.flavor"
+NOVA_SERVER_FLAVOR_TAGS = {}
+NOVA_SERVER_FLAVOR_METRICS = {
+    f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.vcpus": {},
+    f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.ram": {},
+    f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.disk": {},
+    f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.os_flv_ext_data:ephemeral": {"optional": True},
+    f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.ephemeral": {"min_version": "2.47"},
+    f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.swap": {"optional": True},
+    f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.rxtx_factor": {"optional": True},
 }
 NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX = f"{NOVA_SERVER_METRICS_PREFIX}.diagnostic"
 NOVA_SERVER_DIAGNOSTICS_TAGS = {

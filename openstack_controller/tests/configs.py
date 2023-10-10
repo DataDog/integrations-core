@@ -102,6 +102,33 @@ REST_DEMO_SERVERS_DIAGNOSTICS_FALSE = {
     },
 }
 
+REST_DEMO_SERVERS_FLAVORS_FALSE = {
+    'keystone_server_url': 'http://127.0.0.1:8080/identity',
+    'username': 'admin',
+    'password': 'password',
+    'use_legacy_check_version': False,
+    "projects": {
+        "include": [
+            {
+                "name": "^admin.*",
+            },
+            {
+                "name": "^demo.*",
+                "compute": {
+                    "servers": {
+                        "include": [
+                            {
+                                "name": ".*",
+                                "flavors": False,
+                            },
+                        ],
+                    },
+                },
+            },
+        ],
+    },
+}
+
 REST_NOVA_MICROVERSION_2_93 = {
     'keystone_server_url': 'http://127.0.0.1:8080/identity',
     'username': 'admin',
@@ -167,6 +194,34 @@ REST_NOVA_MICROVERSION_2_93_DEMO_SERVERS_DIAGNOSTICS_FALSE = {
                             {
                                 "name": ".*",
                                 "diagnostics": False,
+                            },
+                        ],
+                    },
+                },
+            },
+        ],
+    },
+}
+
+REST_NOVA_MICROVERSION_2_93_DEMO_SERVERS_FLAVORS_FALSE = {
+    'keystone_server_url': 'http://127.0.0.1:8080/identity',
+    'username': 'admin',
+    'password': 'password',
+    'nova_microversion': '2.93',
+    'use_legacy_check_version': False,
+    "projects": {
+        "include": [
+            {
+                "name": "^admin.*",
+            },
+            {
+                "name": "^demo.*",
+                "compute": {
+                    "servers": {
+                        "include": [
+                            {
+                                "name": ".*",
+                                "flavors": False,
                             },
                         ],
                     },
@@ -271,6 +326,32 @@ SDK_DEMO_SERVERS_DIAGNOSTICS_FALSE = {
     },
 }
 
+SDK_DEMO_SERVERS_FLAVORS_FALSE = {
+    'openstack_cloud_name': 'test_cloud',
+    'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,
+    'use_legacy_check_version': False,
+    "projects": {
+        "include": [
+            {
+                "name": "^admin.*",
+            },
+            {
+                "name": "^demo.*",
+                "compute": {
+                    "servers": {
+                        "include": [
+                            {
+                                "name": ".*",
+                                "flavors": False,
+                            },
+                        ],
+                    },
+                },
+            },
+        ],
+    },
+}
+
 SDK_NOVA_MICROVERSION_2_93 = {
     'openstack_cloud_name': 'test_cloud',
     'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,
@@ -337,6 +418,33 @@ SDK_NOVA_MICROVERSION_2_93_EXCLUDING_DEV_SERVERS = {
                 },
             },
             "^demo.*",
+        ],
+    },
+}
+
+SDK_NOVA_MICROVERSION_2_93_DEMO_SERVERS_FLAVORS_FALSE = {
+    'openstack_cloud_name': 'test_cloud',
+    'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,
+    'nova_microversion': '2.93',
+    'use_legacy_check_version': False,
+    "projects": {
+        "include": [
+            {
+                "name": "^admin.*",
+            },
+            {
+                "name": "^demo.*",
+                "compute": {
+                    "servers": {
+                        "include": [
+                            {
+                                "name": ".*",
+                                "flavors": False,
+                            },
+                        ],
+                    },
+                },
+            },
         ],
     },
 }

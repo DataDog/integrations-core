@@ -1201,6 +1201,171 @@ def test_servers_metrics_excluding_dev_servers(aggregator, check, dd_run_check, 
         pytest.param(
             {
                 'http_error': {
+                    '/compute/v2.1/flavors/c1': MockResponse(status_code=500),
+                }
+            },
+            None,
+            configs.REST,
+            metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_FLAVOR_EXCEPTION,
+            ApiType.REST,
+            None,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            {
+                'http_error': {
+                    '/compute/v2.1/flavors/c1': MockResponse(status_code=500),
+                }
+            },
+            None,
+            configs.REST_NOVA_MICROVERSION_2_93,
+            metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_FLAVOR_EXCEPTION,
+            ApiType.REST,
+            '2.93',
+            id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            None,
+            {
+                'http_error': {
+                    'flavors': {
+                        'c1': MockResponse(status_code=500),
+                    }
+                }
+            },
+            configs.SDK,
+            metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_FLAVOR_EXCEPTION,
+            ApiType.SDK,
+            None,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            None,
+            {
+                'http_error': {
+                    'flavors': {
+                        'c1': MockResponse(status_code=500),
+                    }
+                }
+            },
+            configs.SDK_NOVA_MICROVERSION_2_93,
+            metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_FLAVOR_EXCEPTION,
+            ApiType.SDK,
+            '2.93',
+            id='api sdk microversion 2.93',
+        ),
+    ],
+    indirect=['mock_http_get', 'connection_compute'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_server_flavors_exception(
+    aggregator, check, dd_run_check, mock_http_get, connection_compute, metrics, api_type, microversion
+):
+    dd_run_check(check)
+    for metric in metrics:
+        aggregator.assert_metric(
+            metric['name'],
+            count=metric.get('count'),
+            value=metric.get('value'),
+            tags=metric.get('tags'),
+        )
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, _ = call
+            args_list += list(args)
+        assert (
+            args_list.count(
+                'http://127.0.0.1:8774/compute/v2.1/servers/5102fbbf-7156-48dc-8355-af7ab992266f/diagnostics'
+            )
+            == 1
+        )
+    if api_type == ApiType.SDK:
+        assert connection_compute.get_server_diagnostics.call_count == 11
+        assert (
+            connection_compute.get_server_diagnostics.call_args_list.count(
+                mock.call('5102fbbf-7156-48dc-8355-af7ab992266f', microversion=microversion)
+            )
+            == 1
+        )
+
+
+@pytest.mark.parametrize(
+    ('instance', 'metrics', 'api_type', 'microversion', 'get_flavor_calls'),
+    [
+        pytest.param(
+            configs.REST_DEMO_SERVERS_FLAVORS_FALSE,
+            metrics.COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_DEFAULT,
+            ApiType.REST,
+            None,
+            3,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            configs.REST_NOVA_MICROVERSION_2_93_DEMO_SERVERS_FLAVORS_FALSE,
+            metrics.COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_2_93,
+            ApiType.REST,
+            '2.93',
+            0,
+            id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.SDK_DEMO_SERVERS_FLAVORS_FALSE,
+            metrics.COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_DEFAULT,
+            ApiType.SDK,
+            None,
+            3,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            configs.SDK_NOVA_MICROVERSION_2_93_DEMO_SERVERS_FLAVORS_FALSE,
+            metrics.COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_2_93,
+            ApiType.SDK,
+            '2.93',
+            0,
+            id='api sdk microversion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_server_disable_flavors(
+    aggregator,
+    check,
+    dd_run_check,
+    mock_http_get,
+    connection_compute,
+    metrics,
+    api_type,
+    microversion,
+    get_flavor_calls,
+):
+    dd_run_check(check)
+    for metric in metrics:
+        aggregator.assert_metric(
+            metric['name'],
+            count=metric.get('count'),
+            value=metric.get('value'),
+            tags=metric.get('tags'),
+        )
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, _ = call
+            args_list += list(args)
+        assert args_list.count('http://127.0.0.1:8774/compute/v2.1/flavors/c1') == get_flavor_calls
+    if api_type == ApiType.SDK:
+        assert (
+            connection_compute.get_flavor.call_args_list.count(mock.call('c1', microversion=microversion))
+            == get_flavor_calls
+        )
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'connection_compute', 'instance', 'metrics', 'api_type', 'microversion'),
+    [
+        pytest.param(
+            {
+                'http_error': {
                     '/compute/v2.1/servers/5102fbbf-7156-48dc-8355-af7ab992266f/diagnostics': MockResponse(
                         status_code=500
                     ),

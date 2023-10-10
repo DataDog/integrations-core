@@ -33,6 +33,9 @@ from datadog_checks.openstack_controller.metrics import (
     NOVA_SERVER_DIAGNOSTICS_NIC_DETAILS_METRICS_PREFIX,
     NOVA_SERVER_DIAGNOSTICS_NIC_DETAILS_TAGS,
     NOVA_SERVER_DIAGNOSTICS_TAGS,
+    NOVA_SERVER_FLAVOR_METRICS,
+    NOVA_SERVER_FLAVOR_METRICS_PREFIX,
+    NOVA_SERVER_FLAVOR_TAGS,
     NOVA_SERVER_METRICS,
     NOVA_SERVER_METRICS_PREFIX,
     NOVA_SERVER_TAGS,
@@ -219,23 +222,29 @@ class Compute(Component):
                 self.check.gauge(NOVA_SERVER_COUNT, 1, tags=tags + server['tags'])
                 for metric, value in server['metrics'].items():
                     self.check.gauge(metric, value, tags=tags + server['tags'])
-                self._report_server_flavor(item.get('flavor', {}).get('id'), tags + server['tags'])
+                collect_flavors = item_config.get('flavors', True) if item_config else True
+                if collect_flavors:
+                    self._report_server_flavor(item, tags + server['tags'])
                 collect_diagnostics = item_config.get('diagnostics', True) if item_config else True
                 if collect_diagnostics:
                     self._report_server_diagnostics(item['id'], tags + server['tags'])
 
     @Component.http_error()
-    def _report_server_flavor(self, flavor_id, tags):
+    def _report_server_flavor(self, server, tags):
+        flavor_id = server.get('flavor', {}).get('id')
         flavor_metrics = {}
         if flavor_id:
-            flavor = self.check.api.get_compute_flavor(flavor_id)
-            flavor_metrics['flavor'] = flavor
+            flavor_metrics = self.check.api.get_compute_flavor(flavor_id)
+        else:
+            flavor_metrics = server.get('flavor')
+        self.check.log.debug("flavor_metrics: %s", flavor_metrics)
         flavor_metrics_and_tags = get_metrics_and_tags(
             flavor_metrics,
-            tags=NOVA_SERVER_TAGS,
-            prefix=NOVA_SERVER_METRICS_PREFIX,
-            metrics=NOVA_SERVER_METRICS,
+            tags=NOVA_SERVER_FLAVOR_TAGS,
+            prefix=NOVA_SERVER_FLAVOR_METRICS_PREFIX,
+            metrics=NOVA_SERVER_FLAVOR_METRICS,
         )
+        self.check.log.debug("flavor_metrics_and_tags: %s", flavor_metrics_and_tags)
         for metric, value in flavor_metrics_and_tags['metrics'].items():
             self.check.gauge(metric, value, tags=tags + flavor_metrics_and_tags['tags'])
 
