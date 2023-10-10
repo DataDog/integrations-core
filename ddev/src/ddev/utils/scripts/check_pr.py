@@ -5,6 +5,7 @@ Running this script by itself must not use any external dependencies.
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
+from collections import defaultdict
 
 import os
 import re
@@ -47,8 +48,7 @@ def git(*args) -> str:
     return process.stdout
 
 
-def get_added_lines(git_diff: str) -> dict[str, dict[int, str]]:
-    files: dict[str, dict[int, str]] = {}
+def extract_filenames(git_diff: str) -> Iterator[str]:
     for modification in re.split(r'^diff --git ', git_diff, flags=re.MULTILINE):
         if not modification:
             continue
@@ -58,7 +58,7 @@ def get_added_lines(git_diff: str) -> dict[str, dict[int, str]]:
         # index 0000000000..089fd64579
         # --- a/file
         # +++ b/file
-        metadata, *blocks = re.split(r'^@@ ', modification, flags=re.MULTILINE)
+        metadata, *_ = re.split(r'^@@ ', modification, flags=re.MULTILINE)
         *_, before, after = metadata.strip().splitlines()
 
         # Binary files /dev/null and b/foo/archive.tar.gz differ
@@ -72,7 +72,7 @@ def get_added_lines(git_diff: str) -> dict[str, dict[int, str]]:
             else:
                 _, _, filename = line.partition(' and b/')
 
-            files[filename] = {}
+            yield filename
             continue
 
         # --- a/file
@@ -80,71 +80,40 @@ def get_added_lines(git_diff: str) -> dict[str, dict[int, str]]:
         before = before.split(maxsplit=1)[1]
         after = after.split(maxsplit=1)[1]
         filename = before[2:] if after == '/dev/null' else after[2:]
-        added = files[filename] = {}
-
-        for block in blocks:
-            # -13,3 +13,8 @@
-            info, *lines = block.splitlines()
-            # third number
-            start = int(info.split()[1].split(',')[0][1:])
-
-            removed = 0
-            for i, line in enumerate(lines, start):
-                if line.startswith('+'):
-                    added[i - removed] = line[1:]
-                elif line.startswith('-'):
-                    removed += 1
-
-    return files
+        yield filename
 
 
-def get_changelog_errors(git_diff: str, suffix: str, private: bool = False) -> list[tuple[str, int, str]]:
-    targets: dict[str, dict[str, dict[int, str]]] = {}
-    for filename, lines in get_added_lines(git_diff).items():
+
+def get_changelog_errors(git_diff: str, pr_number: int) -> list[str]:
+    targets: defaultdict[str, list[str]] = defaultdict(list)
+    for filename in extract_filenames(git_diff):
         target, _, path = filename.partition('/')
-        if not path:
-            continue
+        if path:
+            targets[target].append(path)
 
-        targets.setdefault(target, {})[path] = lines
-
-    errors: list[tuple[str, int, str]] = []
+    fragments_dir = 'changelog.d'
+    errors: list[str] = []
     for target, files in sorted(targets.items()):
         if not requires_changelog(target, iter(files)):
             continue
-
-        changelog_file = 'CHANGELOG.md'
-        if changelog_file not in files:
-            errors.append((f'{target}/{changelog_file}', 1, 'Missing changelog entry'))
+        changelog_entries = [f for f in files if f.startswith(fragments_dir)]
+        if not changelog_entries:
+            errors.append(
+                f'Package "{target}" is missing a changelog entry for the following changes:\n'
+                + '\n'.join(f'- {f}' for f in files)
+            )
             continue
-
-        added_lines = files[changelog_file]
-        line_numbers_missing_suffix = []
-        lines_with_suffix = 0
-        for line_number, line in added_lines.items():
-            if not line.startswith('* '):
-                continue
-            elif line.endswith(suffix):
-                lines_with_suffix += 1
-            else:
-                line_numbers_missing_suffix.append(line_number)
-
-        if lines_with_suffix == len(line_numbers_missing_suffix) == 0:
-            errors.append((f'{target}/{changelog_file}', 1, 'Missing changelog entry'))
-        elif not private and line_numbers_missing_suffix:
-            for line_number in line_numbers_missing_suffix:
-                errors.append(
-                    (
-                        f'{target}/{changelog_file}',
-                        line_number,
-                        f'The first line of every new changelog entry must '
-                        f'end with a link to the associated PR:\n`{suffix}`',
-                    )
-                )
+        for entry_path in changelog_entries:
+            entry_parents, entry_fname = os.path.split(entry_path)
+            entry_pr_num, _, entry_fname_rest = entry_fname.partition(".")
+            if int(entry_pr_num) != pr_number:
+                correct_entry_path = os.path.join(entry_parents, f'{pr_number}.{entry_fname_rest}')
+                errors.append(f'Please rename changelog entry file "{entry_path}" to "{correct_entry_path}"')
 
     return errors
 
 
-def changelog_impl(*, ref: str, diff_file: str, pr_file: str, private: bool) -> None:
+def changelog_impl(*, ref: str, diff_file: str, pr_file: str) -> None:
     import json
 
     on_ci = os.environ.get('GITHUB_ACTIONS') == 'true'
@@ -156,29 +125,23 @@ def changelog_impl(*, ref: str, diff_file: str, pr_file: str, private: bool) -> 
             pr = json.loads(f.read())['pull_request']
 
         pr_number = pr['number']
-        pr_url = pr['html_url']
         pr_labels = [label['name'] for label in pr['labels']]
     else:
         git_diff = git('diff', f'{ref}...')
         pr_number = 1
-        pr_url = f'https://github.com/DataDog/integrations-core/pull/{pr_number}'
         pr_labels = []
 
     if 'changelog/no-changelog' in pr_labels:
         print('No changelog entries required (changelog/no-changelog label found)')
         return
 
-    errors = get_changelog_errors(git_diff, changelog_entry_suffix(pr_number, pr_url), private=private)
+    errors = get_changelog_errors(git_diff, pr_number)
     if not errors:
         return
-    elif os.environ.get('GITHUB_ACTIONS') == 'true':
-        for relative_path, line_number, message in errors:
-            message = '%0A'.join(message.splitlines())
-            print(f'::error file={relative_path},line={line_number}::{message}')
-    else:
-        for relative_path, line_number, message in errors:
-            print(f'{relative_path}, line {line_number}: {message}')
-
+    for message in errors:
+        formatted = '%0A'.join(message.splitlines()) if on_ci else message
+        print(f'{formatted}\n')
+    print('Please run `ddev release changelog new` to add missing changelog entries.')
     sys.exit(1)
 
 
@@ -187,7 +150,6 @@ def changelog_command(subparsers) -> None:
     parser.add_argument('--ref', default='origin/master')
     parser.add_argument('--diff-file')
     parser.add_argument('--pr-file')
-    parser.add_argument('--private', action='store_true')
     parser.set_defaults(func=changelog_impl)
 
 
