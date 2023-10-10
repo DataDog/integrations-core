@@ -34,7 +34,7 @@
 * Fix sqlserver file stats metrics for Azure SQL DB ([#15695](https://github.com/DataDog/integrations-core/pull/15695))
 * Fix calculation for performance counters that require a corresponding [base counter type](https://learn.microsoft.com/en-us/windows/win32/wmisdk/base-counter-types) which were previously emitting a constant 100% value (such as `sqlserver.buffer.cache_hit_ratio`). ([#15846](https://github.com/DataDog/integrations-core/pull/15846))
 
-## 14.0.0 / 2023-08-18
+## 14.0.0 / 2023-08-18 / Agent 7.48.0
 
 ***Changed***:
 
