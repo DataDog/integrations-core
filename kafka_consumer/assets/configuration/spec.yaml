@@ -104,6 +104,24 @@ files:
         value:
           type: boolean
           example: false
+      - name: consumer_queued_max_messages_kbytes
+        description: |
+          The consumer very aggressively caches messages in the background (tuned for very high throughput).
+          To reduce memory usage, tune down queued.max.messages.kbytes (maximum cache size per partition).
+          Override the kafka default to 1MB for the integration check to optimize
+          memory consumption to avoid potential out of memory (OOM) kill. (Default setting is 1GB per Kafka client)
+        value:
+          type: integer
+          example: 1024
+      - name: close_admin_client
+        description: |
+          Release AdminClient at the end of execution for garbage collection. Originally, we kept the same AdminClient 
+          running over the entire life of the check. By deallocating the AdminClient after the check run, we should free 
+          up any memory used in the client, although the performance of the check run would be slower (since we will 
+          need to reconnect with a new client). Set this config option to false to improve performance.
+        value:
+          type: boolean
+          example: true
       - name: monitor_all_broker_highwatermarks
         description: |
           Setting monitor_all_broker_highwatermarks to `true` tells the check to
