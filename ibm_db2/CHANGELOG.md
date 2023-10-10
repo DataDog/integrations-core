@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add option to control the connection timeout ([#14110](https://github.com/DataDog/integrations-core/pull/14110))
+
 ## 2.0.0 / 2023-08-10
 
 ***Changed***:
