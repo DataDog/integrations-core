@@ -1292,3 +1292,68 @@ def test_server_diagnostics_exception(
             )
             == 1
         )
+
+
+@pytest.mark.parametrize(
+    ('instance', 'metrics', 'api_type', 'microversion'),
+    [
+        pytest.param(
+            configs.REST_DEMO_SERVERS_DIAGNOSTICS_FALSE,
+            metrics.COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_DEFAULT,
+            ApiType.REST,
+            None,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            configs.REST_NOVA_MICROVERSION_2_93_DEMO_SERVERS_DIAGNOSTICS_FALSE,
+            metrics.COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_2_93,
+            ApiType.REST,
+            '2.93',
+            id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.SDK_DEMO_SERVERS_DIAGNOSTICS_FALSE,
+            metrics.COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_DEFAULT,
+            ApiType.SDK,
+            None,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            configs.SDK_NOVA_MICROVERSION_2_93_DEMO_SERVERS_DIAGNOSTICS_FALSE,
+            metrics.COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_2_93,
+            ApiType.SDK,
+            '2.93',
+            id='api sdk microversion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_server_disable_diagnostics(
+    aggregator, check, dd_run_check, mock_http_get, connection_compute, metrics, api_type, microversion
+):
+    dd_run_check(check)
+    for metric in metrics:
+        aggregator.assert_metric(
+            metric['name'],
+            count=metric.get('count'),
+            value=metric.get('value'),
+            tags=metric.get('tags'),
+        )
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, _ = call
+            args_list += list(args)
+        assert (
+            args_list.count(
+                'http://127.0.0.1:8774/compute/v2.1/servers/67ca710a-e73f-4801-a12f-d0c55ccb8955/diagnostics'
+            )
+            == 0
+        )
+    if api_type == ApiType.SDK:
+        assert (
+            connection_compute.get_server_diagnostics.call_args_list.count(
+                mock.call('67ca710a-e73f-4801-a12f-d0c55ccb8955', microversion=microversion)
+            )
+            == 0
+        )

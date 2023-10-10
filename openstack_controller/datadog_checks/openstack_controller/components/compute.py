@@ -220,7 +220,9 @@ class Compute(Component):
                 for metric, value in server['metrics'].items():
                     self.check.gauge(metric, value, tags=tags + server['tags'])
                 self._report_server_flavor(item.get('flavor', {}).get('id'), tags + server['tags'])
-                self._report_server_diagnostics(item['id'], tags + server['tags'])
+                collect_diagnostics = item_config.get('diagnostics', True) if item_config else True
+                if collect_diagnostics:
+                    self._report_server_diagnostics(item['id'], tags + server['tags'])
 
     @Component.http_error()
     def _report_server_flavor(self, flavor_id, tags):
