@@ -45,6 +45,7 @@ class KafkaCheck(AgentCheck):
         except Exception:
             self.log.exception("There was a problem collecting the highwater mark offsets.")
             # Unlike consumer offsets, fail immediately because we can't calculate consumer lag w/o highwater_offsets
+            self.client.close_admin_client()
             raise
 
         total_contexts = len(consumer_offsets) + len(highwater_offsets)
@@ -67,6 +68,7 @@ class KafkaCheck(AgentCheck):
         self.report_consumer_offsets_and_lag(
             consumer_offsets, highwater_offsets, self._context_limit - len(highwater_offsets)
         )
+        self.client.close_admin_client()
 
     def report_highwater_offsets(self, highwater_offsets, contexts_limit):
         """Report the broker highwater offsets."""
@@ -148,7 +150,6 @@ class KafkaCheck(AgentCheck):
                 self.log.warning(msg, consumer_group, topic, partition)
                 self.client.request_metadata_update()  # force metadata update on next poll()
         self.log.debug('%s consumer offsets reported', reported_contexts)
-        self.client.close_admin_client()
 
     def send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
         """Emit an event to the Datadog Event Stream."""

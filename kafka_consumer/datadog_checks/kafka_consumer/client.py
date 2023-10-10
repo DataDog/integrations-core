@@ -14,7 +14,7 @@ class KafkaClient:
         self.config = config
         self.log = log
         self._kafka_client = None
-        self.topics_cache = {}
+        self.topic_partition_cache = {}
 
     @property
     def kafka_client(self):
@@ -35,7 +35,7 @@ class KafkaClient:
             "bootstrap.servers": self.config._kafka_connect_str,
             "group.id": consumer_group,
             "enable.auto.commit": False,  # To avoid offset commit to broker during close
-            "queued.max.messages.kbytes": 1024,  # https://github.com/confluentinc/confluent-kafka-python/issues/759
+            "queued.max.messages.kbytes": self.config._consumer_queued_max_messages_kbytes,
         }
         config.update(self.__get_authentication_config())
 
@@ -154,8 +154,8 @@ class KafkaClient:
         return highwater_offsets
 
     def get_partitions_for_topic(self, topic):
-        if self.topics_cache.get(topic):
-            return self.topics_cache.get(topic)
+        if partitions := self.topic_partition_cache.get(topic):
+            return partitions
 
         try:
             cluster_metadata = self.kafka_client.list_topics(topic, timeout=self.config._request_timeout)
@@ -165,7 +165,7 @@ class KafkaClient:
         else:
             topic_metadata = cluster_metadata.topics[topic]
             partitions = list(topic_metadata.partitions.keys())
-            self.topics_cache[topic] = partitions
+            self.topic_partition_cache[topic] = partitions
             return partitions
 
     def request_metadata_update(self):
