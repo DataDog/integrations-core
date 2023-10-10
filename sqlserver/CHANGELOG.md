@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 15.0.2 / 2023-10-10
+
 ***Fixed***:
 
 * Properly decode query_hash when statement_text is None ([#15974](https://github.com/DataDog/integrations-core/pull/15974))
