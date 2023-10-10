@@ -181,6 +181,13 @@ DATABASE_METRICS = [
     ('sqlserver.database.backup_count', 'msdb.dbo.backupset', 'backup_set_id_count'),
 ]
 
+DATABASE_INDEX_METRICS = [
+    ('sqlserver.index.user_seeks', 'sys.dm_db_index_usage_stats', 'user_seeks'),
+    ('sqlserver.index.user_scans', 'sys.dm_db_index_usage_stats', 'user_scans'),
+    ('sqlserver.index.user_lookups', 'sys.dm_db_index_usage_stats', 'user_lookups'),
+    ('sqlserver.index.user_updates', 'sys.dm_db_index_usage_stats', 'user_updates'),
+]
+
 DATABASE_FRAGMENTATION_METRICS = [
     (
         'sqlserver.database.avg_fragmentation_in_percent',

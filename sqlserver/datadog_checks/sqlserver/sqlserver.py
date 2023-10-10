@@ -20,6 +20,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
+from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
 from datadog_checks.sqlserver.utils import Database, parse_sqlserver_major_version
 
 try:
@@ -40,6 +41,7 @@ from datadog_checks.sqlserver.const import (
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
     DATABASE_FRAGMENTATION_METRICS,
+    DATABASE_INDEX_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DATABASE_SERVICE_CHECK_NAME,
@@ -125,8 +127,10 @@ class SQLServer(AgentCheck):
         # DBM
         self.dbm_enabled = self.instance.get('dbm', False)
         self.statement_metrics_config = self.instance.get('query_metrics', {}) or {}
+        self.procedure_metrics_config = self.instance.get('procedure_metrics', {}) or {}
         self.settings_config = self.instance.get('collect_settings', {}) or {}
         self.statement_metrics = SqlserverStatementMetrics(self)
+        self.procedure_metrics = SqlserverProcedureMetrics(self)
         self.sql_metadata = SqlserverMetadata(self)
         self.activity_config = self.instance.get('query_activity', {}) or {}
         self.activity = SqlserverActivity(self)
@@ -196,6 +200,7 @@ class SQLServer(AgentCheck):
 
     def cancel(self):
         self.statement_metrics.cancel()
+        self.procedure_metrics.cancel()
         self.activity.cancel()
         self.sql_metadata.cancel()
 
@@ -519,7 +524,10 @@ class SQLServer(AgentCheck):
                     )
 
         # Load database statistics
-        for name, table, column in DATABASE_METRICS:
+        db_stats_to_collect = list(DATABASE_METRICS)
+        if is_affirmative(self.instance.get('include_index_usage_metrics', True)):
+            db_stats_to_collect.extend(DATABASE_INDEX_METRICS)
+        for name, table, column in db_stats_to_collect:
             # include database as a filter option
             db_names = [d.name for d in self.databases] or [
                 self.instance.get('database', self.connection.DEFAULT_DATABASE)
@@ -780,6 +788,7 @@ class SQLServer(AgentCheck):
             self._send_database_instance_metadata()
             if self.dbm_enabled:
                 self.statement_metrics.run_job_loop(self.tags)
+                self.procedure_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
                 self.sql_metadata.run_job_loop(self.tags)
         else:

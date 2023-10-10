@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.7.0 / 2023-09-29
+
 ***Added***:
 
 * Add goroutine_by_scheduling_operation metric to kube_scheduler check ([#15697](https://github.com/DataDog/integrations-core/pull/15697))

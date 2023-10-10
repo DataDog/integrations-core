@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 5.1.1 / 2023-09-29
+
 ***Fixed***:
 
 * Trigger tests on JMX metrics.yaml updates ([#15877](https://github.com/DataDog/integrations-core/pull/15877))

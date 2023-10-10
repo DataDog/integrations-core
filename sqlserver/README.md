@@ -24,6 +24,8 @@ _Server Properties_ -> _Security_ -> _SQL Server and Windows Authentication mode
 
 **Note**: To install Database Monitoring for SQL Server, select your hosting solution on the [documentation site](https://docs.datadoghq.com/database_monitoring/#sqlserver) for instructions.
 
+Supported versions of SQL Server for the SQL Server check are the same as for Database Monitoring. Visit the [Setting up SQL Server page](https://docs.datadoghq.com/database_monitoring/setup_sql_server/) to see the currently supported versions under the **Self-hosted** heading.
+
 Proceed with the following steps in this guide only if you are installing the standard integration alone.
 
 1. Create a read-only login to connect to your server:

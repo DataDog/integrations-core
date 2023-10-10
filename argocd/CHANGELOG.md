@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 2.1.0 / 2023-09-29
+
 ***Added***:
 
 * Collect metrics for ArgoCD ApplicationSet ([#15308](https://github.com/DataDog/integrations-core/pull/15308))

@@ -41,6 +41,7 @@ GO
 USE datadog_test;
 CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));
 INSERT INTO datadog_test.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
+CREATE CLUSTERED INDEX thingsindex ON datadog_test.dbo.ϑings (name);
 CREATE USER bob FOR LOGIN bob;
 CREATE USER fred FOR LOGIN fred;
 GO

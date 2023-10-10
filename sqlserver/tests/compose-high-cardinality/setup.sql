@@ -148,6 +148,7 @@ GO
 -- correctly support unicode throughout the integration.
 CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));
 INSERT INTO datadog_test.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
+CREATE CLUSTERED INDEX thingsindex ON datadog_test.dbo.ϑings (name);
 
 -- Table variables
 DECLARE @table_prefix VARCHAR(100) = 'CREATE TABLE datadog_test.dbo.'
