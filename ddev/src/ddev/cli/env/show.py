@@ -21,7 +21,7 @@ def show(app: Application, *, intg_name: str | None, environment: str | None, fo
     Show active or available environments.
     """
     from ddev.e2e.config import EnvDataStorage
-    from ddev.e2e.constants import DEFAULT_AGENT_TYPE
+    from ddev.e2e.constants import DEFAULT_AGENT_TYPE, E2EMetadata
 
     storage = EnvDataStorage(app.data_dir)
 
@@ -37,7 +37,7 @@ def show(app: Application, *, intg_name: str | None, environment: str | None, fo
                 metadata = env_data.read_metadata()
 
                 columns['Name'][i] = name
-                columns['Agent type'][i] = metadata.get('agent_type', DEFAULT_AGENT_TYPE)
+                columns['Agent type'][i] = metadata.get(E2EMetadata.ENV_VARS, DEFAULT_AGENT_TYPE)
 
             app.display_table(active_integration, columns, show_lines=True, force_ascii=force_ascii)
     # Display active and available environments for a specific integration
@@ -54,7 +54,7 @@ def show(app: Application, *, intg_name: str | None, environment: str | None, fo
             metadata = env_data.read_metadata()
 
             active_columns['Name'][i] = name
-            active_columns['Agent type'][i] = metadata.get('agent_type', DEFAULT_AGENT_TYPE)
+            active_columns['Agent type'][i] = metadata.get(E2EMetadata.ENV_VARS, DEFAULT_AGENT_TYPE)
 
         with integration.path.as_cwd():
             environments = json.loads(
@@ -81,7 +81,7 @@ def show(app: Application, *, intg_name: str | None, environment: str | None, fo
             app.abort(f'Environment `{environment}` for integration `{integration.name}` is not running')
 
         metadata = env_data.read_metadata()
-        agent_type = metadata.get('agent_type', DEFAULT_AGENT_TYPE)
+        agent_type = metadata.get(E2EMetadata.ENV_VARS, DEFAULT_AGENT_TYPE)
         agent = get_agent_interface(agent_type)(app.platform, integration, environment, metadata, env_data.config_file)
 
         app.display_pair('Agent type', agent_type)

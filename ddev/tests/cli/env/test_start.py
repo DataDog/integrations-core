@@ -6,7 +6,7 @@ import os
 import pytest
 
 from ddev.e2e.config import EnvDataStorage
-from ddev.e2e.constants import DEFAULT_DOGSTATSD_PORT, E2EEnvVars
+from ddev.e2e.constants import DEFAULT_DOGSTATSD_PORT, E2EEnvVars, E2EMetadata
 from ddev.utils.fs import Path
 from ddev.utils.structures import EnvVars
 
@@ -366,7 +366,7 @@ def test_env_vars(ddev, helpers, data_dir, write_result_file, mocker):
 
 
 def test_logs_detection(ddev, helpers, data_dir, write_result_file, mocker):
-    metadata = {'e2e_env_vars': {f'{E2EEnvVars.LOGS_DIR_PREFIX}1': 'path'}}
+    metadata = {E2EMetadata.ENV_VARS: {f'{E2EEnvVars.LOGS_DIR_PREFIX}1': 'path'}}
     config = {}
     mocker.patch('subprocess.run', side_effect=write_result_file({'metadata': metadata, 'config': config}))
     start = mocker.patch('ddev.e2e.agent.docker.DockerAgent.start')

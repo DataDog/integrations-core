@@ -69,6 +69,7 @@ def test_command(
     from ddev.cli.env.stop import stop
     from ddev.cli.test import test
     from ddev.e2e.config import EnvDataStorage
+    from ddev.e2e.constants import E2EMetadata
     from ddev.utils.ci import running_in_ci
     from ddev.utils.structures import EnvVars
 
@@ -128,7 +129,7 @@ def test_command(
         env_data = storage.get(integration.name, env_name)
         metadata = env_data.read_metadata()
         try:
-            with EnvVars(metadata.get('e2e_env_vars', {})):
+            with EnvVars(metadata.get(E2EMetadata.ENV_VARS, {})):
                 ctx.invoke(
                     test, target_spec=f'{intg_name}:{env_name}', args=args, junit=junit, hide_header=True, e2e=True
                 )

@@ -23,7 +23,7 @@ def shell(app: Application, *, intg_name: str, environment: str):
 
     from ddev.e2e.agent import get_agent_interface
     from ddev.e2e.config import EnvDataStorage
-    from ddev.e2e.constants import DEFAULT_AGENT_TYPE
+    from ddev.e2e.constants import DEFAULT_AGENT_TYPE, E2EMetadata
 
     integration = app.repo.integrations.get(intg_name)
     env_data = EnvDataStorage(app.data_dir).get(integration.name, environment)
@@ -32,7 +32,7 @@ def shell(app: Application, *, intg_name: str, environment: str):
         app.abort(f'Environment `{environment}` for integration `{integration.name}` is not running')
 
     metadata = env_data.read_metadata()
-    agent_type = metadata.get('agent_type', DEFAULT_AGENT_TYPE)
+    agent_type = metadata.get(E2EMetadata.ENV_VARS, DEFAULT_AGENT_TYPE)
     agent = get_agent_interface(agent_type)(app.platform, integration, environment, metadata, env_data.config_file)
 
     try:

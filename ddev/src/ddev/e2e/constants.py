@@ -11,3 +11,8 @@ class E2EEnvVars:
     PARENT_PYTHON = 'DDEV_E2E_PYTHON_PATH'
     RESULT_FILE = 'DDEV_E2E_RESULT_FILE'
     LOGS_DIR_PREFIX = 'DDEV_E2E_ENV_TEMP_DIR_DD_LOG_'
+
+
+class E2EMetadata:
+    AGENT_TYPE = 'agent_type'
+    ENV_VARS = 'e2e_env_vars'

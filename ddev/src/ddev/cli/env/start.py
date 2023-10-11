@@ -62,7 +62,7 @@ def start(
 
     from ddev.e2e.agent import get_agent_interface
     from ddev.e2e.config import EnvDataStorage
-    from ddev.e2e.constants import DEFAULT_AGENT_TYPE, E2EEnvVars
+    from ddev.e2e.constants import DEFAULT_AGENT_TYPE, E2EEnvVars, E2EMetadata
     from ddev.e2e.run import E2EEnvironmentRunner
     from ddev.utils.fs import Path, temp_directory
 
@@ -126,7 +126,7 @@ def start(
     config = result['config']
     env_data.write_config(config)
 
-    agent_type = metadata.get('agent_type', DEFAULT_AGENT_TYPE)
+    agent_type = metadata.get(E2EMetadata.ENV_VARS, DEFAULT_AGENT_TYPE)
     agent = get_agent_interface(agent_type)(app.platform, integration, environment, metadata, env_data.config_file)
 
     if not agent_build:
@@ -161,7 +161,7 @@ def start(
 
 
 def _get_agent_env_vars(org_config, metadata, extra_env_vars, dogstatsd):
-    from ddev.e2e.constants import DEFAULT_DOGSTATSD_PORT, E2EEnvVars
+    from ddev.e2e.constants import DEFAULT_DOGSTATSD_PORT, E2EEnvVars, E2EMetadata
 
     # Use the environment variables defined by tests as defaults so tooling can override them
     env_vars: dict[str, str] = metadata.get('env_vars', {}).copy()
@@ -188,7 +188,7 @@ def _get_agent_env_vars(org_config, metadata, extra_env_vars, dogstatsd):
         env_vars['DD_DOGSTATSD_METRICS_STATS_ENABLE'] = 'true'
 
     # Enable logs Agent by default if the environment is mounting logs
-    if any(ev.startswith(E2EEnvVars.LOGS_DIR_PREFIX) for ev in metadata.get('e2e_env_vars', {})):
+    if any(ev.startswith(E2EEnvVars.LOGS_DIR_PREFIX) for ev in metadata.get(E2EMetadata.ENV_VARS, {})):
         env_vars.setdefault('DD_LOGS_ENABLED', 'true')
 
     return env_vars
