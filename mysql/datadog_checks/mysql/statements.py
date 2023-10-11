@@ -210,6 +210,12 @@ class MySQLStatementMetrics(DBMAsyncJob):
                 obfuscated_statement = statement['query'] if row['digest_text'] is not None else None
             except Exception as e:
                 self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['digest_text'], e)
+                self._check.count(
+                    "dd.mysql.statements.error",
+                    1,
+                    tags=self._tags + ["error:sql-obfuscate"] + self._check._get_debug_tags(),
+                    hostname=self._check.resolved_hostname,
+                )
                 continue
 
             normalized_row['digest_text'] = obfuscated_statement

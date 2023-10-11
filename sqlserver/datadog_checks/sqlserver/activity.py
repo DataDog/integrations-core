@@ -297,6 +297,11 @@ class SqlserverActivity(DBMAsyncJob):
             else:
                 self.log.debug("Failed to obfuscate query | err=[%s]", e)
             obfuscated_statement = "ERROR: failed to obfuscate"
+            self.check.count(
+                "dd.sqlserver.activity.error",
+                1,
+                **self.check.debug_stats_kwargs(tags=["error:obfuscate-query-{}".format(type(e))])
+            )
         row = self._sanitize_row(row, obfuscated_statement)
         return row
 
