@@ -3,6 +3,129 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+NOVA_QUOTA_SET_METRICS = {
+    'openstack.nova.quota_set.cores',
+    'openstack.nova.quota_set.fixed_ips',
+    'openstack.nova.quota_set.floating_ips',
+    'openstack.nova.quota_set.injected_file_content_bytes',
+    'openstack.nova.quota_set.injected_file_path_bytes',
+    'openstack.nova.quota_set.injected_files',
+    'openstack.nova.quota_set.instances',
+    'openstack.nova.quota_set.key_pairs',
+    'openstack.nova.quota_set.metadata_items',
+    'openstack.nova.quota_set.ram',
+    'openstack.nova.quota_set.security_group_rules',
+    'openstack.nova.quota_set.security_groups',
+    'openstack.nova.quota_set.server_group_members',
+    'openstack.nova.quota_set.server_groups',
+}
+
+NOVA_SERVER_DIAGNOSTIC_DISK_DETAILS_METRICS = {
+    'openstack.nova.server.diagnostic.disk_details.read_bytes',
+    'openstack.nova.server.diagnostic.disk_details.read_requests',
+    'openstack.nova.server.diagnostic.disk_details.write_bytes',
+    'openstack.nova.server.diagnostic.disk_details.write_requests',
+    'openstack.nova.server.diagnostic.disk_details.errors_count',
+}
+
+NOVA_SERVER_DIAGNOSTIC_CPU_DETAILS_METRICS = {
+    'openstack.nova.server.diagnostic.cpu_details.time',
+    'openstack.nova.server.diagnostic.cpu_details.utilisation',
+}
+
+NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_METRICS = {
+    'openstack.nova.server.diagnostic.nic_details.rx_drop',
+    'openstack.nova.server.diagnostic.nic_details.rx_errors',
+    'openstack.nova.server.diagnostic.nic_details.rx_octets',
+    'openstack.nova.server.diagnostic.nic_details.rx_packets',
+    'openstack.nova.server.diagnostic.nic_details.rx_rate',
+    'openstack.nova.server.diagnostic.nic_details.tx_drop',
+    'openstack.nova.server.diagnostic.nic_details.tx_errors',
+    'openstack.nova.server.diagnostic.nic_details.tx_octets',
+    'openstack.nova.server.diagnostic.nic_details.tx_packets',
+    'openstack.nova.server.diagnostic.nic_details.tx_rate',
+}
+
+NOVA_SERVER_DIAGNOSTIC_METRICS = {
+    'openstack.nova.server.diagnostic.cpu0_time',
+    'openstack.nova.server.diagnostic.vda_read_req',
+    'openstack.nova.server.diagnostic.vda_read',
+    'openstack.nova.server.diagnostic.vda_write_req',
+    'openstack.nova.server.diagnostic.vda_write',
+    'openstack.nova.server.diagnostic.vda_errors',
+    'openstack.nova.server.diagnostic.memory',
+    'openstack.nova.server.diagnostic.memory_actual',
+    'openstack.nova.server.diagnostic.memory_swap_in',
+    'openstack.nova.server.diagnostic.memory_swap_out',
+    'openstack.nova.server.diagnostic.memory_major_fault',
+    'openstack.nova.server.diagnostic.memory_minor_fault',
+    'openstack.nova.server.diagnostic.memory_unused',
+    'openstack.nova.server.diagnostic.memory_available',
+    'openstack.nova.server.diagnostic.memory_usable',
+    'openstack.nova.server.diagnostic.memory_last_update',
+    'openstack.nova.server.diagnostic.memory_disk_caches',
+    'openstack.nova.server.diagnostic.memory_hugetlb_pgalloc',
+    'openstack.nova.server.diagnostic.memory_hugetlb_pgfail',
+    'openstack.nova.server.diagnostic.memory_rss',
+    'openstack.nova.server.diagnostic.memory_details.maximum',
+    'openstack.nova.server.diagnostic.memory_details.used',
+    'openstack.nova.server.diagnostic.uptime',
+    'openstack.nova.server.diagnostic.num_cpus',
+    'openstack.nova.server.diagnostic.num_nics',
+    'openstack.nova.server.diagnostic.num_disks',
+}
+
+NOVA_SERVER_FLAVOR_METRICS = {
+    'openstack.nova.server.flavor.vcpus',
+    'openstack.nova.server.flavor.ram',
+    'openstack.nova.server.flavor.disk',
+    'openstack.nova.server.flavor.os_flv_ext_data:ephemeral',
+    'openstack.nova.server.flavor.ephemeral',
+    'openstack.nova.server.flavor.swap',
+    'openstack.nova.server.flavor.rxtx_factor',
+}
+
+NOVA_SERVER_METRICS = {
+    'openstack.nova.server.count',
+    'openstack.nova.server.active',
+    'openstack.nova.server.error',
+}
+
+NOVA_ALL_DIAGNOSTIC_METRICS = (
+    NOVA_SERVER_DIAGNOSTIC_METRICS
+    | NOVA_SERVER_DIAGNOSTIC_DISK_DETAILS_METRICS
+    | NOVA_SERVER_DIAGNOSTIC_CPU_DETAILS_METRICS
+    | NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_METRICS
+)
+
+NOVA_ALL_SERVER_METRICS = NOVA_SERVER_METRICS | NOVA_SERVER_FLAVOR_METRICS | NOVA_ALL_DIAGNOSTIC_METRICS
+
+NOVA_PROJECT_METRICS = NOVA_QUOTA_SET_METRICS | NOVA_ALL_SERVER_METRICS
+
+NEUTRON_NETWORK_METRICS = {
+    'openstack.neutron.network.admin_state_up',
+    'openstack.neutron.network.l2_adjacency',
+    'openstack.neutron.network.mtu',
+    'openstack.neutron.network.port_security_enabled',
+    'openstack.neutron.network.shared',
+    'openstack.neutron.network.vlan_transparent',
+    'openstack.neutron.network.is_default',
+}
+
+NEUTRON_QUOTA_METRICS = {
+    'openstack.neutron.quota.floatingip',
+    'openstack.neutron.quota.network',
+    'openstack.neutron.quota.port',
+    'openstack.neutron.quota.rbac_policy',
+    'openstack.neutron.quota.router',
+    'openstack.neutron.quota.security_group',
+    'openstack.neutron.quota.security_group_rule',
+    'openstack.neutron.quota.subnet',
+    'openstack.neutron.quota.subnetpool',
+}
+
+NEUTRON_PROJECT_METRICS = NEUTRON_NETWORK_METRICS | NEUTRON_QUOTA_METRICS
+
 COMPUTE_SERVICES_NOVA_MICROVERSION_DEFAULT = [
     {
         'name': 'openstack.nova.service.count',

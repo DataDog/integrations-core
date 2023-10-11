@@ -9,7 +9,6 @@ import os
 import mock
 import pytest
 
-import datadog_checks.openstack_controller.metrics as dev_metrics
 import tests.configs as configs
 import tests.metrics as metrics
 from datadog_checks.base import AgentCheck
@@ -796,25 +795,183 @@ def test_hypervisors_metrics(aggregator, check, dd_run_check, metrics):
         )
 
 
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            configs.REST_NOVA_MICROVERSION_2_93,
+            id='api rest nova microverion 2.93',
+        ),
+        pytest.param(
+            configs.SDK,
+            id='api sdk',
+        ),
+        pytest.param(
+            configs.SDK_NOVA_MICROVERSION_2_93,
+            id='api sdk nova microverion 2.93',
+        ),
+    ],
+)
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_disable_compute_collect_for_all_projects(aggregator, dd_run_check, openstack_controller_check):
-    instance = {
-        'keystone_server_url': 'http://127.0.0.1:8080/identity',
-        'username': 'admin',
-        'password': 'password',
-        'use_legacy_check_version': False,
+def test_disable_compute_collect_for_all_projects(aggregator, dd_run_check, instance, openstack_controller_check):
+    instance = instance | {
         "projects": {
             "include": [
                 {
                     "name": ".*",
-                    "compute": {"collect": False},
+                    "compute": {
+                        "collect": False,
+                    },
                 },
             ],
         },
     }
     check = openstack_controller_check(instance)
     dd_run_check(check)
-    for metric in dev_metrics.NOVA_PROJECT_METRICS:
+    for metric in metrics.NOVA_PROJECT_METRICS:
+        aggregator.assert_metric(metric, count=0)
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            configs.REST_NOVA_MICROVERSION_2_93,
+            id='api rest nova microverion 2.93',
+        ),
+        pytest.param(
+            configs.SDK,
+            id='api sdk',
+        ),
+        pytest.param(
+            configs.SDK_NOVA_MICROVERSION_2_93,
+            id='api sdk nova microverion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_disable_servers_collect_for_all_projects(aggregator, dd_run_check, instance, openstack_controller_check):
+    instance = instance | {
+        "projects": {
+            "include": [
+                {
+                    "name": ".*",
+                    "compute": {
+                        "servers": {
+                            "collect": False,
+                        },
+                    },
+                },
+            ],
+        },
+    }
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    for metric in metrics.NOVA_ALL_SERVER_METRICS:
+        aggregator.assert_metric(metric, count=0)
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            configs.REST_NOVA_MICROVERSION_2_93,
+            id='api rest nova microverion 2.93',
+        ),
+        pytest.param(
+            configs.SDK,
+            id='api sdk',
+        ),
+        pytest.param(
+            configs.SDK_NOVA_MICROVERSION_2_93,
+            id='api sdk nova microverion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_disable_flavors_collect_for_all_servers(aggregator, dd_run_check, instance, openstack_controller_check):
+    instance = instance | {
+        "projects": {
+            "include": [
+                {
+                    "name": ".*",
+                    "compute": {
+                        "servers": {
+                            "include": [
+                                {
+                                    "name": ".*",
+                                    "flavors": False,
+                                }
+                            ]
+                        },
+                    },
+                },
+            ],
+        },
+    }
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    for metric in metrics.NOVA_SERVER_FLAVOR_METRICS:
+        aggregator.assert_metric(metric, count=0)
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            configs.REST_NOVA_MICROVERSION_2_93,
+            id='api rest nova microverion 2.93',
+        ),
+        pytest.param(
+            configs.SDK,
+            id='api sdk',
+        ),
+        pytest.param(
+            configs.SDK_NOVA_MICROVERSION_2_93,
+            id='api sdk nova microverion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_disable_diagnostics_collect_for_all_servers(aggregator, dd_run_check, instance, openstack_controller_check):
+    instance = instance | {
+        "projects": {
+            "include": [
+                {
+                    "name": ".*",
+                    "compute": {
+                        "servers": {
+                            "include": [
+                                {
+                                    "name": ".*",
+                                    "diagnostics": False,
+                                }
+                            ]
+                        },
+                    },
+                },
+            ],
+        },
+    }
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    for metric in metrics.NOVA_ALL_DIAGNOSTIC_METRICS:
         aggregator.assert_metric(metric, count=0)
 
 

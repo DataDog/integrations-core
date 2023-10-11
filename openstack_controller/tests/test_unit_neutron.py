@@ -7,8 +7,8 @@ import os
 import mock
 import pytest
 
-import datadog_checks.openstack_controller.metrics as dev_metrics
 import tests.configs as configs
+import tests.metrics as metrics
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.openstack_controller.api.type import ApiType
@@ -162,7 +162,7 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
 def test_agents_exception(aggregator, check, dd_run_check, mock_http_get, connection_network, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.neutron.agents.count',
+        'openstack.neutron.agent.count',
         count=0,
     )
     if api_type == ApiType.REST:
@@ -192,7 +192,7 @@ def test_agents_exception(aggregator, check, dd_run_check, mock_http_get, connec
 def test_agents_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.neutron.agents.count',
+        'openstack.neutron.agent.count',
         value=1,
         tags=[
             'agent_availability_zone:',
@@ -204,7 +204,7 @@ def test_agents_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.agents.alive',
+        'openstack.neutron.agent.alive',
         value=1,
         tags=[
             'agent_availability_zone:',
@@ -216,7 +216,7 @@ def test_agents_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.agents.admin_state_up',
+        'openstack.neutron.agent.admin_state_up',
         value=1,
         tags=[
             'agent_availability_zone:',
@@ -228,7 +228,7 @@ def test_agents_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.agents.count',
+        'openstack.neutron.agent.count',
         value=1,
         tags=[
             'agent_availability_zone:',
@@ -240,7 +240,7 @@ def test_agents_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.agents.alive',
+        'openstack.neutron.agent.alive',
         value=1,
         tags=[
             'agent_availability_zone:',
@@ -252,7 +252,7 @@ def test_agents_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.agents.admin_state_up',
+        'openstack.neutron.agent.admin_state_up',
         value=1,
         tags=[
             'agent_availability_zone:',
@@ -265,13 +265,22 @@ def test_agents_metrics(aggregator, check, dd_run_check):
     )
 
 
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            configs.SDK,
+            id='api sdk',
+        ),
+    ],
+)
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_disable_network_collect_for_all_projects(aggregator, dd_run_check, openstack_controller_check):
-    instance = {
-        'keystone_server_url': 'http://127.0.0.1:8080/identity',
-        'username': 'admin',
-        'password': 'password',
-        'use_legacy_check_version': False,
+def test_disable_network_collect_for_all_projects(aggregator, dd_run_check, instance, openstack_controller_check):
+    instance = instance | {
         "projects": {
             "include": [
                 {
@@ -285,9 +294,42 @@ def test_disable_network_collect_for_all_projects(aggregator, dd_run_check, open
     }
     check = openstack_controller_check(instance)
     dd_run_check(check)
-    for metric in dev_metrics.NEUTRON_PROJECT_METRICS:
+    for metric in metrics.NEUTRON_PROJECT_METRICS:
         aggregator.assert_metric(metric, count=0)
 
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            configs.SDK,
+            id='api sdk',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_disable_networks_collect_for_all_projects(aggregator, dd_run_check, instance, openstack_controller_check):
+    instance = instance | {
+        "projects": {
+            "include": [
+                {
+                    "name": ".*",
+                    "network": {
+                        "networks": {
+                            "collect": False,
+                        },
+                    },
+                },
+            ],
+        },
+    }
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    for metric in metrics.NEUTRON_NETWORK_METRICS:
+        aggregator.assert_metric(metric, count=0)
 
 @pytest.mark.parametrize(
     ('mock_http_get', 'connection_network', 'instance', 'api_type'),
@@ -329,7 +371,7 @@ def test_disable_network_collect_for_all_projects(aggregator, dd_run_check, open
 def test_networks_exception(aggregator, check, dd_run_check, mock_http_get, connection_network, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.neutron.networks.count',
+        'openstack.neutron.network.count',
         count=0,
     )
     if api_type == ApiType.REST:
@@ -378,7 +420,7 @@ def test_networks_exception(aggregator, check, dd_run_check, mock_http_get, conn
 def test_networks_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.neutron.networks.count',
+        'openstack.neutron.network.count',
         value=1,
         tags=[
             'domain_id:default',
@@ -391,7 +433,7 @@ def test_networks_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.networks.admin_state_up',
+        'openstack.neutron.network.admin_state_up',
         value=1,
         tags=[
             'domain_id:default',
@@ -404,7 +446,7 @@ def test_networks_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.networks.mtu',
+        'openstack.neutron.network.mtu',
         value=1500,
         tags=[
             'domain_id:default',
@@ -417,7 +459,7 @@ def test_networks_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.networks.port_security_enabled',
+        'openstack.neutron.network.port_security_enabled',
         value=1,
         tags=[
             'domain_id:default',
@@ -430,7 +472,7 @@ def test_networks_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.networks.shared',
+        'openstack.neutron.network.shared',
         value=0,
         tags=[
             'domain_id:default',
@@ -443,7 +485,7 @@ def test_networks_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.networks.is_default',
+        'openstack.neutron.network.is_default',
         value=1,
         tags=[
             'domain_id:default',
@@ -456,7 +498,7 @@ def test_networks_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.networks.count',
+        'openstack.neutron.network.count',
         value=1,
         tags=[
             'domain_id:default',
@@ -469,7 +511,7 @@ def test_networks_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.networks.admin_state_up',
+        'openstack.neutron.network.admin_state_up',
         value=1,
         tags=[
             'domain_id:default',
@@ -482,7 +524,7 @@ def test_networks_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.networks.mtu',
+        'openstack.neutron.network.mtu',
         value=1442,
         tags=[
             'domain_id:default',
@@ -495,7 +537,7 @@ def test_networks_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.networks.port_security_enabled',
+        'openstack.neutron.network.port_security_enabled',
         value=1,
         tags=[
             'domain_id:default',
@@ -508,7 +550,7 @@ def test_networks_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.networks.shared',
+        'openstack.neutron.network.shared',
         value=1,
         tags=[
             'domain_id:default',
@@ -521,7 +563,7 @@ def test_networks_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.networks.count',
+        'openstack.neutron.network.count',
         value=1,
         tags=[
             'domain_id:default',
@@ -534,7 +576,7 @@ def test_networks_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.networks.admin_state_up',
+        'openstack.neutron.network.admin_state_up',
         value=1,
         tags=[
             'domain_id:default',
@@ -547,7 +589,7 @@ def test_networks_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.networks.mtu',
+        'openstack.neutron.network.mtu',
         value=1442,
         tags=[
             'domain_id:default',
@@ -560,7 +602,7 @@ def test_networks_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.networks.port_security_enabled',
+        'openstack.neutron.network.port_security_enabled',
         value=1,
         tags=[
             'domain_id:default',
@@ -573,7 +615,7 @@ def test_networks_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.networks.shared',
+        'openstack.neutron.network.shared',
         value=0,
         tags=[
             'domain_id:default',
@@ -623,15 +665,15 @@ def test_networks_metrics(aggregator, check, dd_run_check):
 def test_quotas_exception(aggregator, check, dd_run_check, mock_http_get, connection_network, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.nova.quotas.floatingip',
+        'openstack.nova.quota.floatingip',
         count=0,
     )
     aggregator.assert_metric(
-        'openstack.nova.quotas.network',
+        'openstack.nova.quota.network',
         count=0,
     )
     aggregator.assert_metric(
-        'openstack.nova.quotas.port',
+        'openstack.nova.quota.port',
         count=0,
     )
     if api_type == ApiType.REST:
@@ -675,7 +717,7 @@ def test_quotas_exception(aggregator, check, dd_run_check, mock_http_get, connec
 def test_quotas_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.neutron.quotas.floatingip',
+        'openstack.neutron.quota.floatingip',
         value=50,
         tags=[
             'domain_id:default',
@@ -685,7 +727,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.quotas.network',
+        'openstack.neutron.quota.network',
         value=100,
         tags=[
             'domain_id:default',
@@ -695,7 +737,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.quotas.port',
+        'openstack.neutron.quota.port',
         value=500,
         tags=[
             'domain_id:default',
@@ -705,7 +747,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.quotas.rbac_policy',
+        'openstack.neutron.quota.rbac_policy',
         value=10,
         tags=[
             'domain_id:default',
@@ -715,7 +757,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.quotas.floatingip',
+        'openstack.neutron.quota.floatingip',
         value=50,
         tags=[
             'domain_id:default',
@@ -725,7 +767,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.quotas.network',
+        'openstack.neutron.quota.network',
         value=100,
         tags=[
             'domain_id:default',
@@ -735,7 +777,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.quotas.port',
+        'openstack.neutron.quota.port',
         value=500,
         tags=[
             'domain_id:default',
@@ -745,7 +787,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.neutron.quotas.rbac_policy',
+        'openstack.neutron.quota.rbac_policy',
         value=10,
         tags=[
             'domain_id:default',

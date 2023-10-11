@@ -9,13 +9,13 @@ from datadog_checks.openstack_controller.metrics import (
     NEUTRON_AGENTS_METRICS,
     NEUTRON_AGENTS_METRICS_PREFIX,
     NEUTRON_AGENTS_TAGS,
-    NEUTRON_NETWORKS_COUNT,
-    NEUTRON_NETWORKS_METRICS,
-    NEUTRON_NETWORKS_METRICS_PREFIX,
-    NEUTRON_NETWORKS_TAGS,
-    NEUTRON_QUOTAS_METRICS,
-    NEUTRON_QUOTAS_METRICS_PREFIX,
-    NEUTRON_QUOTAS_TAGS,
+    NEUTRON_NETWORK_COUNT,
+    NEUTRON_NETWORK_METRICS,
+    NEUTRON_NETWORK_METRICS_PREFIX,
+    NEUTRON_NETWORK_TAGS,
+    NEUTRON_QUOTA_METRICS,
+    NEUTRON_QUOTA_METRICS_PREFIX,
+    NEUTRON_QUOTA_TAGS,
     NEUTRON_RESPONSE_TIME,
     NEUTRON_SERVICE_CHECK,
     get_metrics_and_tags,
@@ -57,19 +57,23 @@ class Network(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_networks(self, project_id, tags, project_config):
-        data = self.check.api.get_network_networks(project_id)
-        for item in data:
-            network = get_metrics_and_tags(
-                item,
-                tags=NEUTRON_NETWORKS_TAGS,
-                prefix=NEUTRON_NETWORKS_METRICS_PREFIX,
-                metrics=NEUTRON_NETWORKS_METRICS,
-            )
-            self.check.log.debug("network: %s", network)
-            self.check.gauge(NEUTRON_NETWORKS_COUNT, 1, tags=tags + network['tags'])
-            for metric, value in network['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + network['tags'])
+    def _report_networks(self, project_id, tags, component_config):
+        config_networks = component_config.get('networks', {})
+        self.check.log.debug("config_networks: %s", config_networks)
+        collect_networks = config_networks.get('collect', True)
+        if collect_networks:
+            data = self.check.api.get_network_networks(project_id)
+            for item in data:
+                network = get_metrics_and_tags(
+                    item,
+                    tags=NEUTRON_NETWORK_TAGS,
+                    prefix=NEUTRON_NETWORK_METRICS_PREFIX,
+                    metrics=NEUTRON_NETWORK_METRICS,
+                )
+                self.check.log.debug("network: %s", network)
+                self.check.gauge(NEUTRON_NETWORK_COUNT, 1, tags=tags + network['tags'])
+                for metric, value in network['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + network['tags'])
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
@@ -77,9 +81,9 @@ class Network(Component):
         item = self.check.api.get_network_quota(project_id)
         quota = get_metrics_and_tags(
             item,
-            tags=NEUTRON_QUOTAS_TAGS,
-            prefix=NEUTRON_QUOTAS_METRICS_PREFIX,
-            metrics=NEUTRON_QUOTAS_METRICS,
+            tags=NEUTRON_QUOTA_TAGS,
+            prefix=NEUTRON_QUOTA_METRICS_PREFIX,
+            metrics=NEUTRON_QUOTA_METRICS,
         )
         self.check.log.debug("quota: %s", quota)
         for metric, value in quota['metrics'].items():

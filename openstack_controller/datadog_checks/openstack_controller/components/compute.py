@@ -16,9 +16,9 @@ from datadog_checks.openstack_controller.metrics import (
     NOVA_LIMITS_METRICS,
     NOVA_LIMITS_METRICS_PREFIX,
     NOVA_LIMITS_TAGS,
-    NOVA_QUOTA_SETS_METRICS,
-    NOVA_QUOTA_SETS_METRICS_PREFIX,
-    NOVA_QUOTA_SETS_TAGS,
+    NOVA_QUOTA_SET_METRICS,
+    NOVA_QUOTA_SET_METRICS_PREFIX,
+    NOVA_QUOTA_SET_TAGS,
     NOVA_RESPONSE_TIME,
     NOVA_SERVER_COUNT,
     NOVA_SERVER_DIAGNOSTIC_CPU_DETAILS_METRICS,
@@ -166,9 +166,9 @@ class Compute(Component):
         item = self.check.api.get_compute_quota_sets(project_id)
         quota_set = get_metrics_and_tags(
             item,
-            tags=NOVA_QUOTA_SETS_TAGS,
-            prefix=NOVA_QUOTA_SETS_METRICS_PREFIX,
-            metrics=NOVA_QUOTA_SETS_METRICS,
+            tags=NOVA_QUOTA_SET_TAGS,
+            prefix=NOVA_QUOTA_SET_METRICS_PREFIX,
+            metrics=NOVA_QUOTA_SET_METRICS,
         )
         self.check.log.debug("quota_set: %s", quota_set)
         for metric, value in quota_set['metrics'].items():
