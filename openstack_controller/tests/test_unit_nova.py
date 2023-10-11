@@ -796,6 +796,7 @@ def test_hypervisors_metrics(aggregator, check, dd_run_check, metrics):
         )
 
 
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
 def test_disable_compute_collect_for_all_projects(aggregator, dd_run_check, openstack_controller_check):
     instance = {
         'keystone_server_url': 'http://127.0.0.1:8080/identity',

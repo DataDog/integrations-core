@@ -7,6 +7,7 @@ import os
 import mock
 import pytest
 
+import datadog_checks.openstack_controller.metrics as dev_metrics
 import tests.configs as configs
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
@@ -262,6 +263,30 @@ def test_agents_metrics(aggregator, check, dd_run_check):
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
+
+
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_disable_network_collect_for_all_projects(aggregator, dd_run_check, openstack_controller_check):
+    instance = {
+        'keystone_server_url': 'http://127.0.0.1:8080/identity',
+        'username': 'admin',
+        'password': 'password',
+        'use_legacy_check_version': False,
+        "projects": {
+            "include": [
+                {
+                    "name": ".*",
+                    "network": {
+                        "collect": False,
+                    },
+                },
+            ],
+        },
+    }
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    for metric in dev_metrics.NEUTRON_PROJECT_METRICS:
+        aggregator.assert_metric(metric, count=0)
 
 
 @pytest.mark.parametrize(
