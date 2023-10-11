@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Fix the manifest template file ([#15984](https://github.com/DataDog/integrations-core/pull/15984))
+
 ## 26.0.0 / 2023-10-02
 
 ***Changed***:

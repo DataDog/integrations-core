@@ -41,6 +41,7 @@ def dbm_instance(instance_complex):
     instance_complex['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     # don't need query activity for these tests
     instance_complex['query_activity'] = {'enabled': False}
+    instance_complex['collect_settings'] = {'enabled': False}
     return instance_complex
 
 

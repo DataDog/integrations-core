@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019-present
+# (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -7,7 +7,7 @@ from datadog_checks.kube_apiserver_metrics import KubeAPIServerMetricsCheck
 
 from .common import HERE
 
-OM_RESPONSE_FIXTURES = os.path.join(HERE, 'fixtures', 'metrics_1.23.0.txt')
+OM_RESPONSE_FIXTURES = os.path.join(HERE, 'fixtures', 'metrics_1.28.0.txt')
 
 customtag = "custom:tag"
 
@@ -27,7 +27,6 @@ class TestKubeAPIServerMetrics:
         'audit_event',
         'go_threads',
         'go_goroutines',
-        'etcd.db.total_size',
         'rest_client_requests_total',
         'authenticated_user_requests',
         'apiserver_request_total',
@@ -47,9 +46,9 @@ class TestKubeAPIServerMetrics:
         'admission_controller_admission_duration_seconds.count',
         'request_duration_seconds.sum',
         'request_duration_seconds.count',
-        'registered_watchers',
         'process_resident_memory_bytes',
         'process_virtual_memory_bytes',
+        'etcd.db.total_size',
         'etcd_request_duration_seconds.sum',
         'etcd_request_duration_seconds.count',
         'watch_events_sizes.sum',
@@ -63,6 +62,7 @@ class TestKubeAPIServerMetrics:
         'storage_list_evaluated_objects_total',
         'storage_list_returned_objects_total',
         'requested_deprecated_apis',
+        'kubernetes_feature_enabled',
         'aggregator_unavailable_apiservice',
         'envelope_encryption_dek_cache_fill_percent',
         'flowcontrol_current_executing_requests',

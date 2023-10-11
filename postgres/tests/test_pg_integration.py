@@ -254,8 +254,10 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
 
     # Second: keep the connection open but an unexpected error happens during check run
     orig_db = check.db
-    check.db = mock.MagicMock(spec=('closed', 'status'), closed=False, status=psycopg2.extensions.STATUS_READY)
+
+    # Second: keep the connection open but an unexpected error happens during check run
     with pytest.raises(AttributeError):
+        check.db = mock.MagicMock(side_effect=AttributeError('foo'))
         check.check(pg_instance)
     aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.CRITICAL, tags=expected_tags)
     aggregator.reset()
@@ -501,9 +503,10 @@ def test_query_timeout(integration_check, pg_instance):
     pg_instance['query_timeout'] = 1000
     check = integration_check(pg_instance)
     check._connect()
-    cursor = check.db.cursor()
     with pytest.raises(psycopg2.errors.QueryCanceled):
-        cursor.execute("select pg_sleep(2000)")
+        with check.db() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("select pg_sleep(2000)")
 
 
 @requires_over_10

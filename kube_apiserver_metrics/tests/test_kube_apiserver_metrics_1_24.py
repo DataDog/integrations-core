@@ -69,6 +69,8 @@ class TestKubeAPIServerMetrics:
         'envelope_encryption_dek_cache_fill_percent',
         'flowcontrol_current_executing_requests',
         'flowcontrol_request_concurrency_limit',
+        'flowcontrol_current_inqueue_requests',
+        'flowcontrol_dispatched_requests_total',
     ]
     COUNT_METRICS = [
         'audit_event.count',
