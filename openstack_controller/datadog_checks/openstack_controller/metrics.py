@@ -142,20 +142,20 @@ NOVA_QUOTA_SETS_TAGS = {
     'id': 'quota_id',
 }
 NOVA_QUOTA_SETS_METRICS = {
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.cores": {},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.fixed_ips": {"max_version": "2.35"},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.floating_ips": {"max_version": "2.35"},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.injected_file_content_bytes": {"max_version": "2.56"},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.injected_file_path_bytes": {"max_version": "2.56"},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.injected_files": {"max_version": "2.56"},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.instances": {},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.key_pairs": {},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.metadata_items": {},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.ram": {},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.security_group_rules": {"max_version": "2.35"},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.security_groups": {"max_version": "2.35"},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.server_group_members": {},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.server_groups": {},
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.cores",
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.fixed_ips",
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.floating_ips",
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.injected_file_content_bytes",
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.injected_file_path_bytes",
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.injected_files",
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.instances",
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.key_pairs",
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.metadata_items",
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.ram",
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.security_group_rules",
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.security_groups",
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.server_group_members",
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.server_groups",
 }
 
 NOVA_SERVER_METRICS_PREFIX = f"{NOVA_METRICS_PREFIX}.server"
@@ -167,84 +167,84 @@ NOVA_SERVER_TAGS = {
     'OS-EXT-SRV-ATTR:hypervisor_hostname': 'hypervisor',
 }
 NOVA_SERVER_METRICS = {
-    f"{NOVA_SERVER_METRICS_PREFIX}.active": {"optional": True},
-    f"{NOVA_SERVER_METRICS_PREFIX}.error": {"optional": True},
+    f"{NOVA_SERVER_METRICS_PREFIX}.active",
+    f"{NOVA_SERVER_METRICS_PREFIX}.error",
 }
 NOVA_SERVER_FLAVOR_METRICS_PREFIX = f"{NOVA_SERVER_METRICS_PREFIX}.flavor"
 NOVA_SERVER_FLAVOR_TAGS = {}
 NOVA_SERVER_FLAVOR_METRICS = {
-    f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.vcpus": {},
-    f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.ram": {},
-    f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.disk": {},
-    f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.os_flv_ext_data:ephemeral": {"optional": True},
-    f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.ephemeral": {"min_version": "2.47"},
-    f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.swap": {"optional": True},
-    f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.rxtx_factor": {"optional": True},
+    f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.vcpus",
+    f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.ram",
+    f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.disk",
+    f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.os_flv_ext_data:ephemeral",
+    f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.ephemeral",
+    f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.swap",
+    f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.rxtx_factor",
 }
-NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX = f"{NOVA_SERVER_METRICS_PREFIX}.diagnostic"
-NOVA_SERVER_DIAGNOSTICS_TAGS = {
+NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX = f"{NOVA_SERVER_METRICS_PREFIX}.diagnostic"
+NOVA_SERVER_DIAGNOSTIC_TAGS = {
     'driver': 'server_driver',
 }
-NOVA_SERVER_DIAGNOSTICS_METRICS = {
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.cpu0_time": {"max_version": "2.47"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.vda_read_req": {"max_version": "2.47"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.vda_read": {"max_version": "2.47"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.vda_write_req": {"max_version": "2.47"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.vda_write": {"max_version": "2.47"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.vda_errors": {"max_version": "2.47"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.memory": {"max_version": "2.47"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.memory_actual": {"max_version": "2.47"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.memory_swap_in": {"max_version": "2.47"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.memory_swap_out": {"max_version": "2.47"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.memory_major_fault": {"max_version": "2.47"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.memory_minor_fault": {"max_version": "2.47"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.memory_unused": {"max_version": "2.47"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.memory_available": {"max_version": "2.47"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.memory_usable": {"max_version": "2.47"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.memory_last_update": {"max_version": "2.47"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.memory_disk_caches": {"max_version": "2.47"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.memory_hugetlb_pgalloc": {"max_version": "2.47"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.memory_hugetlb_pgfail": {"max_version": "2.47"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.memory_rss": {"max_version": "2.47"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.memory_details.maximum": {"min_version": "2.48"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.memory_details.used": {"min_version": "2.48"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.uptime": {"min_version": "2.48"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.num_cpus": {"min_version": "2.48"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.num_nics": {"min_version": "2.48"},
-    f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.num_disks": {"min_version": "2.48"},
+NOVA_SERVER_DIAGNOSTIC_METRICS = {
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.cpu0_time",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.vda_read_req",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.vda_read",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.vda_write_req",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.vda_write",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.vda_errors",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.memory",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.memory_actual",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.memory_swap_in",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.memory_swap_out",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.memory_major_fault",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.memory_minor_fault",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.memory_unused",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.memory_available",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.memory_usable",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.memory_last_update",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.memory_disk_caches",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.memory_hugetlb_pgalloc",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.memory_hugetlb_pgfail",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.memory_rss",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.memory_details.maximum",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.memory_details.used",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.uptime",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.num_cpus",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.num_nics",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.num_disks",
 }
-NOVA_SERVER_DIAGNOSTICS_DISK_DETAILS_METRICS_PREFIX = f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.disk_details"
-NOVA_SERVER_DIAGNOSTICS_DISK_DETAILS_TAGS = {}
-NOVA_SERVER_DIAGNOSTICS_DISK_DETAILS_METRICS = {
-    f"{NOVA_SERVER_DIAGNOSTICS_DISK_DETAILS_METRICS_PREFIX}.read_bytes": {"min_version": "2.48"},
-    f"{NOVA_SERVER_DIAGNOSTICS_DISK_DETAILS_METRICS_PREFIX}.read_requests": {"min_version": "2.48"},
-    f"{NOVA_SERVER_DIAGNOSTICS_DISK_DETAILS_METRICS_PREFIX}.write_bytes": {"min_version": "2.48"},
-    f"{NOVA_SERVER_DIAGNOSTICS_DISK_DETAILS_METRICS_PREFIX}.write_requests": {"min_version": "2.48"},
-    f"{NOVA_SERVER_DIAGNOSTICS_DISK_DETAILS_METRICS_PREFIX}.errors_count": {"min_version": "2.48"},
+NOVA_SERVER_DIAGNOSTIC_DISK_DETAILS_METRICS_PREFIX = f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.disk_details"
+NOVA_SERVER_DIAGNOSTIC_DISK_DETAILS_TAGS = {}
+NOVA_SERVER_DIAGNOSTIC_DISK_DETAILS_METRICS = {
+    f"{NOVA_SERVER_DIAGNOSTIC_DISK_DETAILS_METRICS_PREFIX}.read_bytes",
+    f"{NOVA_SERVER_DIAGNOSTIC_DISK_DETAILS_METRICS_PREFIX}.read_requests",
+    f"{NOVA_SERVER_DIAGNOSTIC_DISK_DETAILS_METRICS_PREFIX}.write_bytes",
+    f"{NOVA_SERVER_DIAGNOSTIC_DISK_DETAILS_METRICS_PREFIX}.write_requests",
+    f"{NOVA_SERVER_DIAGNOSTIC_DISK_DETAILS_METRICS_PREFIX}.errors_count",
 }
-NOVA_SERVER_DIAGNOSTICS_CPU_DETAILS_METRICS_PREFIX = f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.cpu_details"
-NOVA_SERVER_DIAGNOSTICS_CPU_DETAILS_TAGS = {
+NOVA_SERVER_DIAGNOSTIC_CPU_DETAILS_METRICS_PREFIX = f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.cpu_details"
+NOVA_SERVER_DIAGNOSTIC_CPU_DETAILS_TAGS = {
     'id': 'cpu_id',
 }
-NOVA_SERVER_DIAGNOSTICS_CPU_DETAILS_METRICS = {
-    f"{NOVA_SERVER_DIAGNOSTICS_CPU_DETAILS_METRICS_PREFIX}.time": {"min_version": "2.48"},
-    f"{NOVA_SERVER_DIAGNOSTICS_CPU_DETAILS_METRICS_PREFIX}.utilisation": {"min_version": "2.48"},
+NOVA_SERVER_DIAGNOSTIC_CPU_DETAILS_METRICS = {
+    f"{NOVA_SERVER_DIAGNOSTIC_CPU_DETAILS_METRICS_PREFIX}.time",
+    f"{NOVA_SERVER_DIAGNOSTIC_CPU_DETAILS_METRICS_PREFIX}.utilisation",
 }
-NOVA_SERVER_DIAGNOSTICS_NIC_DETAILS_METRICS_PREFIX = f"{NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX}.nic_details"
-NOVA_SERVER_DIAGNOSTICS_NIC_DETAILS_TAGS = {
+NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_METRICS_PREFIX = f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.nic_details"
+NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_TAGS = {
     'mac_address': 'mac_address',
 }
-NOVA_SERVER_DIAGNOSTICS_NIC_DETAILS_METRICS = {
-    f"{NOVA_SERVER_DIAGNOSTICS_NIC_DETAILS_METRICS_PREFIX}.rx_drop": {"min_version": "2.48"},
-    f"{NOVA_SERVER_DIAGNOSTICS_NIC_DETAILS_METRICS_PREFIX}.rx_errors": {"min_version": "2.48"},
-    f"{NOVA_SERVER_DIAGNOSTICS_NIC_DETAILS_METRICS_PREFIX}.rx_octets": {"min_version": "2.48"},
-    f"{NOVA_SERVER_DIAGNOSTICS_NIC_DETAILS_METRICS_PREFIX}.rx_packets": {"min_version": "2.48"},
-    f"{NOVA_SERVER_DIAGNOSTICS_NIC_DETAILS_METRICS_PREFIX}.rx_rate": {"min_version": "2.48"},
-    f"{NOVA_SERVER_DIAGNOSTICS_NIC_DETAILS_METRICS_PREFIX}.tx_drop": {"min_version": "2.48"},
-    f"{NOVA_SERVER_DIAGNOSTICS_NIC_DETAILS_METRICS_PREFIX}.tx_errors": {"min_version": "2.48"},
-    f"{NOVA_SERVER_DIAGNOSTICS_NIC_DETAILS_METRICS_PREFIX}.tx_octets": {"min_version": "2.48"},
-    f"{NOVA_SERVER_DIAGNOSTICS_NIC_DETAILS_METRICS_PREFIX}.tx_packets": {"min_version": "2.48"},
-    f"{NOVA_SERVER_DIAGNOSTICS_NIC_DETAILS_METRICS_PREFIX}.tx_rate": {"min_version": "2.48"},
+NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_METRICS = {
+    f"{NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_METRICS_PREFIX}.rx_drop",
+    f"{NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_METRICS_PREFIX}.rx_errors",
+    f"{NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_METRICS_PREFIX}.rx_octets",
+    f"{NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_METRICS_PREFIX}.rx_packets",
+    f"{NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_METRICS_PREFIX}.rx_rate",
+    f"{NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_METRICS_PREFIX}.tx_drop",
+    f"{NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_METRICS_PREFIX}.tx_errors",
+    f"{NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_METRICS_PREFIX}.tx_octets",
+    f"{NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_METRICS_PREFIX}.tx_packets",
+    f"{NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_METRICS_PREFIX}.tx_rate",
 }
 
 NOVA_FLAVORS_METRICS_PREFIX = f"{NOVA_METRICS_PREFIX}.flavor"
@@ -253,12 +253,12 @@ NOVA_FLAVORS_TAGS = {
     'name': 'flavor_name',
 }
 NOVA_FLAVORS_METRICS = {
-    f"{NOVA_FLAVORS_METRICS_PREFIX}.vcpus": {},
-    f"{NOVA_FLAVORS_METRICS_PREFIX}.ram": {},
-    f"{NOVA_FLAVORS_METRICS_PREFIX}.disk": {},
-    f"{NOVA_FLAVORS_METRICS_PREFIX}.os_flv_ext_data:ephemeral": {"optional": True},
-    f"{NOVA_FLAVORS_METRICS_PREFIX}.swap": {"optional": True},
-    f"{NOVA_FLAVORS_METRICS_PREFIX}.rxtx_factor": {"optional": True},
+    f"{NOVA_FLAVORS_METRICS_PREFIX}.vcpus",
+    f"{NOVA_FLAVORS_METRICS_PREFIX}.ram",
+    f"{NOVA_FLAVORS_METRICS_PREFIX}.disk",
+    f"{NOVA_FLAVORS_METRICS_PREFIX}.os_flv_ext_data:ephemeral",
+    f"{NOVA_FLAVORS_METRICS_PREFIX}.swap",
+    f"{NOVA_FLAVORS_METRICS_PREFIX}.rxtx_factor",
 }
 
 NOVA_HYPERVISORS_METRICS_PREFIX = f"{NOVA_METRICS_PREFIX}.hypervisor"
@@ -287,6 +287,17 @@ NOVA_HYPERVISORS_METRICS = {
     f"{NOVA_HYPERVISORS_METRICS_PREFIX}.load_5": {},
     f"{NOVA_HYPERVISORS_METRICS_PREFIX}.load_15": {},
 }
+
+NOVA_GLOBAL_METRICS = NOVA_LIMITS_METRICS
+NOVA_PROJECT_METRICS = (
+    NOVA_QUOTA_SETS_METRICS
+    | NOVA_SERVER_METRICS
+    | NOVA_SERVER_FLAVOR_METRICS
+    | NOVA_SERVER_DIAGNOSTIC_METRICS
+    | NOVA_SERVER_DIAGNOSTIC_DISK_DETAILS_METRICS
+    | NOVA_SERVER_DIAGNOSTIC_CPU_DETAILS_METRICS
+    | NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_METRICS
+)
 
 NEUTRON_METRICS_PREFIX = "openstack.neutron"
 NEUTRON_SERVICE_CHECK = f"{NEUTRON_METRICS_PREFIX}.api.up"
@@ -525,7 +536,6 @@ def get_normalized_tags(data, prefix, tags):
         for key, value in data.items():
             long_tag_name = f'{prefix}.{get_normalized_key(key)}' if prefix else get_normalized_key(key)
             if value is not None and long_tag_name in tags:
-                # 'loadbalancers': [{'id': 'd27b9995-81cb-4fd7-9849-67008ce39fc7'}]
                 if isinstance(value, list):
                     for item in value:
                         normalized_tags.extend(get_normalized_tags(item, None, tags[long_tag_name]))
@@ -542,21 +552,20 @@ def get_normalized_metrics(data, prefix, metrics, lambda_name=None, lambda_value
         for key, value in data.items():
             long_metric_name = f'{prefix}.{get_normalized_key(key if not lambda_name else lambda_name(key))}'
             value = value if not lambda_value else lambda_value(key, value)
-            referenced_metric = metrics.get(long_metric_name)
             if isinstance(value, (int, float)) and not isinstance(value, bool):
-                if referenced_metric is not None:
+                if long_metric_name in metrics:
                     normalized_metrics[long_metric_name] = value
             elif isinstance(value, bool):
-                if referenced_metric is not None:
+                if long_metric_name in metrics:
                     normalized_metrics[long_metric_name] = 1 if value else 0
             elif isinstance(value, str):
-                if referenced_metric is not None:
+                if long_metric_name in metrics:
                     try:
                         normalized_metrics[long_metric_name] = int(value) if value else 0
                     except ValueError:
                         pass
             elif isinstance(value, type(None)):
-                if referenced_metric is not None:
+                if long_metric_name in metrics:
                     normalized_metrics[long_metric_name] = 0
             else:
                 normalized_metrics.update(

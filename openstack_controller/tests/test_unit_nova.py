@@ -9,6 +9,7 @@ import os
 import mock
 import pytest
 
+import datadog_checks.openstack_controller.metrics as dev_metrics
 import tests.configs as configs
 import tests.metrics as metrics
 from datadog_checks.base import AgentCheck
@@ -795,6 +796,27 @@ def test_hypervisors_metrics(aggregator, check, dd_run_check, metrics):
         )
 
 
+def test_disable_compute_collect_for_all_projects(aggregator, dd_run_check, openstack_controller_check):
+    instance = {
+        'keystone_server_url': 'http://127.0.0.1:8080/identity',
+        'username': 'admin',
+        'password': 'password',
+        'use_legacy_check_version': False,
+        "projects": {
+            "include": [
+                {
+                    "name": ".*",
+                    "compute": {"collect": False},
+                },
+            ],
+        },
+    }
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    for metric in dev_metrics.NOVA_PROJECT_METRICS:
+        aggregator.assert_metric(metric, count=0)
+
+
 @pytest.mark.parametrize(
     ('mock_http_get', 'connection_compute', 'instance', 'api_type'),
     [
@@ -1354,10 +1376,7 @@ def test_server_disable_flavors(
             args_list += list(args)
         assert args_list.count('http://127.0.0.1:8774/compute/v2.1/flavors/c1') == get_flavor_calls
     if api_type == ApiType.SDK:
-        assert (
-            connection_compute.get_flavor.call_args_list.count(mock.call('c1', microversion=microversion))
-            == get_flavor_calls
-        )
+        assert connection_compute.get_flavor.call_args_list.count(mock.call('c1')) == get_flavor_calls
 
 
 @pytest.mark.parametrize(

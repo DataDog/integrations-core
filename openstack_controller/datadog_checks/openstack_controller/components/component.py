@@ -149,18 +149,23 @@ class Component:
         else:
             self.check.log.debug("`%s` component not found in catalog", self.ID.value)
 
-    def report_project_metrics(self, project_id, tags, project_config):
-        self.check.log.debug("reporting `%s` component project metrics", self.ID.value)
-        if self.check.api.component_in_catalog(self.TYPES.value):
-            self.found_in_catalog = True
-            self.check.log.debug("`%s` component found in catalog", self.ID.value)
-            if self.ID in Component.registered_project_metric_methods:
+    def report_project_metrics(self, project, project_config, project_tags):
+        if self.ID not in Component.registered_project_metric_methods:
+            self.check.log.debug("`%s` component has not registered methods for project metrics", self.ID.value)
+            return
+        project_id = project['id']
+        project_name = project['name']
+        self.check.log.debug("reporting `%s` component project metrics for project `%s`", self.ID.value, project_name)
+        self.check.log.debug("project_config: %s", project_config)
+        component_config = project_config.get(self.ID.value, {}) if project_config else {}
+        collect_component = component_config.get('collect', True)
+        if collect_component:
+            if self.check.api.component_in_catalog(self.TYPES.value):
+                self.found_in_catalog = True
+                self.check.log.debug("`%s` component found in catalog for project %s", self.ID.value, project_name)
                 for registered_method in Component.registered_project_metric_methods[self.ID]:
-                    registered_method(self, project_id, tags, project_config)
+                    registered_method(self, project_id, project_tags, component_config)
             else:
-                self.check.log.debug(
-                    "`%s` component has not registered methods for project metrics",
-                    self.ID.value,
-                )
+                self.check.log.debug("`%s` component not found in catalog for project %s", self.ID.value, project_name)
         else:
-            self.check.log.debug("`%s` component not found in catalog", self.ID.value)
+            self.check.log.debug("`%s` component will not be collected for project %s", self.ID.value, project_name)

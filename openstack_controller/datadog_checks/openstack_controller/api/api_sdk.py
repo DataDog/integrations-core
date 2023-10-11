@@ -210,9 +210,7 @@ class ApiSdk(Api):
 
     def get_compute_flavor(self, flavor_id):
         self.log.debug("getting compute flavor `%s`", flavor_id)
-        return self.connection.compute.get_flavor(flavor_id, microversion=self.config.nova_microversion).to_dict(
-            original_names=True
-        )
+        return self.connection.compute.get_flavor(flavor_id).to_dict(original_names=True)
 
     def get_network_agents(self):
         return [agent.to_dict(original_names=True) for agent in self.connection.network.agents()]

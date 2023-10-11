@@ -450,15 +450,11 @@ def connection_compute(request, mock_responses):
             )['servers']
         ]
 
-    def get_flavor(flavor_id, microversion):
+    def get_flavor(flavor_id):
         if http_error and 'flavors' in http_error and flavor_id in http_error['flavors']:
             raise requests.exceptions.HTTPError(response=http_error['flavors'][flavor_id])
         return mock.MagicMock(
-            to_dict=mock.MagicMock(
-                return_value=mock_responses('GET', f'/compute/v2.1/flavors/{flavor_id}', microversion=microversion)[
-                    'flavor'
-                ]
-            )
+            to_dict=mock.MagicMock(return_value=mock_responses('GET', f'/compute/v2.1/flavors/{flavor_id}')['flavor'])
         )
 
     def get_server_diagnostics(server_id, microversion):

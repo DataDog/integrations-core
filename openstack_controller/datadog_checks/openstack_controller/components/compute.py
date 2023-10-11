@@ -21,18 +21,18 @@ from datadog_checks.openstack_controller.metrics import (
     NOVA_QUOTA_SETS_TAGS,
     NOVA_RESPONSE_TIME,
     NOVA_SERVER_COUNT,
-    NOVA_SERVER_DIAGNOSTICS_CPU_DETAILS_METRICS,
-    NOVA_SERVER_DIAGNOSTICS_CPU_DETAILS_METRICS_PREFIX,
-    NOVA_SERVER_DIAGNOSTICS_CPU_DETAILS_TAGS,
-    NOVA_SERVER_DIAGNOSTICS_DISK_DETAILS_METRICS,
-    NOVA_SERVER_DIAGNOSTICS_DISK_DETAILS_METRICS_PREFIX,
-    NOVA_SERVER_DIAGNOSTICS_DISK_DETAILS_TAGS,
-    NOVA_SERVER_DIAGNOSTICS_METRICS,
-    NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX,
-    NOVA_SERVER_DIAGNOSTICS_NIC_DETAILS_METRICS,
-    NOVA_SERVER_DIAGNOSTICS_NIC_DETAILS_METRICS_PREFIX,
-    NOVA_SERVER_DIAGNOSTICS_NIC_DETAILS_TAGS,
-    NOVA_SERVER_DIAGNOSTICS_TAGS,
+    NOVA_SERVER_DIAGNOSTIC_CPU_DETAILS_METRICS,
+    NOVA_SERVER_DIAGNOSTIC_CPU_DETAILS_METRICS_PREFIX,
+    NOVA_SERVER_DIAGNOSTIC_CPU_DETAILS_TAGS,
+    NOVA_SERVER_DIAGNOSTIC_DISK_DETAILS_METRICS,
+    NOVA_SERVER_DIAGNOSTIC_DISK_DETAILS_METRICS_PREFIX,
+    NOVA_SERVER_DIAGNOSTIC_DISK_DETAILS_TAGS,
+    NOVA_SERVER_DIAGNOSTIC_METRICS,
+    NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX,
+    NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_METRICS,
+    NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_METRICS_PREFIX,
+    NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_TAGS,
+    NOVA_SERVER_DIAGNOSTIC_TAGS,
     NOVA_SERVER_FLAVOR_METRICS,
     NOVA_SERVER_FLAVOR_METRICS_PREFIX,
     NOVA_SERVER_FLAVOR_TAGS,
@@ -176,8 +176,8 @@ class Compute(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_servers(self, project_id, tags, project_config):
-        config_servers = project_config.get(Compute.ID, {}).get('servers', {}) if project_config else {}
+    def _report_servers(self, project_id, tags, component_config):
+        config_servers = component_config.get('servers', {})
         self.check.log.debug("config_servers: %s", config_servers)
         collect_servers = config_servers.get('collect', True)
         if collect_servers:
@@ -254,9 +254,9 @@ class Compute(Component):
         self.check.log.debug("server_diagnostics: %s", item_diagnostic)
         diagnostic = get_metrics_and_tags(
             item_diagnostic,
-            tags=NOVA_SERVER_DIAGNOSTICS_TAGS,
-            prefix=NOVA_SERVER_DIAGNOSTICS_METRICS_PREFIX,
-            metrics=NOVA_SERVER_DIAGNOSTICS_METRICS,
+            tags=NOVA_SERVER_DIAGNOSTIC_TAGS,
+            prefix=NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX,
+            metrics=NOVA_SERVER_DIAGNOSTIC_METRICS,
         )
         self.check.log.debug("diagnostic: %s", diagnostic)
         for metric, value in diagnostic['metrics'].items():
@@ -264,27 +264,27 @@ class Compute(Component):
         for item_disk_details in item_diagnostic.get('disk_details', []):
             disk_detail = get_metrics_and_tags(
                 item_disk_details,
-                tags=NOVA_SERVER_DIAGNOSTICS_DISK_DETAILS_TAGS,
-                prefix=NOVA_SERVER_DIAGNOSTICS_DISK_DETAILS_METRICS_PREFIX,
-                metrics=NOVA_SERVER_DIAGNOSTICS_DISK_DETAILS_METRICS,
+                tags=NOVA_SERVER_DIAGNOSTIC_DISK_DETAILS_TAGS,
+                prefix=NOVA_SERVER_DIAGNOSTIC_DISK_DETAILS_METRICS_PREFIX,
+                metrics=NOVA_SERVER_DIAGNOSTIC_DISK_DETAILS_METRICS,
             )
             for metric, value in disk_detail['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + diagnostic['tags'] + disk_detail['tags'])
         for item_cpu_details in item_diagnostic.get('cpu_details', []):
             cpu_detail = get_metrics_and_tags(
                 item_cpu_details,
-                tags=NOVA_SERVER_DIAGNOSTICS_CPU_DETAILS_TAGS,
-                prefix=NOVA_SERVER_DIAGNOSTICS_CPU_DETAILS_METRICS_PREFIX,
-                metrics=NOVA_SERVER_DIAGNOSTICS_CPU_DETAILS_METRICS,
+                tags=NOVA_SERVER_DIAGNOSTIC_CPU_DETAILS_TAGS,
+                prefix=NOVA_SERVER_DIAGNOSTIC_CPU_DETAILS_METRICS_PREFIX,
+                metrics=NOVA_SERVER_DIAGNOSTIC_CPU_DETAILS_METRICS,
             )
             for metric, value in cpu_detail['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + diagnostic['tags'] + cpu_detail['tags'])
         for item_nic_details in item_diagnostic.get('nic_details', []):
             nic_detail = get_metrics_and_tags(
                 item_nic_details,
-                tags=NOVA_SERVER_DIAGNOSTICS_NIC_DETAILS_TAGS,
-                prefix=NOVA_SERVER_DIAGNOSTICS_NIC_DETAILS_METRICS_PREFIX,
-                metrics=NOVA_SERVER_DIAGNOSTICS_NIC_DETAILS_METRICS,
+                tags=NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_TAGS,
+                prefix=NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_METRICS_PREFIX,
+                metrics=NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_METRICS,
             )
             for metric, value in nic_detail['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + diagnostic['tags'] + nic_detail['tags'])

@@ -98,7 +98,7 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
                     f"project_id:{project['id']}",
                     f"project_name:{project['name']}",
                 ]
-                self._report_project_metrics(project['id'], project_tags, project_config)
+                self._report_project_metrics(project, project_config, project_tags)
 
     def _finish_report(self, tags):
         for component in self.components:
@@ -109,6 +109,6 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
         for component in self.components:
             component.report_global_metrics(tags)
 
-    def _report_project_metrics(self, project_id, tags, project_config):
+    def _report_project_metrics(self, project, project_config, project_tags):
         for component in self.components:
-            component.report_project_metrics(project_id, tags, project_config)
+            component.report_project_metrics(project, project_config, project_tags)
