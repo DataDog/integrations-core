@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Improve the upgrade-python script ([#16000](https://github.com/DataDog/integrations-core/pull/16000))
+
 ## 5.2.1 / 2023-10-12
 
 ***Fixed***:
