@@ -8,7 +8,7 @@
 
 * Upgrade to openstacksdk version 1.5.0 ([#15919](https://github.com/DataDog/integrations-core/pull/15919))
 
-## 4.0.0 / 2023-08-10
+## 4.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 

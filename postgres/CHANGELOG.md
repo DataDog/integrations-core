@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 15.1.0 / 2023-10-06
+
+***Added***:
+
+* Establish a dedicated main db connection to prevent the main thread db from closing prematurely ([#15962](https://github.com/DataDog/integrations-core/pull/15962))
+
 ## 15.0.0 / 2023-09-29
 
 ***Changed***:
@@ -18,7 +24,7 @@
 * Prevent Postgres integration from collecting WAL metrics from Aurora instances that cannot be collected ([#15896](https://github.com/DataDog/integrations-core/pull/15896))
 * Set lower log level for relations metrics truncated ([#15903](https://github.com/DataDog/integrations-core/pull/15903))
 
-## 14.4.0 / 2023-09-19
+## 14.4.0 / 2023-09-19 / Agent 7.48.0
 
 ***Added***:
 
