@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## 2.1.0 / 2023-08-18
+## 2.1.0 / 2023-08-18 / Agent 7.48.0
 
 ***Added***:
 
@@ -22,7 +22,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 1.2.1 / 2023-07-13
+## 1.2.1 / 2023-07-13 / Agent 7.47.0
 
 ***Fixed***:
 
