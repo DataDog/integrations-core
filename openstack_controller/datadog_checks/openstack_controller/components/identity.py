@@ -67,7 +67,7 @@ class Identity(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error(report_service_check=True)
-    def _report_response_time(self, tags):
+    def _report_response_time(self, global_components_config, tags):
         self.check.log.debug("reporting `%s` response time", Identity.ID.value)
         response_time = self.check.api.get_response_time(Identity.TYPES.value)
         self.check.log.debug("`%s` response time: %s", Identity.ID.value, response_time)
@@ -75,7 +75,7 @@ class Identity(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_regions(self, tags):
+    def _report_regions(self, global_components_config, tags):
         data = self.check.api.get_identity_regions()
         self.check.log.debug("data: %s", data)
         for item in data:
@@ -91,7 +91,7 @@ class Identity(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_domains(self, tags):
+    def _report_domains(self, global_components_config, tags):
         data = self.check.api.get_identity_domains()
         self.check.log.debug("data: %s", data)
         for item in data:
@@ -109,7 +109,7 @@ class Identity(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_projects(self, tags):
+    def _report_projects(self, global_components_config, tags):
         data = self.check.api.get_identity_projects()
         for item in data:
             project = get_metrics_and_tags(
@@ -125,7 +125,7 @@ class Identity(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_users(self, tags):
+    def _report_users(self, global_components_config, tags):
         data = self.check.api.get_identity_users()
         for item in data:
             user = get_metrics_and_tags(
@@ -141,7 +141,7 @@ class Identity(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_groups(self, tags):
+    def _report_groups(self, global_components_config, tags):
         data = self.check.api.get_identity_groups()
         for item in data:
             group = get_metrics_and_tags(
@@ -162,7 +162,7 @@ class Identity(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_services(self, tags):
+    def _report_services(self, global_components_config, tags):
         data = self.check.api.get_identity_services()
         for item in data:
             service = get_metrics_and_tags(
@@ -178,7 +178,7 @@ class Identity(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_registered_limits(self, tags):
+    def _report_registered_limits(self, global_components_config, tags):
         data = self.check.api.get_identity_registered_limits()
         for item in data:
             registered_limit = get_metrics_and_tags(
@@ -194,7 +194,7 @@ class Identity(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_limits(self, tags):
+    def _report_limits(self, global_components_config, tags):
         data = self.check.api.get_identity_limits()
         for item in data:
             limit = get_metrics_and_tags(

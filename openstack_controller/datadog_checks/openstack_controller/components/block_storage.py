@@ -20,7 +20,7 @@ class BlockStorage(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error(report_service_check=True)
-    def _report_response_time(self, tags):
+    def _report_response_time(self, global_components_config, tags):
         self.check.log.debug("reporting `%s` response time", BlockStorage.ID.value)
         response_time = self.check.api.get_response_time(BlockStorage.TYPES.value)
         self.check.log.debug("`%s` response time: %s", BlockStorage.ID.value, response_time)

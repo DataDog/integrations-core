@@ -3,6 +3,24 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+NOVA_HYPERVISOR_METRICS = {
+    'openstack.nova.hypervisor.current_workload',
+    'openstack.nova.hypervisor.disk_available_least',
+    'openstack.nova.hypervisor.free_disk_gb',
+    'openstack.nova.hypervisor.free_ram_mb',
+    'openstack.nova.hypervisor.local_gb',
+    'openstack.nova.hypervisor.local_gb_used',
+    'openstack.nova.hypervisor.memory_mb',
+    'openstack.nova.hypervisor.memory_mb_used',
+    'openstack.nova.hypervisor.running_vms',
+    'openstack.nova.hypervisor.vcpus',
+    'openstack.nova.hypervisor.vcpus_used',
+    'openstack.nova.hypervisor.up',
+    'openstack.nova.hypervisor.load_1',
+    'openstack.nova.hypervisor.load_5',
+    'openstack.nova.hypervisor.load_15',
+}
+
 NOVA_QUOTA_SET_METRICS = {
     'openstack.nova.quota_set.cores',
     'openstack.nova.quota_set.fixed_ips',

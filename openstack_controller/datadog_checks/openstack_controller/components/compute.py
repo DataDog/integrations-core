@@ -58,7 +58,7 @@ class Compute(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error(report_service_check=True)
-    def _report_response_time(self, tags):
+    def _report_response_time(self, global_components_config, tags):
         self.check.log.debug("reporting `%s` response time", Compute.ID.value)
         response_time = self.check.api.get_response_time(Compute.TYPES.value)
         self.check.log.debug("`%s` response time: %s", Compute.ID.value, response_time)
@@ -66,7 +66,7 @@ class Compute(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_limits(self, tags):
+    def _report_limits(self, global_components_config, tags):
         item = self.check.api.get_compute_limits()
         limits = get_metrics_and_tags(
             item,
@@ -80,7 +80,7 @@ class Compute(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_services(self, tags):
+    def _report_services(self, global_components_config, tags):
         data = self.check.api.get_compute_services()
         for item in data:
             service = get_metrics_and_tags(
@@ -100,7 +100,7 @@ class Compute(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_flavors(self, tags):
+    def _report_flavors(self, global_components_config, tags):
         data = self.check.api.get_compute_flavors()
         for item in data:
             flavor = get_metrics_and_tags(
@@ -115,23 +115,27 @@ class Compute(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_hypervisors(self, tags):
-        data = self.check.api.get_compute_hypervisors()
-        for item in data:
-            hypervisor = get_metrics_and_tags(
-                item,
-                tags=NOVA_HYPERVISORS_TAGS,
-                prefix=NOVA_HYPERVISORS_METRICS_PREFIX,
-                metrics=NOVA_HYPERVISORS_METRICS,
-                lambda_name=lambda key: 'up' if key == 'state' else key,
-                lambda_value=lambda key, value, item=item: (item['state'] == 'up' and item['status'] == 'enabled')
-                if key == 'state'
-                else value,
-            )
-            self.check.log.debug("hypervisor: %s", hypervisor)
-            for metric, value in hypervisor['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + hypervisor['tags'])
-            self._report_hypervisor_uptime(item['id'], item.get('uptime'), tags + hypervisor['tags'])
+    def _report_hypervisors(self, global_components_config, tags):
+        config_hypervisors = global_components_config.get('hypervisors', {})
+        self.check.log.debug("config_hypervisors: %s", config_hypervisors)
+        collect_hypervisors = config_hypervisors.get('collect', True)
+        if collect_hypervisors:
+            data = self.check.api.get_compute_hypervisors()
+            for item in data:
+                hypervisor = get_metrics_and_tags(
+                    item,
+                    tags=NOVA_HYPERVISORS_TAGS,
+                    prefix=NOVA_HYPERVISORS_METRICS_PREFIX,
+                    metrics=NOVA_HYPERVISORS_METRICS,
+                    lambda_name=lambda key: 'up' if key == 'state' else key,
+                    lambda_value=lambda key, value, item=item: (item['state'] == 'up' and item['status'] == 'enabled')
+                    if key == 'state'
+                    else value,
+                )
+                self.check.log.debug("hypervisor: %s", hypervisor)
+                for metric, value in hypervisor['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + hypervisor['tags'])
+                self._report_hypervisor_uptime(item['id'], item.get('uptime'), tags + hypervisor['tags'])
 
     @Component.http_error()
     def _report_hypervisor_uptime(self, hypervisor_id, uptime, tags):
@@ -162,7 +166,7 @@ class Compute(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_quota_sets(self, project_id, tags, project_config):
+    def _report_quota_sets(self, project_id, tags, component_config):
         item = self.check.api.get_compute_quota_sets(project_id)
         quota_set = get_metrics_and_tags(
             item,

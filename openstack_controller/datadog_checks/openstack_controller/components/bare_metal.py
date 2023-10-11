@@ -28,7 +28,7 @@ class BareMetal(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error(report_service_check=True)
-    def _report_response_time(self, tags):
+    def _report_response_time(self, global_components_config, tags):
         self.check.log.debug("reporting `%s` response time", BareMetal.ID.value)
         response_time = self.check.api.get_response_time(BareMetal.TYPES.value)
         self.check.log.debug("`%s` response time: %s", BareMetal.ID.value, response_time)
@@ -36,7 +36,7 @@ class BareMetal(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_nodes(self, tags):
+    def _report_nodes(self, global_components_config, tags):
         data = self.check.api.get_baremetal_nodes()
         for item in data:
             node = get_metrics_and_tags(
@@ -58,7 +58,7 @@ class BareMetal(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_conductors(self, tags):
+    def _report_conductors(self, global_components_config, tags):
         data = self.check.api.get_baremetal_conductors()
         for item in data:
             conductor = get_metrics_and_tags(

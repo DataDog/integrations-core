@@ -106,9 +106,20 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
 
     def _report_global_metrics(self, tags):
         self.log.info("reporting global metrics")
+        global_components_config = self.instance.get('components', {})
         for component in self.components:
-            component.report_global_metrics(tags)
+            global_component_config = (
+                global_components_config.get(component.ID.value, {}) if global_components_config else {}
+            )
+            component.report_global_metrics(global_component_config, tags)
 
     def _report_project_metrics(self, project, project_config, project_tags):
+        global_components_config = self.instance.get('components', {})
         for component in self.components:
-            component.report_project_metrics(project, project_config, project_tags)
+            global_component_config = (
+                global_components_config.get(component.ID.value, {}) if global_components_config else {}
+            )
+            component_config = global_component_config | (
+                project_config.get(component.ID.value, {}) if project_config else {}
+            )
+            component.report_project_metrics(project, component_config, project_tags)

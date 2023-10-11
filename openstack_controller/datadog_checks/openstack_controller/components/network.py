@@ -34,7 +34,7 @@ class Network(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error(report_service_check=True)
-    def _report_response_time(self, tags):
+    def _report_response_time(self, global_components_config, tags):
         self.check.log.debug("reporting `%s` response time", Network.ID.value)
         response_time = self.check.api.get_response_time(Network.TYPES.value)
         self.check.log.debug("`%s` response time: %s", Network.ID.value, response_time)
@@ -42,7 +42,7 @@ class Network(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_agents(self, tags):
+    def _report_agents(self, global_components_config, tags):
         data = self.check.api.get_network_agents()
         for item in data:
             agent = get_metrics_and_tags(

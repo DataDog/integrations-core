@@ -91,7 +91,6 @@ class Component:
                 if func_hash not in self.reported_global_metrics:
                     if func(self, *args, **kwargs):
                         self.reported_global_metrics.append(func_hash)
-
             if component_id not in cls.registered_global_metric_methods:
                 cls.registered_global_metric_methods[component_id] = []
             cls.registered_global_metric_methods[component_id].append(wrapper)
@@ -133,38 +132,34 @@ class Component:
         if not self.found_in_catalog:
             self.check.service_check(self.SERVICE_CHECK, AgentCheck.UNKNOWN, tags=tags)
 
-    def report_global_metrics(self, tags):
+    def report_global_metrics(self, global_components_config, tags):
+        if self.ID not in Component.registered_global_metric_methods:
+            self.check.log.debug("`%s` component has not registered methods for global metrics", self.ID.value)
+            return
         self.check.log.debug("reporting `%s` component global metrics", self.ID.value)
+        self.check.log.debug("global_components_config: %s", global_components_config)
         if self.check.api.component_in_catalog(self.TYPES.value):
             self.found_in_catalog = True
             self.check.log.debug("`%s` component found in catalog", self.ID.value)
-            if self.ID in Component.registered_global_metric_methods:
-                for registered_method in Component.registered_global_metric_methods[self.ID]:
-                    registered_method(self, tags)
-            else:
-                self.check.log.debug(
-                    "`%s` component has not registered methods for global metrics",
-                    self.ID.value,
-                )
+            for registered_method in Component.registered_global_metric_methods[self.ID]:
+                registered_method(self, global_components_config, tags)
         else:
             self.check.log.debug("`%s` component not found in catalog", self.ID.value)
 
-    def report_project_metrics(self, project, project_config, project_tags):
+    def report_project_metrics(self, project, component_config, project_tags):
         if self.ID not in Component.registered_project_metric_methods:
             self.check.log.debug("`%s` component has not registered methods for project metrics", self.ID.value)
             return
-        project_id = project['id']
         project_name = project['name']
         self.check.log.debug("reporting `%s` component project metrics for project `%s`", self.ID.value, project_name)
-        self.check.log.debug("project_config: %s", project_config)
-        component_config = project_config.get(self.ID.value, {}) if project_config else {}
+        self.check.log.debug("component_config: %s", component_config)
         collect_component = component_config.get('collect', True)
         if collect_component:
             if self.check.api.component_in_catalog(self.TYPES.value):
                 self.found_in_catalog = True
                 self.check.log.debug("`%s` component found in catalog for project %s", self.ID.value, project_name)
                 for registered_method in Component.registered_project_metric_methods[self.ID]:
-                    registered_method(self, project_id, project_tags, component_config)
+                    registered_method(self, project['id'], project_tags, component_config)
             else:
                 self.check.log.debug("`%s` component not found in catalog for project %s", self.ID.value, project_name)
         else:

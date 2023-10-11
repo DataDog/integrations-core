@@ -938,9 +938,7 @@ def test_networks_metrics_with_exclude(aggregator, dd_run_check, instance, opens
                                     "name": "^.*",
                                 },
                             ],
-                            "exclude": [
-                                "^private.*"
-                            ]
+                            "exclude": ["^private.*"],
                         },
                     },
                 },
