@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Fix the manifest template file ([#15984](https://github.com/DataDog/integrations-core/pull/15984))
+
+## 26.0.0 / 2023-10-02
+
+***Changed***:
+
+* Update eula validation to only occur if it is present in the manifest for marketplace prs to support private-offer-only listings ([#15935](https://github.com/DataDog/integrations-core/pull/15935))
+
 ## 25.1.2 / 2023-09-26
 
 ***Fixed***:
@@ -15,6 +25,7 @@
 * Exclude psycopg2 from automatic upgrades ([#15864](https://github.com/DataDog/integrations-core/pull/15864))
 * Upper-bound pydantic to quickly fix CI while we investigate what in the latest version breaks us. ([#15901](https://github.com/DataDog/integrations-core/pull/15901))
 * Finalize pytest plugin logic for E2E refactor ([#15898](https://github.com/DataDog/integrations-core/pull/15898))
+* Fix `ddev release make all` so that it won't stop on the first unchanged integration ([#15932](https://github.com/DataDog/integrations-core/pull/15932))
 
 ## 25.1.0 / 2023-09-15
 

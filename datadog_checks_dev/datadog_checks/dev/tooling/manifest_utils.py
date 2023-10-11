@@ -153,7 +153,10 @@ class ManifestV2:
         return path_join(get_root(), self._check_name, 'assets', 'dashboards')
 
     def get_eula_from_manifest(self):
-        path = self._manifest_json['legal_terms']['eula']
+        path = self._manifest_json.get('legal_terms', {}).get('eula')
+        if path is None:
+            return None, False
+
         path = os.path.join(get_root(), self._check_name, *path.split('/'))
         return path, file_exists(path)
 

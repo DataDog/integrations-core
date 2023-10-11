@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-***Changed***
+## 7.0.0 / 2023-09-29
+
+***Changed***:
 
 * Add `assert_all_profile_metrics_and_tags_covered` and fix mappings in profiles ([#15720](https://github.com/DataDog/integrations-core/pull/15720))
 * Refactor arista profiles extends ([#15767](https://github.com/DataDog/integrations-core/pull/15767))
@@ -15,8 +17,9 @@
 * Delete unnecessary extend for ubiquiti profiles ([#15643](https://github.com/DataDog/integrations-core/pull/15643))
 * Add comment for fanSpeedSensorStatus ([#15804](https://github.com/DataDog/integrations-core/pull/15804))
 * Update Cisco model metadata regex ([#15908](https://github.com/DataDog/integrations-core/pull/15908))
+* Update generic-ospf profile mappings ([#15764](https://github.com/DataDog/integrations-core/pull/15764))
 
-## 6.2.3 / 2023-09-13
+## 6.2.3 / 2023-09-13 / Agent 7.48.0
 
 ***Fixed***:
 

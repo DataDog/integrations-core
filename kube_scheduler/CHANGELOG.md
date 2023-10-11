@@ -2,12 +2,14 @@
 
 ## Unreleased
 
+## 4.7.0 / 2023-09-29
+
 ***Added***:
 
 * Add goroutine_by_scheduling_operation metric to kube_scheduler check ([#15697](https://github.com/DataDog/integrations-core/pull/15697))
 * Add support for kube_scheduler SLI metrics ([#15731](https://github.com/DataDog/integrations-core/pull/15731))
 
-## 4.6.1 / 2023-08-18
+## 4.6.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:
 
