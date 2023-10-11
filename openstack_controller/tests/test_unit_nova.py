@@ -792,7 +792,50 @@ def test_disable_hypervisors_metrics(aggregator, dd_run_check, instance, opensta
     }
     check = openstack_controller_check(instance)
     dd_run_check(check)
-    for metric in metrics.NOVA_HYPERVISOR_METRICS:
+    for metric in metrics.NOVA_ALL_HYPERVISOR_METRICS:
+        aggregator.assert_metric(metric, count=0)
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            configs.REST_NOVA_MICROVERSION_2_93,
+            id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.SDK,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            configs.SDK_NOVA_MICROVERSION_2_93,
+            id='api sdk microversion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_disable_all_hypervisors_uptime_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
+    instance = instance | {
+        "components": {
+            "compute": {
+                "hypervisors": {
+                    "include": [
+                        {
+                            "hypervisor_hostname": ".*",
+                            "uptime": False,
+                        },
+                    ],
+                },
+            },
+        },
+    }
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    for metric in metrics.NOVA_HYPERVISOR_UPTIME_METRICS:
         aggregator.assert_metric(metric, count=0)
 
 

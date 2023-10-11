@@ -10,9 +10,10 @@ from datadog_checks.openstack_controller.metrics import (
     NOVA_FLAVORS_METRICS,
     NOVA_FLAVORS_METRICS_PREFIX,
     NOVA_FLAVORS_TAGS,
-    NOVA_HYPERVISORS_METRICS,
-    NOVA_HYPERVISORS_METRICS_PREFIX,
-    NOVA_HYPERVISORS_TAGS,
+    NOVA_HYPERVISOR_METRICS,
+    NOVA_HYPERVISOR_METRICS_PREFIX,
+    NOVA_HYPERVISOR_TAGS,
+    NOVA_HYPERVISOR_UPTIME_METRICS,
     NOVA_LIMITS_METRICS,
     NOVA_LIMITS_METRICS_PREFIX,
     NOVA_LIMITS_TAGS,
@@ -120,13 +121,33 @@ class Compute(Component):
         self.check.log.debug("config_hypervisors: %s", config_hypervisors)
         collect_hypervisors = config_hypervisors.get('collect', True)
         if collect_hypervisors:
-            data = self.check.api.get_compute_hypervisors()
-            for item in data:
+            hypervisors_discovery = None
+            config_hypervisors_include = normalize_discover_config_include(config_hypervisors, ["hypervisor_hostname"])
+            self.check.log.debug("config_hypervisors_include: %s", config_hypervisors_include)
+            if config_hypervisors_include:
+                hypervisors_discovery = Discovery(
+                    lambda: self.check.api.get_compute_hypervisors(),
+                    limit=config_hypervisors.get('limit'),
+                    include=config_hypervisors_include,
+                    exclude=config_hypervisors.get('exclude'),
+                    interval=config_hypervisors.get('interval'),
+                    key=lambda hypervisor: hypervisor.get('hypervisor_hostname'),
+                )
+            if hypervisors_discovery:
+                discovered_hypervisors = list(hypervisors_discovery.get_items())
+            else:
+                discovered_hypervisors = [
+                    (None, hypervisor.get('hypervisor_hostname'), hypervisor, None)
+                    for hypervisor in self.check.api.get_compute_hypervisors()
+                ]
+            for _pattern, _item_name, item, item_config in discovered_hypervisors:
+                self.check.log.debug("item: %s", item)
+                self.check.log.debug("item_config: %s", item_config)
                 hypervisor = get_metrics_and_tags(
                     item,
-                    tags=NOVA_HYPERVISORS_TAGS,
-                    prefix=NOVA_HYPERVISORS_METRICS_PREFIX,
-                    metrics=NOVA_HYPERVISORS_METRICS,
+                    tags=NOVA_HYPERVISOR_TAGS,
+                    prefix=NOVA_HYPERVISOR_METRICS_PREFIX,
+                    metrics=NOVA_HYPERVISOR_METRICS,
                     lambda_name=lambda key: 'up' if key == 'state' else key,
                     lambda_value=lambda key, value, item=item: (item['state'] == 'up' and item['status'] == 'enabled')
                     if key == 'state'
@@ -135,12 +156,14 @@ class Compute(Component):
                 self.check.log.debug("hypervisor: %s", hypervisor)
                 for metric, value in hypervisor['metrics'].items():
                     self.check.gauge(metric, value, tags=tags + hypervisor['tags'])
-                if item['hypervisor_type'] != 'ironic':
-                    self._report_hypervisor_uptime(item['id'], item.get('uptime'), tags + hypervisor['tags'])
-                else:
-                    self.log.debug(
-                        "Skipping uptime metrics for bare metal hypervisor `%s`", item['hypervisor_hostname']
-                    )
+                collect_uptime = item_config.get('uptime', True) if item_config else True
+                if collect_uptime:
+                    if item['hypervisor_type'] != 'ironic':
+                        self._report_hypervisor_uptime(item['id'], item.get('uptime'), tags + hypervisor['tags'])
+                    else:
+                        self.log.debug(
+                            "Skipping uptime metrics for bare metal hypervisor `%s`", item['hypervisor_hostname']
+                        )
 
     @Component.http_error()
     def _report_hypervisor_uptime(self, hypervisor_id, uptime, tags):
@@ -162,9 +185,9 @@ class Compute(Component):
                 uptime_metrics[f"load_{avg}"] = load_averages[i]
         uptime_metrics_and_tags = get_metrics_and_tags(
             uptime_metrics,
-            tags=NOVA_HYPERVISORS_TAGS,
-            prefix=NOVA_HYPERVISORS_METRICS_PREFIX,
-            metrics=NOVA_HYPERVISORS_METRICS,
+            tags=NOVA_HYPERVISOR_TAGS,
+            prefix=NOVA_HYPERVISOR_METRICS_PREFIX,
+            metrics=NOVA_HYPERVISOR_UPTIME_METRICS,
         )
         for metric, value in uptime_metrics_and_tags['metrics'].items():
             self.check.gauge(metric, value, tags=tags + uptime_metrics_and_tags['tags'])

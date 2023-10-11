@@ -16,10 +16,15 @@ NOVA_HYPERVISOR_METRICS = {
     'openstack.nova.hypervisor.vcpus',
     'openstack.nova.hypervisor.vcpus_used',
     'openstack.nova.hypervisor.up',
+}
+
+NOVA_HYPERVISOR_UPTIME_METRICS = {
     'openstack.nova.hypervisor.load_1',
     'openstack.nova.hypervisor.load_5',
     'openstack.nova.hypervisor.load_15',
 }
+
+NOVA_ALL_HYPERVISOR_METRICS = NOVA_HYPERVISOR_METRICS | NOVA_HYPERVISOR_UPTIME_METRICS
 
 NOVA_QUOTA_SET_METRICS = {
     'openstack.nova.quota_set.cores',
