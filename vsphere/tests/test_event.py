@@ -97,17 +97,70 @@ def test_events_collection(aggregator, realtime_instance):
     aggregator.reset()
     check.api.mock_events = [event1]
     check.check(None)
-    aggregator.assert_event("vCenter monitor status changed on this alarm, it was green and it's now red.", count=1)
+    aggregator.assert_event("vCenter monitor status changed on this alarm, it was green and it's now red.", count=1, tags=['vcenter_server:FAKE'])
     assert len(aggregator.events) == 1
+    assert aggregator.events[0]['msg_title'] == "[Triggered] alarm1 on VM vm1 is now red"
     assert check.latest_event_query == time1 + dt.timedelta(seconds=1)
 
     # 3 events
     aggregator.reset()
     check.api.mock_events = [event2, event3, event3, event4]
     check.check(None)
+    for from_status, to_status, count in [('yellow', 'red', 1), ('red', 'red', 2)]:
+        aggregator.assert_event(
+            "vCenter monitor status changed on this alarm, it was {} and it's now {}.".format(from_status, to_status),
+            tags=['vcenter_server:FAKE'],
+            count=count,
+        )
+    assert len(aggregator.events) == 3
+    assert check.latest_event_query == time3 + dt.timedelta(seconds=1)
+
+
+    aggregator.reset()
+    realtime_instance['event_resource_filters'] = ['vm', 'host', 'datacenter', 'cluster', 'datastore']
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    check.initiate_api_connection()
+
+    check.api.mock_events = [event2, event3, event3, event4]
+    check.check(None)
     for from_status, to_status, count in [('yellow', 'red', 1), ('red', 'red', 2), ('red', 'green', 1)]:
         aggregator.assert_event(
-            "vCenter monitor status changed on this alarm, it was {} and it's now {}.".format(from_status, to_status), count=count
+            "vCenter monitor status changed on this alarm, it was {} and it's now {}.".format(from_status, to_status),
+            tags=['vcenter_server:FAKE'],
+            count=count,
         )
     assert len(aggregator.events) == 4
     assert check.latest_event_query == time3 + dt.timedelta(seconds=1)
+
+
+    aggregator.reset()
+    realtime_instance['event_resource_filters'] = ['host', 'datacenter', 'cluster', 'datastore']
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    check.initiate_api_connection()
+
+    check.api.mock_events = [event2, event3, event3, event4]
+    check.check(None)
+    for from_status, to_status, count in [('red', 'green', 1)]:
+        aggregator.assert_event(
+            "vCenter monitor status changed on this alarm, it was {} and it's now {}.".format(from_status, to_status),
+            tags=['vcenter_server:FAKE'],
+            count=count,
+        )
+    assert len(aggregator.events) == 1
+    assert aggregator.events[0]['msg_title'] == "[Recovered] alarm1 on cluster c1 is now green"
+    assert check.latest_event_query == time3 + dt.timedelta(seconds=1)
+
+
+    aggregator.reset()
+    realtime_instance['event_resource_filters'] = []
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    check.initiate_api_connection()
+
+    check.api.mock_events = [event2, event3, event3, event4]
+    check.check(None)
+    assert len(aggregator.events) == 0
+    assert check.latest_event_query == time3 + dt.timedelta(seconds=1)
+
+    with pytest.raises(Exception, match=r"Invalid resource type specified in `event_resource_filters`: hey."):
+        realtime_instance['event_resource_filters'] = ['hey']
+        check = VSphereCheck('vsphere', {}, [realtime_instance])

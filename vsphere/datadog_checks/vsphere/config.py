@@ -17,6 +17,7 @@ from datadog_checks.vsphere.constants import (
     ALLOWED_FILTER_TYPES,
     BOTH,
     DEFAULT_BATCH_COLLECTOR_SIZE,
+    DEFAULT_EVENT_RESOURCES,
     DEFAULT_MAX_QUERY_METRICS,
     DEFAULT_METRICS_PER_QUERY,
     DEFAULT_REFRESH_INFRASTRUCTURE_CACHE_INTERVAL,
@@ -120,6 +121,7 @@ class VSphereConfig(object):
         # Filters
         self.resource_filters = self._parse_resource_filters(instance.get("resource_filters", []))
         self.metric_filters = self._parse_metric_regex_filters(instance.get("metric_filters", {}))
+        self.event_resource_filters = instance.get("event_resource_filters", DEFAULT_EVENT_RESOURCES)
 
         # Since `collect_per_instance_filters` have the same structure as `metric_filters` we use the same parser
         self.collect_per_instance_filters = self._parse_metric_regex_filters(
@@ -156,6 +158,14 @@ class VSphereConfig(object):
                 "set the collection_level to something different than a "
                 "integer between 1 and 4."
             )
+
+        all_valid_resource_types = list(MOR_TYPE_AS_STRING.values())
+        for resource_type in self.event_resource_filters:
+            if resource_type not in all_valid_resource_types:
+                raise ConfigurationError(
+                    "Invalid resource type specified in `event_resource_filters`: {}. "
+                    "Valid resource types: {}".format(resource_type, all_valid_resource_types),
+                )
 
     def _parse_resource_filters(self, all_resource_filters):
         # type: (List[ResourceFilterConfig]) -> List[ResourceFilter]
