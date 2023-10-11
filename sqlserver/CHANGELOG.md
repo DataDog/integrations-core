@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add support to report SQL obfuscation errors ([#15990](https://github.com/DataDog/integrations-core/pull/15990))
+
 ***Fixed***:
 
 * Properly decode query_hash when statement_text is None ([#15974](https://github.com/DataDog/integrations-core/pull/15974))
