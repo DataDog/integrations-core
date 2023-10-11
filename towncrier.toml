@@ -1,10 +1,11 @@
 [tool.towncrier]
+# If you change the values for directory or filename, make sure to look for them in the code as well.
 directory = "changelog.d"
 filename = "CHANGELOG.md"
 start_string = "<!-- towncrier release notes start -->\n"
 underlines = ["", "", ""]
 template = "changelog_template.jinja"
-title_format = "## [{version}] / {project_date}"
+title_format = "## {version} / {project_date}"
 # We automatically link to PRs, but towncrier only has an issue template so we abuse that.
 issue_format = "([#{issue}](https://github.com/DataDog/integrations-core/pull/{issue}))"
 
