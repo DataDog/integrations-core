@@ -3,7 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.openstack_controller.components.component import Component
+from datadog_checks.openstack_controller.config import normalize_discover_config_include
 from datadog_checks.openstack_controller.metrics import (
     NEUTRON_AGENTS_COUNT,
     NEUTRON_AGENTS_METRICS,
@@ -62,8 +64,27 @@ class Network(Component):
         self.check.log.debug("config_networks: %s", config_networks)
         collect_networks = config_networks.get('collect', True)
         if collect_networks:
-            data = self.check.api.get_network_networks(project_id)
-            for item in data:
+            networks_discovery = None
+            if config_networks:
+                config_networks_include = normalize_discover_config_include(config_networks, ["name"])
+                self.check.log.debug("config_networks_include: %s", config_networks_include)
+                if config_networks_include:
+                    networks_discovery = Discovery(
+                        lambda: self.check.api.get_network_networks(project_id),
+                        limit=config_networks.get('limit'),
+                        include=config_networks_include,
+                        exclude=config_networks.get('exclude'),
+                        interval=config_networks.get('interval'),
+                        key=lambda network: network.get('name'),
+                    )
+            if networks_discovery:
+                discovered_networks = list(networks_discovery.get_items())
+            else:
+                discovered_networks = [
+                    (None, network.get('name'), network, None)
+                    for network in self.check.api.get_network_networks(project_id)
+                ]
+            for _pattern, _item_name, item, _item_config in discovered_networks:
                 network = get_metrics_and_tags(
                     item,
                     tags=NEUTRON_NETWORK_TAGS,

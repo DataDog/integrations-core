@@ -297,6 +297,7 @@ def test_disable_network_collect_for_all_projects(aggregator, dd_run_check, inst
     for metric in metrics.NEUTRON_PROJECT_METRICS:
         aggregator.assert_metric(metric, count=0)
 
+
 @pytest.mark.parametrize(
     ('instance'),
     [
@@ -330,6 +331,7 @@ def test_disable_networks_collect_for_all_projects(aggregator, dd_run_check, ins
     dd_run_check(check)
     for metric in metrics.NEUTRON_NETWORK_METRICS:
         aggregator.assert_metric(metric, count=0)
+
 
 @pytest.mark.parametrize(
     ('mock_http_get', 'connection_network', 'instance', 'api_type'),
@@ -617,6 +619,499 @@ def test_networks_metrics(aggregator, check, dd_run_check):
     aggregator.assert_metric(
         'openstack.neutron.network.shared',
         value=0,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ebdfddd9-14b8-46bd-98d6-10205d13038c',
+            'network_name:private',
+            'network_status:ACTIVE',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            configs.SDK,
+            id='api sdk',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_networks_metrics_with_include(aggregator, dd_run_check, instance, openstack_controller_check):
+    instance = instance | {
+        "projects": {
+            "include": [
+                {
+                    "name": ".*",
+                    "network": {
+                        "networks": {
+                            "include": [
+                                {
+                                    "name": "^public.*",
+                                },
+                            ],
+                        },
+                    },
+                },
+            ],
+        },
+    }
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.neutron.network.count',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ec38babc-37e8-4bd7-9de0-03009304b2e4',
+            'network_name:public',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.admin_state_up',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ec38babc-37e8-4bd7-9de0-03009304b2e4',
+            'network_name:public',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.mtu',
+        value=1500,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ec38babc-37e8-4bd7-9de0-03009304b2e4',
+            'network_name:public',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.port_security_enabled',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ec38babc-37e8-4bd7-9de0-03009304b2e4',
+            'network_name:public',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.shared',
+        value=0,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ec38babc-37e8-4bd7-9de0-03009304b2e4',
+            'network_name:public',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.is_default',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ec38babc-37e8-4bd7-9de0-03009304b2e4',
+            'network_name:public',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.count',
+        count=0,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:f7b6adc8-24ea-490c-9537-5c4eae015cd8',
+            'network_name:shared',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.admin_state_up',
+        count=0,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:f7b6adc8-24ea-490c-9537-5c4eae015cd8',
+            'network_name:shared',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.mtu',
+        count=0,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:f7b6adc8-24ea-490c-9537-5c4eae015cd8',
+            'network_name:shared',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.port_security_enabled',
+        count=0,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:f7b6adc8-24ea-490c-9537-5c4eae015cd8',
+            'network_name:shared',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.shared',
+        count=0,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:f7b6adc8-24ea-490c-9537-5c4eae015cd8',
+            'network_name:shared',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.count',
+        count=0,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ebdfddd9-14b8-46bd-98d6-10205d13038c',
+            'network_name:private',
+            'network_status:ACTIVE',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.admin_state_up',
+        count=0,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ebdfddd9-14b8-46bd-98d6-10205d13038c',
+            'network_name:private',
+            'network_status:ACTIVE',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.mtu',
+        count=0,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ebdfddd9-14b8-46bd-98d6-10205d13038c',
+            'network_name:private',
+            'network_status:ACTIVE',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.port_security_enabled',
+        count=0,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ebdfddd9-14b8-46bd-98d6-10205d13038c',
+            'network_name:private',
+            'network_status:ACTIVE',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.shared',
+        count=0,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ebdfddd9-14b8-46bd-98d6-10205d13038c',
+            'network_name:private',
+            'network_status:ACTIVE',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            configs.SDK,
+            id='api sdk',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_networks_metrics_with_exclude(aggregator, dd_run_check, instance, openstack_controller_check):
+    instance = instance | {
+        "projects": {
+            "include": [
+                {
+                    "name": ".*",
+                    "network": {
+                        "networks": {
+                            "include": [
+                                {
+                                    "name": "^.*",
+                                },
+                            ],
+                            "exclude": [
+                                "^private.*"
+                            ]
+                        },
+                    },
+                },
+            ],
+        },
+    }
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.neutron.network.count',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ec38babc-37e8-4bd7-9de0-03009304b2e4',
+            'network_name:public',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.admin_state_up',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ec38babc-37e8-4bd7-9de0-03009304b2e4',
+            'network_name:public',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.mtu',
+        value=1500,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ec38babc-37e8-4bd7-9de0-03009304b2e4',
+            'network_name:public',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.port_security_enabled',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ec38babc-37e8-4bd7-9de0-03009304b2e4',
+            'network_name:public',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.shared',
+        value=0,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ec38babc-37e8-4bd7-9de0-03009304b2e4',
+            'network_name:public',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.is_default',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ec38babc-37e8-4bd7-9de0-03009304b2e4',
+            'network_name:public',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.count',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:f7b6adc8-24ea-490c-9537-5c4eae015cd8',
+            'network_name:shared',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.admin_state_up',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:f7b6adc8-24ea-490c-9537-5c4eae015cd8',
+            'network_name:shared',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.mtu',
+        value=1442,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:f7b6adc8-24ea-490c-9537-5c4eae015cd8',
+            'network_name:shared',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.port_security_enabled',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:f7b6adc8-24ea-490c-9537-5c4eae015cd8',
+            'network_name:shared',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.shared',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:f7b6adc8-24ea-490c-9537-5c4eae015cd8',
+            'network_name:shared',
+            'network_status:ACTIVE',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.count',
+        count=0,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ebdfddd9-14b8-46bd-98d6-10205d13038c',
+            'network_name:private',
+            'network_status:ACTIVE',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.admin_state_up',
+        count=0,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ebdfddd9-14b8-46bd-98d6-10205d13038c',
+            'network_name:private',
+            'network_status:ACTIVE',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.mtu',
+        count=0,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ebdfddd9-14b8-46bd-98d6-10205d13038c',
+            'network_name:private',
+            'network_status:ACTIVE',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.port_security_enabled',
+        count=0,
+        tags=[
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'network_id:ebdfddd9-14b8-46bd-98d6-10205d13038c',
+            'network_name:private',
+            'network_status:ACTIVE',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.neutron.network.shared',
+        count=0,
         tags=[
             'domain_id:default',
             'keystone_server:http://127.0.0.1:8080/identity',
