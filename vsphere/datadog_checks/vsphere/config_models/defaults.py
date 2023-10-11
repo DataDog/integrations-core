@@ -52,6 +52,10 @@ def instance_disable_generic_tags():
     return False
 
 
+def instance_event_resource_filters():
+    return ['vm', 'host']
+
+
 def instance_excluded_host_tags():
     return []
 
