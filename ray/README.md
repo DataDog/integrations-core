@@ -153,7 +153,8 @@ The Ray integration can collect logs from the Ray service and forward them to Da
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][13].
 
-Then, set [Log Integrations][9] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][14].
+Then, set Log Integrations as pod annotations. This can also be configured with a file, a configmap, or a key-value store. For more information, see the configuration section of [Kubernetes Log Collection][14].
+
 
 **Annotations v1/v2**
 
@@ -191,4 +192,4 @@ Need help? Contact [Datadog support][9].
 [11]: https://github.com/DataDog/integrations-core/blob/master/ray/datadog_checks/ray/data/conf.yaml.example#L59-L105 
 [12]: https://docs.ray.io/en/latest/ray-observability/user-guides/configure-logging.html
 [13]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
-[14]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
+[14]: https://docs.datadoghq.com/agent/kubernetes/log/#configuration
