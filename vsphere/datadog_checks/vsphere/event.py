@@ -66,7 +66,7 @@ class VSphereEvent(object):
             # Get the entity type/name
             self.entity_type = self.raw_event.entity.entity.__class__
 
-            self.host_type = MOR_TYPE_AS_STRING.get(self.raw_event.entity.entity.__class__, None)
+            self.host_type = MOR_TYPE_AS_STRING.get(self.entity_type, None)
             if self.host_type not in self.event_resource_filters:
                 return True
 
