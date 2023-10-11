@@ -91,6 +91,7 @@ class Component:
                 if func_hash not in self.reported_global_metrics:
                     if func(self, *args, **kwargs):
                         self.reported_global_metrics.append(func_hash)
+
             if component_id not in cls.registered_global_metric_methods:
                 cls.registered_global_metric_methods[component_id] = []
             cls.registered_global_metric_methods[component_id].append(wrapper)

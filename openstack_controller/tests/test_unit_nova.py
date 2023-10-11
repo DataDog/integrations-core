@@ -857,15 +857,10 @@ def test_hypervisors_metrics(aggregator, check, dd_run_check, metrics):
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
 def test_disable_compute_collect_for_all_projects(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
-        "projects": {
-            "include": [
-                {
-                    "name": ".*",
-                    "compute": {
-                        "collect": False,
-                    },
-                },
-            ],
+        "components": {
+            "compute": {
+                "collect": False,
+            },
         },
     }
     check = openstack_controller_check(instance)
@@ -898,17 +893,12 @@ def test_disable_compute_collect_for_all_projects(aggregator, dd_run_check, inst
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
 def test_disable_servers_collect_for_all_projects(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
-        "projects": {
-            "include": [
-                {
-                    "name": ".*",
-                    "compute": {
-                        "servers": {
-                            "collect": False,
-                        },
-                    },
+        "components": {
+            "compute": {
+                "servers": {
+                    "collect": False,
                 },
-            ],
+            },
         },
     }
     check = openstack_controller_check(instance)
@@ -941,22 +931,17 @@ def test_disable_servers_collect_for_all_projects(aggregator, dd_run_check, inst
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
 def test_disable_flavors_collect_for_all_servers(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
-        "projects": {
-            "include": [
-                {
-                    "name": ".*",
-                    "compute": {
-                        "servers": {
-                            "include": [
-                                {
-                                    "name": ".*",
-                                    "flavors": False,
-                                }
-                            ]
-                        },
-                    },
+        "components": {
+            "compute": {
+                "servers": {
+                    "include": [
+                        {
+                            "name": ".*",
+                            "flavors": False,
+                        }
+                    ]
                 },
-            ],
+            },
         },
     }
     check = openstack_controller_check(instance)
@@ -989,22 +974,17 @@ def test_disable_flavors_collect_for_all_servers(aggregator, dd_run_check, insta
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
 def test_disable_diagnostics_collect_for_all_servers(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
-        "projects": {
-            "include": [
-                {
-                    "name": ".*",
-                    "compute": {
-                        "servers": {
-                            "include": [
-                                {
-                                    "name": ".*",
-                                    "diagnostics": False,
-                                }
-                            ]
-                        },
-                    },
+        "components": {
+            "compute": {
+                "servers": {
+                    "include": [
+                        {
+                            "name": ".*",
+                            "diagnostics": False,
+                        }
+                    ]
                 },
-            ],
+            },
         },
     }
     check = openstack_controller_check(instance)
