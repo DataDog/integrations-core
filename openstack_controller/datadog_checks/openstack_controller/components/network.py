@@ -98,14 +98,18 @@ class Network(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_quotas(self, project_id, tags, project_config):
-        item = self.check.api.get_network_quota(project_id)
-        quota = get_metrics_and_tags(
-            item,
-            tags=NEUTRON_QUOTA_TAGS,
-            prefix=NEUTRON_QUOTA_METRICS_PREFIX,
-            metrics=NEUTRON_QUOTA_METRICS,
-        )
-        self.check.log.debug("quota: %s", quota)
-        for metric, value in quota['metrics'].items():
-            self.check.gauge(metric, value, tags=tags + quota['tags'])
+    def _report_quotas(self, project_id, tags, component_config):
+        config_quotas = component_config.get('quotas', {})
+        self.check.log.debug("config_quotas: %s", config_quotas)
+        collect_quotas = config_quotas.get('collect', True)
+        if collect_quotas:
+            item = self.check.api.get_network_quota(project_id)
+            quota = get_metrics_and_tags(
+                item,
+                tags=NEUTRON_QUOTA_TAGS,
+                prefix=NEUTRON_QUOTA_METRICS_PREFIX,
+                metrics=NEUTRON_QUOTA_METRICS,
+            )
+            self.check.log.debug("quota: %s", quota)
+            for metric, value in quota['metrics'].items():
+                self.check.gauge(metric, value, tags=tags + quota['tags'])

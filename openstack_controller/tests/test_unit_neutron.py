@@ -334,6 +334,41 @@ def test_disable_networks_collect_for_all_projects(aggregator, dd_run_check, ins
 
 
 @pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            configs.SDK,
+            id='api sdk',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_disable_quotas_collect_for_all_projects(aggregator, dd_run_check, instance, openstack_controller_check):
+    instance = instance | {
+        "projects": {
+            "include": [
+                {
+                    "name": ".*",
+                    "network": {
+                        "quotas": {
+                            "collect": False,
+                        },
+                    },
+                },
+            ],
+        },
+    }
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    for metric in metrics.NEUTRON_QUOTA_METRICS:
+        aggregator.assert_metric(metric, count=0)
+
+
+@pytest.mark.parametrize(
     ('mock_http_get', 'connection_network', 'instance', 'api_type'),
     [
         pytest.param(
