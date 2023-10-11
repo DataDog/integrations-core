@@ -4,7 +4,7 @@
 
 ***Added***:
 
-* Add support to report SQL obfuscation errors ([#15990](https://github.com/DataDog/integrations-core/pull/15990))
+* Add support for reporting SQL obfuscation errors ([#15990](https://github.com/DataDog/integrations-core/pull/15990))
 
 ## 15.1.0 / 2023-10-06
 

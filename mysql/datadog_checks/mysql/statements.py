@@ -211,9 +211,11 @@ class MySQLStatementMetrics(DBMAsyncJob):
             except Exception as e:
                 self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['digest_text'], e)
                 self._check.count(
-                    "dd.mysql.statements.error",
+                    "dd.mysql.obfuscation.error",
                     1,
-                    tags=self._tags + ["error:sql-obfuscate"] + self._check._get_debug_tags(),
+                    tags=self.tags
+                    + ["error:{}".format(type(e)), "error_msg:{}".format(e)]
+                    + self._check._get_debug_tags(),
                     hostname=self._check.resolved_hostname,
                 )
                 continue
