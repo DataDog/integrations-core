@@ -5,8 +5,8 @@ import pytest
 
 from ddev.repo.core import Repository
 
-OLD_PYTHON_VERSION = "3.9"
-NEW_PYTHON_VERSION = "3.11"
+OLD_PYTHON_VERSION = "3.11"
+NEW_PYTHON_VERSION = "3.12"
 
 
 @pytest.fixture

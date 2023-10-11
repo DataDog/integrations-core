@@ -510,7 +510,7 @@ class PostgreSql(AgentCheck):
             column_values = row[len(descriptors) :]
 
             # build a map of descriptors and their values
-            desc_map = {name: value for (_, name), value in zip(descriptors, descriptor_values)}
+            desc_map = {name: value for (_, name), value in zip(descriptors, descriptor_values, strict=False)}
 
             # Build tags.
 
@@ -532,7 +532,7 @@ class PostgreSql(AgentCheck):
             tags += [("%s:%s" % (k, v)) for (k, v) in iteritems(desc_map)]
 
             # Submit metrics to the Agent.
-            for column, value in zip(cols, column_values):
+            for column, value in zip(cols, column_values, strict=False):
                 name, submit_metric = scope['metrics'][column]
                 submit_metric(self, name, value, tags=set(tags), hostname=self.resolved_hostname)
 
@@ -831,7 +831,7 @@ class PostgreSql(AgentCheck):
                         query_tags = list(custom_query.get('tags', []))
                         query_tags.extend(tags)
 
-                        for column, value in zip(columns, row):
+                        for column, value in zip(columns, row, strict=False):
                             # Columns can be ignored via configuration.
                             if not column:
                                 continue

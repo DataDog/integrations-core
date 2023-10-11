@@ -71,7 +71,7 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.11',
     ],
     # The package we're going to ship
     packages=['datadog_checks.btrfs'],

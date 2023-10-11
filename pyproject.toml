@@ -63,7 +63,7 @@ exclude = [
     "**/datadog_checks/dev/tooling/templates/*",
     "**/datadog_checks/*/vendor/*",
 ]
-target-version = "py38"
+target-version = "py311"
 line-length = 120
 # Rules were ported over from the legacy flake8 settings for parity
 # All the rules can be found here: https://beta.ruff.rs/docs/rules/
@@ -84,6 +84,7 @@ ignore = [
   "B904",
   # Allow non-abstract empty methods in abstract base classes
   "B027",
+  "B905",  # TODO: remove when we drop Python 2
   # Ignore McCabe complexity
   "C901",
 ]

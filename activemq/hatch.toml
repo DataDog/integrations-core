@@ -1,12 +1,12 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["3.9"]
+python = ["3.11"]
 version = ["2.15.0"]
 compose-file = ["artemis.yaml"]
 
 [[envs.default.matrix]]
-python = ["3.9"]
+python = ["3.11"]
 version = ["5.15.9"]
 compose-file = ["activemq.yaml"]
 
