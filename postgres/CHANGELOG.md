@@ -123,7 +123,7 @@
 * Add metrics for timeline id and checkpoint delay ([#14759](https://github.com/DataDog/integrations-core/pull/14759))
 * Add `postgresql.wal.*` metrics from `pg_stat_wal`  ([#13768](https://github.com/DataDog/integrations-core/pull/13768))
 * PG: Add metrics for wal files: count, size and age ([#13725](https://github.com/DataDog/integrations-core/pull/13725))
-* Allow explain plan collection to be configured separately from activity collection in pg agent ([#14673](https://github.com/DataDog/integrations-core/pull/14673))
+*  Allow explain plan collection to be configured separately from activity collection in pg agent ([#14673](https://github.com/DataDog/integrations-core/pull/14673))
 * Make cancel() synchronous in DBMAsyncJob ([#14717](https://github.com/DataDog/integrations-core/pull/14717))
 * Postgres: Add `postgres.snapshot.{xmin,xmax,xip_count}` metric ([#13777](https://github.com/DataDog/integrations-core/pull/13777))
 * Report per-index disk usage metrics for PostgreSQL ([#13880](https://github.com/DataDog/integrations-core/pull/13880)) Thanks [jcoleman](https://github.com/jcoleman).
@@ -866,7 +866,7 @@
 
 ***Fixed***:
 
-* Gracefully handle errors when performing custom_queries ([#2184](https://github.com/DataDog/integrations-core/pull/2184))
+*  Gracefully handle errors when performing custom_queries ([#2184](https://github.com/DataDog/integrations-core/pull/2184))
 * Gracefully handle failed version regex match ([#2178](https://github.com/DataDog/integrations-core/pull/2178))
 
 ## 2.2.0 / 2018-09-04
