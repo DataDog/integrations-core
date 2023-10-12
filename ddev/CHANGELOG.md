@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 5.2.1 / 2023-10-12
+
 ***Fixed***:
 
 * Fix environment metadata accessor ([#16009](https://github.com/DataDog/integrations-core/pull/16009))
