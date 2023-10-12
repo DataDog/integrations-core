@@ -142,7 +142,7 @@ metrics:
         name: panEntryFRUModuleNumPorts
     metric_tags:
       - MIB: ENTITY-MIB
-        column:
+        symbol:
           OID: 1.3.6.1.2.1.47.1.1.1.1.2
           name: entPhysicalDescr
         table: entPhysicalTable
@@ -157,7 +157,7 @@ metrics:
         name: panEntryFanTrayPowerUsed
     metric_tags:
       - MIB: ENTITY-MIB
-        column:
+        symbol:
           OID: 1.3.6.1.2.1.47.1.1.1.1.2
           name: entPhysicalDescr
         table: entPhysicalTable

@@ -14,15 +14,15 @@ metrics:
       - name: cpu.usage
         OID: 1.3.6.1.4.1.171.14.5.1.7.1.3 # dEntityExtCpuUtilOneMinute
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.171.14.5.1.7.1.1
           name: dEntityExtCpuUtilUnitId
         tag: dlink_entity_ext_cpu_util_unit_id
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.171.14.5.1.7.1.2
           name: dEntityExtCpuUtilCpuID
         tag: cpu
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.171.14.5.1.7.1.2
           name: dEntityExtCpuUtilCpuID
         tag: dlink_entity_ext_cpu_util_cpu_id # duplicated for readability
@@ -36,11 +36,11 @@ metrics:
       - name: memory.used
         OID: 1.3.6.1.4.1.171.14.5.1.4.1.4
     metric_tags:
-      - column:
+      - symbol:
           name: dEntityExtMemUtilUnitId
           OID: 1.3.6.1.4.1.171.14.5.1.4.1.1
         tag: mem
-      - column:
+      - symbol:
           name: dEntityExtMemUtilType
           OID: 1.3.6.1.4.1.171.14.5.1.4.1.2
         tag: d_entity_ext_mem_util_type
@@ -56,19 +56,19 @@ metrics:
       - name: dlink.dEntityExtEnvTempCurrent
         OID: 1.3.6.1.4.1.171.14.5.1.1.1.1.4
     metric_tags:
-      - column:
+      - symbol:
           name: dEntityExtEnvTempUnitId
           OID: 1.3.6.1.4.1.171.14.5.1.1.1.1.1
         tag: d_entity_ext_env_temp_unit_id
-      - column:
+      - symbol:
           name: dEntityExtEnvTempIndex
           OID: 1.3.6.1.4.1.171.14.5.1.1.1.1.2
         tag: d_entity_ext_env_temp_index
-      - column:
+      - symbol:
           name: dEntityExtEnvTempDescr
           OID: 1.3.6.1.4.1.171.14.5.1.1.1.1.3
         tag: d_entity_ext_env_temp_descr
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.171.14.5.1.1.1.1.7
           name: dEntityExtEnvTempStatus
         tag: d_entity_ext_env_temp_status
@@ -83,19 +83,19 @@ metrics:
       - name: dlink.dEntityExtEnvFan
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: dEntityExtEnvFanUnitId
           OID: 1.3.6.1.4.1.171.14.5.1.1.2.1.1
         tag: d_entity_ext_env_fan_unit_id
-      - column:
+      - symbol:
           name: dEntityExtEnvFanIndex
           OID: 1.3.6.1.4.1.171.14.5.1.1.2.1.2
         tag: d_entity_ext_env_fan_index
-      - column:
+      - symbol:
           name: dEntityExtEnvFanDescr
           OID: 1.3.6.1.4.1.171.14.5.1.1.2.1.3
         tag: d_entity_ext_env_fan_descr
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.171.14.5.1.1.2.1.4
           name: dEntityExtEnvFanStatus
         tag: d_entity_ext_env_fan_status
@@ -112,19 +112,19 @@ metrics:
       - name: dlink.dEntityExtEnvPowerMaxPower
         OID: 1.3.6.1.4.1.171.14.5.1.1.3.1.5
     metric_tags:
-      - column:
+      - symbol:
           name: dEntityExtEnvPowerUnitId
           OID: 1.3.6.1.4.1.171.14.5.1.1.3.1.1
         tag: d_entity_ext_env_power_unit_id
-      - column:
+      - symbol:
           name: dEntityExtEnvPowerIndex
           OID: 1.3.6.1.4.1.171.14.5.1.1.3.1.2
         tag: d_entity_ext_env_power_index
-      - column:
+      - symbol:
           name: dEntityExtEnvPowerDescr
           OID: 1.3.6.1.4.1.171.14.5.1.1.3.1.3
         tag: d_entity_ext_env_power_descr
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.171.14.5.1.1.3.1.6
           name: dEntityExtEnvPowerStatus
         tag: d_entity_ext_env_power_status
@@ -140,11 +140,11 @@ metrics:
       - name: dlink.dEntityExtEnvAirFlow
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: dEntityExtEnvAirFlowUnitId
           OID: 1.3.6.1.4.1.171.14.5.1.1.4.1.1
         tag: d_entity_ext_env_air_flow_unit_id
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.171.14.5.1.1.4.1.2
           name: dEntityExtEnvAirFlowStatus
         tag: d_entity_ext_env_air_flow_status
@@ -159,11 +159,11 @@ metrics:
       - name: dlink.dEntityExtUnit
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: dEntityExtUnitIndex
           OID: 1.3.6.1.4.1.171.14.5.1.3.1.1
         tag: d_entity_ext_unit_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.171.14.5.1.3.1.2
           name: dEntityExtUnitStatus
         tag: d_entity_ext_unit_status
