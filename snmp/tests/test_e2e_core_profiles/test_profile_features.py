@@ -4,14 +4,10 @@
 
 import pytest
 
-from datadog_checks.dev.utils import get_metadata_metrics
-
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
-    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
-    assert_extend_generic_if,
     create_e2e_core_test_config,
     get_device_ip_from_config,
 )
@@ -55,7 +51,7 @@ def test_e2e_features(dd_agent_check):
         'name': 'features.device.name',
         'profile': 'features',
         'status': 1,
-        'sys_object_id': '1.2.3.20231012'
+        'sys_object_id': '1.2.3.20231012',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
