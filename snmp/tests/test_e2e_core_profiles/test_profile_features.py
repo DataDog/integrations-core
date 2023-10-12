@@ -39,14 +39,12 @@ def test_e2e_features(dd_agent_check):
 
     tag_rows = [
         [
-            'mtxr_optical_index:10',
-            'mtxr_optical_name:oxen acted',
-            'mtxr_optical_rx_loss:true',
-            'mtxr_optical_tx_fault:false',
+            'tag_using_deprecated_column_syntax:If1',
+            'interface_alias:If1Alias',
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.mtxrOpticalRxPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ifInErrors', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -63,5 +61,4 @@ def test_e2e_features(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
-    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()

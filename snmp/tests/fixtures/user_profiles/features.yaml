@@ -2,6 +2,9 @@
 # Especially deprecated features since they are not used anymore in our default profiles,
 # but we need to keep backward compatibility.
 
+extends:
+  - _base.yaml
+
 sysobjectid: 1.2.3.20231012
 
 metrics:
@@ -15,9 +18,9 @@ metrics:
   metric_tags:
   - column:  # test deprecated `column` syntax
       OID: 1.3.6.1.2.1.31.1.1.1.1
-      name: ifName_usingDeprecatedColumnSyntax
+      name: ifName
     table: ifXTable
-    tag: interface
+    tag: tag_using_deprecated_column_syntax
   - symbol:
       OID: 1.3.6.1.2.1.31.1.1.1.18
       name: ifAlias
