@@ -121,7 +121,9 @@ class VSphereConfig(object):
         # Filters
         self.resource_filters = self._parse_resource_filters(instance.get("resource_filters", []))
         self.metric_filters = self._parse_metric_regex_filters(instance.get("metric_filters", {}))
-        self.event_resource_filters = instance.get("event_resource_filters", DEFAULT_EVENT_RESOURCES)
+        self.event_resource_filters = self._normalize_event_resource_filters(
+            instance.get("event_resource_filters", DEFAULT_EVENT_RESOURCES)
+        )
 
         # Since `collect_per_instance_filters` have the same structure as `metric_filters` we use the same parser
         self.collect_per_instance_filters = self._parse_metric_regex_filters(
@@ -281,6 +283,9 @@ class VSphereConfig(object):
             metric_filters[resource_type] = filters
 
         return {k: [re.compile(r) for r in v] for k, v in iteritems(metric_filters)}
+
+    def _normalize_event_resource_filters(self, filters):
+        return [filter.lower() for filter in filters]
 
     @property
     def object_properties_to_collect_by_mor(self):

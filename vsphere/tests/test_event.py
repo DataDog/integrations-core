@@ -120,7 +120,7 @@ def test_events_collection(aggregator, realtime_instance):
     assert check.latest_event_query == time3 + dt.timedelta(seconds=1)
 
     aggregator.reset()
-    realtime_instance['event_resource_filters'] = ['vm', 'host', 'datacenter', 'cluster', 'datastore']
+    realtime_instance['event_resource_filters'] = ['vm', 'host', 'DATAcenter', 'Cluster', 'datastore']
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     check.initiate_api_connection()
 
