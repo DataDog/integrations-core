@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Migrate E2E features ([#15931](https://github.com/DataDog/integrations-core/pull/15931))
+
 ## 5.1.1 / 2023-09-29
 
 ***Fixed***:

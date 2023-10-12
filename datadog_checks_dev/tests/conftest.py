@@ -11,7 +11,7 @@ def mock_e2e_config():
 
 @pytest.fixture(scope='session')
 def mock_e2e_metadata():
-    return {'env_type': 'vagrant', 'future': 'now', 'env_vars': {}}
+    return {'agent_type': 'vagrant', 'e2e_env_vars': {}, 'future': 'now', 'env_vars': {}}
 
 
 @pytest.fixture(scope='session')
