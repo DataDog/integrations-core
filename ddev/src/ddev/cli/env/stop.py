@@ -45,7 +45,7 @@ def stop(app: Application, *, intg_name: str, environment: str, ignore_state: bo
         metadata = env_data.read_metadata()
         env_vars.update(metadata.get(E2EMetadata.ENV_VARS, {}))
 
-        agent_type = metadata.get(E2EMetadata.ENV_VARS, DEFAULT_AGENT_TYPE)
+        agent_type = metadata.get(E2EMetadata.AGENT_TYPE, DEFAULT_AGENT_TYPE)
         agent = get_agent_interface(agent_type)(app.platform, integration, environment, metadata, env_data.config_file)
 
         try:
