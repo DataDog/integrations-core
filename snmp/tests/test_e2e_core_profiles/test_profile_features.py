@@ -50,15 +50,14 @@ def test_e2e_features(dd_agent_check):
 
     # --- TEST METADATA ---
     device = {
-        'description': 'features Device Description',
+        'description': 'Fake features test device',
         'id': 'default:' + ip_address,
         'id_tags': ['device_namespace:default', 'snmp_device:' + ip_address],
         'ip_address': '' + ip_address,
         'name': 'features.device.name',
         'profile': 'features',
         'status': 1,
-        'sys_object_id': '1.3.6.1.4.1.14988.1.999',
-        'vendor': 'mikrotik',
+        'sys_object_id': '1.2.3.20231012'
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
