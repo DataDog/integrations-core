@@ -4,7 +4,7 @@
 
 ***Added***:
 
-* Add support for configuring what resources to collet events for ([#15992](https://github.com/DataDog/integrations-core/pull/15992))
+* Add support for configuring what resources to collect events from ([#15992](https://github.com/DataDog/integrations-core/pull/15992))
 
 ## 7.1.0 / 2023-09-29
 
