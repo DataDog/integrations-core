@@ -166,11 +166,11 @@ metrics:
       - name: axFanSpeed
         OID: 1.3.6.1.4.1.22610.2.4.1.5.9.1.4
     metric_tags:
-      - column:
+      - symbol:
           name: axFanName
           OID: 1.3.6.1.4.1.22610.2.4.1.5.9.1.2
         tag: ax_fan_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.22610.2.4.1.5.9.1.3
           name: axFanStatus
         tag: ax_fan_status
@@ -190,11 +190,11 @@ metrics:
       - name: axPowerSupplyVoltage
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: axPowerSupplyVoltageDescription
           OID: 1.3.6.1.4.1.22610.2.4.1.5.11.1.3
         tag: ax_power_supply_voltage_description
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.22610.2.4.1.5.11.1.2
           name: axPowerSupplyVoltageStatus
         tag: ax_power_supply_voltage_status
@@ -210,11 +210,11 @@ metrics:
       - name: axSysPowerSupplyStatus
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: axPowerSupplyName
           OID: 1.3.6.1.4.1.22610.2.4.1.5.12.1.2
         tag: ax_power_supply_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.22610.2.4.1.5.12.1.3
           name: axPowerSupplyStatus
         tag: ax_power_supply_status
@@ -233,7 +233,7 @@ metrics:
       - name: axAppGlobalAllowedMaxValue
         OID: 1.3.6.1.4.1.22610.2.4.3.1.1.1.1.6
     metric_tags:
-      - column:
+      - symbol:
           name: axAppGlobalSystemResourceName
           OID: 1.3.6.1.4.1.22610.2.4.3.1.1.1.1.2
         tag: ax_app_global_system_resource_name
@@ -245,18 +245,18 @@ metrics:
       - name: axServer
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: axServerName
           OID: 1.3.6.1.4.1.22610.2.4.3.2.1.2.1.1
         tag: ax_server_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.22610.2.4.3.2.1.2.1.3
           name: axServerEnabledState
         tag: ax_server_enabled_state
         mapping:
           0: disabled
           1: enabled
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.22610.2.4.3.2.1.2.1.5
           name: axServerMonitorState
         tag: ax_server_monitor_state
@@ -275,11 +275,11 @@ metrics:
         OID: 1.3.6.1.4.1.22610.2.4.3.2.2.2.1.12
         metric_type: monotonic_count
     metric_tags:
-      - column:
+      - symbol:
           name: axServerStatName
           OID: 1.3.6.1.4.1.22610.2.4.3.2.2.2.1.2
         tag: ax_server_stat_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.22610.2.4.3.2.2.2.1.10
           name: axServerStatServerStatus
         tag: ax_server_stat_server_status
@@ -295,11 +295,11 @@ metrics:
       - name: axServiceGroup
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: axServiceGroupName
           OID: 1.3.6.1.4.1.22610.2.4.3.3.1.2.1.1
         tag: ax_service_group_name
-      - column:
+      - symbol:
           name: axServiceGroupType
           OID: 1.3.6.1.4.1.22610.2.4.3.3.1.2.1.2
         tag: ax_service_group_type
@@ -307,7 +307,7 @@ metrics:
           1: firewall
           2: tcp
           3: udp
-      - column:
+      - symbol:
           name: axServiceGroupLbAlgorithm
           OID: 1.3.6.1.4.1.22610.2.4.3.3.1.2.1.3
         tag: ax_service_group_lb_algorithm
@@ -321,7 +321,7 @@ metrics:
           6: fast_response_time
           7: least_request
           8: round_robin_strict
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.22610.2.4.3.3.1.2.1.4
           name: axServiceGroupDisplayStatus
         tag: ax_service_group_display_status
@@ -338,22 +338,22 @@ metrics:
       - name: axVirtualServer
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: axVirtualServerName
           OID: 1.3.6.1.4.1.22610.2.4.3.4.1.2.1.1
         tag: ax_virtual_server_name
-      - column:
+      - symbol:
           name: axVirtualServerHAGroup
           OID: 1.3.6.1.4.1.22610.2.4.3.4.1.2.1.4
         tag: ax_virtual_server_ha_group
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.22610.2.4.3.4.1.2.1.3
           name: axVirtualServerEnabled
         tag: ax_virtual_server_enabled
         mapping:
           0: disabled
           1: enabled
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.22610.2.4.3.4.1.2.1.5
           name: axVirtualServerDisplayStatus
         tag: ax_virtual_server_display_status
@@ -397,15 +397,15 @@ metrics:
         OID: 1.3.6.1.4.1.22610.2.4.3.4.2.1.1.14
         metric_type: monotonic_count
     metric_tags:
-      - column:
+      - symbol:
           name: axVirtualServerStatAddress
           OID: 1.3.6.1.4.1.22610.2.4.3.4.2.1.1.1
         tag: ax_virtual_server_stat_address
-      - column:
+      - symbol:
           name: axVirtualServerStatName
           OID: 1.3.6.1.4.1.22610.2.4.3.4.2.1.1.2
         tag: ax_virtual_server_stat_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.22610.2.4.3.4.2.1.1.10
           name: axVirtualServerStatStatus
         tag: ax_virtual_server_stat_status
@@ -413,7 +413,7 @@ metrics:
           1: up
           2: down
           3: disabled
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.22610.2.4.3.4.2.1.1.11
           name: axVirtualServerStatDisplayStatus
         tag: ax_virtual_server_stat_display_status
@@ -429,11 +429,11 @@ metrics:
       - name: axVirtualServerPortStatCurConns
         OID: 1.3.6.1.4.1.22610.2.4.3.4.4.1.1.12
     metric_tags:
-      - column:
+      - symbol:
           name: axVirtualServerPortStatAddress
           OID: 1.3.6.1.4.1.22610.2.4.3.4.4.1.1.1
         tag: ax_virtual_server_port_stat_address
-      - column:
+      - symbol:
           name: axVirtualServerStatPortType
           OID: 1.3.6.1.4.1.22610.2.4.3.4.4.1.1.2
         tag: ax_virtual_server_stat_port_type
@@ -453,15 +453,15 @@ metrics:
           19: sips
           18: sip_tcp
           5: others
-      - column:
+      - symbol:
           name: axVirtualServerStatPortNum
           OID: 1.3.6.1.4.1.22610.2.4.3.4.4.1.1.3
         tag: ax_virtual_server_stat_port_num
-      - column:
+      - symbol:
           name: axVirtualServerPortStatName
           OID: 1.3.6.1.4.1.22610.2.4.3.4.4.1.1.4
         tag: ax_virtual_server_port_stat_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.22610.2.4.3.4.4.1.1.5
           name: axVirtualServerStatPortStatus
         tag: ax_virtual_server_stat_port_status
@@ -469,7 +469,7 @@ metrics:
           1: up
           2: down
           3: disabled
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.22610.2.4.3.4.4.1.1.13
           name: axVirtualServerStatPortDisplayStatus
         tag: ax_virtual_server_stat_port_display_status

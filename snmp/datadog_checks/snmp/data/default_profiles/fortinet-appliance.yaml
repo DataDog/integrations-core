@@ -167,15 +167,15 @@ metrics:
       - name: fmDevice
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: fmDeviceEntName
           OID: 1.3.6.1.4.1.12356.103.6.2.1.2
         tag: fm_device_ent_name
-      - column:
+      - symbol:
           name: fmDeviceEntSn
           OID: 1.3.6.1.4.1.12356.103.6.2.1.3
         tag: fm_device_ent_sn
-      - column:
+      - symbol:
           name: fmDeviceEntMode
           OID: 1.3.6.1.4.1.12356.103.6.2.1.4
         tag: fm_device_ent_mode
@@ -184,15 +184,15 @@ metrics:
           1: fmg
           2: faz
           3: fmg-faz
-      - column:
+      - symbol:
           name: fmDeviceEntAdom
           OID: 1.3.6.1.4.1.12356.103.6.2.1.5
         tag: fm_device_ent_adom
-      - column:
+      - symbol:
           name: fmDeviceEntIp
           OID: 1.3.6.1.4.1.12356.103.6.2.1.6
         tag: fm_device_ent_ip
-      - column:
+      - symbol:
           name: fmDeviceEntHaMode
           OID: 1.3.6.1.4.1.12356.103.6.2.1.10
         tag: fm_device_ent_ha_mode
@@ -203,15 +203,15 @@ metrics:
           3: elbc
           4: dual
           5: fmg
-      - column:
+      - symbol:
           name: fmDeviceEntHaGroup
           OID: 1.3.6.1.4.1.12356.103.6.2.1.11
         tag: fm_device_ent_ha_group
-      - column:
+      - symbol:
           name: fmDeviceEntDesc
           OID: 1.3.6.1.4.1.12356.103.6.2.1.24
         tag: fm_device_ent_desc
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.12356.103.6.2.1.12
           name: fmDeviceEntConnectState
         tag: fm_device_ent_connect_state
@@ -219,7 +219,7 @@ metrics:
           0: unknown
           1: up
           2: down
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.12356.103.6.2.1.13
           name: fmDeviceEntDbState
         tag: fm_device_ent_db_state
@@ -227,7 +227,7 @@ metrics:
           0: unknown
           1: not-modified
           2: modified
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.12356.103.6.2.1.14
           name: fmDeviceEntConfigState
         tag: fm_device_ent_config_state
@@ -235,7 +235,7 @@ metrics:
           0: unknown
           1: in-sync
           2: out-of-sync
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.12356.103.6.2.1.15
           name: fmDeviceEntState
         tag: fm_device_ent_state
@@ -256,7 +256,7 @@ metrics:
           13: timeout
           14: rev-reverted
           15: auto-updated
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.12356.103.6.2.1.18
           name: fmDeviceEntSupportState
         tag: fm_device_ent_support_state
@@ -271,7 +271,7 @@ metrics:
       - name: fmRaidDiskEntSize
         OID: 1.3.6.1.4.1.12356.103.7.2.1.3
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.12356.103.7.2.1.2
           name: fmRaidDiskEntState
         tag: fm_raid_disk_ent_state
@@ -291,11 +291,11 @@ metrics:
   #       OID: 1.3.6.1.4.1.12356.103.8.2.1.3
   # scalar string metric is not supported yet (keep this metric and this comment in profile until it's fixed)
   #   metric_tags:
-  #     - column:
+  #     - symbol:
   #         name: fmSensorEntName
   #         OID: 1.3.6.1.4.1.12356.103.8.2.1.2
   #       tag: fm_sensor_ent_name
-  #     - column:
+  #     - symbol:
   #         name: fmSensorEntType
   #         OID: 1.3.6.1.4.1.12356.103.8.2.1.4
   #       tag: fm_sensor_ent_type
@@ -304,7 +304,7 @@ metrics:
   #         1: fan
   #         2: temperature
   #         3: voltage
-  #     - column:
+  #     - symbol:
   #         OID: 1.3.6.1.4.1.12356.103.8.2.1.5
   #         name: fmSensorEntState
   #       tag: fm_sensor_ent_state
@@ -324,26 +324,26 @@ metrics:
       - name: fmHaPeer
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: fmHaPeerEntIp
           OID: 1.3.6.1.4.1.12356.103.9.2.1.2
         tag: fm_ha_peer_ent_ip
-      - column:
+      - symbol:
           name: fmHaPeerEntSn
           OID: 1.3.6.1.4.1.12356.103.9.2.1.3
         tag: fm_ha_peer_ent_sn
-      - column:
+      - symbol:
           name: fmHaPeerEntHostName
           OID: 1.3.6.1.4.1.12356.103.9.2.1.5
         tag: fm_ha_peer_ent_host_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.12356.103.9.2.1.4
           name: fmHaPeerEntEnabled
         tag: fm_ha_peer_ent_enabled
         mapping:
           1: disabled
           2: enabled
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.12356.103.9.2.1.6
           name: fmHaPeerEntState
         tag: fm_ha_peer_ent_state

@@ -17,7 +17,7 @@ metrics:
       - OID: 1.3.6.1.4.1.1347.43.18.2.1.3
         name: kcprtAlertStateCode
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.1347.43.18.2.1.2
           name: kcprtAlertStateDisplay
         tag: kcprt_alert_state_display
@@ -31,7 +31,7 @@ metrics:
       - OID: 1.3.6.1.4.1.1347.43.20.1.1.5
         name: kcprtMemoryDeviceUsedSize
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.1347.43.20.1.1.2
           name: kcprtMemoryDeviceLocation
         tag: kcprt_memory_device_location
@@ -44,7 +44,7 @@ metrics:
           5: hard_disk
           6: memory_card
           255: others
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.1347.43.20.1.1.3
           name: kcprtMemoryDeviceType
         tag: kcprt_memory_device_type
@@ -55,7 +55,7 @@ metrics:
           3: dram
           4: strage
           255: others
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.1347.43.20.1.1.6
           name: kcprtMemoryDeviceStatus
         tag: kcprt_memory_device_status

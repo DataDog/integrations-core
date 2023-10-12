@@ -38,7 +38,7 @@ metrics:
         tag: fc_fe_module_index
       - index: 2  # fcFxPortIndex is index #2 of fcFxPortEntry
         tag: fc_fx_port_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.75.1.2.1.1.3
           name: fcFxPortOperMode
         tag: fc_fx_port_oper_mode
@@ -46,7 +46,7 @@ metrics:
           1: unknown
           2: f_port
           3: fl_port
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.75.1.2.1.1.4
           name: fcFxPortAdminMode
         tag: fc_fx_port_admin_mode
@@ -65,7 +65,7 @@ metrics:
         tag: fc_fe_module_index
       - index: 2  # fcFxPortIndex is index #2 of fcFxPortEntry
         tag: fc_fx_port_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.75.1.2.2.1.1
           name: fcFxPortPhysAdminStatus
         tag: fc_fx_port_phys_admin_status
@@ -73,7 +73,7 @@ metrics:
           1: online
           2: offline
           3: testing
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.75.1.2.2.1.2
           name: fcFxPortPhysOperStatus
         tag: fc_fx_port_phys_oper_status
@@ -133,11 +133,11 @@ metrics:
         OID: 1.3.6.1.4.1.1588.2.1.1.1.6.2.1.28
         metric_type: monotonic_count
     metric_tags:
-      - column:
+      - symbol:
           name: swFCPortName
           OID: 1.3.6.1.4.1.1588.2.1.1.1.6.2.1.36
         tag: sw_fc_port_name
-      - column:
+      - symbol:
           name: swFCPortSpecifier
           OID: 1.3.6.1.4.1.1588.2.1.1.1.6.2.1.37
         tag: sw_fc_port_specifier

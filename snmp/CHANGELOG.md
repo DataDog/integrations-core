@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Update default profiles column to symbol ([#15998](https://github.com/DataDog/integrations-core/pull/15998))
+
 ## 7.0.0 / 2023-09-29
 
 ***Changed***:
