@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 7.2.0-beta.1 / 2023-10-12
+
 ***Added***:
 
 * Add support for configuring what resources to collect events from ([#15992](https://github.com/DataDog/integrations-core/pull/15992))
