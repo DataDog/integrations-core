@@ -272,10 +272,10 @@ files:
       value:
         type: string
     - name: timeout
-      description: The number of seconds to wait for new event signals.
+      description: The number of milliseconds to wait for new event signals.
       value:
-        type: number
-        example: 5
+        type: integer
+        example: 5000
     - name: payload_size
       description: |
         The number of events to request at a time.
