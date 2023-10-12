@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import os
+import re
 from collections import namedtuple
 
 import mock
@@ -14,7 +15,12 @@ from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
 from datadog_checks.sqlserver.metrics import SqlDbIndexUsageStats, SqlFractionMetric, SqlMasterDatabaseFileStats
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
-from datadog_checks.sqlserver.utils import Database, parse_sqlserver_major_version, set_default_driver_conf
+from datadog_checks.sqlserver.utils import (
+    Database,
+    extract_sql_comments_and_procedure_name,
+    parse_sqlserver_major_version,
+    set_default_driver_conf,
+)
 
 from .common import CHECK_NAME, DOCKER_SERVER, assert_metrics
 from .utils import windows_ci
@@ -486,3 +492,237 @@ def test_database_state(aggregator, dd_run_check, init_config, instance_docker):
         'db:{}'.format(instance_docker['database']),
     ]
     aggregator.assert_metric('sqlserver.database.state', tags=expected_tags, hostname=sqlserver_check.resolved_hostname)
+
+
+@pytest.mark.parametrize(
+    "query,expected_comments,is_proc,expected_name",
+    [
+        [
+            None,
+            [],
+            False,
+            None,
+        ],
+        [
+            "",
+            [],
+            False,
+            None,
+        ],
+        [
+            "/*",
+            [],
+            False,
+            None,
+        ],
+        [
+            "--",
+            [],
+            False,
+            None,
+        ],
+        [
+            "/*justonecomment*/",
+            ["/*justonecomment*/"],
+            False,
+            None,
+        ],
+        [
+            """\
+            /* a comment */
+            -- Single comment
+            """,
+            ["/* a comment */", "-- Single comment"],
+            False,
+            None,
+        ],
+        [
+            "/*tag=foo*/ SELECT * FROM foo;",
+            ["/*tag=foo*/"],
+            False,
+            None,
+        ],
+        [
+            "/*tag=foo*/ SELECT * FROM /*other=tag,incomment=yes*/ foo;",
+            ["/*tag=foo*/", "/*other=tag,incomment=yes*/"],
+            False,
+            None,
+        ],
+        [
+            "/*tag=foo*/ SELECT * FROM /*other=tag,incomment=yes*/ foo /*lastword=yes*/",
+            ["/*tag=foo*/", "/*other=tag,incomment=yes*/", "/*lastword=yes*/"],
+            False,
+            None,
+        ],
+        [
+            """\
+            -- My Comment
+            CREATE PROCEDURE bobProcedure
+            BEGIN
+                SELECT name FROM bob
+            END;
+            """,
+            ["-- My Comment"],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            -- My procedure
+            CREATE PROCEDURE bobProcedure
+            BEGIN
+                SELECT name FROM bob
+            END;
+            """,
+            ["-- My procedure"],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            -- My Comment
+            CREATE PROCEDURE bobProcedure
+            -- In the middle
+            BEGIN
+                SELECT name FROM bob
+            END;
+            """,
+            ["-- My Comment", "-- In the middle"],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            -- My Comment
+            CREATE PROCEDURE bobProcedure
+            -- this procedure does foo
+            BEGIN
+                SELECT name FROM bob
+            END;
+            """,
+            ["-- My Comment", "-- this procedure does foo"],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            -- My Comment
+            CREATE PROCEDURE bobProcedure
+            -- In the middle
+            BEGIN
+                SELECT name FROM bob
+            END;
+            -- And at the end
+            """,
+            ["-- My Comment", "-- In the middle", "-- And at the end"],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            -- My Comment
+            CREATE PROCEDURE bobProcedure
+            -- In the middle
+            /*mixed with mult-line foo*/
+            BEGIN
+                SELECT name FROM bob
+            END;
+            -- And at the end
+            """,
+            ["-- My Comment", "-- In the middle", "/*mixed with mult-line foo*/", "-- And at the end"],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            -- My procedure
+            CREATE PROCEDURE bobProcedure
+            -- In the middle
+            /*mixed with procedure foo*/
+            BEGIN
+                SELECT name FROM bob
+            END;
+            -- And at the end
+            """,
+            ["-- My procedure", "-- In the middle", "/*mixed with procedure foo*/", "-- And at the end"],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            /* hello
+            this is a mult-line-comment
+            tag=foo,blah=tag
+            */
+            /*
+            second multi-line
+            comment
+            */
+            CREATE PROCEDURE bobProcedure
+            BEGIN
+                SELECT name FROM bob
+            END;
+            -- And at the end
+            """,
+            [
+                "/* hello this is a mult-line-comment tag=foo,blah=tag */",
+                "/* second multi-line comment */",
+                "-- And at the end",
+            ],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            /* hello
+            this is a mult-line-comment
+            tag=foo,blah=tag
+            */
+            /*
+            second multi-line
+            for procedure foo
+            */
+            CREATE PROCEDURE bobProcedure
+            BEGIN
+                SELECT name FROM bob
+            END;
+            -- And at the end
+            """,
+            [
+                "/* hello this is a mult-line-comment tag=foo,blah=tag */",
+                "/* second multi-line for procedure foo */",
+                "-- And at the end",
+            ],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            /* hello
+            this is a mult-line-commet
+            tag=foo,blah=tag
+            */
+            CREATE PROCEDURE bobProcedure
+            -- In the middle
+            /*mixed with mult-line foo*/
+            BEGIN
+                SELECT name FROM bob
+            END;
+            -- And at the end
+            """,
+            [
+                "/* hello this is a mult-line-commet tag=foo,blah=tag */",
+                "-- In the middle",
+                "/*mixed with mult-line foo*/",
+                "-- And at the end",
+            ],
+            True,
+            "bobProcedure",
+        ],
+    ],
+)
+def test_extract_sql_comments_and_procedure_name(query, expected_comments, is_proc, expected_name):
+    comments, p, name = extract_sql_comments_and_procedure_name(query)
+    assert comments == expected_comments
+    assert p == is_proc
+    assert re.match(name, expected_name, re.IGNORECASE) if expected_name else expected_name == name
