@@ -5,6 +5,7 @@
 ***Fixed***:
 
 * Properly decode query_hash when statement_text is None ([#15974](https://github.com/DataDog/integrations-core/pull/15974))
+* Strip sql comments before parsing procedure name ([#16004](https://github.com/DataDog/integrations-core/pull/16004))
 
 ## 15.0.1 / 2023-10-06
 
