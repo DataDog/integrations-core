@@ -22,7 +22,7 @@ def test_nonexistent(ddev, helpers, mocker):
     restart.assert_not_called()
 
 
-def test_basic(ddev, data_dir, mocker):
+def test_basic(ddev, helpers, data_dir, mocker):
     restart = mocker.patch('ddev.e2e.agent.docker.DockerAgent.restart')
 
     integration = 'postgres'
@@ -33,6 +33,10 @@ def test_basic(ddev, data_dir, mocker):
     result = ddev('env', 'reload', integration, environment)
 
     assert result.exit_code == 0, result.output
-    assert not result.output
+    assert result.output == helpers.dedent(
+        f"""
+        Config reloaded: {env_data.config_file}
+        """
+    )
 
     restart.assert_called_once()
