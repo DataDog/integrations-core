@@ -36,7 +36,7 @@ def test_e2e_features(dd_agent_check):
     tag_rows = [
         [
             'tag_using_deprecated_column_syntax:If1',
-            'interface_alias:If1Alias',
+            'tag_using_symbol_syntax:If1Alias',
         ],
     ]
     for tag_row in tag_rows:
