@@ -162,7 +162,7 @@ class DockerAgent(AgentInterface):
                     remaining = ':'.join(parts[2:])
                     volumes[i] = f'/{vm_file}:{remaining}'
 
-        if not os.getenv('DDEV_E2E_DOCKER_NO_PULL') != '1':
+        if os.getenv('DDEV_E2E_DOCKER_NO_PULL') != '1':
             process = self._run_command(['docker', 'pull', agent_build])
             if process.returncode:
                 raise RuntimeError(f'Could not pull image {agent_build}')
