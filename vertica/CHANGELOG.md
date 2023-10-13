@@ -2,7 +2,13 @@
 
 ## Unreleased
 
-## 4.1.0 / 2023-08-18
+## 4.2.0 / 2023-09-29
+
+***Added***:
+
+* Update Vertica dependency to 1.3.5 ([#15922](https://github.com/DataDog/integrations-core/pull/15922))
+
+## 4.1.0 / 2023-08-18 / Agent 7.48.0
 
 ***Added***:
 
@@ -23,7 +29,7 @@
 * Close and recreate a connection instead of using the `reset_connection` method ([#15413](https://github.com/DataDog/integrations-core/pull/15413))
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 3.5.0 / 2023-07-10
+## 3.5.0 / 2023-07-10 / Agent 7.47.0
 
 ***Added***:
 

@@ -84,15 +84,15 @@ metrics:
     metric_type: monotonic_count
     metric_tags:
       - tag: index
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.789.1.19.11.1.1
           name: svIndex
       - tag: destination
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.789.1.19.11.1.3
           name: svDst
       - tag: state
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.789.1.19.11.1.5
           name: svState
 
@@ -108,11 +108,11 @@ metrics:
         name: snapmirrorLag # SNMP type is TimeTicks
     metric_tags:
       - tag: index
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.789.1.9.20.1.1
           name: snapmirrorIndex
       - tag: state
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.789.1.9.20.1.5
           name: snapmirrorState
 
@@ -126,11 +126,11 @@ metrics:
         name: snapmirrorTotalFailures
     metric_tags:
       - tag: index
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.789.1.9.20.1.1
           name: snapmirrorIndex
       - tag: state
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.789.1.9.20.1.5
           name: snapmirrorState
 
@@ -152,11 +152,11 @@ metrics:
         name: dfInodesFree
     metric_tags:
       - tag: index
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.789.1.5.4.1.1
           name: dfIndex
       - tag: filesystem
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.789.1.5.4.1.2
           name: dfFileSys
 
@@ -172,11 +172,11 @@ metrics:
         name: ifHighInOctets
     metric_tags:
       - tag: index
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.789.1.22.1.2.1.1
           name: netifIndex
       - tag: interface
-        column:
+        symbol:
           # A DisplayString that represents the manufacturer, product name and hardware version.
           # Will be normalized to something like 'netgear_ifX300_v1'.
           OID: 1.3.6.1.4.1.789.1.22.1.2.1.2

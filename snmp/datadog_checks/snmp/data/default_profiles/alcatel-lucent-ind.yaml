@@ -23,7 +23,9 @@ metrics:
       - name: alcatel.ind.chasEntPhysical
         constant_value_one: true
     metric_tags:
-      - column:
+      - # MIB: ENTITY-MIB
+        # table: entPhysicalTable
+        symbol:
           OID: 1.3.6.1.2.1.47.1.1.1.1.5
           name: alcatel.ind.entPhysicalClass
         tag: ent_physical_class
@@ -40,19 +42,28 @@ metrics:
           10: port
           11: stack
           12: cpu
-      - column:
+          13: energy_object
+          14: battery
+          15: storage_drive
+      - # MIB: ENTITY-MIB
+        # table: entPhysicalTable
+        symbol:
           OID: 1.3.6.1.2.1.47.1.1.1.1.7
           name: alcatel.ind.entPhysicalName
         tag: ent_physical_name
-      - column:
+      - # MIB: ENTITY-MIB
+        # table: entPhysicalTable
+        symbol:
           OID: 1.3.6.1.2.1.47.1.1.1.1.11
           name: alcatel.ind.entPhysicalSerialNum
         tag: ent_physical_serial_num
-      - column:
+      - # MIB: ENTITY-MIB
+        # table: entPhysicalTable
+        symbol:
           OID: 1.3.6.1.2.1.47.1.1.1.1.13
           name: alcatel.ind.entPhysicalModelName
         tag: ent_physical_model_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.1
           name: alcatel.ind.chasEntPhysAdminStatus
         tag: chas_ent_phys_admin_status
@@ -64,7 +75,9 @@ metrics:
           5: takeover
           6: reset_all
           7: standby
-      - column:
+          8: reset_with_fabric
+          9: takeover_with_fabrc
+      - symbol:
           OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.2
           name: alcatel.ind.chasEntPhysOperStatus
         tag: chas_ent_phys_oper_status
@@ -77,7 +90,7 @@ metrics:
           6: not_present
           7: unpowered
           8: master
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.8
           name: alcatel.ind.chasEntPhysLedStatusOk1
         tag: chas_ent_phys_led_status_ok1
@@ -88,7 +101,7 @@ metrics:
           3: green_blink
           4: amber_on
           5: amber_blink
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.9
           name: alcatel.ind.chasEntPhysLedStatusOk2
         tag: chas_ent_phys_led_status_ok2
@@ -99,7 +112,7 @@ metrics:
           3: green_blink
           4: amber_on
           5: amber_blink
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.10
           name: alcatel.ind.chasEntPhysLedStatusPrimaryCMM
         tag: chas_ent_phys_led_status_primary_cmm
@@ -110,7 +123,7 @@ metrics:
           3: green_blink
           4: amber_on
           5: amber_blink
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.11
           name: alcatel.ind.chasEntPhysLedStatusSecondaryCMM
         tag: chas_ent_phys_led_status_secondary_cmm
@@ -121,7 +134,7 @@ metrics:
           3: green_blink
           4: amber_on
           5: amber_blink
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.12
           name: alcatel.ind.chasEntPhysLedStatusTemperature
         tag: chas_ent_phys_led_status_temperature
@@ -132,7 +145,7 @@ metrics:
           3: green_blink
           4: amber_on
           5: amber_blink
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.13
           name: alcatel.ind.chasEntPhysLedStatusFan
         tag: chas_ent_phys_led_status_fan
@@ -143,7 +156,7 @@ metrics:
           3: green_blink
           4: amber_on
           5: amber_blink
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.14
           name: alcatel.ind.chasEntPhysLedStatusFan1
         tag: chas_ent_phys_led_status_fan1
@@ -154,7 +167,7 @@ metrics:
           3: green_blink
           4: amber_on
           5: amber_blink
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.15
           name: alcatel.ind.chasEntPhysLedStatusFan2
         tag: chas_ent_phys_led_status_fan2
@@ -165,7 +178,7 @@ metrics:
           3: green_blink
           4: amber_on
           5: amber_blink
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.16
           name: alcatel.ind.chasEntPhysLedStatusFan3
         tag: chas_ent_phys_led_status_fan3
@@ -176,7 +189,7 @@ metrics:
           3: green_blink
           4: amber_on
           5: amber_blink
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.17
           name: alcatel.ind.chasEntPhysLedStatusBackupPS
         tag: chas_ent_phys_led_status_backup_ps
@@ -187,7 +200,7 @@ metrics:
           3: green_blink
           4: amber_on
           5: amber_blink
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.18
           name: alcatel.ind.chasEntPhysLedStatusInternalPS
         tag: chas_ent_phys_led_status_internal_ps
@@ -198,7 +211,7 @@ metrics:
           3: green_blink
           4: amber_on
           5: amber_blink
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.19
           name: alcatel.ind.chasEntPhysLedStatusControl
         tag: chas_ent_phys_led_status_control
@@ -209,7 +222,7 @@ metrics:
           3: green_blink
           4: amber_on
           5: amber_blink
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.20
           name: alcatel.ind.chasEntPhysLedStatusFabric
         tag: chas_ent_phys_led_status_fabric
@@ -220,7 +233,7 @@ metrics:
           3: green_blink
           4: amber_on
           5: amber_blink
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.21
           name: alcatel.ind.chasEntPhysLedStatusPSU
         tag: chas_ent_phys_led_status_psu

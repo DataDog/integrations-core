@@ -9,6 +9,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
+    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     assert_extend_cisco_cpu_memory,
     assert_extend_generic_bgp4,
@@ -25,7 +26,8 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile__cisco_generic(dd_agent_check):
-    config = create_e2e_core_test_config('_cisco-generic')
+    profile = '_cisco-generic'
+    config = create_e2e_core_test_config(profile)
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -53,6 +55,7 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         ['fru:16'],
@@ -74,14 +77,14 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         )
 
     tag_rows = [
-        ['fru:4', 'power_admin_status:on', 'power_oper_status:offCooling'],
-        ['fru:5', 'power_admin_status:powerCycle', 'power_oper_status:offEnvOther'],
-        ['fru:6', 'power_admin_status:inlineAuto', 'power_oper_status:offEnvPower'],
-        ['fru:16', 'power_admin_status:powerCycle', 'power_oper_status:offCooling'],
-        ['fru:19', 'power_admin_status:off', 'power_oper_status:offDenied'],
-        ['fru:20', 'power_admin_status:inlineAuto', 'power_oper_status:offEnvFan'],
-        ['fru:23', 'power_admin_status:on', 'power_oper_status:onButFanFail'],
-        ['fru:30', 'power_admin_status:inlineOn', 'power_oper_status:offConnectorRating'],
+        ['fru:4', 'power_admin_status:on', 'power_oper_status:off_cooling'],
+        ['fru:5', 'power_admin_status:power_cycle', 'power_oper_status:off_env_other'],
+        ['fru:6', 'power_admin_status:inline_auto', 'power_oper_status:off_env_power'],
+        ['fru:16', 'power_admin_status:power_cycle', 'power_oper_status:off_cooling'],
+        ['fru:19', 'power_admin_status:off', 'power_oper_status:off_denied'],
+        ['fru:20', 'power_admin_status:inline_auto', 'power_oper_status:off_env_fan'],
+        ['fru:23', 'power_admin_status:on', 'power_oper_status:on_but_fan_fail'],
+        ['fru:30', 'power_admin_status:inline_on', 'power_oper_status:off_connector_rating'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cefcFRUPowerStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -98,11 +101,15 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
             'snmp.cpmCPUTotalMonIntervalValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
-    aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.COUNT, tags=common_tags)
+    tag_rows = [
+        ['interface:le0'],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['temp_index:15', 'temp_state:6'],
-        ['temp_index:20', 'temp_state:2'],
+        ['temp_index:15', 'temp_state:not_functioning'],
+        ['temp_index:20', 'temp_state:warning'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -110,8 +117,8 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         )
 
     tag_rows = [
-        ['power_source:2', 'power_status_descr:kept Jaded oxen Jaded their'],
-        ['power_source:5', 'power_status_descr:their'],
+        ['power_source:ac', 'power_status_descr:kept Jaded oxen Jaded their'],
+        ['power_source:internal_redundant', 'power_status_descr:their'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -119,8 +126,8 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         )
 
     tag_rows = [
-        ['cisco_env_mon_supply_state:critical', 'power_source:5', 'power_status_descr:their'],
-        ['cisco_env_mon_supply_state:shutdown', 'power_source:2', 'power_status_descr:kept Jaded oxen Jaded their'],
+        ['cisco_env_mon_supply_state:critical', 'power_source:internal_redundant', 'power_status_descr:their'],
+        ['cisco_env_mon_supply_state:shutdown', 'power_source:ac', 'power_status_descr:kept Jaded oxen Jaded their'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -135,7 +142,7 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         aggregator.assert_metric('snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['fan_status_index:11', 'fan_state:notFunctioning', 'fan_status_descr:oxen their but kept forward kept'],
+        ['fan_status_index:11', 'fan_state:not_functioning', 'fan_status_descr:oxen their but kept forward kept'],
         ['fan_status_index:16', 'fan_state:normal', 'fan_status_descr:acted'],
     ]
     for tag_row in tag_rows:
@@ -160,11 +167,11 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         ['mac_addr:11:11:11:11:11:11', 'entity_physical_name:name1', 'switch_state:progressing'],
         ['mac_addr:11:11:11:11:11:11', 'entity_physical_name:name2', 'switch_state:ready'],
         ['mac_addr:11:11:11:11:11:11', 'entity_physical_name:name3', 'switch_state:added'],
-        ['mac_addr:11:11:11:11:11:11', 'entity_physical_name:name4', 'switch_state:verMismatch'],
+        ['mac_addr:11:11:11:11:11:11', 'entity_physical_name:name4', 'switch_state:ver_mismatch'],
         ['mac_addr:11:11:11:11:11:11', 'entity_physical_name:name5', 'switch_state:progressing'],
-        ['mac_addr:11:11:11:11:11:11', 'entity_physical_name:name6', 'switch_state:sdmMismatch'],
+        ['mac_addr:11:11:11:11:11:11', 'entity_physical_name:name6', 'switch_state:sdm_mismatch'],
         ['mac_addr:11:11:11:11:11:11', 'entity_physical_name:name7', 'switch_state:provisioned'],
-        ['mac_addr:11:11:11:11:11:11', 'entity_physical_name:name8', 'switch_state:verMismatch'],
+        ['mac_addr:11:11:11:11:11:11', 'entity_physical_name:name8', 'switch_state:ver_mismatch'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cswSwitchInfo', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -183,13 +190,13 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         aggregator.assert_metric('snmp.cefcFanTrayOperStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['fru:21', 'cefc_fan_tray_oper_status:warning', 'cefc_fan_tray_direction:frontToBack'],
-        ['fru:23', 'cefc_fan_tray_oper_status:up', 'cefc_fan_tray_direction:frontToBack'],
-        ['fru:25', 'cefc_fan_tray_oper_status:unknown', 'cefc_fan_tray_direction:frontToBack'],
+        ['fru:21', 'cefc_fan_tray_oper_status:warning', 'cefc_fan_tray_direction:front_to_back'],
+        ['fru:23', 'cefc_fan_tray_oper_status:up', 'cefc_fan_tray_direction:front_to_back'],
+        ['fru:25', 'cefc_fan_tray_oper_status:unknown', 'cefc_fan_tray_direction:front_to_back'],
         ['fru:27', 'cefc_fan_tray_oper_status:unknown', 'cefc_fan_tray_direction:unknown'],
-        ['fru:29', 'cefc_fan_tray_oper_status:unknown', 'cefc_fan_tray_direction:backToFront'],
-        ['fru:30', 'cefc_fan_tray_oper_status:up', 'cefc_fan_tray_direction:backToFront'],
-        ['fru:7', 'cefc_fan_tray_oper_status:up', 'cefc_fan_tray_direction:backToFront'],
+        ['fru:29', 'cefc_fan_tray_oper_status:unknown', 'cefc_fan_tray_direction:back_to_front'],
+        ['fru:30', 'cefc_fan_tray_oper_status:up', 'cefc_fan_tray_direction:back_to_front'],
+        ['fru:7', 'cefc_fan_tray_oper_status:up', 'cefc_fan_tray_direction:back_to_front'],
         ['fru:9', 'cefc_fan_tray_oper_status:warning', 'cefc_fan_tray_direction:unknown'],
     ]
     for tag_row in tag_rows:
@@ -204,11 +211,10 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         aggregator.assert_metric(
             'snmp.ciscoMemoryPoolLargestFree', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-
-    aggregator.assert_metric('snmp.ciscoMemoryPoolUsed', metric_type=aggregator.GAUGE, tags=common_tags)
+        aggregator.assert_metric('snmp.ciscoMemoryPoolUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['connection_type:5'],
+        ['connection_type:current_half_open'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -235,8 +241,8 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         aggregator.assert_metric('snmp.cvsChassisUpTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['rtt_index:2'],
-        ['rtt_index:5'],
+        ['rtt_index:26', 'rtt_state:inactive', 'rtt_type:tcp_connect'],
+        ['rtt_index:30', 'rtt_state:orderly_stop', 'rtt_type:script'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -247,8 +253,8 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         )
 
     tag_rows = [
-        ['rtt_index:26', 'rtt_state:5'],
-        ['rtt_index:30', 'rtt_state:2', 'rtt_type:4'],
+        ['rtt_index:26', 'rtt_state:inactive', 'rtt_type:tcp_connect'],
+        ['rtt_index:30', 'rtt_state:orderly_stop', 'rtt_type:script'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -271,5 +277,6 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
+    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

@@ -2,7 +2,13 @@
 
 ## Unreleased
 
-## 4.0.0 / 2023-08-10
+## 5.0.0 / 2023-09-29
+
+***Changed***:
+
+* Upgrade to openstacksdk version 1.5.0 ([#15919](https://github.com/DataDog/integrations-core/pull/15919))
+
+## 4.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 
@@ -16,7 +22,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 3.1.0 / 2023-07-10
+## 3.1.0 / 2023-07-10 / Agent 7.47.0
 
 ***Added***:
 

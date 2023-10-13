@@ -20,7 +20,7 @@ The Strimzi check collects Prometheus-formatted metrics on the following operato
    - Topic
    - User
 
-**Note**: For monitoring Kafka and Zookeeper, please use the [Kafka][11] and [Zookeeper][12] checks respectively.
+**Note**: For monitoring Kafka and Zookeeper, please use the [Kafka][11], [Kafka Consumer][17] and [Zookeeper][12] checks respectively.
  
 Follow the instructions below to enable and configure this check for an Agent.
 
@@ -66,9 +66,9 @@ spec:
             }
           }
       spec:
-        serviceAccountName: strimzi-cluster-operator
+        containers:
+        - name: strimzi-cluster-operator
 ...
-
 ```
 **Note**: The template used for this example can be found [here][13].
 
@@ -99,15 +99,15 @@ spec:
                 }
               }
             ad.datadoghq.com/user-operator.checks: |
-            {
-              "strimzi": {
-                "instances":[
-                  {
-                    "user_operator_endpoint": "http://%%host%%:8081/metrics"
-                  }
-                ]
-              }
-            } 
+              {
+                "strimzi": {
+                  "instances":[
+                    {
+                      "user_operator_endpoint": "http://%%host%%:8081/metrics"
+                    }
+                  ]
+                }
+              } 
 ...
 ```
 **Note**: The template used as for this example can be found [here][14].
@@ -116,7 +116,7 @@ See the [sample strimzi.d/conf.yaml][4] for all available configuration options.
 
 #### Kafka and Zookeeper
 
-The Kafka and Zookeeper components of Strimzi can be monitored using the [Kafka][11] and [Zookeeper][12] checks. Kafka metrics are collected through JMX. For more information on enabling JMX, see the [Strimzi documentation on JMX options][15]. Here's an example of how to configure the Kafka and Zookeeper checks using Pod annotations:
+The Kafka and Zookeeper components of Strimzi can be monitored using the [Kafka][11], [Kafka Consumer][17] and [Zookeeper][12] checks. Kafka metrics are collected through JMX. For more information on enabling JMX, see the [Strimzi documentation on JMX options][15]. Here's an example of how to configure the Kafka, Kafka Consumer and Zookeeper checks using Pod annotations:
 ```yaml
 apiVersion: kafka.strimzi.io/v1beta2
 kind: Kafka
@@ -132,10 +132,6 @@ spec:
         port: 9092
         type: internal
         tls: false
-      - name: tls
-        port: 9093
-        type: internal
-        tls: true
     template:
       pod:
         metadata:  
@@ -152,6 +148,15 @@ spec:
                     {
                       "host": "%%host%%",
                       "port": "9999"
+                    }
+                  ]
+                },
+                "kafka_consumer": {
+                  "init_config": {},
+                  "instances": [
+                    {
+                      "kafka_connect_str": "%%host%%:9092",
+                      "monitor_unlisted_consumer_groups": "true"
                     }
                   ]
                 }
@@ -171,8 +176,6 @@ spec:
       pod:
         metadata:
           annotations:
-            key1: label3
-            key2: label4
             ad.datadoghq.com/zookeeper.checks: |
               {
                 "zk": {
@@ -237,3 +240,4 @@ Need help? Contact [Datadog support][9].
 [14]: https://github.com/strimzi/strimzi-kafka-operator/blob/release-0.34.x/examples/kafka/kafka-ephemeral-single.yaml
 [15]: https://strimzi.io/docs/operators/0.20.0/full/using.html#assembly-jmx-options-deployment-configuration-kafka
 [16]: https://docs.datadoghq.com/agent/kubernetes/log/
+[17]: https://docs.datadoghq.com/integrations/kafka/?tab=host#kafka-consumer-integration

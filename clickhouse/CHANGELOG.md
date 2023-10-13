@@ -2,7 +2,14 @@
 
 ## Unreleased
 
-## 3.0.0 / 2023-08-10
+## 3.1.0 / 2023-09-29
+
+***Added***:
+
+* Upgrade clickhouse-driver to 0.2.6 on Python 3 ([#15726](https://github.com/DataDog/integrations-core/pull/15726))
+* Upgrade lz4 to 4.3.2 on Python 3 ([#15746](https://github.com/DataDog/integrations-core/pull/15746))
+
+## 3.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 
@@ -16,7 +23,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 2.8.3 / 2023-07-10
+## 2.8.3 / 2023-07-10 / Agent 7.47.0
 
 ***Fixed***:
 

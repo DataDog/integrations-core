@@ -1,0 +1,28 @@
+name: Ray
+files:
+- name: ray.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - template: instances/openmetrics
+  - template: logs
+    example:
+    - type: file
+      path: /tmp/ray/session_latest/logs/dashboard.log
+      source: ray
+      service: <SERVICE>
+    - type: file
+      path: /tmp/ray/session_latest/logs/dashboard.err
+      source: ray
+      service: <SERVICE>
+    - type: file
+      path: /tmp/ray/session_latest/logs/gcs_server.out
+      source: ray
+      service: <SERVICE>
+    - type: file
+      path: /tmp/ray/session_latest/logs/gcs_server.err
+      source: ray
+      service: <SERVICE>

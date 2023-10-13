@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## 4.0.0 / 2023-08-10
+## 4.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 
@@ -18,7 +18,7 @@
 * Bump minimum base package version ([#15303](https://github.com/DataDog/integrations-core/pull/15303))
 * Revert to requesting Prometheus format by default ([#15292](https://github.com/DataDog/integrations-core/pull/15292))
 
-## 3.0.2 / 2023-07-13
+## 3.0.2 / 2023-07-13 / Agent 7.47.0
 
 ***Fixed***:
 

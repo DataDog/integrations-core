@@ -2,6 +2,69 @@
 
 ## Unreleased
 
+## 27.0.0 / 2023-10-12
+
+***Changed***:
+
+* Migrate E2E features ([#15931](https://github.com/DataDog/integrations-core/pull/15931))
+
+## 26.0.1 / 2023-10-11
+
+***Fixed***:
+
+* Fix the manifest template file ([#15984](https://github.com/DataDog/integrations-core/pull/15984))
+
+## 26.0.0 / 2023-10-02
+
+***Changed***:
+
+* Update eula validation to only occur if it is present in the manifest for marketplace prs to support private-offer-only listings ([#15935](https://github.com/DataDog/integrations-core/pull/15935))
+
+## 25.1.2 / 2023-09-26
+
+***Fixed***:
+
+* Fix test output rewrite conditional ([#15915](https://github.com/DataDog/integrations-core/pull/15915))
+
+## 25.1.1 / 2023-09-26
+
+***Fixed***:
+
+* Exclude psycopg2 from automatic upgrades ([#15864](https://github.com/DataDog/integrations-core/pull/15864))
+* Upper-bound pydantic to quickly fix CI while we investigate what in the latest version breaks us. ([#15901](https://github.com/DataDog/integrations-core/pull/15901))
+* Finalize pytest plugin logic for E2E refactor ([#15898](https://github.com/DataDog/integrations-core/pull/15898))
+* Fix `ddev release make all` so that it won't stop on the first unchanged integration ([#15932](https://github.com/DataDog/integrations-core/pull/15932))
+
+## 25.1.0 / 2023-09-15
+
+***Added***:
+
+* Added overview examples to the readme file ([#15817](https://github.com/DataDog/integrations-core/pull/15817))
+* Added required classifier tag examples to template ([#15828](https://github.com/DataDog/integrations-core/pull/15828))
+* Prepare E2E tooling for better message passing ([#15843](https://github.com/DataDog/integrations-core/pull/15843))
+
+## 25.0.0 / 2023-09-13
+
+***Changed***:
+
+* Include support for `domain_regex` when validating JMX metric files ([#15761](https://github.com/DataDog/integrations-core/pull/15761))
+* Adjust template and test collection based on new team guidelines ([#15078](https://github.com/DataDog/integrations-core/pull/15078))
+    * `ddev create` produces initial test file named `test_unit.py` instead of `test_<integration>.py`.
+    * Our pytest collection plugin attaches labels to tests based on their location. E.g. all tests in `test_unit.py` get the `unit` label.
+
+***Added***:
+
+* Add short hand for force-env-rebuild ([#15716](https://github.com/DataDog/integrations-core/pull/15716))
+
+***Fixed***:
+
+* Allow bumping the version of clickhouse-driver ([#15745](https://github.com/DataDog/integrations-core/pull/15745))
+* Allow bumping the version of lz4 ([#15747](https://github.com/DataDog/integrations-core/pull/15747))
+* Remove flup from the dependency bump exclusion list ([#15748](https://github.com/DataDog/integrations-core/pull/15748))
+* Remove setuptools from the build-system for new integrations ([#15766](https://github.com/DataDog/integrations-core/pull/15766))
+* Stop using the old GPG_COMMAND constant from securesystemslib ([#15776](https://github.com/DataDog/integrations-core/pull/15776))
+* Override the default test options for some integrations ([#15779](https://github.com/DataDog/integrations-core/pull/15779))
+
 ## 24.1.0 / 2023-08-25
 
 ***Security***:

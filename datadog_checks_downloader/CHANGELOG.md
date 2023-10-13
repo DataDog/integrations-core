@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 4.3.1 / 2023-09-29
+
+***Fixed***:
+
+* Override the default test options for some integrations ([#15779](https://github.com/DataDog/integrations-core/pull/15779))
+
 ## 4.3.0 / 2023-08-25
 
 ***Security***:

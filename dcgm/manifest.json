@@ -8,10 +8,11 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Monitors the exposed GPU metrics leveraged by the DCGM Exporter",
-    "title": "DCGM Exporter",
+    "description": "Monitors the exposed GPU metrics leveraged by the Nvidia DCGM Exporter",
+    "title": "Nvidia DCGM Exporter",
     "media": [],
     "classifier_tags": [
+      "Category::AI/ML",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS"

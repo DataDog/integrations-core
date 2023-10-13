@@ -5,6 +5,10 @@ from pyVmomi import vim
 
 SOURCE_TYPE = 'vsphere'
 
+BOTH = 'both'
+HISTORICAL = 'historical'
+REALTIME = 'realtime'
+
 ALLOWED_FILTER_TYPES = ['whitelist', 'blacklist']
 ALLOWED_FILTER_PROPERTIES = ['name', 'inventory_path', 'tag', 'attribute']
 EXTRA_FILTER_PROPERTIES_FOR_VMS = ['hostname', 'guest_hostname']
@@ -36,9 +40,16 @@ ALL_RESOURCES = [
     vim.ComputeResource,
     vim.Folder,
 ]
-REALTIME_RESOURCES = [vim.VirtualMachine, vim.HostSystem]
-HISTORICAL_RESOURCES = [vim.Datacenter, vim.Datastore, vim.ClusterComputeResource]
-ALL_RESOURCES_WITH_METRICS = REALTIME_RESOURCES + HISTORICAL_RESOURCES
+
+HOST_RESOURCES = [vim.VirtualMachine, vim.HostSystem]
+
+ALL_RESOURCES_WITH_METRICS = [
+    vim.VirtualMachine,
+    vim.HostSystem,
+    vim.Datacenter,
+    vim.Datastore,
+    vim.ClusterComputeResource,
+]
 
 REALTIME_METRICS_INTERVAL_ID = 20
 
@@ -123,6 +134,25 @@ VM_PROPERTIES = VM_OBJECT_PROPERTIES + VM_SIMPLE_PROPERTIES
 
 ALL_PROPERTIES = VM_PROPERTIES + HOST_PROPERTIES + CLUSTER_PROPERTIES + DATASTORE_PROPERTIES
 
+
+OBJECT_PROPERTIES_TO_METRIC_NAME = {
+    "guest.net": ["guest.net.ipConfig.address", "guest.net"],
+    "guest.ipStack": ["guest.ipStack.ipRoute", "guest.ipStack"],
+    "guest.disk": ["guest.disk.freeSpace", "guest.disk.capacity"],
+}
+
+VM_OBJECT_PROPERTY_METRICS = [
+    "guest.net.ipConfig.address",
+    "guest.net",
+    "guest.ipStack.ipRoute",
+    "guest.ipStack",
+    "guest.disk.freeSpace",
+    "guest.disk.capacity",
+]
+OBJECT_PROPERTIES_BY_RESOURCE_TYPE = {
+    'vm': VM_OBJECT_PROPERTIES,
+}
+
 SIMPLE_PROPERTIES_BY_RESOURCE_TYPE = {
     'vm': VM_SIMPLE_PROPERTIES,
     'host': HOST_SIMPLE_PROPERTIES,
@@ -135,4 +165,11 @@ PROPERTIES_BY_RESOURCE_TYPE = {
     'host': HOST_PROPERTIES,
     'cluster': CLUSTER_PROPERTIES,
     'datastore': DATASTORE_PROPERTIES,
+}
+
+PROPERTY_METRICS_BY_RESOURCE_TYPE = {
+    'vm': VM_SIMPLE_PROPERTIES + VM_OBJECT_PROPERTY_METRICS,
+    'host': HOST_SIMPLE_PROPERTIES,
+    'cluster': CLUSTER_SIMPLE_PROPERTIES,
+    'datastore': DATASTORE_SIMPLE_PROPERTIES,
 }

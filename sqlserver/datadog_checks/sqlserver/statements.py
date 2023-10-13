@@ -21,7 +21,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.sqlserver.utils import PROC_CHAR_LIMIT, extract_sql_comments, is_statement_proc
+from datadog_checks.sqlserver.utils import PROC_CHAR_LIMIT, extract_sql_comments_and_procedure_name
 
 try:
     import datadog_agent
@@ -263,7 +263,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self._statement_metrics_query = statements_query.format(
             query_metrics_columns=', '.join(available_columns),
             query_metrics_column_sums=', '.join(['sum({}) as {}'.format(c, c) for c in available_columns]),
-            collection_interval=int(math.ceil(self.collection_interval) * 2),
             limit=self.dm_exec_query_stats_row_limit,
             proc_char_limit=PROC_CHAR_LIMIT,
         )
@@ -274,9 +273,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self.log.debug("collecting sql server statement metrics")
         statement_metrics_query = self._get_statement_metrics_query_cached(cursor)
         now = time.time()
-        query_interval = self.collection_interval
+        query_interval = self.collection_interval * 2
         if self._last_stats_query_time:
-            query_interval = now - self._last_stats_query_time
+            query_interval = max(query_interval, now - self._last_stats_query_time)
         self._last_stats_query_time = now
         params = (math.ceil(query_interval),)
         self.log.debug("Running query [%s] %s", statement_metrics_query, params)
@@ -293,7 +292,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             try:
                 statement = obfuscate_sql_with_metadata(row['statement_text'], self.check.obfuscator_options)
                 procedure_statement = None
-                row['is_proc'], procedure_name = is_statement_proc(row['text'])
+                comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
                 if row['is_proc']:
                     procedure_statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
             except Exception as e:
@@ -309,7 +308,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 )
                 continue
             obfuscated_statement = statement['query']
-            comments = extract_sql_comments(row['text'])
             row['dd_comments'] = comments
             # update 'text' field to be obfuscated stmt
             row['text'] = obfuscated_statement
@@ -361,6 +359,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             'timestamp': time.time() * 1000,
             'min_collection_interval': self.collection_interval,
             'tags': self.tags,
+            'kind': 'query_metrics',
             'cloud_metadata': self.check.cloud_metadata,
             'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
             'sqlserver_version': self.check.static_info_cache.get(STATIC_INFO_VERSION, ""),
@@ -447,11 +446,14 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self.log.debug("collecting plan. plan_handle=%s", plan_handle)
         self.log.debug("Running query [%s] %s", PLAN_LOOKUP_QUERY, (plan_handle,))
         cursor.execute(PLAN_LOOKUP_QUERY, ("0x" + plan_handle,))
-        result = cursor.fetchall()
-        if not result or not result[0]:
+        result = cursor.fetchone()
+        if not result:
             self.log.debug("failed to loan plan, it must have just been expired out of the plan cache")
             return None, None
-        return result[0]
+        raw_plan, is_plan_encrypted = result
+        if not raw_plan:
+            self.log.debug("plan was null in the plan cache")
+        return raw_plan, is_plan_encrypted
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_plans(self, rows, cursor, deadline):

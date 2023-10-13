@@ -28,6 +28,7 @@
       }
     ],
     "classifier_tags": [
+      "Category::AI/ML",
       "Category::Metrics",
       "Category::Cost Management",
       "Submitted Data Type::Metrics",

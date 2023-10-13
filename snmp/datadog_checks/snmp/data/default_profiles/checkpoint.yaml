@@ -66,7 +66,7 @@ metrics:
     # CPU
   - MIB: CHECKPOINT-MIB
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2620.1.6.7.5.1.1
           name: multiProcIndex
         tag: cpu_core
@@ -116,11 +116,11 @@ metrics:
   - MIB: CHECKPOINT-MIB
     metric_type: gauge
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2620.1.6.7.6.1.1
           name: multiDiskIndex
         tag: disk_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2620.1.6.7.6.1.2
           name: multiDiskName
         tag: disk_name
@@ -143,11 +143,11 @@ metrics:
     # Appliances
   - MIB: CHECKPOINT-MIB
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2620.1.6.7.8.2.1.1
           name: fanSpeedSensorIndex
         tag: sensor_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2620.1.6.7.8.2.1.2
           name: fanSpeedSensorName
         tag: sensor_name
@@ -167,29 +167,31 @@ metrics:
       - name: fanSpeedSensor
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2620.1.6.7.8.2.1.6
           name: fanSpeedSensorStatus
         tag: fan_speed_sensor_status
+        # mapping from description:
+        #   Sensor is out of range TRUE(1), FALSE(0), READING ERROR(2)
         mapping:
           0: false
           1: true
           2: reading_error
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2620.1.6.7.8.2.1.1
           name: fanSpeedSensorIndex
         tag: sensor_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2620.1.6.7.8.2.1.2
           name: fanSpeedSensorName
         tag: sensor_name
   - MIB: CHECKPOINT-MIB
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2620.1.6.7.8.1.1.1
           name: tempertureSensorIndex
         tag: sensor_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2620.1.6.7.8.1.1.2
           name: tempertureSensorName
         tag: sensor_name

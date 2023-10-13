@@ -30,7 +30,7 @@ metrics:
       - name: cppmSystemDiskSpaceFree
         OID: 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.15
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.4
           name: cppmSystemHostname
         tag: cppm_system_hostname
@@ -50,7 +50,8 @@ metrics:
       - name: radServerCounterCount
         OID: 1.3.6.1.4.1.14823.1.6.1.1.2.1.1.5
     metric_tags:
-      - column:
+      - table: cppmSystemTable
+        symbol:
           OID: 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.4
           name: cppmSystemHostname
         tag: cppm_system_hostname
@@ -68,7 +69,7 @@ metrics:
       - name: radAuthCounterTime
         OID: 1.3.6.1.4.1.14823.1.6.1.1.2.2.1.6
     metric_tags:
-      - column:
+      - symbol:
           name: radAuthSourceName
           OID: 1.3.6.1.4.1.14823.1.6.1.1.2.2.1.2
         tag: rad_auth_source_name
@@ -116,7 +117,8 @@ metrics:
       - name: dailyTotalAuthCount
         OID: 1.3.6.1.4.1.14823.1.6.1.1.2.3.1.19
     metric_tags:
-      - column:
+      - table: cppmSystemTable
+        symbol:
           OID: 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.4
           name: cppmSystemHostname
         tag: cppm_system_hostname
@@ -134,7 +136,7 @@ metrics:
       - name: psAutzCounterTime
         OID: 1.3.6.1.4.1.14823.1.6.1.1.2.5.1.6
     metric_tags:
-      - column:
+      - symbol:
           name: psAutzSourceName
           OID: 1.3.6.1.4.1.14823.1.6.1.1.2.5.1.2
         tag: ps_autz_source_name
@@ -158,7 +160,8 @@ metrics:
       - name: tacPolicyEvalTime
         OID: 1.3.6.1.4.1.14823.1.6.1.1.2.7.1.7
     metric_tags:
-      - column:
+      - table: cppmSystemTable
+        symbol:
           OID: 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.4
           name: cppmSystemHostname
         tag: cppm_system_hostname
@@ -176,7 +179,8 @@ metrics:
       - name: tacAutzCounterTime
         OID: 1.3.6.1.4.1.14823.1.6.1.1.2.8.1.4
     metric_tags:
-      - column:
+      - table: cppmSystemTable
+        symbol:
           OID: 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.4
           name: cppmSystemHostname
         tag: cppm_system_hostname
@@ -190,7 +194,7 @@ metrics:
       - name: nwTrafficTotal
         OID: 1.3.6.1.4.1.14823.1.6.1.1.3.1.1.4
     metric_tags:
-      - column:
+      - symbol:
           name: nwAppName
           OID: 1.3.6.1.4.1.14823.1.6.1.1.3.1.1.2
         tag: nw_app_name

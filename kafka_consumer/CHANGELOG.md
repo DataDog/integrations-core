@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 4.1.3 / 2023-10-11
+
+***Fixed***:
+
+* Add ability to cache offsets and close admin client ([#15960](https://github.com/DataDog/integrations-core/pull/15960))
+
+## 4.1.2 / 2023-09-04 / Agent 7.48.0
+
+***Fixed***:
+
+* Set tls_verify to string rather than boolean ([#15699](https://github.com/DataDog/integrations-core/pull/15699))
+* Filter out empty consumer groups ([#15657](https://github.com/DataDog/integrations-core/pull/15657))
+
 ## 4.1.1 / 2023-08-24
 
 ***Fixed***:
@@ -30,6 +43,13 @@
 * Optimize highwater offset collection ([#15285](https://github.com/DataDog/integrations-core/pull/15285))
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 * Simplify regex compilation ([#15239](https://github.com/DataDog/integrations-core/pull/15239))
+
+## 3.1.3 / 2023-08-14 / Agent 7.47.0
+
+***Fixed***:
+
+* Optimize highwater offset collection. See [#15285](https://github.com/DataDog/integrations-core/pull/15285).
+* Reduce number of consumer creations. See [#15476](https://github.com/DataDog/integrations-core/pull/15476).
 
 ## 3.1.2 / 2023-07-13
 

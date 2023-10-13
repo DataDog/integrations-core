@@ -22,12 +22,11 @@ from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCac
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import (
     DEFAULT_MAX_QUERY_METRICS,
-    HISTORICAL_RESOURCES,
+    HISTORICAL,
+    HOST_RESOURCES,
     MAX_QUERY_METRICS_OPTION,
     PROPERTY_COUNT_METRICS,
     REALTIME_METRICS_INTERVAL_ID,
-    REALTIME_RESOURCES,
-    SIMPLE_PROPERTIES_BY_RESOURCE_TYPE,
 )
 from datadog_checks.vsphere.event import VSphereEvent
 from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
@@ -48,6 +47,7 @@ from datadog_checks.vsphere.utils import (
     format_metric_name,
     get_mapped_instance_tag,
     get_tags_recursively,
+    is_metric_allowed_for_collection_type,
     is_metric_excluded_by_filters,
     is_resource_collected_by_filters,
     should_collect_per_instance_values,
@@ -151,9 +151,9 @@ class VSphereCheck(AgentCheck):
             allowed_counters = []
             for c in counters:
                 metric_name = format_metric_name(c)
-                if metric_name in ALLOWED_METRICS_FOR_MOR[mor_type] and not is_metric_excluded_by_filters(
-                    metric_name, mor_type, self._config.metric_filters
-                ):
+                if is_metric_allowed_for_collection_type(
+                    mor_type, metric_name, self._config.collection_type
+                ) and not is_metric_excluded_by_filters(metric_name, mor_type, self._config.metric_filters):
                     allowed_counters.append(c)
             metadata = {c.key: format_metric_name(c) for c in allowed_counters}  # type: Dict[CounterId, MetricName]
             self.metrics_metadata_cache.set_metadata(mor_type, metadata)
@@ -279,11 +279,16 @@ class VSphereCheck(AgentCheck):
             parent = properties.get('parent')
             runtime_host = properties.get('runtime.host')
             if parent is not None:
-                tags.extend(get_tags_recursively(parent, infrastructure_data, self._config))
+                tags.extend(
+                    get_tags_recursively(parent, infrastructure_data, self._config.include_datastore_cluster_folder_tag)
+                )
             if runtime_host is not None:
                 tags.extend(
                     get_tags_recursively(
-                        runtime_host, infrastructure_data, self._config, include_only=['vsphere_cluster']
+                        runtime_host,
+                        infrastructure_data,
+                        self._config.include_datastore_cluster_folder_tag,
+                        include_only=['vsphere_cluster'],
                     )
                 )
             tags.append('vsphere_type:{}'.format(mor_type_str))
@@ -410,9 +415,9 @@ class VSphereCheck(AgentCheck):
                     continue
 
                 tags = []
-                if should_collect_per_instance_values(self._config, metric_name, resource_type) and (
-                    metric_name in have_instance_value[resource_type]
-                ):
+                if should_collect_per_instance_values(
+                    self._config.collect_per_instance_filters, metric_name, resource_type
+                ) and (metric_name in have_instance_value[resource_type]):
                     instance_value = result.id.instance
                     # When collecting per instance values, it's possible that both aggregated metric and per instance
                     # metrics are received. In that case, the metric with no instance value is skipped.
@@ -424,7 +429,7 @@ class VSphereCheck(AgentCheck):
                 vsphere_tags = self.infrastructure_cache.get_mor_tags(results_per_mor.entity)
                 mor_tags = mor_props['tags'] + vsphere_tags
 
-                if resource_type in HISTORICAL_RESOURCES:
+                if resource_type not in HOST_RESOURCES:
                     # Tags are attached to the metrics
                     tags.extend(mor_tags)
                     hostname = None
@@ -475,37 +480,40 @@ class VSphereCheck(AgentCheck):
         server_current_time = self.api.get_current_time()
         self.log.debug("Server current datetime: %s", server_current_time)
         for resource_type in self._config.collected_resource_types:
-            mors = self.infrastructure_cache.get_mors(resource_type)
-            counters = self.metrics_metadata_cache.get_metadata(resource_type)
-            metric_ids = []  # type: List[vim.PerformanceManager.MetricId]
-            for counter_key, metric_name in iteritems(counters):
-                # PerformanceManager.MetricId `instance` kwarg:
-                # - An asterisk (*) to specify all instances of the metric for the specified counterId
-                # - Double-quotes ("") to specify aggregated statistics
-                # More info https://code.vmware.com/apis/704/vsphere/vim.PerformanceManager.MetricId.html
-                if should_collect_per_instance_values(self._config, metric_name, resource_type):
-                    instance = "*"
-                else:
-                    instance = ''
-
-                metric_ids.append(vim.PerformanceManager.MetricId(counterId=counter_key, instance=instance))
-
-            for batch in self.make_batch(mors, metric_ids, resource_type):
-                query_specs = []
-                for mor, metrics in iteritems(batch):
-                    query_spec = vim.PerformanceManager.QuerySpec()  # type: vim.PerformanceManager.QuerySpec
-                    query_spec.entity = mor
-                    query_spec.metricId = metrics
-                    if resource_type in REALTIME_RESOURCES:
-                        query_spec.intervalId = REALTIME_METRICS_INTERVAL_ID
-                        query_spec.maxSample = 1  # Request a single datapoint
+            for metric_type in self._config.collected_metric_types:
+                mors = self.infrastructure_cache.get_mors(resource_type)
+                counters = self.metrics_metadata_cache.get_metadata(resource_type)
+                metric_ids = []  # type: List[vim.PerformanceManager.MetricId]
+                is_historical_batch = metric_type == HISTORICAL
+                for counter_key, metric_name in iteritems(counters):
+                    # PerformanceManager.MetricId `instance` kwarg:
+                    # - An asterisk (*) to specify all instances of the metric for the specified counterId
+                    # - Double-quotes ("") to specify aggregated statistics
+                    # More info https://code.vmware.com/apis/704/vsphere/vim.PerformanceManager.MetricId.html
+                    if should_collect_per_instance_values(
+                        self._config.collect_per_instance_filters, metric_name, resource_type
+                    ):
+                        instance = "*"
                     else:
-                        # We cannot use `maxSample` for historical metrics, let's specify a timewindow that will
-                        # contain at least one element
-                        query_spec.startTime = server_current_time - dt.timedelta(hours=2)
-                    query_specs.append(query_spec)
-                if query_specs:
-                    yield query_specs
+                        instance = ''
+
+                    if metric_name in ALLOWED_METRICS_FOR_MOR[resource_type][metric_type]:
+                        metric_ids.append(vim.PerformanceManager.MetricId(counterId=counter_key, instance=instance))
+
+                for batch in self.make_batch(mors, metric_ids, resource_type, is_historical_batch=is_historical_batch):
+                    query_specs = []
+                    for mor, metrics in iteritems(batch):
+                        query_spec = vim.PerformanceManager.QuerySpec()  # type: vim.PerformanceManager.QuerySpec
+                        query_spec.entity = mor
+                        query_spec.metricId = metrics
+                        if is_historical_batch:
+                            query_spec.startTime = server_current_time - dt.timedelta(hours=2)
+                        else:
+                            query_spec.intervalId = REALTIME_METRICS_INTERVAL_ID
+                            query_spec.maxSample = 1  # Request a single datapoint
+                        query_specs.append(query_spec)
+                    if query_specs:
+                        yield query_specs
 
     def collect_metrics_async(self):
         # type: () -> None
@@ -547,6 +555,7 @@ class VSphereCheck(AgentCheck):
         mors,  # type: Iterable[vim.ManagedEntity]
         metric_ids,  # type: List[vim.PerformanceManager.MetricId]
         resource_type,  # type: Type[vim.ManagedEntity]
+        is_historical_batch=False,  # type: bool
     ):  # type: (...) -> Generator[MorBatch, None, None]
         """Iterates over mor and generate batches with a fixed number of metrics to query.
         Querying multiple resource types in the same call is error prone if we query a cluster metric. Indeed,
@@ -560,7 +569,7 @@ class VSphereCheck(AgentCheck):
         if resource_type == vim.ClusterComputeResource:
             # Cluster metrics are unpredictable and a single call can max out the limit. Always collect them one by one.
             max_batch_size = 1  # type: float
-        elif resource_type in REALTIME_RESOURCES or self._config.max_historical_metrics < 0:
+        elif is_historical_batch or self._config.max_historical_metrics < 0:
             # Queries are not limited by vCenter
             max_batch_size = self._config.metrics_per_query
         else:
@@ -590,7 +599,7 @@ class VSphereCheck(AgentCheck):
         only VMs and Hosts appear as 'datadog hosts'."""
         external_host_tags = []
 
-        for resource_type in REALTIME_RESOURCES:
+        for resource_type in HOST_RESOURCES:
             for mor in self.infrastructure_cache.get_mors(resource_type):
                 mor_props = self.infrastructure_cache.get_mor_props(mor)
                 mor_tags = self.infrastructure_cache.get_mor_tags(mor)
@@ -674,6 +683,10 @@ class VSphereCheck(AgentCheck):
         Then combine all tags and submit the metric.
         """
         metric_full_name = "{}.{}".format(resource_metric_suffix, metric_name)
+
+        if metric_full_name not in self._config.property_metrics_to_collect_by_mor.get(resource_metric_suffix, []):
+            return
+
         is_count_metric = metric_name in PROPERTY_COUNT_METRICS
 
         if additional_tags is None:
@@ -757,7 +770,6 @@ class VSphereCheck(AgentCheck):
                 resource_metric_suffix,
                 additional_tags=disk_tags,
             )
-
             self.submit_property_metric(
                 'guest.disk.capacity',
                 capacity,
@@ -841,7 +853,7 @@ class VSphereCheck(AgentCheck):
         resource_metric_suffix,  # type: str
     ):
         # type: (...) -> None
-        simple_properties = SIMPLE_PROPERTIES_BY_RESOURCE_TYPE[resource_metric_suffix]
+        simple_properties = self._config.simple_properties_to_collect_by_mor.get(resource_metric_suffix, [])
         for property_name in simple_properties:
             property_val = all_properties.get(property_name, None)
 
@@ -872,14 +884,22 @@ class VSphereCheck(AgentCheck):
         base_tags = self._config.base_tags + resource_tags
 
         if resource_type == vim.VirtualMachine:
-            nics = all_properties.get('guest.net', [])
-            self.submit_nic_property_metrics(nics, base_tags, hostname, resource_metric_suffix)
+            object_properties = self._config.object_properties_to_collect_by_mor.get(resource_metric_suffix, [])
 
-            ip_stacks = all_properties.get('guest.ipStack', [])
-            self.submit_ip_stack_property_metrics(ip_stacks, base_tags, hostname, resource_metric_suffix)
+            net_property = 'guest.net'
+            if net_property in object_properties:
+                nics = all_properties.get('guest.net', [])
+                self.submit_nic_property_metrics(nics, base_tags, hostname, resource_metric_suffix)
 
-            disks = all_properties.get('guest.disk', [])
-            self.submit_disk_property_metrics(disks, base_tags, hostname, resource_metric_suffix)
+            ip_stack_property = 'guest.ipStack'
+            if net_property in object_properties:
+                ip_stacks = all_properties.get(ip_stack_property, [])
+                self.submit_ip_stack_property_metrics(ip_stacks, base_tags, hostname, resource_metric_suffix)
+
+            disk_property = 'guest.disk'
+            if disk_property in object_properties:
+                disks = all_properties.get(disk_property, [])
+                self.submit_disk_property_metrics(disks, base_tags, hostname, resource_metric_suffix)
 
         self.submit_simple_property_metrics(all_properties, base_tags, hostname, resource_metric_suffix)
 

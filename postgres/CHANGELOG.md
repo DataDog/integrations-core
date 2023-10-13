@@ -2,6 +2,68 @@
 
 ## Unreleased
 
+## 15.1.0 / 2023-10-06
+
+***Added***:
+
+* Establish a dedicated main db connection to prevent the main thread db from closing prematurely ([#15962](https://github.com/DataDog/integrations-core/pull/15962))
+
+## 15.0.0 / 2023-09-29
+
+***Changed***:
+
+* Update `ssl` default configuration to 'allow' ([#15917](https://github.com/DataDog/integrations-core/pull/15917))
+
+***Added***:
+
+* Update dependencies ([#15922](https://github.com/DataDog/integrations-core/pull/15922))
+
+***Fixed***:
+
+* Revise `postgresql.replication_delay` to function with archive WAL-driven replica ([#15925](https://github.com/DataDog/integrations-core/pull/15925))
+* Prevent Postgres integration from collecting WAL metrics from Aurora instances that cannot be collected ([#15896](https://github.com/DataDog/integrations-core/pull/15896))
+* Set lower log level for relations metrics truncated ([#15903](https://github.com/DataDog/integrations-core/pull/15903))
+
+## 14.4.0 / 2023-09-19 / Agent 7.48.0
+
+***Added***:
+
+* Add schema collection to Postgres integration (#15484) ([#15866](https://github.com/DataDog/integrations-core/pull/15866))
+
+## 14.3.0 / 2023-09-19
+
+***Added***:
+
+* Attempt to connect to the database and fail fast before trying to establish a connection pool ([#15839](https://github.com/DataDog/integrations-core/pull/15839))
+
+***Fixed***:
+
+* Revert psycopg3 upgrade ([#15859](https://github.com/DataDog/integrations-core/pull/15859))
+
+## 14.2.4 / 2023-09-07
+
+***Fixed***:
+
+* Initialize pg_settings on Postgres check start and lazy load pg_settings if it's not set ([#15773](https://github.com/DataDog/integrations-core/pull/15773))
+
+## 14.2.3 / 2023-09-06
+
+***Fixed***:
+
+* Set lower connection timeout on connection pool to avoid long running checks ([#15768](https://github.com/DataDog/integrations-core/pull/15768))
+
+## 14.2.2 / 2023-09-05
+
+***Fixed***:
+
+* Pass timeout when connection pool closes ([#15724](https://github.com/DataDog/integrations-core/pull/15724))
+
+## 14.2.1 / 2023-08-29
+
+***Fixed***:
+
+* Return Azure AD auth token in correct format ([#15701](https://github.com/DataDog/integrations-core/pull/15701))
+
 ## 14.2.0 / 2023-08-18
 
 ***Added***:
@@ -13,6 +75,7 @@
 
 ***Fixed***:
 
+* Fix explaining parameterized queries flood server logs ([#15612](https://github.com/DataDog/integrations-core/pull/15612))
 * Update datadog-checks-base dependency version to 32.6.0 ([#15604](https://github.com/DataDog/integrations-core/pull/15604))
 * Prevent `command already in progress` errors in the Postgres integration ([#15489](https://github.com/DataDog/integrations-core/pull/15489))
 
@@ -36,7 +99,7 @@
 * Upgrade postgres check to psycopg3 ([#15411](https://github.com/DataDog/integrations-core/pull/15411))
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 14.0.1 / 2023-07-13
+## 14.0.1 / 2023-07-13 / Agent 7.47.0
 
 ***Fixed***:
 

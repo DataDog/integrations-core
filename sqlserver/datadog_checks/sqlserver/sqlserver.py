@@ -20,6 +20,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
+from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
 from datadog_checks.sqlserver.utils import Database, parse_sqlserver_major_version
 
 try:
@@ -40,6 +41,7 @@ from datadog_checks.sqlserver.const import (
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
     DATABASE_FRAGMENTATION_METRICS,
+    DATABASE_INDEX_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DATABASE_SERVICE_CHECK_NAME,
@@ -59,6 +61,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_VERSION,
     TASK_SCHEDULER_METRICS,
+    TEMPDB_FILE_SPACE_USAGE_METRICS,
     VALID_METRIC_TYPES,
     expected_sys_databases_columns,
 )
@@ -115,6 +118,7 @@ class SQLServer(AgentCheck):
         self.databases = set()
         self.autodiscovery_query = None
         self.ad_last_check = 0
+        self._sql_counter_types = {}
 
         self.proc = self.instance.get('stored_procedure')
         self.proc_type_mapping = {'gauge': self.gauge, 'rate': self.rate, 'histogram': self.histogram}
@@ -123,8 +127,10 @@ class SQLServer(AgentCheck):
         # DBM
         self.dbm_enabled = self.instance.get('dbm', False)
         self.statement_metrics_config = self.instance.get('query_metrics', {}) or {}
+        self.procedure_metrics_config = self.instance.get('procedure_metrics', {}) or {}
         self.settings_config = self.instance.get('collect_settings', {}) or {}
         self.statement_metrics = SqlserverStatementMetrics(self)
+        self.procedure_metrics = SqlserverProcedureMetrics(self)
         self.sql_metadata = SqlserverMetadata(self)
         self.activity_config = self.instance.get('query_activity', {}) or {}
         self.activity = SqlserverActivity(self)
@@ -190,9 +196,11 @@ class SQLServer(AgentCheck):
         self._query_manager = None
         self._dynamic_queries = None
         self.server_state_queries = None
+        self.sqlserver_incr_fraction_metric_previous_values = {}
 
     def cancel(self):
         self.statement_metrics.cancel()
+        self.procedure_metrics.cancel()
         self.activity.cancel()
         self.sql_metadata.cancel()
 
@@ -516,7 +524,10 @@ class SQLServer(AgentCheck):
                     )
 
         # Load database statistics
-        for name, table, column in DATABASE_METRICS:
+        db_stats_to_collect = list(DATABASE_METRICS)
+        if is_affirmative(self.instance.get('include_index_usage_metrics', True)):
+            db_stats_to_collect.extend(DATABASE_INDEX_METRICS)
+        for name, table, column in db_stats_to_collect:
             # include database as a filter option
             db_names = [d.name for d in self.databases] or [
                 self.instance.get('database', self.connection.DEFAULT_DATABASE)
@@ -579,9 +590,15 @@ class SQLServer(AgentCheck):
                     }
                     metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
+        # Load DB File Space Usage metrics
+        if is_affirmative(self.instance.get('include_tempdb_file_space_usage_metrics', True)):
+            for name, table, column in TEMPDB_FILE_SPACE_USAGE_METRICS:
+                cfg = {'name': name, 'table': table, 'column': column, 'instance_name': 'tempdb', 'tags': tags}
+                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+
         # Load any custom metrics from conf.d/sqlserver.yaml
         for cfg in custom_metrics:
-            sql_type = None
+            sql_counter_type = None
             base_name = None
 
             custom_tags = tags + cfg.get('tags', [])
@@ -605,17 +622,21 @@ class SQLServer(AgentCheck):
                 user_type = cfg.get('type')
                 if user_type is not None and user_type not in VALID_METRIC_TYPES:
                     self.log.error('%s has an invalid metric type: %s', cfg['name'], user_type)
-                sql_type = None
+                sql_counter_type = None
                 try:
                     if user_type is None:
-                        sql_type, base_name = self.get_sql_type(cfg['counter_name'])
+                        sql_counter_type, base_name = self.get_sql_counter_type(cfg['counter_name'])
                 except Exception:
                     self.log.warning("Can't load the metric %s, ignoring", cfg['name'], exc_info=True)
                     continue
 
                 metrics_to_collect.append(
                     self.typed_metric(
-                        cfg_inst=cfg, table=db_table, base_name=base_name, user_type=user_type, sql_type=sql_type
+                        cfg_inst=cfg,
+                        table=db_table,
+                        base_name=base_name,
+                        user_type=user_type,
+                        sql_counter_type=sql_counter_type,
                     )
                 )
 
@@ -623,7 +644,11 @@ class SQLServer(AgentCheck):
                 for column in cfg['columns']:
                     metrics_to_collect.append(
                         self.typed_metric(
-                            cfg_inst=cfg, table=db_table, base_name=base_name, sql_type=sql_type, column=column
+                            cfg_inst=cfg,
+                            table=db_table,
+                            base_name=base_name,
+                            sql_counter_type=sql_counter_type,
+                            column=column,
                         )
                     )
 
@@ -645,7 +670,7 @@ class SQLServer(AgentCheck):
             tags = tags + ['database:{}'.format(db)]
         for name, counter_name, instance_name in metrics:
             try:
-                sql_type, base_name = self.get_sql_type(counter_name)
+                sql_counter_type, base_name = self.get_sql_counter_type(counter_name)
                 cfg = {
                     'name': name,
                     'counter_name': counter_name,
@@ -656,7 +681,10 @@ class SQLServer(AgentCheck):
 
                 metrics_to_collect.append(
                     self.typed_metric(
-                        cfg_inst=cfg, table=DEFAULT_PERFORMANCE_TABLE, base_name=base_name, sql_type=sql_type
+                        cfg_inst=cfg,
+                        table=DEFAULT_PERFORMANCE_TABLE,
+                        base_name=base_name,
+                        sql_counter_type=sql_counter_type,
                     )
                 )
             except SQLConnectionError:
@@ -665,24 +693,27 @@ class SQLServer(AgentCheck):
                 self.log.warning("Can't load the metric %s, ignoring", name, exc_info=True)
                 continue
 
-    def get_sql_type(self, counter_name):
+    def get_sql_counter_type(self, counter_name):
         """
         Return the type of the performance counter so that we can report it to
         Datadog correctly
-        If the sql_type is one that needs a base (PERF_RAW_LARGE_FRACTION and
+        If the sql_counter_type is one that needs a base (PERF_RAW_LARGE_FRACTION and
         PERF_AVERAGE_BULK), the name of the base counter will also be returned
         """
+        cached = self._sql_counter_types.get(counter_name)
+        if cached:
+            return cached
         with self.connection.get_managed_cursor() as cursor:
             cursor.execute(COUNTER_TYPE_QUERY, (counter_name,))
-            (sql_type,) = cursor.fetchone()
-            if sql_type == PERF_LARGE_RAW_BASE:
+            (sql_counter_type,) = cursor.fetchone()
+            if sql_counter_type == PERF_LARGE_RAW_BASE:
                 self.log.warning("Metric %s is of type Base and shouldn't be reported this way", counter_name)
             base_name = None
-            if sql_type in [PERF_AVERAGE_BULK, PERF_RAW_LARGE_FRACTION]:
+            if sql_counter_type in [PERF_AVERAGE_BULK, PERF_RAW_LARGE_FRACTION]:
                 # This is an ugly hack. For certains type of metric (PERF_RAW_LARGE_FRACTION
                 # and PERF_AVERAGE_BULK), we need two metrics: the metrics specified and
-                # a base metrics to get the ratio. There is no unique schema so we generate
-                # the possible candidates and we look at which ones exist in the db.
+                # a base metrics to get the ratio. There is no unique schema, so we generate
+                # the possible candidates, and we look at which ones exist in the db.
                 candidates = (
                     counter_name + " base",
                     counter_name.replace("(ms)", "base"),
@@ -692,18 +723,19 @@ class SQLServer(AgentCheck):
                     cursor.execute(BASE_NAME_QUERY, candidates)
                     base_name = cursor.fetchone().counter_name.strip()
                     self.log.debug("Got base metric: %s for metric: %s", base_name, counter_name)
+                    self._sql_counter_types[counter_name] = (sql_counter_type, base_name)
                 except Exception as e:
                     self.log.warning("Could not get counter_name of base for metric: %s", e)
 
-        return sql_type, base_name
+        return sql_counter_type, base_name
 
-    def typed_metric(self, cfg_inst, table, base_name=None, user_type=None, sql_type=None, column=None):
+    def typed_metric(self, cfg_inst, table, base_name=None, user_type=None, sql_counter_type=None, column=None):
         """
         Create the appropriate BaseSqlServerMetric object, each implementing its method to
         fetch the metrics properly.
         If a `type` was specified in the config, it is used to report the value
         directly fetched from SQLServer. Otherwise, it is decided based on the
-        sql_type, according to microsoft's documentation.
+        sql_counter_type, according to microsoft's documentation.
         """
         if table == DEFAULT_PERFORMANCE_TABLE:
             metric_type_mapping = {
@@ -719,7 +751,7 @@ class SQLServer(AgentCheck):
                 cls = metrics.SqlSimpleMetric
 
             else:
-                metric_type, cls = metric_type_mapping[sql_type]
+                metric_type, cls = metric_type_mapping[sql_counter_type]
         else:
             # Lookup metrics classes by their associated table
             metric_type_str, cls = metrics.TABLE_MAPPING[table]
@@ -756,6 +788,7 @@ class SQLServer(AgentCheck):
             self._send_database_instance_metadata()
             if self.dbm_enabled:
                 self.statement_metrics.run_job_loop(self.tags)
+                self.procedure_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
                 self.sql_metadata.run_job_loop(self.tags)
         else:
@@ -815,7 +848,6 @@ class SQLServer(AgentCheck):
                     self._make_metric_list_to_collect(self.custom_metrics)
 
                 instance_results = {}
-
                 # Execute the `fetch_all` operations first to minimize the database calls
                 for cls, metric_names in six.iteritems(self.instance_per_type_metrics):
                     if not metric_names:
@@ -834,20 +866,17 @@ class SQLServer(AgentCheck):
 
                         instance_results[cls] = rows, cols
 
-                # Using the cached data, extract and report individual metrics
                 for metric in self.instance_metrics:
-                    if type(metric) is metrics.SqlIncrFractionMetric:
-                        # special case, since it uses the same results as SqlFractionMetric
-                        key = 'SqlFractionMetric'
-                    else:
-                        key = metric.__class__.__name__
-
+                    key = metric.__class__.__name__
                     if key not in instance_results:
                         self.log.warning("No %s metrics found, skipping", str(key))
                     else:
                         rows, cols = instance_results[key]
                         if rows is not None:
-                            metric.fetch_metric(rows, cols)
+                            if key == 'SqlIncrFractionMetric':
+                                metric.fetch_metric(rows, cols, self.sqlserver_incr_fraction_metric_previous_values)
+                            else:
+                                metric.fetch_metric(rows, cols)
 
             # Neither pyodbc nor adodbapi are able to read results of a query if the number of rows affected
             # statement are returned as part of the result set, so we disable for the entire connection

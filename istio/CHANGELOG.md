@@ -2,7 +2,13 @@
 
 ## Unreleased
 
-## 5.1.0 / 2023-08-18
+## 5.2.0 / 2023-09-29
+
+***Added***:
+
+* Add additional Istio metrics ([#15820](https://github.com/DataDog/integrations-core/pull/15820))
+
+## 5.1.0 / 2023-08-18 / Agent 7.48.0
 
 ***Added***:
 
@@ -22,7 +28,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 4.4.1 / 2023-07-10
+## 4.4.1 / 2023-07-10 / Agent 7.47.0
 
 ***Fixed***:
 

@@ -2,7 +2,20 @@
 
 ## Unreleased
 
-## 4.6.1 / 2023-08-18
+## 4.7.1 / 2023-10-11
+
+***Fixed***:
+
+* Update kube_scheduler SLI metrics implementation for consistency across components ([#15929](https://github.com/DataDog/integrations-core/pull/15929))
+
+## 4.7.0 / 2023-09-29
+
+***Added***:
+
+* Add goroutine_by_scheduling_operation metric to kube_scheduler check ([#15697](https://github.com/DataDog/integrations-core/pull/15697))
+* Add support for kube_scheduler SLI metrics ([#15731](https://github.com/DataDog/integrations-core/pull/15731))
+
+## 4.6.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:
 
@@ -18,7 +31,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 4.5.1 / 2023-07-10
+## 4.5.1 / 2023-07-10 / Agent 7.47.0
 
 ***Fixed***:
 

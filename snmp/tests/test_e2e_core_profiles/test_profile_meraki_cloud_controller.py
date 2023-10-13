@@ -17,6 +17,7 @@ from ..metrics import (
 )
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
+    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     assert_extend_generic_if,
     create_e2e_core_test_config,
@@ -27,7 +28,8 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
-    config = create_e2e_core_test_config('meraki-cloud-controller')
+    profile = 'meraki-cloud-controller'
+    config = create_e2e_core_test_config(profile)
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -69,14 +71,20 @@ def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
     aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=common_tags)
 
     tag_rows = [
-        ['mac_address:02:02:00:66:f5:7f', 'network:L_NETWORK', 'product:MR16-HW'],
+        ['mac_address:02:02:00:66:f5:7f', 'network:L_NETWORK', 'product:MR16-HW', 'device_name:Gymnasium'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.devClientCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.devStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['mac_address:02:02:00:66:f5:7f', 'network:L_NETWORK', 'product:MR16-HW', 'status:online'],
+        [
+            'mac_address:02:02:00:66:f5:7f',
+            'network:L_NETWORK',
+            'product:MR16-HW',
+            'status:online',
+            'device_name:Gymnasium',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.meraki.dev', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -107,5 +115,6 @@ def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
+    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

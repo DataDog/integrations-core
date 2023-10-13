@@ -26,20 +26,20 @@ metrics:
         name: devClientCount
     metric_tags:
       # devMac is part of the devTable index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.29671.1.1.4.1.1
           name: devMac
           format: mac_address
         tag: mac_address
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.29671.1.1.4.1.2
           name: devName
-        tag: device
-      - column:
+        tag: device_name
+      - symbol:
           OID: 1.3.6.1.4.1.29671.1.1.4.1.9
           name: devProductCode
         tag: product
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.29671.1.1.4.1.11
           name: devNetworkName
         tag: network
@@ -54,24 +54,24 @@ metrics:
         constant_value_one: true
     metric_tags:
       # devMac is part of the devTable index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.29671.1.1.4.1.1
           name: devMac
           format: mac_address
         tag: mac_address
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.29671.1.1.4.1.2
           name: devName
-        tag: device
-      - column:
+        tag: device_name
+      - symbol:
           OID: 1.3.6.1.4.1.29671.1.1.4.1.9
           name: devProductCode
         tag: product
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.29671.1.1.4.1.11
           name: devNetworkName
         tag: network
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.29671.1.1.4.1.3
           name: devStatus
         tag: status
@@ -95,16 +95,16 @@ metrics:
         name: devInterfaceRecvBytes
     metric_tags:
       # devMac and devInterfaceIndex are part of the devInterfaceTable index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.29671.1.1.5.1.1
           name: devInterfaceDevMac
           format: mac_address
         tag: mac_address
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.29671.1.1.5.1.2
           name: devInterfaceIndex
         tag: index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.29671.1.1.5.1.3
           name: devInterfaceName
         tag: interface

@@ -9,6 +9,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
+    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     assert_extend_generic_if,
     create_e2e_core_test_config,
@@ -19,7 +20,8 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
-    config = create_e2e_core_test_config('dell-emc-data-domain')
+    profile = 'dell-emc-data-domain'
+    config = create_e2e_core_test_config(profile)
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -41,6 +43,7 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
     aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.datadomain.fileSystemVirtualSpace', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
         ['datadomain_power_module_description:kept acted kept acted Jaded', 'datadomain_power_module_status:ok'],
         ['datadomain_power_module_description:oxen acted but Jaded zombies', 'datadomain_power_module_status:faulty'],
@@ -159,7 +162,7 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
             'snmp.datadomain.fileSystemPreCompressionSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.fileSystemReductionPercent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemReductionPercent1', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
             'snmp.datadomain.fileSystemTotalCompressionFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
@@ -209,7 +212,7 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
             'snmp.datadomain.nvramWriteKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.relOutKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.replOutKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
             'snmp.datadomain.replInKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
@@ -296,5 +299,6 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
+    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

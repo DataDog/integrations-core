@@ -13,10 +13,10 @@ metrics:
         name: powernet.rPDULoadStatusLoad
     metric_tags:
       - tag: powernet_r_pdu_load_status_index
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.318.1.1.12.2.3.1.1.1
           name: rPDULoadStatusIndex
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.318.1.1.12.2.3.1.1.3
           name: rPDULoadStatusLoadState
         tag: powernet_r_pdu_load_status_load_state
@@ -34,20 +34,20 @@ metrics:
         name: powernet.rPDUOutletStatusLoad
     metric_tags:
       - tag: powernet_r_pdu_outlet_status_index
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.318.1.1.12.3.5.1.1.1
           name: rPDUOutletStatusIndex
       - tag: powernet_r_pdu_outlet_status_outlet_name
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.318.1.1.12.3.5.1.1.2
           name: rPDUOutletStatusOutletName
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.318.1.1.12.3.5.1.1.4
           name: rPDUOutletStatusOutletState
         tag: powernet_r_pdu_outlet_status_outlet_state
         mapping:
           1: outlet_status_on
-          0: outlet_status_off
+          2: outlet_status_off
 #  - MIB: PowerNet-MIB
 #    symbol:
 #      OID: 1.3.6.1.4.1.318.1.1.12.4.1.1.0
@@ -80,14 +80,14 @@ metrics:
         constant_value_one: true
     metric_tags:
       - tag: powernet_r_pdu_status_bank_index
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.318.1.1.12.5.2.1.1
           name: rPDUStatusBankIndex
       - tag: powernet_r_pdu_status_bank_number
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.318.1.1.12.5.2.1.2
           name: rPDUStatusBankNumber
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.318.1.1.12.5.2.1.3
           name: rPDUStatusBankState
         tag: powernet_r_pdu_status_bank_state
@@ -105,14 +105,14 @@ metrics:
         constant_value_one: true
     metric_tags:
       - tag: powernet_r_pdu_status_phase_index
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.318.1.1.12.5.4.1.1
           name: rPDUStatusPhaseIndex
       - tag: powernet_r_pdu_status_phase_number
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.318.1.1.12.5.4.1.2
           name: rPDUStatusPhaseNumber
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.318.1.1.12.5.4.1.3
           name: rPDUStatusPhaseState
         tag: powernet_r_pdu_status_phase_state
@@ -130,14 +130,14 @@ metrics:
         constant_value_one: true
     metric_tags:
       - tag: powernet_r_pdu_status_outlet_index
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.318.1.1.12.5.6.1.1
           name: rPDUStatusOutletIndex
       - tag: powernet_r_pdu_status_outlet_number
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.318.1.1.12.5.6.1.2
           name: rPDUStatusOutletNumber
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.318.1.1.12.5.6.1.3
           name: rPDUStatusOutletState
         tag: powernet_r_pdu_status_outlet_state
@@ -159,11 +159,11 @@ metrics:
         name: powernet.rPDU2SensorTempHumidityStatusRelativeHumidity
     metric_tags:
       - tag: powernet_r_pdu2_sensor_temp_humidity_status_name
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.318.1.1.26.10.2.2.1.3
           name: rPDU2SensorTempHumidityStatusName
       - tag: powernet_r_pdu2_sensor_temp_humidity_status_type
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.318.1.1.26.10.2.2.1.5
           name: rPDU2SensorTempHumidityStatusType
         mapping:
@@ -171,7 +171,7 @@ metrics:
           2: temperature_humidity
           3: comms_lost
           4: not_installed
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.318.1.1.26.10.2.2.1.9
           name: rPDU2SensorTempHumidityStatusTempStatus
         tag: powernet_r_pdu2_sensor_temp_humidity_status_temp_status
@@ -182,7 +182,7 @@ metrics:
           4: normal
           5: above_high
           6: above_max
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.318.1.1.26.10.2.2.1.11
           name: rPDU2SensorTempHumidityStatusHumidityStatus
         tag: powernet_r_pdu2_sensor_temp_humidity_status_humidity_status

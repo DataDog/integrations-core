@@ -8,10 +8,12 @@ class AppEnvVars:
     VERBOSE = 'DDEV_VERBOSE'
     # https://no-color.org
     NO_COLOR = 'NO_COLOR'
-    FORCE_COLOR = 'DDEV_COLOR'
+    FORCE_COLOR = 'FORCE_COLOR'
 
 
 class ConfigEnvVars:
+    DATA = 'DDEV_DATA_DIR'
+    CACHE = 'DDEV_CACHE_DIR'
     CONFIG = 'DDEV_CONFIG'
 
 

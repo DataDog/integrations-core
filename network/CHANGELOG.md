@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## 3.0.0 / 2023-08-10
+## 3.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 
@@ -17,7 +17,7 @@
 * Improve debug logs for ena and ethtool network metrics ([#15447](https://github.com/DataDog/integrations-core/pull/15447))
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 2.10.0 / 2023-07-10
+## 2.10.0 / 2023-07-10 / Agent 7.47.0
 
 ***Added***:
 
