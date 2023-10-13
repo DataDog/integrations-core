@@ -6,6 +6,7 @@
     "tags": [
         "integration:strimzi"
     ],
+    "description": "Notify your team when a Strimzi Topic Operator resource is in a 'fail' state",
     "definition": {
     "name": "Strimzi Topic Operator Resource {kind.name} on {host.name} is in a \"fail\" state\"",
     "type": "query alert",
