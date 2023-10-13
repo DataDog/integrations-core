@@ -14,7 +14,7 @@
 
 * Add `use_cert_from_response` option ([#15785](https://github.com/DataDog/integrations-core/pull/15785))
 
-## 9.0.1 / 2023-08-18
+## 9.0.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:
 

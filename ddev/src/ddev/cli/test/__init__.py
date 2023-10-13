@@ -38,6 +38,7 @@ def fix_coverage_report(report_file: Path):
 @click.option('--list', '-l', 'list_envs', is_flag=True, help='Show available test environments')
 @click.option('--python-filter', envvar='PYTHON_FILTER', hidden=True)
 @click.option('--junit', is_flag=True, hidden=True)
+@click.option('--hide-header', is_flag=True, hidden=True)
 @click.option('--e2e', is_flag=True, hidden=True)
 @click.pass_obj
 def test(
@@ -56,6 +57,7 @@ def test(
     list_envs: bool,
     python_filter: str | None,
     junit: bool,
+    hide_header: bool,
     e2e: bool,
 ):
     """
@@ -67,6 +69,7 @@ def test(
 
     from ddev.repo.constants import PYTHON_VERSION
     from ddev.testing.constants import EndToEndEnvVars, TestEnvVars
+    from ddev.testing.hatch import get_hatch_env_vars
     from ddev.utils.ci import running_in_ci
 
     if target_spec is None:
@@ -110,13 +113,10 @@ def test(
     if compat:
         recreate = True
 
-    global_env_vars: dict[str, str] = {}
+    global_env_vars: dict[str, str] = get_hatch_env_vars(verbosity=app.verbosity + 1)
 
-    hatch_verbosity = app.verbosity + 1
-    if hatch_verbosity > 0:
-        global_env_vars['HATCH_VERBOSE'] = str(hatch_verbosity)
-    elif hatch_verbosity < 0:
-        global_env_vars['HATCH_QUIET'] = str(abs(hatch_verbosity))
+    # Disable unnecessary output from Docker
+    global_env_vars['DOCKER_CLI_HINTS'] = 'false'
 
     api_key = app.config.org.config.get('api_key')
     if api_key and not (lint or fmt):
@@ -173,7 +173,8 @@ def test(
 
     app.display_debug(f'Targets: {", ".join(targets)}')
     for target in targets.values():
-        app.display_header(target.display_name)
+        if not hide_header:
+            app.display_header(target.display_name)
 
         command = base_command.copy()
         env_vars = global_env_vars.copy()

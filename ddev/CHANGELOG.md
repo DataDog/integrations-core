@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 5.2.1 / 2023-10-12
+
+***Fixed***:
+
+* Fix environment metadata accessor ([#16009](https://github.com/DataDog/integrations-core/pull/16009))
+
+## 5.2.0 / 2023-10-12
+
+***Added***:
+
+* Migrate E2E features ([#15931](https://github.com/DataDog/integrations-core/pull/15931))
+* Bump the minimum supported version of datadog-checks-dev ([#16006](https://github.com/DataDog/integrations-core/pull/16006))
+
 ## 5.1.1 / 2023-09-29
 
 ***Fixed***:

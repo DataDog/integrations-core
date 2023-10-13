@@ -35,11 +35,11 @@ metrics:
       - name: arubaWiredTempSensorTemperature
         OID: 1.3.6.1.4.1.47196.4.1.1.3.11.3.1.1.7
     metric_tags:
-      - column:
+      - symbol:
           name: arubaWiredTempSensorName
           OID: 1.3.6.1.4.1.47196.4.1.1.3.11.3.1.1.5
         tag: aruba_wired_temp_sensor_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.47196.4.1.1.3.11.3.1.1.6
           name: arubaWiredTempSensorState
         tag: aruba_wired_temp_sensor_state
@@ -53,23 +53,23 @@ metrics:
       - name: arubaWiredPSUNumberFailures
         OID: 1.3.6.1.4.1.47196.4.1.1.3.11.2.1.1.9
     metric_tags:
-      - column:
+      - symbol:
           name: arubaWiredPSUName
           OID: 1.3.6.1.4.1.47196.4.1.1.3.11.2.1.1.3
         tag: aruba_wired_psu_name
-      - column:
+      - symbol:
           name: arubaWiredPSUProductName
           OID: 1.3.6.1.4.1.47196.4.1.1.3.11.2.1.1.5
         tag: aruba_wired_psu_product_name
-      - column:
+      - symbol:
           name: arubaWiredPSUSerialNumber
           OID: 1.3.6.1.4.1.47196.4.1.1.3.11.2.1.1.6
         tag: aruba_wired_psu_serial_number
-      - column:
+      - symbol:
           name: arubaWiredPSUAirflowDirection
           OID: 1.3.6.1.4.1.47196.4.1.1.3.11.2.1.1.10
         tag: aruba_wired_psu_airflow_direction
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.47196.4.1.1.3.11.2.1.1.4
           name: arubaWiredPSUState
         tag: aruba_wired_psu_state
@@ -81,19 +81,19 @@ metrics:
       - name: arubaWiredFanTray
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: arubaWiredFanTrayName
           OID: 1.3.6.1.4.1.47196.4.1.1.3.11.4.1.1.3
         tag: aruba_wired_fan_tray_name
-      - column:
+      - symbol:
           name: arubaWiredFanTrayProductName
           OID: 1.3.6.1.4.1.47196.4.1.1.3.11.4.1.1.5
         tag: aruba_wired_fan_tray_product_name
-      - column:
+      - symbol:
           name: arubaWiredFanTraySerialNumber
           OID: 1.3.6.1.4.1.47196.4.1.1.3.11.4.1.1.6
         tag: aruba_wired_fan_tray_serial_number
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.47196.4.1.1.3.11.4.1.1.4
           name: arubaWiredFanTrayState
         tag: aruba_wired_fan_tray_state
@@ -105,23 +105,23 @@ metrics:
       - name: arubaWiredFanRPM
         OID: 1.3.6.1.4.1.47196.4.1.1.3.11.5.1.1.8
     metric_tags:
-      - column:
+      - symbol:
           name: arubaWiredFanName
           OID: 1.3.6.1.4.1.47196.4.1.1.3.11.5.1.1.4
         tag: aruba_wired_fan_name
-      - column:
+      - symbol:
           name: arubaWiredFanProductName
           OID: 1.3.6.1.4.1.47196.4.1.1.3.11.5.1.1.6
         tag: aruba_wired_fan_product_name
-      - column:
+      - symbol:
           name: arubaWiredFanSerialNumber
           OID: 1.3.6.1.4.1.47196.4.1.1.3.11.5.1.1.7
         tag: aruba_wired_fan_serial_number
-      - column:
+      - symbol:
           name: arubaWiredFanAirflowDirection
           OID: 1.3.6.1.4.1.47196.4.1.1.3.11.5.1.1.9
         tag: aruba_wired_fan_airflow_direction
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.47196.4.1.1.3.11.5.1.1.5
           name: arubaWiredFanState
         tag: aruba_wired_fan_state

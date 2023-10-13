@@ -14,6 +14,7 @@ class KafkaClient:
         self.config = config
         self.log = log
         self._kafka_client = None
+        self.topic_partition_cache = {}
 
     @property
     def kafka_client(self):
@@ -34,6 +35,7 @@ class KafkaClient:
             "bootstrap.servers": self.config._kafka_connect_str,
             "group.id": consumer_group,
             "enable.auto.commit": False,  # To avoid offset commit to broker during close
+            "queued.max.messages.kbytes": self.config._consumer_queued_max_messages_kbytes,
         }
         config.update(self.__get_authentication_config())
 
@@ -152,6 +154,9 @@ class KafkaClient:
         return highwater_offsets
 
     def get_partitions_for_topic(self, topic):
+        if partitions := self.topic_partition_cache.get(topic):
+            return partitions
+
         try:
             cluster_metadata = self.kafka_client.list_topics(topic, timeout=self.config._request_timeout)
         except KafkaException as e:
@@ -160,6 +165,7 @@ class KafkaClient:
         else:
             topic_metadata = cluster_metadata.topics[topic]
             partitions = list(topic_metadata.partitions.keys())
+            self.topic_partition_cache[topic] = partitions
             return partitions
 
     def request_metadata_update(self):
@@ -244,6 +250,9 @@ class KafkaClient:
     def _list_consumer_group_offsets(self, cg_tp):
         return self.kafka_client.list_consumer_group_offsets([cg_tp])
 
+    def close_admin_client(self):
+        self._kafka_client = None
+
     def _get_consumer_offset_futures(self, consumer_groups):
         futures = []
 
@@ -271,11 +280,8 @@ class KafkaClient:
                 # If partitions are not defined
                 else:
                     # get all the partitions for this topic
-                    partitions = (
-                        self.kafka_client.list_topics(topic=topic, timeout=self.config._request_timeout)
-                        .topics[topic]
-                        .partitions
-                    )
+                    partitions = self.get_partitions_for_topic(topic)
+
                     topic_partitions = [TopicPartition(topic, partition) for partition in partitions]
 
                 futures.append(

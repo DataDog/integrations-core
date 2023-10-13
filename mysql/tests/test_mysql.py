@@ -358,6 +358,12 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
 )
 def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, aggregator, dd_run_check, instance_basic):
     instance_basic['dbm'] = dbm_enabled
+    if dbm_enabled:
+        # set a very small collection interval so the tests go fast
+        instance_basic['collect_settings'] = {'collection_interval': 0.1}
+        instance_basic['query_activity'] = {'collection_interval': 0.1}
+        instance_basic['query_samples'] = {'collection_interval': 0.1}
+        instance_basic['query_metrics'] = {'collection_interval': 0.1}
     instance_basic['disable_generic_tags'] = False  # This flag also affects the hostname
     instance_basic['reported_hostname'] = reported_hostname
 
@@ -656,6 +662,12 @@ def test_set_resources(aggregator, dd_run_check, instance_basic, cloud_metadata,
 @pytest.mark.usefixtures('dd_environment')
 def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, dbm_enabled, reported_hostname):
     instance_complex['dbm'] = dbm_enabled
+    if dbm_enabled:
+        # set a very small collection interval so the tests go fast
+        instance_complex['collect_settings'] = {'collection_interval': 0.1}
+        instance_complex['query_activity'] = {'collection_interval': 0.1}
+        instance_complex['query_samples'] = {'collection_interval': 0.1}
+        instance_complex['query_metrics'] = {'collection_interval': 0.1}
     if reported_hostname:
         instance_complex['reported_hostname'] = reported_hostname
     expected_host = reported_hostname if reported_hostname else 'stubbed.hostname'
