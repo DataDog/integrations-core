@@ -4,6 +4,7 @@
 
 ***Added***:
 
+* Upgrade `psycopg2-binary` to `v2.9.8` ([#15949](https://github.com/DataDog/integrations-core/pull/15949))
 * Add support for reporting SQL obfuscation errors ([#15990](https://github.com/DataDog/integrations-core/pull/15990))
 
 ## 15.1.0 / 2023-10-06
@@ -16,7 +17,6 @@
 
 ***Changed***:
 
-* Upgrade `psycopg2-binary` to `v2.9.8` ([#15949](https://github.com/DataDog/integrations-core/pull/15949))
 * Update `ssl` default configuration to 'allow' ([#15917](https://github.com/DataDog/integrations-core/pull/15917))
 
 ***Added***:
