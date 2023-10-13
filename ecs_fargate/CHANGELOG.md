@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add storage_stats support for Windows ([#16014](https://github.com/DataDog/integrations-core/pull/16014))
+
 ***Fixed***:
 
 * Fix blkio_stats bad metrics for Windows ([#16014](https://github.com/DataDog/integrations-core/pull/16014))
