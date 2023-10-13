@@ -34,23 +34,23 @@ metrics:
       - name: servertech.sentry3.towerLineFrequency
         OID: 1.3.6.1.4.1.1718.3.2.1.1.15
     metric_tags:
-      - column:
+      - symbol:
           name: servertech.sentry3.towerID
           OID: 1.3.6.1.4.1.1718.3.2.1.1.2
         tag: servertech_sentry3_tower_id
-      - column:
+      - symbol:
           name: servertech.sentry3.towerName
           OID: 1.3.6.1.4.1.1718.3.2.1.1.3
         tag: servertech_sentry3_tower_name
-      - column:
+      - symbol:
           name: servertech.sentry3.towerProductSN
           OID: 1.3.6.1.4.1.1718.3.2.1.1.6
         tag: servertech_sentry3_tower_product_sn
-      - column:
+      - symbol:
           name: servertech.sentry3.towerModelNumber
           OID: 1.3.6.1.4.1.1718.3.2.1.1.7
         tag: servertech_sentry3_tower_model_number
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.1718.3.2.1.1.4
           name: servertech.sentry3.towerStatus
         tag: servertech_sentry3_tower_status
@@ -85,27 +85,27 @@ metrics:
       - name: servertech.sentry3.infeedCapacityUsed
         OID: 1.3.6.1.4.1.1718.3.2.2.1.20
     metric_tags:
-      - column:
+      - symbol:
           name: servertech.sentry3.infeedID
           OID: 1.3.6.1.4.1.1718.3.2.2.1.2
         tag: servertech_sentry3_infeed_id
-      - column:
+      - symbol:
           name: servertech.sentry3.infeedName
           OID: 1.3.6.1.4.1.1718.3.2.2.1.3
         tag: servertech_sentry3_infeed_name
-      - column:
+      - symbol:
           name: servertech.sentry3.infeedLineID
           OID: 1.3.6.1.4.1.1718.3.2.2.1.21
         tag: servertech_sentry3_infeed_line_id
-      - column:
+      - symbol:
           name: servertech.sentry3.infeedLineToLineID
           OID: 1.3.6.1.4.1.1718.3.2.2.1.22
         tag: servertech_sentry3_infeed_line_to_line_id
-      - column:
+      - symbol:
           name: servertech.sentry3.infeedPhaseID
           OID: 1.3.6.1.4.1.1718.3.2.2.1.23
         tag: servertech_sentry3_infeed_phase_id
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.1718.3.2.2.1.5
           name: servertech.sentry3.infeedStatus
         tag: servertech_sentry3_infeed_status
@@ -120,7 +120,7 @@ metrics:
           7: reading
           8: off_fuse
           9: on_fuse
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.1718.3.2.2.1.6
           name: servertech.sentry3.infeedLoadStatus
         tag: servertech_sentry3_infeed_load_status
@@ -133,7 +133,7 @@ metrics:
           5: over_load
           6: read_error
           7: no_comm
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.1718.3.2.2.1.17
           name: servertech.sentry3.infeedReactance
         tag: servertech_sentry3_infeed_reactance
@@ -150,15 +150,15 @@ metrics:
       - name: servertech.sentry3.outlet
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: servertech.sentry3.outletID
           OID: 1.3.6.1.4.1.1718.3.2.3.1.2
         tag: servertech_sentry3_outlet_id
-      - column:
+      - symbol:
           name: servertech.sentry3.outletName
           OID: 1.3.6.1.4.1.1718.3.2.3.1.3
         tag: servertech_sentry3_outlet_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.1718.3.2.3.1.5
           name: servertech.sentry3.outletStatus
         tag: servertech_sentry3_outlet_status
@@ -173,7 +173,7 @@ metrics:
           7: reading
           8: off_fuse
           9: on_fuse
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.1718.3.2.3.1.10
           name: servertech.sentry3.outletControlState
         tag: servertech_sentry3_outlet_control_state
@@ -196,7 +196,7 @@ metrics:
           15: event_on
           16: event_reboot
           17: event_shutdown
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.1718.3.2.3.1.19
           name: servertech.sentry3.outletWakeupState
         tag: servertech_sentry3_outlet_wakeup_state
@@ -212,15 +212,15 @@ metrics:
       - name: servertech.sentry3.envMon
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: servertech.sentry3.envMonID
           OID: 1.3.6.1.4.1.1718.3.2.4.1.2
         tag: servertech_sentry3_env_mon_id
-      - column:
+      - symbol:
           name: servertech.sentry3.envMonName
           OID: 1.3.6.1.4.1.1718.3.2.4.1.3
         tag: servertech_sentry3_env_mon_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.1718.3.2.4.1.4
           name: servertech.sentry3.envMonStatus
         tag: servertech_sentry3_env_mon_status
@@ -237,15 +237,15 @@ metrics:
       - name: servertech.sentry3.tempHumidSensorHumidValue
         OID: 1.3.6.1.4.1.1718.3.2.5.1.10
     metric_tags:
-      - column:
+      - symbol:
           name: servertech.sentry3.tempHumidSensorID
           OID: 1.3.6.1.4.1.1718.3.2.5.1.2
         tag: servertech_sentry3_temp_humid_sensor_id
-      - column:
+      - symbol:
           name: servertech.sentry3.tempHumidSensorName
           OID: 1.3.6.1.4.1.1718.3.2.5.1.3
         tag: servertech_sentry3_temp_humid_sensor_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.1718.3.2.5.1.4
           name: servertech.sentry3.tempHumidSensorStatus
         tag: servertech_sentry3_temp_humid_sensor_status
@@ -254,7 +254,7 @@ metrics:
           1: not_found
           2: lost
           3: no_comm
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.1718.3.2.5.1.5
           name: servertech.sentry3.tempHumidSensorTempStatus
         tag: servertech_sentry3_temp_humid_sensor_temp_status
@@ -267,7 +267,7 @@ metrics:
           5: read_error
           6: lost
           7: no_comm
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.1718.3.2.5.1.9
           name: servertech.sentry3.tempHumidSensorHumidStatus
         tag: servertech_sentry3_temp_humid_sensor_humid_status
@@ -280,7 +280,7 @@ metrics:
           5: read_error
           6: lost
           7: no_comm
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.1718.3.2.5.1.13
           name: servertech.sentry3.tempHumidSensorTempScale
         tag: servertech_sentry3_temp_humid_sensor_temp_scale

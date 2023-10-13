@@ -62,31 +62,31 @@ metrics:
       - name: sonicSAStatOutFragPktCount
         OID: 1.3.6.1.4.1.8741.1.3.2.1.1.1.13
     metric_tags:
-      - column:
+      - symbol:
           name: sonicSAStatPeerGateway
           OID: 1.3.6.1.4.1.8741.1.3.2.1.1.1.2
         tag: sonic_sa_stat_peer_gateway
-      - column:
+      - symbol:
           name: sonicSAStatSrcAddrBegin
           OID: 1.3.6.1.4.1.8741.1.3.2.1.1.1.3
         tag: sonic_sa_stat_src_addr_begin
-      - column:
+      - symbol:
           name: sonicSAStatSrcAddrEnd
           OID: 1.3.6.1.4.1.8741.1.3.2.1.1.1.4
         tag: sonic_sa_stat_src_addr_end
-      - column:
+      - symbol:
           name: sonicSAStatDstAddrBegin
           OID: 1.3.6.1.4.1.8741.1.3.2.1.1.1.5
         tag: sonic_sa_stat_dst_addr_begin
-      - column:
+      - symbol:
           name: sonicSAStatDstAddrEnd
           OID: 1.3.6.1.4.1.8741.1.3.2.1.1.1.6
         tag: sonic_sa_stat_dst_addr_end
-      - column:
+      - symbol:
           name: sonicSAStatCreateTime
           OID: 1.3.6.1.4.1.8741.1.3.2.1.1.1.7
         tag: sonic_sa_stat_create_time
-      - column:
+      - symbol:
           name: sonicSAStatUserName
           OID: 1.3.6.1.4.1.8741.1.3.2.1.1.1.14
         tag: sonic_sa_stat_user_name

@@ -10,7 +10,7 @@
 
 * Add `yarn.metrics.decommissioning_nodes` metric ([#15980](https://github.com/DataDog/integrations-core/pull/15980))
 
-## 5.0.0 / 2023-08-10
+## 5.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 

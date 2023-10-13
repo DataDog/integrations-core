@@ -31,7 +31,7 @@ metadata:
           OID: 1.3.6.1.2.1.31.1.1.1.18
           name: ifAlias
     id_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.31.1.1.1.1
           name: ifName
         tag: interface
@@ -57,12 +57,12 @@ metrics:
   - OID: 1.3.6.1.2.1.2.2.1.19
     name: ifOutDiscards
   metric_tags:
-  - column:
+  - symbol:
       OID: 1.3.6.1.2.1.31.1.1.1.1
       name: ifName
     table: ifXTable
     tag: interface
-  - column:
+  - symbol:
       OID: 1.3.6.1.2.1.31.1.1.1.18
       name: ifAlias
     table: ifXTable
@@ -81,12 +81,12 @@ metrics:
   - OID: 1.3.6.1.2.1.2.2.1.5
     name: ifSpeed
   metric_tags:
-  - column:
+  - symbol:
       OID: 1.3.6.1.2.1.31.1.1.1.1
       name: ifName
     table: ifXTable
     tag: interface
-  - column:
+  - symbol:
       OID: 1.3.6.1.2.1.31.1.1.1.18
       name: ifAlias
     table: ifXTable
@@ -112,11 +112,11 @@ metrics:
   - OID: 1.3.6.1.2.1.31.1.1.1.13
     name: ifHCOutBroadcastPkts
   metric_tags:
-  - column:
+  - symbol:
       OID: 1.3.6.1.2.1.31.1.1.1.1
       name: ifName
     tag: interface
-  - column:
+  - symbol:
       OID: 1.3.6.1.2.1.31.1.1.1.18
       name: ifAlias
     table: ifXTable
@@ -134,11 +134,11 @@ metrics:
   - OID: 1.3.6.1.2.1.31.1.1.1.10
     name: ifHCOutOctets
   metric_tags:
-  - column:
+  - symbol:
       OID: 1.3.6.1.2.1.31.1.1.1.1
       name: ifName
     tag: interface
-  - column:
+  - symbol:
       OID: 1.3.6.1.2.1.31.1.1.1.18
       name: ifAlias
     table: ifXTable
@@ -153,11 +153,11 @@ metrics:
   - OID: 1.3.6.1.2.1.31.1.1.1.15
     name: ifHighSpeed
   metric_tags:
-  - column:
+  - symbol:
       OID: 1.3.6.1.2.1.31.1.1.1.1
       name: ifName
     tag: interface
-  - column:
+  - symbol:
       OID: 1.3.6.1.2.1.31.1.1.1.18
       name: ifAlias
     table: ifXTable

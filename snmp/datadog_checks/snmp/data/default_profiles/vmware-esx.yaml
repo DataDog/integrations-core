@@ -21,11 +21,11 @@ metrics:
       - name: vmwHostBusAdapter
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: vmwHbaDeviceName
           OID: 1.3.6.1.4.1.6876.3.5.2.1.2
         tag: vmw_hba_device_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6876.3.5.2.1.4
           name: vmwHbaStatus
         tag: vmw_hba_status
@@ -43,7 +43,7 @@ metrics:
       - name: vmwEnv
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: vmwSubsystemType
           OID: 1.3.6.1.4.1.6876.4.20.3.1.2
         tag: vmw_subsystem_type
@@ -58,7 +58,7 @@ metrics:
           8: temperature_sensor
           9: raid_controller
           10: voltage
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6876.4.20.3.1.3
           name: vmwHardwareStatus
         tag: vmw_hardware_status

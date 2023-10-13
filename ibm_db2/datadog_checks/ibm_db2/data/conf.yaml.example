@@ -62,6 +62,11 @@ instances:
     #
     # tls_cert: <TLS_CERT>
 
+    ## @param connection_timeout - integer - optional - default: 10
+    ## Connection timeout in seconds
+    #
+    # connection_timeout: 10
+
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
     ## Only metrics specified in `custom_queries` will be collected.
