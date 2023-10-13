@@ -2,9 +2,13 @@
 
 ## Unreleased
 
+***Changed***:
+
+* Drop support for Python 2 ([#15949](https://github.com/DataDog/integrations-core/pull/15949))
+
 ***Added***:
 
-* Upgrade `psycopg2-binary` to `v2.9.8` and drop support for `python2` ([#15949](https://github.com/DataDog/integrations-core/pull/15949))
+* Upgrade `psycopg2-binary` to `v2.9.8` ([#15949](https://github.com/DataDog/integrations-core/pull/15949))
 
 ## 5.0.0 / 2023-08-10 / Agent 7.48.0
 
