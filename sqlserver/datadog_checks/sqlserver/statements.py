@@ -306,6 +306,11 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     1,
                     **self.check.debug_stats_kwargs(tags=["error:obfuscate-query-{}".format(type(e))])
                 )
+                self.check.count(
+                    "dd.sqlserver.obfuscation.error",
+                    1,
+                    **self.check.debug_stats_kwargs(tags=["error:{}".format(type(e)), "error_msg:{}".format(e)])
+                )
                 continue
             obfuscated_statement = statement['query']
             row['dd_comments'] = comments
