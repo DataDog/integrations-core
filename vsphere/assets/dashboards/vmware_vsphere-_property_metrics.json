@@ -28,7 +28,7 @@
             "prefix": "vsphere_cluster"
         }
     ],
-    "title": "VMware vSphere- Property Metrics",
+    "title": "VMware vSphere - Property Metrics",
     "widgets": [
         {
             "definition": {
