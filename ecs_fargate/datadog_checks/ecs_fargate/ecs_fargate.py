@@ -334,10 +334,8 @@ class FargateCheck(AgentCheck):
 
                 blkio_stats = container_stats.get("blkio_stats", {}).get(blkio_cat)
                 # In Windows is always "None" (string), so don't report anything
-                if blkio_stats == 'None':
+                if blkio_stats is None or blkio_stats == 'None':
                     continue
-                elif blkio_stats is None:
-                    blkio_stats = []
 
                 for blkio_stat in blkio_stats:
 
