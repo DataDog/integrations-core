@@ -4,39 +4,39 @@
 
 from datadog_checks.openstack_controller.components.component import Component
 from datadog_checks.openstack_controller.metrics import (
-    KEYSTONE_DOMAINS_COUNT,
-    KEYSTONE_DOMAINS_METRICS,
-    KEYSTONE_DOMAINS_METRICS_PREFIX,
-    KEYSTONE_DOMAINS_TAGS,
-    KEYSTONE_GROUPS_COUNT,
-    KEYSTONE_GROUPS_METRICS,
-    KEYSTONE_GROUPS_METRICS_PREFIX,
-    KEYSTONE_GROUPS_TAGS,
-    KEYSTONE_GROUPS_USERS,
-    KEYSTONE_LIMITS_METRICS,
-    KEYSTONE_LIMITS_METRICS_PREFIX,
-    KEYSTONE_LIMITS_TAGS,
-    KEYSTONE_PROJECTS_COUNT,
-    KEYSTONE_PROJECTS_METRICS,
-    KEYSTONE_PROJECTS_METRICS_PREFIX,
-    KEYSTONE_PROJECTS_TAGS,
-    KEYSTONE_REGIONS_COUNT,
-    KEYSTONE_REGIONS_METRICS,
-    KEYSTONE_REGIONS_METRICS_PREFIX,
-    KEYSTONE_REGIONS_TAGS,
-    KEYSTONE_REGISTERED_LIMITS_METRICS,
-    KEYSTONE_REGISTERED_LIMITS_METRICS_PREFIX,
-    KEYSTONE_REGISTERED_LIMITS_TAGS,
+    KEYSTONE_DOMAIN_COUNT,
+    KEYSTONE_DOMAIN_METRICS,
+    KEYSTONE_DOMAIN_METRICS_PREFIX,
+    KEYSTONE_DOMAIN_TAGS,
+    KEYSTONE_GROUP_COUNT,
+    KEYSTONE_GROUP_METRICS,
+    KEYSTONE_GROUP_METRICS_PREFIX,
+    KEYSTONE_GROUP_TAGS,
+    KEYSTONE_GROUP_USERS,
+    KEYSTONE_LIMIT_METRICS,
+    KEYSTONE_LIMIT_METRICS_PREFIX,
+    KEYSTONE_LIMIT_TAGS,
+    KEYSTONE_PROJECT_COUNT,
+    KEYSTONE_PROJECT_METRICS,
+    KEYSTONE_PROJECT_METRICS_PREFIX,
+    KEYSTONE_PROJECT_TAGS,
+    KEYSTONE_REGION_COUNT,
+    KEYSTONE_REGION_METRICS,
+    KEYSTONE_REGION_METRICS_PREFIX,
+    KEYSTONE_REGION_TAGS,
+    KEYSTONE_REGISTERED_LIMIT_METRICS,
+    KEYSTONE_REGISTERED_LIMIT_METRICS_PREFIX,
+    KEYSTONE_REGISTERED_LIMIT_TAGS,
     KEYSTONE_RESPONSE_TIME,
     KEYSTONE_SERVICE_CHECK,
-    KEYSTONE_SERVICES_COUNT,
-    KEYSTONE_SERVICES_METRICS,
-    KEYSTONE_SERVICES_METRICS_PREFIX,
-    KEYSTONE_SERVICES_TAGS,
-    KEYSTONE_USERS_COUNT,
-    KEYSTONE_USERS_METRICS,
-    KEYSTONE_USERS_METRICS_PREFIX,
-    KEYSTONE_USERS_TAGS,
+    KEYSTONE_SERVICE_COUNT,
+    KEYSTONE_SERVICE_METRICS,
+    KEYSTONE_SERVICE_METRICS_PREFIX,
+    KEYSTONE_SERVICE_TAGS,
+    KEYSTONE_USER_COUNT,
+    KEYSTONE_USER_METRICS,
+    KEYSTONE_USER_METRICS_PREFIX,
+    KEYSTONE_USER_TAGS,
     get_metrics_and_tags,
 )
 
@@ -81,12 +81,12 @@ class Identity(Component):
         for item in data:
             region = get_metrics_and_tags(
                 item,
-                tags=KEYSTONE_REGIONS_TAGS,
-                prefix=KEYSTONE_REGIONS_METRICS_PREFIX,
-                metrics=KEYSTONE_REGIONS_METRICS,
+                tags=KEYSTONE_REGION_TAGS,
+                prefix=KEYSTONE_REGION_METRICS_PREFIX,
+                metrics=KEYSTONE_REGION_METRICS,
             )
             self.check.log.debug("region: %s", region)
-            self.check.gauge(KEYSTONE_REGIONS_COUNT, 1, tags=tags + region['tags'])
+            self.check.gauge(KEYSTONE_REGION_COUNT, 1, tags=tags + region['tags'])
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
@@ -96,12 +96,12 @@ class Identity(Component):
         for item in data:
             domain = get_metrics_and_tags(
                 item,
-                tags=KEYSTONE_DOMAINS_TAGS,
-                prefix=KEYSTONE_DOMAINS_METRICS_PREFIX,
-                metrics=KEYSTONE_DOMAINS_METRICS,
+                tags=KEYSTONE_DOMAIN_TAGS,
+                prefix=KEYSTONE_DOMAIN_METRICS_PREFIX,
+                metrics=KEYSTONE_DOMAIN_METRICS,
             )
             self.check.log.debug("domain: %s", domain)
-            self.check.gauge(KEYSTONE_DOMAINS_COUNT, 1, tags=tags + domain['tags'])
+            self.check.gauge(KEYSTONE_DOMAIN_COUNT, 1, tags=tags + domain['tags'])
             for metric, value in domain['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + domain['tags'])
 
@@ -113,12 +113,12 @@ class Identity(Component):
         for item in data:
             project = get_metrics_and_tags(
                 item,
-                tags=KEYSTONE_PROJECTS_TAGS,
-                prefix=KEYSTONE_PROJECTS_METRICS_PREFIX,
-                metrics=KEYSTONE_PROJECTS_METRICS,
+                tags=KEYSTONE_PROJECT_TAGS,
+                prefix=KEYSTONE_PROJECT_METRICS_PREFIX,
+                metrics=KEYSTONE_PROJECT_METRICS,
             )
             self.check.log.debug("project: %s", project)
-            self.check.gauge(KEYSTONE_PROJECTS_COUNT, 1, tags=tags + project['tags'])
+            self.check.gauge(KEYSTONE_PROJECT_COUNT, 1, tags=tags + project['tags'])
             for metric, value in project['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + project['tags'])
 
@@ -130,12 +130,12 @@ class Identity(Component):
         for item in data:
             user = get_metrics_and_tags(
                 item,
-                tags=KEYSTONE_USERS_TAGS,
-                prefix=KEYSTONE_USERS_METRICS_PREFIX,
-                metrics=KEYSTONE_USERS_METRICS,
+                tags=KEYSTONE_USER_TAGS,
+                prefix=KEYSTONE_USER_METRICS_PREFIX,
+                metrics=KEYSTONE_USER_METRICS,
             )
             self.check.log.debug("user: %s", user)
-            self.check.gauge(KEYSTONE_USERS_COUNT, 1, tags=tags + user['tags'])
+            self.check.gauge(KEYSTONE_USER_COUNT, 1, tags=tags + user['tags'])
             for metric, value in user['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + user['tags'])
 
@@ -147,19 +147,19 @@ class Identity(Component):
         for item in data:
             group = get_metrics_and_tags(
                 item,
-                tags=KEYSTONE_GROUPS_TAGS,
-                prefix=KEYSTONE_GROUPS_METRICS_PREFIX,
-                metrics=KEYSTONE_GROUPS_METRICS,
+                tags=KEYSTONE_GROUP_TAGS,
+                prefix=KEYSTONE_GROUP_METRICS_PREFIX,
+                metrics=KEYSTONE_GROUP_METRICS,
             )
             self.check.log.debug("group: %s", group)
-            self.check.gauge(KEYSTONE_GROUPS_COUNT, 1, tags=tags + group['tags'])
+            self.check.gauge(KEYSTONE_GROUP_COUNT, 1, tags=tags + group['tags'])
             self._report_group_users(item['id'], tags + group['tags'])
 
     @Component.http_error()
     def _report_group_users(self, group_id, tags):
         users = self.check.api.get_identity_group_users(group_id)
         self.check.log.debug("users: %s", users)
-        self.check.gauge(KEYSTONE_GROUPS_USERS, len(users), tags=tags)
+        self.check.gauge(KEYSTONE_GROUP_USERS, len(users), tags=tags)
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
@@ -169,12 +169,12 @@ class Identity(Component):
         for item in data:
             service = get_metrics_and_tags(
                 item,
-                tags=KEYSTONE_SERVICES_TAGS,
-                prefix=KEYSTONE_SERVICES_METRICS_PREFIX,
-                metrics=KEYSTONE_SERVICES_METRICS,
+                tags=KEYSTONE_SERVICE_TAGS,
+                prefix=KEYSTONE_SERVICE_METRICS_PREFIX,
+                metrics=KEYSTONE_SERVICE_METRICS,
             )
             self.check.log.debug("service: %s", service)
-            self.check.gauge(KEYSTONE_SERVICES_COUNT, 1, tags=tags + service['tags'])
+            self.check.gauge(KEYSTONE_SERVICE_COUNT, 1, tags=tags + service['tags'])
             for metric, value in service['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + service['tags'])
 
@@ -186,9 +186,9 @@ class Identity(Component):
         for item in data:
             registered_limit = get_metrics_and_tags(
                 item,
-                tags=KEYSTONE_REGISTERED_LIMITS_TAGS,
-                prefix=KEYSTONE_REGISTERED_LIMITS_METRICS_PREFIX,
-                metrics=KEYSTONE_REGISTERED_LIMITS_METRICS,
+                tags=KEYSTONE_REGISTERED_LIMIT_TAGS,
+                prefix=KEYSTONE_REGISTERED_LIMIT_METRICS_PREFIX,
+                metrics=KEYSTONE_REGISTERED_LIMIT_METRICS,
                 lambda_name=lambda key: 'limit' if key == 'default_limit' else key,
             )
             self.check.log.debug("registered limit: %s", registered_limit)
@@ -203,9 +203,9 @@ class Identity(Component):
         for item in data:
             limit = get_metrics_and_tags(
                 item,
-                tags=KEYSTONE_LIMITS_TAGS,
-                prefix=KEYSTONE_LIMITS_METRICS_PREFIX,
-                metrics=KEYSTONE_LIMITS_METRICS,
+                tags=KEYSTONE_LIMIT_TAGS,
+                prefix=KEYSTONE_LIMIT_METRICS_PREFIX,
+                metrics=KEYSTONE_LIMIT_METRICS,
                 lambda_name=lambda key: 'limit' if key == 'resource_limit' else key,
             )
             self.check.log.debug("limit: %s", limit)

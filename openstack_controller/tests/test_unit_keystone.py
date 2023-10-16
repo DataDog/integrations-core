@@ -193,11 +193,11 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
 def test_regions_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.keystone.regions.count',
+        'openstack.keystone.region.count',
         count=0,
     )
     aggregator.assert_metric(
-        'openstack.keystone.regions.enabled',
+        'openstack.keystone.region.enabled',
         count=0,
     )
     if api_type == ApiType.REST:
@@ -227,7 +227,7 @@ def test_regions_exception(aggregator, check, dd_run_check, mock_http_get, conne
 def test_regions_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.keystone.regions.count',
+        'openstack.keystone.region.count',
         value=1,
         tags=[
             'region_id:RegionOne',
@@ -235,7 +235,7 @@ def test_regions_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.regions.count',
+        'openstack.keystone.region.count',
         value=1,
         tags=[
             'region_id:my-region',
@@ -268,11 +268,11 @@ def test_regions_metrics(aggregator, check, dd_run_check):
 def test_domains_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.keystone.domains.count',
+        'openstack.keystone.domain.count',
         count=0,
     )
     aggregator.assert_metric(
-        'openstack.keystone.domains.enabled',
+        'openstack.keystone.domain.enabled',
         count=0,
     )
     if api_type == ApiType.REST:
@@ -302,7 +302,7 @@ def test_domains_exception(aggregator, check, dd_run_check, mock_http_get, conne
 def test_domains_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.keystone.domains.count',
+        'openstack.keystone.domain.count',
         value=1,
         tags=[
             'domain_id:default',
@@ -311,7 +311,7 @@ def test_domains_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.domains.count',
+        'openstack.keystone.domain.count',
         value=1,
         tags=[
             'domain_id:03e40b01788d403e98e4b9a20210492e',
@@ -320,7 +320,7 @@ def test_domains_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.domains.enabled',
+        'openstack.keystone.domain.enabled',
         value=1,
         tags=[
             'domain_id:default',
@@ -329,7 +329,7 @@ def test_domains_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.domains.enabled',
+        'openstack.keystone.domain.enabled',
         value=1,
         tags=[
             'domain_id:03e40b01788d403e98e4b9a20210492e',
@@ -363,11 +363,11 @@ def test_domains_metrics(aggregator, check, dd_run_check):
 def test_projects_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.keystone.projects.count',
+        'openstack.keystone.project.count',
         count=0,
     )
     aggregator.assert_metric(
-        'openstack.keystone.projects.enabled',
+        'openstack.keystone.project.enabled',
         count=0,
     )
     if api_type == ApiType.REST:
@@ -397,7 +397,7 @@ def test_projects_exception(aggregator, check, dd_run_check, mock_http_get, conn
 def test_projects_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.keystone.projects.count',
+        'openstack.keystone.project.count',
         value=1,
         tags=[
             'domain_id:default',
@@ -407,7 +407,7 @@ def test_projects_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.projects.enabled',
+        'openstack.keystone.project.enabled',
         value=1,
         tags=[
             'domain_id:default',
@@ -417,7 +417,7 @@ def test_projects_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.projects.count',
+        'openstack.keystone.project.count',
         value=1,
         tags=[
             'domain_id:default',
@@ -427,7 +427,7 @@ def test_projects_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.projects.enabled',
+        'openstack.keystone.project.enabled',
         value=1,
         tags=[
             'domain_id:default',
@@ -437,7 +437,7 @@ def test_projects_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.projects.count',
+        'openstack.keystone.project.count',
         value=1,
         tags=[
             'domain_id:default',
@@ -447,7 +447,7 @@ def test_projects_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.projects.enabled',
+        'openstack.keystone.project.enabled',
         value=1,
         tags=[
             'domain_id:default',
@@ -457,7 +457,7 @@ def test_projects_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.projects.count',
+        'openstack.keystone.project.count',
         value=1,
         tags=[
             'domain_id:default',
@@ -467,7 +467,7 @@ def test_projects_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.projects.enabled',
+        'openstack.keystone.project.enabled',
         value=0,
         tags=[
             'domain_id:default',
@@ -477,7 +477,7 @@ def test_projects_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.projects.count',
+        'openstack.keystone.project.count',
         value=1,
         tags=[
             'domain_id:default',
@@ -487,7 +487,7 @@ def test_projects_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.projects.enabled',
+        'openstack.keystone.project.enabled',
         value=1,
         tags=[
             'domain_id:default',
@@ -522,7 +522,7 @@ def test_projects_metrics(aggregator, check, dd_run_check):
 def test_users_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.keystone.users.count',
+        'openstack.keystone.user.count',
         count=0,
     )
     if api_type == ApiType.REST:
@@ -552,7 +552,7 @@ def test_users_exception(aggregator, check, dd_run_check, mock_http_get, connect
 def test_users_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.keystone.users.count',
+        'openstack.keystone.user.count',
         value=1,
         tags=[
             'domain_id:default',
@@ -562,7 +562,7 @@ def test_users_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.users.enabled',
+        'openstack.keystone.user.enabled',
         value=1,
         tags=[
             'domain_id:default',
@@ -572,7 +572,7 @@ def test_users_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.users.enabled',
+        'openstack.keystone.user.enabled',
         value=1,
         tags=[
             'domain_id:default',
@@ -582,7 +582,7 @@ def test_users_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.users.enabled',
+        'openstack.keystone.user.enabled',
         value=0,
         tags=[
             'domain_id:default',
@@ -592,7 +592,7 @@ def test_users_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.users.enabled',
+        'openstack.keystone.user.enabled',
         value=1,
         tags=[
             'domain_id:default',
@@ -602,7 +602,7 @@ def test_users_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.users.enabled',
+        'openstack.keystone.user.enabled',
         value=1,
         tags=[
             'domain_id:default',
@@ -612,7 +612,7 @@ def test_users_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.users.enabled',
+        'openstack.keystone.user.enabled',
         value=1,
         tags=[
             'domain_id:default',
@@ -622,7 +622,7 @@ def test_users_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.users.enabled',
+        'openstack.keystone.user.enabled',
         value=1,
         tags=[
             'domain_id:default',
@@ -632,7 +632,7 @@ def test_users_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.users.enabled',
+        'openstack.keystone.user.enabled',
         value=1,
         tags=[
             'domain_id:default',
@@ -642,7 +642,7 @@ def test_users_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.users.enabled',
+        'openstack.keystone.user.enabled',
         value=1,
         tags=[
             'domain_id:default',
@@ -652,7 +652,7 @@ def test_users_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.users.enabled',
+        'openstack.keystone.user.enabled',
         value=1,
         tags=[
             'domain_id:default',
@@ -662,7 +662,7 @@ def test_users_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.users.enabled',
+        'openstack.keystone.user.enabled',
         value=1,
         tags=[
             'domain_id:default',
@@ -672,7 +672,7 @@ def test_users_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.users.enabled',
+        'openstack.keystone.user.enabled',
         value=1,
         tags=[
             'domain_id:default',
@@ -682,7 +682,7 @@ def test_users_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.users.enabled',
+        'openstack.keystone.user.enabled',
         value=1,
         tags=[
             'domain_id:default',
@@ -717,7 +717,7 @@ def test_users_metrics(aggregator, check, dd_run_check):
 def test_groups_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.keystone.groups.count',
+        'openstack.keystone.group.count',
         count=0,
     )
     if api_type == ApiType.REST:
@@ -758,7 +758,7 @@ def test_groups_exception(aggregator, check, dd_run_check, mock_http_get, connec
 def test_group_users_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.keystone.groups.count',
+        'openstack.keystone.group.count',
         value=1,
         tags=[
             'domain_id:default',
@@ -768,7 +768,7 @@ def test_group_users_exception(aggregator, check, dd_run_check, mock_http_get, c
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.groups.count',
+        'openstack.keystone.group.count',
         value=1,
         tags=[
             'domain_id:default',
@@ -778,7 +778,7 @@ def test_group_users_exception(aggregator, check, dd_run_check, mock_http_get, c
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.groups.users',
+        'openstack.keystone.group.users',
         count=0,
         tags=[
             'domain_id:default',
@@ -788,7 +788,7 @@ def test_group_users_exception(aggregator, check, dd_run_check, mock_http_get, c
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.groups.users',
+        'openstack.keystone.group.users',
         value=0,
         tags=[
             'domain_id:default',
@@ -827,7 +827,7 @@ def test_group_users_exception(aggregator, check, dd_run_check, mock_http_get, c
 def test_groups_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.keystone.groups.count',
+        'openstack.keystone.group.count',
         value=1,
         tags=[
             'keystone_server:http://127.0.0.1:8080/identity',
@@ -837,7 +837,7 @@ def test_groups_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.groups.users',
+        'openstack.keystone.group.users',
         value=1,
         tags=[
             'keystone_server:http://127.0.0.1:8080/identity',
@@ -847,7 +847,7 @@ def test_groups_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.groups.count',
+        'openstack.keystone.group.count',
         value=1,
         tags=[
             'keystone_server:http://127.0.0.1:8080/identity',
@@ -857,7 +857,7 @@ def test_groups_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.groups.users',
+        'openstack.keystone.group.users',
         value=0,
         tags=[
             'keystone_server:http://127.0.0.1:8080/identity',
@@ -892,7 +892,7 @@ def test_groups_metrics(aggregator, check, dd_run_check):
 def test_services_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.keystone.services.count',
+        'openstack.keystone.service.count',
         count=0,
     )
     if api_type == ApiType.REST:
@@ -922,7 +922,7 @@ def test_services_exception(aggregator, check, dd_run_check, mock_http_get, conn
 def test_services_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.keystone.services.count',
+        'openstack.keystone.service.count',
         value=1,
         tags=[
             'keystone_server:http://127.0.0.1:8080/identity',
@@ -932,7 +932,7 @@ def test_services_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.services.enabled',
+        'openstack.keystone.service.enabled',
         value=1,
         tags=[
             'keystone_server:http://127.0.0.1:8080/identity',
@@ -942,7 +942,7 @@ def test_services_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.services.enabled',
+        'openstack.keystone.service.enabled',
         value=1,
         tags=[
             'keystone_server:http://127.0.0.1:8080/identity',
@@ -952,7 +952,7 @@ def test_services_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.services.enabled',
+        'openstack.keystone.service.enabled',
         value=1,
         tags=[
             'keystone_server:http://127.0.0.1:8080/identity',
@@ -962,7 +962,7 @@ def test_services_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.services.enabled',
+        'openstack.keystone.service.enabled',
         value=1,
         tags=[
             'keystone_server:http://127.0.0.1:8080/identity',
@@ -972,7 +972,7 @@ def test_services_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.services.enabled',
+        'openstack.keystone.service.enabled',
         value=1,
         tags=[
             'keystone_server:http://127.0.0.1:8080/identity',
@@ -982,7 +982,7 @@ def test_services_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.services.enabled',
+        'openstack.keystone.service.enabled',
         value=1,
         tags=[
             'keystone_server:http://127.0.0.1:8080/identity',
@@ -992,7 +992,7 @@ def test_services_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.services.enabled',
+        'openstack.keystone.service.enabled',
         value=1,
         tags=[
             'keystone_server:http://127.0.0.1:8080/identity',
@@ -1002,7 +1002,7 @@ def test_services_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.services.enabled',
+        'openstack.keystone.service.enabled',
         value=1,
         tags=[
             'keystone_server:http://127.0.0.1:8080/identity',
@@ -1037,7 +1037,7 @@ def test_services_metrics(aggregator, check, dd_run_check):
 def test_registered_limits_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.keystone.limits.limit',
+        'openstack.keystone.limit.limit',
         count=0,
         tags=[
             'keystone_server:http://127.0.0.1:8080/identity',
@@ -1081,7 +1081,7 @@ def test_registered_limits_exception(aggregator, check, dd_run_check, mock_http_
 def test_limits_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.keystone.limits.limit',
+        'openstack.keystone.limit.limit',
         count=0,
         tags=[
             'keystone_server:http://127.0.0.1:8080/identity',
@@ -1118,7 +1118,7 @@ def test_limits_exception(aggregator, check, dd_run_check, mock_http_get, connec
 def test_limits_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.keystone.limits.limit',
+        'openstack.keystone.limit.limit',
         value=1000,
         tags=[
             'keystone_server:http://127.0.0.1:8080/identity',
@@ -1129,7 +1129,7 @@ def test_limits_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.limits.limit',
+        'openstack.keystone.limit.limit',
         value=1000,
         tags=[
             'keystone_server:http://127.0.0.1:8080/identity',
@@ -1140,7 +1140,7 @@ def test_limits_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.limits.limit',
+        'openstack.keystone.limit.limit',
         value=100,
         tags=[
             'keystone_server:http://127.0.0.1:8080/identity',
@@ -1151,7 +1151,7 @@ def test_limits_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.limits.limit',
+        'openstack.keystone.limit.limit',
         value=100,
         tags=[
             'keystone_server:http://127.0.0.1:8080/identity',
@@ -1162,7 +1162,7 @@ def test_limits_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.limits.limit',
+        'openstack.keystone.limit.limit',
         value=11,
         tags=[
             'keystone_server:http://127.0.0.1:8080/identity',
@@ -1173,7 +1173,7 @@ def test_limits_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.keystone.limits.limit',
+        'openstack.keystone.limit.limit',
         value=5,
         tags=[
             'keystone_server:http://127.0.0.1:8080/identity',
