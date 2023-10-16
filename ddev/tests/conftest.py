@@ -157,9 +157,8 @@ def isolation() -> Generator[Path, None, None]:
             yield d
 
 
-@pytest.fixture(scope='session')
-def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
-    cloned_repo_path = isolation / local_repo.name
+def __local_clone(isolation, local_repo, branch='origin/master'):
+    cloned_repo_path = isolation / branch / local_repo.name
 
     PLATFORM.check_command_output(
         ['git', 'clone', '--local', '--shared', '--no-tags', str(local_repo), str(cloned_repo_path)]
@@ -169,22 +168,44 @@ def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
         PLATFORM.check_command_output(['git', 'config', 'user.email', 'foo@bar.baz'])
         PLATFORM.check_command_output(['git', 'config', 'commit.gpgsign', 'false'])
 
-    cloned_repo = ClonedRepo(cloned_repo_path, 'origin/master', 'ddev-testing')
+    cloned_repo = ClonedRepo(cloned_repo_path, branch, 'ddev-testing')
     cloned_repo.reset_branch()
 
-    yield cloned_repo
+    return cloned_repo
+
+
+@pytest.fixture(scope='session')
+def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
+    yield __local_clone(isolation, local_repo)
+
+
+@pytest.fixture(scope='session')
+def local_clone_with_current_branch(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
+    with local_repo.as_cwd():
+        current_branch = PLATFORM.check_command_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).strip()
+
+    yield __local_clone(isolation, local_repo, current_branch)
+
+
+def __repository(clone, config_file):
+    config_file.model.repos['core'] = str(clone.path)
+    config_file.save()
+
+    try:
+        yield clone
+    finally:
+        set_root('')
+        clone.reset_branch()
 
 
 @pytest.fixture
 def repository(local_clone, config_file) -> Generator[ClonedRepo, None, None]:
-    config_file.model.repos['core'] = str(local_clone.path)
-    config_file.save()
+    yield from __repository(local_clone, config_file)
 
-    try:
-        yield local_clone
-    finally:
-        set_root('')
-        local_clone.reset_branch()
+
+@pytest.fixture
+def repository_with_current_branch(local_clone_with_current_branch, config_file) -> Generator[ClonedRepo, None, None]:
+    yield from __repository(local_clone_with_current_branch, config_file)
 
 
 @pytest.fixture(scope='session')

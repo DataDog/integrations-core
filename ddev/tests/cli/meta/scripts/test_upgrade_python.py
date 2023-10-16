@@ -6,12 +6,12 @@ from collections import defaultdict
 from ddev.repo.constants import PYTHON_VERSION
 
 
-def test_upgrade_python(ddev, repository):
+def test_upgrade_python(ddev, repository_with_current_branch):
     major, minor = PYTHON_VERSION.split('.')
     new_version = f'{major}.{int(minor) + 1}'
 
     changes = defaultdict(list)
-    for entry in repository.path.iterdir():
+    for entry in repository_with_current_branch.path.iterdir():
         config_file = entry / 'hatch.toml'
         if not config_file.is_file():
             continue
@@ -22,7 +22,7 @@ def test_upgrade_python(ddev, repository):
 
     minimum_changes = sum(map(len, changes.values()))
 
-    constant_file = repository.path / 'ddev' / 'src' / 'ddev' / 'repo' / 'constants.py'
+    constant_file = repository_with_current_branch.path / 'ddev' / 'src' / 'ddev' / 'repo' / 'constants.py'
     contents = constant_file.read_text()
 
     assert f'PYTHON_VERSION = {PYTHON_VERSION!r}' in contents
