@@ -62,6 +62,7 @@ instances:
     #   - template%
     #   - rdsadmin
     #   - azure_maintenance
+    #   - cloudsqladmin
 
     ## @param ssl - string - optional - default: allow
     ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
