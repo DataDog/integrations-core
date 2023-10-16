@@ -579,8 +579,8 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "# VMs",
-                                            "cell_display_mode": "bar",
+                                            "alias": "# VMS",
+                                            "cell_display_mode": "number",
                                             "formula": "query1",
                                             "limit": {
                                                 "count": 500,
@@ -605,6 +605,7 @@
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "title": "Guest Running by VM",
                             "title_align": "left",
                             "title_size": "16",
