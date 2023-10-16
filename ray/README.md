@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [Ray][1] through the Datadog Agent.
+This check monitors [Ray][1] through the Datadog Agent. Ray is an open-source unified compute framework that makes it easy to scale AI and Python workloads, from reinforcement learning to deep learning to tuning, and model serving.
 
 ## Setup
 
