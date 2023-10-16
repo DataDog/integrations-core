@@ -65,7 +65,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "count",
+                                            "alias": "# ADAPTERS",
                                             "formula": "query1",
                                             "limit": {
                                                 "count": 10,
@@ -84,7 +84,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Network Adapters",
                             "title_align": "left",
                             "title_size": "16",
@@ -104,7 +103,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "count",
+                                            "alias": "# ADDRESSES",
                                             "formula": "query1",
                                             "limit": {
                                                 "count": 500,
@@ -123,7 +122,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Static IP Addresses",
                             "title_align": "left",
                             "title_size": "16",
@@ -143,7 +141,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "routes",
+                                            "alias": "# ROUTES",
                                             "formula": "query1",
                                             "limit": {
                                                 "count": 500,
@@ -162,7 +160,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "All Routes",
                             "title_align": "left",
                             "title_size": "16",
@@ -203,7 +200,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "tools",
+                                            "alias": "# VMS",
                                             "formula": "query1",
                                             "limit": {
                                                 "count": 500,
@@ -228,7 +225,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "VMware Tools Running Status by VM",
                             "title_align": "left",
                             "title_size": "16",
@@ -248,7 +244,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "count",
+                                            "alias": "# VMs",
                                             "formula": "query1",
                                             "limit": {
                                                 "count": 500,
@@ -267,7 +263,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "VMware Tools Version by VM",
                             "title_align": "left",
                             "title_size": "16",
@@ -287,7 +282,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "status",
+                                            "alias": "# VMs",
                                             "formula": "query1",
                                             "limit": {
                                                 "count": 500,
@@ -306,7 +301,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": " VMware Tools Version Status by VM",
                             "title_align": "left",
                             "title_size": "16",
@@ -397,7 +391,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Free Space in VMs",
                             "title_align": "left",
                             "title_size": "16",
@@ -525,7 +518,6 @@
                                 }
                             ],
                             "style": {},
-                            "time": {},
                             "title": "VM Uptime",
                             "title_align": "left",
                             "title_size": "16",
@@ -584,9 +576,8 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "guest",
+                                            "alias": "# VMs",
                                             "cell_display_mode": "bar",
-                                            "conditional_formats": [],
                                             "formula": "query1",
                                             "limit": {
                                                 "count": 500,
@@ -723,7 +714,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "host",
+                                            "alias": "# HOSTS",
                                             "formula": "query1",
                                             "limit": {
                                                 "count": 500,
@@ -742,7 +733,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Power State",
                             "title_align": "left",
                             "title_size": "16",
@@ -762,7 +752,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "host",
+                                            "alias": "# HOSTS",
                                             "formula": "query1",
                                             "limit": {
                                                 "count": 500,
@@ -781,7 +771,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "CPU Management Policy",
                             "title_align": "left",
                             "title_size": "16",
@@ -801,7 +790,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "host",
+                                            "alias": "# HOSTS",
                                             "formula": "query1",
                                             "limit": {
                                                 "count": 500,
@@ -839,6 +828,7 @@
                                 {
                                     "formulas": [
                                         {
+                                            "alias": "# HOSTS",
                                             "formula": "query1",
                                             "limit": {
                                                 "count": 500,
@@ -857,7 +847,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Connection State",
                             "title_align": "left",
                             "title_size": "16",
@@ -915,7 +904,6 @@
                                 }
                             ],
                             "style": {},
-                            "time": {},
                             "title": "Capacity by Datastore",
                             "title_align": "left",
                             "title_size": "16",
@@ -949,7 +937,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Free Space by Datastore",
                             "type": "treemap"
                         },
@@ -985,7 +972,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "cluster",
+                                            "alias": "# clusters",
                                             "formula": "query1",
                                             "limit": {
                                                 "count": 500,
@@ -1004,7 +991,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "DAS Enabled",
                             "title_align": "left",
                             "title_size": "16",
@@ -1024,7 +1010,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "cluster",
+                                            "alias": "# clusters",
                                             "formula": "query1",
                                             "limit": {
                                                 "count": 500,
@@ -1043,7 +1029,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "DRS Enabled",
                             "title_align": "left",
                             "title_size": "16",
@@ -1082,7 +1067,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "vMotion Rate",
                             "title_align": "left",
                             "title_size": "16",
@@ -1102,7 +1086,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "cluster",
+                                            "alias": "# clusters",
                                             "formula": "query1",
                                             "limit": {
                                                 "count": 500,
@@ -1121,7 +1105,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Default VM Behavior",
                             "title_align": "left",
                             "title_size": "16",
