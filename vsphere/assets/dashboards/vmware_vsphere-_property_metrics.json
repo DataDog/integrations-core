@@ -225,6 +225,7 @@
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "title": "VMware Tools Running Status by VM",
                             "title_align": "left",
                             "title_size": "16",
@@ -244,7 +245,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "# VMs",
+                                            "alias": "# VMS",
                                             "formula": "query1",
                                             "limit": {
                                                 "count": 500,
@@ -263,6 +264,7 @@
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "title": "VMware Tools Version by VM",
                             "title_align": "left",
                             "title_size": "16",
@@ -282,7 +284,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "# VMs",
+                                            "alias": "# VMS",
                                             "formula": "query1",
                                             "limit": {
                                                 "count": 500,
@@ -301,6 +303,7 @@
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "title": " VMware Tools Version Status by VM",
                             "title_align": "left",
                             "title_size": "16",
