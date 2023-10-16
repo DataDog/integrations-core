@@ -12,7 +12,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 Starting from Agent release 7.49.0, the Ray check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
-<div class="alert alert-warning">This check uses <a href="https://docs.datadoghq.com/integrations/openmetrics/">OpenMetrics</a> to collect metrics from the OpenMetrics endpoint Ray can expose, which requires Python 3.</div>
+**WARNING**: This check uses [OpenMetrics](https://docs.datadoghq.com/integrations/openmetrics/) to collect metrics from the OpenMetrics endpoint Ray can expose, which requires Python 3.
 
 ### Configuration
 
@@ -23,7 +23,7 @@ Starting from Agent release 7.49.0, the Ray check is included in the [Datadog Ag
 
 ##### Metric collection
 
-1. Edit the `ray.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your ray performance data. See the [sample ray.d/conf.yaml][4] for all available configuration options.
+1. Edit the `ray.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Ray performance data. See the [sample configuration file][4] for all available configuration options.
 
     This example demonstrates the configuration:
 
@@ -43,7 +43,7 @@ Starting from Agent release 7.49.0, the Ray check is included in the [Datadog Ag
 
 ##### Metric collection
 
-This example demonstrates the configuration as a Docker label inside `docker-compose.yml`. See the [sample ray.d/conf.yaml][4] for all available configuration options.
+This example demonstrates the configuration as a Docker label inside `docker-compose.yml`. See the [sample configuration file][4] for all available configuration options.
 
 ```yaml
 labels:
@@ -57,7 +57,7 @@ labels:
 
 ##### Metric collection
 
-This example demonstrates the configuration in the previous sections as Kubernetes annotations on your Ray pods. See the [sample ray.d/conf.yaml][4] for all available configuration options.
+This example demonstrates the configuration as Kubernetes annotations on your Ray pods. See the [sample configuration file][4] for all available configuration options.
 
 ```yaml
 apiVersion: v1
@@ -85,9 +85,9 @@ spec:
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
-Ray allows the custom service code to emit [your own metrics that will be available on the OpenMetrics endpoint][10]. You can configure this integration to collect these metrics using the `extra_metrics` option. These metrics will have the `ray.` prefix, just like any other metrics coming from this endpoint.
+Ray metrics are available on the OpenMetrics endpoint. Additionally, Ray allows you to [export custom application-level metrics][10]. You can configure the Ray integration to collect these metrics using the `extra_metrics` option. All Ray metrics, including your custom metrics, use the `ray.` prefix.
 
-<div class="alert alert-info">These custom Ray metrics are considered standard metrics in Datadog.</div>
+**Note:** Custom Ray metrics are considered standard metrics in Datadog.
 
 This example demonstrates a configuration leveraging the `extra_metrics` option:
 
@@ -101,7 +101,7 @@ instances:
       - my_custom_ray_metric
 ```
 
-More info on how to configure this option can be found in the [sample ray.d/conf.yaml][11].
+More info on how to configure this option can be found in the [sample `ray.d/conf.yaml` configuration file][11].
 
 ### Validation
 
@@ -191,5 +191,5 @@ Need help? Contact [Datadog support][9].
 [10]: https://docs.ray.io/en/latest/ray-observability/user-guides/add-app-metrics.html
 [11]: https://github.com/DataDog/integrations-core/blob/master/ray/datadog_checks/ray/data/conf.yaml.example#L59-L105 
 [12]: https://docs.ray.io/en/latest/ray-observability/user-guides/configure-logging.html
-[13]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[13]: https://docs.datadoghq.com/agent/kubernetes/log/#setup
 [14]: https://docs.datadoghq.com/agent/kubernetes/log/#configuration
