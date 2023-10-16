@@ -264,9 +264,6 @@ class DBMAsyncJob(object):
         Send a signal to cancel the job loop asynchronously.
         """
         self._cancel_event.set()
-        # after setting cancel event, wait for job loop to fully shutdown
-        if self._job_loop_future:
-            self._job_loop_future.result()
 
     def run_job_loop(self, tags):
         """
@@ -300,7 +297,11 @@ class DBMAsyncJob(object):
                     self._check.count("dd.{}.async_job.cancel".format(self._dbms), 1, tags=self._job_tags, raw=True)
                     break
                 if time.time() - self._last_check_run > self._min_collection_interval * 2:
-                    self._log.info("[%s] Job loop stopping due to check inactivity", self._job_tags_str)
+                    self._log.info(
+                        "[%s] Job loop stopping due to check inactivity, last check run at %s",
+                        self._job_tags_str,
+                        self._last_check_run,
+                    )
                     self._check.count(
                         "dd.{}.async_job.inactive_stop".format(self._dbms), 1, tags=self._job_tags, raw=True
                     )
