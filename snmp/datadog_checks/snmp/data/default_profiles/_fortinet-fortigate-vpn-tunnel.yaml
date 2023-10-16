@@ -12,6 +12,6 @@ metrics:
         name: fgVpnTunEntStatus
     metric_tags:
       - tag: vpn_tunnel
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.12356.101.12.2.2.1.2
           name: fgVpnTunEntPhase1Name

@@ -6,7 +6,6 @@ import os
 
 import mock
 import pytest
-import requests
 import requests_mock
 
 from datadog_checks.kube_scheduler import KubeSchedulerCheck
@@ -32,7 +31,7 @@ def mock_metrics():
 
 
 def test_check_metrics_slis(aggregator, mock_metrics, mock_request, instance):
-    mock_request.head('http://localhost:10251/metrics/slis', status_code=200)
+    mock_request.get('http://localhost:10251/metrics/slis', status_code=200)
     c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
@@ -40,14 +39,55 @@ def test_check_metrics_slis(aggregator, mock_metrics, mock_request, instance):
         # Wrapper to keep assertions < 120 chars
         aggregator.assert_metric("{}.{}".format(CHECK_NAME, name), **kwargs)
 
-    assert_metric('slis.kubernetes_healthcheck', value=1, tags=['name:ping', 'type:healthz'])
+    assert_metric('slis.kubernetes_healthcheck', value=1, tags=['sli_name:ping'])
     assert_metric(
         'slis.kubernetes_healthchecks_total',
         value=2450,
-        tags=['name:ping', 'status:success', 'type:healthz'],
+        tags=['sli_name:ping', 'status:success'],
     )
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_check_metrics_slis_transform(aggregator, mock_metrics, mock_request, instance):
+    mock_request.get('http://localhost:10251/metrics/slis', status_code=200)
+    c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
+    c.check(instance)
+
+    def assert_metric(name, **kwargs):
+        # Wrapper to keep assertions < 120 chars
+        aggregator.assert_metric("{}.{}".format(CHECK_NAME, name), **kwargs)
+
+    # Check that no metrics with `name` tag come through
+    assert_metric('slis.kubernetes_healthcheck', count=0, metric_type=aggregator.GAUGE, tags=['name:attachdetach'])
+    assert_metric(
+        'slis.kubernetes_healthchecks_total',
+        metric_type=aggregator.MONOTONIC_COUNT,
+        count=0,
+        tags=['name:attachdetach', 'status:success'],
+    )
+
+
+def test_check_metrics_slis_filter_by_type(aggregator, mock_metrics, mock_request, instance):
+    mock_request.get('http://localhost:10251/metrics/slis', status_code=200)
+    c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
+    c.check(instance)
+
+    def assert_metric(name, **kwargs):
+        # Wrapper to keep assertions < 120 chars
+        aggregator.assert_metric("{}.{}".format(CHECK_NAME, name), **kwargs)
+
+    # Check that metrics with type other than `healthz` are filtered out
+    assert_metric(
+        'slis.kubernetes_healthcheck', count=0, metric_type=aggregator.GAUGE, tags=['sli_name:etcd', 'type:readyz']
+    )
+
+    assert_metric(
+        'slis.kubernetes_healthchecks_total',
+        metric_type=aggregator.MONOTONIC_COUNT,
+        count=0,
+        tags=['sli_name:etcd', 'status:success', 'type:readyz'],
+    )
 
 
 @pytest.fixture()
@@ -56,33 +96,25 @@ def mock_request():
         yield m
 
 
-def test_detect_sli_endpoint(mock_metrics, mock_request, instance):
-    mock_request.head('http://localhost:10251/metrics/slis', status_code=200)
-    c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
-    c.check(instance)
-    assert c._slis_available is True
-    assert mock_request.call_count == 1
+def test_detect_sli_endpoint(mock_metrics, instance):
+    with mock.patch('requests.get') as mock_request:
+        mock_request.return_value.status_code = 200
+        c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
+        c.check(instance)
+        assert c._slis_available is True
 
 
-def test_detect_sli_endpoint_404(mock_metrics, mock_request, instance):
-    mock_request.head('http://localhost:10251/metrics/slis', status_code=404)
-    c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
-    c.check(instance)
-    assert c._slis_available is False
-    assert mock_request.call_count == 1
+def test_detect_sli_endpoint_404(mock_metrics, instance):
+    with mock.patch('requests.get') as mock_request:
+        mock_request.return_value.status_code = 404
+        c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
+        c.check(instance)
+        assert c._slis_available is False
 
 
-def test_detect_sli_endpoint_403(mock_metrics, mock_request, instance):
-    mock_request.head('http://localhost:10251/metrics/slis', status_code=403)
-    c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
-    c.check(instance)
-    assert c._slis_available is False
-    assert mock_request.call_count == 1
-
-
-def test_detect_sli_endpoint_timeout(mock_metrics, mock_request, instance):
-    mock_request.head('http://localhost:10251/metrics/slis', exc=requests.exceptions.ConnectTimeout)
-    c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
-    c.check(instance)
-    assert c._slis_available is None
-    assert mock_request.call_count == 1
+def test_detect_sli_endpoint_403(mock_metrics, instance):
+    with mock.patch('requests.get') as mock_request:
+        mock_request.return_value.status_code = 403
+        c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
+        c.check(instance)
+        assert c._slis_available is False

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 4.7.1 / 2023-10-11
+
+***Fixed***:
+
+* Update kube_scheduler SLI metrics implementation for consistency across components ([#15929](https://github.com/DataDog/integrations-core/pull/15929))
+
 ## 4.7.0 / 2023-09-29
 
 ***Added***:

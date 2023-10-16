@@ -171,11 +171,11 @@ metrics:
         OID: 1.3.6.1.4.1.14685.3.1.28.1.5
         metric_type: monotonic_count
     metric_tags:
-      - column:
+      - symbol:
           name: ibm.dpStatusLogTargetStatusLogTarget
           OID: 1.3.6.1.4.1.14685.3.1.28.1.1
         tag: ibm_dp_status_log_target_status_log_target
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.14685.3.1.28.1.2
           name: ibm.dpStatusLogTargetStatusStatus
         tag: ibm_dp_status_log_target_status_status
@@ -184,7 +184,7 @@ metrics:
           2: warning
           3: failure
           4: suspended
-#      - column:
+#      - symbol:
 #          OID: 1.3.6.1.4.1.14685.3.1.28.1.6
 #          name: ibm.dpStatusLogTargetStatusErrorInfo
 #        tag: ibm_dp_status_log_target_status_error_info
@@ -219,7 +219,7 @@ metrics:
         OID: 1.3.6.1.4.1.14685.3.1.124.1.26
         metric_type: monotonic_count
     metric_tags:
-      - column:
+      - symbol:
           name: ibm.dpStatusNetworkInterfaceStatusInterfaceType
           OID: 1.3.6.1.4.1.14685.3.1.124.1.2
         tag: ibm_dp_status_network_interface_status_interface_type
@@ -229,11 +229,11 @@ metrics:
           131: tunnel
           135: vlan
           161: aggregate
-      - column:
+      - symbol:
           name: ibm.dpStatusNetworkInterfaceStatusName
           OID: 1.3.6.1.4.1.14685.3.1.124.1.3
         tag: ibm_dp_status_network_interface_status_name
-      - column:
+      - symbol:
           name: ibm.dpStatusNetworkInterfaceStatusIPType
           OID: 1.3.6.1.4.1.14685.3.1.124.1.6
         tag: ibm_dp_status_network_interface_status_ip_type
@@ -245,24 +245,24 @@ metrics:
           4: ipv6z
           16: dns
           25: l2vpn
-      - column:
+      - symbol:
           name: ibm.dpStatusNetworkInterfaceStatusIP
           OID: 1.3.6.1.4.1.14685.3.1.124.1.7
           format: ip_address
         tag: ibm_dp_status_network_interface_status_ip
-      - column:
+      - symbol:
           name: ibm.dpStatusNetworkInterfaceStatusMACAddress
           OID: 1.3.6.1.4.1.14685.3.1.124.1.9
           format: mac_address
         tag: ibm_dp_status_network_interface_status_mac_address
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.14685.3.1.124.1.4
           name: ibm.dpStatusNetworkInterfaceStatusAdminStatus
         tag: ibm_dp_status_network_interface_status_admin_status
         mapping:
           1: up
           2: down
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.14685.3.1.124.1.5
           name: ibm.dpStatusNetworkInterfaceStatusOperStatus
         tag: ibm_dp_status_network_interface_status_oper_status

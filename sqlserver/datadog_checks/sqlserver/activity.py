@@ -13,7 +13,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.utils import PROC_CHAR_LIMIT, extract_sql_comments, is_statement_proc
+from datadog_checks.sqlserver.utils import PROC_CHAR_LIMIT, extract_sql_comments_and_procedure_name
 
 try:
     import datadog_agent
@@ -275,14 +275,14 @@ class SqlserverActivity(DBMAsyncJob):
             statement = obfuscate_sql_with_metadata(row['statement_text'], self.check.obfuscator_options)
             procedure_statement = None
             # sqlserver doesn't have a boolean data type so convert integer to boolean
-            row['is_proc'], procedure_name = is_statement_proc(row['text'])
+            comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
             if row['is_proc'] and 'text' in row:
                 procedure_statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
             obfuscated_statement = statement['query']
             metadata = statement['metadata']
             row['dd_commands'] = metadata.get('commands', None)
             row['dd_tables'] = metadata.get('tables', None)
-            row['dd_comments'] = extract_sql_comments(row['text'])
+            row['dd_comments'] = comments
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
             # procedure_signature is used to link this activity event with
             # its related plan events
@@ -297,6 +297,11 @@ class SqlserverActivity(DBMAsyncJob):
             else:
                 self.log.debug("Failed to obfuscate query | err=[%s]", e)
             obfuscated_statement = "ERROR: failed to obfuscate"
+            self.check.count(
+                "dd.sqlserver.obfuscation.error",
+                1,
+                **self.check.debug_stats_kwargs(tags=["error:{}".format(type(e)), "error_msg:{}".format(e)])
+            )
         row = self._sanitize_row(row, obfuscated_statement)
         return row
 
