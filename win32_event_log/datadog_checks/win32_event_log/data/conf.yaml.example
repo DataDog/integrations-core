@@ -222,10 +222,10 @@ instances:
     #
     # domain: <DOMAIN>
 
-    ## @param timeout - number - optional - default: 5
-    ## The number of seconds to wait for new event signals.
+    ## @param timeout - integer - optional - default: 5000
+    ## The number of milliseconds to wait for new event signals.
     #
-    # timeout: 5
+    # timeout: 5000
 
     ## @param payload_size - integer - optional - default: 10
     ## The number of events to request at a time.
