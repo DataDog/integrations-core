@@ -14,7 +14,43 @@ files:
             service.hidden: true
     - template: instances
       options:
+        - name: use_legacy_check_version
+          required: true
+          display_priority: 1
+          description: |
+            For backward compatibility reasons, it is possible to use a deprecated version of the Openstack Controller
+            integration by setting this field to "true".
+          value:
+              type: boolean
+              example: false
+        - name: name
+          hidden: true
+          description: |
+            Unique identifier for this instance.
+          value:
+            example: <INSTANCE_NAME>
+            type: string
+        - name: username
+          description: |
+           The User name used to connect to Openstack.
+          value:
+            example: "admin"
+            type: string
+        - name: password
+          description: |
+           The Password used to connect to Openstack.
+          value:
+            example: <PASSWORD>
+            type: string
+        - name: domain_id
+          description: |
+           The domain ID used to connect to Openstack. If not specified, the check will
+           use the "default" Domain ID
+          value:
+            example: "default"
+            type: string
         - name: user
+          hidden: true
           description: |
            Password authentication is the only auth method supported
            User expects username, password, and user domain id
@@ -29,7 +65,36 @@ files:
                 id: <DOMAIN_ID>
             type: object
           enabled: true
+        - name: whitelist_project_names
+          hidden: true
+          description: |
+           IDs of projects to whitelist for monitoring (by default the agent collects limit metrics from all projects)
+           Regex expressions for the project names are supported.
+           Blacklist takes precedence over whitelist in case of overlap.
+          value:
+            example:
+              - <PROJECT_NAME>
+              - <PROJECT_PREFIX>*
+            display_default: []
+            type: array
+            items:
+              type: string
+        - name: blacklist_project_names
+          hidden: true
+          description: |
+           IDs of projects to blacklist for monitoring (by default the agent collects limit metrics from all projects)
+           Regex expressions for the project names are supported.
+           Blacklist takes precedence over whitelist in case of overlap.
+          value:
+            example:
+              - <PROJECT_NAME>
+              - <PROJECT_PREFIX>*
+            display_default: []
+            type: array
+            items:
+              type: string
         - name: exclude_server_ids
+          hidden: true
           description: |
            IDs of servers to exclude from monitoring. (by default the agent collects metrics from all guest servers)
            Regex expressions for the server IDs are supported.
@@ -42,6 +107,7 @@ files:
             items:
               type: string
         - name: exclude_network_ids
+          hidden: true
           description: |
            IDs of networks to exclude from monitoring (by default the agent collects metrics from networks returned by the
            neutron:get_networks operation)
@@ -91,7 +157,32 @@ files:
             example: https://<KEYSTONE_ENDPOINT>:<PORT>/
             type: string
             display_default: null
+        - name: ironic_microversion
+          description: |
+           The microversion of the Ironic (Bare Metal) API to call.
+           It is recommended to set this parameter to the latest Ironic microversion supported by your Openstack version.
+
+           View this page for more about Ironic microvoersion compatibility:
+              https://docs.openstack.org/ironic/latest/contributor/webapi-version-history.html
+          enabled: true
+          value:
+            example: "1.80"
+            type: string
+        - name: nova_microversion
+          description: |
+           The microversion of the Nova (Compute) API to call.
+           It is recommended to set this parameter to the latest Compute microversion supported by your Openstack version.
+           View this page for more about Compute microvoersion compatibility:
+              https://docs.openstack.org/nova/latest/reference/api-microversion-history.html
+           View this page for more information about microversions in Openstack:
+              https://docs.openstack.org/api-guide/compute/microversions.html
+          enabled: true
+          value:
+            example: "2.93"
+            type: string
+            display_default: null
         - name: collect_hypervisor_load
+          hidden: true
           description: |
            Collects hypervisor_load.1/5/15 for each hypervisor
            Disabled by default to increase performance of the check.
@@ -102,6 +193,7 @@ files:
             display_default: true
             type: boolean
         - name: collect_hypervisor_metrics
+          hidden: true
           description: |
            Collects hypervisor metrics (including hypervisor_load).
           value:
@@ -109,6 +201,7 @@ files:
             display_default: true
             type: boolean
         - name: collect_project_metrics
+          hidden: true
           description: |
            The admin user defined for Datadog starts with a "default" project.
            If this option is disabled, project limits metrics are only collected from projects the
@@ -118,6 +211,7 @@ files:
             display_default: true
             type: boolean
         - name: collect_network_metrics
+          hidden: true
           description: |
            Collects network metrics.
           value:
@@ -125,6 +219,7 @@ files:
             display_default: true
             type: boolean
         - name: collect_server_flavor_metrics
+          hidden: true
           description: |
            Collect server flavor metrics.
           value:
@@ -132,6 +227,7 @@ files:
             display_default: true
             type: boolean
         - name: collect_server_diagnostic_metrics
+          hidden: true
           description: |
            Collect server diagnostic metrics. Enabling this may result in performance decrease.
            This is fine for small deployments. For large deployment, turn it off and install the agent on VMs directly.
@@ -148,6 +244,25 @@ files:
             example: false
             display_default: false
             type: boolean
+        - name: endpoint_interface
+          description: |
+           Indicates the visibility scope of the component's endpoints to use. The possible values are:
+             public: This endpoint is accessible from outside the cloud and typically denotes a public-facing URL or 
+                 IP address.
+             internal: This endpoint is typically used for communication between services within the cloud 
+                 infrastructure itself.
+                 It may be an internal IP or hostname that's not accessible from outside the cloud.  
+             admin: This endpoint is specifically for administrative tasks and may have extended privileges or 
+                 functionality compared to the public and internal endpoints.
+                 It's meant for cloud operators or administrators.
+          value:
+            example: "public"
+            type: string
+        - name: endpoint_region_id
+          description: |
+           The region_id that will be used to filter the endpoints to use for each component.
+          value:
+            type: string
         - name: projects
           description: |
             Optional configuration to indicate the projects that we want to be processed. If not configured,

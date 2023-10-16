@@ -33,35 +33,27 @@ init_config:
 #
 instances:
 
-    ## @param user - mapping - optional
-    ## Password authentication is the only auth method supported
-    ## User expects username, password, and user domain id
-    ## `user` should resolve to a structure like
-    ## {'password': '<PASSWORD>', 'name': '<USER_NAME>', 'domain': {'id': '<DOMAIN_ID>'}}
-    ## The check uses the Unscoped token method to collect information about all available projects to the user.
+    ## @param use_legacy_check_version - boolean - required
+    ## For backward compatibility reasons, it is possible to use a deprecated version of the Openstack Controller
+    ## integration by setting this field to "true".
     #
-  - user:
-      password: <PASSWORD>
-      name: <USER_NAME>
-      domain:
-        id: <DOMAIN_ID>
+  - use_legacy_check_version: false
 
-    ## @param exclude_server_ids - list of strings - optional - default: []
-    ## IDs of servers to exclude from monitoring. (by default the agent collects metrics from all guest servers)
-    ## Regex expressions for the server IDs are supported.
+    ## @param username - string - optional - default: admin
+    ## The User name used to connect to Openstack.
     #
-    # exclude_server_ids:
-    #   - <SERVER_ID>
-    #   - <SERVER_ID_PREFIX>*
+    # username: admin
 
-    ## @param exclude_network_ids - list of strings - optional - default: []
-    ## IDs of networks to exclude from monitoring (by default the agent collects metrics from networks returned by the
-    ## neutron:get_networks operation)
-    ## Regex expressions for the network IDs to exclude are supported.
+    ## @param password - string - optional
+    ## The Password used to connect to Openstack.
     #
-    # exclude_network_ids:
-    #   - <NETWORK_ID>
-    #   - <NETWORK_ID_PREFIX>*
+    # password: <PASSWORD>
+
+    ## @param domain_id - string - optional - default: default
+    ## The domain ID used to connect to Openstack. If not specified, the check will
+    ## use the "default" Domain ID
+    #
+    # domain_id: default
 
     ## @param use_agent_proxy - boolean - optional - default: true
     ## Whether the dd-agent proxy should also be used for openstack API requests (if set).
@@ -92,41 +84,24 @@ instances:
     #
     # keystone_server_url: https://<KEYSTONE_ENDPOINT>:<PORT>/
 
-    ## @param collect_hypervisor_load - boolean - optional - default: true
-    ## Collects hypervisor_load.1/5/15 for each hypervisor
-    ## Disabled by default to increase performance of the check.
-    ## With this enabled there is an extra N requests per check run (N = # of hypervisors)
-    ## If the Agent is installed on each hypervisor, this metric is available as system.load.1/5/15
+    ## @param ironic_microversion - string - optional - default: 1.80
+    ## The microversion of the Ironic (Bare Metal) API to call.
+    ## It is recommended to set this parameter to the latest Ironic microversion supported by your Openstack version.
+    ##
+    ## View this page for more about Ironic microvoersion compatibility:
+    ##    https://docs.openstack.org/ironic/latest/contributor/webapi-version-history.html
     #
-    # collect_hypervisor_load: true
+    ironic_microversion: '1.80'
 
-    ## @param collect_hypervisor_metrics - boolean - optional - default: true
-    ## Collects hypervisor metrics (including hypervisor_load).
+    ## @param nova_microversion - string - optional
+    ## The microversion of the Nova (Compute) API to call.
+    ## It is recommended to set this parameter to the latest Compute microversion supported by your Openstack version.
+    ## View this page for more about Compute microvoersion compatibility:
+    ##    https://docs.openstack.org/nova/latest/reference/api-microversion-history.html
+    ## View this page for more information about microversions in Openstack:
+    ##    https://docs.openstack.org/api-guide/compute/microversions.html
     #
-    # collect_hypervisor_metrics: true
-
-    ## @param collect_project_metrics - boolean - optional - default: true
-    ## The admin user defined for Datadog starts with a "default" project.
-    ## If this option is disabled, project limits metrics are only collected from projects the
-    ## datadog defined user has access to view.
-    #
-    # collect_project_metrics: true
-
-    ## @param collect_network_metrics - boolean - optional - default: true
-    ## Collects network metrics.
-    #
-    # collect_network_metrics: true
-
-    ## @param collect_server_flavor_metrics - boolean - optional - default: true
-    ## Collect server flavor metrics.
-    #
-    # collect_server_flavor_metrics: true
-
-    ## @param collect_server_diagnostic_metrics - boolean - optional - default: true
-    ## Collect server diagnostic metrics. Enabling this may result in performance decrease.
-    ## This is fine for small deployments. For large deployment, turn it off and install the agent on VMs directly.
-    #
-    # collect_server_diagnostic_metrics: true
+    nova_microversion: '2.93'
 
     ## @param use_shortname - boolean - optional - default: false
     ## In some OpenStack environments, the hostname registered to Nova is the shortname.
@@ -134,6 +109,24 @@ instances:
     ## comparing against nova responses. Only affects aggregate tagging.
     #
     # use_shortname: false
+
+    ## @param endpoint_interface - string - optional - default: public
+    ## Indicates the visibility scope of the component's endpoints to use. The possible values are:
+    ##   public: This endpoint is accessible from outside the cloud and typically denotes a public-facing URL or 
+    ##       IP address.
+    ##   internal: This endpoint is typically used for communication between services within the cloud 
+    ##       infrastructure itself.
+    ##       It may be an internal IP or hostname that's not accessible from outside the cloud.  
+    ##   admin: This endpoint is specifically for administrative tasks and may have extended privileges or 
+    ##       functionality compared to the public and internal endpoints.
+    ##       It's meant for cloud operators or administrators.
+    #
+    # endpoint_interface: public
+
+    ## @param endpoint_region_id - string - optional
+    ## The region_id that will be used to filter the endpoints to use for each component.
+    #
+    # endpoint_region_id: <ENDPOINT_REGION_ID>
 
     ## @param projects - mapping - optional
     ## Optional configuration to indicate the projects that we want to be processed. If not configured,

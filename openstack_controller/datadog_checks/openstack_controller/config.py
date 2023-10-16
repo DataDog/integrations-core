@@ -50,9 +50,6 @@ class OpenstackConfig:
         self.endpoint_region_id = instance.get('endpoint_region_id', None)
         self.api_type = None
         self.custom_tags = instance.get("tags", [])
-        self.collect_hypervisor_metrics = instance.get("collect_hypervisor_metrics", True)
-        self.collect_hypervisor_load = instance.get("collect_hypervisor_load", True)
-        self.report_legacy_metrics = instance.get("report_legacy_metrics", True)
         self.validate()
 
     def validate(self):
