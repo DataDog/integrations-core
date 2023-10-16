@@ -429,6 +429,14 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['query'], e)
                 else:
                     self._log.debug("Failed to obfuscate query | err=[%s]", e)
+                self._check.count(
+                    "dd.postgres.obfuscation.error",
+                    1,
+                    tags=self.tags
+                    + ["error:{}".format(type(e)), "error_msg:{}".format(e)]
+                    + self._check._get_debug_tags(),
+                    hostname=self._check.resolved_hostname,
+                )
                 continue
 
             obfuscated_query = statement['query']

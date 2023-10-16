@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+***Added***:
+
+* Upgrade `psycopg2-binary` to `v2.9.8` ([#15949](https://github.com/DataDog/integrations-core/pull/15949))
+* Add support for reporting SQL obfuscation errors ([#15990](https://github.com/DataDog/integrations-core/pull/15990))
+
 ***Fixed***:
 
 * Add cloudsqladmin to default list of databases to exclude from autodiscovery to prevent failures on Postgres 15 on Google CloudSQL ([#16027](https://github.com/DataDog/integrations-core/pull/16027))

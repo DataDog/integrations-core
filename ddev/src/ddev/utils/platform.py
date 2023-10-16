@@ -130,6 +130,16 @@ class Platform:
             yield line.decode('utf-8')
 
     @property
+    def format_file_uri(self):
+        if self.__format_file_uri is None:
+            if self.windows:
+                self.__format_file_uri = lambda p: f'file:///{p}'.replace('\\', '/')
+            else:
+                self.__format_file_uri = lambda p: f'file://{p}'
+
+        return self.__format_file_uri
+
+    @property
     def windows(self):
         """
         Indicates whether ddev is running on Windows.

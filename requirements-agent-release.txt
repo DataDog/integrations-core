@@ -87,7 +87,7 @@ datadog-kube-controller-manager==4.5.0
 datadog-kube-dns==4.2.1
 datadog-kube-metrics-server==3.1.1
 datadog-kube-proxy==6.1.1
-datadog-kube-scheduler==4.7.0
+datadog-kube-scheduler==4.7.1
 datadog-kubelet==7.9.2
 datadog-kubernetes-state==7.5.0
 datadog-kyototycoon==2.3.1

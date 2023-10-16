@@ -43,7 +43,7 @@ def show(app, all_keys):
         from rich.syntax import Syntax
 
         text = app.config_file.read() if all_keys else app.config_file.read_scrubbed()
-        app.display_raw(Syntax(text.rstrip(), 'toml', background_color='default'))
+        app.output(Syntax(text.rstrip(), 'toml', background_color='default'))
 
 
 @config.command(short_help='Update the config file with any new fields')
@@ -146,4 +146,4 @@ def set_value(app, key, value):
     from rich.syntax import Syntax
 
     app.display_success('New setting:')
-    app.display_raw(Syntax(rendered_changed, 'toml', background_color='default'))
+    app.output(Syntax(rendered_changed, 'toml', background_color='default'))

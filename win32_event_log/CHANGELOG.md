@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Fix the `timeout` config option definition ([#16017](https://github.com/DataDog/integrations-core/pull/16017))
+
 ## 3.1.0 / 2023-09-29
 
 ***Added***:

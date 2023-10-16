@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 27.0.0 / 2023-10-12
+
+***Changed***:
+
+* Migrate E2E features ([#15931](https://github.com/DataDog/integrations-core/pull/15931))
+
+## 26.0.1 / 2023-10-11
+
 ***Fixed***:
 
 * Fix the manifest template file ([#15984](https://github.com/DataDog/integrations-core/pull/15984))
@@ -34,7 +42,7 @@
 * Added overview examples to the readme file ([#15817](https://github.com/DataDog/integrations-core/pull/15817))
 * Added required classifier tag examples to template ([#15828](https://github.com/DataDog/integrations-core/pull/15828))
 * Prepare E2E tooling for better message passing ([#15843](https://github.com/DataDog/integrations-core/pull/15843))
-  
+
 ## 25.0.0 / 2023-09-13
 
 ***Changed***:
