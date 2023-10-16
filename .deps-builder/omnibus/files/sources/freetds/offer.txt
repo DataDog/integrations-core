@@ -1,0 +1,2 @@
+This package ships freetds.
+Contact Datadog Support (http://docs.datadoghq.com/help/) to request the sources of this software."

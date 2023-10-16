@@ -1,0 +1,8 @@
+hatchling==0.25.1
+setuptools==66.1.1
+wheel==0.38.4
+setuptools_scm
+setuptools_rust
+maturin
+cython
+pip-tools==7.3.0
