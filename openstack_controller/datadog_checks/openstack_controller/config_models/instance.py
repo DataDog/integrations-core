@@ -55,7 +55,7 @@ class InstanceConfig(BaseModel):
     password: Optional[str] = None
     projects: Optional[Projects] = None
     use_agent_proxy: Optional[bool] = None
-    use_legacy_check_version: bool
+    use_legacy_check_version: Optional[bool] = None
     use_shortname: Optional[bool] = None
     user: Optional[MappingProxyType[str, Any]] = None
     username: Optional[str] = None

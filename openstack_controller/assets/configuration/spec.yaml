@@ -15,7 +15,6 @@ files:
     - template: instances
       options:
         - name: use_legacy_check_version
-          required: true
           display_priority: 1
           description: |
             For backward compatibility reasons, it is possible to use a deprecated version of the Openstack Controller

@@ -68,6 +68,10 @@ def instance_use_agent_proxy():
     return True
 
 
+def instance_use_legacy_check_version():
+    return False
+
+
 def instance_use_shortname():
     return False
 

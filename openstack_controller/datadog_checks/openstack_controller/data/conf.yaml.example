@@ -33,11 +33,12 @@ init_config:
 #
 instances:
 
-    ## @param use_legacy_check_version - boolean - required
+  -
+    ## @param use_legacy_check_version - boolean - optional - default: false
     ## For backward compatibility reasons, it is possible to use a deprecated version of the Openstack Controller
     ## integration by setting this field to "true".
     #
-  - use_legacy_check_version: false
+    # use_legacy_check_version: false
 
     ## @param username - string - optional - default: admin
     ## The User name used to connect to Openstack.
