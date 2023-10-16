@@ -77,9 +77,8 @@ class Identity(Component):
     @Component.http_error()
     def _report_regions(self, global_components_config, tags):
         data = self.check.api.get_identity_regions()
-        self.check.log.debug("data: %s", data)
+        self.check.log.debug("regions: %s", data)
         for item in data:
-            self.check.log.debug("item: %s", item)
             region = get_metrics_and_tags(
                 item,
                 tags=KEYSTONE_REGIONS_TAGS,
@@ -93,9 +92,8 @@ class Identity(Component):
     @Component.http_error()
     def _report_domains(self, global_components_config, tags):
         data = self.check.api.get_identity_domains()
-        self.check.log.debug("data: %s", data)
+        self.check.log.debug("domains: %s", data)
         for item in data:
-            self.check.log.debug("item: %s", item)
             domain = get_metrics_and_tags(
                 item,
                 tags=KEYSTONE_DOMAINS_TAGS,
@@ -111,6 +109,7 @@ class Identity(Component):
     @Component.http_error()
     def _report_projects(self, global_components_config, tags):
         data = self.check.api.get_identity_projects()
+        self.check.log.debug("projects: %s", data)
         for item in data:
             project = get_metrics_and_tags(
                 item,
@@ -127,6 +126,7 @@ class Identity(Component):
     @Component.http_error()
     def _report_users(self, global_components_config, tags):
         data = self.check.api.get_identity_users()
+        self.check.log.debug("users: %s", data)
         for item in data:
             user = get_metrics_and_tags(
                 item,
@@ -143,6 +143,7 @@ class Identity(Component):
     @Component.http_error()
     def _report_groups(self, global_components_config, tags):
         data = self.check.api.get_identity_groups()
+        self.check.log.debug("groups: %s", data)
         for item in data:
             group = get_metrics_and_tags(
                 item,
@@ -164,6 +165,7 @@ class Identity(Component):
     @Component.http_error()
     def _report_services(self, global_components_config, tags):
         data = self.check.api.get_identity_services()
+        self.check.log.debug("services: %s", data)
         for item in data:
             service = get_metrics_and_tags(
                 item,
@@ -180,6 +182,7 @@ class Identity(Component):
     @Component.http_error()
     def _report_registered_limits(self, global_components_config, tags):
         data = self.check.api.get_identity_registered_limits()
+        self.check.log.debug("registered limits: %s", data)
         for item in data:
             registered_limit = get_metrics_and_tags(
                 item,
@@ -188,7 +191,7 @@ class Identity(Component):
                 metrics=KEYSTONE_REGISTERED_LIMITS_METRICS,
                 lambda_name=lambda key: 'limit' if key == 'default_limit' else key,
             )
-            self.check.log.debug("registered_limit: %s", registered_limit)
+            self.check.log.debug("registered limit: %s", registered_limit)
             for metric, value in registered_limit['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + registered_limit['tags'])
 
@@ -196,6 +199,7 @@ class Identity(Component):
     @Component.http_error()
     def _report_limits(self, global_components_config, tags):
         data = self.check.api.get_identity_limits()
+        self.check.log.debug("limits: %s", data)
         for item in data:
             limit = get_metrics_and_tags(
                 item,

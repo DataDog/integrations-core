@@ -64,7 +64,7 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
                 )
 
     def check(self, _instance):
-        self.log.info("running check")
+        self.log.info("Running check")
         tags = ['keystone_server:{}'.format(self.api.auth_url())] + self.instance.get('tags', [])
         self.gauge("openstack.controller", 1, tags=tags)
         if self.identity.authorize_user():
@@ -80,9 +80,12 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
             component.start_report()
 
     def _report_metrics(self, tags):
-        self.log.info("reporting metrics")
+        self.log.info("Reporting metrics")
         if self.identity.authorize_system():
+            self.log.info("User successfully authorized (system scope)")
             self._report_global_metrics(tags)
+        else:
+            self.log.debug("Error while authorizing user (system scope)")
         if self.projects_discovery:
             discovered_projects = list(self.projects_discovery.get_items())
         else:
@@ -90,8 +93,9 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
                 (None, project.get('name'), project, None) for project in self.identity.get_auth_projects()
             ]
         for _pattern, project_name, project, project_config in discovered_projects:
-            self.log.info("reporting metrics for project: %s", project_name)
+            self.log.info("Reporting metrics for project: %s", project_name)
             if self.identity.authorize_project(project['id']):
+                self.log.info("User successfully authorized (project scope)")
                 self._report_global_metrics(tags)
                 project_tags = tags + [
                     f"domain_id:{project['domain_id']}",
@@ -99,13 +103,15 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
                     f"project_name:{project['name']}",
                 ]
                 self._report_project_metrics(project, project_config, project_tags)
+            else:
+                self.log.debug("Error while authorizing user (project scope)")
 
     def _finish_report(self, tags):
         for component in self.components:
             component.finish_report(tags)
 
     def _report_global_metrics(self, tags):
-        self.log.info("reporting global metrics")
+        self.log.info("Reporting global metrics")
         global_components_config = self.instance.get('components', {})
         for component in self.components:
             global_component_config = (
