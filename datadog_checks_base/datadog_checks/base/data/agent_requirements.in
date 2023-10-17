@@ -68,7 +68,7 @@ pyjwt==2.8.0; python_version > '3.0'
 pymongo[srv]==4.3.3; python_version >= '3.9'
 pymqi==1.12.10; sys_platform != 'darwin' or platform_machine != 'arm64'
 pymysql==0.10.1
-pyodbc==4.0.32; sys_platform != 'darwin' or platform_machine != 'arm64'
+pyodbc==4.0.39; sys_platform != 'darwin' or platform_machine != 'arm64'
 pyro4==4.82; sys_platform == 'win32'
 pysmi==0.3.4
 pysnmp-mibs==0.1.6
