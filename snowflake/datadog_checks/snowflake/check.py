@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import copy
 from contextlib import closing
 
 import snowflake.connector as sf
@@ -71,23 +70,34 @@ class SnowflakeCheck(AgentCheck):
                 'Snowflake `role` is set as `ACCOUNTADMIN` which should be used cautiously, '
                 'refer to docs about custom roles.'
             )
-        metric_groups = copy.deepcopy(
+        metric_groups = (
             ORGANIZATION_USAGE_METRIC_GROUPS
             if (self._config.schema == 'ORGANIZATION_USAGE')
             else ACCOUNT_USAGE_METRIC_GROUPS
         )
         self.metric_queries = []
         self.errors = []
+
+        # Collect queries according to groups provided in the config
         for mgroup in self._config.metric_groups:
             try:
-                if not self._config.aggregate_last_24_hours:
-                    for query in range(len(metric_groups[mgroup])):
-                        metric_groups[mgroup][query]['query'] = metric_groups[mgroup][query]['query'].replace(
-                            'DATEADD(hour, -24, current_timestamp())', 'date_trunc(day, current_date)'
-                        )
-                self.metric_queries.extend(metric_groups[mgroup])
+                queries_for_group = metric_groups[mgroup]
             except KeyError:
                 self.errors.append(mgroup)
+                continue
+
+            if not self._config.aggregate_last_24_hours:
+                queries_for_group = [
+                    {
+                        **q,
+                        'query': q['query'].replace(
+                            'DATEADD(hour, -24, current_timestamp())', 'date_trunc(day, current_date)'
+                        ),
+                    }
+                    for q in queries_for_group
+                ]
+
+            self.metric_queries.extend(queries_for_group)
 
         if self.errors:
             self.log.warning(
