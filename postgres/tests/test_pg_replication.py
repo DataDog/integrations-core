@@ -33,7 +33,6 @@ def test_common_replica_metrics(aggregator, integration_check, metrics_cache_rep
     check = integration_check(pg_replica_instance)
     check._connect()
     check.initialize_is_aurora()
-    aggregator.reset()
     check.check(pg_replica_instance)
 
     expected_tags = _get_expected_tags(check, pg_replica_instance)
