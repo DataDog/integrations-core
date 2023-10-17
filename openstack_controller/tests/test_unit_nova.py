@@ -23,6 +23,40 @@ pytestmark = [
 
 
 @pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            configs.REST_NOVA_MICROVERSION_2_93,
+            id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.SDK,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            configs.SDK_NOVA_MICROVERSION_2_93,
+            id='api sdk microversion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_disable_nova_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
+    instance = instance | {
+        "components": {
+            "compute": False,
+        },
+    }
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    for metric in aggregator.metric_names:
+        assert not metric.startswith('openstack.nova.')
+
+
+@pytest.mark.parametrize(
     ('mock_http_post', 'connection_session_auth', 'instance', 'api_type'),
     [
         pytest.param(
@@ -744,9 +778,7 @@ def test_disable_hypervisors_metrics(aggregator, dd_run_check, instance, opensta
     instance = instance | {
         "components": {
             "compute": {
-                "hypervisors": {
-                    "collect": False,
-                },
+                "hypervisors": False,
             },
         },
     }
@@ -861,9 +893,7 @@ def test_hypervisors_metrics(aggregator, check, dd_run_check, metrics):
 def test_disable_compute_collect_for_all_projects(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "components": {
-            "compute": {
-                "collect": False,
-            },
+            "compute": False,
         },
     }
     check = openstack_controller_check(instance)
@@ -898,9 +928,7 @@ def test_disable_servers_collect_for_all_projects(aggregator, dd_run_check, inst
     instance = instance | {
         "components": {
             "compute": {
-                "servers": {
-                    "collect": False,
-                },
+                "servers": False,
             },
         },
     }

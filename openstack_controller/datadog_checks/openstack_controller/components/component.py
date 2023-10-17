@@ -133,35 +133,27 @@ class Component:
         if not self.found_in_catalog:
             self.check.service_check(self.SERVICE_CHECK, AgentCheck.UNKNOWN, tags=tags)
 
-    def report_global_metrics(self, global_components_config, tags):
+    def report_global_metrics(self, config, tags):
         if self.ID not in Component.registered_global_metric_methods:
             self.check.log.debug("`%s` component has not registered methods for global metrics", self.ID.value)
             return
         self.check.log.debug("reporting `%s` component global metrics", self.ID.value)
-        self.check.log.debug("global_components_config: %s", global_components_config)
         if self.check.api.component_in_catalog(self.TYPES.value):
             self.found_in_catalog = True
             self.check.log.debug("`%s` component found in catalog", self.ID.value)
             for registered_method in Component.registered_global_metric_methods[self.ID]:
-                registered_method(self, global_components_config, tags)
+                registered_method(self, config, tags)
         else:
             self.check.log.debug("`%s` component not found in catalog", self.ID.value)
 
-    def report_project_metrics(self, project, component_config, project_tags):
+    def report_project_metrics(self, project, config, project_tags):
         if self.ID not in Component.registered_project_metric_methods:
             self.check.log.debug("`%s` component has not registered methods for project metrics", self.ID.value)
             return
-        project_name = project['name']
-        self.check.log.debug("reporting `%s` component project metrics for project `%s`", self.ID.value, project_name)
-        self.check.log.debug("component_config: %s", component_config)
-        collect_component = component_config.get('collect', True)
-        if collect_component:
-            if self.check.api.component_in_catalog(self.TYPES.value):
-                self.found_in_catalog = True
-                self.check.log.debug("`%s` component found in catalog for project %s", self.ID.value, project_name)
-                for registered_method in Component.registered_project_metric_methods[self.ID]:
-                    registered_method(self, project['id'], project_tags, component_config)
-            else:
-                self.check.log.debug("`%s` component not found in catalog for project %s", self.ID.value, project_name)
+        if self.check.api.component_in_catalog(self.TYPES.value):
+            self.found_in_catalog = True
+            self.check.log.debug("`%s` component found in catalog for project %s", self.ID.value, project['name'])
+            for registered_method in Component.registered_project_metric_methods[self.ID]:
+                registered_method(self, project['id'], project_tags, config)
         else:
-            self.check.log.debug("`%s` component will not be collected for project %s", self.ID.value, project_name)
+            self.check.log.debug("`%s` component not found in catalog for project %s", self.ID.value, project['name'])

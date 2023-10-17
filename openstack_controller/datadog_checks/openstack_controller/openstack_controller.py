@@ -114,18 +114,34 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
         self.log.info("Reporting global metrics")
         global_components_config = self.instance.get('components', {})
         for component in self.components:
-            global_component_config = (
-                global_components_config.get(component.ID.value, {}) if global_components_config else {}
-            )
-            component.report_global_metrics(global_component_config, tags)
+            if component.ID.value in global_components_config:
+                global_component_config = global_components_config[component.ID.value]
+            else:
+                global_component_config = {}
+            report_component = True
+            if isinstance(global_component_config, bool):
+                report_component = global_component_config
+            if report_component:
+                component.report_global_metrics(global_component_config, tags)
+            else:
+                self.log.debug("`%s` component will not report global metrics", component.ID.value)
 
     def _report_project_metrics(self, project, project_config, project_tags):
+        self.log.info("Reporting project metrics for project `%s`", project['name'])
         global_components_config = self.instance.get('components', {})
         for component in self.components:
-            global_component_config = (
-                global_components_config.get(component.ID.value, {}) if global_components_config else {}
-            )
-            component_config = global_component_config | (
-                project_config.get(component.ID.value, {}) if project_config else {}
-            )
-            component.report_project_metrics(project, component_config, project_tags)
+            if project_config and component.ID.value in project_config:
+                project_component_config = project_config[component.ID.value]
+            else:
+                if component.ID.value in global_components_config:
+                    project_component_config = global_components_config[component.ID.value]
+                else:
+                    project_component_config = {}
+            report_component = True
+            if isinstance(project_component_config, bool):
+                report_component = project_component_config
+                project_component_config = {}
+            if report_component:
+                component.report_project_metrics(project, project_component_config, project_tags)
+            else:
+                self.log.debug("`%s` component will not report metrics for `%s`", component.ID.value, project['name'])
