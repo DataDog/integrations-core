@@ -8,6 +8,7 @@ from openstack.config import loader
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.models.types import copy_raw
 from datadog_checks.openstack_controller.api.type import ApiType
+from datadog_checks.openstack_controller.defaults import DEFAULT_DOMAIN_ID
 
 
 # Discovery class requires 'include' to be a dict, so this function is needed to normalize the config
@@ -42,7 +43,7 @@ class OpenstackConfig:
         self.keystone_server_url = instance.get("keystone_server_url")
         self.username = instance.get("username")
         self.password = instance.get("password")
-        self.domain_id = instance.get("domain_id", "default")
+        self.domain_id = instance.get("domain_id", DEFAULT_DOMAIN_ID)
         self.user = instance.get("user")
         self.nova_microversion = instance.get('nova_microversion')
         self.ironic_microversion = instance.get('ironic_microversion')

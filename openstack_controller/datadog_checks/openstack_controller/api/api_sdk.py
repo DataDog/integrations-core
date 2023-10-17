@@ -11,6 +11,7 @@ from openstack.config import loader
 from datadog_checks.openstack_controller.api.api import Api
 from datadog_checks.openstack_controller.api.catalog import Catalog
 from datadog_checks.openstack_controller.components.component import Component
+from datadog_checks.openstack_controller.defaults import DEFAULT_DOMAIN_ID
 
 
 class ApiSdk(Api):
@@ -64,7 +65,7 @@ class ApiSdk(Api):
             auth_url=self.cloud_config.get_auth_args().get('auth_url'),
             username=self.cloud_config.get_auth_args().get('username'),
             password=self.cloud_config.get_auth_args().get('password'),
-            user_domain_name=self.cloud_config.get_auth_args().get('user_domain_name', 'default'),
+            user_domain_name=self.cloud_config.get_auth_args().get('user_domain_name', DEFAULT_DOMAIN_ID),
         )
         keystone_session = session.Session(auth=v3_auth, session=self.http.session)
         self.connection = connection.Connection(
@@ -80,7 +81,7 @@ class ApiSdk(Api):
             auth_url=self.cloud_config.get_auth_args().get('auth_url'),
             username=self.cloud_config.get_auth_args().get('username'),
             password=self.cloud_config.get_auth_args().get('password'),
-            user_domain_name=self.cloud_config.get_auth_args().get('user_domain_name', 'default'),
+            user_domain_name=self.cloud_config.get_auth_args().get('user_domain_name', DEFAULT_DOMAIN_ID),
             system_scope="all",
         )
         keystone_session = session.Session(auth=v3_auth, session=self.http.session)
@@ -97,9 +98,9 @@ class ApiSdk(Api):
             auth_url=self.cloud_config.get_auth_args().get('auth_url'),
             username=self.cloud_config.get_auth_args().get('username'),
             password=self.cloud_config.get_auth_args().get('password'),
-            user_domain_name=self.cloud_config.get_auth_args().get('user_domain_name', 'default'),
+            user_domain_name=self.cloud_config.get_auth_args().get('user_domain_name', DEFAULT_DOMAIN_ID),
             project_id=project_id,
-            project_domain_name=self.cloud_config.get_auth_args().get('project_domain_name', 'default'),
+            project_domain_name=self.cloud_config.get_auth_args().get('project_domain_name', DEFAULT_DOMAIN_ID),
         )
         keystone_session = session.Session(auth=v3_auth, session=self.http.session)
         self.connection = connection.Connection(
