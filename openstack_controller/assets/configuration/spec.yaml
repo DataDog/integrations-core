@@ -264,6 +264,50 @@ files:
            The region_id that will be used to filter the endpoints to use for each component.
           value:
             type: string
+        - name: components
+          description: |
+            General configuration that we want to apply to each of the components and their different metric blocks.
+          value:
+            type: object
+            properties:
+              - name: identity
+                anyOf:
+                  - type: boolean
+                  - type: object
+                    properties:
+                      - name: regions
+                        type: boolean
+                      - name: domains
+                        type: boolean
+                      - name: projects
+                        type: boolean
+                      - name: users
+                        type: boolean
+                      - name: groups
+                        type: boolean
+                      - name: services
+                        type: boolean
+                      - name: limits
+                        type: boolean
+              - name: compute
+                anyOf:
+                  - type: boolean
+                  - type: object
+                    properties:
+                      - name: limits
+                        type: boolean
+                      - name: hypervisors
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                      - name: quota_sets
+                        type: boolean
+                      - name: servers
+                        anyOf:
+                          - type: boolean
+                          - type: object
+            example:
+              compute: false
         - name: projects
           description: |
             Optional configuration to indicate the projects that we want to be processed. If not configured,

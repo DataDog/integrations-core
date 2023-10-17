@@ -20,6 +20,40 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class ComputeItem(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    hypervisors: Optional[Union[bool, MappingProxyType[str, Any]]] = None
+    limits: Optional[bool] = None
+    quota_sets: Optional[bool] = None
+    servers: Optional[Union[bool, MappingProxyType[str, Any]]] = None
+
+
+class IdentityItem(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    domains: Optional[bool] = None
+    groups: Optional[bool] = None
+    limits: Optional[bool] = None
+    projects: Optional[bool] = None
+    regions: Optional[bool] = None
+    services: Optional[bool] = None
+    users: Optional[bool] = None
+
+
+class Components(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    compute: Optional[Union[bool, ComputeItem]] = None
+    identity: Optional[Union[bool, IdentityItem]] = None
+
+
 class Projects(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -44,6 +78,7 @@ class InstanceConfig(BaseModel):
     collect_project_metrics: Optional[bool] = None
     collect_server_diagnostic_metrics: Optional[bool] = None
     collect_server_flavor_metrics: Optional[bool] = None
+    components: Optional[Components] = None
     domain_id: Optional[str] = None
     endpoint_interface: Optional[str] = None
     endpoint_region_id: Optional[str] = None

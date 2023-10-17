@@ -118,11 +118,13 @@ class Compute(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_hypervisors(self, global_components_config, tags):
-        config_hypervisors = global_components_config.get('hypervisors', {})
-        self.check.log.debug("config_hypervisors: %s", config_hypervisors)
-        collect_hypervisors = config_hypervisors.get('collect', True)
-        if collect_hypervisors:
+    def _report_hypervisors(self, config, tags):
+        report_hypervisors = True
+        config_hypervisors = config.get('hypervisors', {})
+        if isinstance(config_hypervisors, bool):
+            report_hypervisors = config_hypervisors
+            config_hypervisors = {}
+        if report_hypervisors:
             hypervisors_discovery = None
             config_hypervisors_include = normalize_discover_config_include(config_hypervisors, ["hypervisor_hostname"])
             self.check.log.debug("config_hypervisors_include: %s", config_hypervisors_include)
@@ -210,11 +212,13 @@ class Compute(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_servers(self, project_id, tags, component_config):
-        config_servers = component_config.get('servers', {})
-        self.check.log.debug("config_servers: %s", config_servers)
-        collect_servers = config_servers.get('collect', True)
-        if collect_servers:
+    def _report_servers(self, project_id, tags, config):
+        report_servers = True
+        config_servers = config.get('servers', {})
+        if isinstance(config_servers, bool):
+            report_servers = config_servers
+            config_servers = {}
+        if report_servers:
             servers_discovery = None
             if config_servers:
                 config_servers_include = normalize_discover_config_include(config_servers, ["name"])

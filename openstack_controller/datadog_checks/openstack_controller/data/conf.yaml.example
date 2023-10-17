@@ -129,6 +129,12 @@ instances:
     #
     # endpoint_region_id: <ENDPOINT_REGION_ID>
 
+    ## @param components - mapping - optional
+    ## General configuration that we want to apply to each of the components and their different metric blocks.
+    #
+    # components:
+    #   compute: false
+
     ## @param projects - mapping - optional
     ## Optional configuration to indicate the projects that we want to be processed. If not configured,
     ## all projects will be processed.

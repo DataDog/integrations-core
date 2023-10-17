@@ -66,9 +66,7 @@ REST_DEMO_SERVERS_COLLECT_FALSE = {
             {
                 "name": "^demo.*",
                 "compute": {
-                    "servers": {
-                        "collect": False,
-                    },
+                    "servers": False,
                 },
             },
         ],
@@ -291,9 +289,7 @@ SDK_DEMO_SERVERS_COLLECT_FALSE = {
             {
                 "name": "^demo.*",
                 "compute": {
-                    "servers": {
-                        "collect": False,
-                    },
+                    "servers": False,
                 },
             },
         ],
