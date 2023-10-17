@@ -289,11 +289,15 @@ class PostgreSql(AgentCheck):
 
     def cancel(self):
         """
-        Cancels and waits for all threads to stop.
+        Cancels and sends cancel signal to all threads.
         """
-        self.statement_samples.cancel()
-        self.statement_metrics.cancel()
-        self.metadata_samples.cancel()
+        if self._config.dbm_enabled:
+            self.statement_samples.cancel()
+            self.statement_metrics.cancel()
+            self.metadata_samples.cancel()
+        self._close_db_pool()
+        if self._db:
+            self._db.close()
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
