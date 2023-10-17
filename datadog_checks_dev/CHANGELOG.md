@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Allow bumping the version of `pyodbc` ([#16030](https://github.com/DataDog/integrations-core/pull/16030))
+
 ## 27.0.0 / 2023-10-12
 
 ***Changed***:
