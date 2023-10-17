@@ -15,6 +15,9 @@ No additional installation is needed on your server.
 
 ### Configuration
 
+#### Requirements
+The Cloudera check requires version 7 of Cloudera Manager.
+
 #### Prepare Cloudera Manager
 1. In Cloudera Data Platform, navigate to the Management Console and click on the **User Management** tab.
 ![User Management][10]
