@@ -78,26 +78,25 @@ class SnowflakeCheck(AgentCheck):
         self.metric_queries = []
         self.errors = []
 
-        # Collect queries according to groups provided in the config
+        # Collect queries corresponding to groups provided in the config
         for mgroup in self._config.metric_groups:
             try:
-                queries_for_group = metric_groups[mgroup]
+                self.metric_queries.extend(metric_groups[mgroup])
             except KeyError:
                 self.errors.append(mgroup)
                 continue
 
-            if not self._config.aggregate_last_24_hours:
-                queries_for_group = [
-                    {
-                        **q,
-                        'query': q['query'].replace(
-                            'DATEADD(hour, -24, current_timestamp())', 'date_trunc(day, current_date)'
-                        ),
-                    }
-                    for q in queries_for_group
-                ]
-
-            self.metric_queries.extend(queries_for_group)
+        if not self._config.aggregate_last_24_hours:
+            # Modify queries to use legacy time aggregation behavior
+            self.metric_queries = [
+                {
+                    **query,
+                    'query': query['query'].replace(
+                        'DATEADD(hour, -24, current_timestamp())', 'date_trunc(day, current_date)'
+                    ),
+                }
+                for query in self.metric_queries
+            ]
 
         if self.errors:
             self.log.warning(
