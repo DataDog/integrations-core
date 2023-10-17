@@ -108,13 +108,14 @@ class ApiRest(Api):
         self.log.debug("creating auth token")
         response = self.http.post('{}/v3/auth/tokens'.format(self.config.keystone_server_url), json=data)
         response.raise_for_status()
-        self.log.debug("response: %s", response.json())
+        response_json = response.json()
+        self.log.debug("response: %s", response_json)
         self._catalog = Catalog(
-            response.json().get('token', {}).get('catalog', []),
+            response_json.get('token', {}).get('catalog', []),
             self._interface,
             self._region_id,
         )
-        self._role_names = [role.get('name') for role in response.json().get('token', {}).get('roles', [])]
+        self._role_names = [role.get('name') for role in response_json.get('token', {}).get('roles', [])]
         self.http.options['headers']['X-Auth-Token'] = response.headers['X-Subject-Token']
 
     def _add_microversion_headers(self):
