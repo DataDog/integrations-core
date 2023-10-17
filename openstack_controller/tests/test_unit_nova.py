@@ -233,81 +233,41 @@ def test_limits_metrics(aggregator, check, dd_run_check):
         value=128,
         tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
-    # aggregator.assert_metric(
-    #     'openstack.nova.limits.absolute.max_image_meta',
-    #     value=128,
-    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
-    # )
-    # aggregator.assert_metric(
-    #     'openstack.nova.limits.absolute.max_personality',
-    #     value=5,
-    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
-    # )
-    # aggregator.assert_metric(
-    #     'openstack.nova.limits.absolute.max_personality_size',
-    #     value=10240,
-    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
-    # )
-    # aggregator.assert_metric(
-    #     'openstack.nova.limits.absolute.max_total_keypairs',
-    #     value=100,
-    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
-    # )
-    # aggregator.assert_metric(
-    #     'openstack.nova.limits.absolute.max_server_groups',
-    #     value=10,
-    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
-    # )
-    # aggregator.assert_metric(
-    #     'openstack.nova.limits.absolute.max_server_group_members',
-    #     value=10,
-    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
-    # )
-    # aggregator.assert_metric(
-    #     'openstack.nova.limits.absolute.max_total_floating_ips',
-    #     value=-1,
-    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
-    # )
-    # aggregator.assert_metric(
-    #     'openstack.nova.limits.absolute.max_security_groups',
-    #     value=-1,
-    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
-    # )
-    # aggregator.assert_metric(
-    #     'openstack.nova.limits.absolute.max_security_group_rules',
-    #     value=-1,
-    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
-    # )
-    # aggregator.assert_metric(
-    #     'openstack.nova.limits.absolute.total_ram_used',
-    #     value=2048,
-    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
-    # )
-    # aggregator.assert_metric(
-    #     'openstack.nova.limits.absolute.total_cores_used',
-    #     value=8,
-    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
-    # )
-    # aggregator.assert_metric(
-    #     'openstack.nova.limits.absolute.total_instances_used',
-    #     value=8,
-    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
-    # )
-    # aggregator.assert_metric(
-    #     'openstack.nova.limits.absolute.total_floating_ips_used',
-    #     value=0,
-    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
-    # )
-    # aggregator.assert_metric(
-    #     'openstack.nova.limits.absolute.total_security_groups_used',
-    #     value=0,
-    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
-    # )
-    # aggregator.assert_metric(
-    #     'openstack.nova.limits.absolute.total_server_groups_used',
-    #     value=0,
-    #     tags=['keystone_server:http://127.0.0.1:8080/identity'],
-    # )
+    aggregator.assert_metric(
+        'openstack.nova.limits.absolute.max_total_keypairs',
+        value=100,
+        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.limits.absolute.max_server_groups',
+        value=10,
+        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.limits.absolute.max_server_group_members',
+        value=10,
+        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.limits.absolute.total_ram_used',
+        value=2048,
+        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.limits.absolute.total_cores_used',
+        value=8,
+        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.limits.absolute.total_instances_used',
+        value=8,
+        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.limits.absolute.total_server_groups_used',
+        value=0,
+        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+    )
 
 
 @pytest.mark.parametrize(
