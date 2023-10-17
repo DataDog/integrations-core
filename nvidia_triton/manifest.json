@@ -8,17 +8,13 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "",
+    "description": "NVIDIA Triton Inference Server is an open source inference-serving software",
     "title": "Nvidia Triton",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS",
-      "Category::"
-      "Offering::"
-      "Queried Data Type::"
-      "Submitted Data Type::"
+      "Supported OS::macOS"
     ]
   },
   "assets": {
@@ -32,7 +28,7 @@
       },
       "metrics": {
         "prefix": "nvidia_triton.",
-        "check": "",
+        "check": "nvidia_triton.nv.inference.compute.infer.duration_us",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
