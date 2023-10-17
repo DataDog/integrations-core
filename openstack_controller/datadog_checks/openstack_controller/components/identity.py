@@ -165,7 +165,7 @@ class Identity(Component):
     @Component.http_error()
     def _report_services(self, global_components_config, tags):
         data = self.check.api.get_identity_services()
-        self.check.log.debug("services: %s", data)
+        self.check.log.debug("identity services: %s", data)
         for item in data:
             service = get_metrics_and_tags(
                 item,

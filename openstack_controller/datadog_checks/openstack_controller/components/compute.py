@@ -83,6 +83,7 @@ class Compute(Component):
     @Component.http_error()
     def _report_services(self, global_components_config, tags):
         data = self.check.api.get_compute_services()
+        self.check.log.debug("compute services: %s", data)
         for item in data:
             service = get_metrics_and_tags(
                 item,
@@ -103,6 +104,7 @@ class Compute(Component):
     @Component.http_error()
     def _report_flavors(self, global_components_config, tags):
         data = self.check.api.get_compute_flavors()
+        self.check.log.debug("flavors: %s", data)
         for item in data:
             flavor = get_metrics_and_tags(
                 item,
