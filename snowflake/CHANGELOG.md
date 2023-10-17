@@ -4,7 +4,7 @@
 
 ***Fixed***:
 
-* Fixed bug where setting the `aggregate_last_24_hours` option to `true` would not be honored when other instances had it set it to `false` (the default) ([#16033](https://github.com/DataDog/integrations-core/pull/16033))
+* Fixed bug where setting the `aggregate_last_24_hours` option to `true` was not honored when other instances had it set to `false` (the default) ([#16033](https://github.com/DataDog/integrations-core/pull/16033))
 
 ## 5.0.0 / 2023-08-10 / Agent 7.48.0
 
