@@ -1,4 +1,4 @@
-# Teradata Integration E2E
+# Openstack Controller Integration E2E
 
 The Openstack_controller integration includes three E2E environments:
 
