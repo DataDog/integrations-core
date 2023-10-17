@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 15.1.1 / 2023-10-17
+
 ***Fixed***:
 
 * Fix check cancellation timeout due to `DBMAsyncJob` cancellation being blocked ([#16028](https://github.com/DataDog/integrations-core/pull/16028))
