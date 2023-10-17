@@ -40,7 +40,7 @@ instances:
       - <SERVICE_NAME_1>
       - name: <SERVICE_NAME_2>
       - startup_type: automatic
-        trigger_start: false
+      - trigger_start: false
 
     ## @param disable_legacy_service_tag - boolean - optional - default: false
     ## Whether or not to stop submitting the tag `service` that has been renamed
