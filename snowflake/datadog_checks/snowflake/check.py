@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 from contextlib import closing
 
 import snowflake.connector as sf
@@ -70,7 +71,7 @@ class SnowflakeCheck(AgentCheck):
                 'Snowflake `role` is set as `ACCOUNTADMIN` which should be used cautiously, '
                 'refer to docs about custom roles.'
             )
-        metric_groups = (
+        metric_groups = copy.deepcopy(
             ORGANIZATION_USAGE_METRIC_GROUPS
             if (self._config.schema == 'ORGANIZATION_USAGE')
             else ACCOUNT_USAGE_METRIC_GROUPS
