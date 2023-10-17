@@ -262,19 +262,19 @@ metrics:
       - name: netscaler.vsvrCurClntConnections
         OID: 1.3.6.1.4.1.5951.4.1.3.1.1.7
     metric_tags:
-      - column:
+      - symbol:
           name: netscaler.vsvrName
           OID: 1.3.6.1.4.1.5951.4.1.3.1.1.1
         tag: netscaler_vsvr_name
-      - column:
+      - symbol:
           name: netscaler.vsvrIpAddress
           OID: 1.3.6.1.4.1.5951.4.1.3.1.1.2
         tag: netscaler_vsvr_ip_address
-      - column:
+      - symbol:
           name: netscaler.vsvrPort
           OID: 1.3.6.1.4.1.5951.4.1.3.1.1.3
         tag: netscaler_vsvr_port
-      - column:
+      - symbol:
           name: netscaler.vsvrType
           OID: 1.3.6.1.4.1.5951.4.1.3.1.1.4
         tag: netscaler_vsvr_type
@@ -337,7 +337,7 @@ metrics:
           117: mqtt_tls
           118: quic_bridge
           120: service_unknown
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.5951.4.1.3.1.1.5
           name: netscaler.vsvrState
         tag: netscaler_vsvr_state
@@ -363,7 +363,7 @@ metrics:
       - name: netscaler.sysHealthDiskPerusage
         OID: 1.3.6.1.4.1.5951.4.1.1.41.8.1.5
     metric_tags:
-      - column:
+      - symbol:
           name: netscaler.sysHealthDiskName
           OID: 1.3.6.1.4.1.5951.4.1.1.41.8.1.1
         tag: netscaler_sys_health_disk_name
@@ -391,11 +391,11 @@ metrics:
         OID: 1.3.6.1.4.1.5951.4.1.1.54.1.20
         metric_type: monotonic_count
     metric_tags:
-      - column:
+      - symbol:
           name: netscaler.ifName
           OID: 1.3.6.1.4.1.5951.4.1.1.54.1.1
         tag: netscaler_if_name
-      - column:
+      - symbol:
           name: netscaler.ifMedia
           OID: 1.3.6.1.4.1.5951.4.1.1.54.1.2
         tag: netscaler_if_media
@@ -411,15 +411,15 @@ metrics:
         OID: 1.3.6.1.4.1.5951.4.1.3.2.1.6
         metric_type: monotonic_count
     metric_tags:
-      - column:
+      - symbol:
           name: netscaler.vsvrServiceName
           OID: 1.3.6.1.4.1.5951.4.1.3.2.1.8
         tag: netscaler_vsvr_service_name
-      - column:
+      - symbol:
           name: netscaler.vsvrServiceFullName
           OID: 1.3.6.1.4.1.5951.4.1.3.2.1.9
         tag: netscaler_vsvr_service_full_name
-      - column:
+      - symbol:
           name: netscaler.vserverFullName
           OID: 1.3.6.1.4.1.5951.4.1.3.2.1.10
         tag: netscaler_vserver_full_name
@@ -431,7 +431,7 @@ metrics:
       - name: netscaler.nsCPUusage
         OID: 1.3.6.1.4.1.5951.4.1.1.41.6.1.2
     metric_tags:
-      - column:
+      - symbol:
           name: netscaler.nsCPUname
           OID: 1.3.6.1.4.1.5951.4.1.1.41.6.1.1
         tag: netscaler_ns_cp_uname
@@ -460,7 +460,7 @@ metrics:
       - name: netscaler.lbvsvrAvgSvrTTFB
         OID: 1.3.6.1.4.1.5951.4.1.3.6.1.5
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.5951.4.1.3.6.1.1
           name: netscaler.lbvsvrLBMethod
         tag: netscaler_lbvsvr_lb_method
@@ -486,7 +486,7 @@ metrics:
           19: lrtm
           20: call_id_hashed
           21: api
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.5951.4.1.3.6.1.2
           name: netscaler.lbvsvrPersistanceType
         tag: netscaler_lbvsvr_persistance_type
@@ -522,11 +522,11 @@ metrics:
       - name: netscaler.serviceGroup
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: netscaler.svcgrpSvcGroupName
           OID: 1.3.6.1.4.1.5951.4.1.2.11.1.1
         tag: netscaler_svcgrp_svc_group_name
-      - column:
+      - symbol:
           name: netscaler.svcgrpSvcGroupType
           OID: 1.3.6.1.4.1.5951.4.1.2.11.1.2
         tag: netscaler_svcgrp_svc_group_type
@@ -589,11 +589,11 @@ metrics:
           117: mqtt_tls
           118: quic_bridge
           120: service_unknown
-      - column:
+      - symbol:
           name: netscaler.svcgrpSvcGroupFullName
           OID: 1.3.6.1.4.1.5951.4.1.2.11.1.4
         tag: netscaler_svcgrp_svc_group_full_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.5951.4.1.2.11.1.3
           name: netscaler.svcgrpSvcGroupState
         tag: netscaler_svcgrp_svc_group_state
@@ -608,7 +608,7 @@ metrics:
       - name: netscaler.sslDaysToExpire
         OID: 1.3.6.1.4.1.5951.4.1.1.56.1.1.5
     metric_tags:
-      - column:
+      - symbol:
           name: netscaler.sslCertKeyName
           OID: 1.3.6.1.4.1.5951.4.1.1.56.1.1.1
         tag: netscaler_ssl_cert_key_name
@@ -659,11 +659,11 @@ metrics:
       - name: netscaler.vsvrSoThreshold
         OID: 1.3.6.1.4.1.5951.4.1.3.1.1.70
     metric_tags:
-      - column:
+      - symbol:
           name: netscaler.vsvrFullName
           OID: 1.3.6.1.4.1.5951.4.1.3.1.1.59
         tag: netscaler_vsvr_full_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.5951.4.1.3.1.1.66
           name: netscaler.vsvrActiveActiveState
         tag: netscaler_vsvr_active_active_state
@@ -715,19 +715,19 @@ metrics:
       - name: netscaler.svcActiveTransactions
         OID: 1.3.6.1.4.1.5951.4.1.2.1.1.53
     metric_tags:
-      - column:
+      - symbol:
           name: netscaler.svcServiceName
           OID: 1.3.6.1.4.1.5951.4.1.2.1.1.1
         tag: netscaler_svc_service_name
-      - column:
+      - symbol:
           name: netscaler.svcIpAddress
           OID: 1.3.6.1.4.1.5951.4.1.2.1.1.2
         tag: netscaler_svc_ip_address
-      - column:
+      - symbol:
           name: netscaler.svcPort
           OID: 1.3.6.1.4.1.5951.4.1.2.1.1.3
         tag: netscaler_svc_port
-      - column:
+      - symbol:
           name: netscaler.svcServiceType
           OID: 1.3.6.1.4.1.5951.4.1.2.1.1.4
         tag: netscaler_svc_service_type
@@ -790,7 +790,7 @@ metrics:
           117: mqtt_tls
           118: quic_bridge
           120: service_unknown
-      - column:
+      - symbol:
           name: netscaler.svcServiceFullName
           OID: 1.3.6.1.4.1.5951.4.1.2.1.1.54
         tag: netscaler_svc_service_full_name
@@ -802,15 +802,15 @@ metrics:
       - name: netscaler.server
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: netscaler.serverName
           OID: 1.3.6.1.4.1.5951.4.1.2.2.1.1
         tag: netscaler_server_name
-      - column:
+      - symbol:
           name: netscaler.serverIpAddress
           OID: 1.3.6.1.4.1.5951.4.1.2.2.1.2
         tag: netscaler_server_ip_address
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.5951.4.1.2.2.1.3
           name: netscaler.serverState
         tag: netscaler_server_state

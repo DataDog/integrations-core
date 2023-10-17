@@ -45,6 +45,10 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
+    "monitors": {
+      "cluster_operate_resource_state": "assets/monitors/cluster_operator_resource.json",
+      "topic_operate_resource_state": "assets/monitors/topic_operator_resource.json"
+    },
     "dashboards": {
       "strimzi": "assets/dashboards/overview.json"
     },

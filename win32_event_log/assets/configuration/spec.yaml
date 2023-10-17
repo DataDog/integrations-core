@@ -274,7 +274,7 @@ files:
     - name: timeout
       description: The number of seconds to wait for new event signals.
       value:
-        type: number
+        type: integer
         example: 5
     - name: payload_size
       description: |

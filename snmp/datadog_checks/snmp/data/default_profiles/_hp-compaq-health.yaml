@@ -123,7 +123,7 @@ metrics:
         name: cpqHeTemperatureCondition
     metric_tags:
       - tag: temperature_index
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.232.6.2.6.8.1.3
           name: cpqHeTemperatureIndex
 
@@ -149,7 +149,7 @@ metrics:
         name: cpqHeSysBatteryStatus
     metric_tags:
       - tag: battery_index
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.232.6.2.17.2.1.2
           name: cpqHeSysBatteryIndex
 
@@ -173,7 +173,7 @@ metrics:
       - OID: 1.3.6.1.4.1.232.6.2.14.13.1.20
         name: cpqHeResMem2ModuleCondition
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.6.2.14.13.1.15
           name: cpqHeResMem2ModuleCellTablePtr
         tag: mem_board_index
@@ -187,7 +187,7 @@ metrics:
       - OID: 1.3.6.1.4.1.232.6.2.9.3.1.5
         name: cpqHeFltTolPowerSupplyStatus
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.6.2.9.3.1.1
           name: cpqHeFltTolPowerSupplyChassis
         tag: chassis_num
@@ -204,7 +204,7 @@ metrics:
       - OID: 1.3.6.1.4.1.232.6.2.9.3.1.8
         name: cpqHeFltTolPowerSupplyCapacityMaximum
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.6.2.9.3.1.5
           name: cpqHeFltTolPowerSupplyStatus
         mapping:
@@ -226,7 +226,7 @@ metrics:
           16: calibration_table_invalid
           17: no_power_input
         tag: power_supply_status
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.6.2.9.3.1.1
           name: cpqHeFltTolPowerSupplyChassis
         tag: chassis_num

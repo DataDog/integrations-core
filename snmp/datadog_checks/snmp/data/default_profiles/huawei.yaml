@@ -22,11 +22,11 @@ metrics:
       - name: huawei.hwEntityVoltage
         OID: 1.3.6.1.4.1.2011.5.25.31.1.1.1.1.13
     metric_tags:
-      - column:
+      - symbol:
           name: huawei.hwEntityBoardName
           OID: 1.3.6.1.4.1.2011.5.25.31.1.1.1.1.43
         tag: huawei_hw_entity_board_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.31.1.1.1.1.1
           name: huawei.hwEntityAdminStatus
         tag: huawei_hw_entity_admin_status
@@ -38,7 +38,7 @@ metrics:
           11: up
           12: down
           13: loopback
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.31.1.1.1.1.2
           name: huawei.hwEntityOperStatus
         tag: huawei_hw_entity_oper_status
@@ -55,7 +55,7 @@ metrics:
           17: link_down
           18: present
           19: absent
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.31.1.1.1.1.3
           name: huawei.hwEntityStandbyStatus
         tag: huawei_hw_entity_standby_status
@@ -64,7 +64,7 @@ metrics:
           2: hot_standby
           3: cold_standby
           4: providing_service
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.31.1.1.1.1.42
           name: huawei.hwEntityFaultLight
         tag: huawei_hw_entity_fault_light
@@ -80,22 +80,22 @@ metrics:
       - name: huawei.hwEntityFanSpeed
         OID: 1.3.6.1.4.1.2011.5.25.31.1.1.10.1.5
     metric_tags:
-      - column:
+      - symbol:
           name: huawei.hwEntityFanSlot
           OID: 1.3.6.1.4.1.2011.5.25.31.1.1.10.1.1
         tag: huawei_hw_entity_fan_slot
-      - column:
+      - symbol:
           name: huawei.hwEntityFanSn
           OID: 1.3.6.1.4.1.2011.5.25.31.1.1.10.1.2
         tag: huawei_hw_entity_fan_sn
-      - column:
+      - symbol:
           name: huawei.hwEntityFanReg
           OID: 1.3.6.1.4.1.2011.5.25.31.1.1.10.1.3
         tag: huawei_hw_entity_fan_reg
         mapping:
           1: yes
           2: no
-      - column:
+      - symbol:
           name: huawei.hwEntityFanSpdAdjMode
           OID: 1.3.6.1.4.1.2011.5.25.31.1.1.10.1.4
         tag: huawei_hw_entity_fan_spd_adj_mode
@@ -104,14 +104,14 @@ metrics:
           2: manual
           3: unknown
           4: silent
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.31.1.1.10.1.6
           name: huawei.hwEntityFanPresent
         tag: huawei_hw_entity_fan_present
         mapping:
           1: present
           2: absent
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.31.1.1.10.1.7
           name: huawei.hwEntityFanState
         tag: huawei_hw_entity_fan_state
@@ -130,7 +130,7 @@ metrics:
       - name: huawei.hwSystemPowerRemainPower
         OID: 1.3.6.1.4.1.2011.5.25.31.1.1.14.1.4
     metric_tags:
-      - column:
+      - symbol:
           name: huawei.hwSystemPowerDeviceID
           OID: 1.3.6.1.4.1.2011.5.25.31.1.1.14.1.1
         tag: huawei_hw_system_power_device_id
@@ -146,31 +146,31 @@ metrics:
       - name: huawei.hwOspfv2NbrDeadTimeLeft
         OID: 1.3.6.1.4.1.2011.5.25.155.6.1.15
     metric_tags:
-      - column:
+      - symbol:
           name: huawei.hwOspfv2SelfRouterId
           OID: 1.3.6.1.4.1.2011.5.25.155.6.1.3
         tag: huawei_hw_ospfv2_self_router_id
-      - column:
+      - symbol:
           name: huawei.hwOspfv2NbrRouterId
           OID: 1.3.6.1.4.1.2011.5.25.155.6.1.9
         tag: huawei_hw_ospfv2_neighbor_router_id
-      - column:
+      - symbol:
           name: huawei.hwOspfv2SelfIfIpAddress
           OID: 1.3.6.1.4.1.2011.5.25.155.6.1.4
         tag: huawei_hw_ospfv2_self_if_ip_address
-      - column:
+      - symbol:
           name: huawei.hwOspfv2SelfIfName
           OID: 1.3.6.1.4.1.2011.5.25.155.6.1.5
         tag: huawei_hw_ospfv2_self_if_name
-      - column:
+      - symbol:
           name: huawei.hwOspfv2NbrIfDesignatedRouter
           OID: 1.3.6.1.4.1.2011.5.25.155.6.1.6
         tag: huawei_hw_ospfv2_nbr_if_designated_router
-      - column:
+      - symbol:
           name: huawei.hwOspfv2NbrIfBackupDesignatedRouter
           OID: 1.3.6.1.4.1.2011.5.25.155.6.1.7
         tag: huawei_hw_ospfv2_nbr_if_backup_designated_router
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.155.6.1.10
           name: huawei.hwOspfv2NbrState
         tag: huawei_hw_ospfv2_nbr_state
@@ -183,14 +183,14 @@ metrics:
           6: exchange
           7: loading
           8: full
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.155.6.1.11
           name: huawei.hwOspfv2NbrMode
         tag: huawei_hw_ospfv2_nbr_mode
         mapping:
           1: master
           2: slave
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.155.6.1.16
           name: huawei.hwOspfv2NbrGrStatus
         tag: huawei_hw_ospfv2_nbr_gr_status

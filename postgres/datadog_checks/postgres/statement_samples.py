@@ -401,6 +401,13 @@ class PostgresStatementSamples(DBMAsyncJob):
                 tags=self._dbtags(row['datname'], "error:sql-obfuscate") + self._check._get_debug_tags(),
                 hostname=self._check.resolved_hostname,
             )
+            self._check.count(
+                "dd.postgres.obfuscation.error",
+                1,
+                tags=self._dbtags(row['datname'], "error:{}".format(type(e)), "error_msg:{}".format(e))
+                + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
         normalized_row['statement'] = obfuscated_query
         return normalized_row
 

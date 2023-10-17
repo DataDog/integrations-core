@@ -83,6 +83,8 @@ METRICS = {
     # For Kubernetes >= 1.28
     'apiserver_storage_size_bytes': 'etcd.db.total_size',
     'apiserver_flowcontrol_nominal_limit_seats': 'flowcontrol_request_concurrency_limit',
+    'etcd_requests_total': 'etcd_requests_total',
+    'etcd_request_errors_total': 'etcd_request_errors_total',
 }
 
 

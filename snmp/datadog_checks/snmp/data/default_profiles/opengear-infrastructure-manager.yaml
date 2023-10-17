@@ -18,47 +18,47 @@ metrics:
         OID: 1.3.6.1.4.1.25049.16.1.1.4
         metric_type: monotonic_count
     metric_tags:
-      - column:
+      - symbol:
           name: ogSerialPortStatusPort
           OID: 1.3.6.1.4.1.25049.16.1.1.2
         tag: og_serial_port_status_port
-      - column:
+      - symbol:
           name: ogSerialPortStatusSpeed
           OID: 1.3.6.1.4.1.25049.16.1.1.5
         tag: og_serial_port_status_speed
-      - column:
+      - symbol:
           name: ogSerialPortStatusLabel
           OID: 1.3.6.1.4.1.25049.16.1.1.11
         tag: og_serial_port_status_label
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.25049.16.1.1.6
           name: ogSerialPortStatusDCD
         tag: og_serial_port_status_dcd
         mapping:
           0: off
           1: on
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.25049.16.1.1.7
           name: ogSerialPortStatusDTR
         tag: og_serial_port_status_dtr
         mapping:
           0: off
           1: on
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.25049.16.1.1.8
           name: ogSerialPortStatusDSR
         tag: og_serial_port_status_dsr
         mapping:
           0: off
           1: on
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.25049.16.1.1.9
           name: ogSerialPortStatusCTS
         tag: og_serial_port_status_cts
         mapping:
           0: off
           1: on
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.25049.16.1.1.10
           name: ogSerialPortStatusRTS
         tag: og_serial_port_status_rts
@@ -75,7 +75,7 @@ metrics:
       - name: ogRpcStatusAlertCount
         OID: 1.3.6.1.4.1.25049.16.3.1.4
     metric_tags:
-      - column:
+      - symbol:
           name: ogRpcStatusName
           OID: 1.3.6.1.4.1.25049.16.3.1.2
         tag: og_rpc_status_name
@@ -91,7 +91,7 @@ metrics:
       - name: ogEmdStatusAlertCount
         OID: 1.3.6.1.4.1.25049.16.4.1.5
     metric_tags:
-      - column:
+      - symbol:
           name: ogEmdStatusName
           OID: 1.3.6.1.4.1.25049.16.4.1.2
         tag: og_emd_status_name
