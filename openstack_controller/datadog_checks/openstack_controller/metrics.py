@@ -165,6 +165,7 @@ NOVA_SERVER_TAGS = {
     'name': 'server_name',
     'status': 'server_status',
     'OS-EXT-SRV-ATTR:hypervisor_hostname': 'hypervisor',
+    'OS-EXT-SRV-ATTR:hostname': 'instance_hostname',
 }
 NOVA_SERVER_METRICS = {
     f"{NOVA_SERVER_METRICS_PREFIX}.active",
