@@ -33,7 +33,7 @@ files:
           description: |
            The User name used to connect to Openstack.
           value:
-            example: "admin"
+            example: <USER>
             type: string
         - name: password
           description: |

@@ -80,9 +80,5 @@ def instance_use_shortname():
     return False
 
 
-def instance_username():
-    return 'admin'
-
-
 def instance_whitelist_project_names():
     return []
