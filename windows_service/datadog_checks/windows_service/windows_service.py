@@ -179,7 +179,8 @@ class ServiceView(object):
                 if e.winerror != winerror.ERROR_INSUFFICIENT_BUFFER:
                     raise
 
-            # allocate buffer and get trigger info, raise error if function returns 0
+            # allocate buffer and get trigger info
+            # raise any error from QueryServiceConfig2W
             bytesBuffer = ctypes.create_string_buffer(bytesneeded.value)
             QueryServiceConfig2W(
                 ctypes.c_void_p(self.hSvc.handle),
