@@ -60,10 +60,6 @@ def instance_exclude_server_ids():
     return []
 
 
-def instance_ironic_microversion():
-    return '1.80'
-
-
 def instance_paginated_limit():
     return 1000
 

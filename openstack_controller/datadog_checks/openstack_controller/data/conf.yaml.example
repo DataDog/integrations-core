@@ -40,7 +40,7 @@ instances:
     #
     # use_legacy_check_version: false
 
-    ## @param username - string - optional - default: admin
+    ## @param username - string - optional
     ## The User name used to connect to Openstack.
     #
     # username: admin
@@ -85,7 +85,7 @@ instances:
     #
     # keystone_server_url: https://<KEYSTONE_ENDPOINT>:<PORT>/
 
-    ## @param ironic_microversion - string - optional - default: 1.80
+    ## @param ironic_microversion - string - optional
     ## The microversion of the Ironic (Bare Metal) API to call.
     ## It is recommended to set this parameter to the latest Ironic microversion supported by your Openstack version.
     ##

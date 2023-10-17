@@ -33,8 +33,9 @@ files:
           description: |
            The User name used to connect to Openstack.
           value:
-            example: <USER>
+            example: "admin"
             type: string
+            display_default: null
         - name: password
           description: |
            The Password used to connect to Openstack.
@@ -167,6 +168,7 @@ files:
           value:
             example: "1.80"
             type: string
+            display_default: null
         - name: nova_microversion
           description: |
            The microversion of the Nova (Compute) API to call.
