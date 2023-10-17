@@ -89,7 +89,7 @@ def instance_tag_sid():
 
 
 def instance_timeout():
-    return 5000
+    return 5
 
 
 def instance_type():
