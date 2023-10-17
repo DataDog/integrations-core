@@ -38,7 +38,7 @@ license = "BSD-3-Clause"
 [project.optional-dependencies]
 deps = [
     "lxml==4.9.3",
-    "pyodbc==4.0.32; sys_platform != 'darwin' or platform_machine != 'arm64'",
+    "pyodbc==4.0.39; sys_platform != 'darwin' or platform_machine != 'arm64'",
     "pyro4==4.82; sys_platform == 'win32'",
     "pywin32==306; sys_platform == 'win32' and python_version > '3.0'",
     "serpent==1.41; sys_platform == 'win32' and python_version > '3.0'",
