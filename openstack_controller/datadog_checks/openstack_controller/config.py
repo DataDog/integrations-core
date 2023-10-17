@@ -8,7 +8,6 @@ from openstack.config import loader
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.models.types import copy_raw
 from datadog_checks.openstack_controller.api.type import ApiType
-from datadog_checks.openstack_controller.defaults import DEFAULT_DOMAIN_ID
 
 
 # Discovery class requires 'include' to be a dict, so this function is needed to normalize the config
@@ -35,22 +34,20 @@ def normalize_discover_config_include(config, item_keys):
 
 
 class OpenstackConfig:
-    def __init__(self, logger, instance):
+    def __init__(self, logger, config):
         self.log = logger
-        self.instance = instance
-        self.openstack_config_file_path = instance.get("openstack_config_file_path")
-        self.openstack_cloud_name = instance.get("openstack_cloud_name")
-        self.keystone_server_url = instance.get("keystone_server_url")
-        self.username = instance.get("username")
-        self.password = instance.get("password")
-        self.domain_id = instance.get("domain_id", DEFAULT_DOMAIN_ID)
-        self.user = instance.get("user")
-        self.nova_microversion = instance.get('nova_microversion')
-        self.ironic_microversion = instance.get('ironic_microversion')
-        self.endpoint_interface = instance.get('endpoint_interface', None)
-        self.endpoint_region_id = instance.get('endpoint_region_id', None)
+        self.openstack_config_file_path = config.openstack_config_file_path
+        self.openstack_cloud_name = config.openstack_cloud_name
+        self.keystone_server_url = config.keystone_server_url
+        self.username = config.username
+        self.password = config.password
+        self.domain_id = config.domain_id
+        self.user = config.user
+        self.nova_microversion = config.nova_microversion
+        self.ironic_microversion = config.ironic_microversion
+        self.endpoint_interface = config.endpoint_interface
+        self.endpoint_region_id = config.endpoint_region_id
         self.api_type = None
-        self.custom_tags = instance.get("tags", [])
         self.validate()
 
     def validate(self):
