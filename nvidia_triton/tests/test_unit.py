@@ -12,7 +12,6 @@ from datadog_checks.nvidia_triton import NvidiaTritonCheck
 from . common import METRICS_MOCK, get_fixture_path
 
 
-
 def test_check_mock_nvidia_triton(dd_run_check, aggregator, instance, mock_http_response):
     """
     The instance is a deepcopy of the INSTANCE_MOCK in common
@@ -36,7 +35,7 @@ def test_check_nvidia_triton_metadata(datadog_agent, instance, mock_http_respons
     check._submit_version_metadata()
     check.check_id = 'test:123'
     raw_version = "2.38.0"
-      
+
     major, minor, patch = raw_version.split('.')
     version_metadata = {
         'version.scheme': 'semver',
