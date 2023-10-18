@@ -362,7 +362,11 @@ files:
                   type: string
               - name: interval
                 type: integer
-            example: {}
+            example:
+              include:
+                - '.*'
+              exclude:
+                - 'tmp_.*'
     - template: instances/default
       overrides:
         service.hidden: true

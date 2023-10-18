@@ -170,7 +170,11 @@ instances:
     ##       - 'tmp_.*'
     ##     interval: 60
     #
-    # projects: {}
+    # projects:
+    #   include:
+    #   - .*
+    #   exclude:
+    #   - tmp_.*
 
 ## @param tags - list of strings - optional
 ## A list of tags to attach to every metric and service check emitted by this instance.
