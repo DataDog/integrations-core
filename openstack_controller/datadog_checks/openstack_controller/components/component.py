@@ -86,7 +86,6 @@ class Component:
         def decorator_register_metrics_method(func):
             @wraps(func)  # Preserve function metadata
             def wrapper(self, *args, **kwargs):
-                self.check.log.warning(func.__name__)
                 func_hash = generate_hash(func, *args, **kwargs)
                 if func_hash not in self.reported_global_metrics:
                     if func(self, *args, **kwargs):
@@ -104,7 +103,6 @@ class Component:
         def decorator_register_metrics_method(func):
             @wraps(func)  # Preserve function metadata
             def wrapper(self, *args, **kwargs):
-                self.check.log.warning(func.__name__)
                 func_hash = generate_hash(func, *args, **kwargs)
                 if func_hash not in self.reported_project_metrics:
                     if func(self, *args, **kwargs):
