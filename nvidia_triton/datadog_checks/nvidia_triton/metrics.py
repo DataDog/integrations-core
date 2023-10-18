@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-METRIC_MAP = {
+METRICS_MAP = {
     'nv_cache_insertion_duration': 'nv.cache.insertion.duration',
     'nv_cache_lookup_duration': 'nv.cache.lookup.duration',
     'nv_cache_num_entries': 'nv.cache.num.entries',

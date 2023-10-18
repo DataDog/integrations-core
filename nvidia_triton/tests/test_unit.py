@@ -9,7 +9,7 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nvidia_triton import NvidiaTritonCheck
 
-from . common import METRICS_MOCK, get_fixture_path
+from .common import METRICS_MOCK, get_fixture_path
 
 
 def test_check_mock_nvidia_triton(dd_run_check, aggregator, instance, mock_http_response):
@@ -51,7 +51,7 @@ def test_emits_critical_openemtrics_service_check_when_service_is_down(dd_run_ch
     If we fail to reach the openmetrics endpoint the openmetrics service check should report as critical
     """
     mock_http_response(status_code=404)
-    check = NvidiaTritonCheck('nvidia_triton', {}, [instance]) 
+    check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
     dd_run_check(check)
 
     aggregator.assert_service_check('nvidia_triton.openmetrics.health', ServiceCheck.CRITICAL)
