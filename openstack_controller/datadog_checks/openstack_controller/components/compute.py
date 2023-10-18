@@ -102,19 +102,21 @@ class Compute(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_flavors(self, global_components_config, tags):
-        data = self.check.api.get_compute_flavors()
-        self.check.log.debug("flavors: %s", data)
-        for item in data:
-            flavor = get_metrics_and_tags(
-                item,
-                tags=NOVA_FLAVORS_TAGS,
-                prefix=NOVA_FLAVORS_METRICS_PREFIX,
-                metrics=NOVA_FLAVORS_METRICS,
-            )
-            self.check.log.debug("flavor: %s", flavor)
-            for metric, value in flavor['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + flavor['tags'])
+    def _report_flavors(self, config, tags):
+        report_flavors = config.get('flavors', True)
+        if report_flavors:
+            data = self.check.api.get_compute_flavors()
+            self.check.log.debug("flavors: %s", data)
+            for item in data:
+                flavor = get_metrics_and_tags(
+                    item,
+                    tags=NOVA_FLAVORS_TAGS,
+                    prefix=NOVA_FLAVORS_METRICS_PREFIX,
+                    metrics=NOVA_FLAVORS_METRICS,
+                )
+                self.check.log.debug("flavor: %s", flavor)
+                for metric, value in flavor['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + flavor['tags'])
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
