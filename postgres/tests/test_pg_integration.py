@@ -29,6 +29,7 @@ from .common import (
     check_db_count,
     check_file_wal_metrics,
     check_logical_replication_slots,
+    check_performance_metrics,
     check_physical_replication_slots,
     check_slru_metrics,
     check_snapshot_txid_metrics,
@@ -72,6 +73,13 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check_logical_replication_slots(aggregator, expected_tags)
     check_physical_replication_slots(aggregator, expected_tags)
     check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
+
+    check_performance_metrics(
+        aggregator,
+        expected_tags=check.tags + check._get_debug_tags(),
+        is_aurora=is_aurora
+    )
+
     aggregator.assert_all_metrics_covered()
 
 

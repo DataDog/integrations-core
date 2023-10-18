@@ -96,6 +96,17 @@ CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_co
 CONNECTION_METRICS_DB = ['postgresql.connections']
 COMMON_DBS = ['dogs', 'postgres', 'dogs_nofunc', 'dogs_noschema', DB_NAME]
 
+CHECK_PERFORMANCE_METRICS = [
+    'archiver_metrics',
+    'bgw_metrics',
+    'connections_metrics',
+    'count_metrics',
+    'instance_metrics',
+    'replication_metrics',
+    'replication_stats_metrics',
+    'slru_metrics',
+]
+
 requires_static_version = pytest.mark.skipif(USING_LATEST, reason='Version `latest` is ever-changing, skipping')
 
 
@@ -313,3 +324,13 @@ def check_stat_wal_metrics(aggregator, expected_tags, count=1):
 
     for metric_name in _iterate_metric_name(STAT_WAL_METRICS):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
+def check_performance_metrics(aggregator, expected_tags, count=1, is_aurora=False):
+    expected_metrics = set(CHECK_PERFORMANCE_METRICS)
+    if is_aurora:
+        expected_metrics = expected_metrics - {'replication_metrics'}
+    if float(POSTGRES_VERSION) < 13.0:
+        expected_metrics = expected_metrics - {'slru_metrics'}
+    for name in expected_metrics:
+        aggregator.assert_metric('dd.postgres.{}.time'.format(name), count=count, tags=expected_tags)
