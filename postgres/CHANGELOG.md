@@ -6,6 +6,7 @@
 
 * Upgrade `psycopg2-binary` to `v2.9.8` ([#15949](https://github.com/DataDog/integrations-core/pull/15949))
 * Add support for reporting SQL obfuscation errors ([#15990](https://github.com/DataDog/integrations-core/pull/15990))
+* Emit postgres metrics queries operation time ([#16040](https://github.com/DataDog/integrations-core/pull/16040))
 
 ## 15.1.0 / 2023-10-06
 
