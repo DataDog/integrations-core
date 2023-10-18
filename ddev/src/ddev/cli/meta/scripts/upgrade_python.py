@@ -74,18 +74,15 @@ def update_ddev_template_files(app: Application, new_version: str, old_version: 
             / '{check_name}'
         )
         pyproject_file = folder_path / 'pyproject.toml'
-        changed = False
 
         if pyproject_file.is_file():
-            content = pyproject_file.read_text()
+            old_content = new_content = pyproject_file.read_text()
 
             for pattern in ('requires-python = ">={}"', "Programming Language :: Python :: {}"):
-                if pattern.format(old_version) in content:
-                    content = content.replace(pattern.format(old_version), pattern.format(new_version))
-                    changed = True
+                new_content = new_content.replace(pattern.format(old_version), pattern.format(new_version))
 
-            if changed:
-                pyproject_file.write_text(content)
+            if old_content != new_content:
+                pyproject_file.write_text(new_content)
                 tracker.success()
 
         if (folder_path / 'hatch.toml').is_file():
