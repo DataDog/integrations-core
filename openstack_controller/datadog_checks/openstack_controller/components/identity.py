@@ -130,20 +130,22 @@ class Identity(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_users(self, global_components_config, tags):
-        data = self.check.api.get_identity_users()
-        self.check.log.debug("users: %s", data)
-        for item in data:
-            user = get_metrics_and_tags(
-                item,
-                tags=KEYSTONE_USER_TAGS,
-                prefix=KEYSTONE_USER_METRICS_PREFIX,
-                metrics=KEYSTONE_USER_METRICS,
-            )
-            self.check.log.debug("user: %s", user)
-            self.check.gauge(KEYSTONE_USER_COUNT, 1, tags=tags + user['tags'])
-            for metric, value in user['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + user['tags'])
+    def _report_users(self, config, tags):
+        report_users = config.get('users', True)
+        if report_users:
+            data = self.check.api.get_identity_users()
+            self.check.log.debug("users: %s", data)
+            for item in data:
+                user = get_metrics_and_tags(
+                    item,
+                    tags=KEYSTONE_USER_TAGS,
+                    prefix=KEYSTONE_USER_METRICS_PREFIX,
+                    metrics=KEYSTONE_USER_METRICS,
+                )
+                self.check.log.debug("user: %s", user)
+                self.check.gauge(KEYSTONE_USER_COUNT, 1, tags=tags + user['tags'])
+                for metric, value in user['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + user['tags'])
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
