@@ -149,19 +149,21 @@ class Identity(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_groups(self, global_components_config, tags):
-        data = self.check.api.get_identity_groups()
-        self.check.log.debug("groups: %s", data)
-        for item in data:
-            group = get_metrics_and_tags(
-                item,
-                tags=KEYSTONE_GROUP_TAGS,
-                prefix=KEYSTONE_GROUP_METRICS_PREFIX,
-                metrics=KEYSTONE_GROUP_METRICS,
-            )
-            self.check.log.debug("group: %s", group)
-            self.check.gauge(KEYSTONE_GROUP_COUNT, 1, tags=tags + group['tags'])
-            self._report_group_users(item['id'], tags + group['tags'])
+    def _report_groups(self, config, tags):
+        report_groups = config.get('groups', True)
+        if report_groups:
+            data = self.check.api.get_identity_groups()
+            self.check.log.debug("groups: %s", data)
+            for item in data:
+                group = get_metrics_and_tags(
+                    item,
+                    tags=KEYSTONE_GROUP_TAGS,
+                    prefix=KEYSTONE_GROUP_METRICS_PREFIX,
+                    metrics=KEYSTONE_GROUP_METRICS,
+                )
+                self.check.log.debug("group: %s", group)
+                self.check.gauge(KEYSTONE_GROUP_COUNT, 1, tags=tags + group['tags'])
+                self._report_group_users(item['id'], tags + group['tags'])
 
     @Component.http_error()
     def _report_group_users(self, group_id, tags):
