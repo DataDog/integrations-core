@@ -6,6 +6,7 @@
 
 * Align package version in integration template with changelog. ([#16029](https://github.com/DataDog/integrations-core/pull/16029))
 * Allow bumping the version of `pyodbc` ([#16030](https://github.com/DataDog/integrations-core/pull/16030))
+* Display changes on `ddev show changes` when changes are found ([#16045](https://github.com/DataDog/integrations-core/pull/16045))
 
 ## 27.0.0 / 2023-10-12
 
