@@ -173,51 +173,57 @@ class Identity(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_services(self, global_components_config, tags):
-        data = self.check.api.get_identity_services()
-        self.check.log.debug("identity services: %s", data)
-        for item in data:
-            service = get_metrics_and_tags(
-                item,
-                tags=KEYSTONE_SERVICE_TAGS,
-                prefix=KEYSTONE_SERVICE_METRICS_PREFIX,
-                metrics=KEYSTONE_SERVICE_METRICS,
-            )
-            self.check.log.debug("service: %s", service)
-            self.check.gauge(KEYSTONE_SERVICE_COUNT, 1, tags=tags + service['tags'])
-            for metric, value in service['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + service['tags'])
+    def _report_services(self, config, tags):
+        report_services = config.get('services', True)
+        if report_services:
+            data = self.check.api.get_identity_services()
+            self.check.log.debug("identity services: %s", data)
+            for item in data:
+                service = get_metrics_and_tags(
+                    item,
+                    tags=KEYSTONE_SERVICE_TAGS,
+                    prefix=KEYSTONE_SERVICE_METRICS_PREFIX,
+                    metrics=KEYSTONE_SERVICE_METRICS,
+                )
+                self.check.log.debug("service: %s", service)
+                self.check.gauge(KEYSTONE_SERVICE_COUNT, 1, tags=tags + service['tags'])
+                for metric, value in service['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + service['tags'])
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_registered_limits(self, global_components_config, tags):
-        data = self.check.api.get_identity_registered_limits()
-        self.check.log.debug("registered limits: %s", data)
-        for item in data:
-            registered_limit = get_metrics_and_tags(
-                item,
-                tags=KEYSTONE_REGISTERED_LIMIT_TAGS,
-                prefix=KEYSTONE_REGISTERED_LIMIT_METRICS_PREFIX,
-                metrics=KEYSTONE_REGISTERED_LIMIT_METRICS,
-                lambda_name=lambda key: 'limit' if key == 'default_limit' else key,
-            )
-            self.check.log.debug("registered limit: %s", registered_limit)
-            for metric, value in registered_limit['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + registered_limit['tags'])
+    def _report_registered_limits(self, config, tags):
+        report_limits = config.get('limits', True)
+        if report_limits:
+            data = self.check.api.get_identity_registered_limits()
+            self.check.log.debug("registered limits: %s", data)
+            for item in data:
+                registered_limit = get_metrics_and_tags(
+                    item,
+                    tags=KEYSTONE_REGISTERED_LIMIT_TAGS,
+                    prefix=KEYSTONE_REGISTERED_LIMIT_METRICS_PREFIX,
+                    metrics=KEYSTONE_REGISTERED_LIMIT_METRICS,
+                    lambda_name=lambda key: 'limit' if key == 'default_limit' else key,
+                )
+                self.check.log.debug("registered limit: %s", registered_limit)
+                for metric, value in registered_limit['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + registered_limit['tags'])
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_limits(self, global_components_config, tags):
-        data = self.check.api.get_identity_limits()
-        self.check.log.debug("limits: %s", data)
-        for item in data:
-            limit = get_metrics_and_tags(
-                item,
-                tags=KEYSTONE_LIMIT_TAGS,
-                prefix=KEYSTONE_LIMIT_METRICS_PREFIX,
-                metrics=KEYSTONE_LIMIT_METRICS,
-                lambda_name=lambda key: 'limit' if key == 'resource_limit' else key,
-            )
-            self.check.log.debug("limit: %s", limit)
-            for metric, value in limit['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + limit['tags'])
+    def _report_limits(self, config, tags):
+        report_limits = config.get('limits', True)
+        if report_limits:
+            data = self.check.api.get_identity_limits()
+            self.check.log.debug("limits: %s", data)
+            for item in data:
+                limit = get_metrics_and_tags(
+                    item,
+                    tags=KEYSTONE_LIMIT_TAGS,
+                    prefix=KEYSTONE_LIMIT_METRICS_PREFIX,
+                    metrics=KEYSTONE_LIMIT_METRICS,
+                    lambda_name=lambda key: 'limit' if key == 'resource_limit' else key,
+                )
+                self.check.log.debug("limit: %s", limit)
+                for metric, value in limit['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + limit['tags'])
