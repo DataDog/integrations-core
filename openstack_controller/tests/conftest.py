@@ -167,7 +167,6 @@ def mock_responses(microversion_headers):
         filename = file
         url = url.replace("?", "/")
         if any(re.search(pattern, url) for pattern in NOVA_ENDPOINTS):
-            print(microversion_headers[0])
             microversion = headers.get('X-OpenStack-Nova-API-Version') if headers else microversion_headers[0]
             filename = f'{file}-{microversion}' if microversion else file
         if any(re.search(pattern, url) for pattern in IRONIC_ENDPOINTS):
