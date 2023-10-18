@@ -781,9 +781,7 @@ class PostgreSql(AgentCheck):
                         self.log.debug("Running query: %s", query)
                         cursor.execute(query)
                         self._report_check_query_perf_metrics(
-                            start_time,
-                            name='custom_queries',
-                            tags=['metric_prefix:{}'.format(metric_prefix)]
+                            start_time, name='custom_queries', tags=['metric_prefix:{}'.format(metric_prefix)]
                         )
                     except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
                         self.log.error("Error executing query for metric_prefix %s: %s", metric_prefix, str(e))
