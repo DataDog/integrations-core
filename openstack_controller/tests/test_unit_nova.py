@@ -57,7 +57,7 @@ def test_disable_nova_metrics(aggregator, dd_run_check, instance, openstack_cont
 
 
 @pytest.mark.parametrize(
-    ('mock_http_post', 'connection_session_auth', 'instance', 'api_type'),
+    ('mock_http_post', 'session_auth', 'instance', 'api_type'),
     [
         pytest.param(
             {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['compute'])}},
@@ -74,10 +74,10 @@ def test_disable_nova_metrics(aggregator, dd_run_check, instance, openstack_cont
             id='api sdk',
         ),
     ],
-    indirect=['mock_http_post', 'connection_session_auth'],
+    indirect=['mock_http_post', 'session_auth'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, connection_session_auth, api_type):
+def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, session_auth, api_type):
     with caplog.at_level(logging.DEBUG):
         dd_run_check(check)
 
@@ -102,7 +102,7 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
             args_list += list(args)
         assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
     if api_type == ApiType.SDK:
-        assert connection_session_auth.get_access.call_count == 4
+        assert session_auth.get_access.call_count == 4
     assert '`compute` component not found in catalog' in caplog.text
 
 
@@ -749,7 +749,7 @@ def test_hypervisor_uptime_exception(aggregator, check, dd_run_check, mock_http_
         assert args_list.count('http://127.0.0.1:8774/compute/v2.1/os-hypervisors/1/uptime') == 1
     if api_type == ApiType.SDK:
         assert connection_compute.get_hypervisor_uptime.call_count == 1
-        assert connection_compute.get_hypervisor_uptime.call_args_list.count(mock.call(1, microversion=None)) == 1
+        assert connection_compute.get_hypervisor_uptime.call_args_list.count(mock.call(1)) == 1
 
 
 @pytest.mark.parametrize(
@@ -1072,18 +1072,8 @@ def test_quota_sets_exception(aggregator, check, dd_run_check, mock_http_get, co
         assert args_list.count('http://127.0.0.1:8774/compute/v2.1/os-quota-sets/6e39099cccde4f809b003d9e0dd09304') == 1
     if api_type == ApiType.SDK:
         assert connection_compute.get_quota_set.call_count == 2
-        assert (
-            connection_compute.get_quota_set.call_args_list.count(
-                mock.call('1e6e233e637d4d55a50a62b63398ad15', microversion=None)
-            )
-            == 1
-        )
-        assert (
-            connection_compute.get_quota_set.call_args_list.count(
-                mock.call('6e39099cccde4f809b003d9e0dd09304', microversion=None)
-            )
-            == 1
-        )
+        assert connection_compute.get_quota_set.call_args_list.count(mock.call('1e6e233e637d4d55a50a62b63398ad15')) == 1
+        assert connection_compute.get_quota_set.call_args_list.count(mock.call('6e39099cccde4f809b003d9e0dd09304')) == 1
 
 
 @pytest.mark.parametrize(
@@ -1224,13 +1214,13 @@ def test_servers_exception(aggregator, check, dd_run_check, mock_http_get, conne
         assert connection_compute.servers.call_count == 2
         assert (
             connection_compute.servers.call_args_list.count(
-                mock.call(details=True, project_id='1e6e233e637d4d55a50a62b63398ad15', microversion=None)
+                mock.call(details=True, project_id='1e6e233e637d4d55a50a62b63398ad15')
             )
             == 1
         )
         assert (
             connection_compute.servers.call_args_list.count(
-                mock.call(details=True, project_id='6e39099cccde4f809b003d9e0dd09304', microversion=None)
+                mock.call(details=True, project_id='6e39099cccde4f809b003d9e0dd09304')
             )
             == 1
         )
@@ -1301,13 +1291,13 @@ def test_servers_disable_call(aggregator, check, dd_run_check, mock_http_get, co
         assert connection_compute.servers.call_count == 1
         assert (
             connection_compute.servers.call_args_list.count(
-                mock.call(details=True, project_id='1e6e233e637d4d55a50a62b63398ad15', microversion=None)
+                mock.call(details=True, project_id='1e6e233e637d4d55a50a62b63398ad15')
             )
             == 0
         )
         assert (
             connection_compute.servers.call_args_list.count(
-                mock.call(details=True, project_id='6e39099cccde4f809b003d9e0dd09304', microversion=None)
+                mock.call(details=True, project_id='6e39099cccde4f809b003d9e0dd09304')
             )
             == 1
         )
@@ -1513,7 +1503,7 @@ def test_server_flavors_exception(
         assert connection_compute.get_server_diagnostics.call_count == 11
         assert (
             connection_compute.get_server_diagnostics.call_args_list.count(
-                mock.call('5102fbbf-7156-48dc-8355-af7ab992266f', microversion=microversion)
+                mock.call('5102fbbf-7156-48dc-8355-af7ab992266f')
             )
             == 1
         )
@@ -1679,7 +1669,7 @@ def test_server_diagnostics_exception(
         assert connection_compute.get_server_diagnostics.call_count == 11
         assert (
             connection_compute.get_server_diagnostics.call_args_list.count(
-                mock.call('5102fbbf-7156-48dc-8355-af7ab992266f', microversion=microversion)
+                mock.call('5102fbbf-7156-48dc-8355-af7ab992266f')
             )
             == 1
         )

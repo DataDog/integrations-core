@@ -54,7 +54,7 @@ def test_disable_octavia_metrics(aggregator, dd_run_check, instance, openstack_c
 
 
 @pytest.mark.parametrize(
-    ('mock_http_post', 'connection_session_auth', 'instance', 'api_type'),
+    ('mock_http_post', 'session_auth', 'instance', 'api_type'),
     [
         pytest.param(
             {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['load-balancer'])}},
@@ -71,10 +71,10 @@ def test_disable_octavia_metrics(aggregator, dd_run_check, instance, openstack_c
             id='api sdk',
         ),
     ],
-    indirect=['mock_http_post', 'connection_session_auth'],
+    indirect=['mock_http_post', 'session_auth'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, connection_session_auth, api_type):
+def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, session_auth, api_type):
     with caplog.at_level(logging.DEBUG):
         dd_run_check(check)
 
@@ -99,7 +99,7 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
             args_list += list(args)
         assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
     if api_type == ApiType.SDK:
-        assert connection_session_auth.get_access.call_count == 4
+        assert session_auth.get_access.call_count == 4
     assert '`load-balancer` component not found in catalog' in caplog.text
 
 

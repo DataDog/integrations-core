@@ -126,8 +126,14 @@ def get_json_value_from_file(file_path):
         return json.load(file)
 
 
+@pytest.fixture(scope='function')
+def microversion_headers():
+    headers = [None, None]
+    yield headers
+
+
 @pytest.fixture
-def mock_responses():
+def mock_responses(microversion_headers):
     responses_map = {}
 
     def process_files(dir, response_parent):
@@ -157,18 +163,15 @@ def mock_responses():
         for ironic_subdir in ironic_subdirs:
             process_dir(ironic_subdir, responses_map)
 
-    def method(method, url, file='response', headers=None, microversion=None):
+    def method(method, url, file='response', headers=None):
         filename = file
         url = url.replace("?", "/")
         if any(re.search(pattern, url) for pattern in NOVA_ENDPOINTS):
-            microversion = (
-                microversion if microversion else headers.get('X-OpenStack-Nova-API-Version') if headers else None
-            )
+            print(microversion_headers[0])
+            microversion = headers.get('X-OpenStack-Nova-API-Version') if headers else microversion_headers[0]
             filename = f'{file}-{microversion}' if microversion else file
         if any(re.search(pattern, url) for pattern in IRONIC_ENDPOINTS):
-            microversion = (
-                microversion if microversion else headers.get('X-OpenStack-Ironic-API-Version') if headers else None
-            )
+            microversion = headers.get('X-OpenStack-Ironic-API-Version') if headers else microversion_headers[1]
             filename = f'{file}-{microversion}' if microversion else file
         response = responses_map.get(method, {}).get(url, {}).get(filename)
         return response
@@ -193,18 +196,7 @@ def mock_http_call(mock_responses):
 
 
 @pytest.fixture
-def openstack_session():
-    def create_session(auth, session):
-        session = mock.MagicMock()
-        session.project_id = auth.project_id
-        return session
-
-    with mock.patch('keystoneauth1.session.Session', side_effect=create_session) as mock_session:
-        yield mock_session
-
-
-@pytest.fixture
-def connection_session_auth(request, openstack_session, mock_responses):
+def session_auth(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     catalog = param.get('catalog')
 
@@ -218,6 +210,20 @@ def connection_session_auth(request, openstack_session, mock_responses):
         )
 
     return mock.MagicMock(get_access=mock.MagicMock(side_effect=get_access))
+
+
+@pytest.fixture
+def openstack_session(session_auth, microversion_headers):
+    def session(auth, session):
+        microversion_headers[0] = session.headers.get('X-OpenStack-Nova-API-Version')
+        microversion_headers[1] = session.headers.get('X-OpenStack-Ironic-API-Version')
+        return mock.MagicMock(
+            return_value=mock.MagicMock(project_id=auth.project_id),
+            auth=session_auth,
+        )
+
+    with mock.patch('keystoneauth1.session.Session', side_effect=session) as mock_session:
+        yield mock_session
 
 
 @pytest.fixture
@@ -367,16 +373,16 @@ def connection_compute(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
 
-    def get_limits(microversion):
+    def get_limits():
         if http_error and 'limits' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['limits'])
         return mock.MagicMock(
             to_dict=mock.MagicMock(
-                return_value=mock_responses('GET', '/compute/v2.1/limits', microversion=microversion)['limits'],
+                return_value=mock_responses('GET', '/compute/v2.1/limits')['limits'],
             )
         )
 
-    def services(microversion):
+    def services():
         if http_error and 'services' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['services'])
         return [
@@ -385,10 +391,10 @@ def connection_compute(request, mock_responses):
                     return_value=service,
                 )
             )
-            for service in mock_responses('GET', '/compute/v2.1/os-services', microversion=microversion)['services']
+            for service in mock_responses('GET', '/compute/v2.1/os-services')['services']
         ]
 
-    def flavors(microversion, details):
+    def flavors(details):
         if http_error and 'flavors' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['flavors'])
         return [
@@ -397,10 +403,10 @@ def connection_compute(request, mock_responses):
                     return_value=service,
                 )
             )
-            for service in mock_responses('GET', '/compute/v2.1/flavors/detail', microversion=microversion)['flavors']
+            for service in mock_responses('GET', '/compute/v2.1/flavors/detail')['flavors']
         ]
 
-    def hypervisors(microversion, details):
+    def hypervisors(details):
         if http_error and 'hypervisors' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['hypervisors'])
         return [
@@ -409,34 +415,30 @@ def connection_compute(request, mock_responses):
                     return_value=hypervisor,
                 )
             )
-            for hypervisor in mock_responses('GET', '/compute/v2.1/os-hypervisors/detail', microversion=microversion)[
-                'hypervisors'
-            ]
+            for hypervisor in mock_responses('GET', '/compute/v2.1/os-hypervisors/detail')['hypervisors']
         ]
 
-    def get_hypervisor_uptime(hypervisor_id, microversion):
+    def get_hypervisor_uptime(hypervisor_id):
         if http_error and 'hypervisor_uptime' in http_error and hypervisor_id in http_error['hypervisor_uptime']:
             raise requests.exceptions.HTTPError(response=http_error['hypervisor_uptime'][hypervisor_id])
         return mock.MagicMock(
             to_dict=mock.MagicMock(
-                return_value=mock_responses(
-                    'GET', f'/compute/v2.1/os-hypervisors/{hypervisor_id}/uptime', microversion=microversion
-                )['hypervisor'],
+                return_value=mock_responses('GET', f'/compute/v2.1/os-hypervisors/{hypervisor_id}/uptime')[
+                    'hypervisor'
+                ],
             )
         )
 
-    def get_quota_set(project_id, microversion):
+    def get_quota_set(project_id):
         if http_error and 'quota_sets' in http_error and project_id in http_error['quota_sets']:
             raise requests.exceptions.HTTPError(response=http_error['quota_sets'][project_id])
         return mock.MagicMock(
             to_dict=mock.MagicMock(
-                return_value=mock_responses(
-                    'GET', f'/compute/v2.1/os-quota-sets/{project_id}', microversion=microversion
-                )['quota_set']
+                return_value=mock_responses('GET', f'/compute/v2.1/os-quota-sets/{project_id}')['quota_set']
             )
         )
 
-    def servers(project_id, details, microversion):
+    def servers(project_id, details):
         if http_error and 'servers' in http_error and project_id in http_error['servers']:
             raise requests.exceptions.HTTPError(response=http_error['servers'][project_id])
         return [
@@ -445,9 +447,7 @@ def connection_compute(request, mock_responses):
                     return_value=server,
                 )
             )
-            for server in mock_responses(
-                'GET', f'/compute/v2.1/servers/detail?project_id={project_id}', microversion=microversion
-            )['servers']
+            for server in mock_responses('GET', f'/compute/v2.1/servers/detail?project_id={project_id}')['servers']
         ]
 
     def get_flavor(flavor_id):
@@ -457,14 +457,12 @@ def connection_compute(request, mock_responses):
             to_dict=mock.MagicMock(return_value=mock_responses('GET', f'/compute/v2.1/flavors/{flavor_id}')['flavor'])
         )
 
-    def get_server_diagnostics(server_id, microversion):
+    def get_server_diagnostics(server_id):
         if http_error and 'server_diagnostics' in http_error and server_id in http_error['server_diagnostics']:
             raise requests.exceptions.HTTPError(response=http_error['server_diagnostics'][server_id])
         return mock.MagicMock(
             to_dict=mock.MagicMock(
-                return_value=mock_responses(
-                    'GET', f'/compute/v2.1/servers/{server_id}/diagnostics', microversion=microversion
-                ),
+                return_value=mock_responses('GET', f'/compute/v2.1/servers/{server_id}/diagnostics'),
             )
         )
 
@@ -531,7 +529,7 @@ def connection_baremetal(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
 
-    def nodes(details, microversion):
+    def nodes(details):
         if http_error and 'nodes' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['nodes'])
         return [
@@ -540,10 +538,10 @@ def connection_baremetal(request, mock_responses):
                     return_value=node,
                 )
             )
-            for node in mock_responses('GET', '/baremetal/v1/nodes/detail', microversion=microversion)['nodes']
+            for node in mock_responses('GET', '/baremetal/v1/nodes/detail')['nodes']
         ]
 
-    def conductors(microversion):
+    def conductors():
         if http_error and 'conductors' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['conductors'])
         return [
@@ -552,7 +550,7 @@ def connection_baremetal(request, mock_responses):
                     return_value=node,
                 )
             )
-            for node in mock_responses('GET', '/baremetal/v1/conductors', microversion=microversion)['conductors']
+            for node in mock_responses('GET', '/baremetal/v1/conductors')['conductors']
         ]
 
     return mock.MagicMock(nodes=mock.MagicMock(side_effect=nodes), conductors=mock.MagicMock(side_effect=conductors))
@@ -698,7 +696,7 @@ def connection_load_balancer(request, mock_responses):
 
 @pytest.fixture
 def openstack_connection(
-    connection_session_auth,
+    openstack_session,
     connection_authorize,
     connection_identity,
     connection_compute,
@@ -708,10 +706,7 @@ def openstack_connection(
 ):
     def connection(cloud, session, region_name):
         return mock.MagicMock(
-            session=mock.MagicMock(
-                return_value=session,
-                auth=connection_session_auth,
-            ),
+            session=session,
             authorize=connection_authorize,
             identity=connection_identity,
             compute=connection_compute,

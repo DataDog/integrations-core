@@ -149,52 +149,40 @@ class ApiSdk(Api):
         return [limit.to_dict(original_names=True) for limit in self.connection.identity.limits()]
 
     def get_compute_limits(self):
-        return self.connection.compute.get_limits(microversion=self.config.nova_microversion).to_dict(
-            original_names=True
-        )
+        return self.connection.compute.get_limits().to_dict(original_names=True)
 
     def get_compute_services(self):
-        return [
-            service.to_dict(original_names=True)
-            for service in self.connection.compute.services(microversion=self.config.nova_microversion)
-        ]
+        return [service.to_dict(original_names=True) for service in self.connection.compute.services()]
 
     def get_compute_flavors(self):
-        return [
-            flavor.to_dict(original_names=True)
-            for flavor in self.connection.compute.flavors(microversion=self.config.nova_microversion, details=True)
-        ]
+        return [flavor.to_dict(original_names=True) for flavor in self.connection.compute.flavors(details=True)]
 
     def get_compute_hypervisors(self):
         return [
-            hypervisor.to_dict(original_names=True)
-            for hypervisor in self.connection.compute.hypervisors(
-                microversion=self.config.nova_microversion, details=True
-            )
+            hypervisor.to_dict(original_names=True) for hypervisor in self.connection.compute.hypervisors(details=True)
         ]
 
     def get_compute_hypervisor_uptime(self, hypervisor_id):
         return self.connection.compute.get_hypervisor_uptime(
-            hypervisor_id, microversion=self.config.nova_microversion
+            hypervisor_id,
         ).to_dict(original_names=True)
 
     def get_compute_quota_sets(self, project_id):
-        return self.connection.compute.get_quota_set(project_id, microversion=self.config.nova_microversion).to_dict(
-            original_names=True
-        )
+        return self.connection.compute.get_quota_set(
+            project_id,
+        ).to_dict(original_names=True)
 
     def get_compute_servers(self, project_id):
         return [
             server.to_dict(original_names=True)
             for server in self.connection.compute.servers(
-                details=True, project_id=project_id, microversion=self.config.nova_microversion
+                details=True,
+                project_id=project_id,
             )
         ]
 
     def get_compute_server_diagnostics(self, server_id):
-        return self.connection.compute.get_server_diagnostics(
-            server_id, microversion=self.config.nova_microversion
-        ).to_dict(original_names=True)
+        return self.connection.compute.get_server_diagnostics(server_id).to_dict(original_names=True)
 
     def get_compute_flavor(self, flavor_id):
         return self.connection.compute.get_flavor(flavor_id).to_dict(original_names=True)
@@ -211,16 +199,10 @@ class ApiSdk(Api):
         return self.connection.network.get_quota(project_id, details=True).to_dict(original_names=True)
 
     def get_baremetal_nodes(self):
-        return [
-            node.to_dict(original_names=True)
-            for node in self.connection.baremetal.nodes(details=True, microversion=self.config.ironic_microversion)
-        ]
+        return [node.to_dict(original_names=True) for node in self.connection.baremetal.nodes(details=True)]
 
     def get_baremetal_conductors(self):
-        return [
-            conductor.to_dict(original_names=True)
-            for conductor in self.connection.baremetal.conductors(microversion=self.config.ironic_microversion)
-        ]
+        return [conductor.to_dict(original_names=True) for conductor in self.connection.baremetal.conductors()]
 
     def get_auth_projects(self):
         response = self.http.get('{}/v3/auth/projects'.format(self.cloud_config.get_auth_args().get('auth_url')))
