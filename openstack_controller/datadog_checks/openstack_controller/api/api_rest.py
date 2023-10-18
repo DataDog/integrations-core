@@ -32,7 +32,11 @@ class ApiRest(Api):
         return self._catalog.has_component(component_types)
 
     def get_response_time(self, endpoint_types):
-        endpoint = self._catalog.get_endpoint_by_type(endpoint_types).replace(self._current_project_id, "")
+        endpoint = (
+            self._catalog.get_endpoint_by_type(endpoint_types).replace(self._current_project_id, "")
+            if self._current_project_id
+            else self._catalog.get_endpoint_by_type(endpoint_types)
+        )
         response = self.http.get(endpoint)
         response.raise_for_status()
         return response.elapsed.total_seconds() * 1000
