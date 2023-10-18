@@ -270,8 +270,9 @@ class Compute(Component):
     @Component.http_error()
     def _report_server_flavor(self, server, tags):
         flavor_id = server.get('flavor', {}).get('id')
+        flavor_original_name = server.get('flavor', {}).get('original_name')
         flavor_metrics = {}
-        if flavor_id:
+        if flavor_id and flavor_original_name is None:
             flavor_metrics = self.check.api.get_compute_flavor(flavor_id)
         else:
             flavor_metrics = server.get('flavor')
