@@ -111,20 +111,22 @@ class Identity(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_projects(self, global_components_config, tags):
-        data = self.check.api.get_identity_projects()
-        self.check.log.debug("projects: %s", data)
-        for item in data:
-            project = get_metrics_and_tags(
-                item,
-                tags=KEYSTONE_PROJECT_TAGS,
-                prefix=KEYSTONE_PROJECT_METRICS_PREFIX,
-                metrics=KEYSTONE_PROJECT_METRICS,
-            )
-            self.check.log.debug("project: %s", project)
-            self.check.gauge(KEYSTONE_PROJECT_COUNT, 1, tags=tags + project['tags'])
-            for metric, value in project['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + project['tags'])
+    def _report_projects(self, config, tags):
+        report_projects = config.get('projects', True)
+        if report_projects:
+            data = self.check.api.get_identity_projects()
+            self.check.log.debug("projects: %s", data)
+            for item in data:
+                project = get_metrics_and_tags(
+                    item,
+                    tags=KEYSTONE_PROJECT_TAGS,
+                    prefix=KEYSTONE_PROJECT_METRICS_PREFIX,
+                    metrics=KEYSTONE_PROJECT_METRICS,
+                )
+                self.check.log.debug("project: %s", project)
+                self.check.gauge(KEYSTONE_PROJECT_COUNT, 1, tags=tags + project['tags'])
+                for metric, value in project['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + project['tags'])
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
