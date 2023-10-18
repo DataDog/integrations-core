@@ -9,7 +9,7 @@ mypy-args = [
     "datadog_checks/singlestore",
 ]
 mypy-deps = [
-  "types-PyMySQL==1.0.4",
+  "types-PyMySQL==1.1.0.1",
 ]
 
 [[envs.default.matrix]]
