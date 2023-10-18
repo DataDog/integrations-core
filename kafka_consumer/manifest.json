@@ -12,7 +12,7 @@
     "title": "Kafka Consumer",
     "media": [],
     "classifier_tags": [
-      "Category::Messaging",
+      "Category::Message Queues",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS"

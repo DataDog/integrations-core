@@ -14,7 +14,7 @@
     "classifier_tags": [
       "Category::IoT",
       "Category::Log Collection",
-      "Category::Messaging",
+      "Category::Message Queues",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS"
