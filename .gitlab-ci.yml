@@ -125,7 +125,7 @@ validate-agent-build:
           echo $BUILD_SUCCESS
           if [[ "$BUILD_SUCCESS" = "true" ]]; then
               echo "Agent build was successful!"
-              postmessage "$SLACK_AUTHOR" "Build was successful, you can merge your PR!" success
+              postmessage "$SLACK_AUTHOR" "Build ${CI_JOB_URL} was successful, you can merge your PR!" success
           else
               echo "Agent build failed."
               postmessage "$SLACK_AUTHOR" "The build failed, you might want to retry this job: ${CI_JOB_URL}" alert
