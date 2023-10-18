@@ -75,18 +75,20 @@ class Identity(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_regions(self, global_components_config, tags):
-        data = self.check.api.get_identity_regions()
-        self.check.log.debug("regions: %s", data)
-        for item in data:
-            region = get_metrics_and_tags(
-                item,
-                tags=KEYSTONE_REGION_TAGS,
-                prefix=KEYSTONE_REGION_METRICS_PREFIX,
-                metrics=KEYSTONE_REGION_METRICS,
-            )
-            self.check.log.debug("region: %s", region)
-            self.check.gauge(KEYSTONE_REGION_COUNT, 1, tags=tags + region['tags'])
+    def _report_regions(self, config, tags):
+        report_regions = config.get('regions', True)
+        if report_regions:
+            data = self.check.api.get_identity_regions()
+            self.check.log.debug("regions: %s", data)
+            for item in data:
+                region = get_metrics_and_tags(
+                    item,
+                    tags=KEYSTONE_REGION_TAGS,
+                    prefix=KEYSTONE_REGION_METRICS_PREFIX,
+                    metrics=KEYSTONE_REGION_METRICS,
+                )
+                self.check.log.debug("region: %s", region)
+                self.check.gauge(KEYSTONE_REGION_COUNT, 1, tags=tags + region['tags'])
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
