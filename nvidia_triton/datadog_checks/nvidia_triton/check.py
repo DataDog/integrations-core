@@ -55,16 +55,6 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
         else:
             self.log.debug("Could not retrieve version metadata.")
 
-    
-    def _submit_stat_metrics(self):
-        endpoint =  urljoin(self.api_url, DEFAULT_SERVER_STATS_ENDPOINT)
-        response = self.http.get(endpoint)
-        
-        if not response.ok:
-            self.log.error("Unable to get a valid response from url: %s with status code: %s", str(endpoint), str(response.status_code))
-            return
-        
-        #TO DO : add the code to parse the endpoint stat metrics (json format)
         
     def _check_server_health(self, extra_params=None, response_handler=None):
 
@@ -85,4 +75,3 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
         if self.api_url:
             self._check_server_health()
             self._submit_version_metadata()
-            self._submit_server_metrics()

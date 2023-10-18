@@ -10,7 +10,7 @@ def get_fixture_path(filename):
 INSTANCE_MOCK = {
     'openmetrics_endpoint': 'http://triton:8002/metrics',
     'weaviate_api_endpoint': 'http://triton:8000',
-    'tags': ['env:test'],
+    'tags': ['test:test'],
 }
 
 METRICS_MOCK = {

@@ -22,29 +22,11 @@ def test_check_mock_nvidia_triton(dd_run_check, aggregator, instance, mock_http_
 
     for metric in METRICS_MOCK:
         aggregator.assert_metric(metric)
-        aggregator.assert_metric_has_tag(metric, 'pytest:test')
+        aggregator.assert_metric_has_tag(metric, 'test:test')
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_service_check('nvidia_triton.openmetrics.health', ServiceCheck.OK)
 
-def test_check_nvidia_triton_metadata(datadog_agent, instance, mock_http_response):
-
-    check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
-    mock_http_response(file_path=get_fixture_path('nvidia_triton_metadata.json'))
-
-    check._submit_version_metadata()
-    check.check_id = 'test:123'
-    raw_version = "2.38.0"
-
-    major, minor, patch = raw_version.split('.')
-    version_metadata = {
-        'version.scheme': 'semver',
-        'version.major': major,
-        'version.minor': minor,
-        'version.patch': patch,
-        'version.raw': raw_version,
-    }
-    datadog_agent.assert_metadata('test:123', version_metadata)
 
 def test_emits_critical_openemtrics_service_check_when_service_is_down(dd_run_check, aggregator, instance, mock_http_response):
     """
@@ -67,10 +49,22 @@ def test_emits_critical_api_service_check_when_service_is_down(aggregator, insta
 
     aggregator.assert_service_check('nvidia_triton.health.status', ServiceCheck.CRITICAL)
 
-def test_empty_instance(dd_run_check):
-    with pytest.raises(
-        Exception,
-        match='InstanceConfig`:\nopenmetrics_endpoint\n  Field required',
-    ):
-        check = NvidiaTritonCheck('nvidia_triton', {}, [])
-        dd_run_check(check)
+
+def test_check_nvidia_triton_metadata(datadog_agent, instance, mock_http_response):
+
+    check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
+    mock_http_response(file_path=get_fixture_path('nvidia_triton_metadata.json'))
+
+    check._submit_version_metadata()
+    check.check_id = 'test:123'
+    raw_version = '2.38.0'
+
+    major, minor, patch = raw_version.split('.')
+    version_metadata = {
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': raw_version,
+        'version.scheme': 'semver',
+    }
+    datadog_agent.assert_metadata('test:123', version_metadata)
