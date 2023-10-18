@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add util to track db query operation time ([#16040](https://github.com/DataDog/integrations-core/pull/16040))
+
 ***Fixed***:
 
 * Bump the `pyodbc` version to 4.0.39 ([#16021](https://github.com/DataDog/integrations-core/pull/16021))

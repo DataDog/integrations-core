@@ -12,7 +12,7 @@ from ...config import is_affirmative
 from ..containers import iter_unique
 from .query import Query
 from .transform import COLUMN_TRANSFORMERS, EXTRA_TRANSFORMERS
-from .utils import SUBMISSION_METHODS, create_submission_transformer
+from .utils import SUBMISSION_METHODS, create_submission_transformer, tracked_query
 
 
 class QueryExecutor(object):
@@ -72,7 +72,8 @@ class QueryExecutor(object):
             query_tags = query.base_tags
 
             try:
-                rows = self.execute_query(query.query)
+                with tracked_query(check=self.submitter, operation=query_name):
+                    rows = self.execute_query(query.query)
             except Exception as e:
                 if self.error_handler:
                     self.logger.error('Error querying %s: %s', query_name, self.error_handler(str(e)))

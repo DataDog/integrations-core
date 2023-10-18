@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import contextlib
 import datetime
 import decimal
 import functools
@@ -20,6 +21,7 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.types import Transformer  # noqa: F401
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.base.utils.tracing import INTEGRATION_TRACING_SERVICE_NAME, tracing_enabled
 
 from ..common import to_native_string
@@ -354,3 +356,18 @@ class DBMAsyncJob(object):
 
     def run_job(self):
         raise NotImplementedError()
+
+
+@contextlib.contextmanager
+def tracked_query(check, operation, tags=None):
+    """
+    A simple context manager that tracks the time spent in a given query operation
+    """
+    start_time = get_timestamp()
+    stats_kwargs = {}
+    if hasattr(check, 'debug_stats_kwargs'):
+        stats_kwargs = dict(check.debug_stats_kwargs())
+    stats_kwargs['tags'] = stats_kwargs.get('tags', []) + ["operation:{}".format(operation)] + (tags or [])
+    yield
+    elapsed_ms = (get_timestamp() - start_time) * 1000
+    check.histogram("dd.{}.operation.time".format(check.name), elapsed_ms, **stats_kwargs)

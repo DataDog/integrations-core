@@ -14,6 +14,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.utils import (
     default_json_event_encoding,
+    tracked_query,
 )
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.base.utils.serialization import json
@@ -413,21 +414,17 @@ class PostgreSql(AgentCheck):
         is_relations = scope.get('relation') and self._relations_manager.has_relations
         try:
             query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
-            start_time = time()
-            # if this is a relation-specific query, we need to list all relations last
-            if is_relations:
-                schema_field = get_schema_field(descriptors)
-                formatted_query = self._relations_manager.filter_relation_query(query, schema_field)
-                cursor.execute(formatted_query)
-            else:
-                self.log.debug("Running query: %s", str(query))
-                cursor.execute(query.replace(r'%', r'%%'))
+            with tracked_query(check=self, operation='custom_metrics' if is_custom_metrics else scope['name']):
+                # if this is a relation-specific query, we need to list all relations last
+                if is_relations:
+                    schema_field = get_schema_field(descriptors)
+                    formatted_query = self._relations_manager.filter_relation_query(query, schema_field)
+                    cursor.execute(formatted_query)
+                else:
+                    self.log.debug("Running query: %s", str(query))
+                    cursor.execute(query.replace(r'%', r'%%'))
 
-            results = cursor.fetchall()
-            self._track_query_perf(
-                start_time,
-                name='custom_metrics' if is_custom_metrics else scope['name'],
-            )
+                results = cursor.fetchall()
         except psycopg2.errors.FeatureNotSupported as e:
             # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
@@ -565,9 +562,11 @@ class PostgreSql(AgentCheck):
                     for scope in relations_scopes:
                         self._query_scope(cursor, scope, instance_tags, False, db)
         elapsed_ms = (time() - start_time) * 1000
-        self._track_query_perf(
-            start_time,
-            name='collect_relations_autodiscovery',
+        self.histogram(
+            "dd.postgres._collect_relations_autodiscovery.time",
+            elapsed_ms,
+            tags=self.tags + self._get_debug_tags(),
+            hostname=self.resolved_hostname,
         )
         if elapsed_ms > self._config.min_collection_interval * 1000:
             self.record_warning(
@@ -781,12 +780,11 @@ class PostgreSql(AgentCheck):
             with self.db() as conn:
                 with conn.cursor() as cursor:
                     try:
-                        start_time = time()
                         self.log.debug("Running query: %s", query)
-                        cursor.execute(query)
-                        self._track_query_perf(
-                            start_time, name='custom_queries', tags=['metric_prefix:{}'.format(metric_prefix)]
-                        )
+                        with tracked_query(
+                            check=self, operation='custom_queries', tags=['metric_prefix:{}'.format(metric_prefix)]
+                        ):
+                            cursor.execute(query)
                     except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
                         self.log.error("Error executing query for metric_prefix %s: %s", metric_prefix, str(e))
                         continue
@@ -890,12 +888,6 @@ class PostgreSql(AgentCheck):
             }
             self._database_instance_emitted[self.resolved_hostname] = event
             self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
-
-    def _track_query_perf(self, start_time: float, name: str, tags=None) -> None:
-        tags = ['operation:{}'.format(name)] + (tags or [])
-        self.histogram(
-            "dd.postgres.operation.time", (time() - start_time) * 1000, **self.debug_stats_kwargs(tags)
-        )
 
     def debug_stats_kwargs(self, tags=None):
         tags = self.tags + self._get_debug_tags() + (tags or [])
