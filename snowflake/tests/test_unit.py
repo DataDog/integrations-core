@@ -481,3 +481,34 @@ def test_aggregate_last_24_hours_queries(aggregate_last_24_hours, expected_query
 
     # Only one query configured
     assert check.metric_queries[0]['query'] == expected_query
+
+
+def test_aggregate_last_24_hours_queries_multiple_instances():
+    # This test checks that the `aggregate_last_24_hours` setting doesn't leak into other instances.
+    inst_default = {
+        'metric_groups': ['snowflake.replication'],
+        'username': 'user',
+        'password': 'password',
+        'account': 'account',
+        'role': 'role',
+    }
+
+    inst_last_24_hours = dict(inst_default)
+
+    inst_default['aggregate_last_24_hours'] = False
+    inst_last_24_hours['aggregate_last_24_hours'] = True
+
+    check_default = SnowflakeCheck(CHECK_NAME, {}, [inst_default])
+    check_last_24_hours = SnowflakeCheck(CHECK_NAME, {}, [inst_last_24_hours])
+
+    assert check_default.metric_queries[0]['query'] == (
+        'select database_name, avg(credits_used), sum(credits_used), '
+        'avg(bytes_transferred), sum(bytes_transferred) from replication_usage_history '
+        'where start_time >= date_trunc(day, current_date) group by 1;'
+    )
+
+    assert check_last_24_hours.metric_queries[0]['query'] == (
+        'select database_name, avg(credits_used), sum(credits_used), '
+        'avg(bytes_transferred), sum(bytes_transferred) from replication_usage_history '
+        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1;'
+    )
