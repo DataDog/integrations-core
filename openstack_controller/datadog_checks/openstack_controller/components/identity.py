@@ -92,20 +92,22 @@ class Identity(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_domains(self, global_components_config, tags):
-        data = self.check.api.get_identity_domains()
-        self.check.log.debug("domains: %s", data)
-        for item in data:
-            domain = get_metrics_and_tags(
-                item,
-                tags=KEYSTONE_DOMAIN_TAGS,
-                prefix=KEYSTONE_DOMAIN_METRICS_PREFIX,
-                metrics=KEYSTONE_DOMAIN_METRICS,
-            )
-            self.check.log.debug("domain: %s", domain)
-            self.check.gauge(KEYSTONE_DOMAIN_COUNT, 1, tags=tags + domain['tags'])
-            for metric, value in domain['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + domain['tags'])
+    def _report_domains(self, config, tags):
+        report_domains = config.get('domains', True)
+        if report_domains:
+            data = self.check.api.get_identity_domains()
+            self.check.log.debug("domains: %s", data)
+            for item in data:
+                domain = get_metrics_and_tags(
+                    item,
+                    tags=KEYSTONE_DOMAIN_TAGS,
+                    prefix=KEYSTONE_DOMAIN_METRICS_PREFIX,
+                    metrics=KEYSTONE_DOMAIN_METRICS,
+                )
+                self.check.log.debug("domain: %s", domain)
+                self.check.gauge(KEYSTONE_DOMAIN_COUNT, 1, tags=tags + domain['tags'])
+                for metric, value in domain['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + domain['tags'])
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
