@@ -15,6 +15,7 @@ from six import iteritems
 from datadog_checks.postgres import PostgreSql, util
 
 from .common import PORT, check_performance_metrics
+from .utils import requires_over_10
 
 pytestmark = pytest.mark.unit
 
@@ -240,6 +241,7 @@ def test_resolved_hostname_metadata(check, test_case):
         m.assert_any_call('test:123', 'resolved_hostname', test_case)
 
 
+@requires_over_10
 @pytest.mark.usefixtures('mock_cursor_for_replica_stats')
 def test_replication_stats(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)

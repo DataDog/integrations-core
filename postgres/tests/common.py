@@ -332,5 +332,7 @@ def check_performance_metrics(aggregator, expected_tags, count=1, is_aurora=Fals
         expected_metrics = expected_metrics - {'replication_metrics'}
     if float(POSTGRES_VERSION) < 13.0:
         expected_metrics = expected_metrics - {'slru_metrics'}
+    if float(POSTGRES_VERSION) < 10.0:
+        expected_metrics = expected_metrics - {'replication_stats_metrics'}
     for name in expected_metrics:
         aggregator.assert_metric('dd.postgres.{}.time'.format(name), count=count, tags=expected_tags)
