@@ -6,7 +6,7 @@
 
 * Allow multiple expected modes to be specified ([#15909](https://github.com/DataDog/integrations-core/pull/15909))
 
-## 4.3.1 / 2023-08-18
+## 4.3.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:
 

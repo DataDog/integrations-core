@@ -45,6 +45,19 @@ files:
       value:
         type: string
         example: normal
+    - name: legacy_mode
+      description: |
+        Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
+
+          /\ WARNING /\
+          This mode, by nature of the underlying technology, is significantly more resource intensive.
+
+        Setting this option to `false` is only supported on Agent versions 7 and above.
+      enabled: true
+      value:
+        type: boolean
+        display_default: true
+        example: false
     - template: init_config/default
   - template: instances
     overrides:
@@ -261,7 +274,7 @@ files:
     - name: timeout
       description: The number of seconds to wait for new event signals.
       value:
-        type: number
+        type: integer
         example: 5
     - name: payload_size
       description: |
@@ -287,11 +300,10 @@ files:
           This mode, by nature of the underlying technology, is significantly more resource intensive.
 
         Setting this option to `false` is only supported on Agent versions 7 and above.
-      enabled: true
       value:
         type: boolean
         display_default: true
-        example: false
+        example: true
     - name: host
       description: |
         By default, the local machine's event logs are captured. To capture a remote

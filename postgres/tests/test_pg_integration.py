@@ -38,7 +38,7 @@ from .common import (
     check_wal_receiver_metrics,
     requires_static_version,
 )
-from .utils import _get_conn, _get_superconn, requires_over_10, requires_over_14
+from .utils import _get_conn, _get_superconn, requires_over_10, requires_over_14, run_one_check
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
 
@@ -65,21 +65,25 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check_stat_replication(aggregator, expected_tags=expected_tags)
     if is_aurora is False:
         check_wal_receiver_metrics(aggregator, expected_tags=expected_tags, connected=0)
+        check_file_wal_metrics(aggregator, expected_tags=expected_tags)
+        check_stat_wal_metrics(aggregator, expected_tags=expected_tags)
     check_uptime_metrics(aggregator, expected_tags=expected_tags)
 
     check_logical_replication_slots(aggregator, expected_tags)
     check_physical_replication_slots(aggregator, expected_tags)
     check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
-    check_stat_wal_metrics(aggregator, expected_tags=expected_tags)
-    check_file_wal_metrics(aggregator, expected_tags=expected_tags)
-
     aggregator.assert_all_metrics_covered()
 
 
 def test_snapshot_xmin(aggregator, integration_check, pg_instance):
     with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+        conn.set_session(autocommit=True)
         with conn.cursor() as cur:
-            cur.execute('select txid_snapshot_xmin(txid_current_snapshot());')
+            if float(POSTGRES_VERSION) >= 13.0:
+                query = 'select pg_snapshot_xmin(pg_current_snapshot());'
+            else:
+                query = 'select txid_snapshot_xmin(txid_current_snapshot());'
+            cur.execute(query)
             xmin = float(cur.fetchall()[0][0])
     check = integration_check(pg_instance)
     check.check(pg_instance)
@@ -93,13 +97,16 @@ def test_snapshot_xmin(aggregator, integration_check, pg_instance):
         conn.set_session(autocommit=True)
         with conn.cursor() as cur:
             # Force increases of txid
-            cur.execute('select txid_current();')
-            cur.execute('select txid_current();')
+            if float(POSTGRES_VERSION) >= 13.0:
+                query = 'select pg_current_xact_id();'
+            else:
+                query = 'select txid_current();'
+            cur.execute(query)
 
     check = integration_check(pg_instance)
     check.check(pg_instance)
-    aggregator.assert_metric('postgresql.snapshot.xmin', value=xmin + 2, count=1, tags=expected_tags)
-    aggregator.assert_metric('postgresql.snapshot.xmax', value=xmin + 2, count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.snapshot.xmin', value=xmin + 1, count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.snapshot.xmax', value=xmin + 1, count=1, tags=expected_tags)
 
 
 def test_snapshot_xip(aggregator, integration_check, pg_instance):
@@ -255,8 +262,10 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
 
     # Second: keep the connection open but an unexpected error happens during check run
     orig_db = check.db
-    check.db = mock.MagicMock(spec=('closed', 'status'), closed=False, status=psycopg2.extensions.STATUS_READY)
+
+    # Second: keep the connection open but an unexpected error happens during check run
     with pytest.raises(AttributeError):
+        check.db = mock.MagicMock(side_effect=AttributeError('foo'))
         check.check(pg_instance)
     aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.CRITICAL, tags=expected_tags)
     aggregator.reset()
@@ -457,7 +466,11 @@ def test_state_clears_on_connection_error(integration_check, pg_instance):
 
 
 @requires_over_14
-def test_wal_stats(aggregator, integration_check, pg_instance):
+@pytest.mark.parametrize(
+    'is_aurora',
+    [True, False],
+)
+def test_wal_stats(aggregator, integration_check, pg_instance, is_aurora):
     conn = _get_superconn(pg_instance)
     with conn.cursor() as cur:
         cur.execute("select wal_records, wal_fpi, wal_bytes from pg_stat_wal;")
@@ -474,6 +487,9 @@ def test_wal_stats(aggregator, integration_check, pg_instance):
         time.sleep(0.1)
 
     check = integration_check(pg_instance)
+    check.is_aurora = is_aurora
+    if is_aurora is True:
+        return
     check.check(pg_instance)
 
     expected_tags = _get_expected_tags(check, pg_instance)
@@ -487,7 +503,7 @@ def test_wal_stats(aggregator, integration_check, pg_instance):
     # We should have at least one full page write
     assert_metric_at_least(aggregator, 'postgresql.wal.bytes', tags=expected_tags, count=1, lower_bound=wal_bytes + 100)
     assert_metric_at_least(
-        aggregator, 'postgresql.wal.full_page_images', tags=expected_tags, count=1, lower_bound=wal_fpi + 1
+        aggregator, 'postgresql.wal.full_page_images', tags=expected_tags, count=1, lower_bound=wal_fpi
     )
 
 
@@ -495,14 +511,23 @@ def test_query_timeout(integration_check, pg_instance):
     pg_instance['query_timeout'] = 1000
     check = integration_check(pg_instance)
     check._connect()
-    cursor = check.db.cursor()
     with pytest.raises(psycopg2.errors.QueryCanceled):
-        cursor.execute("select pg_sleep(2000)")
+        with check.db() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("select pg_sleep(2000)")
 
 
 @requires_over_10
-def test_wal_metrics(aggregator, integration_check, pg_instance):
+@pytest.mark.parametrize(
+    'is_aurora',
+    [True, False],
+)
+def test_wal_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check = integration_check(pg_instance)
+    check.is_aurora = is_aurora
+
+    if is_aurora is True:
+        return
     # Default PG's wal size is 16MB
     wal_size = 16777216
 
@@ -638,7 +663,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, pg_instance, dbm_e
     expected_host = reported_hostname if reported_hostname else 'stubbed.hostname'
     expected_tags = pg_instance['tags'] + ['port:{}'.format(pg_instance['port'])]
     check = PostgreSql('test_instance', {}, [pg_instance])
-    dd_run_check(check)
+    run_one_check(check, pg_instance)
 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
@@ -655,7 +680,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, pg_instance, dbm_e
 
     # Run a second time and expect the metadata to not be emitted again because of the cache TTL
     aggregator.reset()
-    dd_run_check(check)
+    run_one_check(check, pg_instance)
 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)

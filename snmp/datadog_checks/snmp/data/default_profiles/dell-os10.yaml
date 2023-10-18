@@ -21,7 +21,7 @@ metrics:
         name: cpu.usage
     metric_tags:
       - tag: hr_processor_frw_id
-        column:
+        symbol:
           OID: 1.3.6.1.2.1.25.3.3.1.1
           name: hrProcessorFrwID
   - MIB: HOST-RESOURCES-MIB
@@ -44,15 +44,15 @@ metrics:
       - OID: 1.3.6.1.4.1.674.11000.5000.100.4.1.1.4.1.5
         name: dell.os10CardTemp
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.11000.5000.100.4.1.1.4.1.3
           name: dell.os10CardDescription
         tag: dell_os10_card_description
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.11000.5000.100.4.1.1.4.1.9
           name: dell.os10CardServiceTag
         tag: dell_os10_card_service_tag
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.11000.5000.100.4.1.1.4.1.4
           name: dell.os10CardStatus
         tag: dell_os10_card_status
@@ -71,7 +71,7 @@ metrics:
       - name: dell.os10PowerSupply
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.11000.5000.100.4.1.2.1.1.4
           name: dell.os10PowerSupplyOperStatus
         tag: dell_os10_power_supply_oper_status
@@ -84,7 +84,7 @@ metrics:
           6: not_present
           7: lower_layer_down
           8: failed
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.11000.5000.100.4.1.2.1.1.1
           name: dell.os10PowerSupplyIndex
         tag: dell_os10_power_supply_index
@@ -96,7 +96,7 @@ metrics:
       - name: dell.os10FanTray
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.11000.5000.100.4.1.2.2.1.4
           name: dell.os10FanTrayOperStatus
         tag: dell_os10_fan_tray_oper_status
@@ -109,7 +109,7 @@ metrics:
           6: not_present
           7: lower_layer_down
           8: failed
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.11000.5000.100.4.1.2.2.1.1
           name: dell.os10FanTrayIndex
         tag: dell_os10_fan_tray_index
@@ -121,7 +121,7 @@ metrics:
       - name: dell.os10Fan
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.11000.5000.100.4.1.2.3.1.7
           name: dell.os10FanOperStatus
         tag: dell_os10_fan_oper_status
@@ -134,7 +134,7 @@ metrics:
           6: not_present
           7: lower_layer_down
           8: failed
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.11000.5000.100.4.1.2.3.1.1
           name: dell.os10FanIndex
         tag: dell_os10_fan_index
@@ -146,7 +146,7 @@ metrics:
       - name: dell.os10bgp4V2Peer
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.11000.5000.200.1.1.2.1.2
           name: dell.os10bgp4V2PeerLocalAddrType
         tag: dell_os10bgp4_v2_peer_local_addr_type
@@ -158,11 +158,11 @@ metrics:
           4: ipv6z
           16: dns
           25: l2vpn
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.11000.5000.200.1.1.2.1.3
           name: dell.os10bgp4V2PeerLocalAddr
         tag: dell_os10bgp4_v2_peer_local_addr
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.11000.5000.200.1.1.2.1.4
           name: dell.os10bgp4V2PeerRemoteAddrType
         tag: dell_os10bgp4_v2_peer_remote_addr_type
@@ -174,46 +174,46 @@ metrics:
           4: ipv6z
           16: dns
           25: l2vpn
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.11000.5000.200.1.1.2.1.5
           name: dell.os10bgp4V2PeerRemoteAddr
         tag: dell_os10bgp4_v2_peer_remote_addr
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.11000.5000.200.1.1.2.1.6
           name: dell.os10bgp4V2PeerLocalPort
         tag: dell_os10bgp4_v2_peer_local_port
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.11000.5000.200.1.1.2.1.7
           name: dell.os10bgp4V2PeerLocalAs
         tag: dell_os10bgp4_v2_peer_local_as
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.11000.5000.200.1.1.2.1.8
           name: dell.os10bgp4V2PeerLocalIdentifier
         tag: dell_os10bgp4_v2_peer_local_identifier
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.11000.5000.200.1.1.2.1.9
           name: dell.os10bgp4V2PeerRemotePort
         tag: dell_os10bgp4_v2_peer_remote_port
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.11000.5000.200.1.1.2.1.10
           name: dell.os10bgp4V2PeerRemoteAs
         tag: dell_os10bgp4_v2_peer_remote_as
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.11000.5000.200.1.1.2.1.11
           name: dell.os10bgp4V2PeerRemoteIdentifier
         tag: dell_os10bgp4_v2_peer_remote_identifier
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.11000.5000.200.1.1.2.1.14
           name: dell.os10bgp4V2PeerDescription
         tag: dell_os10bgp4_v2_peer_description
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.11000.5000.200.1.1.2.1.12
           name: dell.os10bgp4V2PeerAdminStatus
         tag: dell_os10bgp4_v2_peer_admin_status
         mapping:
           1: halted
           2: running
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.11000.5000.200.1.1.2.1.13
           name: dell.os10bgp4V2PeerState
         tag: dell_os10bgp4_v2_peer_state

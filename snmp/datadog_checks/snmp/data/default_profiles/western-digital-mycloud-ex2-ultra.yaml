@@ -50,19 +50,19 @@ metrics:
 #        name: wdmycloudex2VolumeFreeSpace
 # string metric is not supported yet (keep this metric and this comment in profile until it's fixed)
     metric_tags:
-      - column:
+      - symbol:
           name: wdmycloudex2VolumeNum
           OID: 1.3.6.1.4.1.5127.1.1.1.8.1.9.1.1
         tag: wdmycloudex2_volume_num
-      - column:
+      - symbol:
           name: wdmycloudex2VolumeName
           OID: 1.3.6.1.4.1.5127.1.1.1.8.1.9.1.2
         tag: wdmycloudex2_volume_name
-      - column:
+      - symbol:
           name: wdmycloudex2VolumeFsType
           OID: 1.3.6.1.4.1.5127.1.1.1.8.1.9.1.3
         tag: wdmycloudex2_volume_fs_type
-      - column:
+      - symbol:
           name: wdmycloudex2VolumeRaidLevel
           OID: 1.3.6.1.4.1.5127.1.1.1.8.1.9.1.4
         tag: wdmycloudex2_volume_raid_level
@@ -77,23 +77,23 @@ metrics:
       - name: wdmycloudex2Disk
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: wdmycloudex2DiskNum
           OID: 1.3.6.1.4.1.5127.1.1.1.8.1.10.1.1
         tag: wdmycloudex2_disk_num
-      - column:
+      - symbol:
           name: wdmycloudex2DiskVendor
           OID: 1.3.6.1.4.1.5127.1.1.1.8.1.10.1.2
         tag: wdmycloudex2_disk_vendor
-      - column:
+      - symbol:
           name: wdmycloudex2DiskModel
           OID: 1.3.6.1.4.1.5127.1.1.1.8.1.10.1.3
         tag: wdmycloudex2_disk_model
-      - column:
+      - symbol:
           name: wdmycloudex2DiskSerialNumber
           OID: 1.3.6.1.4.1.5127.1.1.1.8.1.10.1.4
         tag: wdmycloudex2_disk_serial_number
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.5127.1.1.1.8.1.10.1.6
           name: wdmycloudex2DiskCapacity
         tag: wdmycloudex2_disk_capacity
@@ -108,23 +108,23 @@ metrics:
 #        OID: 1.3.6.1.4.1.5127.1.1.1.8.1.11.5
 # string metric is not supported yet (keep this metric and this comment in profile until it's fixed)
     metric_tags:
-      - column:
+      - symbol:
           name: wdmycloudex2UPSNum
           OID: 1.3.6.1.4.1.5127.1.1.1.8.1.11.1.1
         tag: wdmycloudex2_ups_num
-      - column:
+      - symbol:
           name: wdmycloudex2UPSMode
           OID: 1.3.6.1.4.1.5127.1.1.1.8.1.11.1.2
         tag: wdmycloudex2_ups_mode
-      - column:
+      - symbol:
           name: wdmycloudex2UPSManufacturer
           OID: 1.3.6.1.4.1.5127.1.1.1.8.1.11.1.3
         tag: wdmycloudex2_ups_manufacturer
-      - column:
+      - symbol:
           name: wdmycloudex2UPSProduct
           OID: 1.3.6.1.4.1.5127.1.1.1.8.1.11.1.4
         tag: wdmycloudex2_ups_product
-      - column:
+      - symbol:
           name: wdmycloudex2UPSStatus
           OID: 1.3.6.1.4.1.5127.1.1.1.8.1.11.1.6
         tag: wdmycloudex2_ups_status

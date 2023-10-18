@@ -2,7 +2,18 @@
 
 ## Unreleased
 
-## 11.1.0 / 2023-08-18
+***Added***:
+
+* Add support for reporting SQL obfuscation errors ([#15990](https://github.com/DataDog/integrations-core/pull/15990))
+
+## 11.2.0 / 2023-09-29
+
+***Added***:
+
+* Update Cryptography to 41.0.4 ([#15922](https://github.com/DataDog/integrations-core/pull/15922))
+* Add `wsrep_local_{recv,send}_queue` instant metric ([#15841](https://github.com/DataDog/integrations-core/pull/15841)) Thanks [frivoire](https://github.com/frivoire).
+
+## 11.1.0 / 2023-08-18 / Agent 7.48.0
 
 ***Added***:
 

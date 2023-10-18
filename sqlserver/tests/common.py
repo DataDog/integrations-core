@@ -12,14 +12,15 @@ from datadog_checks.sqlserver.const import (
     AO_METRICS,
     AO_METRICS_PRIMARY,
     AO_METRICS_SECONDARY,
-    DATABASE_FILE_SPACE_USAGE_METRICS,
     DATABASE_FRAGMENTATION_METRICS,
+    DATABASE_INDEX_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DBM_MIGRATED_METRICS,
     INSTANCE_METRICS,
     INSTANCE_METRICS_DATABASE,
     TASK_SCHEDULER_METRICS,
+    TEMPDB_FILE_SPACE_USAGE_METRICS,
 )
 from datadog_checks.sqlserver.queries import get_query_file_stats
 
@@ -81,6 +82,7 @@ EXPECTED_DEFAULT_METRICS = (
             DBM_MIGRATED_METRICS,
             INSTANCE_METRICS_DATABASE,
             DATABASE_METRICS,
+            TEMPDB_FILE_SPACE_USAGE_METRICS,
         )
     ]
     + SERVER_METRICS
@@ -94,7 +96,6 @@ EXPECTED_METRICS = (
             TASK_SCHEDULER_METRICS,
             DATABASE_FRAGMENTATION_METRICS,
             DATABASE_MASTER_FILES,
-            DATABASE_FILE_SPACE_USAGE_METRICS,
         )
     ]
     + CUSTOM_METRICS
@@ -154,7 +155,6 @@ INSTANCE_SQL.update(
         'include_ao_metrics': False,
         'include_master_files_metrics': True,
         'disable_generic_tags': True,
-        'include_db_file_space_usage_metrics': True,
     }
 )
 
@@ -233,6 +233,12 @@ def assert_metrics(
     # as they are emitted from the DBM backend
     if dbm_enabled:
         expected_metrics = [m for m in expected_metrics if m not in DBM_MIGRATED_METRICS_NAMES]
+
+    # remove index usage metrics, which require extra setup & will be tested separately
+    for m in DATABASE_INDEX_METRICS:
+        if m[0] in aggregator._metrics:
+            del aggregator._metrics[m[0]]
+
     if database_autodiscovery:
         # when autodiscovery is enabled, we should not double emit metrics,
         # so we should assert for these separately with the proper tags

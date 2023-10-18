@@ -34,6 +34,7 @@ def test_status(instance, aggregator, ping_url_tag, dd_run_check):
         'php_fpm.requests.slow',
         'php_fpm.requests.accepted',
         'php_fpm.processes.max_reached',
+        'php_fpm.status.duration',
     ]
 
     expected_tags = ['fpm_cluster:forums', 'pool:www']
@@ -57,6 +58,7 @@ def test_status_fastcgi(instance_fastcgi, aggregator, ping_url_tag_fastcgi, dd_r
         'php_fpm.requests.slow',
         'php_fpm.requests.accepted',
         'php_fpm.processes.max_reached',
+        'php_fpm.status.duration',
     ]
 
     expected_tags = ['fpm_cluster:forums', 'pool:www']

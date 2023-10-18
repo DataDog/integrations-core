@@ -14,7 +14,7 @@
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::macOS",
-      "Category::Data Store",
+      "Category::Data Stores",
       "Category::OS & System",
       "Category::Log Collection"
     ]
@@ -43,11 +43,7 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": [
-        "ceph-mon",
-        "ceph-mgr",
-        "ceph-osd"
-      ]
+      "process_signatures": ["ceph-mon", "ceph-mgr", "ceph-osd"]
     },
     "dashboards": {
       "ceph": "assets/dashboards/overview.json"

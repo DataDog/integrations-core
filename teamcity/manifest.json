@@ -14,7 +14,7 @@
     "classifier_tags": [
       "Category::Configuration & Deployment",
       "Category::Log Collection",
-      "Category::Notification",
+      "Category::Notifications",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS"

@@ -4,8 +4,42 @@
 
 ***Fixed***:
 
+* Align package version in integration template with changelog. ([#16029](https://github.com/DataDog/integrations-core/pull/16029))
+* Allow bumping the version of `pyodbc` ([#16030](https://github.com/DataDog/integrations-core/pull/16030))
+* Display changes on `ddev show changes` when changes are found ([#16045](https://github.com/DataDog/integrations-core/pull/16045))
+
+## 27.0.0 / 2023-10-12
+
+***Changed***:
+
+* Migrate E2E features ([#15931](https://github.com/DataDog/integrations-core/pull/15931))
+
+## 26.0.1 / 2023-10-11
+
+***Fixed***:
+
+* Fix the manifest template file ([#15984](https://github.com/DataDog/integrations-core/pull/15984))
+
+## 26.0.0 / 2023-10-02
+
+***Changed***:
+
+* Update eula validation to only occur if it is present in the manifest for marketplace prs to support private-offer-only listings ([#15935](https://github.com/DataDog/integrations-core/pull/15935))
+
+## 25.1.2 / 2023-09-26
+
+***Fixed***:
+
+* Fix test output rewrite conditional ([#15915](https://github.com/DataDog/integrations-core/pull/15915))
+
+## 25.1.1 / 2023-09-26
+
+***Fixed***:
+
 * Exclude psycopg2 from automatic upgrades ([#15864](https://github.com/DataDog/integrations-core/pull/15864))
 * Upper-bound pydantic to quickly fix CI while we investigate what in the latest version breaks us. ([#15901](https://github.com/DataDog/integrations-core/pull/15901))
+* Finalize pytest plugin logic for E2E refactor ([#15898](https://github.com/DataDog/integrations-core/pull/15898))
+* Fix `ddev release make all` so that it won't stop on the first unchanged integration ([#15932](https://github.com/DataDog/integrations-core/pull/15932))
 
 ## 25.1.0 / 2023-09-15
 
@@ -14,7 +48,7 @@
 * Added overview examples to the readme file ([#15817](https://github.com/DataDog/integrations-core/pull/15817))
 * Added required classifier tag examples to template ([#15828](https://github.com/DataDog/integrations-core/pull/15828))
 * Prepare E2E tooling for better message passing ([#15843](https://github.com/DataDog/integrations-core/pull/15843))
-  
+
 ## 25.0.0 / 2023-09-13
 
 ***Changed***:

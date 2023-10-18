@@ -46,7 +46,7 @@ To configure this check for an Agent running on a host:
 
 3. [Restart the Agent][6].
 
-**Note**: Ensure the `datadog-agent` user has read access to tail the log files you want to collect from. See [Permission issues tailing log files][12] for more information.
+**Note**: Ensure the `datadog-agent` user has read access to tail the log files you want to collect from. When IIS creates a new sub-folder (such as when a new site is created), the permissions of the parent folder are not automatically inherited. See [Permission issues tailing log files][12] for more information.
 
 
 ### Validation

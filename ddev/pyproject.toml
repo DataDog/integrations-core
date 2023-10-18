@@ -28,7 +28,7 @@ classifiers = [
 dependencies = [
     "click~=8.1.6",
     "coverage",
-    "datadog-checks-dev[cli]~=25.0",
+    "datadog-checks-dev[cli]~=27.0",
     "hatch>=1.6.3",
     "httpx",
     "jsonpointer",
@@ -75,6 +75,7 @@ include = '\.pyi?$'
 line-length = 120
 skip-string-normalization = true
 target-version = ["py39"]
+extend-exclude = "src/ddev/_version.py"
 
 [tool.ruff]
 exclude = []

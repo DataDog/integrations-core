@@ -112,10 +112,10 @@ INSTANCE_METRICS = [
     ('sqlserver.replica.transaction_delay', 'Transaction Delay', '_Total'),
     ('sqlserver.replica.flow_control_sec', 'Flow Control/sec', '_Total'),
     # SQLServer:Transactions
-    ('sqlserver.stats.version_store_size', 'Version Store Size (KB)', ''),
-    ('sqlserver.stats.version_cleanup_rate', 'Version Cleanup rate (KB/s)', ''),
-    ('sqlserver.stats.version_generation_rate', 'Version Generation rate (KB/s)', ''),
-    ('sqlserver.stats.longest_transaction_running_time', 'Longest Transaction Running Time', ''),
+    ('sqlserver.transactions.version_store_size', 'Version Store Size (KB)', ''),
+    ('sqlserver.transactions.version_cleanup_rate', 'Version Cleanup rate (KB/s)', ''),
+    ('sqlserver.transactions.version_generation_rate', 'Version Generation rate (KB/s)', ''),
+    ('sqlserver.transactions.longest_transaction_running_time', 'Longest Transaction Running Time', ''),
 ]
 
 # Performance table metrics, initially configured to track at instance-level only
@@ -181,6 +181,13 @@ DATABASE_METRICS = [
     ('sqlserver.database.backup_count', 'msdb.dbo.backupset', 'backup_set_id_count'),
 ]
 
+DATABASE_INDEX_METRICS = [
+    ('sqlserver.index.user_seeks', 'sys.dm_db_index_usage_stats', 'user_seeks'),
+    ('sqlserver.index.user_scans', 'sys.dm_db_index_usage_stats', 'user_scans'),
+    ('sqlserver.index.user_lookups', 'sys.dm_db_index_usage_stats', 'user_lookups'),
+    ('sqlserver.index.user_updates', 'sys.dm_db_index_usage_stats', 'user_updates'),
+]
+
 DATABASE_FRAGMENTATION_METRICS = [
     (
         'sqlserver.database.avg_fragmentation_in_percent',
@@ -205,22 +212,22 @@ DATABASE_MASTER_FILES = [
     ('sqlserver.database.master_files.state', 'sys.master_files', 'state'),
 ]
 
-DATABASE_FILE_SPACE_USAGE_METRICS = [
-    ('sqlserver.database.file_space_usage.free_space', 'sys.dm_db_file_space_usage', 'free_space'),
+TEMPDB_FILE_SPACE_USAGE_METRICS = [
+    ('sqlserver.tempdb.file_space_usage.free_space', 'sys.dm_db_file_space_usage', 'free_space'),
     (
-        'sqlserver.database.file_space_usage.used_space_by_version_store',
+        'sqlserver.tempdb.file_space_usage.version_store_space',
         'sys.dm_db_file_space_usage',
         'used_space_by_version_store',
     ),
     (
-        'sqlserver.database.file_space_usage.used_space_by_internal_object',
+        'sqlserver.tempdb.file_space_usage.internal_object_space',
         'sys.dm_db_file_space_usage',
         'used_space_by_internal_object',
     ),
     (
-        'sqlserver.database.file_space_usage.used_space_by_user_object',
+        'sqlserver.tempdb.file_space_usage.user_object_space',
         'sys.dm_db_file_space_usage',
         'used_space_by_user_object',
     ),
-    ('sqlserver.database.file_space_usage.mixed_extent_space', 'sys.dm_db_file_space_usage', 'mixed_extent_space'),
+    ('sqlserver.tempdb.file_space_usage.mixed_extent_space', 'sys.dm_db_file_space_usage', 'mixed_extent_space'),
 ]

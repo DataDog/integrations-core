@@ -2,13 +2,19 @@
 
 ## Unreleased
 
+## 9.2.0 / 2023-09-29
+
+***Added***:
+
+* Update Cryptography to 41.0.4 ([#15922](https://github.com/DataDog/integrations-core/pull/15922))
+
 ## 9.1.0 / 2023-09-08
 
 ***Added***:
 
 * Add `use_cert_from_response` option ([#15785](https://github.com/DataDog/integrations-core/pull/15785))
 
-## 9.0.1 / 2023-08-18
+## 9.0.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:
 

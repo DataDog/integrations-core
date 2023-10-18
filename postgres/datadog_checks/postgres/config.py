@@ -14,6 +14,7 @@ DEFAULT_IGNORE_DATABASES = [
     'template%',
     'rdsadmin',
     'azure_maintenance',
+    'cloudsqladmin',
     'postgres',
 ]
 
@@ -60,7 +61,7 @@ class PostgresConfig:
         self.max_connections = instance.get('max_connections', 30)
         self.tags = self._build_tags(instance.get('tags', []))
 
-        ssl = instance.get('ssl', "disable")
+        ssl = instance.get('ssl', "allow")
         if ssl in SSL_MODES:
             self.ssl_mode = ssl
 

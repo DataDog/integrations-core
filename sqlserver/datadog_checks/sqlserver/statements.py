@@ -21,7 +21,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.sqlserver.utils import PROC_CHAR_LIMIT, extract_sql_comments, is_statement_proc
+from datadog_checks.sqlserver.utils import PROC_CHAR_LIMIT, extract_sql_comments_and_procedure_name
 
 try:
     import datadog_agent
@@ -292,7 +292,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             try:
                 statement = obfuscate_sql_with_metadata(row['statement_text'], self.check.obfuscator_options)
                 procedure_statement = None
-                row['is_proc'], procedure_name = is_statement_proc(row['text'])
+                comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
                 if row['is_proc']:
                     procedure_statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
             except Exception as e:
@@ -306,9 +306,13 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     1,
                     **self.check.debug_stats_kwargs(tags=["error:obfuscate-query-{}".format(type(e))])
                 )
+                self.check.count(
+                    "dd.sqlserver.obfuscation.error",
+                    1,
+                    **self.check.debug_stats_kwargs(tags=["error:{}".format(type(e)), "error_msg:{}".format(e)])
+                )
                 continue
             obfuscated_statement = statement['query']
-            comments = extract_sql_comments(row['text'])
             row['dd_comments'] = comments
             # update 'text' field to be obfuscated stmt
             row['text'] = obfuscated_statement
@@ -360,6 +364,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             'timestamp': time.time() * 1000,
             'min_collection_interval': self.collection_interval,
             'tags': self.tags,
+            'kind': 'query_metrics',
             'cloud_metadata': self.check.cloud_metadata,
             'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
             'sqlserver_version': self.check.static_info_cache.get(STATIC_INFO_VERSION, ""),
