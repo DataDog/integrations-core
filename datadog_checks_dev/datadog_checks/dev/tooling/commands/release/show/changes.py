@@ -12,6 +12,8 @@ from ...console import (
     CONTEXT_SETTINGS,
     abort,
     echo_failure,
+    echo_info,
+    echo_success,
     validate_check_arg,
 )
 
@@ -69,5 +71,9 @@ def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization, since, e
     for line in unreleased:
         if line.startswith('***'):
             applicable_changelog_types.append(line[3:-5])
+            echo_success(line)
+
+        elif line.strip():
+            echo_info(line)
 
     return cur_version, applicable_changelog_types
