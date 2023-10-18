@@ -47,16 +47,14 @@ def upgrade_python(app: Application, version: str):
 
 def update_ci_files(app: Application, new_version: str, old_version: str, tracker: ValidationTracker):
     for file in (app.repo.path / ".github" / "workflows").glob("*.yml"):
-        changed = False
-        content = file.read_text()
+        old_content = new_content = file.read_text()
 
         for pattern in ("python-version: '{}'", 'PYTHON_VERSION: "{}"', "'{}'"):
-            if pattern.format(old_version) in content:
-                content = content.replace(pattern.format(old_version), pattern.format(new_version))
-                changed = True
+            if pattern.format(old_version) in new_content:
+                new_content = new_content.replace(pattern.format(old_version), pattern.format(new_version))
 
-        if changed:
-            file.write_text(content)
+        if old_content != new_content:
+            file.write_text(new_content)
             tracker.success()
 
 
