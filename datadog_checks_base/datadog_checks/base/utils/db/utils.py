@@ -359,10 +359,13 @@ class DBMAsyncJob(object):
 
 
 @contextlib.contextmanager
-def tracked_query(check, operation, tags=None):
+def tracked_query(check, operation, tags=None, track_operation_time=True):
     """
     A simple context manager that tracks the time spent in a given query operation
     """
+    if not track_operation_time:
+        yield
+        return
     start_time = get_timestamp()
     stats_kwargs = {}
     if hasattr(check, 'debug_stats_kwargs'):
