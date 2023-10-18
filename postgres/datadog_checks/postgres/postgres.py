@@ -426,7 +426,7 @@ class PostgreSql(AgentCheck):
             results = cursor.fetchall()
             self._report_check_query_perf_metrics(
                 start_time,
-                name='custom_metrics' if is_custom_metrics else scope.get('name'),
+                name='custom_metrics' if is_custom_metrics else scope['name'],
             )
         except psycopg2.errors.FeatureNotSupported as e:
             # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
@@ -646,9 +646,13 @@ class PostgreSql(AgentCheck):
                 with conn.cursor() as cursor:
                     self._query_scope(cursor, activity_metrics, instance_tags, False)
 
-            for scope in list(metric_scope) + self._config.custom_metrics:
+            for scope in list(metric_scope):
                 with conn.cursor() as cursor:
-                    self._query_scope(cursor, scope, instance_tags, scope in self._config.custom_metrics)
+                    self._query_scope(cursor, scope, instance_tags, False)
+
+            for scope in self._config.custom_metrics:
+                with conn.cursor() as cursor:
+                    self._query_scope(cursor, scope, instance_tags, True)
 
         if self.dynamic_queries:
             self.dynamic_queries.execute()
@@ -887,15 +891,17 @@ class PostgreSql(AgentCheck):
             self._database_instance_emitted[self.resolved_hostname] = event
             self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
-    def _report_check_query_perf_metrics(self, start_time, name, tags=None):
-        if not name:
-            return
+    def _report_check_query_perf_metrics(self, start_time: float, name: str, tags=None) -> None:
         self.histogram(
-            "dd.postgres.{}.time".format(name),
-            (time() - start_time) * 1000,
-            tags=self.tags + self._get_debug_tags() + (tags or []),
-            hostname=self.resolved_hostname,
+            "dd.postgres.{}.time".format(name), (time() - start_time) * 1000, **self.debug_stats_kwargs(tags)
         )
+
+    def debug_stats_kwargs(self, tags=None):
+        tags = self.tags + self._get_debug_tags() + (tags or [])
+        return {
+            'tags': tags,
+            "hostname": self.resolved_hostname,
+        }
 
     def check(self, _):
         tags = copy.copy(self.tags)
