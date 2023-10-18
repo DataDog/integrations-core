@@ -179,6 +179,7 @@ class PostgreSql(AgentCheck):
             queries=queries,
             tags=self.tags_without_db,
             hostname=self.resolved_hostname,
+            track_operation_time=True,
         )
 
     def execute_query_raw(self, query):
