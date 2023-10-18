@@ -174,7 +174,9 @@ def test_autodiscovery_collect_all_relations(aggregator, integration_check, pg_i
             aggregator.assert_metric(metric, tags=expected_tags)
 
     aggregator.assert_metric(
-        'dd.postgres._collect_relations_autodiscovery.time',
+        'dd.postgres.operation.time',
+        tags=['operation:collect_relations_autodiscovery'] + check.debug_stats_kwargs()['tags'],
+        count=1
     )
 
 

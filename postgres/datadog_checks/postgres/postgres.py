@@ -424,7 +424,7 @@ class PostgreSql(AgentCheck):
                 cursor.execute(query.replace(r'%', r'%%'))
 
             results = cursor.fetchall()
-            self._report_check_query_perf_metrics(
+            self._track_query_perf(
                 start_time,
                 name='custom_metrics' if is_custom_metrics else scope['name'],
             )
@@ -565,9 +565,9 @@ class PostgreSql(AgentCheck):
                     for scope in relations_scopes:
                         self._query_scope(cursor, scope, instance_tags, False, db)
         elapsed_ms = (time() - start_time) * 1000
-        self._report_check_query_perf_metrics(
+        self._track_query_perf(
             start_time,
-            name='_collect_relations_autodiscovery',
+            name='collect_relations_autodiscovery',
         )
         if elapsed_ms > self._config.min_collection_interval * 1000:
             self.record_warning(
@@ -784,7 +784,7 @@ class PostgreSql(AgentCheck):
                         start_time = time()
                         self.log.debug("Running query: %s", query)
                         cursor.execute(query)
-                        self._report_check_query_perf_metrics(
+                        self._track_query_perf(
                             start_time, name='custom_queries', tags=['metric_prefix:{}'.format(metric_prefix)]
                         )
                     except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
@@ -891,9 +891,10 @@ class PostgreSql(AgentCheck):
             self._database_instance_emitted[self.resolved_hostname] = event
             self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
-    def _report_check_query_perf_metrics(self, start_time: float, name: str, tags=None) -> None:
+    def _track_query_perf(self, start_time: float, name: str, tags=None) -> None:
+        tags = ['operation:{}'.format(name)] + (tags or [])
         self.histogram(
-            "dd.postgres.{}.time".format(name), (time() - start_time) * 1000, **self.debug_stats_kwargs(tags)
+            "dd.postgres.operation.time", (time() - start_time) * 1000, **self.debug_stats_kwargs(tags)
         )
 
     def debug_stats_kwargs(self, tags=None):
