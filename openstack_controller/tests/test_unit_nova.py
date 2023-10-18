@@ -78,6 +78,42 @@ def test_disable_nova_metrics(aggregator, dd_run_check, instance, openstack_cont
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_disable_nova_limit_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
+    instance = instance | {
+        "components": {
+            "compute": {
+                "limits": False,
+            },
+        },
+    }
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    for metric in aggregator.metric_names:
+        assert not metric.startswith('openstack.nova.limit.')
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            configs.REST_NOVA_MICROVERSION_2_93,
+            id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.SDK,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            configs.SDK_NOVA_MICROVERSION_2_93,
+            id='api sdk microversion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
 def test_disable_nova_flavor_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "components": {
@@ -89,7 +125,7 @@ def test_disable_nova_flavor_metrics(aggregator, dd_run_check, instance, opensta
     check = openstack_controller_check(instance)
     dd_run_check(check)
     for metric in aggregator.metric_names:
-        assert not metric.startswith('openstack.nova.flavor')
+        assert not metric.startswith('openstack.nova.flavor.')
 
 
 @pytest.mark.parametrize(

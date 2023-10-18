@@ -67,17 +67,19 @@ class Compute(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_limits(self, global_components_config, tags):
-        item = self.check.api.get_compute_limits()
-        limits = get_metrics_and_tags(
-            item,
-            tags=NOVA_LIMITS_TAGS,
-            prefix=NOVA_LIMITS_METRICS_PREFIX,
-            metrics=NOVA_LIMITS_METRICS,
-        )
-        self.check.log.debug("limits: %s", limits)
-        for metric, value in limits['metrics'].items():
-            self.check.gauge(metric, value, tags=tags + limits['tags'])
+    def _report_limits(self, config, tags):
+        report_limits = config.get('limits', True)
+        if report_limits:
+            item = self.check.api.get_compute_limits()
+            limits = get_metrics_and_tags(
+                item,
+                tags=NOVA_LIMITS_TAGS,
+                prefix=NOVA_LIMITS_METRICS_PREFIX,
+                metrics=NOVA_LIMITS_METRICS,
+            )
+            self.check.log.debug("limits: %s", limits)
+            for metric, value in limits['metrics'].items():
+                self.check.gauge(metric, value, tags=tags + limits['tags'])
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
