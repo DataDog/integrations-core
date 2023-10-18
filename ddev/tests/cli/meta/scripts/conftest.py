@@ -45,6 +45,72 @@ python = ["2.7", "3.9"]
 """,
     )
 
+    write_file(
+        repo_path / 'dummy',
+        'pyproject.toml',
+        """[project]
+name = "dummy"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3.9",
+]
+""",
+    )
+
+    write_file(
+        repo_path / '.github' / 'workflows',
+        'build-ddev.yml',
+        """name: build ddev
+env:
+  APP_NAME: ddev
+  PYTHON_VERSION: "3.9"
+  PYOXIDIZER_VERSION: "0.24.0"
+""",
+    )
+
+    write_file(
+        repo_path / 'ddev',
+        'pyproject.toml',
+        """[tool.black]
+target-version = ["py39"]
+
+[tool.ruff]
+target-version = "py39"
+""",
+    )
+
+    write_file(
+        repo_path
+        / 'datadog_checks_dev'
+        / 'datadog_checks'
+        / 'dev'
+        / 'tooling'
+        / 'templates'
+        / 'integration'
+        / 'check'
+        / '{check_name}',
+        'pyproject.toml',
+        """[project]
+name = "dummy"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3.9",
+]
+""",
+    )
+
     yield repo
 
 
