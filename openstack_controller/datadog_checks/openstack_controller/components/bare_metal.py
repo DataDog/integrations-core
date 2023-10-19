@@ -2,7 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.openstack_controller.components.component import Component
+from datadog_checks.openstack_controller.config import normalize_discover_config_include
 from datadog_checks.openstack_controller.metrics import (
     IRONIC_CONDUCTOR_COUNT,
     IRONIC_CONDUCTOR_METRICS,
@@ -16,8 +18,6 @@ from datadog_checks.openstack_controller.metrics import (
     IRONIC_SERVICE_CHECK,
     get_metrics_and_tags,
 )
-from datadog_checks.openstack_controller.config import normalize_discover_config_include
-from datadog_checks.base.utils.discovery import Discovery
 
 
 class BareMetal(Component):
@@ -62,8 +62,7 @@ class BareMetal(Component):
                 discovered_nodes = list(nodes_discovery.get_items())
             else:
                 discovered_nodes = [
-                    (None, node.get('name'), node, None)
-                    for node in self.check.api.get_baremetal_nodes()
+                    (None, node.get('name'), node, None) for node in self.check.api.get_baremetal_nodes()
                 ]
         for _pattern, _item_name, item, item_config in discovered_nodes:
             self.check.log.debug("item: %s", item)
