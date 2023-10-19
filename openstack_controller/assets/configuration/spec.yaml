@@ -426,6 +426,179 @@ files:
                                 type: integer
                       - name: conductors
                         type: boolean
+              - name: load-balancer
+                anyOf:
+                  - type: boolean
+                  - type: object
+                    properties:
+                      - name: loadbalancers
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: limit
+                                description: |
+                                  Maximum number of loadbalancers to be processed.
+                                type: integer
+                              - name: include
+                                type: array
+                                items:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        - name: name
+                                          type: string
+                                        - name: stats
+                                          type: boolean
+                              - name: exclude
+                                type: array
+                                items:
+                                  type: string
+                              - name: interval
+                                type: integer
+                      - name: listeners
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: limit
+                                description: |
+                                  Maximum number of listeners to be processed.
+                                type: integer
+                              - name: include
+                                type: array
+                                items:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        - name: name
+                                          type: string
+                                        - name: stats
+                                          type: boolean
+                              - name: exclude
+                                type: array
+                                items:
+                                  type: string
+                              - name: interval
+                                type: integer
+                      - name: pools
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: limit
+                                description: |
+                                  Maximum number of pools to be processed.
+                                type: integer
+                              - name: include
+                                type: array
+                                items:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        - name: name
+                                          type: string
+                                        - name: members
+                                          anyOf:
+                                          - type: boolean
+                                          - type: object
+                                            properties:
+                                              - name: limit
+                                                description: |
+                                                  Maximum number of members to be processed.
+                                                type: integer
+                                              - name: include
+                                                type: array
+                                                items:
+                                                  anyOf:
+                                                    - type: string
+                                                    - type: object
+                                                      properties:
+                                                        - name: name
+                                                          type: string
+                                              - name: exclude
+                                                type: array
+                                                items:
+                                                  type: string
+                                              - name: interval
+                                                type: integer           
+                      - name: healthmonitors
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: limit
+                                description: |
+                                  Maximum number of healthmonitors to be processed.
+                                type: integer
+                              - name: include
+                                type: array
+                                items:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        - name: name
+                                          type: string
+                              - name: exclude
+                                type: array
+                                items:
+                                  type: string
+                              - name: interval
+                                type: integer
+                      - name: quotas
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: limit
+                                description: |
+                                  Maximum number of quotas to be processed.
+                                type: integer
+                              - name: include
+                                type: array
+                                items:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        - name: name
+                                          type: string
+                              - name: exclude
+                                type: array
+                                items:
+                                  type: string
+                              - name: interval
+                                type: integer                                  
+                      - name: amphorae
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: limit
+                                description: |
+                                  Maximum number of amphorae to be processed.
+                                type: integer
+                              - name: include
+                                type: array
+                                items:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        - name: name
+                                          type: string
+                                        - name: stats
+                                          type: boolean
+                              - name: exclude
+                                type: array
+                                items:
+                                  type: string
+                              - name: interval
+                                type: integer
             example:
               compute: false
         - name: projects

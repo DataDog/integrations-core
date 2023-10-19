@@ -114,6 +114,137 @@ class IncludeItem3(BaseModel):
         frozen=True,
     )
     name: Optional[str] = None
+    stats: Optional[bool] = None
+
+
+class AmphoraeItem(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[Union[str, IncludeItem3], ...]] = None
+    interval: Optional[int] = None
+    limit: Optional[int] = Field(None, description='Maximum number of amphorae to be processed.\n')
+
+
+class IncludeItem4(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    name: Optional[str] = None
+
+
+class Healthmonitor(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[Union[str, IncludeItem4], ...]] = None
+    interval: Optional[int] = None
+    limit: Optional[int] = Field(None, description='Maximum number of healthmonitors to be processed.\n')
+
+
+class IncludeItem5(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    name: Optional[str] = None
+    stats: Optional[bool] = None
+
+
+class Listener(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[Union[str, IncludeItem5], ...]] = None
+    interval: Optional[int] = None
+    limit: Optional[int] = Field(None, description='Maximum number of listeners to be processed.\n')
+
+
+class Loadbalancer(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[Union[str, IncludeItem5], ...]] = None
+    interval: Optional[int] = None
+    limit: Optional[int] = Field(None, description='Maximum number of loadbalancers to be processed.\n')
+
+
+class IncludeItem8(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    name: Optional[str] = None
+
+
+class Member(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[Union[str, IncludeItem8], ...]] = None
+    interval: Optional[int] = None
+    limit: Optional[int] = Field(None, description='Maximum number of members to be processed.\n')
+
+
+class IncludeItem7(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    members: Optional[Union[bool, Member]] = None
+    name: Optional[str] = None
+
+
+class Pool(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    include: Optional[tuple[Union[str, IncludeItem7], ...]] = None
+    limit: Optional[int] = Field(None, description='Maximum number of pools to be processed.\n')
+
+
+class IncludeItem9(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    name: Optional[str] = None
+
+
+class Quota(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[Union[str, IncludeItem9], ...]] = None
+    interval: Optional[int] = None
+    limit: Optional[int] = Field(None, description='Maximum number of quotas to be processed.\n')
+
+
+class LoadBalancerItem(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    amphorae: Optional[Union[bool, AmphoraeItem]] = None
+    healthmonitors: Optional[Union[bool, Healthmonitor]] = None
+    listeners: Optional[Union[bool, Listener]] = None
+    loadbalancers: Optional[Union[bool, Loadbalancer]] = None
+    pools: Optional[Union[bool, Pool]] = None
+    quotas: Optional[Union[bool, Quota]] = None
 
 
 class Network(BaseModel):
@@ -122,7 +253,7 @@ class Network(BaseModel):
         frozen=True,
     )
     exclude: Optional[tuple[str, ...]] = None
-    include: Optional[tuple[Union[str, IncludeItem3], ...]] = None
+    include: Optional[tuple[Union[str, IncludeItem9], ...]] = None
     interval: Optional[int] = None
     limit: Optional[int] = Field(None, description='Maximum number of networks to be processed.\n')
 
@@ -146,6 +277,7 @@ class Components(BaseModel):
     block_storage: Optional[Union[bool, MappingProxyType[str, Any]]] = Field(None, alias='block-storage')
     compute: Optional[Union[bool, ComputeItem]] = None
     identity: Optional[Union[bool, IdentityItem]] = None
+    load_balancer: Optional[Union[bool, LoadBalancerItem]] = Field(None, alias='load-balancer')
     network: Optional[Union[bool, NetworkItem]] = None
 
 
