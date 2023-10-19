@@ -6,6 +6,10 @@
 
 * Improve the upgrade-python script ([#16000](https://github.com/DataDog/integrations-core/pull/16000))
 
+***Fixed***:
+
+* Do not modify the agent build name if provided by the user when running the e2e environments ([#16052](https://github.com/DataDog/integrations-core/pull/16052))
+
 ## 5.2.1 / 2023-10-12
 
 ***Fixed***:
