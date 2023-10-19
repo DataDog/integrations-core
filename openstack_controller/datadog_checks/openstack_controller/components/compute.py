@@ -204,17 +204,19 @@ class Compute(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_quota_sets(self, project_id, tags, component_config):
-        item = self.check.api.get_compute_quota_sets(project_id)
-        quota_set = get_metrics_and_tags(
-            item,
-            tags=NOVA_QUOTA_SET_TAGS,
-            prefix=NOVA_QUOTA_SET_METRICS_PREFIX,
-            metrics=NOVA_QUOTA_SET_METRICS,
-        )
-        self.check.log.debug("quota_set: %s", quota_set)
-        for metric, value in quota_set['metrics'].items():
-            self.check.gauge(metric, value, tags=tags + quota_set['tags'])
+    def _report_quota_sets(self, project_id, tags, config):
+        report_quota_sets = config.get('quota_sets', True)
+        if report_quota_sets:
+            item = self.check.api.get_compute_quota_sets(project_id)
+            quota_set = get_metrics_and_tags(
+                item,
+                tags=NOVA_QUOTA_SET_TAGS,
+                prefix=NOVA_QUOTA_SET_METRICS_PREFIX,
+                metrics=NOVA_QUOTA_SET_METRICS,
+            )
+            self.check.log.debug("quota_set: %s", quota_set)
+            for metric, value in quota_set['metrics'].items():
+                self.check.gauge(metric, value, tags=tags + quota_set['tags'])
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
