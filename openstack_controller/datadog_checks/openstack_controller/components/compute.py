@@ -83,24 +83,26 @@ class Compute(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_services(self, global_components_config, tags):
-        data = self.check.api.get_compute_services()
-        self.check.log.debug("compute services: %s", data)
-        for item in data:
-            service = get_metrics_and_tags(
-                item,
-                tags=NOVA_SERVICES_TAGS,
-                prefix=NOVA_SERVICES_METRICS_PREFIX,
-                metrics=NOVA_SERVICES_METRICS,
-                lambda_name=lambda key: 'up' if key == 'state' else key,
-                lambda_value=lambda key, value, item=item: (item['state'] == 'up' and item['status'] == 'enabled')
-                if key == 'state'
-                else value,
-            )
-            self.check.log.debug("service: %s", service)
-            self.check.gauge(NOVA_SERVICES_COUNT, 1, tags=tags + service['tags'])
-            for metric, value in service['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + service['tags'])
+    def _report_services(self, config, tags):
+        report_services = config.get('services', True)
+        if report_services:
+            data = self.check.api.get_compute_services()
+            self.check.log.debug("compute services: %s", data)
+            for item in data:
+                service = get_metrics_and_tags(
+                    item,
+                    tags=NOVA_SERVICES_TAGS,
+                    prefix=NOVA_SERVICES_METRICS_PREFIX,
+                    metrics=NOVA_SERVICES_METRICS,
+                    lambda_name=lambda key: 'up' if key == 'state' else key,
+                    lambda_value=lambda key, value, item=item: (item['state'] == 'up' and item['status'] == 'enabled')
+                    if key == 'state'
+                    else value,
+                )
+                self.check.log.debug("service: %s", service)
+                self.check.gauge(NOVA_SERVICES_COUNT, 1, tags=tags + service['tags'])
+                for metric, value in service['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + service['tags'])
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
