@@ -122,6 +122,7 @@ class Components(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    block_storage: Optional[Union[bool, MappingProxyType[str, Any]]] = Field(None, alias='block-storage')
     compute: Optional[Union[bool, ComputeItem]] = None
     identity: Optional[Union[bool, IdentityItem]] = None
     network: Optional[Union[bool, NetworkItem]] = None

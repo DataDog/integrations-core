@@ -389,6 +389,10 @@ files:
                                 type: integer
                       - name: quotas
                         type: boolean
+              - name: block-storage
+                anyOf:
+                  - type: boolean
+                  - type: object
             example:
               compute: false
         - name: projects
