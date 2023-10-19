@@ -33,16 +33,23 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
 
         # Get the base url from the openmetrics endpoint and construct the server info API endpoint.
         self.server_info_api = None
+        self.base_url = None
         try:
             parts = urlparse(self.openmetrics_endpoint)
-            parts.__replace(path="")
-            self.server_info_api= parts.__replace(netloc=parts.hostname+':'+self.server_port).geturl()
+            # Delete the /metrics from the url
+            self.base_url=parts._replace(path="")
+            # Replace the openmetrics port by the server port
+            self.server_info_api= self.base_url._replace(netloc=parts.hostname+':'+self.server_port).geturl()
             
         except Exception as e:
-            self.log.debug("Unable to determine the base url for server info collection: %s", str(e))        
+            self.log.debug("Unable to determine the base url for server info collection: %s", str(e))
 
         # Wheather to collect the server info through the API or not
         self.collect_server_info = self.instance.get('collect_server_info', True)
+
+        if self.collect_server_info == True :
+            self._submit_version_metadata()
+            self._check_server_health()
 
     def get_default_config(self):
         return {
