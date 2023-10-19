@@ -16,11 +16,17 @@ files:
         openmetrics_endpoint.description: |
           Endpoint exposing the Nvidia Triton's Prometheus metrics. For more information refer to:
           https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/metrics.html#metrics
-    - name: nvidia_triton_api_endpoint
+    - name: collect_server_info
       display_priority: 1
       description: |
-        HTTP Endpoint of Nvidia Triton API.
+        Weather to collect server status and metadata from HTTP Endpoint of Nvidia Triton API.
       value:
-        display_default: null
-        example: http://localhost:8000
+        display_default: true
+        example: true
+        type: boolean
+    - name: server_port
+      description: |
+        The port exposing HTTP Endpoint of Nvidia Triton API.
+      value:
+        display_default: "8000"
         type: string

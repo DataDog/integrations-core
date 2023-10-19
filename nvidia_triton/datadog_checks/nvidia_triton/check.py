@@ -3,15 +3,16 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any
 from urllib.parse import urljoin  # noqa: F401
+from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
+from datadog_checks.base.errors import ConfigurationError
 
 from .metrics import METRICS_MAP
 
 
 DEFAULT_METADATA_ENDPOINT = '/v2'
-DEFAULT_SERVER_STATS_ENDPOINT = '/v2/models/stats'
-DEFAULT_HEALTH_ENDPOINT = 'v2/health/ready'
+DEFAULT_HEALTH_ENDPOINT = '/health/ready'
 
 class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
 
@@ -21,16 +22,38 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
 
     def __init__(self, name, init_config, instances=None):
         super(NvidiaTritonCheck, self).__init__(name, init_config, instances)
-        self.openmetrics_endpoint = self.instance.get("openmetrics_endpoint")
+        if 'openmetrics_endpoint' not in self.instance:
+            raise ConfigurationError("Missing 'openmetrics url' in nvidia triton config")
+        self.openmetrics_endpoint = self.instance["openmetrics_endpoint"]
         self.tags = self.instance.get('tags', [])
-        self.api_url = self.instance.get('nvidia_triton_api_endpoint')
+
+        # Get the API server port if specified, otherwise use the default 8000.
+        self.server_port = self.instance.get('server_port', "8000")
+
+        # Get the host address from the openmetrics endpoint and construct the server info API endpoint.
+        parsed_url = urlparse(self.openmetrics_endpoint)
+        endpoint = parsed_url.hostname
+        self.server_info_api = urljoin(endpoint, ":", self.server_port)
+
+        # Wheather to collect the server info through the API or not
+        self.collect_server_info = self.instance.get('collect_server_info', True)
 
     def get_default_config(self):
-        return {'metrics': [METRICS_MAP]}
+        return {
+            "metrics": [METRICS_MAP],
+            # Rename labels that are reserved in datadog.
+            "rename_labels": {
+                "version": "model_version",
+            },
+        }
+    
         
     @AgentCheck.metadata_entrypoint
     def _submit_version_metadata(self):
-        endpoint = urljoin(self.api_url, DEFAULT_METADATA_ENDPOINT)
+        if self.collect_server_info == False :
+            self.log.warning("Collecting server info through API is disabled.")
+
+        endpoint = urljoin(self.server_info_api, DEFAULT_METADATA_ENDPOINT)
         response = self.http.get(endpoint)
 
         if response.ok:
@@ -56,12 +79,13 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
             self.log.debug("Could not retrieve version metadata.")
 
         
-    def _check_server_health(self, extra_params=None, response_handler=None):
+    def _check_server_health(self, response_handler=None):
+        if self.collect_server_info == False :
+            self.log.warning("Collecting server info through API is disabled.")
 
-        endpoint = urljoin(self.api_url, DEFAULT_HEALTH_ENDPOINT)
+        endpoint = urljoin(self.server_info_api, DEFAULT_METADATA_ENDPOINT, DEFAULT_HEALTH_ENDPOINT)
         response = self.http.get(endpoint)
-        #The helath endpoint only exposes the status code in verbose mode, so we need to check we can properly retrieve it from the response
-
+        
         if response.status_code != 200:
             self.service_check('health.status', AgentCheck.CRITICAL, self.tags)
         if response.status_code == 200:
@@ -70,8 +94,5 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
             self.service_check('health.status', AgentCheck.UNKNOWN, self.tags)
 
     def check(self, instance):
-        if self.instance.get("openmetrics_endpoint"):
+        if instance['openmetrics_endpoint']:
             super().check(instance)
-        if self.api_url:
-            self._check_server_health()
-            self._submit_version_metadata()

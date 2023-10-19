@@ -12,7 +12,7 @@ from datadog_checks.nvidia_triton import NvidiaTritonCheck
 from .common import METRICS_MOCK, get_fixture_path
 
 
-def test_check_mock_nvidia_triton(dd_run_check, aggregator, instance, mock_http_response):
+def test_check_metrics_nvidia_triton(dd_run_check, aggregator, instance, mock_http_response):
     """
     The instance is a deepcopy of the INSTANCE_MOCK in common
     """
