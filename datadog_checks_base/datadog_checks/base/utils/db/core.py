@@ -74,9 +74,10 @@ class QueryExecutor(object):
             query_tags = query.base_tags
 
             try:
-                with tracked_query(
-                    check=self.submitter, operation=query_name, track_operation_time=self.track_operation_time
-                ):
+                if self.track_operation_time:
+                    with tracked_query(check=self.submitter, operation=query_name):
+                        rows = self.execute_query(query.query)
+                else:
                     rows = self.execute_query(query.query)
             except Exception as e:
                 if self.error_handler:

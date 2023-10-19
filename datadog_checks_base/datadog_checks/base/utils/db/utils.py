@@ -21,7 +21,6 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.types import Transformer  # noqa: F401
 from datadog_checks.base.utils.serialization import json
-from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.base.utils.tracing import INTEGRATION_TRACING_SERVICE_NAME, tracing_enabled
 
 from ..common import to_native_string
@@ -356,18 +355,30 @@ class DBMAsyncJob(object):
 
 
 @contextlib.contextmanager
-def tracked_query(check, operation, tags=None, track_operation_time=True):
+def tracked_query(check, operation, tags=None):
     """
     A simple context manager that tracks the time spent in a given query operation
+
+    The intention is to use this for context manager is to wrap the execution of a query,
+    that way the time spent waiting for query execution can be tracked as a metric. For example,
+    '''
+    with tracked_query(check, "my_metric_query", tags):
+        cursor.execute(query)
+    '''
+
+    if debug_stats_kwargs is defined on the check instance,
+    it will be called to set additional kwargs when submitting the metric.
+
+    :param check: The check instance
+    :param operation: The name of the query operation being performed.
+    :param tags: A list of tags to apply to the metric.
     """
-    if not track_operation_time:
-        yield
-        return
-    start_time = get_timestamp()
+    start_time = time.time()
     stats_kwargs = {}
     if hasattr(check, 'debug_stats_kwargs'):
         stats_kwargs = dict(check.debug_stats_kwargs())
     stats_kwargs['tags'] = stats_kwargs.get('tags', []) + ["operation:{}".format(operation)] + (tags or [])
+    stats_kwargs['raw'] = True  # always submit as raw to ignore any defined namespace prefix
     yield
-    elapsed_ms = (get_timestamp() - start_time) * 1000
+    elapsed_ms = (time.time() - start_time) * 1000
     check.histogram("dd.{}.operation.time".format(check.name), elapsed_ms, **stats_kwargs)

@@ -279,17 +279,14 @@ def test_default_json_event_encoding(input):
     assert json.dumps(input, default=default_json_event_encoding)
 
 
-@pytest.mark.parametrize("track_operation_time", [True, False])
-def test_tracked_query(aggregator, track_operation_time):
-    def test_query():
-        time.sleep(0.1)
-
-    with tracked_query(
-        check=AgentCheck(name="testcheck"),
-        operation="test_query",
-        tags=["test:tag"],
-        track_operation_time=track_operation_time,
-    ):
-        test_query()
-    if track_operation_time:
-        aggregator.assert_metric("dd.testcheck.operation.time", tags=["test:tag", "operation:test_query"], count=1)
+def test_tracked_query(aggregator):
+    with mock.patch('time.time', side_effect=[100, 101]):
+        with tracked_query(
+            check=AgentCheck(name="testcheck"),
+            operation="test_query",
+            tags=["test:tag"],
+        ):
+            pass
+        aggregator.assert_metric(
+            "dd.testcheck.operation.time", tags=["test:tag", "operation:test_query"], count=1, value=1000.0
+        )
