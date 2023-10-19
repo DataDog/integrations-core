@@ -6,6 +6,10 @@
 
 * Improve the upgrade-python script ([#16000](https://github.com/DataDog/integrations-core/pull/16000))
 
+***Fixed***:
+
+* Fix `ddev env test` so that tests run for all environments properly when no environment is specified ([#16054](https://github.com/DataDog/integrations-core/pull/16054))
+
 ## 5.2.1 / 2023-10-12
 
 ***Fixed***:
