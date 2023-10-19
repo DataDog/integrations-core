@@ -296,16 +296,66 @@ files:
                     properties:
                       - name: limits
                         type: boolean
+                      - name: services
+                        type: boolean
+                      - name: flavors
+                        type: boolean
                       - name: hypervisors
                         anyOf:
                           - type: boolean
                           - type: object
+                            properties:
+                              - name: limit
+                                description: |
+                                  Maximum number of hypervisors to be processed.
+                                type: integer
+                              - name: include
+                                type: array
+                                items:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        - name: name
+                                          type: string
+                                        - name: uptime
+                                          type: boolean
+                              - name: exclude
+                                type: array
+                                items:
+                                  type: string
+                              - name: interval
+                                type: integer
                       - name: quota_sets
                         type: boolean
                       - name: servers
                         anyOf:
                           - type: boolean
                           - type: object
+                            properties:
+                              - name: limit
+                                description: |
+                                  Maximum number of servers to be processed.
+                                type: integer
+                              - name: include
+                                type: array
+                                items:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        - name: name
+                                          type: string
+                                        - name: flavors
+                                          type: boolean
+                                        - name: diagnostics
+                                          type: boolean
+                              - name: exclude
+                                type: array
+                                items:
+                                  type: string
+                              - name: interval
+                                type: integer
             example:
               compute: false
         - name: projects

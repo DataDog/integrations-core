@@ -20,15 +20,58 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class IncludeItem(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    name: Optional[str] = None
+    uptime: Optional[bool] = None
+
+
+class Hypervisor(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[Union[str, IncludeItem], ...]] = None
+    interval: Optional[int] = None
+    limit: Optional[int] = Field(None, description='Maximum number of hypervisors to be processed.\n')
+
+
+class IncludeItem1(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    diagnostics: Optional[bool] = None
+    flavors: Optional[bool] = None
+    name: Optional[str] = None
+
+
+class Server(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[Union[str, IncludeItem1], ...]] = None
+    interval: Optional[int] = None
+    limit: Optional[int] = Field(None, description='Maximum number of servers to be processed.\n')
+
+
 class ComputeItem(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    hypervisors: Optional[Union[bool, MappingProxyType[str, Any]]] = None
+    flavors: Optional[bool] = None
+    hypervisors: Optional[Union[bool, Hypervisor]] = None
     limits: Optional[bool] = None
     quota_sets: Optional[bool] = None
-    servers: Optional[Union[bool, MappingProxyType[str, Any]]] = None
+    servers: Optional[Union[bool, Server]] = None
+    services: Optional[bool] = None
 
 
 class IdentityItem(BaseModel):
