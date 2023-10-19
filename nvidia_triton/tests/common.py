@@ -18,7 +18,7 @@ INSTANCE_MOCK = {
 }
 
 INSTANCE_DISABLED_SERVER_INFO = {
-    'openmetrics_endpoint': 'http://triton:8002/metrics',
+    'openmetrics_endpoint': f'http://{HOST}:8002/metrics',
     'collect_server_info': False,
     'tags': ['test:test'],
 }
@@ -67,3 +67,5 @@ METRICS_MOCK = {
     'nv.inference.request_failure',
     'nv.inference.request_success',
 }
+
+METRICS_MOCK = [f'nvidia_triton.{m}' for m in METRICS_MOCK]

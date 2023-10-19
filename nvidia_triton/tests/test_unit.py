@@ -31,7 +31,7 @@ def test_emits_critical_openemtrics_service_check_when_service_is_down(dd_run_ch
     """
     If we fail to reach the openmetrics endpoint the openmetrics service check should report as critical
     """
-    mock_http_response(status_code=400)
+    mock_http_response(status_code=404)
     check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
     dd_run_check(check)
 
@@ -42,7 +42,7 @@ def test_emits_critical_api_service_check_when_service_is_down(aggregator, insta
     """
     If we fail to reach the API endpoint the health service check should report as critical
     """
-    mock_http_response(status_code=400)
+    mock_http_response(status_code=404)
     check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
     check._check_server_health()
 

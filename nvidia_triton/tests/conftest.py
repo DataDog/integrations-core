@@ -13,16 +13,16 @@ def dd_environment():
     compose_file = common.COMPOSE_FILE
     conditions = [
         CheckDockerLogs(identifier='caddy', patterns=['server running']),
-        CheckEndpoints(common.INSTANCE["openmetrics_endpoint"]),
+        CheckEndpoints(common.INSTANCE_DISABLED_SERVER_INFO["openmetrics_endpoint"]),
     ]
     with docker_run(compose_file, conditions=conditions):
         yield {
-            'instances': [common.INSTANCE],
+            'instances': [common.INSTANCE_DISABLED_SERVER_INFO],
         }
 
 
 @pytest.fixture
 def instance():
-    #return copy.deepcopy(common.INSTANCE_MOCK)
-    return copy.deepcopy(common.INSTANCE)
+    return copy.deepcopy(common.INSTANCE_DISABLED_SERVER_INFO)
+    #return copy.deepcopy(common.INSTANCE_DISABLED_SERVER_INFO)
 
