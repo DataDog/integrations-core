@@ -184,21 +184,47 @@ class LoadBalancer(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_pools(self, project_id, tags, component_config):
-        data = self.check.api.get_load_balancer_pools(project_id)
-        self.check.log.debug("data: %s", data)
-        for item in data:
-            pool = get_metrics_and_tags(
-                item,
-                tags=OCTAVIA_POOL_TAGS,
-                prefix=OCTAVIA_POOL_METRICS_PREFIX,
-                metrics=OCTAVIA_POOL_METRICS,
-            )
-            self.check.log.debug("pool: %s", pool)
-            self.check.gauge(OCTAVIA_POOL_COUNT, 1, tags=tags + pool['tags'])
-            for metric, value in pool['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + pool['tags'])
-            self._report_pool_members(item['id'], project_id, tags)
+    def _report_pools(self, project_id, tags, config):
+        report_pools = True
+        config_pools = config.get('pools', {})
+        if isinstance(config_pools, bool):
+            report_pools = config_pools
+            config_pools = {}
+        if report_pools:
+            pools_discovery = None
+            if config_pools:
+                config_pools_include = normalize_discover_config_include(config_pools, ["name"])
+                if config_pools_include:
+                    pools_discovery = Discovery(
+                        lambda: self.check.api.get_load_balancer_pools(project_id),
+                        limit=config_pools.get('limit'),
+                        include=config_pools_include,
+                        exclude=config_pools.get('exclude'),
+                        interval=config_pools.get('interval'),
+                        key=lambda pool: pool.get('name'),
+                    )
+            if pools_discovery:
+                discovered_pools = list(pools_discovery.get_items())
+            else:
+                discovered_pools = [
+                    (None, pool.get('name'), pool, None) for pool in self.check.api.get_load_balancer_pools(project_id)
+                ]
+            for _pattern, _item_name, item, item_config in discovered_pools:
+                self.check.log.debug("item: %s", item)
+                self.check.log.debug("item_config: %s", item_config)
+                pool = get_metrics_and_tags(
+                    item,
+                    tags=OCTAVIA_POOL_TAGS,
+                    prefix=OCTAVIA_POOL_METRICS_PREFIX,
+                    metrics=OCTAVIA_POOL_METRICS,
+                )
+                self.check.log.debug("pool: %s", pool)
+                self.check.gauge(OCTAVIA_POOL_COUNT, 1, tags=tags + pool['tags'])
+                for metric, value in pool['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + pool['tags'])
+                report_members = item_config.get('members', True) if item_config else True
+                if report_members:
+                    self._report_pool_members(item['id'], project_id, tags)
 
     @Component.http_error()
     def _report_pool_members(self, pool_id, project_id, tags):
