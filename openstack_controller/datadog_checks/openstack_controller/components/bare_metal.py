@@ -16,6 +16,8 @@ from datadog_checks.openstack_controller.metrics import (
     IRONIC_SERVICE_CHECK,
     get_metrics_and_tags,
 )
+from datadog_checks.openstack_controller.config import normalize_discover_config_include
+from datadog_checks.base.utils.discovery import Discovery
 
 
 class BareMetal(Component):
@@ -36,9 +38,36 @@ class BareMetal(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_nodes(self, global_components_config, tags):
-        data = self.check.api.get_baremetal_nodes()
-        for item in data:
+    def _report_nodes(self, config, tags):
+        report_nodes = True
+        config_nodes = config.get('nodes', {})
+        if isinstance(config_nodes, bool):
+            report_nodes = config_nodes
+            config_nodes = {}
+        if report_nodes:
+            nodes_discovery = None
+            if config_nodes:
+                config_nodes_include = normalize_discover_config_include(config_nodes, ["name"])
+                self.check.log.debug("config_nodes_include: %s", config_nodes_include)
+                if config_nodes_include:
+                    nodes_discovery = Discovery(
+                        lambda: self.check.api.get_baremetal_nodes(),
+                        limit=config_nodes.get('limit'),
+                        include=config_nodes_include,
+                        exclude=config_nodes.get('exclude'),
+                        interval=config_nodes.get('interval'),
+                        key=lambda server: server.get('name'),
+                    )
+            if nodes_discovery:
+                discovered_nodes = list(nodes_discovery.get_items())
+            else:
+                discovered_nodes = [
+                    (None, node.get('name'), node, None)
+                    for node in self.check.api.get_baremetal_nodes()
+                ]
+        for _pattern, _item_name, item, item_config in discovered_nodes:
+            self.check.log.debug("item: %s", item)
+            self.check.log.debug("item_config: %s", item_config)
             node = get_metrics_and_tags(
                 item,
                 tags=IRONIC_NODE_TAGS,
@@ -58,17 +87,19 @@ class BareMetal(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_conductors(self, global_components_config, tags):
-        data = self.check.api.get_baremetal_conductors()
-        for item in data:
-            conductor = get_metrics_and_tags(
-                item,
-                tags=IRONIC_CONDUCTOR_TAGS,
-                prefix=IRONIC_CONDUCTOR_METRICS_PREFIX,
-                metrics=IRONIC_CONDUCTOR_METRICS,
-                lambda_name=lambda key: 'up' if key == 'alive' else key,
-            )
-            self.check.log.debug("conductor: %s", conductor)
-            self.check.gauge(IRONIC_CONDUCTOR_COUNT, 1, tags=tags + conductor['tags'])
-            for metric, value in conductor['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + conductor['tags'])
+    def _report_conductors(self, config, tags):
+        report_conductors = config.get('conductors', True)
+        if report_conductors:
+            data = self.check.api.get_baremetal_conductors()
+            for item in data:
+                conductor = get_metrics_and_tags(
+                    item,
+                    tags=IRONIC_CONDUCTOR_TAGS,
+                    prefix=IRONIC_CONDUCTOR_METRICS_PREFIX,
+                    metrics=IRONIC_CONDUCTOR_METRICS,
+                    lambda_name=lambda key: 'up' if key == 'alive' else key,
+                )
+                self.check.log.debug("conductor: %s", conductor)
+                self.check.gauge(IRONIC_CONDUCTOR_COUNT, 1, tags=tags + conductor['tags'])
+                for metric, value in conductor['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + conductor['tags'])
