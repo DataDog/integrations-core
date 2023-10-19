@@ -42,28 +42,32 @@ class Network(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
-    def _report_agents(self, global_components_config, tags):
-        data = self.check.api.get_network_agents()
-        for item in data:
-            agent = get_metrics_and_tags(
-                item,
-                tags=NEUTRON_AGENTS_TAGS,
-                prefix=NEUTRON_AGENTS_METRICS_PREFIX,
-                metrics=NEUTRON_AGENTS_METRICS,
-                lambda_name=lambda key: 'name' if key == 'binary' else key,
-            )
-            self.check.log.debug("agent: %s", agent)
-            self.check.gauge(NEUTRON_AGENTS_COUNT, 1, tags=tags + agent['tags'])
-            for metric, value in agent['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + agent['tags'])
+    def _report_agents(self, config, tags):
+        report_agents = config.get('agents', True)
+        if report_agents:
+            data = self.check.api.get_network_agents()
+            for item in data:
+                agent = get_metrics_and_tags(
+                    item,
+                    tags=NEUTRON_AGENTS_TAGS,
+                    prefix=NEUTRON_AGENTS_METRICS_PREFIX,
+                    metrics=NEUTRON_AGENTS_METRICS,
+                    lambda_name=lambda key: 'name' if key == 'binary' else key,
+                )
+                self.check.log.debug("agent: %s", agent)
+                self.check.gauge(NEUTRON_AGENTS_COUNT, 1, tags=tags + agent['tags'])
+                for metric, value in agent['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + agent['tags'])
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_networks(self, project_id, tags, component_config):
-        config_networks = component_config.get('networks', {})
-        self.check.log.debug("config_networks: %s", config_networks)
-        collect_networks = config_networks.get('collect', True)
-        if collect_networks:
+    def _report_networks(self, project_id, tags, config):
+        report_networks = True
+        config_networks = config.get('networks', {})
+        if isinstance(config_networks, bool):
+            report_networks = config_networks
+            config_networks = {}
+        if report_networks:
             networks_discovery = None
             if config_networks:
                 config_networks_include = normalize_discover_config_include(config_networks, ["name"])
