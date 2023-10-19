@@ -20,7 +20,7 @@ def test_check_metrics_nvidia_triton(dd_run_check, aggregator, instance, mock_ht
     dd_run_check(check)
 
     for metric in METRICS_MOCK:
-        aggregator.assert_metric(metric)
+        aggregator.assert_metric(name=metric)
         aggregator.assert_metric_has_tag(metric, 'test:test')
 
     aggregator.assert_all_metrics_covered()
@@ -35,6 +35,7 @@ def test_emits_critical_openemtrics_service_check_when_service_is_down(dd_run_ch
     check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
     dd_run_check(check)
 
+    aggregator.assert_all_metrics_covered()
     aggregator.assert_service_check('nvidia_triton.openmetrics.health', ServiceCheck.CRITICAL)
 
 
@@ -46,6 +47,7 @@ def test_emits_critical_api_service_check_when_service_is_down(aggregator, insta
     check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
     check._check_server_health()
 
+    aggregator.assert_all_metrics_covered()
     aggregator.assert_service_check('nvidia_triton.health.status', ServiceCheck.CRITICAL)
 
 

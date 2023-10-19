@@ -24,5 +24,5 @@ def dd_environment():
 @pytest.fixture
 def instance():
     return copy.deepcopy(common.INSTANCE_DISABLED_SERVER_INFO)
-    #return copy.deepcopy(common.INSTANCE_DISABLED_SERVER_INFO)
+    #return copy.deepcopy(common.INSTANCE_MOCK)
 

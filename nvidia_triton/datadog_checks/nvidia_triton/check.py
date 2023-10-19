@@ -12,7 +12,7 @@ from .metrics import METRICS_MAP
 
 
 DEFAULT_METADATA_ENDPOINT = '/v2'
-DEFAULT_HEALTH_ENDPOINT = '/health/ready'
+DEFAULT_HEALTH_ENDPOINT = DEFAULT_METADATA_ENDPOINT +'/health/ready'
 DEFAULT_ERROR_CODE = r'(4|5)\d\d'
 
 class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
@@ -94,7 +94,7 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
         if self.collect_server_info == False :
             self.log.warning("Collecting server info through API is disabled.")
 
-        endpoint = urljoin(self.server_info_api, DEFAULT_METADATA_ENDPOINT, DEFAULT_HEALTH_ENDPOINT)
+        endpoint = urljoin(self.server_info_api, DEFAULT_HEALTH_ENDPOINT)
         response = self.http.get(endpoint)
         
         if response.status_code == DEFAULT_ERROR_CODE:

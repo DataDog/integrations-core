@@ -10,10 +10,11 @@ def get_fixture_path(filename):
 
 INSTANCE = {
     "openmetrics_endpoint": f"http://{HOST}:8002/metrics",
+    'tags': ['test:test'],
 }
 
 INSTANCE_MOCK = {
-    'openmetrics_endpoint': 'http://triton:8002/metrics',
+    'openmetrics_endpoint': 'http://localhost:8002/metrics',
     'tags': ['test:test'],
 }
 

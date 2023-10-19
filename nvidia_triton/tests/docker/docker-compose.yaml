@@ -11,5 +11,5 @@ services:
       - "8000:8000"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./serve:/site
-      - ./info:/serve_site
+      - ./metrics:/site
+      - ./info:/v2
