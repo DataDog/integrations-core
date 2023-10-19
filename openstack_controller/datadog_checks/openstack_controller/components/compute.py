@@ -170,7 +170,7 @@ class Compute(Component):
                     if item['hypervisor_type'] != 'ironic':
                         self._report_hypervisor_uptime(item['id'], item.get('uptime'), tags + hypervisor['tags'])
                     else:
-                        self.log.debug(
+                        self.check.log.debug(
                             "Skipping uptime metrics for bare metal hypervisor `%s`", item['hypervisor_hostname']
                         )
 
