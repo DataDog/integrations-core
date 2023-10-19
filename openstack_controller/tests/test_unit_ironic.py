@@ -33,7 +33,7 @@ pytestmark = [
             id='api rest no microversion',
         ),
         pytest.param(
-            configs.REST_NOVA_MICROVERSION_2_93,
+            configs.REST_IRONIC_MICROVERSION_1_80,
             id='api rest microversion 2.93',
         ),
         pytest.param(
@@ -41,7 +41,7 @@ pytestmark = [
             id='api sdk no microversion',
         ),
         pytest.param(
-            configs.SDK_NOVA_MICROVERSION_2_93,
+            configs.SDK_IRONIC_MICROVERSION_1_80,
             id='api sdk microversion 2.93',
         ),
     ],
@@ -67,7 +67,7 @@ def test_disable_ironic_metrics(aggregator, dd_run_check, instance, openstack_co
             id='api rest no microversion',
         ),
         pytest.param(
-            configs.REST_NOVA_MICROVERSION_2_93,
+            configs.REST_IRONIC_MICROVERSION_1_80,
             id='api rest microversion 2.93',
         ),
         pytest.param(
@@ -75,7 +75,7 @@ def test_disable_ironic_metrics(aggregator, dd_run_check, instance, openstack_co
             id='api sdk no microversion',
         ),
         pytest.param(
-            configs.SDK_NOVA_MICROVERSION_2_93,
+            configs.SDK_IRONIC_MICROVERSION_1_80,
             id='api sdk microversion 2.93',
         ),
     ],
@@ -93,6 +93,42 @@ def test_disable_ironic_node_metrics(aggregator, dd_run_check, instance, opensta
     dd_run_check(check)
     for metric in aggregator.metric_names:
         assert not metric.startswith('openstack.ironic.node.')
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            configs.REST_IRONIC_MICROVERSION_1_80,
+            id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.SDK,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            configs.SDK_IRONIC_MICROVERSION_1_80,
+            id='api sdk microversion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_disable_ironic_conductor_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
+    instance = instance | {
+        "components": {
+            "baremetal": {
+                "conductors": False,
+            },
+        },
+    }
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    for metric in aggregator.metric_names:
+        assert not metric.startswith('openstack.ironic.conductor.')
 
 
 @pytest.mark.parametrize(
