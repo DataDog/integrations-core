@@ -133,7 +133,6 @@ class Compute(Component):
         if report_hypervisors:
             hypervisors_discovery = None
             config_hypervisors_include = normalize_discover_config_include(config_hypervisors, ["hypervisor_hostname"])
-            self.check.log.debug("config_hypervisors_include: %s", config_hypervisors_include)
             if config_hypervisors_include:
                 hypervisors_discovery = Discovery(
                     lambda: self.check.api.get_compute_hypervisors(),

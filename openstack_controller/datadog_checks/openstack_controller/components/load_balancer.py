@@ -67,7 +67,6 @@ class LoadBalancer(Component):
     @Component.register_project_metrics(ID)
     @Component.http_error()
     def _report_loadbalancers(self, project_id, tags, config):
-        self.check.log.debug("config: %s", config)
         report_loadbalancers = True
         config_loadbalancers = config.get('loadbalancers', {})
         if isinstance(config_loadbalancers, bool):
@@ -77,7 +76,6 @@ class LoadBalancer(Component):
             loadbalancers_discovery = None
             if config_loadbalancers:
                 config_loadbalancers_include = normalize_discover_config_include(config_loadbalancers, ["name"])
-                self.check.log.debug("config_loadbalancers_include: %s", config_loadbalancers_include)
                 if config_loadbalancers_include:
                     loadbalancers_discovery = Discovery(
                         lambda: self.check.api.get_load_balancer_loadbalancers(project_id),
@@ -94,10 +92,6 @@ class LoadBalancer(Component):
                     (None, loadbalancer.get('name'), loadbalancer, None)
                     for loadbalancer in self.check.api.get_load_balancer_loadbalancers(project_id)
                 ]
-            self.check.log.debug(
-                "get_load_balancer_loadbalancers: %s", self.check.api.get_load_balancer_loadbalancers(project_id)
-            )
-            self.check.log.debug("discovered_loadbalancers: %s", len(discovered_loadbalancers))
             for _pattern, _item_name, item, item_config in discovered_loadbalancers:
                 self.check.log.debug("item: %s", item)
                 self.check.log.debug("item_config: %s", item_config)
@@ -131,21 +125,48 @@ class LoadBalancer(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_listeners(self, project_id, tags, component_config):
-        data = self.check.api.get_load_balancer_listeners(project_id)
-        self.check.log.debug("data: %s", data)
-        for item in data:
-            listener = get_metrics_and_tags(
-                item,
-                tags=OCTAVIA_LISTENER_TAGS,
-                prefix=OCTAVIA_LISTENER_METRICS_PREFIX,
-                metrics=OCTAVIA_LISTENER_METRICS,
-            )
-            self.check.log.debug("listener: %s", listener)
-            self.check.gauge(OCTAVIA_LISTENER_COUNT, 1, tags=tags + listener['tags'])
-            for metric, value in listener['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + listener['tags'])
-            self._report_listener_stats(item['id'], tags + listener['tags'])
+    def _report_listeners(self, project_id, tags, config):
+        report_listeners = True
+        config_listeners = config.get('listeners', {})
+        if isinstance(config_listeners, bool):
+            report_listeners = config_listeners
+            config_listeners = {}
+        if report_listeners:
+            listeners_discovery = None
+            if config_listeners:
+                config_listeners_include = normalize_discover_config_include(config_listeners, ["name"])
+                if config_listeners_include:
+                    listeners_discovery = Discovery(
+                        lambda: self.check.api.get_load_balancer_listeners(project_id),
+                        limit=config_listeners.get('limit'),
+                        include=config_listeners_include,
+                        exclude=config_listeners.get('exclude'),
+                        interval=config_listeners.get('interval'),
+                        key=lambda listener: listener.get('name'),
+                    )
+            if listeners_discovery:
+                discovered_listeners = list(listeners_discovery.get_items())
+            else:
+                discovered_listeners = [
+                    (None, listener.get('name'), listener, None)
+                    for listener in self.check.api.get_load_balancer_listeners(project_id)
+                ]
+            for _pattern, _item_name, item, item_config in discovered_listeners:
+                self.check.log.debug("item: %s", item)
+                self.check.log.debug("item_config: %s", item_config)
+                listener = get_metrics_and_tags(
+                    item,
+                    tags=OCTAVIA_LISTENER_TAGS,
+                    prefix=OCTAVIA_LISTENER_METRICS_PREFIX,
+                    metrics=OCTAVIA_LISTENER_METRICS,
+                )
+                self.check.log.debug("listener: %s", listener)
+                self.check.gauge(OCTAVIA_LISTENER_COUNT, 1, tags=tags + listener['tags'])
+                for metric, value in listener['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + listener['tags'])
+                report_stats = item_config.get('stats', True) if item_config else True
+                if report_stats:
+                    self._report_listener_stats(item['id'], tags + listener['tags'])
 
     @Component.http_error()
     def _report_listener_stats(self, listener_id, tags):
