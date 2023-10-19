@@ -356,6 +356,39 @@ files:
                                   type: string
                               - name: interval
                                 type: integer
+              - name: network
+                anyOf:
+                  - type: boolean
+                  - type: object
+                    properties:
+                      - name: agents
+                        type: boolean
+                      - name: networks
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: limit
+                                description: |
+                                  Maximum number of networks to be processed.
+                                type: integer
+                              - name: include
+                                type: array
+                                items:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        - name: name
+                                          type: string
+                              - name: exclude
+                                type: array
+                                items:
+                                  type: string
+                              - name: interval
+                                type: integer
+                      - name: quotas
+                        type: boolean
             example:
               compute: false
         - name: projects

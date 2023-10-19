@@ -88,6 +88,35 @@ class IdentityItem(BaseModel):
     users: Optional[bool] = None
 
 
+class IncludeItem2(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    name: Optional[str] = None
+
+
+class Network(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[Union[str, IncludeItem2], ...]] = None
+    interval: Optional[int] = None
+    limit: Optional[int] = Field(None, description='Maximum number of networks to be processed.\n')
+
+
+class NetworkItem(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    agents: Optional[bool] = None
+    networks: Optional[Union[bool, Network]] = None
+    quotas: Optional[bool] = None
+
+
 class Components(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -95,6 +124,7 @@ class Components(BaseModel):
     )
     compute: Optional[Union[bool, ComputeItem]] = None
     identity: Optional[Union[bool, IdentityItem]] = None
+    network: Optional[Union[bool, NetworkItem]] = None
 
 
 class Projects(BaseModel):
