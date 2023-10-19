@@ -119,7 +119,7 @@ def mock_cursor_for_replica_stats():
                 data.appendleft(['app1', 'streaming', 'async', '1.1.1.1', 12, 12, 12, 12])
                 data.appendleft(['app2', 'backup', 'sync', '1.1.1.1', 13, 13, 13, 13])
             elif query == 'SHOW SERVER_VERSION;':
-                data.appendleft(['10.15'])
+                data.appendleft([POSTGRES_VERSION])
 
         def cursor_fetchall():
             while data:
