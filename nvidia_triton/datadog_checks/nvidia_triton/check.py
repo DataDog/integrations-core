@@ -44,10 +44,7 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
             self.log.debug("Unable to determine the base url for server info collection: %s", str(e))
 
         self.collect_server_info = self.instance.get('collect_server_info', True)
-        # Whether to collect the server info through the API or not
-        if self.collect_server_info == True :
-            self._submit_version_metadata()
-            self._check_server_health()
+
 
     def get_default_config(self):
         return {
@@ -107,3 +104,7 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
     def check(self, instance):
         if instance['openmetrics_endpoint']:
             super().check(instance)
+        # Whether to collect the server info through the API or not
+        if self.collect_server_info == True :
+            self._submit_version_metadata()
+            self._check_server_health()

@@ -33,7 +33,8 @@ def test_emits_critical_openemtrics_service_check_when_service_is_down(dd_run_ch
     """
     mock_http_response(status_code=404)
     check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
-    dd_run_check(check)
+    with pytest.raises(Exception, match="requests.exceptions.HTTPError"):
+        dd_run_check(check)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_service_check('nvidia_triton.openmetrics.health', ServiceCheck.CRITICAL)
@@ -52,12 +53,11 @@ def test_emits_critical_api_service_check_when_service_is_down(aggregator, insta
 
 
 def test_check_nvidia_triton_metadata(datadog_agent, instance, mock_http_response):
-
-    check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
     mock_http_response(file_path=get_fixture_path('nvidia_triton_metadata.json'))
+    check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
 
-    check._submit_version_metadata()
     check.check_id = 'test:123'
+    check._submit_version_metadata()
     raw_version = '2.38.0'
 
     major, minor, patch = raw_version.split('.')
