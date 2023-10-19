@@ -506,26 +506,26 @@ def test_listeners_exception(aggregator, check, dd_run_check, mock_http_get, con
             args_list += list(args)
         assert (
             args_list.count(
-                'http://127.0.0.1:9876/load-balancer/v2/lbaas/loadbalancers?project_id=1e6e233e637d4d55a50a62b63398ad15'
+                'http://127.0.0.1:9876/load-balancer/v2/lbaas/listeners?project_id=1e6e233e637d4d55a50a62b63398ad15'
             )
             == 1
         )
         assert (
             args_list.count(
-                'http://127.0.0.1:9876/load-balancer/v2/lbaas/loadbalancers?project_id=6e39099cccde4f809b003d9e0dd09304'
+                'http://127.0.0.1:9876/load-balancer/v2/lbaas/listeners?project_id=6e39099cccde4f809b003d9e0dd09304'
             )
             == 1
         )
     if api_type == ApiType.SDK:
-        assert connection_load_balancer.load_balancers.call_count == 2
+        assert connection_load_balancer.listeners.call_count == 2
         assert (
-            connection_load_balancer.load_balancers.call_args_list.count(
+            connection_load_balancer.listeners.call_args_list.count(
                 mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15')
             )
             == 1
         )
         assert (
-            connection_load_balancer.load_balancers.call_args_list.count(
+            connection_load_balancer.listeners.call_args_list.count(
                 mock.call(project_id='6e39099cccde4f809b003d9e0dd09304')
             )
             == 1
@@ -1106,7 +1106,7 @@ def test_pools_exception(aggregator, dd_run_check, check, mock_http_get, connect
             == 1
         )
     if api_type == ApiType.SDK:
-        assert connection_load_balancer.load_balancers.call_count == 2
+        assert connection_load_balancer.pools.call_count == 2
         assert (
             connection_load_balancer.pools.call_args_list.count(
                 mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15')
@@ -1206,7 +1206,6 @@ def test_pool_members_exception(aggregator, check, dd_run_check, mock_http_get, 
             == 1
         )
     if api_type == ApiType.SDK:
-        assert connection_load_balancer.load_balancers.call_count == 2
         assert (
             connection_load_balancer.members.call_args_list.count(
                 mock.call('d0335b34-3115-4b3b-9a1a-7e2363ebfee3', project_id='1e6e233e637d4d55a50a62b63398ad15')
@@ -1378,7 +1377,6 @@ def test_healthmonitors_exception(aggregator, check, dd_run_check, mock_http_get
             == 1
         )
     if api_type == ApiType.SDK:
-        assert connection_load_balancer.load_balancers.call_count == 2
         assert (
             connection_load_balancer.health_monitors.call_args_list.count(
                 mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15')
