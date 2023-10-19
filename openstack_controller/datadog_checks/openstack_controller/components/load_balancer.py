@@ -2,43 +2,46 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+
+from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.openstack_controller.components.component import Component
+from datadog_checks.openstack_controller.config import normalize_discover_config_include
 from datadog_checks.openstack_controller.metrics import (
+    OCTAVIA_AMPHORA_COUNT,
+    OCTAVIA_AMPHORA_METRICS,
+    OCTAVIA_AMPHORA_METRICS_PREFIX,
     OCTAVIA_AMPHORA_STATS_METRICS,
     OCTAVIA_AMPHORA_STATS_METRICS_PREFIX,
     OCTAVIA_AMPHORA_STATS_TAGS,
-    OCTAVIA_AMPHORAE_COUNT,
-    OCTAVIA_AMPHORAE_METRICS,
-    OCTAVIA_AMPHORAE_METRICS_PREFIX,
-    OCTAVIA_AMPHORAE_TAGS,
-    OCTAVIA_HEALTHMONITORS_COUNT,
-    OCTAVIA_HEALTHMONITORS_METRICS,
-    OCTAVIA_HEALTHMONITORS_METRICS_PREFIX,
-    OCTAVIA_HEALTHMONITORS_TAGS,
+    OCTAVIA_AMPHORA_TAGS,
+    OCTAVIA_HEALTHMONITOR_COUNT,
+    OCTAVIA_HEALTHMONITOR_METRICS,
+    OCTAVIA_HEALTHMONITOR_METRICS_PREFIX,
+    OCTAVIA_HEALTHMONITOR_TAGS,
+    OCTAVIA_LISTENER_COUNT,
+    OCTAVIA_LISTENER_METRICS,
+    OCTAVIA_LISTENER_METRICS_PREFIX,
     OCTAVIA_LISTENER_STATS_METRICS,
     OCTAVIA_LISTENER_STATS_METRICS_PREFIX,
-    OCTAVIA_LISTENERS_COUNT,
-    OCTAVIA_LISTENERS_METRICS,
-    OCTAVIA_LISTENERS_METRICS_PREFIX,
-    OCTAVIA_LISTENERS_TAGS,
+    OCTAVIA_LISTENER_TAGS,
+    OCTAVIA_LOAD_BALANCER_COUNT,
+    OCTAVIA_LOAD_BALANCER_METRICS,
+    OCTAVIA_LOAD_BALANCER_METRICS_PREFIX,
     OCTAVIA_LOAD_BALANCER_STATS_METRICS,
     OCTAVIA_LOAD_BALANCER_STATS_METRICS_PREFIX,
-    OCTAVIA_LOAD_BALANCERS_COUNT,
-    OCTAVIA_LOAD_BALANCERS_METRICS,
-    OCTAVIA_LOAD_BALANCERS_METRICS_PREFIX,
-    OCTAVIA_LOAD_BALANCERS_TAGS,
+    OCTAVIA_LOAD_BALANCER_TAGS,
+    OCTAVIA_POOL_COUNT,
     OCTAVIA_POOL_MEMBERS_COUNT,
     OCTAVIA_POOL_MEMBERS_METRICS,
     OCTAVIA_POOL_MEMBERS_METRICS_PREFIX,
     OCTAVIA_POOL_MEMBERS_TAGS,
-    OCTAVIA_POOLS_COUNT,
-    OCTAVIA_POOLS_METRICS,
-    OCTAVIA_POOLS_METRICS_PREFIX,
-    OCTAVIA_POOLS_TAGS,
-    OCTAVIA_QUOTAS_COUNT,
-    OCTAVIA_QUOTAS_METRICS,
-    OCTAVIA_QUOTAS_METRICS_PREFIX,
-    OCTAVIA_QUOTAS_TAGS,
+    OCTAVIA_POOL_METRICS,
+    OCTAVIA_POOL_METRICS_PREFIX,
+    OCTAVIA_POOL_TAGS,
+    OCTAVIA_QUOTA_COUNT,
+    OCTAVIA_QUOTA_METRICS,
+    OCTAVIA_QUOTA_METRICS_PREFIX,
+    OCTAVIA_QUOTA_TAGS,
     OCTAVIA_RESPONSE_TIME,
     OCTAVIA_SERVICE_CHECK,
     get_metrics_and_tags,
@@ -63,21 +66,54 @@ class LoadBalancer(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_loadbalancers(self, project_id, tags, component_config):
-        data = self.check.api.get_load_balancer_loadbalancers(project_id)
-        self.check.log.debug("data: %s", data)
-        for item in data:
-            loadbalancer = get_metrics_and_tags(
-                item,
-                tags=OCTAVIA_LOAD_BALANCERS_TAGS,
-                prefix=OCTAVIA_LOAD_BALANCERS_METRICS_PREFIX,
-                metrics=OCTAVIA_LOAD_BALANCERS_METRICS,
+    def _report_loadbalancers(self, project_id, tags, config):
+        self.check.log.debug("config: %s", config)
+        report_loadbalancers = True
+        config_loadbalancers = config.get('loadbalancers', {})
+        if isinstance(config_loadbalancers, bool):
+            report_loadbalancers = config_loadbalancers
+            config_loadbalancers = {}
+        if report_loadbalancers:
+            loadbalancers_discovery = None
+            if config_loadbalancers:
+                config_loadbalancers_include = normalize_discover_config_include(config_loadbalancers, ["name"])
+                self.check.log.debug("config_loadbalancers_include: %s", config_loadbalancers_include)
+                if config_loadbalancers_include:
+                    loadbalancers_discovery = Discovery(
+                        lambda: self.check.api.get_load_balancer_loadbalancers(project_id),
+                        limit=config_loadbalancers.get('limit'),
+                        include=config_loadbalancers_include,
+                        exclude=config_loadbalancers.get('exclude'),
+                        interval=config_loadbalancers.get('interval'),
+                        key=lambda loadbalancer: loadbalancer.get('name'),
+                    )
+            if loadbalancers_discovery:
+                discovered_loadbalancers = list(loadbalancers_discovery.get_items())
+            else:
+                discovered_loadbalancers = [
+                    (None, loadbalancer.get('name'), loadbalancer, None)
+                    for loadbalancer in self.check.api.get_load_balancer_loadbalancers(project_id)
+                ]
+            self.check.log.debug(
+                "get_load_balancer_loadbalancers: %s", self.check.api.get_load_balancer_loadbalancers(project_id)
             )
-            self.check.log.debug("loadbalancer: %s", loadbalancer)
-            self.check.gauge(OCTAVIA_LOAD_BALANCERS_COUNT, 1, tags=tags + loadbalancer['tags'])
-            for metric, value in loadbalancer['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + loadbalancer['tags'])
-            self._report_loadbalancer_stats(item['id'], tags + loadbalancer['tags'])
+            self.check.log.debug("discovered_loadbalancers: %s", len(discovered_loadbalancers))
+            for _pattern, _item_name, item, item_config in discovered_loadbalancers:
+                self.check.log.debug("item: %s", item)
+                self.check.log.debug("item_config: %s", item_config)
+                loadbalancer = get_metrics_and_tags(
+                    item,
+                    tags=OCTAVIA_LOAD_BALANCER_TAGS,
+                    prefix=OCTAVIA_LOAD_BALANCER_METRICS_PREFIX,
+                    metrics=OCTAVIA_LOAD_BALANCER_METRICS,
+                )
+                self.check.log.debug("loadbalancer: %s", loadbalancer)
+                self.check.gauge(OCTAVIA_LOAD_BALANCER_COUNT, 1, tags=tags + loadbalancer['tags'])
+                for metric, value in loadbalancer['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + loadbalancer['tags'])
+                report_stats = item_config.get('stats', True) if item_config else True
+                if report_stats:
+                    self._report_loadbalancer_stats(item['id'], tags + loadbalancer['tags'])
 
     @Component.http_error()
     def _report_loadbalancer_stats(self, loadbalancer_id, tags):
@@ -85,7 +121,7 @@ class LoadBalancer(Component):
         self.check.log.debug("data: %s", data)
         loadbalancer_stats = get_metrics_and_tags(
             data,
-            tags=OCTAVIA_LOAD_BALANCERS_TAGS,
+            tags=OCTAVIA_LOAD_BALANCER_TAGS,
             prefix=OCTAVIA_LOAD_BALANCER_STATS_METRICS_PREFIX,
             metrics=OCTAVIA_LOAD_BALANCER_STATS_METRICS,
         )
@@ -101,12 +137,12 @@ class LoadBalancer(Component):
         for item in data:
             listener = get_metrics_and_tags(
                 item,
-                tags=OCTAVIA_LISTENERS_TAGS,
-                prefix=OCTAVIA_LISTENERS_METRICS_PREFIX,
-                metrics=OCTAVIA_LISTENERS_METRICS,
+                tags=OCTAVIA_LISTENER_TAGS,
+                prefix=OCTAVIA_LISTENER_METRICS_PREFIX,
+                metrics=OCTAVIA_LISTENER_METRICS,
             )
             self.check.log.debug("listener: %s", listener)
-            self.check.gauge(OCTAVIA_LISTENERS_COUNT, 1, tags=tags + listener['tags'])
+            self.check.gauge(OCTAVIA_LISTENER_COUNT, 1, tags=tags + listener['tags'])
             for metric, value in listener['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + listener['tags'])
             self._report_listener_stats(item['id'], tags + listener['tags'])
@@ -117,7 +153,7 @@ class LoadBalancer(Component):
         self.check.log.debug("data: %s", data)
         listener_stats = get_metrics_and_tags(
             data,
-            tags=OCTAVIA_LISTENERS_TAGS,
+            tags=OCTAVIA_LISTENER_TAGS,
             prefix=OCTAVIA_LISTENER_STATS_METRICS_PREFIX,
             metrics=OCTAVIA_LISTENER_STATS_METRICS,
         )
@@ -133,12 +169,12 @@ class LoadBalancer(Component):
         for item in data:
             pool = get_metrics_and_tags(
                 item,
-                tags=OCTAVIA_POOLS_TAGS,
-                prefix=OCTAVIA_POOLS_METRICS_PREFIX,
-                metrics=OCTAVIA_POOLS_METRICS,
+                tags=OCTAVIA_POOL_TAGS,
+                prefix=OCTAVIA_POOL_METRICS_PREFIX,
+                metrics=OCTAVIA_POOL_METRICS,
             )
             self.check.log.debug("pool: %s", pool)
-            self.check.gauge(OCTAVIA_POOLS_COUNT, 1, tags=tags + pool['tags'])
+            self.check.gauge(OCTAVIA_POOL_COUNT, 1, tags=tags + pool['tags'])
             for metric, value in pool['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + pool['tags'])
             self._report_pool_members(item['id'], project_id, tags)
@@ -167,12 +203,12 @@ class LoadBalancer(Component):
         for item in data:
             healthmonitor = get_metrics_and_tags(
                 item,
-                tags=OCTAVIA_HEALTHMONITORS_TAGS,
-                prefix=OCTAVIA_HEALTHMONITORS_METRICS_PREFIX,
-                metrics=OCTAVIA_HEALTHMONITORS_METRICS,
+                tags=OCTAVIA_HEALTHMONITOR_TAGS,
+                prefix=OCTAVIA_HEALTHMONITOR_METRICS_PREFIX,
+                metrics=OCTAVIA_HEALTHMONITOR_METRICS,
             )
             self.check.log.debug("healthmonitor: %s", healthmonitor)
-            self.check.gauge(OCTAVIA_HEALTHMONITORS_COUNT, 1, tags=tags + healthmonitor['tags'])
+            self.check.gauge(OCTAVIA_HEALTHMONITOR_COUNT, 1, tags=tags + healthmonitor['tags'])
             for metric, value in healthmonitor['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + healthmonitor['tags'])
 
@@ -184,13 +220,13 @@ class LoadBalancer(Component):
         for item in data:
             quota = get_metrics_and_tags(
                 item,
-                tags=OCTAVIA_QUOTAS_TAGS,
-                prefix=OCTAVIA_QUOTAS_METRICS_PREFIX,
-                metrics=OCTAVIA_QUOTAS_METRICS,
+                tags=OCTAVIA_QUOTA_TAGS,
+                prefix=OCTAVIA_QUOTA_METRICS_PREFIX,
+                metrics=OCTAVIA_QUOTA_METRICS,
                 lambda_value=lambda key, value, item=item: -1 if value is None else value,
             )
             self.check.log.debug("quota: %s", quota)
-            self.check.gauge(OCTAVIA_QUOTAS_COUNT, 1, tags=tags + quota['tags'])
+            self.check.gauge(OCTAVIA_QUOTA_COUNT, 1, tags=tags + quota['tags'])
             for metric, value in quota['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + quota['tags'])
 
@@ -202,13 +238,13 @@ class LoadBalancer(Component):
         for item in data:
             amphora = get_metrics_and_tags(
                 item,
-                tags=OCTAVIA_AMPHORAE_TAGS,
-                prefix=OCTAVIA_AMPHORAE_METRICS_PREFIX,
-                metrics=OCTAVIA_AMPHORAE_METRICS,
+                tags=OCTAVIA_AMPHORA_TAGS,
+                prefix=OCTAVIA_AMPHORA_METRICS_PREFIX,
+                metrics=OCTAVIA_AMPHORA_METRICS,
                 lambda_value=lambda key, value, item=item: -1 if value is None else value,
             )
             self.check.log.debug("amphora: %s", amphora)
-            self.check.gauge(OCTAVIA_AMPHORAE_COUNT, 1, tags=tags + amphora['tags'])
+            self.check.gauge(OCTAVIA_AMPHORA_COUNT, 1, tags=tags + amphora['tags'])
             for metric, value in amphora['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + amphora['tags'])
             self._report_amphora_stats(item['id'], tags + amphora['tags'])

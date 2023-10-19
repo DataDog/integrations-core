@@ -54,6 +54,85 @@ def test_disable_octavia_metrics(aggregator, dd_run_check, instance, openstack_c
 
 
 @pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            configs.REST_NOVA_MICROVERSION_2_93,
+            id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.SDK,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            configs.SDK_NOVA_MICROVERSION_2_93,
+            id='api sdk microversion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_disable_octavia_loadbalancer_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
+    instance = instance | {
+        "components": {
+            "load-balancer": {
+                "loadbalancers": False,
+            },
+        },
+    }
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    for metric in aggregator.metric_names:
+        assert not metric.startswith('openstack.octavia.loadbalancer.')
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            configs.REST_NOVA_MICROVERSION_2_93,
+            id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.SDK,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            configs.SDK_NOVA_MICROVERSION_2_93,
+            id='api sdk microversion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_disable_octavia_loadbalancer_stats_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
+    instance = instance | {
+        "components": {
+            "load-balancer": {
+                "loadbalancers": {
+                    "include": [
+                        {
+                            "name": ".*",
+                            "stats": False,
+                        }
+                    ],
+                },
+            },
+        },
+    }
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    for metric in aggregator.metric_names:
+        assert not metric.startswith('openstack.octavia.loadbalancer.stats.')
+
+
+@pytest.mark.parametrize(
     ('mock_http_post', 'session_auth', 'instance', 'api_type'),
     [
         pytest.param(
@@ -211,7 +290,7 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
 def test_loadbalancers_exception(aggregator, check, dd_run_check, mock_http_get, connection_load_balancer, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.octavia.loadbalancers.count',
+        'openstack.octavia.loadbalancer.count',
         count=0,
     )
     if api_type == ApiType.REST:
@@ -264,7 +343,7 @@ def test_loadbalancers_exception(aggregator, check, dd_run_check, mock_http_get,
 def test_loadbalancers_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.octavia.loadbalancers.count',
+        'openstack.octavia.loadbalancer.count',
         value=1,
         tags=[
             'domain_id:default',
@@ -280,7 +359,7 @@ def test_loadbalancers_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.loadbalancers.admin_state_up',
+        'openstack.octavia.loadbalancer.admin_state_up',
         value=1,
         tags=[
             'domain_id:default',
@@ -296,7 +375,7 @@ def test_loadbalancers_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.loadbalancers.stats.active_connections',
+        'openstack.octavia.loadbalancer.stats.active_connections',
         value=0,
         tags=[
             'domain_id:default',
@@ -312,7 +391,7 @@ def test_loadbalancers_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.loadbalancers.stats.bytes_in',
+        'openstack.octavia.loadbalancer.stats.bytes_in',
         value=0,
         tags=[
             'domain_id:default',
@@ -328,7 +407,7 @@ def test_loadbalancers_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.loadbalancers.stats.bytes_out',
+        'openstack.octavia.loadbalancer.stats.bytes_out',
         value=0,
         tags=[
             'domain_id:default',
@@ -344,7 +423,7 @@ def test_loadbalancers_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.loadbalancers.stats.request_errors',
+        'openstack.octavia.loadbalancer.stats.request_errors',
         value=0,
         tags=[
             'domain_id:default',
@@ -360,7 +439,7 @@ def test_loadbalancers_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.loadbalancers.stats.total_connections',
+        'openstack.octavia.loadbalancer.stats.total_connections',
         value=0,
         tags=[
             'domain_id:default',
@@ -417,7 +496,7 @@ def test_loadbalancers_metrics(aggregator, check, dd_run_check):
 def test_listeners_exception(aggregator, check, dd_run_check, mock_http_get, connection_load_balancer, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.octavia.listeners.count',
+        'openstack.octavia.listener.count',
         count=0,
     )
     if api_type == ApiType.REST:
@@ -470,7 +549,7 @@ def test_listeners_exception(aggregator, check, dd_run_check, mock_http_get, con
 def test_listeners_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.octavia.listeners.count',
+        'openstack.octavia.listener.count',
         value=1,
         tags=[
             'domain_id:default',
@@ -485,7 +564,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.count',
+        'openstack.octavia.listener.count',
         value=1,
         tags=[
             'domain_id:default',
@@ -500,7 +579,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.count',
+        'openstack.octavia.listener.count',
         value=1,
         tags=[
             'domain_id:default',
@@ -515,7 +594,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.connection_limit',
+        'openstack.octavia.listener.connection_limit',
         value=-1,
         tags=[
             'domain_id:default',
@@ -530,7 +609,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.connection_limit',
+        'openstack.octavia.listener.connection_limit',
         value=-1,
         tags=[
             'domain_id:default',
@@ -545,7 +624,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.connection_limit',
+        'openstack.octavia.listener.connection_limit',
         value=-1,
         tags=[
             'domain_id:default',
@@ -560,7 +639,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.timeout_client_data',
+        'openstack.octavia.listener.timeout_client_data',
         value=50000,
         tags=[
             'domain_id:default',
@@ -575,7 +654,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.timeout_client_data',
+        'openstack.octavia.listener.timeout_client_data',
         value=50000,
         tags=[
             'domain_id:default',
@@ -590,7 +669,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.timeout_client_data',
+        'openstack.octavia.listener.timeout_client_data',
         value=50000,
         tags=[
             'domain_id:default',
@@ -605,7 +684,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.timeout_member_connect',
+        'openstack.octavia.listener.timeout_member_connect',
         value=5000,
         tags=[
             'domain_id:default',
@@ -620,7 +699,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.timeout_member_connect',
+        'openstack.octavia.listener.timeout_member_connect',
         value=5000,
         tags=[
             'domain_id:default',
@@ -635,7 +714,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.timeout_member_connect',
+        'openstack.octavia.listener.timeout_member_connect',
         value=5000,
         tags=[
             'domain_id:default',
@@ -650,7 +729,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.timeout_member_data',
+        'openstack.octavia.listener.timeout_member_data',
         value=50000,
         tags=[
             'domain_id:default',
@@ -665,7 +744,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.timeout_member_data',
+        'openstack.octavia.listener.timeout_member_data',
         value=50000,
         tags=[
             'domain_id:default',
@@ -680,7 +759,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.timeout_member_data',
+        'openstack.octavia.listener.timeout_member_data',
         value=50000,
         tags=[
             'domain_id:default',
@@ -695,7 +774,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.timeout_tcp_inspect',
+        'openstack.octavia.listener.timeout_tcp_inspect',
         value=0,
         tags=[
             'domain_id:default',
@@ -710,7 +789,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.timeout_tcp_inspect',
+        'openstack.octavia.listener.timeout_tcp_inspect',
         value=0,
         tags=[
             'domain_id:default',
@@ -725,7 +804,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.timeout_tcp_inspect',
+        'openstack.octavia.listener.timeout_tcp_inspect',
         value=0,
         tags=[
             'domain_id:default',
@@ -740,7 +819,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.stats.active_connections',
+        'openstack.octavia.listener.stats.active_connections',
         value=0,
         tags=[
             'domain_id:default',
@@ -755,7 +834,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.stats.active_connections',
+        'openstack.octavia.listener.stats.active_connections',
         value=0,
         tags=[
             'domain_id:default',
@@ -770,7 +849,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.stats.active_connections',
+        'openstack.octavia.listener.stats.active_connections',
         value=0,
         tags=[
             'domain_id:default',
@@ -785,7 +864,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.stats.bytes_in',
+        'openstack.octavia.listener.stats.bytes_in',
         value=0,
         tags=[
             'domain_id:default',
@@ -800,7 +879,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.stats.bytes_in',
+        'openstack.octavia.listener.stats.bytes_in',
         value=0,
         tags=[
             'domain_id:default',
@@ -815,7 +894,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.stats.bytes_in',
+        'openstack.octavia.listener.stats.bytes_in',
         value=0,
         tags=[
             'domain_id:default',
@@ -830,7 +909,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.stats.bytes_out',
+        'openstack.octavia.listener.stats.bytes_out',
         value=0,
         tags=[
             'domain_id:default',
@@ -845,7 +924,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.stats.bytes_out',
+        'openstack.octavia.listener.stats.bytes_out',
         value=0,
         tags=[
             'domain_id:default',
@@ -860,7 +939,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.stats.bytes_out',
+        'openstack.octavia.listener.stats.bytes_out',
         value=0,
         tags=[
             'domain_id:default',
@@ -875,7 +954,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.stats.request_errors',
+        'openstack.octavia.listener.stats.request_errors',
         value=0,
         tags=[
             'domain_id:default',
@@ -890,7 +969,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.stats.request_errors',
+        'openstack.octavia.listener.stats.request_errors',
         value=0,
         tags=[
             'domain_id:default',
@@ -905,7 +984,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.stats.request_errors',
+        'openstack.octavia.listener.stats.request_errors',
         value=0,
         tags=[
             'domain_id:default',
@@ -920,7 +999,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.stats.total_connections',
+        'openstack.octavia.listener.stats.total_connections',
         value=0,
         tags=[
             'domain_id:default',
@@ -935,7 +1014,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.stats.total_connections',
+        'openstack.octavia.listener.stats.total_connections',
         value=0,
         tags=[
             'domain_id:default',
@@ -950,7 +1029,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.listeners.stats.total_connections',
+        'openstack.octavia.listener.stats.total_connections',
         value=0,
         tags=[
             'domain_id:default',
@@ -1006,7 +1085,7 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
 def test_pools_exception(aggregator, dd_run_check, check, mock_http_get, connection_load_balancer, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.octavia.pools.count',
+        'openstack.octavia.pool.count',
         count=0,
     )
     if api_type == ApiType.REST:
@@ -1059,7 +1138,7 @@ def test_pools_exception(aggregator, dd_run_check, check, mock_http_get, connect
 def test_pools_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.octavia.pools.count',
+        'openstack.octavia.pool.count',
         value=1,
         tags=[
             'domain_id:default',
@@ -1111,7 +1190,7 @@ def test_pools_metrics(aggregator, check, dd_run_check):
 def test_pool_members_exception(aggregator, check, dd_run_check, mock_http_get, connection_load_balancer, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.octavia.members.count',
+        'openstack.octavia.pool.member.count',
         count=0,
     )
     if api_type == ApiType.REST:
@@ -1153,7 +1232,7 @@ def test_pool_members_exception(aggregator, check, dd_run_check, mock_http_get, 
 def test_pool_members_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.octavia.members.count',
+        'openstack.octavia.pool.member.count',
         value=1,
         tags=[
             'domain_id:default',
@@ -1167,7 +1246,7 @@ def test_pool_members_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.members.admin_state_up',
+        'openstack.octavia.pool.member.admin_state_up',
         value=1,
         tags=[
             'domain_id:default',
@@ -1181,7 +1260,7 @@ def test_pool_members_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.members.weight',
+        'openstack.octavia.pool.member.weight',
         value=1,
         tags=[
             'domain_id:default',
@@ -1195,7 +1274,7 @@ def test_pool_members_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.members.count',
+        'openstack.octavia.pool.member.count',
         value=1,
         tags=[
             'domain_id:default',
@@ -1209,7 +1288,7 @@ def test_pool_members_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.members.admin_state_up',
+        'openstack.octavia.pool.member.admin_state_up',
         value=1,
         tags=[
             'domain_id:default',
@@ -1223,7 +1302,7 @@ def test_pool_members_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.members.weight',
+        'openstack.octavia.pool.member.weight',
         value=1,
         tags=[
             'domain_id:default',
@@ -1278,7 +1357,7 @@ def test_pool_members_metrics(aggregator, check, dd_run_check):
 def test_healthmonitors_exception(aggregator, check, dd_run_check, mock_http_get, connection_load_balancer, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.octavia.healthmonitors.count',
+        'openstack.octavia.healthmonitor.count',
         count=0,
     )
     if api_type == ApiType.REST:
@@ -1331,7 +1410,7 @@ def test_healthmonitors_exception(aggregator, check, dd_run_check, mock_http_get
 def test_healthmonitors_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.octavia.healthmonitors.count',
+        'openstack.octavia.healthmonitor.count',
         value=1,
         tags=[
             'domain_id:default',
@@ -1347,7 +1426,7 @@ def test_healthmonitors_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.healthmonitors.delay',
+        'openstack.octavia.healthmonitor.delay',
         value=5,
         tags=[
             'domain_id:default',
@@ -1363,7 +1442,7 @@ def test_healthmonitors_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.healthmonitors.timeout',
+        'openstack.octavia.healthmonitor.timeout',
         value=5,
         tags=[
             'domain_id:default',
@@ -1379,7 +1458,7 @@ def test_healthmonitors_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.healthmonitors.max_retries',
+        'openstack.octavia.healthmonitor.max_retries',
         value=3,
         tags=[
             'domain_id:default',
@@ -1395,7 +1474,7 @@ def test_healthmonitors_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.healthmonitors.max_retries_down',
+        'openstack.octavia.healthmonitor.max_retries_down',
         value=3,
         tags=[
             'domain_id:default',
@@ -1452,7 +1531,7 @@ def test_healthmonitors_metrics(aggregator, check, dd_run_check):
 def test_quotas_exception(aggregator, check, dd_run_check, mock_http_get, connection_load_balancer, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.octavia.quotas.count',
+        'openstack.octavia.quota.count',
         count=0,
     )
     if api_type == ApiType.REST:
@@ -1505,7 +1584,7 @@ def test_quotas_exception(aggregator, check, dd_run_check, mock_http_get, connec
 def test_quotas_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.octavia.quotas.count',
+        'openstack.octavia.quota.count',
         value=1,
         tags=[
             'domain_id:default',
@@ -1515,7 +1594,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.quotas.count',
+        'openstack.octavia.quota.count',
         value=1,
         tags=[
             'domain_id:default',
@@ -1525,7 +1604,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.quotas.loadbalancer',
+        'openstack.octavia.quota.loadbalancer',
         value=10,
         tags=[
             'domain_id:default',
@@ -1535,7 +1614,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.quotas.loadbalancer',
+        'openstack.octavia.quota.loadbalancer',
         value=-1,
         tags=[
             'domain_id:default',
@@ -1545,7 +1624,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.quotas.load_balancer',
+        'openstack.octavia.quota.load_balancer',
         value=10,
         tags=[
             'domain_id:default',
@@ -1555,7 +1634,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.quotas.load_balancer',
+        'openstack.octavia.quota.load_balancer',
         value=-1,
         tags=[
             'domain_id:default',
@@ -1565,7 +1644,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.quotas.listener',
+        'openstack.octavia.quota.listener',
         value=20,
         tags=[
             'domain_id:default',
@@ -1575,7 +1654,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.quotas.listener',
+        'openstack.octavia.quota.listener',
         value=-1,
         tags=[
             'domain_id:default',
@@ -1585,7 +1664,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.quotas.member',
+        'openstack.octavia.quota.member',
         value=-1,
         tags=[
             'domain_id:default',
@@ -1595,7 +1674,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.quotas.member',
+        'openstack.octavia.quota.member',
         value=-1,
         tags=[
             'domain_id:default',
@@ -1605,7 +1684,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.quotas.pool',
+        'openstack.octavia.quota.pool',
         value=20,
         tags=[
             'domain_id:default',
@@ -1615,7 +1694,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.quotas.pool',
+        'openstack.octavia.quota.pool',
         value=-1,
         tags=[
             'domain_id:default',
@@ -1625,7 +1704,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.quotas.healthmonitor',
+        'openstack.octavia.quota.healthmonitor',
         value=10,
         tags=[
             'domain_id:default',
@@ -1635,7 +1714,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.quotas.healthmonitor',
+        'openstack.octavia.quota.healthmonitor',
         value=-1,
         tags=[
             'domain_id:default',
@@ -1645,7 +1724,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.quotas.health_monitor',
+        'openstack.octavia.quota.health_monitor',
         value=10,
         tags=[
             'domain_id:default',
@@ -1655,7 +1734,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.quotas.health_monitor',
+        'openstack.octavia.quota.health_monitor',
         value=-1,
         tags=[
             'domain_id:default',
@@ -1665,7 +1744,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.quotas.l7policy',
+        'openstack.octavia.quota.l7policy',
         value=-1,
         tags=[
             'domain_id:default',
@@ -1675,7 +1754,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.quotas.l7policy',
+        'openstack.octavia.quota.l7policy',
         value=-1,
         tags=[
             'domain_id:default',
@@ -1685,7 +1764,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.quotas.l7rule',
+        'openstack.octavia.quota.l7rule',
         value=-1,
         tags=[
             'domain_id:default',
@@ -1695,7 +1774,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.quotas.l7rule',
+        'openstack.octavia.quota.l7rule',
         value=-1,
         tags=[
             'domain_id:default',
@@ -1746,7 +1825,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
 def test_amphorae_exception(aggregator, check, dd_run_check, mock_http_get, connection_load_balancer, api_type):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.octavia.amphorae.count',
+        'openstack.octavia.amphora.count',
         count=0,
     )
     if api_type == ApiType.REST:
@@ -1799,7 +1878,7 @@ def test_amphorae_exception(aggregator, check, dd_run_check, mock_http_get, conn
 def test_amphorae_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
-        'openstack.octavia.amphorae.count',
+        'openstack.octavia.amphora.count',
         value=1,
         tags=[
             'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
@@ -1811,7 +1890,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.amphorae.stats.active_connections',
+        'openstack.octavia.amphora.stats.active_connections',
         value=0,
         tags=[
             'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
@@ -1824,7 +1903,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.amphorae.stats.bytes_in',
+        'openstack.octavia.amphora.stats.bytes_in',
         value=0,
         tags=[
             'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
@@ -1837,7 +1916,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.amphorae.stats.bytes_out',
+        'openstack.octavia.amphora.stats.bytes_out',
         value=0,
         tags=[
             'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
@@ -1850,7 +1929,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.amphorae.stats.request_errors',
+        'openstack.octavia.amphora.stats.request_errors',
         value=0,
         tags=[
             'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
@@ -1863,7 +1942,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.amphorae.stats.total_connections',
+        'openstack.octavia.amphora.stats.total_connections',
         value=0,
         tags=[
             'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
@@ -1876,7 +1955,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.amphorae.stats.active_connections',
+        'openstack.octavia.amphora.stats.active_connections',
         value=0,
         tags=[
             'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
@@ -1889,7 +1968,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.amphorae.stats.bytes_in',
+        'openstack.octavia.amphora.stats.bytes_in',
         value=0,
         tags=[
             'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
@@ -1902,7 +1981,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.amphorae.stats.bytes_out',
+        'openstack.octavia.amphora.stats.bytes_out',
         value=0,
         tags=[
             'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
@@ -1915,7 +1994,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.amphorae.stats.request_errors',
+        'openstack.octavia.amphora.stats.request_errors',
         value=0,
         tags=[
             'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
@@ -1928,7 +2007,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.amphorae.stats.total_connections',
+        'openstack.octavia.amphora.stats.total_connections',
         value=0,
         tags=[
             'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
@@ -1941,7 +2020,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.amphorae.count',
+        'openstack.octavia.amphora.count',
         value=1,
         tags=[
             'amphora_id:042bcca4-4d97-47a9-bc04-d88c1e3a4d72',
@@ -1953,7 +2032,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.amphorae.stats.active_connections',
+        'openstack.octavia.amphora.stats.active_connections',
         value=0,
         tags=[
             'amphora_id:042bcca4-4d97-47a9-bc04-d88c1e3a4d72',
@@ -1966,7 +2045,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.amphorae.stats.bytes_in',
+        'openstack.octavia.amphora.stats.bytes_in',
         value=0,
         tags=[
             'amphora_id:042bcca4-4d97-47a9-bc04-d88c1e3a4d72',
@@ -1979,7 +2058,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.amphorae.stats.bytes_out',
+        'openstack.octavia.amphora.stats.bytes_out',
         value=0,
         tags=[
             'amphora_id:042bcca4-4d97-47a9-bc04-d88c1e3a4d72',
@@ -1992,7 +2071,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.amphorae.stats.request_errors',
+        'openstack.octavia.amphora.stats.request_errors',
         value=0,
         tags=[
             'amphora_id:042bcca4-4d97-47a9-bc04-d88c1e3a4d72',
@@ -2005,7 +2084,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
-        'openstack.octavia.amphorae.stats.total_connections',
+        'openstack.octavia.amphora.stats.total_connections',
         value=0,
         tags=[
             'amphora_id:042bcca4-4d97-47a9-bc04-d88c1e3a4d72',
