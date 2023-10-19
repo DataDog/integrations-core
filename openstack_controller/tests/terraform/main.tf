@@ -11,9 +11,9 @@ resource "google_compute_instance" "openstack" {
   }
   network_interface {
     network = "default"
-    network_ip = "10.164.0.71"
+    network_ip = var.network_ip
     access_config {
-      nat_ip = "34.91.117.188"
+      nat_ip = var.nat_ip
     }
   }
   metadata = {
@@ -26,9 +26,6 @@ resource "google_compute_instance" "openstack" {
     private_key = "${tls_private_key.ssh-key.private_key_pem}"
     host = "${google_compute_instance.openstack.network_interface.0.access_config.0.nat_ip}"
   }
-#  provisioner "remote-exec" {
-#    script = "script.sh"
-#  }
 }
 
 data "google_compute_instance" "openstack" {
