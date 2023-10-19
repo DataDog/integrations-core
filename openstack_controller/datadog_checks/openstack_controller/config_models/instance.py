@@ -29,6 +29,26 @@ class IncludeItem(BaseModel):
     uptime: Optional[bool] = None
 
 
+class Node(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[Union[str, IncludeItem], ...]] = None
+    interval: Optional[int] = None
+    limit: Optional[int] = Field(None, description='Maximum number of nodes to be processed.\n')
+
+
+class BaremetalItem(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    conductors: Optional[bool] = None
+    nodes: Optional[Union[bool, Node]] = None
+
+
 class Hypervisor(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -40,7 +60,7 @@ class Hypervisor(BaseModel):
     limit: Optional[int] = Field(None, description='Maximum number of hypervisors to be processed.\n')
 
 
-class IncludeItem1(BaseModel):
+class IncludeItem2(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -56,7 +76,7 @@ class Server(BaseModel):
         frozen=True,
     )
     exclude: Optional[tuple[str, ...]] = None
-    include: Optional[tuple[Union[str, IncludeItem1], ...]] = None
+    include: Optional[tuple[Union[str, IncludeItem2], ...]] = None
     interval: Optional[int] = None
     limit: Optional[int] = Field(None, description='Maximum number of servers to be processed.\n')
 
@@ -88,7 +108,7 @@ class IdentityItem(BaseModel):
     users: Optional[bool] = None
 
 
-class IncludeItem2(BaseModel):
+class IncludeItem3(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -102,7 +122,7 @@ class Network(BaseModel):
         frozen=True,
     )
     exclude: Optional[tuple[str, ...]] = None
-    include: Optional[tuple[Union[str, IncludeItem2], ...]] = None
+    include: Optional[tuple[Union[str, IncludeItem3], ...]] = None
     interval: Optional[int] = None
     limit: Optional[int] = Field(None, description='Maximum number of networks to be processed.\n')
 
@@ -122,6 +142,7 @@ class Components(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    baremetal: Optional[Union[bool, BaremetalItem]] = None
     block_storage: Optional[Union[bool, MappingProxyType[str, Any]]] = Field(None, alias='block-storage')
     compute: Optional[Union[bool, ComputeItem]] = None
     identity: Optional[Union[bool, IdentityItem]] = None

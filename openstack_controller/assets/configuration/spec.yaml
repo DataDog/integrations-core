@@ -393,6 +393,39 @@ files:
                 anyOf:
                   - type: boolean
                   - type: object
+              - name: baremetal
+                anyOf:
+                  - type: boolean
+                  - type: object
+                    properties:
+                      - name: nodes
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: limit
+                                description: |
+                                  Maximum number of nodes to be processed.
+                                type: integer
+                              - name: include
+                                type: array
+                                items:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        - name: name
+                                          type: string
+                                        - name: uptime
+                                          type: boolean
+                              - name: exclude
+                                type: array
+                                items:
+                                  type: string
+                              - name: interval
+                                type: integer
+                      - name: conductors
+                        type: boolean
             example:
               compute: false
         - name: projects
