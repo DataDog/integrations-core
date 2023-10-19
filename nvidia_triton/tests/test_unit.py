@@ -11,7 +11,6 @@ from datadog_checks.nvidia_triton import NvidiaTritonCheck
 
 from .common import METRICS_MOCK, get_fixture_path
 
-
 def test_check_metrics_nvidia_triton(dd_run_check, aggregator, instance, mock_http_response):
     """
     The instance is a deepcopy of the INSTANCE_MOCK in common
@@ -32,7 +31,7 @@ def test_emits_critical_openemtrics_service_check_when_service_is_down(dd_run_ch
     """
     If we fail to reach the openmetrics endpoint the openmetrics service check should report as critical
     """
-    mock_http_response(status_code=404)
+    mock_http_response(status_code=400)
     check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
     dd_run_check(check)
 
@@ -43,7 +42,7 @@ def test_emits_critical_api_service_check_when_service_is_down(aggregator, insta
     """
     If we fail to reach the API endpoint the health service check should report as critical
     """
-    mock_http_response(status_code=404)
+    mock_http_response(status_code=400)
     check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
     check._check_server_health()
 

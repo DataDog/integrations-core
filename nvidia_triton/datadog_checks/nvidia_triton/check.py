@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any
 from urllib.parse import urljoin  # noqa: F401
-from six.moves.urllib.parse import urlparse
+from six.moves.urllib.parse import urlparse, urlunparse
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.errors import ConfigurationError
@@ -13,6 +13,7 @@ from .metrics import METRICS_MAP
 
 DEFAULT_METADATA_ENDPOINT = '/v2'
 DEFAULT_HEALTH_ENDPOINT = '/health/ready'
+DEFAULT_ERROR_CODE = r'(4|5)\d\d'
 
 class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
 
@@ -30,10 +31,15 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
         # Get the API server port if specified, otherwise use the default 8000.
         self.server_port = self.instance.get('server_port', "8000")
 
-        # Get the host address from the openmetrics endpoint and construct the server info API endpoint.
-        parsed_url = urlparse(self.openmetrics_endpoint)
-        endpoint = parsed_url.hostname
-        self.server_info_api = urljoin(endpoint, ":", self.server_port)
+        # Get the base url from the openmetrics endpoint and construct the server info API endpoint.
+        self.server_info_api = None
+        try:
+            parts = urlparse(self.openmetrics_endpoint)
+            parts.__replace(path="")
+            self.server_info_api= parts.__replace(netloc=parts.hostname+':'+self.server_port).geturl()
+            
+        except Exception as e:
+            self.log.debug("Unable to determine the base url for server info collection: %s", str(e))        
 
         # Wheather to collect the server info through the API or not
         self.collect_server_info = self.instance.get('collect_server_info', True)
@@ -86,7 +92,7 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
         endpoint = urljoin(self.server_info_api, DEFAULT_METADATA_ENDPOINT, DEFAULT_HEALTH_ENDPOINT)
         response = self.http.get(endpoint)
         
-        if response.status_code != 200:
+        if response.status_code == DEFAULT_ERROR_CODE:
             self.service_check('health.status', AgentCheck.CRITICAL, self.tags)
         if response.status_code == 200:
             self.service_check('health.status', AgentCheck.OK, self.tags)

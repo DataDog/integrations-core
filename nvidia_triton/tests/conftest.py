@@ -5,12 +5,24 @@ import copy
 import pytest
 from . import common
 
+from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield
+    compose_file = common.COMPOSE_FILE
+    conditions = [
+        CheckDockerLogs(identifier='caddy', patterns=['server running']),
+        CheckEndpoints(common.INSTANCE["openmetrics_endpoint"]),
+    ]
+    with docker_run(compose_file, conditions=conditions):
+        yield {
+            'instances': [common.INSTANCE],
+        }
 
 
 @pytest.fixture
 def instance():
-    return copy.deepcopy(common.INSTANCE_MOCK)
+    #return copy.deepcopy(common.INSTANCE_MOCK)
+    return copy.deepcopy(common.INSTANCE)
+
