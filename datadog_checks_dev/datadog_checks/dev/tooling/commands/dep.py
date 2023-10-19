@@ -30,7 +30,6 @@ from .console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
 IGNORED_DEPS = {
     'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
     'dnspython',
-    'pymysql',  # https://github.com/DataDog/integrations-core/pull/12612
     'foundationdb',  # Breaking datadog_checks_base tests
     'openstacksdk',  # Breaking openstack_controller tests
     'pyasn1',  # Breaking snmp tests
