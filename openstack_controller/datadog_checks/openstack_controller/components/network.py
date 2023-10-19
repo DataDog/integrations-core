@@ -102,11 +102,9 @@ class Network(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_quotas(self, project_id, tags, component_config):
-        config_quotas = component_config.get('quotas', {})
-        self.check.log.debug("config_quotas: %s", config_quotas)
-        collect_quotas = config_quotas.get('collect', True)
-        if collect_quotas:
+    def _report_quotas(self, project_id, tags, config):
+        report_quotas = config.get('quotas', True)
+        if report_quotas:
             item = self.check.api.get_network_quota(project_id)
             quota = get_metrics_and_tags(
                 item,
