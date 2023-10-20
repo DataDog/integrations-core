@@ -102,7 +102,7 @@ trigger-agent-build:
 validate-agent-build:
   stage: validate
   image: $VALIDATE_AGENT_BUILD
-  timeout: 2 hours
+  timeout: 3 hours
   cache:
     <<: *slack-cache
   script:

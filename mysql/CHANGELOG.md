@@ -6,6 +6,10 @@
 
 * Add support for reporting SQL obfuscation errors ([#15990](https://github.com/DataDog/integrations-core/pull/15990))
 
+***Fixed***:
+
+* Bump the `pymysql` version to 1.1.0 on Python 3 ([#16042](https://github.com/DataDog/integrations-core/pull/16042))
+
 ## 11.2.0 / 2023-09-29
 
 ***Added***:

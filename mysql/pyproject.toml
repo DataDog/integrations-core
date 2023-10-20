@@ -44,7 +44,8 @@ deps = [
     "cryptography==3.3.2; python_version < '3.0'",
     "cryptography==41.0.4; python_version > '3.0'",
     "futures==3.4.0; python_version < '3.0'",
-    "pymysql==0.10.1",
+    "pymysql==0.10.1; python_version < '3.0'",
+    "pymysql==1.1.0; python_version > '3.0'",
 ]
 
 [project.urls]

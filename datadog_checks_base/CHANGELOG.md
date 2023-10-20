@@ -2,9 +2,14 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add util to track db query operation time ([#16040](https://github.com/DataDog/integrations-core/pull/16040))
+
 ***Fixed***:
 
-* Bump the `pyodbc` version to 4.0.39 ([#16021](https://github.com/DataDog/integrations-core/pull/16021))
+* Bump the `pymysql` version to 1.1.0 on Python 3 ([#16042](https://github.com/DataDog/integrations-core/pull/16042))
+* Bump the `pyodbc` version to 5.0.1 ([#16041](https://github.com/DataDog/integrations-core/pull/16041))
 
 ## 34.0.1 / 2023-10-17
 
