@@ -9,6 +9,7 @@
 ***Fixed***:
 
 * Fix `ddev env test` so that tests run for all environments properly when no environment is specified ([#16054](https://github.com/DataDog/integrations-core/pull/16054))
+* Fix e2e test env detection to use `platforms`, not `platform` ([#16063](https://github.com/DataDog/integrations-core/pull/16063))
 * Include ddev's source code when measuring its coverage ([#16057](https://github.com/DataDog/integrations-core/pull/16057))
 * Fix Github API search query ([#15943](https://github.com/DataDog/integrations-core/pull/15943))
 
