@@ -27,7 +27,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
     def package_directory(self):
         name = self.root.name
         if name == 'ddev':
-            return 'ddev/src/ddev'
+            return 'src/ddev'
 
         if name == 'datadog_checks_base':
             directory = 'base'
