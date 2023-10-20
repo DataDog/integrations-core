@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add storage_stats support for Windows ([#16014](https://github.com/DataDog/integrations-core/pull/16014))
+
+***Fixed***:
+
+* Fix blkio_stats bad metrics for Windows ([#16014](https://github.com/DataDog/integrations-core/pull/16014))
+
 ## 4.0.1 / 2023-08-25 / Agent 7.48.0
 
 ***Fixed***:
