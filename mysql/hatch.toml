@@ -11,7 +11,7 @@ mypy-args = [
 mypy-deps = [
   "types-cachetools==0.1.10",
   "types-enum34==1.1.1",
-  "types-pymysql==1.0.4",
+  "types-pymysql==1.1.0.1",
 ]
 
 [[envs.default.matrix]]

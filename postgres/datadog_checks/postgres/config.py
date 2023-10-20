@@ -14,6 +14,7 @@ DEFAULT_IGNORE_DATABASES = [
     'template%',
     'rdsadmin',
     'azure_maintenance',
+    'cloudsqladmin',
     'postgres',
 ]
 

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Bump the `pyodbc` version to 5.0.1 ([#16041](https://github.com/DataDog/integrations-core/pull/16041))
+
 ## 2.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:

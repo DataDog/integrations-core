@@ -6,6 +6,17 @@
 
 * Upgrade `psycopg2-binary` to `v2.9.8` ([#15949](https://github.com/DataDog/integrations-core/pull/15949))
 * Add support for reporting SQL obfuscation errors ([#15990](https://github.com/DataDog/integrations-core/pull/15990))
+* Emit postgres metrics queries operation time ([#16040](https://github.com/DataDog/integrations-core/pull/16040))
+
+***Fixed***:
+
+* Add cloudsqladmin to default list of databases to exclude from autodiscovery and databases to ignore to prevent failures on Postgres 15 on Google CloudSQL ([#16027](https://github.com/DataDog/integrations-core/pull/16027))
+
+## 15.1.1 / 2023-10-17
+
+***Fixed***:
+
+* Fix check cancellation timeout due to `DBMAsyncJob` cancellation being blocked ([#16028](https://github.com/DataDog/integrations-core/pull/16028))
 
 ## 15.1.0 / 2023-10-06
 

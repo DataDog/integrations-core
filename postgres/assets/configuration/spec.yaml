@@ -65,10 +65,12 @@ files:
           - 'template%'
           - rdsadmin
           - azure_maintenance
+          - cloudsqladmin
         default:
           - 'template%'
           - rdsadmin
           - azure_maintenance
+          - cloudsqladmin
     - name: ssl
       description: |
         This option determines whether or not and with what priority a secure SSL TCP/IP connection
@@ -352,6 +354,9 @@ files:
             example:
               - "model"
               - "msdb"
+              - "cloudsqladmin"
+            display_default:
+              - "cloudsqladmin"
         - name: refresh
           description: Frequency in seconds of scans for new databases. Defaults to 10 minutes.
           value:
