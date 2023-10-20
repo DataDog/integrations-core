@@ -34,6 +34,7 @@ class BaseSqlServerMetric(object):
     TABLE = None
     DEFAULT_METRIC_TYPE = None
     QUERY_BASE = None
+    OPERATION_NAME = 'base_metrics'
 
     # Flag to indicate if this subclass/table is available for custom queries
     CUSTOM_QUERIES_AVAILABLE = True
@@ -94,6 +95,7 @@ class SqlSimpleMetric(BaseSqlServerMetric):
                     from {table} where counter_name in ({{placeholders}})""".format(
         table=TABLE
     )
+    OPERATION_NAME = 'simple_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -131,6 +133,7 @@ class SqlFractionMetric(BaseSqlServerMetric):
                     order by cntr_type;""".format(
         table=TABLE
     )
+    OPERATION_NAME = 'fraction_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -221,6 +224,8 @@ class SqlIncrFractionMetric(SqlFractionMetric):
     the current value and the base value (denominator) between two collection points that are one second apart.
     """
 
+    OPERATION_NAME = 'incr_fraction_metrics'
+
     def report_fraction(self, value, base, metric_tags, previous_values):
         # return if nil is passed as the values cache, as this should be instantiated
         # at check instantiation
@@ -246,6 +251,7 @@ class SqlOsWaitStat(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_wait_stats'
     DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = """select * from {table} where wait_type in ({{placeholders}})""".format(table=TABLE)
+    OPERATION_NAME = 'os_wait_stat_metric'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -277,6 +283,7 @@ class SqlIoVirtualFileStat(BaseSqlServerMetric):
             table=TABLE
         )
     )
+    OPERATION_NAME = 'io_virtual_file_stats_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -336,6 +343,7 @@ class SqlOsMemoryClerksStat(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_memory_clerks'
     DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = """select * from {table} where type in ({{placeholders}})""".format(table=TABLE)
+    OPERATION_NAME = 'os_memory_clerks_stat_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -367,6 +375,7 @@ class SqlOsSchedulers(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_schedulers'
     DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = "select * from {table}".format(table=TABLE)
+    OPERATION_NAME = 'os_schedulers_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -403,6 +412,7 @@ class SqlOsTasks(BaseSqlServerMetric):
     """.format(
         table=TABLE
     )
+    OPERATION_NAME = 'os_tasks_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -435,6 +445,7 @@ class SqlMasterDatabaseFileStats(BaseSqlServerMetric):
         table=TABLE
     )
     DB_TYPE_MAP = {0: 'data', 1: 'transaction_log', 2: 'filestream', 3: 'unknown', 4: 'full_text'}
+    OPERATION_NAME = 'master_database_file_stats_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -480,6 +491,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
     TABLE = 'sys.database_files'
     DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = "select * from {table}".format(table=TABLE)
+    OPERATION_NAME = 'database_file_stats_metrics'
 
     DB_TYPE_MAP = {0: 'data', 1: 'transaction_log', 2: 'filestream', 3: 'unknown', 4: 'full_text'}
 
@@ -581,6 +593,7 @@ class SqlDatabaseStats(BaseSqlServerMetric):
     TABLE = 'sys.databases'
     DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = "select * from {table}".format(table=TABLE)
+    OPERATION_NAME = 'database_stats_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -626,6 +639,7 @@ class SqlDatabaseBackup(BaseSqlServerMetric):
         group by sys.databases.name""".format(
         table=TABLE
     )
+    OPERATION_NAME = 'database_backup_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -676,6 +690,7 @@ class SqlDbFragmentation(BaseSqlServerMetric):
         "AND DDIPS.index_id = I.index_id "
         "WHERE DDIPS.fragment_count is not null".format(table=TABLE)
     )
+    OPERATION_NAME = 'db_fragmentation_metrics'
 
     def __init__(self, cfg_instance, base_name, report_function, column, logger):
         super(SqlDbFragmentation, self).__init__(cfg_instance, base_name, report_function, column, logger)
@@ -761,6 +776,7 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
                  on dhdrs.replica_id = ar.replica_id""".format(
         table=TABLE
     )
+    OPERATION_NAME = 'db_replica_states_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -815,6 +831,7 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
                     on ag.group_id = dhdrcs.group_id""".format(
         table=TABLE
     )
+    OPERATION_NAME = 'availability_groups_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -868,6 +885,7 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
                     on ag.group_id = ar.group_id""".format(
         table=TABLE
     )
+    OPERATION_NAME = 'availability_replicas_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -944,6 +962,7 @@ class SqlDbFileSpaceUsage(BaseSqlServerMetric):
         FROM {table} group by database_id""".format(
         table=TABLE
     )
+    OPERATION_NAME = 'db_file_space_usage_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -1033,6 +1052,7 @@ class SqlDbIndexUsageStats(BaseSqlServerMetric):
         sql_columns=','.join(f'ixus.{col}' for col in columns),
         table=TABLE,
     ).strip()
+    OPERATION_NAME = 'db_index_usage_stats_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
