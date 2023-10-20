@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any
 from urllib.parse import urljoin  # noqa: F401
-from six.moves.urllib.parse import urlparse, urlunparse
+from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.errors import ConfigurationError
@@ -13,7 +13,6 @@ from .metrics import METRICS_MAP
 
 DEFAULT_METADATA_ENDPOINT = '/v2'
 DEFAULT_HEALTH_ENDPOINT = DEFAULT_METADATA_ENDPOINT +'/health/ready'
-DEFAULT_ERROR_CODE = r'(4|5)\d\d'
 
 class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
 
@@ -87,19 +86,21 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
             self.log.debug("Could not retrieve version metadata.")
 
         
-    def _check_server_health(self, response_handler=None):
+    def _check_server_health(self):
         if self.collect_server_info == False :
             self.log.warning("Collecting server info through API is disabled.")
 
         endpoint = urljoin(self.server_info_api, DEFAULT_HEALTH_ENDPOINT)
         response = self.http.get(endpoint)
         
-        if response.status_code == DEFAULT_ERROR_CODE:
+        #Any 4xx or 5xx response from the API endpoint (/v2/health/ready) means the server is not ready
+        if (400 <=response.status_code and response.status_code < 600):
             self.service_check('health.status', AgentCheck.CRITICAL, self.tags)
         if response.status_code == 200:
             self.service_check('health.status', AgentCheck.OK, self.tags)
         else:
             self.service_check('health.status', AgentCheck.UNKNOWN, self.tags)
+
 
     def check(self, instance):
         if instance['openmetrics_endpoint']:
