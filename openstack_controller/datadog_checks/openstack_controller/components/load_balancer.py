@@ -244,20 +244,45 @@ class LoadBalancer(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_healthmonitors(self, project_id, tags, component_config):
-        data = self.check.api.get_load_balancer_healthmonitors(project_id)
-        self.check.log.debug("data: %s", data)
-        for item in data:
-            healthmonitor = get_metrics_and_tags(
-                item,
-                tags=OCTAVIA_HEALTHMONITOR_TAGS,
-                prefix=OCTAVIA_HEALTHMONITOR_METRICS_PREFIX,
-                metrics=OCTAVIA_HEALTHMONITOR_METRICS,
-            )
-            self.check.log.debug("healthmonitor: %s", healthmonitor)
-            self.check.gauge(OCTAVIA_HEALTHMONITOR_COUNT, 1, tags=tags + healthmonitor['tags'])
-            for metric, value in healthmonitor['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + healthmonitor['tags'])
+    def _report_healthmonitors(self, project_id, tags, config):
+        report_healthmonitors = True
+        config_healthmonitors = config.get('healthmonitors', {})
+        if isinstance(config_healthmonitors, bool):
+            report_healthmonitors = config_healthmonitors
+            config_healthmonitors = {}
+        if report_healthmonitors:
+            healthmonitors_discovery = None
+            if config_healthmonitors:
+                config_healthmonitors_include = normalize_discover_config_include(config_healthmonitors, ["name"])
+                if config_healthmonitors_include:
+                    healthmonitors_discovery = Discovery(
+                        lambda: self.check.api.get_load_balancer_healthmonitors(project_id),
+                        limit=config_healthmonitors.get('limit'),
+                        include=config_healthmonitors_include,
+                        exclude=config_healthmonitors.get('exclude'),
+                        interval=config_healthmonitors.get('interval'),
+                        key=lambda healthmonitor: healthmonitor.get('name'),
+                    )
+            if healthmonitors_discovery:
+                discovered_healthmonitors = list(healthmonitors_discovery.get_items())
+            else:
+                discovered_healthmonitors = [
+                    (None, healthmonitor.get('name'), healthmonitor, None)
+                    for healthmonitor in self.check.api.get_load_balancer_healthmonitors(project_id)
+                ]
+            for _pattern, _item_name, item, item_config in discovered_healthmonitors:
+                self.check.log.debug("item: %s", item)
+                self.check.log.debug("item_config: %s", item_config)
+                healthmonitor = get_metrics_and_tags(
+                    item,
+                    tags=OCTAVIA_HEALTHMONITOR_TAGS,
+                    prefix=OCTAVIA_HEALTHMONITOR_METRICS_PREFIX,
+                    metrics=OCTAVIA_HEALTHMONITOR_METRICS,
+                )
+                self.check.log.debug("healthmonitor: %s", healthmonitor)
+                self.check.gauge(OCTAVIA_HEALTHMONITOR_COUNT, 1, tags=tags + healthmonitor['tags'])
+                for metric, value in healthmonitor['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + healthmonitor['tags'])
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
