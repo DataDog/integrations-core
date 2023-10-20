@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Collect and graph any WMI metrics.",
-    "title": "WMI Check",
+    "title": "WMI Check (legacy)",
     "media": [],
     "classifier_tags": [
       "Category::OS & System",
