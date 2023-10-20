@@ -24,6 +24,8 @@ INSTANCE_DISABLED_SERVER_INFO = {
     'tags': ['test:test'],
 }
 
+COMPOSE_FILE=os.path.join(HERE, 'docker', 'docker-compose.yaml')
+
 METRICS_MOCK = {
     'nv.cache.insertion.duration',
     'nv.cache.lookup.duration',

@@ -13,11 +13,11 @@ def dd_environment():
     compose_file = common.COMPOSE_FILE
     conditions = [
         CheckDockerLogs(identifier='caddy', patterns=['server running']),
-        CheckEndpoints(common.INSTANCE_DISABLED_SERVER_INFO["openmetrics_endpoint"]),
+        CheckEndpoints(common.INSTANCE["openmetrics_endpoint"]),
     ]
     with docker_run(compose_file, conditions=conditions):
         yield {
-            'instances': [common.INSTANCE_DISABLED_SERVER_INFO],
+            'instances': [common.INSTANCE],
         }
 
 
