@@ -165,6 +165,7 @@ NOVA_SERVER_TAGS = {
     'name': 'server_name',
     'status': 'server_status',
     'OS-EXT-SRV-ATTR:hypervisor_hostname': 'hypervisor',
+    'OS-EXT-SRV-ATTR:instance_name': 'instance_name',
     'OS-EXT-SRV-ATTR:hostname': 'instance_hostname',
 }
 NOVA_SERVER_METRICS = {
@@ -172,7 +173,10 @@ NOVA_SERVER_METRICS = {
     f"{NOVA_SERVER_METRICS_PREFIX}.error",
 }
 NOVA_SERVER_FLAVOR_METRICS_PREFIX = f"{NOVA_SERVER_METRICS_PREFIX}.flavor"
-NOVA_SERVER_FLAVOR_TAGS = {}
+NOVA_SERVER_FLAVOR_TAGS = {
+    'id': 'flavor_id',
+    'name': 'flavor_name',
+}
 NOVA_SERVER_FLAVOR_METRICS = {
     f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.vcpus",
     f"{NOVA_SERVER_FLAVOR_METRICS_PREFIX}.ram",
@@ -532,7 +536,7 @@ def get_normalized_tags(data, prefix, tags):
     normalized_tags = []
     if isinstance(data, dict):
         for key, value in data.items():
-            long_tag_name = f'{prefix}.{get_normalized_key(key)}' if prefix else get_normalized_key(key)
+            long_tag_name = f'{prefix}.{key}' if prefix else key
             if value is not None and long_tag_name in tags:
                 if isinstance(value, list):
                     for item in value:

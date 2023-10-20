@@ -1399,6 +1399,8 @@ def test_servers_disable_call(aggregator, check, dd_run_check, mock_http_get, co
             'server_id:5102fbbf-7156-48dc-8355-af7ab992266f',
             'server_name:admin-1',
             'server_status:ACTIVE',
+            'hypervisor:agent-integrations-openstack-default',
+            'instance_name:instance-0000004a',
         ],
     )
     aggregator.assert_metric(
