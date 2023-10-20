@@ -286,21 +286,46 @@ class LoadBalancer(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_quotas(self, project_id, tags, component_config):
-        data = self.check.api.get_load_balancer_quotas(project_id)
-        self.check.log.debug("data: %s", data)
-        for item in data:
-            quota = get_metrics_and_tags(
-                item,
-                tags=OCTAVIA_QUOTA_TAGS,
-                prefix=OCTAVIA_QUOTA_METRICS_PREFIX,
-                metrics=OCTAVIA_QUOTA_METRICS,
-                lambda_value=lambda key, value, item=item: -1 if value is None else value,
-            )
-            self.check.log.debug("quota: %s", quota)
-            self.check.gauge(OCTAVIA_QUOTA_COUNT, 1, tags=tags + quota['tags'])
-            for metric, value in quota['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + quota['tags'])
+    def _report_quotas(self, project_id, tags, config):
+        report_quotas = True
+        config_quotas = config.get('quotas', {})
+        if isinstance(config_quotas, bool):
+            report_quotas = config_quotas
+            config_quotas = {}
+        if report_quotas:
+            quotas_discovery = None
+            if config_quotas:
+                config_quotas_include = normalize_discover_config_include(config_quotas, ["name"])
+                if config_quotas_include:
+                    quotas_discovery = Discovery(
+                        lambda: self.check.api.get_load_balancer_quotas(project_id),
+                        limit=config_quotas.get('limit'),
+                        include=config_quotas_include,
+                        exclude=config_quotas.get('exclude'),
+                        interval=config_quotas.get('interval'),
+                        key=lambda quota: quota.get('name'),
+                    )
+            if quotas_discovery:
+                discovered_quotas = list(quotas_discovery.get_items())
+            else:
+                discovered_quotas = [
+                    (None, quota.get('name'), quota, None)
+                    for quota in self.check.api.get_load_balancer_quotas(project_id)
+                ]
+            for _pattern, _item_name, item, item_config in discovered_quotas:
+                self.check.log.debug("item: %s", item)
+                self.check.log.debug("item_config: %s", item_config)
+                quota = get_metrics_and_tags(
+                    item,
+                    tags=OCTAVIA_QUOTA_TAGS,
+                    prefix=OCTAVIA_QUOTA_METRICS_PREFIX,
+                    metrics=OCTAVIA_QUOTA_METRICS,
+                    lambda_value=lambda key, value, item=item: -1 if value is None else value,
+                )
+                self.check.log.debug("quota: %s", quota)
+                self.check.gauge(OCTAVIA_QUOTA_COUNT, 1, tags=tags + quota['tags'])
+                for metric, value in quota['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + quota['tags'])
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
