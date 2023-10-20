@@ -89,7 +89,7 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(), check_submission_type=True, exclude=['dd.mysql.operation.time']
+        get_metadata_metrics(), check_submission_type=True, exclude=[variables.OPERATION_TIME_METRIC_NAME]
     )
 
 
@@ -107,7 +107,7 @@ def test_complex_config(aggregator, dd_run_check, instance_complex):
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
         check_submission_type=True,
-        exclude=['alice.age', 'bob.age', 'dd.mysql.operation.time'] + variables.STATEMENT_VARS,
+        exclude=['alice.age', 'bob.age', variables.OPERATION_TIME_METRIC_NAME] + variables.STATEMENT_VARS,
     )
 
 
@@ -122,7 +122,8 @@ def test_e2e(dd_agent_check, dd_default_hostname, instance_complex):
         e2e=True,
     )
     aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(), exclude=['alice.age', 'bob.age', 'dd.mysql.operation.time'] + variables.STATEMENT_VARS
+        get_metadata_metrics(),
+        exclude=['alice.age', 'bob.age'] + variables.E2E_OPERATION_TIME_METRIC_NAME + variables.STATEMENT_VARS,
     )
 
 
@@ -377,7 +378,7 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
         check_submission_type=True,
-        exclude=['alice.age', 'bob.age', 'dd.mysql.operation.time'] + variables.STATEMENT_VARS,
+        exclude=['alice.age', 'bob.age', variables.OPERATION_TIME_METRIC_NAME] + variables.STATEMENT_VARS,
     )
 
     # Make sure group replication is not detected
@@ -473,15 +474,17 @@ def _test_optional_metrics(aggregator, optional_metrics):
 def _test_operation_time_metrics(aggregator, operation_time_metrics, tags, e2e=False):
     for operation_time_metric in operation_time_metrics:
         if e2e:
-            for suffix in ('avg', 'max'):
+            for metric_name in variables.E2E_OPERATION_TIME_METRIC_NAME:
                 aggregator.assert_metric(
-                    'dd.mysql.operation.time.{}'.format(suffix),
+                    metric_name,
                     tags=tags + ['operation:{}'.format(operation_time_metric)],
                     count=1,
                 )
         else:
             aggregator.assert_metric(
-                'dd.mysql.operation.time', tags=tags + ['operation:{}'.format(operation_time_metric)], count=1
+                variables.OPERATION_TIME_METRIC_NAME,
+                tags=tags + ['operation:{}'.format(operation_time_metric)],
+                count=1,
             )
 
 
