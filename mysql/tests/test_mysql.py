@@ -119,13 +119,14 @@ def test_e2e(dd_agent_check, dd_default_hostname, instance_complex):
         tags.SC_TAGS + [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=dd_default_hostname)],
         tags.METRIC_TAGS,
         hostname=dd_default_hostname,
+        e2e=True,
     )
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(), exclude=['alice.age', 'bob.age', 'dd.mysql.operation.time'] + variables.STATEMENT_VARS
     )
 
 
-def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname='stubbed.hostname'):
+def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname='stubbed.hostname', e2e=False):
     # Test service check
     aggregator.assert_service_check(
         'mysql.can_connect',
@@ -239,7 +240,7 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
     _test_optional_metrics(aggregator, optional_metrics)
 
     _test_operation_time_metrics(
-        aggregator, operation_time_metrics, metric_tags + ['agent_hostname:{}'.format(hostname)]
+        aggregator, operation_time_metrics, metric_tags + ['agent_hostname:{}'.format(hostname)], e2e=e2e
     )
 
     # Raises when coverage < 100%
@@ -469,11 +470,19 @@ def _test_optional_metrics(aggregator, optional_metrics):
     assert before > after
 
 
-def _test_operation_time_metrics(aggregator, operation_time_metrics, tags):
+def _test_operation_time_metrics(aggregator, operation_time_metrics, tags, e2e=False):
     for operation_time_metric in operation_time_metrics:
-        aggregator.assert_metric(
-            'dd.mysql.operation.time', tags=tags + ['operation:{}'.format(operation_time_metric)], count=1
-        )
+        if e2e:
+            for suffix in ('avg', 'max'):
+                aggregator.assert_metric(
+                    'dd.mysql.operation.time.{}'.format(suffix),
+                    tags=tags + ['operation:{}'.format(operation_time_metric)],
+                    count=1,
+                )
+        else:
+            aggregator.assert_metric(
+                'dd.mysql.operation.time', tags=tags + ['operation:{}'.format(operation_time_metric)], count=1
+            )
 
 
 @requires_static_version
