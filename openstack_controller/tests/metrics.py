@@ -3683,6 +3683,8 @@ NODES_METRICS_IRONIC_MICROVERSION_DEFAULT = [
         'tags': [
             'keystone_server:http://127.0.0.1:8080/identity',
             'node_uuid:9d72cf53-19c8-4942-9314-005fa5d2a6a0',
+            'driver:ipmi',
+            'provision_state:active',
         ],
     },
     {
@@ -3692,6 +3694,7 @@ NODES_METRICS_IRONIC_MICROVERSION_DEFAULT = [
         'tags': [
             'keystone_server:http://127.0.0.1:8080/identity',
             'node_uuid:bd7a61bb-5fe0-4c93-9628-55e312f9ef0e',
+            'driver:ipmi',
         ],
     },
     {
@@ -3701,6 +3704,7 @@ NODES_METRICS_IRONIC_MICROVERSION_DEFAULT = [
         'tags': [
             'keystone_server:http://127.0.0.1:8080/identity',
             'node_uuid:54855e59-83ca-46f8-a78f-55d3370e0656',
+            'driver:ipmi',
         ],
     },
     {
@@ -3711,6 +3715,8 @@ NODES_METRICS_IRONIC_MICROVERSION_DEFAULT = [
             'keystone_server:http://127.0.0.1:8080/identity',
             'node_uuid:20512deb-e493-4796-a046-5d6e4e072c95',
             'power_state:power on',
+            'driver:fake-hardware',
+            'provision_state:active',
         ],
     },
 ]
@@ -3725,6 +3731,8 @@ NODES_METRICS_IRONIC_MICROVERSION_1_80 = [
             'keystone_server:http://127.0.0.1:8080/identity',
             'node_name:node-0',
             'node_uuid:9d72cf53-19c8-4942-9314-005fa5d2a6a0',
+            'driver:ipmi',
+            'provision_state:active',
         ],
     },
     {
@@ -3736,6 +3744,8 @@ NODES_METRICS_IRONIC_MICROVERSION_1_80 = [
             'keystone_server:http://127.0.0.1:8080/identity',
             'node_name:node-1',
             'node_uuid:bd7a61bb-5fe0-4c93-9628-55e312f9ef0e',
+            'driver:ipmi',
+            'provision_state:available',
         ],
     },
     {
@@ -3747,6 +3757,8 @@ NODES_METRICS_IRONIC_MICROVERSION_1_80 = [
             'keystone_server:http://127.0.0.1:8080/identity',
             'node_name:node-2',
             'node_uuid:54855e59-83ca-46f8-a78f-55d3370e0656',
+            'driver:ipmi',
+            'provision_state:available',
         ],
     },
     {
@@ -3759,6 +3771,8 @@ NODES_METRICS_IRONIC_MICROVERSION_1_80 = [
             'node_name:test',
             'node_uuid:20512deb-e493-4796-a046-5d6e4e072c95',
             'power_state:power on',
+            'driver:fake-hardware',
+            'provision_state:active',
         ],
     },
 ]

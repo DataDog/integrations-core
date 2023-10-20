@@ -358,6 +358,9 @@ IRONIC_NODE_TAGS = {
     'name': 'node_name',
     'conductor_group': 'conductor_group',
     'power_state': 'power_state',
+    'provision_state': 'provision_state',
+    'target_provision_state': 'target_provision_state',
+    'driver': 'driver',
 }
 IRONIC_NODE_METRICS = {
     f"{IRONIC_NODE_METRICS_PREFIX}.up": {},
