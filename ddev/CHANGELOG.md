@@ -9,6 +9,7 @@
 ***Fixed***:
 
 * Fix `ddev env test` so that tests run for all environments properly when no environment is specified ([#16054](https://github.com/DataDog/integrations-core/pull/16054))
+* Fix e2e test env detection to use `platforms`, not `platform` ([#16063](https://github.com/DataDog/integrations-core/pull/16063))
 
 ## 5.2.1 / 2023-10-12
 
