@@ -113,7 +113,7 @@ class IncludeItem3(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    name: Optional[str] = None
+    id: Optional[str] = None
     stats: Optional[bool] = None
 
 

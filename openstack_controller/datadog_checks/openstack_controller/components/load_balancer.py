@@ -329,22 +329,49 @@ class LoadBalancer(Component):
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_amphorae(self, project_id, tags, component_config):
-        data = self.check.api.get_load_balancer_amphorae(project_id)
-        self.check.log.debug("data: %s", data)
-        for item in data:
-            amphora = get_metrics_and_tags(
-                item,
-                tags=OCTAVIA_AMPHORA_TAGS,
-                prefix=OCTAVIA_AMPHORA_METRICS_PREFIX,
-                metrics=OCTAVIA_AMPHORA_METRICS,
-                lambda_value=lambda key, value, item=item: -1 if value is None else value,
-            )
-            self.check.log.debug("amphora: %s", amphora)
-            self.check.gauge(OCTAVIA_AMPHORA_COUNT, 1, tags=tags + amphora['tags'])
-            for metric, value in amphora['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + amphora['tags'])
-            self._report_amphora_stats(item['id'], tags + amphora['tags'])
+    def _report_amphorae(self, project_id, tags, config):
+        report_amphorae = True
+        config_amphorae = config.get('amphorae', {})
+        if isinstance(config_amphorae, bool):
+            report_amphorae = config_amphorae
+            config_amphorae = {}
+        if report_amphorae:
+            amphorae_discovery = None
+            if config_amphorae:
+                config_amphorae_include = normalize_discover_config_include(config_amphorae, ["id"])
+                if config_amphorae_include:
+                    amphorae_discovery = Discovery(
+                        lambda: self.check.api.get_load_balancer_amphorae(project_id),
+                        limit=config_amphorae.get('limit'),
+                        include=config_amphorae_include,
+                        exclude=config_amphorae.get('exclude'),
+                        interval=config_amphorae.get('interval'),
+                        key=lambda amphora: amphora.get('id'),
+                    )
+            if amphorae_discovery:
+                discovered_amphorae = list(amphorae_discovery.get_items())
+            else:
+                discovered_amphorae = [
+                    (None, amphora.get('id'), amphora, None)
+                    for amphora in self.check.api.get_load_balancer_amphorae(project_id)
+                ]
+            for _pattern, _item_id, item, item_config in discovered_amphorae:
+                self.check.log.debug("item: %s", item)
+                self.check.log.debug("item_config: %s", item_config)
+                amphora = get_metrics_and_tags(
+                    item,
+                    tags=OCTAVIA_AMPHORA_TAGS,
+                    prefix=OCTAVIA_AMPHORA_METRICS_PREFIX,
+                    metrics=OCTAVIA_AMPHORA_METRICS,
+                    lambda_value=lambda key, value, item=item: -1 if value is None else value,
+                )
+                self.check.log.debug("amphora: %s", amphora)
+                self.check.gauge(OCTAVIA_AMPHORA_COUNT, 1, tags=tags + amphora['tags'])
+                for metric, value in amphora['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + amphora['tags'])
+                report_stats = item_config.get('stats', True) if item_config else True
+                if report_stats:
+                    self._report_amphora_stats(item['id'], tags + amphora['tags'])
 
     @Component.http_error()
     def _report_amphora_stats(self, amphora_id, tags):

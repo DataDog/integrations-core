@@ -589,7 +589,7 @@ files:
                                     - type: string
                                     - type: object
                                       properties:
-                                        - name: name
+                                        - name: id
                                           type: string
                                         - name: stats
                                           type: boolean
