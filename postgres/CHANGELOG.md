@@ -98,7 +98,7 @@
 
 ***Fixed***:
 
-* Fix InstanceConfig loading error for `ssl` config ([#15611](https://github.com/DataDog/integrations-core/pull/15611))
+* Fix InstanceConfig loading error for `ssl` config because `true` is not a valid value. Please, use `require` instead of `true` ([#15611](https://github.com/DataDog/integrations-core/pull/15611))
 
 ## 14.1.0 / 2023-08-10
 
