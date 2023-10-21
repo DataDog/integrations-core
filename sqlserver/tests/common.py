@@ -219,6 +219,21 @@ INIT_CONFIG_ALT_TABLES = {
     ]
 }
 
+OPERATION_TIME_METRICS = [
+    'simple_metrics',
+    'database_stats_metrics',
+    'db_fragmentation_metrics',
+    'master_database_file_stats_metrics',
+    'fraction_metrics',
+    'db_file_space_usage_metrics',
+    'database_backup_metrics',
+    'database_file_stats_metrics',
+    'incr_fraction_metrics',
+    'db_index_usage_stats_metrics',
+    'os_tasks_metrics',
+    'os_schedulers_metrics',
+]
+
 
 def assert_metrics(
     aggregator, check_tags, service_tags, dbm_enabled=False, hostname=None, database_autodiscovery=False, dbs=None
@@ -251,5 +266,15 @@ def assert_metrics(
         assert hostname is not None, "hostname must be explicitly specified for all metrics"
         aggregator.assert_metric(mname, hostname=hostname)
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK, tags=service_tags)
+
+    operation_time_metric_tags = check_tags + ['agent_hostname:{}'.format(hostname)]
+    for operation_name in OPERATION_TIME_METRICS:
+        aggregator.assert_metric(
+            'dd.sqlserver.operation.time',
+            tags=['operation:{}'.format(operation_name)] + operation_time_metric_tags,
+            hostname=hostname,
+            count=1,
+        )
+
     aggregator.assert_all_metrics_covered()
     aggregator.assert_no_duplicate_metrics()

@@ -16,6 +16,7 @@ from .common import (
     EXPECTED_QUERY_EXECUTOR_AO_METRICS_COMMON,
     EXPECTED_QUERY_EXECUTOR_AO_METRICS_PRIMARY,
     EXPECTED_QUERY_EXECUTOR_AO_METRICS_SECONDARY,
+    OPERATION_TIME_METRICS,
     UNEXPECTED_FCI_METRICS,
     UNEXPECTED_QUERY_EXECUTOR_AO_METRICS,
     inc_perf_counter_metrics,
@@ -131,6 +132,21 @@ def test_check_docker(dd_agent_check, init_config, instance_e2e):
         aggregator.assert_metric(mname, count=0)
 
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK)
+
+    hostname = instance_e2e['host']
+    operation_time_metric_tags = [
+        'agent_hostname:{}'.format(hostname),
+        'dd.internal.resource:database_instance:{}'.format(hostname),
+    ]
+    for operation_name in OPERATION_TIME_METRICS:
+        for suffix in ('avg', 'max', '95percentile', 'count', 'median'):
+            aggregator.assert_metric(
+                'dd.sqlserver.operation.time.{}'.format(suffix),
+                tags=['operation:{}'.format(operation_name)] + operation_time_metric_tags,
+                hostname=hostname,
+                count=1,
+            )
+
     aggregator.assert_all_metrics_covered()
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS)
