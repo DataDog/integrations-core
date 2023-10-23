@@ -86,17 +86,18 @@ class DockerAgent(AgentInterface):
         if not agent_build:
             agent_build = 'datadog/agent-dev:master'
 
-        # Add a potentially missing `py` suffix for default non-RC builds
-        if (
-            'rc' not in agent_build
-            and 'py' not in agent_build
-            and agent_build != 'datadog/agent:6'
-            and agent_build != 'datadog/agent:7'
-        ):
-            agent_build = f'{agent_build}-py{self.python_version[0]}'
+        if agent_build.startswith("datadog/"):
+            # Add a potentially missing `py` suffix for default non-RC builds
+            if (
+                'rc' not in agent_build
+                and 'py' not in agent_build
+                and agent_build != 'datadog/agent:6'
+                and agent_build != 'datadog/agent:7'
+            ):
+                agent_build = f'{agent_build}-py{self.python_version[0]}'
 
-        if self.metadata.get('use_jmx') and not agent_build.endswith('-jmx'):
-            agent_build += '-jmx'
+            if self.metadata.get('use_jmx') and not agent_build.endswith('-jmx'):
+                agent_build += '-jmx'
 
         env_vars = env_vars.copy()
 
