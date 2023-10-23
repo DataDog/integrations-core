@@ -12,6 +12,7 @@
 * Fix e2e test env detection to use `platforms`, not `platform` ([#16063](https://github.com/DataDog/integrations-core/pull/16063))
 * Include ddev's source code when measuring its coverage ([#16057](https://github.com/DataDog/integrations-core/pull/16057))
 * Fix Github API search query ([#15943](https://github.com/DataDog/integrations-core/pull/15943))
+* Do not modify the Agent build name if provided by the user when running the e2e environments ([#16052](https://github.com/DataDog/integrations-core/pull/16052))
 
 ## 5.2.1 / 2023-10-12
 
