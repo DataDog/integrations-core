@@ -1,8 +1,8 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any
 from urllib.parse import urljoin  # noqa: F401
+
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
@@ -10,9 +10,9 @@ from datadog_checks.base.errors import ConfigurationError
 
 from .metrics import METRICS_MAP
 
-
 DEFAULT_METADATA_ENDPOINT = '/v2'
-DEFAULT_HEALTH_ENDPOINT = DEFAULT_METADATA_ENDPOINT +'/health/ready'
+DEFAULT_HEALTH_ENDPOINT = DEFAULT_METADATA_ENDPOINT + '/health/ready'
+
 
 class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
 
@@ -35,15 +35,14 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
         try:
             parts = urlparse(self.openmetrics_endpoint)
             # Delete the /metrics from the url
-            self.base_url=parts._replace(path="")
+            self.base_url = parts._replace(path="")
             # Replace the openmetrics port by the server port
-            self.server_info_api= self.base_url._replace(netloc=parts.hostname+':'+self.server_port).geturl()
-            
+            self.server_info_api = self.base_url._replace(netloc=parts.hostname + ':' + self.server_port).geturl()
+
         except Exception as e:
             self.log.debug("Unable to determine the base url for server info collection: %s", str(e))
 
         self.collect_server_info = self.instance.get('collect_server_info', True)
-
 
     def get_default_config(self):
         return {
@@ -53,11 +52,10 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
                 "version": "model_version",
             },
         }
-    
-        
+
     @AgentCheck.metadata_entrypoint
     def _submit_version_metadata(self):
-        if self.collect_server_info == False :
+        if self.collect_server_info is False:
             self.log.warning("Collecting server info through API is disabled.")
 
         endpoint = urljoin(self.server_info_api, DEFAULT_METADATA_ENDPOINT)
@@ -85,27 +83,25 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
         else:
             self.log.debug("Could not retrieve version metadata.")
 
-        
     def _check_server_health(self):
-        if self.collect_server_info == False :
+        if self.collect_server_info is False:
             self.log.warning("Collecting server info through API is disabled.")
 
         endpoint = urljoin(self.server_info_api, DEFAULT_HEALTH_ENDPOINT)
         response = self.http.get(endpoint)
-        
-        #Any 4xx or 5xx response from the API endpoint (/v2/health/ready) means the server is not ready
-        if (400 <=response.status_code and response.status_code < 600):
+
+        # Any 4xx or 5xx response from the API endpoint (/v2/health/ready) means the server is not ready
+        if 400 <= response.status_code and response.status_code < 600:
             self.service_check('health.status', AgentCheck.CRITICAL, self.tags)
         if response.status_code == 200:
             self.service_check('health.status', AgentCheck.OK, self.tags)
         else:
             self.service_check('health.status', AgentCheck.UNKNOWN, self.tags)
 
-
     def check(self, instance):
         if instance['openmetrics_endpoint']:
             super().check(instance)
         # Whether to collect the server info through the API or not
-        if self.collect_server_info == True :
+        if self.collect_server_info is True:
             self._submit_version_metadata()
             self._check_server_health()

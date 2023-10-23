@@ -1,0 +1,31 @@
+{
+    "title": "Nvidia Triton",
+    "description": null,
+    "widgets": [
+        {
+            "id": 5698943260180544,
+            "definition": {
+                "type": "note",
+                "content": "**Refer to the following resources for more information**\n\n- [Datadog Nvidia Triton documentation]()\n\n- [Available Nvidia Triton metrics]()\n\n- [Nvidia Triton metric collection](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/metrics.html) ",
+                "background_color": "yellow",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 2,
+                "height": 2
+            }
+        }
+    ],
+    "template_variables": [],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

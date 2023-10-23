@@ -28,18 +28,16 @@
       },
       "metrics": {
         "prefix": "nvidia_triton.",
-        "check": "nvidia_triton.nv.inference.compute.infer.duration_us",
+        "check": "nvidia_triton.nv.cpu.memory.total_bytes",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
     },
-    "dashboards": {},
-    "monitors": {},
-    "logs": {},
-    "saved_views": {}
-  },
+    "dashboards": {"nvidia_triton": "assets/dashboards/nvidia_triton_overview.json"},
+    "logs": {"source": "nvidia_triton"}
+    },
   "author": {
     "support_email": "help@datadoghq.com",
     "name": "Datadog",
