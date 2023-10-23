@@ -5,6 +5,7 @@
 ***Fixed***:
 
 * Update default profiles column to symbol ([#15998](https://github.com/DataDog/integrations-core/pull/15998))
+* Deprecate init_config.profiles ([#16068](https://github.com/DataDog/integrations-core/pull/16068))
 
 ## 7.0.0 / 2023-09-29
 
