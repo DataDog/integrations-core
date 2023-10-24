@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
 RELEASE_REGEX = r".*[67]\.\d\d\.\d$"
 
+
 class DockerAgent(AgentInterface):
     @cached_property
     def _isatty(self) -> bool:

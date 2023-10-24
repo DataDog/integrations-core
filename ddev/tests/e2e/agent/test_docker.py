@@ -45,6 +45,18 @@ class TestStart:
                 True,
                 id='custom build with jmx',
             ),
+            pytest.param(
+                'datadog/agent:7.46.0',
+                'datadog/agent:7.46.0',
+                False,
+                id='Specific stable release',
+            ),
+            pytest.param(
+                'datadog/agent:7.45.0',
+                'datadog/agent:7.45.0-jmx',
+                True,
+                id='Specific stable release with jmx',
+            ),
         ],
     )
     def test_agent_build(
