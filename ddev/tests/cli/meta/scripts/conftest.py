@@ -48,23 +48,24 @@ python = ["2.7", "{OLD_PYTHON_VERSION}"]
 """,
     )
 
-    write_file(
-        repo_path / 'dummy',
-        'pyproject.toml',
-        f"""[project]
-name = "dummy"
-classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Intended Audience :: Developers",
-    "Intended Audience :: System Administrators",
-    "License :: OSI Approved :: BSD License",
-    "Natural Language :: English",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python :: 2.7",
-    "Programming Language :: Python :: {OLD_PYTHON_VERSION}",
-]
-""",
-    )
+    for integration in ('dummy', 'datadog_checks_dependency_provider'):
+        write_file(
+            repo_path / integration,
+            'pyproject.toml',
+            f"""[project]
+    name = "dummy"
+    classifiers = [
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Developers",
+        "Intended Audience :: System Administrators",
+        "License :: OSI Approved :: BSD License",
+        "Natural Language :: English",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: {OLD_PYTHON_VERSION}",
+    ]
+    """,
+        )
 
     write_file(
         repo_path / '.github' / 'workflows',
