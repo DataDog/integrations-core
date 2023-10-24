@@ -41,6 +41,7 @@ def changes(check, tag_pattern, tag_prefix, dry_run, since):
             'following SemVer and matches the provided tag_prefix and/or tag_pattern.'
         )
 
-    applicable_changelog_types = [ {fname.split(".")[1] for fname in os.listdir(os.path.join(get_root(), check, 'changelog.d'))}
+    applicable_changelog_types = [
+        {fname.split(".")[1] for fname in os.listdir(os.path.join(get_root(), check, 'changelog.d'))}
     ]
     return cur_version, applicable_changelog_types
