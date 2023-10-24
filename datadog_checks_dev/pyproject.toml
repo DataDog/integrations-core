@@ -85,6 +85,8 @@ cli = [
     "tomli>=1.1.0",
     "tomli-w>=1.0.0",
     "tox>=3.12.1, <4.0.0",
+    # Move towncrier dependency ddev once we migrate changelog-related commands.
+    "towncrier==23.10.0",
     "twine>=1.11.0",
     "virtualenv<20.22.0",
     # TODO: Remove once every check has a pyproject.toml
