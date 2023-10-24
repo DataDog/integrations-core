@@ -171,5 +171,5 @@ OPERATOR_AZURE_METRICS = [
     'cilium.operator.azure.api.duration.seconds.count',
     'cilium.operator.azure.api.duration.seconds.sum',
     'cilium.operator.azure.api.rate_limit.duration.seconds.count',
-    'cilium.operator.azure.api.rate_limit.duration.seconds.sum'
+    'cilium.operator.azure.api.rate_limit.duration.seconds.sum',
 ]
