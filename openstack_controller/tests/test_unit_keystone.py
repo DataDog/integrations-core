@@ -368,6 +368,44 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
 
 
 @pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            configs.SDK,
+            id='api sdk',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_region_id_in_tags(aggregator, dd_run_check, instance, openstack_controller_check):
+    instance = instance | {
+        "endpoint_region_id": "RegionOne",
+    }
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.keystone.response_time',
+        count=1,
+        tags=[
+            'region_id:RegionOne',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_service_check(
+        'openstack.keystone.api.up',
+        status=AgentCheck.OK,
+        tags=[
+            'region_id:RegionOne',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+
+
+@pytest.mark.parametrize(
     ('mock_http_get', 'instance'),
     [
         pytest.param(

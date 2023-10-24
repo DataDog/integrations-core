@@ -66,6 +66,8 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
     def check(self, _instance):
         self.log.info("Running check")
         tags = ['keystone_server:{}'.format(self.api.auth_url())] + self.instance.get('tags', [])
+        if self.config.endpoint_region_id:
+            tags = tags + ['region_id:{}'.format(self.config.endpoint_region_id)]
         self.gauge("openstack.controller", 1, tags=tags)
         if self.identity.authorize_user():
             self.log.info("User successfully authorized")
