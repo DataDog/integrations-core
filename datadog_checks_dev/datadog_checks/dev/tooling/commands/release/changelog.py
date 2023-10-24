@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import sys
 from collections import namedtuple
 
 import click
@@ -20,7 +21,17 @@ def towncrier(target_dir, cmd, *cmd_args):
     Run towncrier command with its arguments in target_dir.
     '''
     tc_res = run_or_abort(
-        ["towncrier", cmd, "--config", os.path.join(get_root(), "towncrier.toml"), "--dir", target_dir, *cmd_args],
+        [
+            sys.executable,
+            "-m",
+            "towncrier",
+            cmd,
+            "--config",
+            os.path.join(get_root(), "towncrier.toml"),
+            "--dir",
+            target_dir,
+            *cmd_args,
+        ],
         capture='both',
     )
     echo_info(tc_res.stdout.rstrip())
