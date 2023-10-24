@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
     from ddev.utils.fs import Path
 
-RELEASE_REGEX = r".*[67]\.\d\d\.\d$"
+RELEASE_REGEX = r'.*[67]\.\d\d\.\d$|.*[67]\.\d\d\.\d-jmx$'
 
 
 class DockerAgent(AgentInterface):
