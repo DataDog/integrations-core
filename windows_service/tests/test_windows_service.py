@@ -1,9 +1,13 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import ctypes
+
 import pytest
 import pywintypes
+import winerror
 from mock import patch
+from six import PY2
 
 from datadog_checks.windows_service import WindowsService
 
@@ -253,6 +257,39 @@ def test_invalid_pattern_regex(aggregator, check, instance_basic_dict):
 
     with pytest.raises(Exception, match=r"Regular expression syntax error in '\(foo':"):
         c.check(instance_basic_dict)
+
+
+def test_trigger_start(aggregator, check, instance_trigger_start):
+    c = check(instance_trigger_start)
+    c.check(instance_trigger_start)
+    aggregator.assert_service_check(
+        WindowsService.SERVICE_CHECK_NAME,
+        status=WindowsService.OK,
+        tags=['windows_service:EventLog', 'optional:tag1'],
+        count=1,
+    )
+
+    aggregator.assert_service_check(
+        WindowsService.SERVICE_CHECK_NAME,
+        status=WindowsService.UNKNOWN,
+        tags=['windows_service:dnscache', 'optional:tag1'],
+        count=1,
+    )
+
+
+def test_trigger_count_failure(aggregator, check, instance_trigger_start, caplog):
+    c = check(instance_trigger_start)
+
+    with patch(
+        'datadog_checks.windows_service.windows_service.QueryServiceConfig2W',
+        side_effect=[ctypes.WinError(winerror.ERROR_INSUFFICIENT_BUFFER), ctypes.WinError(1)] * 2,
+    ):
+        c.check(instance_trigger_start)
+
+    if PY2:
+        assert 'WindowsError: [Error 1] Incorrect function' in caplog.text
+    else:
+        assert 'OSError: [WinError 1] Incorrect function' in caplog.text
 
 
 @pytest.mark.e2e

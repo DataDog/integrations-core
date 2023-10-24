@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add Windows service `trigger_start` filter to config ([#16038](https://github.com/DataDog/integrations-core/pull/16038))
+
 ## 4.6.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:
