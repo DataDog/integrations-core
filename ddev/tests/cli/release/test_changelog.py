@@ -398,7 +398,6 @@ class TestBuild:
 
             * Bar ([#2](https://github.com/DataDog/integrations-core/pull/2))
 
-
             ## 3.3.0 / 2023-07-20
 
             ***Added***:
