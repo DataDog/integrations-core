@@ -36,6 +36,15 @@ class TestStart:
             pytest.param('datadog/agent-dev:master-py3', 'datadog/agent-dev:master-py3', False, id='exact'),
             pytest.param('datadog/agent-dev:master', 'datadog/agent-dev:master-py3-jmx', True, id='jmx'),
             pytest.param('datadog/agent-dev:master-py3-jmx', 'datadog/agent-dev:master-py3-jmx', True, id='jmx exact'),
+            pytest.param(
+                'my-custom-build-that-I-have-locally', 'my-custom-build-that-I-have-locally', False, id='custom build'
+            ),
+            pytest.param(
+                'my-custom-build-that-I-have-locally',
+                'my-custom-build-that-I-have-locally',
+                True,
+                id='custom build with jmx',
+            ),
         ],
     )
     def test_agent_build(

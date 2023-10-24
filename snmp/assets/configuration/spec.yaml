@@ -87,6 +87,7 @@ files:
               definition_file: f5-big-ip.yaml
             cisco-asr:
               definition_file: cisco-asr.yaml
+        hidden: true
       - name: refresh_oids_cache_interval
         description: |
           Note: Beta feature, only available using python SNMP integration.

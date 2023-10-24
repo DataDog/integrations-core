@@ -53,22 +53,6 @@ init_config:
     #     metric_tags:
     #     - TCP
 
-    ## @param profiles - mapping - optional
-    ## Specify profiles to be able to reference a set of metrics by name.
-    ## Either `definition_file` or `definition` must be defined.
-    ## `definition_file` points to a file with a profile, and `definition` inlines
-    ## it directly.
-    ## When using a profile present on the profiles directory of the
-    ## configuration, you can directly pass the filename.
-    ## By default, if the file doesn't start with an underscore, it loads all of the profiles
-    ## installed in the python package and in the configuration directory.
-    #
-    # profiles:
-    #   f5-big-ip:
-    #     definition_file: f5-big-ip.yaml
-    #   cisco-asr:
-    #     definition_file: cisco-asr.yaml
-
     ## @param refresh_oids_cache_interval - integer - optional - default: 0
     ## Note: Beta feature, only available using python SNMP integration.
     ## Set this option to enable caching of OIDs. The value is the number of seconds before the

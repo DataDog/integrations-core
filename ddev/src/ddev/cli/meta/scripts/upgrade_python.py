@@ -3,9 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import itertools
 from typing import TYPE_CHECKING
 
 import click
+
+from ddev.integration.core import Integration
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -26,7 +29,7 @@ def upgrade_python(app: Application, version: str):
 
     tracker = app.create_validation_tracker('Python upgrades')
 
-    for target in app.repo.integrations.iter_testable(['all']):
+    for target in integrations(app):
         update_hatch_file(app, target.path, version, old_version, tracker)
         update_pyproject_file(target, version, old_version, tracker)
         update_setup_file(target, version, old_version, tracker)
@@ -43,6 +46,16 @@ def upgrade_python(app: Application, version: str):
 
     if tracker.errors:  # no cov
         app.abort()
+
+
+def integrations(app):
+    extra_integrations = []
+
+    if app.repo.name == 'core':
+        names = ["datadog_checks_dependency_provider"]
+        extra_integrations = [Integration(app.repo.path / name, app.repo.path, app.repo.config) for name in names]
+
+    return itertools.chain(app.repo.integrations.iter_testable(['all']), extra_integrations)
 
 
 def update_ci_files(app: Application, new_version: str, old_version: str, tracker: ValidationTracker):
@@ -167,6 +180,10 @@ def update_hatch_file(app: Application, target_path, new_version: str, old_versi
     import tomlkit
 
     config_file = target_path / 'hatch.toml'
+
+    if not config_file.exists():
+        return
+
     test_config = tomlkit.parse(config_file.read_text())
     changed = False
 

@@ -7,10 +7,12 @@
 * Upgrade `psycopg2-binary` to `v2.9.8` ([#15949](https://github.com/DataDog/integrations-core/pull/15949))
 * Add support for reporting SQL obfuscation errors ([#15990](https://github.com/DataDog/integrations-core/pull/15990))
 * Emit postgres metrics queries operation time ([#16040](https://github.com/DataDog/integrations-core/pull/16040))
+* Add obfuscation_mode config option to allow enabling obfuscation with go-sqllexer ([#16071](https://github.com/DataDog/integrations-core/pull/16071))
 
 ***Fixed***:
 
 * Add cloudsqladmin to default list of databases to exclude from autodiscovery and databases to ignore to prevent failures on Postgres 15 on Google CloudSQL ([#16027](https://github.com/DataDog/integrations-core/pull/16027))
+* Bump the minimum base check version to 34.1.0 ([#16062](https://github.com/DataDog/integrations-core/pull/16062))
 
 ## 15.1.1 / 2023-10-17
 
@@ -97,7 +99,7 @@
 
 ***Fixed***:
 
-* Fix InstanceConfig loading error for `ssl` config ([#15611](https://github.com/DataDog/integrations-core/pull/15611))
+* Fix InstanceConfig loading error for `ssl` config because `true` is not a valid value. Please, use `require` instead of `true` ([#15611](https://github.com/DataDog/integrations-core/pull/15611))
 
 ## 14.1.0 / 2023-08-10
 
