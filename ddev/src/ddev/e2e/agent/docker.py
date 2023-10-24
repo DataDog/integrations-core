@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import os
+import re
 import sys
 from functools import cache, cached_property
 from typing import TYPE_CHECKING, Callable
@@ -16,6 +17,7 @@ if TYPE_CHECKING:
 
     from ddev.utils.fs import Path
 
+RELEASE_REGEX = r".*[67]\.\d\d\.\d$"
 
 class DockerAgent(AgentInterface):
     @cached_property
@@ -93,6 +95,7 @@ class DockerAgent(AgentInterface):
                 and 'py' not in agent_build
                 and agent_build != 'datadog/agent:6'
                 and agent_build != 'datadog/agent:7'
+                and not re.match(RELEASE_REGEX, agent_build)
             ):
                 agent_build = f'{agent_build}-py{self.python_version[0]}'
 
