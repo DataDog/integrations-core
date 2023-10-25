@@ -324,6 +324,7 @@ def test_nodes_metrics(aggregator, check, dd_run_check, metrics):
             count=metric['count'],
             value=metric['value'],
             tags=metric['tags'],
+            hostname=metric.get('hostname'),
         )
 
 

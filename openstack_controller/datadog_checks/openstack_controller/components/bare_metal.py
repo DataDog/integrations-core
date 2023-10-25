@@ -64,7 +64,7 @@ class BareMetal(Component):
                 discovered_nodes = [
                     (None, node.get('name'), node, None) for node in self.check.api.get_baremetal_nodes()
                 ]
-        for _pattern, _item_name, item, item_config in discovered_nodes:
+        for _pattern, item_name, item, item_config in discovered_nodes:
             self.check.log.debug("item: %s", item)
             self.check.log.debug("item_config: %s", item_config)
             node = get_metrics_and_tags(
@@ -80,9 +80,10 @@ class BareMetal(Component):
                 else value,
             )
             self.check.log.debug("node: %s", node)
-            self.check.gauge(IRONIC_NODE_COUNT, 1, tags=tags + node['tags'])
+            node_hostname = item_name if item_name else item['uuid']
+            self.check.gauge(IRONIC_NODE_COUNT, 1, tags=tags + node['tags'], hostname=node_hostname)
             for metric, value in node['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + node['tags'])
+                self.check.gauge(metric, value, tags=tags + node['tags'], hostname=node_hostname)
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
