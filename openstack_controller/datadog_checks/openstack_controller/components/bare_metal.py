@@ -80,10 +80,9 @@ class BareMetal(Component):
                 else value,
             )
             self.check.log.debug("node: %s", node)
-            node_hostname = item_name if item_name else item['uuid']
-            self.check.gauge(IRONIC_NODE_COUNT, 1, tags=tags + node['tags'], hostname=node_hostname)
+            self.check.gauge(IRONIC_NODE_COUNT, 1, tags=tags + node['tags'], hostname=item['uuid'])
             for metric, value in node['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + node['tags'], hostname=node_hostname)
+                self.check.gauge(metric, value, tags=tags + node['tags'], hostname=item['uuid'])
 
     @Component.register_global_metrics(ID)
     @Component.http_error()

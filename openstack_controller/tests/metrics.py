@@ -4402,7 +4402,7 @@ NODES_METRICS_IRONIC_MICROVERSION_1_80 = [
             'driver:ipmi',
             'provision_state:active',
         ],
-        'hostname': 'node-0',
+        'hostname': '9d72cf53-19c8-4942-9314-005fa5d2a6a0',
     },
     {
         'name': 'openstack.ironic.node.count',
@@ -4416,7 +4416,7 @@ NODES_METRICS_IRONIC_MICROVERSION_1_80 = [
             'driver:ipmi',
             'provision_state:available',
         ],
-        'hostname': 'node-1',
+        'hostname': 'bd7a61bb-5fe0-4c93-9628-55e312f9ef0e',
     },
     {
         'name': 'openstack.ironic.node.count',
@@ -4430,7 +4430,7 @@ NODES_METRICS_IRONIC_MICROVERSION_1_80 = [
             'driver:ipmi',
             'provision_state:available',
         ],
-        'hostname': 'node-2',
+        'hostname': '54855e59-83ca-46f8-a78f-55d3370e0656',
     },
     {
         'name': 'openstack.ironic.node.count',
@@ -4445,7 +4445,7 @@ NODES_METRICS_IRONIC_MICROVERSION_1_80 = [
             'driver:fake-hardware',
             'provision_state:active',
         ],
-        'hostname': 'test',
+        'hostname': '20512deb-e493-4796-a046-5d6e4e072c95',
     },
 ]
 
