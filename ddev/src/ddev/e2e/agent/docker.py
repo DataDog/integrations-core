@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
     from ddev.utils.fs import Path
 
-RELEASE_REGEX = r'.*[67]\.\d\d\.\d(?:$|-jmx$)'
+AGENT_VERSION_REGEX = r'^datadog/agent:[67](?:$|\.(\d\d\.\d(?:$|-jmx$)|$))'
 
 
 class DockerAgent(AgentInterface):
@@ -94,8 +94,6 @@ class DockerAgent(AgentInterface):
             if (
                 'rc' not in agent_build
                 and 'py' not in agent_build
-                and agent_build != 'datadog/agent:6'
-                and agent_build != 'datadog/agent:7'
                 and not re.match(RELEASE_REGEX, agent_build)
             ):
                 agent_build = f'{agent_build}-py{self.python_version[0]}'
