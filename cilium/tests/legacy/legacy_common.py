@@ -166,3 +166,10 @@ OPERATOR_AWS_METRICS = [
     'cilium.operator.num_ceps_per_ces.count',
     'cilium.operator.num_ceps_per_ces.sum',
 ]
+
+OPERATOR_AZURE_METRICS = [
+    'cilium.operator.azure.api.duration.seconds.count',
+    'cilium.operator.azure.api.duration.seconds.sum',
+    'cilium.operator.azure.api.rate_limit.duration.seconds.count',
+    'cilium.operator.azure.api.rate_limit.duration.seconds.sum',
+]

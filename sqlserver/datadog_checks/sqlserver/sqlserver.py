@@ -125,7 +125,7 @@ class SQLServer(AgentCheck):
         self.custom_metrics = init_config.get('custom_metrics', [])
 
         # DBM
-        self.dbm_enabled = self.instance.get('dbm', False)
+        self.dbm_enabled = is_affirmative(self.instance.get('dbm', False))
         self.statement_metrics_config = self.instance.get('query_metrics', {}) or {}
         self.procedure_metrics_config = self.instance.get('procedure_metrics', {}) or {}
         self.settings_config = self.instance.get('collect_settings', {}) or {}
