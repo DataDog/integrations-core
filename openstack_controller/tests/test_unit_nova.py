@@ -872,6 +872,7 @@ def test_hypervisor_uptime_exception(aggregator, check, dd_run_check, mock_http_
             'hypervisor_status:enabled',
             'hypervisor_type:QEMU',
         ],
+        hostname='agent-integrations-openstack-default',
     )
     aggregator.assert_metric(
         'openstack.nova.hypervisor.load_1',
@@ -1009,6 +1010,7 @@ def test_hypervisors_metrics(aggregator, check, dd_run_check, metrics):
             count=metric.get('count'),
             value=metric.get('value'),
             tags=metric.get('tags'),
+            hostname=metric.get('hostname'),
         )
 
 

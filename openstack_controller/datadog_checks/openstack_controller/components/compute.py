@@ -164,18 +164,27 @@ class Compute(Component):
                 )
                 self.check.log.debug("hypervisor: %s", hypervisor)
                 for metric, value in hypervisor['metrics'].items():
-                    self.check.gauge(metric, value, tags=tags + hypervisor['tags'])
+                    self.check.gauge(
+                        metric,
+                        value,
+                        tags=tags + hypervisor['tags'],
+                        hostname=item['hypervisor_hostname'],
+                    )
                 collect_uptime = item_config.get('uptime', True) if item_config else True
                 if collect_uptime:
                     if item['hypervisor_type'] != 'ironic':
-                        self._report_hypervisor_uptime(item['id'], item.get('uptime'), tags + hypervisor['tags'])
+                        self._report_hypervisor_uptime(item, tags + hypervisor['tags'])
                     else:
                         self.check.log.debug(
                             "Skipping uptime metrics for bare metal hypervisor `%s`", item['hypervisor_hostname']
                         )
 
     @Component.http_error()
-    def _report_hypervisor_uptime(self, hypervisor_id, uptime, tags):
+    def _report_hypervisor_uptime(self, hypervisor, tags):
+        hypervisor_id = hypervisor['id']
+        hypervisor_hostname = hypervisor['hypervisor_hostname']
+        uptime = hypervisor.get('uptime')
+
         def _load_averages_from_uptime(uptime):
             load_averages = []
             if uptime:
@@ -199,7 +208,7 @@ class Compute(Component):
             metrics=NOVA_HYPERVISOR_UPTIME_METRICS,
         )
         for metric, value in uptime_metrics_and_tags['metrics'].items():
-            self.check.gauge(metric, value, tags=tags + uptime_metrics_and_tags['tags'])
+            self.check.gauge(metric, value, tags=tags + uptime_metrics_and_tags['tags'], hostname=hypervisor_hostname)
 
     @Component.register_project_metrics(ID)
     @Component.http_error()

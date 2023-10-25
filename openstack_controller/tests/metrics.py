@@ -392,6 +392,7 @@ COMPUTE_HYPERVISORS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor_status:enabled',
             'hypervisor_type:QEMU',
         ],
+        'hostname': 'agent-integrations-openstack-default',
     },
     {
         'name': 'openstack.nova.hypervisor.load_1',
@@ -405,6 +406,7 @@ COMPUTE_HYPERVISORS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor_status:enabled',
             'hypervisor_type:QEMU',
         ],
+        'hostname': 'agent-integrations-openstack-default',
     },
     {
         'name': 'openstack.nova.hypervisor.load_5',
@@ -418,6 +420,7 @@ COMPUTE_HYPERVISORS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor_status:enabled',
             'hypervisor_type:QEMU',
         ],
+        'hostname': 'agent-integrations-openstack-default',
     },
     {
         'name': 'openstack.nova.hypervisor.load_15',
@@ -431,6 +434,7 @@ COMPUTE_HYPERVISORS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor_status:enabled',
             'hypervisor_type:QEMU',
         ],
+        'hostname': 'agent-integrations-openstack-default',
     },
 ]
 
@@ -447,6 +451,7 @@ COMPUTE_HYPERVISORS_NOVA_MICROVERSION_2_93 = [
             'hypervisor_status:enabled',
             'hypervisor_type:QEMU',
         ],
+        'hostname': 'agent-integrations-openstack-default',
     },
     {
         'name': 'openstack.nova.hypervisor.load_1',
@@ -460,6 +465,7 @@ COMPUTE_HYPERVISORS_NOVA_MICROVERSION_2_93 = [
             'hypervisor_status:enabled',
             'hypervisor_type:QEMU',
         ],
+        'hostname': 'agent-integrations-openstack-default',
     },
     {
         'name': 'openstack.nova.hypervisor.load_5',
@@ -473,6 +479,7 @@ COMPUTE_HYPERVISORS_NOVA_MICROVERSION_2_93 = [
             'hypervisor_status:enabled',
             'hypervisor_type:QEMU',
         ],
+        'hostname': 'agent-integrations-openstack-default',
     },
     {
         'name': 'openstack.nova.hypervisor.load_15',
@@ -486,6 +493,7 @@ COMPUTE_HYPERVISORS_NOVA_MICROVERSION_2_93 = [
             'hypervisor_status:enabled',
             'hypervisor_type:QEMU',
         ],
+        'hostname': 'agent-integrations-openstack-default',
     },
 ]
 
