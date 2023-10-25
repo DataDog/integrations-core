@@ -54,9 +54,6 @@ datadog_checks = "ddev.plugin.external.hatch"
 [tool.hatch.version]
 source = "vcs"
 
-[tool.hatch.metadata]
-allow-direct-references = true
-
 [tool.hatch.version.raw-options]
 root = ".."
 version_scheme = "python-simplified-semver"

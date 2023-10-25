@@ -34,7 +34,7 @@ def new(app: Application, entry_type: str | None, targets: tuple[str], message: 
 
     latest_commit = app.repo.git.latest_commit
     pr = app.github.get_pull_request(latest_commit.sha)
-    message_based_on_git = ""
+    message_based_on_git = ''
     if pr is not None:
         pr_number = pr.number
         message_based_on_git = pr.title
@@ -49,10 +49,10 @@ def new(app: Application, entry_type: str | None, targets: tuple[str], message: 
         entry_type = click.prompt('Entry type?', type=click.Choice(ENTRY_TYPES, case_sensitive=False))
 
     create_cmd = [
-        "create",
-        "--content",
+        'create',
+        '--content',
         message or click.edit(text=message_based_on_git, require_save=False) or message_based_on_git,
-        f"{pr_number}.{entry_type}",
+        f'{pr_number}.{entry_type}',
     ]
     edited = 0
     for check in app.repo.integrations.iter_changed_code(targets):
