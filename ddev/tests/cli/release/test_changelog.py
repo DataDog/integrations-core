@@ -423,7 +423,7 @@ class TestBuild:
                 * Foo ([#1](https://github.com/DataDog/integrations-core/pull/1))
                 '''
             )
-            in result.output
+            in helpers.remove_trailing_spaces(result.output)
         )
         # Make sure that we don't write anything to the changelog.
         assert changelog.read_text() == helpers.dedent(
