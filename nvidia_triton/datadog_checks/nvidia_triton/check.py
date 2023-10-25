@@ -104,9 +104,8 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
             self.service_check('health.status', AgentCheck.UNKNOWN, self.tags)
 
     def check(self, instance):
-        if instance['openmetrics_endpoint']:
-            super().check(instance)
+        super().check(instance)
         # Whether to collect the server info through the API or not
-        if self.collect_server_info is True:
+        if self.collect_server_info:
             self._submit_version_metadata()
             self._check_server_health()
