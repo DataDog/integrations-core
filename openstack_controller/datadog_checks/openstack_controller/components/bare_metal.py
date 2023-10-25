@@ -64,7 +64,7 @@ class BareMetal(Component):
                 discovered_nodes = [
                     (None, node.get('name'), node, None) for node in self.check.api.get_baremetal_nodes()
                 ]
-        for _pattern, item_name, item, item_config in discovered_nodes:
+        for _pattern, _item_name, item, item_config in discovered_nodes:
             self.check.log.debug("item: %s", item)
             self.check.log.debug("item_config: %s", item_config)
             node = get_metrics_and_tags(
