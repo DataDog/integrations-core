@@ -150,6 +150,8 @@ OPERATOR_METRICS = {
     'cilium_operator_ipam_k8s_sync_queued_total': 'operator.ipam.k8s_sync.queued.total',
     'cilium_operator_ipam_nodes': 'operator.ipam.nodes',
     # Cilium 1.9+
+    'cilium_operator_azure_api_duration_seconds': 'operator.azure.api.duration.seconds',
+    'cilium_operator_azure_api_rate_limit_duration_seconds': 'operator.azure.api.rate_limit.duration.seconds',
     'cilium_operator_ec2_api_duration_seconds': 'operator.ec2.api.duration.seconds',
     'cilium_operator_ec2_api_rate_limit_duration_seconds': 'operator.ec2.api.rate_limit.duration.seconds',
     'cilium_operator_ipam_resync_duration_seconds': 'operator.ipam.resync.duration.seconds',
