@@ -20,6 +20,15 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class AuthToken(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    reader: Optional[MappingProxyType[str, Any]] = None
+    writer: Optional[MappingProxyType[str, Any]] = None
+
+
 class IncludeItem(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -281,6 +290,15 @@ class Components(BaseModel):
     network: Optional[Union[bool, NetworkItem]] = None
 
 
+class MetricPatterns(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
+
+
 class Projects(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -292,12 +310,28 @@ class Projects(BaseModel):
     limit: Optional[int] = Field(None, description='Maximum number of clusters to be processed.\n')
 
 
+class Proxy(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    http: Optional[str] = None
+    https: Optional[str] = None
+    no_proxy: Optional[tuple[str, ...]] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    allow_redirects: Optional[bool] = None
+    auth_token: Optional[AuthToken] = None
+    auth_type: Optional[str] = None
+    aws_host: Optional[str] = None
+    aws_region: Optional[str] = None
+    aws_service: Optional[str] = None
     blacklist_project_names: Optional[tuple[str, ...]] = None
     collect_hypervisor_load: Optional[bool] = None
     collect_hypervisor_metrics: Optional[bool] = None
@@ -306,21 +340,53 @@ class InstanceConfig(BaseModel):
     collect_server_diagnostic_metrics: Optional[bool] = None
     collect_server_flavor_metrics: Optional[bool] = None
     components: Optional[Components] = None
+    connect_timeout: Optional[float] = None
+    disable_generic_tags: Optional[bool] = None
     domain_id: Optional[str] = None
+    empty_default_hostname: Optional[bool] = None
     endpoint_interface: Optional[str] = None
     endpoint_region_id: Optional[str] = None
     exclude_network_ids: Optional[tuple[str, ...]] = None
     exclude_server_ids: Optional[tuple[str, ...]] = None
+    extra_headers: Optional[MappingProxyType[str, Any]] = None
+    headers: Optional[MappingProxyType[str, Any]] = None
     ironic_microversion: Optional[str] = None
+    kerberos_auth: Optional[str] = None
+    kerberos_cache: Optional[str] = None
+    kerberos_delegate: Optional[bool] = None
+    kerberos_force_initiate: Optional[bool] = None
+    kerberos_hostname: Optional[str] = None
+    kerberos_keytab: Optional[str] = None
+    kerberos_principal: Optional[str] = None
     keystone_server_url: Optional[str] = None
+    log_requests: Optional[bool] = None
+    metric_patterns: Optional[MetricPatterns] = None
+    min_collection_interval: Optional[float] = None
     name: Optional[str] = None
     nova_microversion: Optional[str] = None
+    ntlm_domain: Optional[str] = None
     openstack_cloud_name: Optional[str] = None
     openstack_config_file_path: Optional[str] = None
     paginated_limit: Optional[int] = None
     password: Optional[str] = None
+    persist_connections: Optional[bool] = None
     projects: Optional[Projects] = None
+    proxy: Optional[Proxy] = None
+    read_timeout: Optional[float] = None
+    request_size: Optional[float] = None
+    service: Optional[str] = None
+    skip_proxy: Optional[bool] = None
+    tags: Optional[tuple[str, ...]] = None
+    timeout: Optional[float] = None
+    tls_ca_cert: Optional[str] = None
+    tls_cert: Optional[str] = None
+    tls_ignore_warning: Optional[bool] = None
+    tls_private_key: Optional[str] = None
+    tls_protocols_allowed: Optional[tuple[str, ...]] = None
+    tls_use_host_header: Optional[bool] = None
+    tls_verify: Optional[bool] = None
     use_agent_proxy: Optional[bool] = None
+    use_legacy_auth_encoding: Optional[bool] = None
     use_legacy_check_version: Optional[bool] = None
     use_shortname: Optional[bool] = None
     user: Optional[MappingProxyType[str, Any]] = None

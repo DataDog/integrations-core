@@ -660,21 +660,23 @@ files:
                 - '.*'
               exclude:
                 - 'tmp_.*'
-    - template: instances/default
-      overrides:
-        service.hidden: true
-        min_collection_interval.hidden: true
-        empty_default_hostname.hidden: true
-    - template: instances/http
-      overrides:
-        tls_use_host_header.hidden: true
-        auth_type.hidden: true
-        use_legacy_auth_encoding.hidden: true
-        auth_token.hidden: true
-        aws_region.hidden: true
-        aws_host.hidden: true
-        aws_service.hidden: true
-        extra_headers.hidden: true
+        - template: instances/default
+          overrides:
+            service.hidden: true
+            min_collection_interval.hidden: true
+            empty_default_hostname.hidden: true
+        - template: instances/http
+          overrides:
+            username.hidden: true
+            password.hidden: true
+            tls_use_host_header.hidden: true
+            auth_type.hidden: true
+            use_legacy_auth_encoding.hidden: true
+            auth_token.hidden: true
+            aws_region.hidden: true
+            aws_host.hidden: true
+            aws_service.hidden: true
+            extra_headers.hidden: true
     - template: logs
       example:
       - type: file
