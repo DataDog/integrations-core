@@ -255,7 +255,7 @@ class Compute(Component):
                     (None, server.get('name'), server, None)
                     for server in self.check.api.get_compute_servers(project_id)
                 ]
-            for _pattern, _item_name, item, item_config in discovered_servers:
+            for _pattern, item_name, item, item_config in discovered_servers:
                 self.check.log.debug("item: %s", item)
                 self.check.log.debug("item_config: %s", item_config)
                 server = get_metrics_and_tags(
@@ -273,15 +273,15 @@ class Compute(Component):
                     else value,
                 )
                 self.check.log.debug("server: %s", server)
-                self.check.gauge(NOVA_SERVER_COUNT, 1, tags=tags + server['tags'])
+                self.check.gauge(NOVA_SERVER_COUNT, 1, tags=tags + server['tags'], hostname=item_name)
                 for metric, value in server['metrics'].items():
-                    self.check.gauge(metric, value, tags=tags + server['tags'])
+                    self.check.gauge(metric, value, tags=tags + server['tags'], hostname=item_name)
                 collect_flavors = item_config.get('flavors', True) if item_config else True
                 if collect_flavors:
                     self._report_server_flavor(item, tags + server['tags'])
                 collect_diagnostics = item_config.get('diagnostics', True) if item_config else True
                 if collect_diagnostics:
-                    self._report_server_diagnostics(item['id'], tags + server['tags'])
+                    self._report_server_diagnostics(item, tags + server['tags'])
 
     @Component.http_error()
     def _report_server_flavor(self, server, tags):
@@ -301,10 +301,11 @@ class Compute(Component):
         )
         self.check.log.debug("flavor_metrics_and_tags: %s", flavor_metrics_and_tags)
         for metric, value in flavor_metrics_and_tags['metrics'].items():
-            self.check.gauge(metric, value, tags=tags + flavor_metrics_and_tags['tags'])
+            self.check.gauge(metric, value, tags=tags + flavor_metrics_and_tags['tags'], hostname=server['name'])
 
     @Component.http_error()
-    def _report_server_diagnostics(self, server_id, tags):
+    def _report_server_diagnostics(self, server, tags):
+        server_id = server['id']
         item_diagnostic = self.check.api.get_compute_server_diagnostics(server_id)
         self.check.log.debug("server_diagnostics: %s", item_diagnostic)
         diagnostic = get_metrics_and_tags(
@@ -315,7 +316,7 @@ class Compute(Component):
         )
         self.check.log.debug("diagnostic: %s", diagnostic)
         for metric, value in diagnostic['metrics'].items():
-            self.check.gauge(metric, value, tags=tags + diagnostic['tags'])
+            self.check.gauge(metric, value, tags=tags + diagnostic['tags'], hostname=server['name'])
         for item_disk_details in item_diagnostic.get('disk_details', []):
             disk_detail = get_metrics_and_tags(
                 item_disk_details,
@@ -324,7 +325,12 @@ class Compute(Component):
                 metrics=NOVA_SERVER_DIAGNOSTIC_DISK_DETAILS_METRICS,
             )
             for metric, value in disk_detail['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + diagnostic['tags'] + disk_detail['tags'])
+                self.check.gauge(
+                    metric,
+                    value,
+                    tags=tags + diagnostic['tags'] + disk_detail['tags'],
+                    hostname=server['name'],
+                )
         for item_cpu_details in item_diagnostic.get('cpu_details', []):
             cpu_detail = get_metrics_and_tags(
                 item_cpu_details,
@@ -333,7 +339,12 @@ class Compute(Component):
                 metrics=NOVA_SERVER_DIAGNOSTIC_CPU_DETAILS_METRICS,
             )
             for metric, value in cpu_detail['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + diagnostic['tags'] + cpu_detail['tags'])
+                self.check.gauge(
+                    metric,
+                    value,
+                    tags=tags + diagnostic['tags'] + cpu_detail['tags'],
+                    hostname=server['name'],
+                )
         for item_nic_details in item_diagnostic.get('nic_details', []):
             nic_detail = get_metrics_and_tags(
                 item_nic_details,
@@ -342,4 +353,9 @@ class Compute(Component):
                 metrics=NOVA_SERVER_DIAGNOSTIC_NIC_DETAILS_METRICS,
             )
             for metric, value in nic_detail['metrics'].items():
-                self.check.gauge(metric, value, tags=tags + diagnostic['tags'] + nic_detail['tags'])
+                self.check.gauge(
+                    metric,
+                    value,
+                    tags=tags + diagnostic['tags'] + nic_detail['tags'],
+                    hostname=server['name'],
+                )

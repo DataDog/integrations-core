@@ -1404,6 +1404,7 @@ def test_servers_disable_call(aggregator, check, dd_run_check, mock_http_get, co
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        hostname='admin-1',
     )
     aggregator.assert_metric(
         'openstack.nova.server.count',
@@ -1485,6 +1486,7 @@ def test_servers_metrics(aggregator, check, dd_run_check, metrics):
             count=metric.get('count'),
             value=metric.get('value'),
             tags=metric.get('tags'),
+            hostname=metric.get('hostname'),
         )
 
 
@@ -1522,6 +1524,7 @@ def test_servers_metrics_excluding_demo_project(aggregator, check, dd_run_check,
             count=metric.get('count'),
             value=metric.get('value'),
             tags=metric.get('tags'),
+            hostname=metric.get('hostname'),
         )
 
 
@@ -1559,6 +1562,7 @@ def test_servers_metrics_excluding_dev_servers(aggregator, check, dd_run_check, 
             count=metric.get('count'),
             value=metric.get('value'),
             tags=metric.get('tags'),
+            hostname=metric.get('hostname'),
         )
 
 
@@ -1635,6 +1639,7 @@ def test_server_flavors_exception(
             count=metric.get('count'),
             value=metric.get('value'),
             tags=metric.get('tags'),
+            hostname=metric.get('hostname'),
         )
     if api_type == ApiType.REST:
         args_list = []
@@ -1713,6 +1718,7 @@ def test_server_disable_flavors(
             count=metric.get('count'),
             value=metric.get('value'),
             tags=metric.get('tags'),
+            hostname=metric.get('hostname'),
         )
     if api_type == ApiType.REST:
         args_list = []
@@ -1801,6 +1807,7 @@ def test_server_diagnostics_exception(
             count=metric.get('count'),
             value=metric.get('value'),
             tags=metric.get('tags'),
+            hostname=metric.get('hostname'),
         )
     if api_type == ApiType.REST:
         args_list = []
@@ -1867,6 +1874,7 @@ def test_server_disable_diagnostics(
             count=metric.get('count'),
             value=metric.get('value'),
             tags=metric.get('tags'),
+            hostname=metric.get('hostname'),
         )
     if api_type == ApiType.REST:
         args_list = []

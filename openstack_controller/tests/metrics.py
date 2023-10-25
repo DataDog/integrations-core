@@ -1075,6 +1075,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -1091,6 +1092,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.flavor.vcpus',
@@ -1109,6 +1111,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'flavor_id:c1',
             'flavor_name:cirros256',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -1125,6 +1128,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -1141,6 +1145,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -1157,6 +1162,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.flavor.vcpus',
@@ -1175,6 +1181,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'flavor_id:c1',
             'flavor_name:cirros256',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -1191,6 +1198,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -1207,6 +1215,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -1223,6 +1232,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.flavor.vcpus',
@@ -1241,6 +1251,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'flavor_id:c1',
             'flavor_name:cirros256',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -1257,6 +1268,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -1273,6 +1285,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -1289,6 +1302,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.flavor.vcpus',
@@ -1307,6 +1321,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'flavor_id:c1',
             'flavor_name:cirros256',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -1323,6 +1338,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
 ]
 
@@ -1343,6 +1359,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:a',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -1360,6 +1377,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:a',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -1378,6 +1396,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:a',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -1395,6 +1414,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:test',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -1412,6 +1432,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:test',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -1430,6 +1451,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:test',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -1447,6 +1469,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:server',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -1464,6 +1487,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:server',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -1482,6 +1506,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:server',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -1499,6 +1524,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -1516,6 +1542,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -1534,6 +1561,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
 ]
 
@@ -1553,6 +1581,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -1569,6 +1598,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -1585,6 +1615,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -1601,6 +1632,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -1617,6 +1649,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -1633,6 +1666,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -1649,6 +1683,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -1665,6 +1700,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -1681,6 +1717,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -1696,6 +1733,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -1711,6 +1749,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -1726,6 +1765,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
 ]
 
@@ -1746,6 +1786,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:a',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -1763,6 +1804,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:a',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -1781,6 +1823,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:a',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -1798,6 +1841,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:test',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -1815,6 +1859,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:test',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -1833,6 +1878,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:test',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -1850,6 +1896,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:server',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -1867,6 +1914,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:server',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -1885,6 +1933,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:server',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -1901,6 +1950,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -1917,6 +1967,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -1934,6 +1985,7 @@ COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
 ]
 
@@ -1953,6 +2005,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -1969,6 +2022,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -1985,6 +2039,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -2001,6 +2056,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -2017,6 +2073,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -2033,6 +2090,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -2048,6 +2106,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -2063,6 +2122,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -2078,6 +2138,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -2094,6 +2155,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -2110,6 +2172,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -2126,6 +2189,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
 ]
 
@@ -2146,6 +2210,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:a',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -2163,6 +2228,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:a',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -2181,6 +2247,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:a',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -2198,6 +2265,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:test',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -2215,6 +2283,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:test',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -2233,6 +2302,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:test',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -2249,6 +2319,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:server',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -2265,6 +2336,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:server',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -2282,6 +2354,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:server',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -2299,6 +2372,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -2316,6 +2390,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -2334,6 +2409,7 @@ COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
 ]
 
@@ -2353,6 +2429,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_FLAVOR_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -2369,6 +2446,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_FLAVOR_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.flavor.vcpus',
@@ -2384,6 +2462,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_FLAVOR_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -2400,6 +2479,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_FLAVOR_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -2416,6 +2496,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_FLAVOR_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -2432,6 +2513,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_FLAVOR_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.flavor.vcpus',
@@ -2447,6 +2529,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_FLAVOR_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -2463,6 +2546,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_FLAVOR_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -2479,6 +2563,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_FLAVOR_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -2495,6 +2580,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_FLAVOR_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.flavor.vcpus',
@@ -2510,6 +2596,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_FLAVOR_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -2526,6 +2613,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_FLAVOR_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -2542,6 +2630,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_FLAVOR_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -2558,6 +2647,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_FLAVOR_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.flavor.vcpus',
@@ -2573,6 +2663,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_FLAVOR_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -2589,6 +2680,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_FLAVOR_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
 ]
 
@@ -2609,6 +2701,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_FLAVOR_EXCEPTION = [
             'instance_hostname:a',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -2626,6 +2719,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_FLAVOR_EXCEPTION = [
             'instance_hostname:a',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -2644,6 +2738,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_FLAVOR_EXCEPTION = [
             'instance_hostname:a',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -2661,6 +2756,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_FLAVOR_EXCEPTION = [
             'instance_hostname:test',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -2678,6 +2774,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_FLAVOR_EXCEPTION = [
             'instance_hostname:test',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -2696,6 +2793,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_FLAVOR_EXCEPTION = [
             'instance_hostname:test',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -2713,6 +2811,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_FLAVOR_EXCEPTION = [
             'instance_hostname:server',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -2730,6 +2829,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_FLAVOR_EXCEPTION = [
             'instance_hostname:server',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -2748,6 +2848,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_FLAVOR_EXCEPTION = [
             'instance_hostname:server',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -2765,6 +2866,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_FLAVOR_EXCEPTION = [
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -2782,6 +2884,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_FLAVOR_EXCEPTION = [
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -2800,6 +2903,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_FLAVOR_EXCEPTION = [
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
 ]
 
@@ -2819,6 +2923,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -2835,6 +2940,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.flavor.vcpus',
@@ -2853,6 +2959,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_DEFAULT = [
             'flavor_id:c1',
             'flavor_name:cirros256',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -2869,6 +2976,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -2885,6 +2993,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -2901,6 +3010,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.flavor.vcpus',
@@ -2919,6 +3029,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_DEFAULT = [
             'flavor_id:c1',
             'flavor_name:cirros256',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -2935,6 +3046,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -2951,6 +3063,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -2967,6 +3080,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.flavor.vcpus',
@@ -2985,6 +3099,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_DEFAULT = [
             'flavor_id:c1',
             'flavor_name:cirros256',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -3001,6 +3116,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -3017,6 +3133,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -3033,6 +3150,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.flavor.vcpus',
@@ -3050,6 +3168,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_DEFAULT = [
             'flavor_id:c1',
             'flavor_name:cirros256',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -3066,6 +3185,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
 ]
 
@@ -3086,6 +3206,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:a',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -3103,6 +3224,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:a',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.flavor.vcpus',
@@ -3120,6 +3242,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:a',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -3138,6 +3261,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:a',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -3155,6 +3279,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:test',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -3172,6 +3297,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:test',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.flavor.vcpus',
@@ -3189,6 +3315,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:test',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -3207,6 +3334,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:test',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -3224,6 +3352,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:server',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -3241,6 +3370,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:server',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.flavor.vcpus',
@@ -3258,6 +3388,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:server',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -3276,6 +3407,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:server',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -3293,6 +3425,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -3310,6 +3443,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.flavor.vcpus',
@@ -3326,6 +3460,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -3344,6 +3479,7 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
 ]
 
@@ -3363,6 +3499,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_SERVER_DIAGNOSTICS_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -3379,6 +3516,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_SERVER_DIAGNOSTICS_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -3394,6 +3532,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_SERVER_DIAGNOSTICS_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -3410,6 +3549,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_SERVER_DIAGNOSTICS_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -3426,6 +3566,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_SERVER_DIAGNOSTICS_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -3442,6 +3583,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_SERVER_DIAGNOSTICS_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -3458,6 +3600,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_SERVER_DIAGNOSTICS_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -3474,6 +3617,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_SERVER_DIAGNOSTICS_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -3490,6 +3634,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_SERVER_DIAGNOSTICS_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -3506,6 +3651,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_SERVER_DIAGNOSTICS_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -3522,6 +3668,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_SERVER_DIAGNOSTICS_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -3538,6 +3685,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT_SERVER_DIAGNOSTICS_EXCEPTION = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
 ]
 
@@ -3558,6 +3706,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_SERVER_DIAGNOSTICS_EXCEPTION = [
             'instance_hostname:a',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -3575,6 +3724,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_SERVER_DIAGNOSTICS_EXCEPTION = [
             'instance_hostname:a',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -3592,6 +3742,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_SERVER_DIAGNOSTICS_EXCEPTION = [
             'instance_hostname:a',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -3609,6 +3760,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_SERVER_DIAGNOSTICS_EXCEPTION = [
             'instance_hostname:test',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -3626,6 +3778,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_SERVER_DIAGNOSTICS_EXCEPTION = [
             'instance_hostname:test',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -3644,6 +3797,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_SERVER_DIAGNOSTICS_EXCEPTION = [
             'instance_hostname:test',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -3661,6 +3815,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_SERVER_DIAGNOSTICS_EXCEPTION = [
             'instance_hostname:server',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -3678,6 +3833,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_SERVER_DIAGNOSTICS_EXCEPTION = [
             'instance_hostname:server',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -3696,6 +3852,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_SERVER_DIAGNOSTICS_EXCEPTION = [
             'instance_hostname:server',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -3713,6 +3870,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_SERVER_DIAGNOSTICS_EXCEPTION = [
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -3730,6 +3888,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_SERVER_DIAGNOSTICS_EXCEPTION = [
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -3748,6 +3907,7 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93_SERVER_DIAGNOSTICS_EXCEPTION = [
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
 ]
 
@@ -3767,6 +3927,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -3783,6 +3944,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -3799,6 +3961,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -3815,6 +3978,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -3831,6 +3995,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -3847,6 +4012,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -3863,6 +4029,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -3879,6 +4046,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -3895,6 +4063,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -3911,6 +4080,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -3927,6 +4097,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.cpu0_time',
@@ -3942,6 +4113,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_DEFAULT = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
 ]
 
@@ -3962,6 +4134,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:a',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -3979,6 +4152,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:a',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -3997,6 +4171,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:a',
             'instance_name:instance-0000004a',
         ],
+        'hostname': 'admin-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -4014,6 +4189,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:test',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -4031,6 +4207,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:test',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -4049,6 +4226,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:test',
             'instance_name:instance-00000049',
         ],
+        'hostname': 'admin-2',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -4066,6 +4244,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:server',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -4083,6 +4262,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:server',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -4101,6 +4281,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:server',
             'instance_name:instance-00000004',
         ],
+        'hostname': 'dev-1',
     },
     {
         'name': 'openstack.nova.server.count',
@@ -4118,6 +4299,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.active',
@@ -4135,6 +4317,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
     {
         'name': 'openstack.nova.server.diagnostic.disk_details.read_bytes',
@@ -4152,6 +4335,7 @@ COMPUTE_SERVERS_DISABLED_DIAGNOSTICS_NOVA_MICROVERSION_2_93 = [
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
         ],
+        'hostname': 'demo-1',
     },
 ]
 
