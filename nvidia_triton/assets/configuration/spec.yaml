@@ -19,7 +19,7 @@ files:
     - name: collect_server_info
       display_priority: 1
       description: |
-        Weather to collect server status and metadata from HTTP Endpoint of Nvidia Triton API.
+        Wether to collect server status and metadata the HTTP endpoint of Nvidia Triton API.
       value:
         display_default: true
         example: true
@@ -28,5 +28,5 @@ files:
       description: |
         The port exposing HTTP Endpoint of Nvidia Triton API.
       value:
-        display_default: "8000"
-        type: string
+        display_default: 8000
+        type: integer

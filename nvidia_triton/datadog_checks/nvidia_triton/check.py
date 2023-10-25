@@ -23,33 +23,36 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
     def __init__(self, name, init_config, instances=None):
         super(NvidiaTritonCheck, self).__init__(name, init_config, instances)
         if 'openmetrics_endpoint' not in self.instance:
-            raise ConfigurationError("Missing 'openmetrics url' in nvidia triton config")
+            raise ConfigurationError(
+                "The 'openmetrics_endpoint' option is missing in the Nvidia Triton integration configuration."
+            )
         self.openmetrics_endpoint = self.instance["openmetrics_endpoint"]
         self.tags = self.instance.get('tags', [])
 
         # Get the API server port if specified, otherwise use the default 8000.
-        self.server_port = self.instance.get('server_port', "8000")
-
-        # Get the base url from the openmetrics endpoint and construct the server info API endpoint.
-        self.base_url = None
-        try:
-            parts = urlparse(self.openmetrics_endpoint)
-            # Delete the /metrics from the url
-            self.base_url = parts._replace(path="")
-            # Replace the openmetrics port by the server port
-            self.server_info_api = self.base_url._replace(netloc=parts.hostname + ':' + self.server_port).geturl()
-
-        except Exception as e:
-            self.log.debug("Unable to determine the base url for server info collection: %s", str(e))
+        self.server_port = str(self.instance.get('server_port', 8000))
 
         self.collect_server_info = self.instance.get('collect_server_info', True)
+
+        # Get the base url from the openmetrics endpoint and construct the server info API endpoint.
+        if self.collect_server_info is True:
+            self.base_url = None
+            try:
+                parts = urlparse(self.openmetrics_endpoint)
+                # Delete the /metrics from the url
+                self.base_url = parts._replace(path="")
+                # Replace the openmetrics port by the server port
+                self.server_info_api = self.base_url._replace(netloc=parts.hostname + ':' + self.server_port).geturl()
+
+            except Exception as e:
+                self.log.debug("Unable to determine the base url for server info collection: %s", str(e))
 
     def get_default_config(self):
         return {
             "metrics": [METRICS_MAP],
             # Rename labels that are reserved in datadog.
             "rename_labels": {
-                "version": "model_version",
+                "version": "triton_model_version",
             },
         }
 
@@ -57,6 +60,7 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
     def _submit_version_metadata(self):
         if self.collect_server_info is False:
             self.log.warning("Collecting server info through API is disabled.")
+            return
 
         endpoint = urljoin(self.server_info_api, DEFAULT_METADATA_ENDPOINT)
         response = self.http.get(endpoint)
@@ -86,6 +90,7 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
     def _check_server_health(self):
         if self.collect_server_info is False:
             self.log.warning("Collecting server info through API is disabled.")
+            return
 
         endpoint = urljoin(self.server_info_api, DEFAULT_HEALTH_ENDPOINT)
         response = self.http.get(endpoint)

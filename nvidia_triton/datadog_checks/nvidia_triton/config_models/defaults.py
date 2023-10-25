@@ -89,7 +89,7 @@ def instance_request_size():
 
 
 def instance_server_port():
-    return '8000'
+    return 8000
 
 
 def instance_skip_proxy():

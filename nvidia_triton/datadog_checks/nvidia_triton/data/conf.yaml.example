@@ -20,7 +20,7 @@ instances:
   - openmetrics_endpoint: http://localhost:8002/metrics
 
     ## @param collect_server_info - boolean - optional - default: true
-    ## Weather to collect server status and metadata from HTTP Endpoint of Nvidia Triton API.
+    ## Wether to collect server status and metadata the HTTP endpoint of Nvidia Triton API.
     #
     # collect_server_info: true
 
@@ -593,7 +593,7 @@ instances:
     #   exclude:
     #   - <EXCLUDE_REGEX>
 
-    ## @param server_port - string - optional - default: 8000
+    ## @param server_port - integer - optional - default: 8000
     ## The port exposing HTTP Endpoint of Nvidia Triton API.
     #
     # server_port: <SERVER_PORT>
