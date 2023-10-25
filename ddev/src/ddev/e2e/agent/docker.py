@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
     from ddev.utils.fs import Path
 
-AGENT_VERSION_REGEX = r'^datadog/agent:[67](?:$|\.(\d\d\.\d(?:$|-jmx$)|$))'
+AGENT_VERSION_REGEX = r'^datadog/agent:\d+(?:$|\.(\d+\.\d(?:$|-jmx$)|$))'
 
 
 class DockerAgent(AgentInterface):
