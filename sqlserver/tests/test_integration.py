@@ -56,6 +56,16 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('dbm_enabled', [True, False, 'true', 'false', None])
+def test_check_dbm_enabled_config(aggregator, dd_run_check, init_config, instance_docker, dbm_enabled):
+    if dbm_enabled is not None:
+        instance_docker['dbm'] = dbm_enabled
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
+    assert isinstance(sqlserver_check.dbm_enabled, bool)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
     'database_autodiscovery,dbm_enabled', [(True, True), (True, False), (False, True), (False, False)]
 )
