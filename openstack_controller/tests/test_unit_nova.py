@@ -1404,7 +1404,7 @@ def test_servers_disable_call(aggregator, check, dd_run_check, mock_http_get, co
             'hypervisor:agent-integrations-openstack-default',
             'instance_name:instance-0000004a',
         ],
-        hostname='admin-1',
+        hostname='5102fbbf-7156-48dc-8355-af7ab992266f',
     )
     aggregator.assert_metric(
         'openstack.nova.server.count',
