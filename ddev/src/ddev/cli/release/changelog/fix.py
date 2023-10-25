@@ -10,6 +10,7 @@ import click
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
+
 @click.command
 @click.pass_obj
 def fix(app: Application):
