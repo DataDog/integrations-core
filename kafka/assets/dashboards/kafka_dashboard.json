@@ -1064,12 +1064,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kafka.consumer.lag{$datacenter,$consumer_group} by {host,consumer_group}"
+                                            "query": "sum:kafka.consumer_lag{$datacenter,$consumer_group} by {host,consumer_group}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:kafka.consumer.offset{$datacenter,$consumer_group} by {host,consumer_group}"
+                                            "query": "sum:kafka.consumer_offset{$datacenter,$consumer_group} by {host,consumer_group}"
                                         }
                                     ],
                                     "response_format": "timeseries",
