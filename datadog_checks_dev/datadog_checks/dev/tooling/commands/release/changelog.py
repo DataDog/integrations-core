@@ -19,9 +19,12 @@ def towncrier(target_dir, cmd, *cmd_args):
     '''
     Run towncrier command with its arguments in target_dir.
     '''
-    run_or_abort(
-        ["towncrier", cmd, "--config", os.path.join(get_root(), "towncrier.toml"), "--dir", target_dir, *cmd_args]
+    tc_res = run_or_abort(
+        ["towncrier", cmd, "--config", os.path.join(get_root(), "towncrier.toml"), "--dir", target_dir, *cmd_args],
+        capture='both',
     )
+    echo_info(tc_res.stdout.rstrip())
+    return tc_res
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Update the changelog for a check')
@@ -30,20 +33,11 @@ def towncrier(target_dir, cmd, *cmd_args):
 @click.argument('old_version', required=False)
 @click.option('--quiet', '-q', is_flag=True)
 @click.option('--dry-run', '-n', is_flag=True)
-@click.option('--output-file', '-o', default='CHANGELOG.md', show_default=True)
 @click.option('--tag-pattern', default=None, hidden=True)
 @click.option('--tag-prefix', '-tp', default='v', show_default=True)
 @click.option('--no-semver', '-ns', default=False, is_flag=True)
-def changelog(
-    check,
-    version,
-    old_version,
-    quiet,
-    dry_run,
-    tag_pattern,
-    tag_prefix,
-    no_semver,
-):
+@click.option('--date', default=None)
+def changelog(check, version, old_version, quiet, dry_run, tag_pattern, tag_prefix, no_semver, date):
     """Perform the operations needed to update the changelog.
 
     This method is supposed to be used by other tasks and not directly.
@@ -67,7 +61,9 @@ def changelog(
     if not quiet:
         echo_info(f'Current version of check {check}: {cur_version}, bumping to: {version}')
 
-    build_args = ["--version", version]
+    build_args = ["--yes", "--version", version]
     if dry_run:
         build_args.append("--draft")
+    if date:
+        build_args.extend(["--date", date])
     towncrier(os.path.join(get_root(), check), "build", *build_args)
