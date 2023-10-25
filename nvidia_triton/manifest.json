@@ -28,7 +28,7 @@
       },
       "metrics": {
         "prefix": "nvidia_triton.",
-        "check": "nvidia_triton.nv.cpu.memory.total_bytes",
+        "check": "nvidia_triton.cpu.memory.total_bytes",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
