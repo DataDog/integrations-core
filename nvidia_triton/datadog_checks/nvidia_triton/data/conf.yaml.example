@@ -594,6 +594,6 @@ instances:
     #   - <EXCLUDE_REGEX>
 
     ## @param server_port - integer - optional - default: 8000
-    ## The port exposing HTTP Endpoint of Nvidia Triton API.
+    ## The port exposing HTTP Endpoint of Nvidia Triton API. This will be ignored if `collect_server_info` is false.
     #
     # server_port: <SERVER_PORT>
