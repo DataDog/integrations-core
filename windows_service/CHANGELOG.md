@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.7.0 / 2023-10-26
+
 ***Added***:
 
 * Add Windows service `trigger_start` filter to config ([#16038](https://github.com/DataDog/integrations-core/pull/16038))
