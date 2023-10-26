@@ -10,6 +10,7 @@ from ....utils import complete_valid_checks, get_valid_checks, get_version_strin
 from ...console import (
     CONTEXT_SETTINGS,
     abort,
+    echo_info,
     validate_check_arg,
 )
 
@@ -41,7 +42,18 @@ def changes(check, tag_pattern, tag_prefix, dry_run, since):
             'following SemVer and matches the provided tag_prefix and/or tag_pattern.'
         )
 
-    applicable_changelog_types = list(
-        {fname.split(".")[1] for fname in os.listdir(os.path.join(get_root(), check, 'changelog.d'))}
-    )
+    applicable_changelog_types = set()
+    fragment_dir = os.path.join(get_root(), check, 'changelog.d')
+    if not os.path.exists(fragment_dir):
+        echo_info('No changes for this check.')
+        return cur_version, applicable_changelog_types
+    changes_to_report = []
+    for fname in os.listdir(fragment_dir):
+        applicable_changelog_types.add(fname.split(".")[1])
+        changes_to_report.append(f'{os.path.join(check, "changelog.d", fname)}:')
+        fpath = os.path.join(fragment_dir, fname)
+        with open(fpath, mode='r') as fh:
+            changes_to_report.append(fh.read() + '\n')
+    echo_info('\n'.join(changes_to_report).rstrip())
+
     return cur_version, applicable_changelog_types
