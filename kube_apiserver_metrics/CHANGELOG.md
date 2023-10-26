@@ -1,6 +1,6 @@
 # CHANGELOG - Kube_apiserver_metrics
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 4.1.0 / 2023-10-26
 

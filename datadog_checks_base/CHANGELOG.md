@@ -1,6 +1,6 @@
 # CHANGELOG - datadog_checks_base
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 34.1.1 / 2023-10-26
 

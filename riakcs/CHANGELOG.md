@@ -1,6 +1,6 @@
 # CHANGELOG - riakcs
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 2.10.1 / 2023-08-18 / Agent 7.48.0
 

@@ -1,6 +1,6 @@
 # CHANGELOG - mysql
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 11.3.0 / 2023-10-26
 

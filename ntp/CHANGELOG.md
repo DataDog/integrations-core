@@ -1,4 +1,3 @@
 # CHANGELOG - NTP
 
-## Unreleased
-
+<!-- towncrier release notes start -->

@@ -1,6 +1,6 @@
 # CHANGELOG - kubelet
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 7.9.2 / 2023-09-29
 
