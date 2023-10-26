@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.7.2 / 2023-10-26 / Agent 7.49.0
+
+***Added***
+
+* Add `API queries response status` widget to the `Datadog Cluster Agent - Overview` dashboard
+
 ## 2.7.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:
