@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 3.1.0 / 2023-10-26
+
 ***Added***:
 
 * Add missing Azure metrics ([#16073](https://github.com/DataDog/integrations-core/pull/16073))
