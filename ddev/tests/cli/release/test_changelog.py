@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import shutil
 from functools import partial
 
 import pytest
@@ -360,6 +361,8 @@ class TestBuild:
             )
         )
         fragments_dir = repo_with_towncrier.path / 'ddev' / 'changelog.d'
+        if fragments_dir.exists():
+            shutil.rmtree(fragments_dir)
         fragments_dir.mkdir(parents=True)
         return changelog, fragments_dir
 
