@@ -6,7 +6,6 @@ import pytest
 
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.nvidia_triton import NvidiaTritonCheck
-
 from .common import METRICS_MOCK, get_fixture_path
 
 
