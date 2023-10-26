@@ -11,9 +11,7 @@ from .common import METRICS_MOCK, get_fixture_path
 
 
 def test_check_metrics_nvidia_triton(dd_run_check, aggregator, instance_metrics, mock_http_response):
-    """
-    The instance is a deepcopy of the INSTANCE_DISABLED_SERVER_INFO in common
-    """
+
     check = NvidiaTritonCheck('nvidia_triton', {}, [instance_metrics])
     mock_http_response(file_path=get_fixture_path('nvidia_triton_openmetrics.txt'))
     dd_run_check(check)

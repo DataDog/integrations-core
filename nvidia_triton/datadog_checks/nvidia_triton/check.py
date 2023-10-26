@@ -1,9 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from urllib.parse import urljoin  # noqa: F401
-
-from six.moves.urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse  # noqa: F401
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.errors import ConfigurationError
@@ -35,17 +33,13 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
         self.collect_server_info = self.instance.get('collect_server_info', True)
 
         # Get the base url from the openmetrics endpoint and construct the server info API endpoint.
-        if self.collect_server_info is True:
+        if self.collect_server_info:
             self.base_url = None
-            try:
-                parts = urlparse(self.openmetrics_endpoint)
-                # Delete the /metrics from the url
-                self.base_url = parts._replace(path="")
-                # Replace the openmetrics port by the server port
-                self.server_info_api = self.base_url._replace(netloc=parts.hostname + ':' + self.server_port).geturl()
-
-            except Exception as e:
-                self.log.debug("Unable to determine the base url for server info collection: %s", str(e))
+            parts = urlparse(self.openmetrics_endpoint)
+            # Delete the /metrics from the url
+            self.base_url = parts._replace(path="")
+            # Replace the openmetrics port by the server port
+            self.server_info_api = self.base_url._replace(netloc=parts.hostname + ':' + self.server_port).geturl()
 
     def get_default_config(self):
         return {
@@ -58,8 +52,8 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
 
     @AgentCheck.metadata_entrypoint
     def _submit_version_metadata(self):
-        if self.collect_server_info is False:
-            self.log.warning("Collecting server info through API is disabled.")
+        if not self.collect_server_info:
+            self.log.debug("Collecting server info through API is disabled.")
             return
 
         endpoint = urljoin(self.server_info_api, DEFAULT_METADATA_ENDPOINT)
@@ -88,8 +82,8 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
             self.log.debug("Could not retrieve version metadata.")
 
     def _check_server_health(self):
-        if self.collect_server_info is False:
-            self.log.warning("Collecting server info through API is disabled.")
+        if not self.collect_server_info:
+            self.log.debug("Collecting server info through API is disabled.")
             return
 
         endpoint = urljoin(self.server_info_api, DEFAULT_HEALTH_ENDPOINT)
@@ -105,7 +99,6 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
 
     def check(self, instance):
         super().check(instance)
-        # Whether to collect the server info through the API or not
         if self.collect_server_info:
             self._submit_version_metadata()
             self._check_server_health()
