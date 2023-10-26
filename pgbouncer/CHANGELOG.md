@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 6.0.0 / 2023-10-26
+
 ***Changed***:
 
 * Drop support for Python 2 ([#15949](https://github.com/DataDog/integrations-core/pull/15949))

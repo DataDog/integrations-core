@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 5.0.1 / 2023-10-26
+
 ***Fixed***:
 
 * Bump the `pymysql` version to 1.1.0 on Python 3 ([#16042](https://github.com/DataDog/integrations-core/pull/16042))
