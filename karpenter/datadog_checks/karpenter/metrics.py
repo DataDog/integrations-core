@@ -1,3 +1,10 @@
+# (C) Datadog, Inc. 2023-present
+# All rights reserved
+# Licensed under Simplified BSD License (see LICENSE)
+
+# Some metrics mapping are too long. This turns off the 120 line limit for this file:
+# ruff: noqa: E501
+
 METRIC_MAP = {
     'certwatcher_read_certificate': 'certwatcher.read.certificate',
     'certwatcher_read_certificate_errors': 'certwatcher.read.certificate.errors',
@@ -88,59 +95,3 @@ METRIC_MAP = {
     'workqueue_unfinished_work_seconds': 'workqueue.unfinished.work_seconds',
     'workqueue_work_duration_seconds': 'workqueue.work.duration_seconds',
 }
-
-# METRICS = [
-#     'certwatcher.read.certificate.errors',
-#     'certwatcher.read.certificate.total',
-#     'controller.runtime.active_workers',
-#     'controller.runtime.max.concurrent_reconciles',
-#     'controller.runtime.reconcile.errors',
-#     'controller.runtime.reconcile',
-#     'go.gc.duration_seconds',
-#     'go.memstats.alloc.bytes',
-#     'go.memstats.alloc_bytes',
-#     'go.memstats.buck.hash.sys_bytes',
-#     'go.memstats.frees',
-#     'go.memstats.heap.alloc_bytes',
-#     'go.memstats.heap.idle_bytes',
-#     'go.memstats.heap.inuse_bytes',
-#     'go.memstats.heap.released_bytes',
-#     'go.memstats.heap.sys_bytes',
-#     'go.memstats.heap_objects',
-#     'go.memstats.last.gc.time_seconds',
-#     'go.memstats.lookups',
-#     'go.memstats.mallocs',
-#     'go.memstats.mcache.inuse_bytes',
-#     'go.memstats.mcache.sys_bytes',
-#     'go.memstats.mspan.inuse_bytes',
-#     'go.memstats.mspan.sys_bytes',
-#     'go.memstats.next.gc_bytes',
-#     'go.memstats.other.sys_bytes',
-#     'go.memstats.stack.inuse_bytes',
-#     'go.memstats.stack.sys_bytes',
-#     'go.memstats.sys_bytes',
-#     'go_goroutines',
-#     'go_info',
-#     'go_memstats_gc_sys_bytes',
-#     'go_threads',
-#     'karpenter.deprovisioning.replacement.machine.initialized_seconds',
-#     'karpenter.interruption.deleted_messages',
-#     'karpenter.interruption.message.latency.time_seconds',
-#     'karpenter.pods.startup.time_seconds',
-#     'karpenter.provisioner.scheduling.duration_seconds',
-#     'process.cpu.seconds',
-#     'process.max_fds',
-#     'process.open_fds',
-#     'process.resident.memory_bytes',
-#     'process.start.time_seconds',
-#     'process.virtual.memory.max_bytes',
-#     'process.virtual.memory_bytes',
-#     'rest.client.requests',
-#     'workqueue.adds',
-#     'workqueue.longest.running.processor_seconds',
-#     'workqueue.queue.duration_seconds',
-#     'workqueue.retries',
-#     'workqueue.unfinished.work_seconds',
-#     'workqueue.work.duration_seconds',
-#     'workqueue_depth',
-# ]

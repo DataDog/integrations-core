@@ -9,6 +9,7 @@ from .metrics import METRIC_MAP
 
 class KarpenterCheck(OpenMetricsBaseCheckV2):
     DEFAULT_METRIC_LIMIT = 0
+    __NAMESPACE__ = 'karpenter'
 
     def __init__(self, name, init_config, instances=None):
 
@@ -19,4 +20,7 @@ class KarpenterCheck(OpenMetricsBaseCheckV2):
         )
 
     def get_default_config(self):
-        return {'namespace': 'karpenter', 'metrics': [METRIC_MAP]}
+        return {
+            'metrics': [METRIC_MAP],
+            "rename_labels": {"version": "go_version", 'host': 'karpenter_host'},
+        }

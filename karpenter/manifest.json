@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "",
+    "description": "Integration for Karpenter",
     "title": "karpenter",
     "media": [],
     "classifier_tags": [
@@ -32,7 +32,7 @@
       },
       "metrics": {
         "prefix": "karpenter.",
-        "check": "",
+        "check": "karpenter.go_goroutines",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
