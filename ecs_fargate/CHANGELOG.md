@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.1.0 / 2023-10-26
+
 ***Added***:
 
 * Add storage_stats support for Windows ([#16014](https://github.com/DataDog/integrations-core/pull/16014))
