@@ -1,6 +1,6 @@
 # CHANGELOG - sqlserver
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 15.1.0 / 2023-10-26
 

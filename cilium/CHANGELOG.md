@@ -1,6 +1,6 @@
 # CHANGELOG - Cilium
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 3.1.0 / 2023-10-26
 

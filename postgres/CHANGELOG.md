@@ -1,6 +1,6 @@
 # CHANGELOG - postgres
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 15.2.0 / 2023-10-26
 

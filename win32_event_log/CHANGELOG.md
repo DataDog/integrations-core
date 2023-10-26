@@ -1,6 +1,6 @@
 # CHANGELOG - win32_event_log
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 3.1.1 / 2023-10-26
 

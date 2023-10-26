@@ -1,6 +1,6 @@
 # CHANGELOG - Kube_scheduler
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 4.7.1 / 2023-10-11
 

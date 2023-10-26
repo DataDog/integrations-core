@@ -1,6 +1,6 @@
 # CHANGELOG - pgbouncer
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 6.0.0 / 2023-10-26
 

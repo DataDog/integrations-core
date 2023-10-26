@@ -1,6 +1,6 @@
 # CHANGELOG - tokumx
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 3.2.0 / 2022-05-15 / Agent 7.37.0
 
