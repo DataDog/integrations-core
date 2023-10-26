@@ -43,18 +43,17 @@ datadog:
 To enable the `kubernetes_state_core` check, the setting `spec.features.kubeStateMetricsCore.enabled` must be set to `true` in the DatadogAgent resource:
 
 ```yaml
-apiVersion: datadoghq.com/v1alpha1
 kind: DatadogAgent
+apiVersion: datadoghq.com/v2alpha1
 metadata:
   name: datadog
 spec:
-  credentials:
-    apiKey: <DATADOG_API_KEY>
-    appKey: <DATADOG_APP_KEY>
+  global:
+    credentials:
+      apiKey: <DATADOG_API_KEY>
   features:
     kubeStateMetricsCore:
       enabled: true
-  # (...)
 ```
 
 Note: Datadog Operator v0.7.0 or greater is required.
@@ -79,6 +78,7 @@ Here is the mapping between deprecated tags and the official tags that have repl
 | cronjob               | kube_cronjob                |
 | daemonset             | kube_daemon_set             |
 | deployment            | kube_deployment             |
+| hpa                   | horizontalpodautoscaler     |
 | image                 | image_name                  |
 | job                   | kube_job                    |
 | job_name              | kube_job                    |
@@ -94,7 +94,7 @@ Here is the mapping between deprecated tags and the official tags that have repl
 The Kubernetes State Metrics Core check is not backward compatible, be sure to read the changes carefully before migrating from the legacy `kubernetes_state` check.
 
 `kubernetes_state.node.by_condition`
-: A new metric with node name granularity. It replaces `kubernetes_state.nodes.by_condition`.
+: A new metric with node name granularity. The legacy metric `kubernetes_state.nodes.by_condition` is deprecated in favor of this one. **Note:** This metric is backported into the Legacy check, where both metrics (it and the legacy metric it replaces) are available.
 
 `kubernetes_state.persistentvolume.by_phase`
 : A new metric with persistentvolume name granularity. It replaces `kubernetes_state.persistentvolumes.by_phase`.
@@ -110,6 +110,49 @@ The Kubernetes State Metrics Core check is not backward compatible, be sure to r
 
 `kube_job`
 : In `kubernetes_state`, the `kube_job` tag value is the `CronJob` name if the `Job` had `CronJob` as an owner, otherwise it is the `Job` name. In `kubernetes_state_core`, the `kube_job` tag value is always the `Job` name, and a new `kube_cronjob` tag key is added with the `CronJob` name as the tag value. When migrating to `kubernetes_state_core`, it's recommended to use the new tag or `kube_job:foo*`, where `foo` is the `CronJob` name, for query filters.
+
+`kubernetes_state.job.succeeded`
+: In `kubernetes_state`, the `kuberenetes.job.succeeded` was `count` type. In `kubernetes_state_core` it is `gauge` type.
+
+### Node-level tag assignment
+
+Host or node-level tags no longer appear on cluster-centric metrics. Only metrics relative to an actual node in the cluster, like `kubernetes_state.node.by_condition` or `kubernetes_state.container.restarts`, continue to inherit their respective host or node level tags. 
+
+To add tags globally, use the `DD_TAGS` environment variable, or use the respective Helm or Operator configurations. Instance-only level tags can be specified by mounting a custom `kubernetes_state_core.yaml` into the Cluster Agent.
+
+<!-- xxx tabs xxx -->
+
+<!-- xxx tab "Helm" xxx -->
+```yaml
+datadog:
+  kubeStateMetricsCore:
+    enabled: true
+  tags: 
+    - "<TAG_KEY>:<TAG_VALUE>"
+```
+<!-- xxz tab xxx -->
+<!-- xxx tab "Operator" xxx -->
+```yaml
+kind: DatadogAgent
+apiVersion: datadoghq.com/v2alpha1
+metadata:
+  name: datadog
+spec:
+  global:
+    credentials:
+      apiKey: <DATADOG_API_KEY>
+    tags:
+      - "<TAG_KEY>:<TAG_VALUE>"
+  features:
+    kubeStateMetricsCore:
+      enabled: true
+```
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
+Metrics like `kubernetes_state.container.memory_limit.total` or `kubernetes_state.node.count` are aggregate counts of groups within a cluster, and host or node-level tags are not added.
+
+### Legacy check
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Helm" xxx -->
@@ -154,6 +197,54 @@ See [../kubernetes/assets/service_checks.json][7] for a list of service checks p
 [Run the Cluster Agent's `status` subcommand][8] inside your Cluster Agent container and look for `kubernetes_state_core` under the Checks section.
 
 ## Troubleshooting
+
+### Timeout errors
+
+By default, the Kubernetes State Metrics Core check waits 10 seconds for a response from the Kubernetes API server. For large clusters, the request may time out, resulting in missing metrics.
+
+You can avoid this by setting the environment variable `DD_KUBERNETES_APISERVER_CLIENT_TIMEOUT` to a higher value than the default 10 seconds.
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Operator" xxx -->
+Update your `datadog-agent.yaml` with the following configuration:
+
+```yaml
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+metadata:
+  name: datadog
+spec:
+  override:
+    clusterAgent:
+      env:
+        - name: DD_KUBERNETES_APISERVER_CLIENT_TIMEOUT
+          value: <value_greater_than_10>
+```
+
+Then apply the new configuration:
+
+```shell
+kubectl apply -n $DD_NAMESPACE -f datadog-agent.yaml
+```
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Helm" xxx -->
+Update your `datadog-values.yaml` with the following configuration:
+
+```yaml
+clusterAgent:
+  env:
+    - name: DD_KUBERNETES_APISERVER_CLIENT_TIMEOUT
+      value: <value_greater_than_10>
+```
+
+Then upgrade your Helm chart:
+
+```shell
+helm upgrade -f datadog-values.yaml <RELEASE_NAME> datadog/datadog
+```
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 Need help? Contact [Datadog support][9].
 
