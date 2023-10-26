@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 27.0.1 / 2023-10-26
+
 ***Fixed***:
 
 * Align package version in integration template with changelog. ([#16029](https://github.com/DataDog/integrations-core/pull/16029))
