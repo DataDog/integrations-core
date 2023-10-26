@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Bump the `cryptography` version to 41.0.5 ([#16083](https://github.com/DataDog/integrations-core/pull/16083))
+
 ## 2.12.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:
