@@ -2,6 +2,10 @@
 
 <!-- towncrier release notes start -->
 
+***Fixed***:
+
+* Bump librdkafka and confluent-kafka to v2.3.0 ([#16088](https://github.com/DataDog/integrations-core/pull/16088))
+
 ## 4.1.3 / 2023-10-11 / Agent 7.48.1
 
 ***Fixed***:
