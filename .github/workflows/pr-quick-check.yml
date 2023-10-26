@@ -57,3 +57,4 @@ jobs:
         --diff-file /tmp/diff
         --pr-file "$GITHUB_EVENT_PATH"
         ${{ github.event.pull_request.base.repo.private && '--private' || '' }}
+        --repo "${{ inputs.repo }}"
