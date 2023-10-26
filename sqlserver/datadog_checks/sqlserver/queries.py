@@ -97,6 +97,49 @@ QUERY_FAILOVER_CLUSTER_INSTANCE = {
     ],
 }
 
+LOG_SHIPPING_PRIMARY = {
+    'name': 'msdb.dbo.log_shipping_monitor_primary',
+    'query': """
+        SELECT primary_id
+            ,primary_server
+            ,primary_database
+            ,DATEDIFF(SECOND, last_backup_date, GETDATE()) AS time_since_backup
+        FROM msdb.dbo.log_shipping_monitor_primary
+    """.strip(),
+    'columns': [
+        {'name': 'primary_id', 'type': 'tag'},
+        {'name': 'primary_server', 'type': 'tag'},
+        {'name': 'primary_db', 'type': 'tag'},
+        {'name': 'log_shipping_primary.time_since_backup', 'type': 'gauge'},
+    ],
+}
+
+LOG_SHIPPING_SECONDARY = {
+    'name': 'msdb.dbo.log_shipping_monitor_primary',
+    'query': """
+        SELECT secondary_server
+            ,secondary_database
+            ,secondary_id
+            ,primary_server
+            ,primary_database
+            ,DATEDIFF(SECOND, last_restored_date, GETDATE()) AS time_since_restore
+            ,DATEDIFF(SECOND, last_copied_date, GETDATE()) AS time_since_copy
+            ,last_restored_latency*60 as last_restored_latency
+        FROM msdb.dbo.log_shipping_monitor_secondary
+    """.strip(),
+    'columns': [
+        {'name': 'secondary_server', 'type': 'tag'},
+        {'name': 'secondary_db', 'type': 'tag'},
+        {'name': 'secondary_id', 'type': 'tag'},
+        {'name': 'primary_server', 'type': 'tag'},
+        {'name': 'primary_db', 'type': 'tag'},
+        {'name': 'log_shipping_secondary.time_since_restore', 'type': 'gauge'},
+        {'name': 'log_shipping_secondary.time_since_copy', 'type': 'gauge'},
+        {'name': 'log_shipping_secondary.last_restored_latency', 'type': 'gauge'},
+    ],
+}
+
+
 
 def get_query_ao_availability_groups(sqlserver_major_version):
     """
