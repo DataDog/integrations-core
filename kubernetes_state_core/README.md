@@ -94,7 +94,7 @@ Here is the mapping between deprecated tags and the official tags that have repl
 The Kubernetes State Metrics Core check is not backward compatible, be sure to read the changes carefully before migrating from the legacy `kubernetes_state` check.
 
 `kubernetes_state.node.by_condition`
-: A new metric with node name granularity. The legacy metric `kubernetes_state.nodes.by_condition` is deprecated in favor of this one. **Note:** This metric is backported into the Legacy check, where both metrics (it and the legacy metric it replaces) are available.
+: A new metric with node name granularity. The legacy metric `kubernetes_state.nodes.by_condition` is deprecated in favor of this one. **Note:** This metric is backported into the legacy check, where both metrics (it and the legacy metric it replaces) are available.
 
 `kubernetes_state.persistentvolume.by_phase`
 : A new metric with persistentvolume name granularity. It replaces `kubernetes_state.persistentvolumes.by_phase`.
