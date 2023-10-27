@@ -15,7 +15,7 @@
                         "id": 4949590841397250,
                         "definition": {
                             "type": "image",
-                            "url": "",
+                            "url": "/static/images/logos/nvidia_triton_large.svg",
                             "sizing": "none",
                             "has_background": true,
                             "has_border": true,
@@ -83,7 +83,7 @@
         {
             "id": 5248388510581226,
             "definition": {
-                "title": "New group",
+                "title": "",
                 "background_color": "vivid_green",
                 "show_title": true,
                 "type": "group",
@@ -97,7 +97,7 @@
                             "display_format": "countsAndList",
                             "color_preference": "text",
                             "hide_zero_counts": true,
-                            "query": "nvidia_triton",
+                            "query": "nvidia triton tag:(integration:nvidia_triton)",
                             "sort": "status,asc",
                             "count": 50,
                             "start": 0,
@@ -299,7 +299,7 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "green",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -346,7 +346,7 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "green",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -642,7 +642,7 @@
                 "x": 0,
                 "y": 8,
                 "width": 12,
-                "height": 1
+                "height": 15
             }
         },
         {
@@ -654,6 +654,27 @@
                 "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
+                    {
+                        "id": 8313114222490506,
+                        "definition": {
+                            "type": "note",
+                            "content": "CPU Metrics are currently only supported on Linux. \nThey collect information from the /proc filesystem.",
+                            "background_color": "green",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
                     {
                         "id": 3240955471872446,
                         "definition": {
@@ -670,13 +691,13 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 0,
+                            "y": 1,
                             "width": 4,
                             "height": 1
                         }
                     },
                     {
-                        "id": 8313114222490506,
+                        "id": 2352720711065806,
                         "definition": {
                             "type": "note",
                             "content": "CPU memory",
@@ -691,7 +712,7 @@
                         },
                         "layout": {
                             "x": 4,
-                            "y": 0,
+                            "y": 1,
                             "width": 8,
                             "height": 1
                         }
@@ -738,7 +759,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 1,
+                            "y": 2,
                             "width": 4,
                             "height": 4
                         }
@@ -746,7 +767,7 @@
                     {
                         "id": 362546652983546,
                         "definition": {
-                            "title": "Free CPU Memory Percentage Per Model ",
+                            "title": "Free CPU Memory Percentage ",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -759,15 +780,15 @@
                                     ],
                                     "queries": [
                                         {
-                                            "name": "query1",
+                                            "name": "query2",
                                             "data_source": "metrics",
-                                            "query": "avg:nvidia_triton.cpu.memory.used_bytes{$model }",
+                                            "query": "avg:nvidia_triton.gpu.memory.total_bytes{*}",
                                             "aggregator": "sum"
                                         },
                                         {
-                                            "name": "query2",
+                                            "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:nvidia_triton.gpu.memory.total_bytes{$model }",
+                                            "query": "avg:nvidia_triton.cpu.memory.used_bytes{*}",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -783,7 +804,7 @@
                         },
                         "layout": {
                             "x": 4,
-                            "y": 1,
+                            "y": 2,
                             "width": 8,
                             "height": 2
                         }
@@ -830,7 +851,7 @@
                         },
                         "layout": {
                             "x": 4,
-                            "y": 3,
+                            "y": 4,
                             "width": 4,
                             "height": 2
                         }
@@ -877,7 +898,7 @@
                         },
                         "layout": {
                             "x": 8,
-                            "y": 3,
+                            "y": 4,
                             "width": 4,
                             "height": 2
                         }
@@ -886,9 +907,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 9,
+                "y": 23,
                 "width": 12,
-                "height": 1
+                "height": 7
             }
         },
         {
@@ -1458,9 +1479,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 10,
+                "y": 30,
                 "width": 12,
-                "height": 1,
+                "height": 18,
                 "is_column_break": true
             }
         },
@@ -1874,9 +1895,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 11,
+                "y": 48,
                 "width": 12,
-                "height": 1
+                "height": 8
             }
         }
     ],
