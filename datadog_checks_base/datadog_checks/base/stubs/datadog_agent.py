@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 
+from six import iteritems
+
 from datadog_checks.base.utils.serialization import json
 
 
@@ -48,9 +50,13 @@ class DatadogAgentStub(object):
             count, metadata_items, repr(self._metadata)
         )
 
-    def assert_external_tags(self, hostname, external_tags):
+    def assert_external_tags(self, hostname, external_tags, match_tags_order=False):
         for h, tags in self._external_tags:
             if h == hostname:
+                if not match_tags_order:
+                    external_tags = {k: sorted(v) for (k, v) in iteritems(external_tags)}
+                    tags = {k: sorted(v) for (k, v) in iteritems(tags)}
+
                 assert (
                     external_tags == tags
                 ), 'Expected {} external tags for hostname {}, found {}. Submitted external tags: {}'.format(
