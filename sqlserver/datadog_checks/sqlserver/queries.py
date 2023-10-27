@@ -115,7 +115,7 @@ LOG_SHIPPING_PRIMARY = {
 }
 
 LOG_SHIPPING_SECONDARY = {
-    'name': 'msdb.dbo.log_shipping_monitor_primary',
+    'name': 'msdb.dbo.log_shipping_monitor_secondary',
     'query': """
         SELECT secondary_server
             ,secondary_database
