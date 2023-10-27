@@ -7,6 +7,9 @@ from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
 
+"""
+Use Caddy for testing due to the CUDA limitation preventing the spin of a Triton docker container.
+"""
 
 def test_check_nvidia_triton(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
