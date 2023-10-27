@@ -56,7 +56,7 @@ spec:
       enabled: true
 ```
 
-Note: Datadog Operator v0.7.0 or greater is required.
+**Note**: Datadog Operator v0.7.0 or greater is required.
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -121,7 +121,6 @@ Host or node-level tags no longer appear on cluster-centric metrics. Only metric
 To add tags globally, use the `DD_TAGS` environment variable, or use the respective Helm or Operator configurations. Instance-only level tags can be specified by mounting a custom `kubernetes_state_core.yaml` into the Cluster Agent.
 
 <!-- xxx tabs xxx -->
-
 <!-- xxx tab "Helm" xxx -->
 ```yaml
 datadog:
@@ -190,7 +189,29 @@ The Kubernetes State Metrics Core check does not include any events.
 
 ### Service Checks
 
-See [../kubernetes/assets/service_checks.json][7] for a list of service checks provided by this integration.
+`kubernetes_state.cronjob.complete`
+: Whether the last job of the cronjob is failed or not. Tags:`kube_cronjob` `kube_namespace` (`env` `service` `version` from standard labels).
+
+`kubernetes_state.cronjob.on_schedule_check`
+: Alert if the cronjob's next schedule is in the past. Tags:`kube_cronjob` `kube_namespace` (`env` `service` `version` from standard labels).
+
+`kubernetes_state.job.complete`
+: Whether the job is failed or not. Tags:`kube_job` or `kube_cronjob` `kube_namespace` (`env` `service` `version` from standard labels).
+
+`kubernetes_state.node.ready`
+: Whether the node is ready. Tags:`node` `condition` `status`.
+
+`kubernetes_state.node.out_of_disk`
+: Whether the node is out of disk. Tags:`node` `condition` `status`.
+
+`kubernetes_state.node.disk_pressure`
+: Whether the node is under disk pressure. Tags:`node` `condition` `status`.
+
+`kubernetes_state.node.network_unavailable`
+: Whether the node network is unavailable. Tags:`node` `condition` `status`.
+
+`kubernetes_state.node.memory_pressure`
+: Whether the node network is under memory pressure. Tags:`node` `condition` `status`.
 
 ### Validation
 
@@ -204,7 +225,7 @@ By default, the Kubernetes State Metrics Core check waits 10 seconds for a respo
 
 You can avoid this by setting the environment variable `DD_KUBERNETES_APISERVER_CLIENT_TIMEOUT` to a higher value than the default 10 seconds.
 
-<!-- xxz tab xxx -->
+<!-- xxx tabs xxx -->
 <!-- xxx tab "Operator" xxx -->
 Update your `datadog-agent.yaml` with the following configuration:
 
@@ -226,8 +247,7 @@ Then apply the new configuration:
 ```shell
 kubectl apply -n $DD_NAMESPACE -f datadog-agent.yaml
 ```
-
-<!-- xxx tabs xxx -->
+<!-- xxz tab xxx -->
 <!-- xxx tab "Helm" xxx -->
 Update your `datadog-values.yaml` with the following configuration:
 
@@ -248,17 +268,12 @@ helm upgrade -f datadog-values.yaml <RELEASE_NAME> datadog/datadog
 
 Need help? Contact [Datadog support][9].
 
-## Further Reading
-
-{{< partial name="whats-next/whats-next.html" >}}
-
-
 [1]: https://kubernetes.io/blog/2021/04/13/kube-state-metrics-v-2-0/
-[2]: /integrations/kubernetes_state_core/#migration-from-kubernetes_state-to-kubernetes_state_core
-[3]: /integrations/kubernetes_state_core/#data-collected
+[2]: #migration-from-kubernetes_state-to-kubernetes_state_core
+[3]: #data-collected
 [4]: /agent/cluster_agent/
 [5]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_state_core/metadata.csv
-[6]: /getting_started/tagging/unified_service_tagging/?tab=kubernetes#configuration-1
+[6]: /getting_started/tagging/unified_service_tagging/#configuration
 [7]: https://github.com/DataDog/integrations-core/blob/master/kubernetes/assets/service_checks.json
-[8]: /agent/guide/agent-commands/?tab=clusteragent#agent-status-and-information
-[9]: https://docs.datadoghq.com/help/
+[8]: /agent/guide/agent-commands/#agent-status-and-information
+[9]: /help/
