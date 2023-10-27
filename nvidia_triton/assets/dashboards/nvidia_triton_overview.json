@@ -1,6 +1,6 @@
 {
     "title": "Nvidia Triton Overview",
-    "description": "[[suggested_dashboards]]",
+    "description": "**Nvidia Triton**\n\nThis dashboard provides insights into your Nvidia Triton Server. You can use this dashbaord to check resource consumption in GPU and CPU. You can also use it to get in depth look at your inference requests per model and cache stats(if enabled).\n\n**Useful Links**\n\n* [Integration Docs]()",
     "widgets": [
         {
             "id": 52540712803644,
@@ -642,7 +642,7 @@
                 "x": 0,
                 "y": 8,
                 "width": 12,
-                "height": 15
+                "height": 1
             }
         },
         {
@@ -907,9 +907,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 23,
+                "y": 9,
                 "width": 12,
-                "height": 7
+                "height": 1
             }
         },
         {
@@ -928,7 +928,7 @@
                             "content": "The following graphs show the Triton server inference numbers, such as failure, success and peneding, along with total count and batch execution",
                             "background_color": "green",
                             "font_size": "14",
-                            "text_align": "left",
+                            "text_align": "center",
                             "vertical_align": "center",
                             "show_tick": true,
                             "tick_pos": "50%",
@@ -1479,9 +1479,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 30,
+                "y": 10,
                 "width": 12,
-                "height": 18,
+                "height": 1,
                 "is_column_break": true
             }
         },
@@ -1498,10 +1498,10 @@
                         "id": 7028067822071352,
                         "definition": {
                             "type": "note",
-                            "content": "",
+                            "content": "The following graph shows the cache metrics reported by Triton directly, such as the cache hit/miss counts and durations.",
                             "background_color": "green",
                             "font_size": "14",
-                            "text_align": "left",
+                            "text_align": "center",
                             "vertical_align": "center",
                             "show_tick": true,
                             "tick_pos": "50%",
@@ -1895,9 +1895,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 48,
+                "y": 11,
                 "width": 12,
-                "height": 8
+                "height": 1
             }
         }
     ],
