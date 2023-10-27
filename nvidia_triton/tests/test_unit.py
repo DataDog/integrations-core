@@ -16,7 +16,7 @@ def test_check_metrics_nvidia_triton(dd_run_check, aggregator, instance_metrics,
     """
 
     check = NvidiaTritonCheck('nvidia_triton', {}, [instance_metrics])
-    mock_http_response(file_path=get_fixture_path('nvidia_triton_openmetrics.txt'))
+    mock_http_response(file_path=get_fixture_path('metrics/metrics'))
     dd_run_check(check)
 
     for metric in METRICS_MOCK:
@@ -54,7 +54,7 @@ def test_emits_critical_api_service_check_when_service_is_down(aggregator, insta
 
 
 def test_check_nvidia_triton_metadata(datadog_agent, instance, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('nvidia_triton_metadata.json'))
+    mock_http_response(file_path=get_fixture_path('info/v2'))
     check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
 
     check.check_id = 'test:123'

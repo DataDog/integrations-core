@@ -11,7 +11,7 @@ PORT = "8002"
 
 
 def get_fixture_path(filename):
-    return os.path.join(HERE, 'fixtures', filename)
+    return os.path.join(HERE, 'docker', filename)
 
 
 INSTANCE = {
