@@ -12,6 +12,7 @@ Use Caddy for testing due to the CUDA limitation preventing the spin of a Triton
 
 """
 
+
 def test_check_nvidia_triton(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
     metrics = common.METRICS_MOCK
