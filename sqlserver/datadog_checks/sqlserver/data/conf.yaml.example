@@ -158,13 +158,15 @@ instances:
 
     ## @param include_primary_log_shipping_metrics - boolean - optional - default: false
     ## Include log_shipping_primary metrics for a log shipping setup. Requires to run
-    ## against the primary instance in a Transaction Log Shipping configuration.
+    ## against the primary instance in a Transaction Log Shipping configuration. Note that
+    ## the datadog user needs to be present in msdb and requires to be added to the db_datareader role.
     #
     # include_primary_log_shipping_metrics: false
 
     ## @param include_secondary_log_shipping_metrics - boolean - optional - default: false
     ## Include log_shipping_secondary metrics for a log shipping setup. Requires to run
-    ## against a secondary instance in a Transaction Log Shipping configuration.
+    ## against a secondary instance in a Transaction Log Shipping configuration. Note that
+    ## the datadog user needs to be present in msdb and requires to be added to the db_datareader role.
     #
     # include_secondary_log_shipping_metrics: false
 
