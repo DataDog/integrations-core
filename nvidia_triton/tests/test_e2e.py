@@ -9,6 +9,7 @@ from . import common
 
 """
 Use Caddy for testing due to the CUDA limitation preventing the spin of a Triton docker container.
+
 """
 
 def test_check_nvidia_triton(dd_agent_check, instance):
