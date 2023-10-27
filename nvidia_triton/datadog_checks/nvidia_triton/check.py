@@ -20,12 +20,10 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
 
     def __init__(self, name, init_config, instances=None):
         super(NvidiaTritonCheck, self).__init__(name, init_config, instances)
-        if 'openmetrics_endpoint' not in self.instance:
-            raise ConfigurationError(
-                "The 'openmetrics_endpoint' option is missing in the Nvidia Triton integration configuration."
-            )
         self.openmetrics_endpoint = self.instance["openmetrics_endpoint"]
         self.tags = self.instance.get('tags', [])
+        self._metadata_endpoint = DEFAULT_METADATA_ENDPOINT
+        self._health_endpoint = DEFAULT_HEALTH_ENDPOINT
 
         # Get the API server port if specified, otherwise use the default 8000.
         self.server_port = str(self.instance.get('server_port', 8000))
@@ -56,7 +54,7 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
             self.log.debug("Collecting server info through API is disabled.")
             return
 
-        endpoint = urljoin(self.server_info_api, DEFAULT_METADATA_ENDPOINT)
+        endpoint = urljoin(self.server_info_api, self._metadata_endpoint)
         response = self.http.get(endpoint)
 
         if response.ok:
@@ -86,7 +84,7 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
             self.log.debug("Collecting server info through API is disabled.")
             return
 
-        endpoint = urljoin(self.server_info_api, DEFAULT_HEALTH_ENDPOINT)
+        endpoint = urljoin(self.server_info_api, self._health_endpoint)
         response = self.http.get(endpoint)
 
         # Any 4xx or 5xx response from the API endpoint (/v2/health/ready) means the server is not ready
