@@ -48,9 +48,13 @@ class DatadogAgentStub(object):
             count, metadata_items, repr(self._metadata)
         )
 
-    def assert_external_tags(self, hostname, external_tags):
+    def assert_external_tags(self, hostname, external_tags, match_tags_order=False):
         for h, tags in self._external_tags:
             if h == hostname:
+                if not match_tags_order:
+                    external_tags = {k: sorted(v) for (k, v) in external_tags.items()}
+                    tags = {k: sorted(v) for (k, v) in tags.items()}
+
                 assert (
                     external_tags == tags
                 ), 'Expected {} external tags for hostname {}, found {}. Submitted external tags: {}'.format(
