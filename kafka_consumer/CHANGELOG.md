@@ -8,10 +8,6 @@
 
 * Add ability to cache offsets and close admin client ([#15960](https://github.com/DataDog/integrations-core/pull/15960))
 
-***Fixed***:
-
-* Attempt client connection before fetching consumer offsets ([#15951](https://github.com/DataDog/integrations-core/pull/15951))
-
 ## 4.1.2 / 2023-09-04 / Agent 7.48.0
 
 ***Fixed***:
