@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import contextlib
 import copy
+import functools
 import os
 from time import time
 
@@ -114,7 +115,7 @@ class PostgreSql(AgentCheck):
         self.check_initializations.append(self.initialize_is_aurora)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         self.autodiscovery = self._build_autodiscovery()
-        self._dynamic_queries = None
+        self._dynamic_queries = []
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
             maxsize=1,
@@ -172,9 +173,9 @@ class PostgreSql(AgentCheck):
             )
         )
 
-    def _new_query_executor(self, queries):
+    def _new_query_executor(self, queries, db):
         return QueryExecutor(
-            self.execute_query_raw,
+            functools.partial(self.execute_query_raw, db=db),
             self,
             queries=queries,
             tags=self.tags_without_db,
@@ -182,8 +183,8 @@ class PostgreSql(AgentCheck):
             track_operation_time=True,
         )
 
-    def execute_query_raw(self, query):
-        with self.db() as conn:
+    def execute_query_raw(self, query, db):
+        with db() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(query)
                 rows = cursor.fetchall()
@@ -231,6 +232,7 @@ class PostgreSql(AgentCheck):
 
         self.log.debug("Generating dynamic queries")
         queries = []
+        per_database_queries = []  # queries that need to be run per database, used for autodiscovery
         if self.version >= V9_2:
             q_pg_stat_database = copy.deepcopy(QUERY_PG_STAT_DATABASE)
             if len(self._config.ignore_databases) > 0:
@@ -281,10 +283,15 @@ class PostgreSql(AgentCheck):
                 query = copy.copy(query)
                 formatted_query = self._relations_manager.filter_relation_query(query['query'], 'nspname')
                 query['query'] = formatted_query
-                queries.append(query)
+                per_database_queries.append(query)
 
-        self._dynamic_queries = self._new_query_executor(queries)
-        self._dynamic_queries.compile_queries()
+        if self.autodiscovery:
+            self._collect_dynamic_queries_autodiscovery(per_database_queries)
+        else:
+            queries.extend(per_database_queries)
+        self._dynamic_queries.append(self._new_query_executor(queries, db=self.db))
+        for dynamic_query in self._dynamic_queries:
+            dynamic_query.compile_queries()
         self.log.debug("initialized %s dynamic querie(s)", len(queries))
 
         return self._dynamic_queries
@@ -304,7 +311,7 @@ class PostgreSql(AgentCheck):
     def _clean_state(self):
         self.log.debug("Cleaning state")
         self.metrics_cache.clean_state()
-        self._dynamic_queries = None
+        self._dynamic_queries = []
 
     def _get_debug_tags(self):
         return ['agent_hostname:{}'.format(self.agent_hostname)]
@@ -586,6 +593,17 @@ class PostgreSql(AgentCheck):
                 ),
             )
 
+    def _collect_dynamic_queries_autodiscovery(self, queries):
+        if not self.autodiscovery:
+            return
+
+        databases = self.autodiscovery.get_items()
+        for dbname in databases:
+            db = functools.partial(
+                self.db_pool.get_connection, dbname=dbname, ttl_ms=self._config.idle_connection_timeout
+            )
+            self._dynamic_queries.append(self._new_query_executor(queries, db=db))
+
     def _collect_stats(self, instance_tags):
         """Query pg_stat_* for various metrics
         If relations is not an empty list, gather per-relation metrics
@@ -659,7 +677,8 @@ class PostgreSql(AgentCheck):
                     self._query_scope(cursor, scope, instance_tags, True)
 
         if self.dynamic_queries:
-            self.dynamic_queries.execute()
+            for dynamic_query in self.dynamic_queries:
+                dynamic_query.execute()
 
     def _new_connection(self, dbname):
         if self._config.host == 'localhost' and self._config.password == '':

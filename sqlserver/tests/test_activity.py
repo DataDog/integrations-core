@@ -22,7 +22,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS, _hash_to_hex
 
-from .common import CHECK_NAME
+from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME
 from .conftest import DEFAULT_TIMEOUT
 
 try:
@@ -196,7 +196,7 @@ def test_collect_load_activity(
 
     # internal debug metrics
     aggregator.assert_metric(
-        "dd.sqlserver.operation.time",
+        OPERATION_TIME_METRIC_NAME,
         tags=['agent_hostname:stubbed.hostname', 'operation:collect_activity']
         + _expected_dbm_instance_tags(dbm_instance),
     )

@@ -1,6 +1,6 @@
 # CHANGELOG - Kube_proxy
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 6.1.1 / 2023-08-18 / Agent 7.48.0
 

@@ -47,6 +47,16 @@ def test_consumer_config_error(check, dd_run_check, kafka_instance):
         dd_run_check(kafka_consumer_check, extract_message=True)
 
 
+def test_invalid_config_raises_exception(check, dd_run_check, kafka_instance):
+    kafka_instance['kafka_connect_str'] = "localhost:9091"
+    kafka_consumer_check = check(kafka_instance)
+
+    with pytest.raises(
+        Exception, match="Unable to connect to the AdminClient. This is likely due to an error in the configuration."
+    ):
+        dd_run_check(kafka_consumer_check, extract_message=True)
+
+
 def test_no_topics(aggregator, check, kafka_instance, dd_run_check):
     kafka_instance['consumer_groups'] = {'my_consumer': {}}
     dd_run_check(check(kafka_instance))

@@ -1,4 +1,3 @@
 # CHANGELOG - Consul Connect
 
-## Unreleased
-
+<!-- towncrier release notes start -->

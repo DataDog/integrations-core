@@ -1,6 +1,6 @@
 # CHANGELOG - Cassandra Nodetool Check
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 1.12.1 / 2023-08-18 / Agent 7.48.0
 
@@ -155,4 +155,3 @@
 ***Added***:
 
 * add `cassandra_nodetool` integration ([#511](https://github.com/DataDog/integrations-core/issues/511) and [#704](https://github)com/DataDog/integrations-core/issues/704)
-

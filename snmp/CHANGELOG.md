@@ -1,6 +1,8 @@
 # CHANGELOG - snmp
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 7.0.1 / 2023-10-26
 
 ***Fixed***:
 

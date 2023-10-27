@@ -15,7 +15,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
-from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host
+from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host, tracked_query
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
@@ -125,7 +125,7 @@ class SQLServer(AgentCheck):
         self.custom_metrics = init_config.get('custom_metrics', [])
 
         # DBM
-        self.dbm_enabled = self.instance.get('dbm', False)
+        self.dbm_enabled = is_affirmative(self.instance.get('dbm', False))
         self.statement_metrics_config = self.instance.get('query_metrics', {}) or {}
         self.procedure_metrics_config = self.instance.get('procedure_metrics', {}) or {}
         self.settings_config = self.instance.get('collect_settings', {}) or {}
@@ -857,9 +857,11 @@ class SQLServer(AgentCheck):
                             db_names = [d.name for d in self.databases] or [
                                 self.instance.get('database', self.connection.DEFAULT_DATABASE)
                             ]
-                            rows, cols = getattr(metrics, cls).fetch_all_values(
-                                cursor, list(metric_names), self.log, databases=db_names
-                            )
+                            metric_cls = getattr(metrics, cls)
+                            with tracked_query(self, operation=metric_cls.OPERATION_NAME):
+                                rows, cols = metric_cls.fetch_all_values(
+                                    cursor, list(metric_names), self.log, databases=db_names
+                                )
                         except Exception as e:
                             self.log.error("Error running `fetch_all` for metrics %s - skipping.  Error: %s", cls, e)
                             rows, cols = None, None

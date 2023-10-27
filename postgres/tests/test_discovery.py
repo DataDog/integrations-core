@@ -42,6 +42,17 @@ RELATION_METRICS = {
     'postgresql.autoanalyzed',
 }
 
+DYNAMIC_RELATION_METRICS = {
+    'postgresql.relation.pages',
+    'postgresql.relation.tuples',
+    'postgresql.relation.all_visible',
+    'postgresql.table_size',
+    'postgresql.relation_size',
+    'postgresql.index_size',
+    'postgresql.toast_size',
+    'postgresql.total_size',
+}
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
@@ -171,6 +182,8 @@ def test_autodiscovery_collect_all_relations(aggregator, integration_check, pg_i
     for db in databases:
         expected_tags = _get_expected_tags(check, pg_instance, db=db, table='breed', schema='public')
         for metric in RELATION_METRICS:
+            aggregator.assert_metric(metric, tags=expected_tags)
+        for metric in DYNAMIC_RELATION_METRICS:
             aggregator.assert_metric(metric, tags=expected_tags)
 
     aggregator.assert_metric(
