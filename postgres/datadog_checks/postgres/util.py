@@ -555,5 +555,5 @@ ACTIVITY_QUERY_LT_10 = """
 SELECT {aggregation_columns_select}
     {{metrics_columns}}
 FROM pg_stat_activity
-GROUP BY {aggregation_columns_group}
+GROUP BY datid {aggregation_columns_group}
 """
