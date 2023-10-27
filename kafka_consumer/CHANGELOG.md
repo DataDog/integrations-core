@@ -1,8 +1,8 @@
 # CHANGELOG - kafka_consumer
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 4.1.3 / 2023-10-11
+## 4.1.3 / 2023-10-11 / Agent 7.48.1
 
 ***Fixed***:
 

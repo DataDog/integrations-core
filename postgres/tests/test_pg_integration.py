@@ -29,6 +29,7 @@ from .common import (
     check_db_count,
     check_file_wal_metrics,
     check_logical_replication_slots,
+    check_performance_metrics,
     check_physical_replication_slots,
     check_slru_metrics,
     check_snapshot_txid_metrics,
@@ -38,7 +39,7 @@ from .common import (
     check_wal_receiver_metrics,
     requires_static_version,
 )
-from .utils import _get_conn, _get_superconn, requires_over_10, requires_over_14
+from .utils import _get_conn, _get_superconn, requires_over_10, requires_over_14, run_one_check
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
 
@@ -72,13 +73,21 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check_logical_replication_slots(aggregator, expected_tags)
     check_physical_replication_slots(aggregator, expected_tags)
     check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
+
+    check_performance_metrics(aggregator, expected_tags=check.debug_stats_kwargs()['tags'], is_aurora=is_aurora)
+
     aggregator.assert_all_metrics_covered()
 
 
 def test_snapshot_xmin(aggregator, integration_check, pg_instance):
     with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+        conn.set_session(autocommit=True)
         with conn.cursor() as cur:
-            cur.execute('select txid_snapshot_xmin(txid_current_snapshot());')
+            if float(POSTGRES_VERSION) >= 13.0:
+                query = 'select pg_snapshot_xmin(pg_current_snapshot());'
+            else:
+                query = 'select txid_snapshot_xmin(txid_current_snapshot());'
+            cur.execute(query)
             xmin = float(cur.fetchall()[0][0])
     check = integration_check(pg_instance)
     check.check(pg_instance)
@@ -92,13 +101,16 @@ def test_snapshot_xmin(aggregator, integration_check, pg_instance):
         conn.set_session(autocommit=True)
         with conn.cursor() as cur:
             # Force increases of txid
-            cur.execute('select txid_current();')
-            cur.execute('select txid_current();')
+            if float(POSTGRES_VERSION) >= 13.0:
+                query = 'select pg_current_xact_id();'
+            else:
+                query = 'select txid_current();'
+            cur.execute(query)
 
     check = integration_check(pg_instance)
     check.check(pg_instance)
-    aggregator.assert_metric('postgresql.snapshot.xmin', value=xmin + 2, count=1, tags=expected_tags)
-    aggregator.assert_metric('postgresql.snapshot.xmax', value=xmin + 2, count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.snapshot.xmin', value=xmin + 1, count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.snapshot.xmax', value=xmin + 1, count=1, tags=expected_tags)
 
 
 def test_snapshot_xip(aggregator, integration_check, pg_instance):
@@ -655,7 +667,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, pg_instance, dbm_e
     expected_host = reported_hostname if reported_hostname else 'stubbed.hostname'
     expected_tags = pg_instance['tags'] + ['port:{}'.format(pg_instance['port'])]
     check = PostgreSql('test_instance', {}, [pg_instance])
-    dd_run_check(check)
+    run_one_check(check, pg_instance)
 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
@@ -672,7 +684,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, pg_instance, dbm_e
 
     # Run a second time and expect the metadata to not be emitted again because of the cache TTL
     aggregator.reset()
-    dd_run_check(check)
+    run_one_check(check, pg_instance)
 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)

@@ -24,7 +24,7 @@ def test_operator_check(aggregator, operator_instance_use_openmetrics, mock_oper
     c = check(operator_instance_use_openmetrics(False))
 
     dd_run_check(c)
-    for m in legacy_common.OPERATOR_METRICS + legacy_common.OPERATOR_AWS_METRICS:
+    for m in legacy_common.OPERATOR_METRICS + legacy_common.OPERATOR_AWS_METRICS + legacy_common.OPERATOR_AZURE_METRICS:
         aggregator.assert_metric(m)
     aggregator.assert_all_metrics_covered()
 

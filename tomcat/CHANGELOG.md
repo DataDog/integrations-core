@@ -1,6 +1,6 @@
 # CHANGELOG - tomcat
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 1.12.2 / 2023-09-29
 

@@ -1,6 +1,11 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import shutil
+from functools import partial
+
+import pytest
+
 from ddev.repo.core import Repository
 
 
@@ -166,26 +171,84 @@ class TestFix:
         )
 
 
+@pytest.fixture
+def repo_with_towncrier(repository, helpers):
+    (repository.path / 'towncrier.toml').write_text(
+        helpers.dedent(
+            r'''
+            [tool.towncrier]
+            # If you change the values for directory or filename, make sure to look for them in the code as well.
+            directory = "changelog.d"
+            filename = "CHANGELOG.md"
+            start_string = "<!-- towncrier release notes start -->\n"
+            underlines = ["", "", ""]
+            template = "changelog_template.jinja"
+            title_format = "## {version} / {project_date}"
+            # We automatically link to PRs, but towncrier only has an issue template so we abuse that.
+            issue_format = "([#{issue}](https://github.com/DataDog/integrations-core/pull/{issue}))"
+
+            # The order of entries matters! It controls the order in which changelog sections are displayed.
+            # https://towncrier.readthedocs.io/en/stable/configuration.html#use-a-toml-array-defined-order
+            [[tool.towncrier.type]]
+            directory="removed"
+            name = "Removed"
+            showcontent = true
+
+            [[tool.towncrier.type]]
+            directory="changed"
+            name = "Changed"
+            showcontent = true
+
+            [[tool.towncrier.type]]
+            directory="security"
+            name = "Security"
+            showcontent = true
+
+            [[tool.towncrier.type]]
+            directory="deprecated"
+            name = "Deprecated"
+            showcontent = true
+
+            [[tool.towncrier.type]]
+            directory="added"
+            name = "Added"
+            showcontent = true
+
+            [[tool.towncrier.type]]
+            directory="fixed"
+            name = "Fixed"
+            showcontent = true
+            '''
+        )
+    )
+    (repository.path / 'changelog_template.jinja').write_text(
+        helpers.dedent(
+            '''
+            {% if sections[""] %}
+            {% for category, val in definitions.items() if category in sections[""] %}
+            ***{{ definitions[category]['name'] }}***:
+
+            {% for text, values in sections[""][category].items() %}
+            * {{ text }} {{ values|join(', ') }}
+            {% endfor %}
+
+            {% endfor %}
+            {% else %}
+            No significant changes.
+
+
+            {% endif %}
+            '''
+        )
+    )
+    return repository
+
+
 class TestNew:
-    def test_start(self, ddev, repository, helpers, network_replay, mocker):
+    @pytest.fixture
+    def fragments_dir(self, repo_with_towncrier, network_replay, mocker):
         network_replay('release/changelog/fix_no_pr.yaml')
-
-        repo = Repository(repository.path.name, str(repository.path))
-
-        changelog = repository.path / 'ddev' / 'CHANGELOG.md'
-        changelog.write_text(
-            helpers.dedent(
-                """
-                # CHANGELOG - ddev
-
-                ## Unreleased
-
-                ## 3.3.0 / 2023-07-20
-
-                ***Added***:
-                """
-            )
-        )
+        repo = Repository(repo_with_towncrier.path.name, str(repo_with_towncrier.path))
         repo.git.capture('add', '.')
         repo.git.capture('commit', '-m', 'test')
         mocker.patch(
@@ -197,498 +260,183 @@ class TestNew:
                 '',
             ],
         )
+        return repo_with_towncrier.path / 'ddev' / 'changelog.d'
+
+    def test_start(self, ddev, fragments_dir, helpers, mocker):
         mocker.patch('click.edit', return_value=None)
+        fragment_file = fragments_dir / '15476.added'
 
         result = ddev('release', 'changelog', 'new', 'added')
 
         assert result.exit_code == 0, result.output
         assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-            """
+            f'''
+            Created news fragment at {fragment_file}
             Added 1 changelog entry
-            """
+            '''
         )
+        assert fragment_file.read_text() == "Foo"
 
-        assert changelog.read_text() == helpers.dedent(
-            """
-            # CHANGELOG - ddev
-
-            ## Unreleased
-
-            ***Added***:
-
-            * Foo ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
-
-            ## 3.3.0 / 2023-07-20
-
-            ***Added***:
-            """
-        )
-
-    def test_append(self, ddev, repository, helpers, network_replay, mocker):
-        network_replay('release/changelog/fix_no_pr.yaml')
-
-        repo = Repository(repository.path.name, str(repository.path))
-
-        changelog = repository.path / 'ddev' / 'CHANGELOG.md'
-        changelog.write_text(
-            helpers.dedent(
-                """
-                # CHANGELOG - ddev
-
-                ## Unreleased
-
-                ***Added***:
-
-                * Over (#9000)
-
-                ## 3.3.0 / 2023-07-20
-
-                ***Added***:
-                """
-            )
-        )
-        repo.git.capture('add', '.')
-        repo.git.capture('commit', '-m', 'test')
-        mocker.patch(
-            'ddev.utils.git.GitManager.capture',
-            side_effect=[
-                '0000000000000000000000000000000000000000\nFoo',
-                'M ddev/pyproject.toml',
-                '',
-                '',
-            ],
-        )
+    def test_explicit_message(self, ddev, fragments_dir, helpers, mocker):
         mocker.patch('click.edit', return_value=None)
-
-        result = ddev('release', 'changelog', 'new', 'added')
-
-        assert result.exit_code == 0, result.output
-        assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-            """
-            Added 1 changelog entry
-            """
-        )
-
-        assert changelog.read_text() == helpers.dedent(
-            """
-            # CHANGELOG - ddev
-
-            ## Unreleased
-
-            ***Added***:
-
-            * Over (#9000)
-            * Foo ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
-
-            ## 3.3.0 / 2023-07-20
-
-            ***Added***:
-            """
-        )
-
-    def test_before(self, ddev, repository, helpers, network_replay, mocker):
-        network_replay('release/changelog/fix_no_pr.yaml')
-
-        repo = Repository(repository.path.name, str(repository.path))
-
-        changelog = repository.path / 'ddev' / 'CHANGELOG.md'
-        changelog.write_text(
-            helpers.dedent(
-                """
-                # CHANGELOG - ddev
-
-                ## Unreleased
-
-                ***Added***:
-
-                * Over (#9000)
-
-                ## 3.3.0 / 2023-07-20
-
-                ***Added***:
-                """
-            )
-        )
-        repo.git.capture('add', '.')
-        repo.git.capture('commit', '-m', 'test')
-        mocker.patch(
-            'ddev.utils.git.GitManager.capture',
-            side_effect=[
-                '0000000000000000000000000000000000000000\nFoo',
-                'M ddev/pyproject.toml',
-                '',
-                '',
-            ],
-        )
-        mocker.patch('click.edit', return_value=None)
-
-        result = ddev('release', 'changelog', 'new', 'changed')
-
-        assert result.exit_code == 0, result.output
-        assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-            """
-            Added 1 changelog entry
-            """
-        )
-
-        assert changelog.read_text() == helpers.dedent(
-            """
-            # CHANGELOG - ddev
-
-            ## Unreleased
-
-            ***Changed***:
-
-            * Foo ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
-
-            ***Added***:
-
-            * Over (#9000)
-
-            ## 3.3.0 / 2023-07-20
-
-            ***Added***:
-            """
-        )
-
-    def test_after(self, ddev, repository, helpers, network_replay, mocker):
-        network_replay('release/changelog/fix_no_pr.yaml')
-
-        repo = Repository(repository.path.name, str(repository.path))
-
-        changelog = repository.path / 'ddev' / 'CHANGELOG.md'
-        changelog.write_text(
-            helpers.dedent(
-                """
-                # CHANGELOG - ddev
-
-                ## Unreleased
-
-                ***Added***:
-
-                * Over (#9000)
-
-                ## 3.3.0 / 2023-07-20
-
-                ***Added***:
-                """
-            )
-        )
-        repo.git.capture('add', '.')
-        repo.git.capture('commit', '-m', 'test')
-        mocker.patch(
-            'ddev.utils.git.GitManager.capture',
-            side_effect=[
-                '0000000000000000000000000000000000000000\nFoo',
-                'M ddev/pyproject.toml',
-                '',
-                '',
-            ],
-        )
-        mocker.patch('click.edit', return_value=None)
-
-        result = ddev('release', 'changelog', 'new', 'fixed')
-
-        assert result.exit_code == 0, result.output
-        assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-            """
-            Added 1 changelog entry
-            """
-        )
-
-        assert changelog.read_text() == helpers.dedent(
-            """
-            # CHANGELOG - ddev
-
-            ## Unreleased
-
-            ***Added***:
-
-            * Over (#9000)
-
-            ***Fixed***:
-
-            * Foo ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
-
-            ## 3.3.0 / 2023-07-20
-
-            ***Added***:
-            """
-        )
-
-    def test_multiple(self, ddev, repository, helpers, network_replay, mocker):
-        network_replay('release/changelog/fix_no_pr.yaml')
-
-        repo = Repository(repository.path.name, str(repository.path))
-
-        changelog1 = repository.path / 'ddev' / 'CHANGELOG.md'
-        changelog1.write_text(
-            helpers.dedent(
-                """
-                # CHANGELOG - ddev
-
-                ## Unreleased
-
-                ***Added***:
-
-                * Over (#9000)
-
-                ## 3.3.0 / 2023-07-20
-
-                ***Added***:
-                """
-            )
-        )
-        changelog2 = repository.path / 'postgres' / 'CHANGELOG.md'
-        changelog2.write_text(
-            helpers.dedent(
-                """
-                # CHANGELOG - postgres
-
-                ## Unreleased
-
-                ***Added***:
-
-                * Over (#9000)
-
-                ## 3.3.0 / 2023-07-20
-
-                ***Added***:
-                """
-            )
-        )
-        repo.git.capture('add', '.')
-        repo.git.capture('commit', '-m', 'test')
-        mocker.patch(
-            'ddev.utils.git.GitManager.capture',
-            side_effect=[
-                '0000000000000000000000000000000000000000\nFoo',
-                'M ddev/pyproject.toml\nM postgres/pyproject.toml',
-                '',
-                '',
-            ],
-        )
-        mocker.patch('click.edit', return_value=None)
-
-        result = ddev('release', 'changelog', 'new', 'added')
-
-        assert result.exit_code == 0, result.output
-        assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-            """
-            Added 2 changelog entries
-            """
-        )
-
-        assert changelog1.read_text() == helpers.dedent(
-            """
-            # CHANGELOG - ddev
-
-            ## Unreleased
-
-            ***Added***:
-
-            * Over (#9000)
-            * Foo ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
-
-            ## 3.3.0 / 2023-07-20
-
-            ***Added***:
-            """
-        )
-        assert changelog2.read_text() == helpers.dedent(
-            """
-            # CHANGELOG - postgres
-
-            ## Unreleased
-
-            ***Added***:
-
-            * Over (#9000)
-            * Foo ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
-
-            ## 3.3.0 / 2023-07-20
-
-            ***Added***:
-            """
-        )
-
-    def test_explicit_message(self, ddev, repository, helpers, network_replay, mocker):
-        network_replay('release/changelog/fix_no_pr.yaml')
-
-        repo = Repository(repository.path.name, str(repository.path))
-
-        changelog = repository.path / 'ddev' / 'CHANGELOG.md'
-        changelog.write_text(
-            helpers.dedent(
-                """
-                # CHANGELOG - ddev
-
-                ## Unreleased
-
-                ## 3.3.0 / 2023-07-20
-
-                ***Added***:
-                """
-            )
-        )
-        repo.git.capture('add', '.')
-        repo.git.capture('commit', '-m', 'test')
-        mocker.patch(
-            'ddev.utils.git.GitManager.capture',
-            side_effect=[
-                '0000000000000000000000000000000000000000\nFoo',
-                'M ddev/pyproject.toml',
-                '',
-                '',
-            ],
-        )
+        fragment_file = fragments_dir / '15476.added'
 
         result = ddev('release', 'changelog', 'new', 'added', '-m', 'Bar')
 
         assert result.exit_code == 0, result.output
         assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-            """
+            f'''
+            Created news fragment at {fragment_file}
             Added 1 changelog entry
-            """
+            '''
         )
+        assert fragment_file.read_text() == "Bar"
 
-        assert changelog.read_text() == helpers.dedent(
-            """
-            # CHANGELOG - ddev
-
-            ## Unreleased
-
-            ***Added***:
-
-            * Bar ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
-
-            ## 3.3.0 / 2023-07-20
-
-            ***Added***:
-            """
-        )
-
-    def test_prompt_for_entry_type(self, ddev, repository, helpers, network_replay, mocker):
-        network_replay('release/changelog/fix_no_pr.yaml')
-
-        repo = Repository(repository.path.name, str(repository.path))
-
-        changelog = repository.path / 'ddev' / 'CHANGELOG.md'
-        changelog.write_text(
-            helpers.dedent(
-                """
-                # CHANGELOG - ddev
-
-                ## Unreleased
-
-                ***Added***:
-
-                * Over (#9000)
-
-                ## 3.3.0 / 2023-07-20
-
-                ***Added***:
-                """
-            )
-        )
-        repo.git.capture('add', '.')
-        repo.git.capture('commit', '-m', 'test')
-        mocker.patch(
-            'ddev.utils.git.GitManager.capture',
-            side_effect=[
-                '0000000000000000000000000000000000000000\nFoo',
-                'M ddev/pyproject.toml',
-                '',
-                '',
-            ],
-        )
+    def test_prompt_for_entry_type(self, ddev, fragments_dir, helpers, mocker):
         mocker.patch('click.edit', return_value=None)
+        fragment_file = fragments_dir / '15476.added'
 
         result = ddev('release', 'changelog', 'new', input='added')
 
         assert result.exit_code == 0, result.output
         assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-            """
-            Entry type? (Removed, Changed, Security, Deprecated, Added, Fixed): added
+            f'''
+            Entry type? (removed, changed, security, deprecated, added, fixed): added
+            Created news fragment at {fragment_file}
             Added 1 changelog entry
-            """
+            '''
         )
+        assert fragment_file.read_text() == "Foo"
 
-        assert changelog.read_text() == helpers.dedent(
-            """
-            # CHANGELOG - ddev
-
-            ## Unreleased
-
-            ***Added***:
-
-            * Over (#9000)
-            * Foo ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
-
-            ## 3.3.0 / 2023-07-20
-
-            ***Added***:
-            """
-        )
-
-    def test_edit_entry(self, ddev, repository, helpers, network_replay, mocker):
-        network_replay('release/changelog/fix_no_pr.yaml')
-
-        repo = Repository(repository.path.name, str(repository.path))
-
-        changelog = repository.path / 'ddev' / 'CHANGELOG.md'
-        changelog.write_text(
-            helpers.dedent(
-                """
-                # CHANGELOG - ddev
-
-                ## Unreleased
-
-                ## 3.3.0 / 2023-07-20
-
-                ***Added***:
-                """
-            )
-        )
-        repo.git.capture('add', '.')
-        repo.git.capture('commit', '-m', 'test')
-        mocker.patch(
-            'ddev.utils.git.GitManager.capture',
-            side_effect=[
-                '0000000000000000000000000000000000000000\nFoo',
-                'M ddev/pyproject.toml',
-                '',
-                '',
-            ],
-        )
+    def test_edit_entry(self, ddev, fragments_dir, helpers, mocker):
+        message = 'Foo \n\n    Bar'
         mocker.patch(
             'click.edit',
-            return_value='* Foo ([#15476](https://github.com/DataDog/integrations-core/pull/15476))\n\n    Bar',
+            return_value=message,
         )
+        fragment_file = fragments_dir / '15476.added'
 
         result = ddev('release', 'changelog', 'new', 'added')
 
         assert result.exit_code == 0, result.output
         assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-            """
+            f'''
+            Created news fragment at {fragment_file}
             Added 1 changelog entry
-            """
+            '''
         )
+        assert fragment_file.read_text() == message
 
+
+class TestBuild:
+    @pytest.fixture
+    def build_changelog(self, repo_with_towncrier):
+        '''
+        We explicitly import and setup the command that only generates the changelog.
+
+        This is needed because the "release make" command does too much.
+        '''
+        from click.testing import CliRunner
+        from datadog_checks.dev.tooling.commands.release.changelog import changelog
+        from datadog_checks.dev.tooling.constants import set_root
+
+        set_root(repo_with_towncrier.path)
+
+        return partial(CliRunner().invoke, changelog, catch_exceptions=False)
+
+    @pytest.fixture
+    def setup_changelog_build(self, repo_with_towncrier, helpers):
+        changelog = repo_with_towncrier.path / 'ddev' / 'CHANGELOG.md'
+        changelog.write_text(
+            helpers.dedent(
+                '''
+                # CHANGELOG - ddev
+
+                <!-- towncrier release notes start -->
+
+                ## 3.3.0 / 2023-07-20
+
+                ***Added***:
+                '''
+            )
+        )
+        fragments_dir = repo_with_towncrier.path / 'ddev' / 'changelog.d'
+        if fragments_dir.exists():
+            shutil.rmtree(fragments_dir)
+        fragments_dir.mkdir(parents=True)
+        return changelog, fragments_dir
+
+    def test_build(self, setup_changelog_build, helpers, build_changelog):
+        '''
+        This example checks several properties of a successful changelog:
+
+        - Entries of the same entry type should be sorted.
+        - Entry types should be sorted.
+        - Multiline entries should preserve what user entered
+        '''
+        changelog, fragments_dir = setup_changelog_build
+        (fragments_dir / '1.added').write_text("Foo")
+        (fragments_dir / '2.fixed').write_text("Bar")
+        (fragments_dir / '3.added').write_text('Foo\n\n    Bar')
+
+        result = build_changelog(args=["ddev", "3.4.0", "--date", "2023-10-11"])
+
+        assert result.exit_code == 0, result.output
         assert changelog.read_text() == helpers.dedent(
-            """
+            '''
             # CHANGELOG - ddev
 
-            ## Unreleased
+            <!-- towncrier release notes start -->
+
+            ## 3.4.0 / 2023-10-11
 
             ***Added***:
 
-            * Foo ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
+            * Foo ([#1](https://github.com/DataDog/integrations-core/pull/1))
+            * Foo
 
-                Bar
+                  Bar ([#3](https://github.com/DataDog/integrations-core/pull/3))
+
+            ***Fixed***:
+
+            * Bar ([#2](https://github.com/DataDog/integrations-core/pull/2))
 
             ## 3.3.0 / 2023-07-20
 
             ***Added***:
-            """
+            '''
+        )
+
+    def test_build_dry_run(self, setup_changelog_build, helpers, build_changelog):
+        changelog, fragments_dir = setup_changelog_build
+
+        (fragments_dir / '1.added').write_text("Foo")
+
+        result = build_changelog(args=["ddev", "3.4.0", "--date", "2023-10-11", "--dry-run"])
+
+        assert result.exit_code == 0, result.output
+        # The new changelog entry should appear in command output.
+        assert (
+            helpers.dedent(
+                '''
+                ## 3.4.0 / 2023-10-11
+
+                ***Added***:
+
+                * Foo ([#1](https://github.com/DataDog/integrations-core/pull/1))
+                '''
+            )
+            in helpers.remove_trailing_spaces(result.output)
+        )
+        # Make sure that we don't write anything to the changelog.
+        assert changelog.read_text() == helpers.dedent(
+            '''
+            # CHANGELOG - ddev
+
+            <!-- towncrier release notes start -->
+
+            ## 3.3.0 / 2023-07-20
+
+            ***Added***:
+            '''
         )

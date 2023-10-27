@@ -1,0 +1,42 @@
+[tool.towncrier]
+# If you change the values for directory or filename, make sure to look for them in the code as well.
+directory = "changelog.d"
+filename = "CHANGELOG.md"
+start_string = "<!-- towncrier release notes start -->\n"
+underlines = ["", "", ""]
+template = "changelog_template.jinja"
+title_format = "## {version} / {project_date}"
+# We automatically link to PRs, but towncrier only has an issue template so we abuse that.
+issue_format = "([#{issue}](https://github.com/DataDog/integrations-core/pull/{issue}))"
+
+# The order of entries matters! It controls the order in which changelog sections are displayed.
+# https://towncrier.readthedocs.io/en/stable/configuration.html#use-a-toml-array-defined-order
+[[tool.towncrier.type]]
+directory="removed"
+name = "Removed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory="changed"
+name = "Changed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory="security"
+name = "Security"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory="deprecated"
+name = "Deprecated"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory="added"
+name = "Added"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory="fixed"
+name = "Fixed"
+showcontent = true

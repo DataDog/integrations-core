@@ -13,7 +13,6 @@ from six import PY3
 
 from datadog_checks.base import AgentCheck, to_native_string
 from datadog_checks.base import __version__ as base_package_version
-from datadog_checks.base.checks.base import datadog_agent
 from datadog_checks.dev.testing import requires_py3
 
 
@@ -623,15 +622,17 @@ class TestTags:
             check.set_external_tags(external_host_tags)
             assert external_host_tags == [('hostname', {'src_name': ['normalize:tag']})]
 
-    def test_external_hostname(self):
+    def test_external_hostname(self, datadog_agent):
         check = AgentCheck()
         external_host_tags = [(u'hostnam\xe9', {'src_name': ['key1:val1']})]
-        with mock.patch.object(datadog_agent, 'set_external_tags') as set_external_tags:
-            check.set_external_tags(external_host_tags)
-            if PY3:
-                set_external_tags.assert_called_with([(u'hostnam\xe9', {'src_name': ['key1:val1']})])
-            else:
-                set_external_tags.assert_called_with([('hostnam\xc3\xa9', {'src_name': ['key1:val1']})])
+        check.set_external_tags(external_host_tags)
+
+        if PY3:
+            datadog_agent.assert_external_tags(u'hostnam\xe9', {'src_name': ['key1:val1']})
+        else:
+            datadog_agent.assert_external_tags('hostnam\xc3\xa9', {'src_name': ['key1:val1']})
+
+        datadog_agent.assert_external_tags_count(1)
 
     @pytest.mark.parametrize(
         "disable_generic_tags, expected_tags",

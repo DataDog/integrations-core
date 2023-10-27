@@ -9,6 +9,7 @@ from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.postgres.util import DatabaseConfigurationError, warning_with_tags
 
 AUTODISCOVERY_QUERY: str = """select datname from pg_catalog.pg_database where datistemplate = false;"""
+DEFAULT_EXCLUDES = ["cloudsqladmin"]
 DEFAULT_MAX_DATABASES = 100
 DEFAULT_REFRESH = 600
 
@@ -25,7 +26,7 @@ class PostgresAutodiscovery(Discovery):
             self._get_databases,
             # parent class asks for includelist to be a dictionary
             include={db: 0 for db in autodiscovery_config.get("include", [".*"])},
-            exclude=autodiscovery_config.get("exclude", []),
+            exclude=autodiscovery_config.get("exclude", DEFAULT_EXCLUDES),
             interval=autodiscovery_config.get("refresh", DEFAULT_REFRESH),
         )
         self._default_ttl = default_ttl

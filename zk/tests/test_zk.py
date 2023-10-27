@@ -63,6 +63,15 @@ def test_wrong_expected_mode(aggregator, dd_environment, get_invalid_mode_instan
     aggregator.assert_service_check("zookeeper.mode", status=zk_check.CRITICAL)
 
 
+def test_multiple_expected_modes(aggregator, dd_environment, get_multiple_expected_modes_config):
+    """
+    Accept multiple expected modes.
+    """
+    zk_check = ZookeeperCheck(conftest.CHECK_NAME, {}, [get_multiple_expected_modes_config])
+    zk_check.check(get_multiple_expected_modes_config)
+    aggregator.assert_service_check("zookeeper.mode", status=zk_check.OK)
+
+
 def test_error_state(aggregator, dd_environment, get_conn_failure_config):
     """
     Raise a 'critical' service check when ZooKeeper is in an error state.

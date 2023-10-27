@@ -1,6 +1,13 @@
 # CHANGELOG - win32_event_log
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 3.1.1 / 2023-10-26
+
+***Fixed***:
+
+* Fix the `timeout` config option definition ([#16017](https://github.com/DataDog/integrations-core/pull/16017))
+* Set back the `timeout` option to seconds ([#16024](https://github.com/DataDog/integrations-core/pull/16024))
 
 ## 3.1.0 / 2023-09-29
 

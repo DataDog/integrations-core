@@ -143,16 +143,16 @@ def test_statement_metrics(
 
     check = integration_check(dbm_instance)
     check._connect()
-    run_one_check(check, dbm_instance)
+    run_one_check(check, dbm_instance, cancel=False)
 
     # We can't change track_io_timing at runtime, but we can change what the integration thinks the runtime value is
     # This must be done after the first check since postgres settings are loaded from the database then
     check.pg_settings["track_io_timing"] = "on" if track_io_timing_enabled else "off"
 
     _run_queries()
-    run_one_check(check, dbm_instance)
+    run_one_check(check, dbm_instance, cancel=False)
     _run_queries()
-    run_one_check(check, dbm_instance)
+    run_one_check(check, dbm_instance, cancel=False)
 
     def _should_catch_query(dbname):
         # we can always catch it if the query originals in the same DB
@@ -370,7 +370,7 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
                 mock_agent.side_effect = obfuscate_sql
                 cursor.execute(query, (['app1', 'app2'],))
                 cursor.execute(query, (['app1', 'app2', 'app3'],))
-                run_one_check(check, dbm_instance)
+                check.check(dbm_instance)
 
                 cursor.execute(query, (['app1', 'app2'],))
                 cursor.execute(query, (['app1', 'app2', 'app3'],))
@@ -798,7 +798,7 @@ def test_statement_metadata(
     if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_statements_view == "pg_stat_statements":
         # cannot catch any queries from other users
         # only can see own queries
-        return False
+        return
 
     fqt_samples = [
         s for s in samples if s.get('dbm_type') == 'fqt' and s['db']['query_signature'] == normalized_query_signature

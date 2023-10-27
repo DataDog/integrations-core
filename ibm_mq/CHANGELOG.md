@@ -1,6 +1,6 @@
 # CHANGELOG - IBM MQ
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 6.0.0 / 2023-09-29
 

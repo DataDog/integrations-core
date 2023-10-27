@@ -1,6 +1,29 @@
 # CHANGELOG - datadog_checks_base
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 34.1.1 / 2023-10-26
+
+***Fixed***:
+
+* Bump the `cryptography` version to 41.0.5 ([#16083](https://github.com/DataDog/integrations-core/pull/16083))
+
+## 34.1.0 / 2023-10-20
+
+***Added***:
+
+* Add util to track db query operation time ([#16040](https://github.com/DataDog/integrations-core/pull/16040))
+
+***Fixed***:
+
+* Bump the `pymysql` version to 1.1.0 on Python 3 ([#16042](https://github.com/DataDog/integrations-core/pull/16042))
+* Bump the `pyodbc` version to 5.0.1 ([#16041](https://github.com/DataDog/integrations-core/pull/16041))
+
+## 34.0.1 / 2023-10-17
+
+***Fixed***:
+
+* Fix check cancellation timeout due to `DBMAsyncJob` cancellation being blocked ([#16028](https://github.com/DataDog/integrations-core/pull/16028))
 
 ## 34.0.0 / 2023-09-29
 

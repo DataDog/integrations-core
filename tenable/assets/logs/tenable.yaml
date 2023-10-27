@@ -9,7 +9,6 @@ facets:
   - name: Event Outcome
     source: log
     path: evt.outcome
-    type: string
     groups:
       - Event
   - name: User Name

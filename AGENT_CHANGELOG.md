@@ -1,3 +1,7 @@
+## Datadog Agent version [7.48.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7481)
+
+* Kafka Consumer [4.1.3](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md)
+
 ## Datadog Agent version [7.48.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7480)
 
 * Active Directory [2.0.0](https://github.com/DataDog/integrations-core/blob/master/active_directory/CHANGELOG.md) **BREAKING CHANGE**

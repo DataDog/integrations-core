@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Union
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
@@ -36,7 +36,7 @@ class InstanceConfig(BaseModel):
     )
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
-    expected_mode: Optional[str] = None
+    expected_mode: Optional[Union[str, tuple[str, ...]]] = None
     host: str
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None

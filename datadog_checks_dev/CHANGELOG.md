@@ -1,6 +1,24 @@
 # CHANGELOG - Datadog Checks Dev
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 28.0.0 / 2023-10-26
+
+***Changed***:
+
+* Generate changelogs from fragment files using towncrier.
+  There are no changes to the ddev commands, only to their outputs.
+  We are making this change to avoid merge conflicts in high-traffic packages where people used to have to modify one CHANGELOG.md file. ([#15983](https://github.com/DataDog/integrations-core/pull/15983))
+
+## 27.0.1 / 2023-10-26
+
+***Fixed***:
+
+* Align package version in integration template with changelog. ([#16029](https://github.com/DataDog/integrations-core/pull/16029))
+* Allow bumping the version of `pyodbc` ([#16030](https://github.com/DataDog/integrations-core/pull/16030))
+* Display changes on `ddev show changes` when changes are found ([#16045](https://github.com/DataDog/integrations-core/pull/16045))
+* Allow bumping the version of `pymysql` ([#16043](https://github.com/DataDog/integrations-core/pull/16043))
+* Remove the `setup.py` file from the new integration template ([#16072](https://github.com/DataDog/integrations-core/pull/16072))
 
 ## 27.0.0 / 2023-10-12
 

@@ -1,5 +1,10 @@
 # Pull requests
 
+!!! warning
+    The formatting notes do NOT apply if you are contributing to [integrations-core](https://github.com/DataDog/integrations-core).
+    In that case use the [`release changelog new`](../ddev/cli.md#ddev-release-changelog-new) command.
+    Add the `changelog/no-changelog` label if you don't need a changelog.
+
 -----
 
 ## Changelog entries

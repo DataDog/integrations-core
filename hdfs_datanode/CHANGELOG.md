@@ -1,6 +1,6 @@
 # CHANGELOG - hdfs_datanode
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 4.0.0 / 2023-08-10 / Agent 7.48.0
 

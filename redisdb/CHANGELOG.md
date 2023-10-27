@@ -1,6 +1,6 @@
 # CHANGELOG - redisdb
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 5.2.0 / 2023-09-29
 

@@ -98,7 +98,7 @@ def test_command(
             name
             for name, data in environments.items()
             if data.get('e2e-env')
-            and (not (platforms := data.get('python')) or app.platform.name in platforms)
+            and (not data.get('platforms') or app.platform.name in data['platforms'])
             and (python_filter is None or data.get('python') == python_filter)
         ]
     elif environment == 'active':

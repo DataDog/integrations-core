@@ -1,6 +1,18 @@
 # CHANGELOG - mysql
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 11.3.0 / 2023-10-26
+
+***Added***:
+
+* Add support for reporting SQL obfuscation errors ([#15990](https://github.com/DataDog/integrations-core/pull/15990))
+* Emit MySQL metrics queries operation time ([#16065](https://github.com/DataDog/integrations-core/pull/16065))
+
+***Fixed***:
+
+* Bump the `pymysql` version to 1.1.0 on Python 3 ([#16042](https://github.com/DataDog/integrations-core/pull/16042))
+* Bump the `cryptography` version to 41.0.5 ([#16083](https://github.com/DataDog/integrations-core/pull/16083))
 
 ## 11.2.0 / 2023-09-29
 

@@ -1,6 +1,12 @@
 # CHANGELOG - php_fpm
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 3.1.0 / 2023-10-26
+
+***Added***:
+
+* Add metric for status page load duration ([#15902](https://github.com/DataDog/integrations-core/pull/15902))
 
 ## 3.0.0 / 2023-08-10 / Agent 7.48.0
 
