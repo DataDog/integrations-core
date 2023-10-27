@@ -8,10 +8,6 @@
 
 * Bump the `cryptography` version to 41.0.5 ([#16083](https://github.com/DataDog/integrations-core/pull/16083))
 
-***Fixed***:
-
-* Bump librdkafka and confluent-kafka to v2.3.0 ([#16088](https://github.com/DataDog/integrations-core/pull/16088))
-
 ## 34.1.0 / 2023-10-20
 
 ***Added***:
