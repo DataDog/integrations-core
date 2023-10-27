@@ -8,10 +8,6 @@
 
 * Upgrade to openstacksdk version 1.5.0 ([#15919](https://github.com/DataDog/integrations-core/pull/15919))
 
-***Added***:
-
-* Refactor integration and add support for Ironic and Octavia components ([#15918](https://github.com/DataDog/integrations-core/pull/15918))
-
 ## 4.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
@@ -21,6 +17,10 @@
 ***Added***:
 
 * Update generated config models ([#15212](https://github.com/DataDog/integrations-core/pull/15212))
+
+***Added***:
+
+* [PLINT-37] Refactor integration and add support for Ironic and Octavia components ([#15918](https://github.com/DataDog/integrations-core/pull/15918))
 
 ***Fixed***:
 
