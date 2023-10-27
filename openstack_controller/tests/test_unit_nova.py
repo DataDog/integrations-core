@@ -27,6 +27,186 @@ pytestmark = [
     [
         pytest.param(
             configs.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            configs.SDK,
+            id='api sdk',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_external_tags(datadog_agent, dd_run_check, check):
+    dd_run_check(check)
+    datadog_agent.assert_external_tags(
+        'agent-integrations-openstack-default',
+        {
+            'openstack': [
+                'host_type:hypervisor',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        '3b27b706-c0ad-4528-a865-7afaf7712130',
+        {
+            'openstack': [
+                'host_type:server',
+                'aggregate:primary-aggregate',
+                'aggregate:secondary-aggregate',
+                'availability_zone:availability-zone',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        '4caf78dc-2e5d-40a7-8d56-1c2f7f664283',
+        {
+            'openstack': [
+                'host_type:server',
+                'aggregate:primary-aggregate',
+                'aggregate:secondary-aggregate',
+                'availability_zone:availability-zone',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        '67ca710a-e73f-4801-a12f-d0c55ccb8955',
+        {
+            'openstack': [
+                'host_type:server',
+                'aggregate:primary-aggregate',
+                'aggregate:secondary-aggregate',
+                'availability_zone:availability-zone',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        '7994720d-62a5-4b48-9158-f941d98db5c1',
+        {
+            'openstack': [
+                'host_type:server',
+                'aggregate:primary-aggregate',
+                'aggregate:secondary-aggregate',
+                'availability_zone:availability-zone',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        '97dec705-edab-4b3a-bbe6-b2121a85a603',
+        {
+            'openstack': [
+                'host_type:server',
+                'aggregate:primary-aggregate',
+                'aggregate:secondary-aggregate',
+                'availability_zone:availability-zone',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        '9e80aa16-5a28-4ec0-bfce-f83bf56d0c86',
+        {
+            'openstack': [
+                'host_type:server',
+                'aggregate:primary-aggregate',
+                'aggregate:secondary-aggregate',
+                'availability_zone:availability-zone',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'cca55639-448f-44cc-ae6a-150afe0fa6b3',
+        {
+            'openstack': [
+                'host_type:server',
+                'aggregate:primary-aggregate',
+                'aggregate:secondary-aggregate',
+                'availability_zone:availability-zone',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'd34c4531-7cd1-4454-b39e-356463af7700',
+        {
+            'openstack': [
+                'host_type:server',
+                'aggregate:primary-aggregate',
+                'aggregate:secondary-aggregate',
+                'availability_zone:availability-zone',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        '5102fbbf-7156-48dc-8355-af7ab992266f',
+        {
+            'openstack': [
+                'host_type:server',
+                'aggregate:primary-aggregate',
+                'aggregate:secondary-aggregate',
+                'availability_zone:availability-zone',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        '954441a8-552a-476c-985e-6564e6fe93d6',
+        {
+            'openstack': [
+                'host_type:server',
+                'aggregate:primary-aggregate',
+                'aggregate:secondary-aggregate',
+                'availability_zone:availability-zone',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        '2c653a68-b520-4582-a05d-41a68067d76c',
+        {
+            'openstack': [
+                'host_type:server',
+                'aggregate:primary-aggregate',
+                'aggregate:secondary-aggregate',
+                'availability_zone:availability-zone',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        '9d72cf53-19c8-4942-9314-005fa5d2a6a0',
+        {
+            'openstack': [
+                'host_type:baremetal',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'bd7a61bb-5fe0-4c93-9628-55e312f9ef0e',
+        {
+            'openstack': [
+                'host_type:baremetal',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        '54855e59-83ca-46f8-a78f-55d3370e0656',
+        {
+            'openstack': [
+                'host_type:baremetal',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        '20512deb-e493-4796-a046-5d6e4e072c95',
+        {
+            'openstack': [
+                'host_type:baremetal',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags_count(16)
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST,
             id='api rest no microversion',
         ),
         pytest.param(

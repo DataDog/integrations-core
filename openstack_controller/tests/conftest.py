@@ -393,6 +393,18 @@ def connection_compute(request, mock_responses):
             for service in mock_responses('GET', '/compute/v2.1/os-services')['services']
         ]
 
+    def aggregates():
+        if http_error and 'aggregates' in http_error:
+            raise requests.exceptions.HTTPError(response=http_error['aggregates'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=aggregate,
+                )
+            )
+            for aggregate in mock_responses('GET', '/compute/v2.1/os-aggregates')['aggregates']
+        ]
+
     def flavors(details):
         if http_error and 'flavors' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['flavors'])
@@ -468,6 +480,7 @@ def connection_compute(request, mock_responses):
     return mock.MagicMock(
         get_limits=mock.MagicMock(side_effect=get_limits),
         services=mock.MagicMock(side_effect=services),
+        aggregates=mock.MagicMock(side_effect=aggregates),
         flavors=mock.MagicMock(side_effect=flavors),
         hypervisors=mock.MagicMock(side_effect=hypervisors),
         get_hypervisor_uptime=mock.MagicMock(side_effect=get_hypervisor_uptime),

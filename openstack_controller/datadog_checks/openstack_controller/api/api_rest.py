@@ -199,6 +199,13 @@ class ApiRest(Api):
         response.raise_for_status()
         return response.json().get('limits', {})
 
+    def get_compute_aggregates(self):
+        response = self.http.get(
+            '{}/os-aggregates'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value))
+        )
+        response.raise_for_status()
+        return response.json().get('aggregates', [])
+
     def get_compute_quota_sets(self, project_id):
         response = self.http.get(
             '{}/os-quota-sets/{}'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value), project_id)

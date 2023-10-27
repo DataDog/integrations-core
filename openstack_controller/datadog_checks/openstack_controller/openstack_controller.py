@@ -41,6 +41,7 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
         self.openstack_config = OpenstackConfig(self.log, self.config)
         self.api = make_api(self.openstack_config, self.log, self.http)
         self.identity = Identity(self)
+        self.external_tags = []
         self.components = [
             self.identity,
             Compute(self),
@@ -78,6 +79,7 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
             self.log.error("Error while authorizing user")
 
     def _start_report(self):
+        self.external_tags = []
         for component in self.components:
             component.start_report()
 
@@ -107,6 +109,8 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
                 self._report_project_metrics(project, project_config, project_tags)
             else:
                 self.log.debug("Error while authorizing user (project scope)")
+        self.log.debug("external_tags:%s", self.external_tags)
+        self.set_external_tags(self.external_tags)
 
     def _finish_report(self, tags):
         for component in self.components:

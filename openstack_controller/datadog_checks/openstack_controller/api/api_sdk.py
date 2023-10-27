@@ -151,6 +151,9 @@ class ApiSdk(Api):
     def get_compute_limits(self):
         return self.connection.compute.get_limits().to_dict(original_names=True)
 
+    def get_compute_aggregates(self):
+        return [aggregate.to_dict(original_names=True) for aggregate in self.connection.compute.aggregates()]
+
     def get_compute_services(self):
         return [service.to_dict(original_names=True) for service in self.connection.compute.services()]
 
