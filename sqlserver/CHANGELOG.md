@@ -1,5 +1,11 @@
 # CHANGELOG - sqlserver
 
+## Unreleased
+
+***Added***:
+
+* Add support for log shipping monitoring on primary and secondary instances through the `include_primary_log_shipping_metrics` and `include_secondary_log_shipping_metrics` configuration options. ([#16101](https://github.com/DataDog/integrations-core/pull/16101))
+
 <!-- towncrier release notes start -->
 
 ## 15.1.0 / 2023-10-26
