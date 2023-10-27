@@ -167,6 +167,8 @@ class InstanceConfig(BaseModel):
     include_fci_metrics: Optional[bool] = None
     include_index_usage_metrics: Optional[bool] = None
     include_instance_metrics: Optional[bool] = None
+    include_log_shipping_primary: Optional[bool] = None
+    include_log_shipping_secondary: Optional[bool] = None
     include_master_files_metrics: Optional[bool] = None
     include_task_scheduler_metrics: Optional[bool] = None
     include_tempdb_file_space_usage_metrics: Optional[bool] = None

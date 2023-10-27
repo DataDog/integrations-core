@@ -156,6 +156,18 @@ instances:
     #
     # include_fci_metrics: false
 
+    ## @param include_log_shipping_primary - boolean - optional - default: false
+    ## Include log_shipping_primary metrics for a log shipping setup. Requires to run
+    ## against the primary instance in a Transaction Log Shipping configuration.
+    #
+    # include_log_shipping_primary: false
+
+    ## @param include_log_shipping_secondary - boolean - optional - default: false
+    ## Include log_shipping_secondary metrics for a log shipping setup. Requires to run
+    ## against a secondary instance in a Transaction Log Shipping configuration.
+    #
+    # include_log_shipping_secondary: false
+
     ## @param include_instance_metrics - boolean - optional - default: true
     ## Include server-level instance metrics.  When setting up multiple instances for
     ## different databases on the same host these metrics will be duplicated unless this option is turned off.
@@ -176,7 +188,7 @@ instances:
     ## @param include_index_usage_metrics - boolean - optional - default: true
     ## Configure the collection of user table index usage statistics from the `sys.dm_db_index_usage_stats` DMV.
     ##
-    ## Because the `sys.dm_db_index_usage_stats` view is scoped to the current database, enable 
+    ## Because the `sys.dm_db_index_usage_stats` view is scoped to the current database, enable
     ## `database_autodiscovery` or set `database`.
     #
     # include_index_usage_metrics: true
@@ -189,7 +201,7 @@ instances:
     # db_fragmentation_object_names: []
 
     ## @param include_tempdb_file_space_usage_metrics - boolean - optional - default: true
-    ## Include tempdb file space usage metrics for how space is used in tempdb data files. 
+    ## Include tempdb file space usage metrics for how space is used in tempdb data files.
     #
     # include_tempdb_file_space_usage_metrics: true
 
