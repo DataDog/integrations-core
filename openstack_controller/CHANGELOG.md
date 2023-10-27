@@ -18,10 +18,6 @@
 
 * Update generated config models ([#15212](https://github.com/DataDog/integrations-core/pull/15212))
 
-***Added***:
-
-* [PLINT-37] Refactor integration and add support for Ironic and Octavia components ([#15918](https://github.com/DataDog/integrations-core/pull/15918))
-
 ***Fixed***:
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
