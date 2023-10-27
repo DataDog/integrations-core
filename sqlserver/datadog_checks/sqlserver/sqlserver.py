@@ -755,10 +755,10 @@ class SQLServer(AgentCheck):
             else:
                 self.log_missing_metric("Failover Cluster Instance", major_version, engine_edition)
 
-        if is_affirmative(self.instance.get('include_log_shipping_primary', False)):
+        if is_affirmative(self.instance.get('include_primary_log_shipping_metrics', False)):
             queries.extend([LOG_SHIPPING_PRIMARY])
 
-        if is_affirmative(self.instance.get('include_log_shipping_secondary', False)):
+        if is_affirmative(self.instance.get('include_secondary_log_shipping_metrics', False)):
             queries.extend([LOG_SHIPPING_SECONDARY])
 
         self._dynamic_queries = self._new_query_executor(queries)
