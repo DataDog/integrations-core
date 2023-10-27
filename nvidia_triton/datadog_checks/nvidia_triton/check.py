@@ -4,7 +4,6 @@
 from urllib.parse import urljoin, urlparse  # noqa: F401
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
-from datadog_checks.base.errors import ConfigurationError
 
 from .metrics import METRICS_MAP
 
