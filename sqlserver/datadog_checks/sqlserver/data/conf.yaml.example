@@ -156,17 +156,17 @@ instances:
     #
     # include_fci_metrics: false
 
-    ## @param include_log_shipping_primary - boolean - optional - default: false
+    ## @param include_primary_log_shipping_metrics - boolean - optional - default: false
     ## Include log_shipping_primary metrics for a log shipping setup. Requires to run
     ## against the primary instance in a Transaction Log Shipping configuration.
     #
-    # include_log_shipping_primary: false
+    # include_primary_log_shipping_metrics: false
 
-    ## @param include_log_shipping_secondary - boolean - optional - default: false
+    ## @param include_secondary_log_shipping_metrics - boolean - optional - default: false
     ## Include log_shipping_secondary metrics for a log shipping setup. Requires to run
     ## against a secondary instance in a Transaction Log Shipping configuration.
     #
-    # include_log_shipping_secondary: false
+    # include_secondary_log_shipping_metrics: false
 
     ## @param include_instance_metrics - boolean - optional - default: true
     ## Include server-level instance metrics.  When setting up multiple instances for

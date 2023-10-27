@@ -80,15 +80,15 @@ def instance_include_instance_metrics():
     return True
 
 
-def instance_include_log_shipping_primary():
-    return False
-
-
-def instance_include_log_shipping_secondary():
-    return False
-
-
 def instance_include_master_files_metrics():
+    return False
+
+
+def instance_include_primary_log_shipping_metrics():
+    return False
+
+
+def instance_include_secondary_log_shipping_metrics():
     return False
 
 
