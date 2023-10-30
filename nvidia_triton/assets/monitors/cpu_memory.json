@@ -4,16 +4,16 @@
     "created_at": "2023-11-15",
     "last_updated_at": "2023-11-15",
     "title": "Nvidia Triton CPU memory usage is High!",
-    "tags": [
-      "integration:nvidia_triton"
-    ],
+    "tags": [],
     "description": "Notify your team when the CPU memory usage is too high.",
     "definition":{
         "name": "Nvidia Triton CPU memory usage on host {{host.name}} is high.",
         "type": "query alert",
         "query": "avg(last_5m):(avg:nvidia_triton.cpu.memory.used_bytes{*} by {host} / avg:nvidia_triton.cpu.memory.total_bytes{*} by {host}) * 100 > 85",
         "message": "{{#is_alert}} Your CPU on {{host.name}} is running high, please check it. {{/is_alert}}",
-        "tags": [],
+        "tags": [
+            "integration:nvidia_triton"
+        ],
         "options": {
             "thresholds": {
                 "critical": 85,
