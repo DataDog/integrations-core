@@ -330,9 +330,7 @@ class Connection(object):
                 connector=self.connector,
                 driver=driver,
             )
-            self.service_check_handler(
-                AgentCheck.CRITICAL, host, database, check_err_message, is_default=is_default
-            )
+            self.service_check_handler(AgentCheck.CRITICAL, host, database, check_err_message, is_default=is_default)
 
             # Only raise exception on the default instance database
             if is_default:
