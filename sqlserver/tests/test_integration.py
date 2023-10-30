@@ -49,7 +49,7 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
     aggregator.assert_service_check(
         'sqlserver.can_connect',
         status=sqlserver_check.CRITICAL,
-        tags=['sqlserver_host:{}'.format(sqlserver_check.resolved_hostname), 'db:master'] + instance_tags,
+        tags=['sqlserver_host:{}'.format(sqlserver_check.resolved_hostname), 'db:master', 'connection_host:{}'.format(instance_docker.get('host'))] + instance_tags,
         message=str(excinfo.value),
     )
 
@@ -86,7 +86,8 @@ def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, da
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
     expected_tags = instance_docker.get('tags', []) + [
-        'sqlserver_host:{}'.format(instance_docker.get('host')),
+        'connection_host:{}'.format(instance_docker.get('host')),
+        'sqlserver_host:{}'.format(instance_docker.get('reported_hostname')),
         'db:master',
     ]
     assert_metrics(

@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## Unreleased
+
+***Fixed***:
+
+* Stabilizes the `host` tag on the `sqlserver.can_connect` metric and adds the `connection_host` tag on the same metric. ([#16114](https://github.com/DataDog/integrations-core/pull/16114))
+
 ## 15.1.0 / 2023-10-26
 
 ***Added***:
