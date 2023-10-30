@@ -1,0 +1,1 @@
+Fix regression introduced in Agent 7.41.0 when handling service name patterns that are a prefix of another pattern
