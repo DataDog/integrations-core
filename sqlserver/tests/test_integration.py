@@ -227,7 +227,12 @@ def test_autodiscovery_db_service_checks(
     # verify that the old status check returns OK
     aggregator.assert_service_check(
         'sqlserver.can_connect',
-        tags=['db:master', 'sqlserver_host:{}'.format(check.resolved_hostname), 'connection_host:{}'.format(instance_autodiscovery.get('host'))] + instance_tags,
+        tags=[
+            'db:master',
+            'sqlserver_host:{}'.format(check.resolved_hostname),
+            'connection_host:{}'.format(instance_autodiscovery.get('host')),
+        ]
+        + instance_tags,
         status=SQLServer.OK,
     )
 
@@ -235,7 +240,12 @@ def test_autodiscovery_db_service_checks(
     aggregator.assert_service_check(
         'sqlserver.database.can_connect',
         count=extra_count,
-        tags=['db:msdb', 'sqlserver_host:{}'.format(check.resolved_hostname), 'connection_host:{}'.format(instance_autodiscovery.get('host'))] + instance_tags,
+        tags=[
+            'db:msdb',
+            'sqlserver_host:{}'.format(check.resolved_hostname),
+            'connection_host:{}'.format(instance_autodiscovery.get('host')),
+        ]
+        + instance_tags,
         status=SQLServer.OK,
     )
     # unavailable_db is an 'offline' database which prevents connections, so we expect this service check to be
@@ -244,7 +254,11 @@ def test_autodiscovery_db_service_checks(
     # to match against, so this assertion does not require the exact string
     sc = aggregator.service_checks('sqlserver.database.can_connect')
     db_critical_exists = False
-    critical_tags = instance_tags + ['db:unavailable_db', 'sqlserver_host:{}'.format(check.resolved_hostname), 'connection_host:{}'.format(instance_autodiscovery.get('host'))]
+    critical_tags = instance_tags + [
+        'db:unavailable_db',
+        'sqlserver_host:{}'.format(check.resolved_hostname),
+        'connection_host:{}'.format(instance_autodiscovery.get('host')),
+    ]
     for c in sc:
         if c.status == SQLServer.CRITICAL:
             db_critical_exists = True
@@ -266,13 +280,23 @@ def test_autodiscovery_exclude_db_service_checks(aggregator, dd_run_check, insta
     # assert no connection is created for an excluded database
     aggregator.assert_service_check(
         'sqlserver.database.can_connect',
-        tags=['db:msdb', 'sqlserver_host:{}'.format(check.resolved_hostname), 'connection_host:{}'.format(instance_autodiscovery.get('host'))] + instance_tags,
+        tags=[
+            'db:msdb',
+            'sqlserver_host:{}'.format(check.resolved_hostname),
+            'connection_host:{}'.format(instance_autodiscovery.get('host')),
+        ]
+        + instance_tags,
         status=SQLServer.OK,
         count=0,
     )
     aggregator.assert_service_check(
         'sqlserver.database.can_connect',
-        tags=['db:master', 'sqlserver_host:{}'.format(check.resolved_hostname), 'connection_host:{}'.format(instance_autodiscovery.get('host'))] + instance_tags,
+        tags=[
+            'db:master',
+            'sqlserver_host:{}'.format(check.resolved_hostname),
+            'connection_host:{}'.format(instance_autodiscovery.get('host')),
+        ]
+        + instance_tags,
         status=SQLServer.OK,
     )
 

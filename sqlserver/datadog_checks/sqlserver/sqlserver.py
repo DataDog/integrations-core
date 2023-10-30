@@ -399,7 +399,11 @@ class SQLServer(AgentCheck):
     def handle_service_check(self, status, connection_host, database, message=None, is_default=True):
         custom_tags = self.instance.get("tags", [])
         disable_generic_tags = self.instance.get('disable_generic_tags', False)
-        service_check_tags = ['sqlserver_host:{}'.format(self.resolved_hostname), 'db:{}'.format(database), 'connection_host:{}'.format(connection_host)]
+        service_check_tags = [
+            'sqlserver_host:{}'.format(self.resolved_hostname),
+            'db:{}'.format(database),
+            'connection_host:{}'.format(connection_host),
+        ]
         if not disable_generic_tags:
             service_check_tags.append('host:{}'.format(self.resolved_hostname))
         if custom_tags is not None:
