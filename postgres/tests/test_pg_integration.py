@@ -549,32 +549,6 @@ def test_wal_metrics(aggregator, integration_check, pg_instance, is_aurora):
     aggregator.assert_metric('postgresql.wal_count', count=1, value=expected_num_wals, tags=dd_agent_tags)
     aggregator.assert_metric('postgresql.wal_size', count=1, value=expected_wal_size, tags=dd_agent_tags)
 
-<<<<<<< HEAD
-=======
-    with postgres_conn.cursor() as cur:
-        try:
-            for _ in range(10):
-                cur.execute("select foo();")
-        except psycopg2.errors.UndefinedFunction:
-            # We don't care about the error, we just want to fill the wal
-            pass
-
-    with postgres_conn.cursor() as cur:
-        # Force a wal switch
-        cur.execute("select pg_switch_wal();")
-        cur.fetchall()
-        # Checkpoint to accelerate new wal file
-        cur.execute("CHECKPOINT;")
-
-    aggregator.reset()
-    check.check(pg_instance)
-
-    expected_num_wals += 1
-    expected_wal_size = expected_num_wals * wal_size
-    aggregator.assert_metric('postgresql.wal_count', count=1, value=expected_num_wals, tags=dd_agent_tags)
-    aggregator.assert_metric('postgresql.wal_size', count=1, value=expected_wal_size, tags=dd_agent_tags)
-
->>>>>>> origin/zhengda.lu/pg15-snapshot-xmin
 
 def test_pg_control(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
