@@ -235,6 +235,7 @@ files:
         By default, datname, usename and application_name will be used.
         If applications with different application_name are creating a lot of short-lived queries,
         removing application_name from the aggregation can help generate more stable metrics.
+        Note that datname is a required aggregation on activity metrics and can't be excluded.
       value:
         type: array
         items:
