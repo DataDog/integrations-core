@@ -257,7 +257,7 @@ build do
   # Produce a lockfile
   # TODO Move this to some constant so that we can reference the same name when "packaging"
   lockfile_path = File.join(install_dir, "frozen.txt")
-  command "#{python_build_env.build_env_python} -m piptools compile --generate-hashes " \
+  command "#{python_build_env.python} -m piptools compile --generate-hashes " \
           "--no-header --no-index --no-emit-find-links --generate-hashes " \
           "-f #{python_build_env.wheels_dir} -o #{lockfile_path} #{agent_requirements_in}"
 end
