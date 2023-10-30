@@ -13,16 +13,13 @@
         "type": "query alert",
         "query": "avg(last_5m):(avg:nvidia_triton.cpu.memory.used_bytes{*} by {host} / avg:nvidia_triton.cpu.memory.total_bytes{*} by {host}) * 100 > 85",
         "message": "{{#is_alert}} Your CPU on {{host.name}} is running high, please check it. {{/is_alert}}",
-        "tags": [
-            "integration:nvidia_triton"
-        ],
+        "tags": [],
         "options": {
             "thresholds": {
                 "critical": 85,
                 "warning": 80
             },
             "notify_audit": false,
-            "on_missing_data": "default",
             "include_tags": true,
             "new_group_delay": 60,
             "silenced": {},
