@@ -96,6 +96,17 @@ CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_co
 CONNECTION_METRICS_DB = ['postgresql.connections']
 COMMON_DBS = ['dogs', 'postgres', 'dogs_nofunc', 'dogs_noschema', DB_NAME]
 
+CHECK_PERFORMANCE_METRICS = [
+    'archiver_metrics',
+    'bgw_metrics',
+    'connections_metrics',
+    'count_metrics',
+    'instance_metrics',
+    'replication_metrics',
+    'replication_stats_metrics',
+    'slru_metrics',
+]
+
 requires_static_version = pytest.mark.skipif(USING_LATEST, reason='Version `latest` is ever-changing, skipping')
 
 
@@ -173,7 +184,7 @@ def check_connection_metrics(aggregator, expected_tags, count=1):
             aggregator.assert_metric(name, count=count, tags=db_tags)
 
 
-def check_activity_metrics(aggregator, tags):
+def check_activity_metrics(aggregator, tags, hostname=None, count=1):
     activity_metrics = [
         'postgresql.transactions.open',
         'postgresql.transactions.idle_in_transaction',
@@ -186,7 +197,7 @@ def check_activity_metrics(aggregator, tags):
         # Query won't have xid assigned so postgresql.activity.backend_xid_age won't be emitted
         activity_metrics.append('postgresql.activity.backend_xmin_age')
     for name in activity_metrics:
-        assert_metric_at_least(aggregator, name, tags=tags)
+        aggregator.assert_metric(name, count=1, tags=tags, hostname=hostname)
 
 
 def check_stat_replication(aggregator, expected_tags, count=1):
@@ -313,3 +324,17 @@ def check_stat_wal_metrics(aggregator, expected_tags, count=1):
 
     for metric_name in _iterate_metric_name(STAT_WAL_METRICS):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
+def check_performance_metrics(aggregator, expected_tags, count=1, is_aurora=False):
+    expected_metrics = set(CHECK_PERFORMANCE_METRICS)
+    if is_aurora:
+        expected_metrics = expected_metrics - {'replication_metrics'}
+    if float(POSTGRES_VERSION) < 13.0:
+        expected_metrics = expected_metrics - {'slru_metrics'}
+    if float(POSTGRES_VERSION) < 10.0:
+        expected_metrics = expected_metrics - {'replication_stats_metrics'}
+    for name in expected_metrics:
+        aggregator.assert_metric(
+            'dd.postgres.operation.time', count=count, tags=expected_tags + ['operation:{}'.format(name)]
+        )

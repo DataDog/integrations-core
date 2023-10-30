@@ -9,14 +9,16 @@ import re
 import warnings
 from base64 import urlsafe_b64encode
 from collections import namedtuple  # Not using dataclasses for Py2 compatibility
+from io import open
 from typing import Dict, List, Optional, Tuple  # noqa: F401
 
 import pytest
-from six import PY2
+from six import PY2, ensure_text
 
 from .._env import (
     E2E_FIXTURE_NAME,
     E2E_PARENT_PYTHON,
+    E2E_RESULT_FILE,
     SKIP_ENVIRONMENT,
     TESTING_PLUGIN,
     e2e_active,
@@ -27,6 +29,8 @@ from .._env import (
     replay_check_run,
     save_state,
     serialize_data,
+    set_up_env,
+    tear_down_env,
 )
 
 __aggregator = None
@@ -101,18 +105,11 @@ def dd_environment_runner(request):
     if isinstance(config, tuple):
         config, possible_metadata = config
 
-        # Support only defining the env_type for ease-of-use
+        # Support only defining the agent_type for ease-of-use
         if isinstance(possible_metadata, str):
-            metadata['env_type'] = possible_metadata
+            metadata['agent_type'] = possible_metadata
         else:
             metadata.update(possible_metadata)
-
-    # Default to Docker as that is the most common
-    metadata.setdefault('env_type', 'docker')
-
-    # Save any environment variables
-    metadata.setdefault('env_vars', {})
-    metadata['env_vars'].update(get_env_vars(raw=True))
 
     # Inject any log configuration
     logs_config = get_state('logs_config', [])
@@ -120,23 +117,50 @@ def dd_environment_runner(request):
         config = format_config(config)
         config['logs'] = logs_config
 
+    agent_type = metadata.get('agent_type')
+
     # Mount any volumes for Docker
-    if metadata['env_type'] == 'docker':
+    if agent_type == 'docker':
         docker_volumes = get_state('docker_volumes', [])
         if docker_volumes:
             metadata.setdefault('docker_volumes', []).extend(docker_volumes)
 
+    # Save any environment variables
+    metadata['e2e_env_vars'] = get_env_vars(raw=True)
+
     data = {'config': config, 'metadata': metadata}
 
-    message = serialize_data(data)
-
-    message = 'DDEV_E2E_START_MESSAGE {} DDEV_E2E_END_MESSAGE'.format(message)
+    message_template = 'DDEV_E2E_START_MESSAGE {} DDEV_E2E_END_MESSAGE'
 
     if testing_plugin:
-        return message
+        return message_template.format(serialize_data(data))
     else:  # no cov
         # Exit testing and pass data back up to command
-        pytest.exit(message)
+        if E2E_RESULT_FILE in os.environ:
+            with open(os.environ[E2E_RESULT_FILE], 'w', encoding='utf-8') as f:
+                f.write(ensure_text(json.dumps(data)))
+
+            # Rather than exiting we skip every test to avoid the following output:
+            # !!!!!!!!!! _pytest.outcomes.Exit: !!!!!!!!!!
+            pytest.skip()
+        else:
+            pytest.exit(message_template.format(serialize_data(data)))
+
+
+# Manipulate the output if we are spinning up or down an environment.
+#
+# Both of these conditions will be true during normal testing while only
+# one of them will be true when performing the logic.
+if not all([set_up_env(), tear_down_env()]):
+
+    def pytest_report_teststatus(report, config):
+        """
+        https://docs.pytest.org/en/stable/reference/reference.html#pytest.hookspec.pytest_report_teststatus
+        """
+        # Skipping every test displays an `s` for each even when using
+        # the minimum verbosity so we force zero output
+        if report.skipped:
+            return 'skipped', '', ''
 
 
 @pytest.fixture
@@ -163,8 +187,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
         python_path = os.environ[E2E_PARENT_PYTHON]
         env = os.environ['HATCH_ENV_ACTIVE']
 
-        # TODO: switch to `ddev` when the old CLI is gone
-        check_command = [python_path, '-m', 'datadog_checks.dev', 'env', 'check', check, env, '--json']
+        check_command = [python_path, '-m', 'ddev', 'env', 'agent', check, env, 'check', '--json']
 
         if config:
             config = format_config(config)
@@ -173,7 +196,14 @@ def dd_agent_check(request, aggregator, datadog_agent):
             with open(config_file, 'wb') as f:
                 output = json.dumps(config).encode('utf-8')
                 f.write(output)
-            check_command.extend(['--config', config_file])
+            check_command.extend(['--config-file', config_file])
+
+        # TODO: remove these legacy flags when all usage of this fixture is migrated
+        if 'rate' in kwargs:
+            kwargs['check_rate'] = kwargs.pop('rate')
+
+        if 'times' in kwargs:
+            kwargs['check_times'] = kwargs.pop('times')
 
         for key, value in kwargs.items():
             if value is not False:

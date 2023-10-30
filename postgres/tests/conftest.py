@@ -6,7 +6,7 @@ import os
 from collections import deque
 
 import mock
-import psycopg
+import psycopg2
 import pytest
 from semver import VersionInfo
 
@@ -26,15 +26,14 @@ INSTANCE = {
     'dbname': DB_NAME,
     'tags': ['foo:bar'],
     'disable_generic_tags': True,
-    'dbm': False,
 }
 
 
 def connect_to_pg():
-    psycopg.connect(host=HOST, dbname=DB_NAME, user=USER, password=PASSWORD)
+    psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, password=PASSWORD)
     if float(POSTGRES_VERSION) >= 10.0:
-        psycopg.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA, password=PASSWORD)
-        psycopg.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA2, password=PASSWORD)
+        psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA, password=PASSWORD)
+        psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA2, password=PASSWORD)
 
 
 @pytest.fixture(scope='session')
@@ -110,33 +109,27 @@ def e2e_instance():
 
 @pytest.fixture()
 def mock_cursor_for_replica_stats():
-    with mock.patch('psycopg_pool.ConnectionPool.connection') as pooled_conn:
+    with mock.patch('psycopg2.connect') as connect:
+        cursor = mock.MagicMock()
         data = deque()
-        mocked_cursor = mock.MagicMock()
-        mocked_conn = mock.MagicMock()
-        mocked_conn.cursor.return_value = mocked_cursor
-
-        pooled_conn.return_value.__enter__.return_value = mocked_conn
+        connect.return_value = mock.MagicMock(cursor=mock.MagicMock(return_value=cursor))
 
         def cursor_execute(query, second_arg=""):
-            print(query)
             if "FROM pg_stat_replication" in query:
                 data.appendleft(['app1', 'streaming', 'async', '1.1.1.1', 12, 12, 12, 12])
                 data.appendleft(['app2', 'backup', 'sync', '1.1.1.1', 13, 13, 13, 13])
             elif query == 'SHOW SERVER_VERSION;':
-                print("SHOW SERVER_VERSION")
-                data.appendleft(['10.15'])
+                data.appendleft([POSTGRES_VERSION])
 
         def cursor_fetchall():
             while data:
                 yield data.pop()
 
         def cursor_fetchone():
-            print("fetchone")
             return data.pop()
 
-        mocked_cursor.__enter__().execute = cursor_execute
-        mocked_cursor.__enter__().fetchall = cursor_fetchall
-        mocked_cursor.__enter__().fetchone = cursor_fetchone
+        cursor.__enter__().execute = cursor_execute
+        cursor.__enter__().fetchall = cursor_fetchall
+        cursor.__enter__().fetchone = cursor_fetchone
 
         yield

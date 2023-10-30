@@ -5,13 +5,11 @@ from __future__ import division
 
 from copy import deepcopy
 
-from kubeutil import get_connection_info
-
 from datadog_checks.base.checks.kubelet_base.base import urljoin
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.utils.tagging import tagger
 
-from .common import get_container_label, replace_container_rt_prefix, tags_for_docker
+from .common import get_container_label, get_prometheus_url, replace_container_rt_prefix, tags_for_docker
 
 PROBES_METRICS_PATH = '/metrics/probes'
 
@@ -35,11 +33,7 @@ class ProbesPrometheusScraperMixin(object):
         Create a copy of the instance and set default values.
         This is so the base class can create a scraper_config with the proper values.
         """
-        kubelet_conn_info = get_connection_info()
-
-        # dummy needed in case kubelet isn't running when the check is first
-        endpoint = kubelet_conn_info.get('url') if kubelet_conn_info is not None else "dummy_url/probes"
-
+        endpoint = get_prometheus_url("dummy_url/probes")
         probes_instance = deepcopy(instance)
         probes_instance.update(
             {

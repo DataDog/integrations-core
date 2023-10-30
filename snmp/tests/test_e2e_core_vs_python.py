@@ -46,7 +46,7 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.ospfVirtIf',
     'snmp.wlsxSysExtFan',  # Aruba constant metric
     'snmp.upsOutletGroupStatus',  # APC UPS constant metric
-    'snmp.cpiPduEas',  # Chatsworth constant metric
+    'snmp.cpiEas',  # Chatsworth constant metric
     'snmp.ciscoEnvMonSupplyStatus',  # Cisco constant metric
     'snmp.ciscoEnvMonFanStatus',  # Cisco constant metric
     'snmp.cefcFanTrayStatus',  # Cisco constant metric
@@ -393,6 +393,9 @@ def test_e2e_profile_cisco_3850(dd_agent_check):
             'power_oper_status',
             'switch_state',
             'mac_addr',
+            'temp_state',
+            'power_source',
+            'connection_type',
         ],  # Ignore tags that have mappings
     )
 
@@ -413,6 +416,11 @@ def test_e2e_profile_cisco_asa(dd_agent_check):
             'power_oper_status',
             'switch_state',
             'mac_addr',
+            'rtt_state',
+            'rtt_type',
+            'temp_state',
+            'power_source',
+            'connection_type',
         ],  # Ignore tags that have mappings
     )
 
@@ -433,6 +441,11 @@ def test_e2e_profile_cisco_asa_5525(dd_agent_check):
             'power_oper_status',
             'switch_state',
             'mac_addr',
+            'rtt_state',
+            'rtt_type',
+            'temp_state',
+            'power_source',
+            'connection_type',
         ],  # Ignore tags that have mappings
     )
 
@@ -465,6 +478,10 @@ def test_e2e_profile_cisco_nexus(dd_agent_check):
             'power_oper_status',
             'switch_state',
             'mac_addr',
+            'temp_state',
+            'power_source',
+            'connection_type',
+            'sensor_type',
         ],  # Ignore tags that have mappings
     )
 
@@ -517,6 +534,9 @@ def test_e2e_profile_dell_poweredge(dd_agent_check):
             'amperage_probe_status',
             'voltage_probe_status',
             'memory_device_status',
+            'probe_type',
+            'cooling_device_type',
+            'temperature_probe_type',
         ],  # Skipping tags with mappings
     )
 
@@ -586,6 +606,9 @@ def test_e2e_profile_idrac(dd_agent_check):
             'amperage_probe_status',
             'voltage_probe_status',
             'memory_device_status',
+            'probe_type',
+            'cooling_device_type',
+            'temperature_probe_type',
         ],  # Skipping tags with mappings
     )
 

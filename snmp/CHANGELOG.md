@@ -1,15 +1,49 @@
 # CHANGELOG - snmp
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 7.0.1 / 2023-10-26
+
+***Fixed***:
+
+* Update default profiles column to symbol ([#15998](https://github.com/DataDog/integrations-core/pull/15998))
+* Deprecate init_config.profiles ([#16068](https://github.com/DataDog/integrations-core/pull/16068))
+
+## 7.0.0 / 2023-09-29
 
 ***Changed***:
 
+* Add `assert_all_profile_metrics_and_tags_covered` and fix mappings in profiles ([#15720](https://github.com/DataDog/integrations-core/pull/15720))
+* Refactor arista profiles extends ([#15767](https://github.com/DataDog/integrations-core/pull/15767))
+* Fix mappings in _dell-rac & dell-poweredge ([#15827](https://github.com/DataDog/integrations-core/pull/15827))
+
+***Fixed***:
+
+* Remove duplicate mem tag in tp-link.yaml ([#15665](https://github.com/DataDog/integrations-core/pull/15665))
+* Remove unsupported metric in riverbed-interceptor.yaml ([#15678](https://github.com/DataDog/integrations-core/pull/15678))
 * Delete unnecessary extend for ubiquiti profiles ([#15643](https://github.com/DataDog/integrations-core/pull/15643))
+* Add comment for fanSpeedSensorStatus ([#15804](https://github.com/DataDog/integrations-core/pull/15804))
+* Update Cisco model metadata regex ([#15908](https://github.com/DataDog/integrations-core/pull/15908))
+* Update generic-ospf profile mappings ([#15764](https://github.com/DataDog/integrations-core/pull/15764))
+
+## 6.2.3 / 2023-09-13 / Agent 7.48.0
+
+***Fixed***:
+
+* Update mappings in SNMP profiles ([#15826](https://github.com/DataDog/integrations-core/pull/15826))
+
+## 6.2.2 / 2023-09-12
+
+***Fixed***:
+
+* Fix mapping for apc-pdu ([#15765](https://github.com/DataDog/integrations-core/pull/15765))
+* Fixes for SNMP Profiles introduced in 7.48 ([#15800](https://github.com/DataDog/integrations-core/pull/15800))
+
+## 6.2.1 / 2023-09-05
 
 ***Fixed***:
 
 * Fix SNMP profiles metric tags mappings using MIBs ([#15668](https://github.com/DataDog/integrations-core/pull/15668))
-* Remove unsupported metric in riverbed-interceptor.yaml ([#15678](https://github.com/DataDog/integrations-core/pull/15678))
 
 ## 6.2.0 / 2023-08-18
 

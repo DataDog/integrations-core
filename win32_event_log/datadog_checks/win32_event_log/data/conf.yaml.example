@@ -36,6 +36,16 @@ init_config:
     #
     # default_event_priority: normal
 
+    ## @param legacy_mode - boolean - optional - default: true
+    ## Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
+    ##
+    ##   /\ WARNING /\
+    ##   This mode, by nature of the underlying technology, is significantly more resource intensive.
+    ##
+    ## Setting this option to `false` is only supported on Agent versions 7 and above.
+    #
+    legacy_mode: false
+
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##
@@ -212,7 +222,7 @@ instances:
     #
     # domain: <DOMAIN>
 
-    ## @param timeout - number - optional - default: 5
+    ## @param timeout - integer - optional - default: 5
     ## The number of seconds to wait for new event signals.
     #
     # timeout: 5
@@ -240,7 +250,7 @@ instances:
     ##
     ## Setting this option to `false` is only supported on Agent versions 7 and above.
     #
-    legacy_mode: false
+    # legacy_mode: true
 
     ## @param host - string - optional - default: localhost
     ## By default, the local machine's event logs are captured. To capture a remote

@@ -9,6 +9,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
+    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     create_e2e_core_test_config,
     get_device_ip_from_config,
@@ -18,7 +19,8 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile__dell_rac(dd_agent_check):
-    config = create_e2e_core_test_config('_dell-rac')
+    profile = '_dell-rac'
+    config = create_e2e_core_test_config(profile)
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -336,16 +338,26 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         )
 
     tag_rows = [
-        ['amperage_probe_index:12', 'chassis_index:13', 'probe_type:8'],
-        ['amperage_probe_index:16', 'chassis_index:3', 'probe_type:3'],
+        ['amperage_probe_index:12', 'chassis_index:13', 'probe_type:amperage_probe_type_is_minus12_volt'],
+        ['amperage_probe_index:16', 'chassis_index:3', 'probe_type:amperage_probe_type_is_1point5_volt'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.amperageProbeReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.amperageProbeStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['amperage_probe_index:12', 'chassis_index:13', 'probe_type:8', 'amperage_probe_status:other'],
-        ['amperage_probe_index:16', 'chassis_index:3', 'probe_type:3', 'amperage_probe_status:critical_lower'],
+        [
+            'amperage_probe_index:12',
+            'chassis_index:13',
+            'probe_type:amperage_probe_type_is_minus12_volt',
+            'amperage_probe_status:other',
+        ],
+        [
+            'amperage_probe_index:16',
+            'chassis_index:3',
+            'probe_type:amperage_probe_type_is_1point5_volt',
+            'amperage_probe_status:critical_lower',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.dell.amperageProbe', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -358,16 +370,26 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         aggregator.assert_metric('snmp.powerUsageStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['chassis_index:14', 'probe_type:19', 'voltage_probe_index:21'],
-        ['chassis_index:29', 'probe_type:3', 'voltage_probe_index:25'],
+        ['chassis_index:14', 'probe_type:voltage_probe_type_is_memory_status', 'voltage_probe_index:21'],
+        ['chassis_index:29', 'probe_type:voltage_probe_type_is_1point5_volt', 'voltage_probe_index:25'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.voltageProbeReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.voltageProbeStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['chassis_index:14', 'probe_type:19', 'voltage_probe_index:21', 'voltage_probe_status:failed'],
-        ['chassis_index:29', 'probe_type:3', 'voltage_probe_index:25', 'voltage_probe_status:critical_lower'],
+        [
+            'chassis_index:14',
+            'probe_type:voltage_probe_type_is_memory_status',
+            'voltage_probe_index:21',
+            'voltage_probe_status:failed',
+        ],
+        [
+            'chassis_index:29',
+            'probe_type:voltage_probe_type_is_1point5_volt',
+            'voltage_probe_index:25',
+            'voltage_probe_status:critical_lower',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.dell.voltageProbe', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -396,14 +418,14 @@ def test_e2e_profile__dell_rac(dd_agent_check):
             'cooling_device_fqdd:driving oxen oxen oxen their',
             'cooling_device_location_name:quaintly driving forward kept zombies quaintly acted oxen',
             'cooling_device_name:13',
-            'cooling_device_type:4',
+            'cooling_device_type:cooling_device_type_is_a_blower',
         ],
         [
             'chassis_index:28',
             'cooling_device_fqdd:kept forward oxen their quaintly oxen oxen zombies driving',
             'cooling_device_location_name:forward quaintly zombies acted quaintly',
             'cooling_device_name:28',
-            'cooling_device_type:10',
+            'cooling_device_type:cooling_device_type_is_active_cooling',
         ],
     ]
     for tag_row in tag_rows:
@@ -418,13 +440,13 @@ def test_e2e_profile__dell_rac(dd_agent_check):
             'chassis_index:10',
             'temperature_probe_index:14',
             'temperature_probe_location_name:but',
-            'temperature_probe_type:3',
+            'temperature_probe_type:temperature_probe_type_is_ambient_esm',
         ],
         [
             'chassis_index:3',
             'temperature_probe_index:18',
             'temperature_probe_location_name:quaintly forward driving zombies oxen their oxen',
-            'temperature_probe_type:2',
+            'temperature_probe_type:temperature_probe_type_is_unknown',
         ],
     ]
     for tag_row in tag_rows:
@@ -488,8 +510,8 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         aggregator.assert_metric('snmp.memoryDeviceStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['chassis_index:15', 'device_index:23', 'device_type:11', 'memory_device_status:unknown'],
-        ['chassis_index:22', 'device_index:23', 'device_type:24', 'memory_device_status:other'],
+        ['chassis_index:15', 'device_index:23', 'device_type:device_type_is_feprom', 'memory_device_status:unknown'],
+        ['chassis_index:22', 'device_index:23', 'device_type:device_type_is_ddr3', 'memory_device_status:other'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.dell.memoryDevice', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -524,14 +546,14 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         )
 
     tag_rows = [
-        ['chassis_index:1'],
+        ['chassis_index:1', 'drs_psu_index:3'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.drsAmpsReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.drsWattsReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['chassis_index:1'],
+        ['chassis_index:1', 'drs_psu_index:3'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.drsKWhCumulative', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
@@ -551,5 +573,6 @@ def test_e2e_profile__dell_rac(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
+    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

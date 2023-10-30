@@ -9,6 +9,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
+    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     assert_extend_generic_if,
     create_e2e_core_test_config,
@@ -19,7 +20,8 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_aruba_wireless_controller(dd_agent_check):
-    config = create_e2e_core_test_config('aruba-wireless-controller')
+    profile = 'aruba-wireless-controller'
+    config = create_e2e_core_test_config(profile)
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -117,34 +119,38 @@ def test_e2e_profile_aruba_wireless_controller(dd_agent_check):
         'snmp.apChannelFrameRetryRate', metric_type=aggregator.GAUGE, tags=common_tags + ['ap_stats_channel:4']
     )
 
-    aggregator.assert_metric('snmp.haAPHbtTunnels', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.haActiveVapTunnels', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.haStandbyVapTunnels', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.haTotalVapTunnels', metric_type=aggregator.GAUGE, tags=common_tags)
+    tags_row = [['ha_membership:MemberGroup1']]
+    for tag_row in tags_row:
+        aggregator.assert_metric('snmp.haAPHbtTunnels', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.haActiveVapTunnels', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.haStandbyVapTunnels', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.haTotalVapTunnels', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
-    aggregator.assert_metric(
-        'snmp.wlanStaRSSI',
-        metric_type=aggregator.GAUGE,
-        tags=common_tags + ['wlan_sta_phy_type:wired', 'wlan_sta_ht_mode:he40'],
-    )
-    aggregator.assert_metric(
-        'snmp.wlanStaTransmitRate',
-        metric_type=aggregator.GAUGE,
-        tags=common_tags + ['wlan_sta_phy_type:wired', 'wlan_sta_ht_mode:he40'],
-    )
-    aggregator.assert_metric(
-        'snmp.wlanStaTransmitRateCode',
-        metric_type=aggregator.GAUGE,
-        tags=common_tags + ['wlan_sta_phy_type:wired', 'wlan_sta_ht_mode:he40'],
-    )
-    aggregator.assert_metric(
-        'snmp.wlanStaUpTime',
-        metric_type=aggregator.GAUGE,
-        tags=common_tags + ['wlan_sta_phy_type:wired', 'wlan_sta_ht_mode:he40'],
-    )
+    tags_row = [
+        [
+            'wlan_sta_phy_type:wired',
+            'wlan_sta_ht_mode:he40',
+            'wlan_sta_access_point_essid:HomeWiFi',
+            'wlan_sta_channel:6',
+            'wlan_sta_vlan_id:1',
+            'wlan_sta_is_authenticated:true',
+            'wlan_sta_is_associated:false',
+        ],
+    ]
+    for tag_row in tags_row:
+        aggregator.assert_metric('snmp.wlanStaRSSI', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.wlanStaTransmitRate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.wlanStaTransmitRateCode', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric('snmp.wlanStaUpTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
-    aggregator.assert_metric('snmp.wlanStaRxBytes64', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.wlanStaTxBytes64', metric_type=aggregator.GAUGE, tags=common_tags)
+    tags_row = [
+        ['wlan_sta_channel_num:3'],
+    ]
+    for tag_row in tags_row:
+        aggregator.assert_metric('snmp.wlanStaRxBytes64', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.wlanStaTxBytes64', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -161,6 +167,7 @@ def test_e2e_profile_aruba_wireless_controller(dd_agent_check):
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
 
-    # # --- CHECK COVERAGE ---
+    # --- CHECK COVERAGE ---
+    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

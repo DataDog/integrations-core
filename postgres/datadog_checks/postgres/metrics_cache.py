@@ -95,12 +95,12 @@ class PostgresMetricsCache:
             "FROM pg_stat_database psd "
             "JOIN pg_database pd ON psd.datname = pd.datname",
             'relation': False,
+            'name': 'instance_metrics',
         }
 
-        if len(self.config.ignore_databases) > 0:
-            res["query"] += " WHERE " + " AND ".join(
-                "psd.datname not ilike '{}'".format(db) for db in self.config.ignore_databases
-            )
+        res["query"] += " WHERE " + " AND ".join(
+            "psd.datname not ilike '{}'".format(db) for db in self.config.ignore_databases
+        )
 
         if self.config.dbstrict:
             res["query"] += " AND psd.datname in('{}')".format(self.config.dbname)
@@ -129,6 +129,7 @@ class PostgresMetricsCache:
             'metrics': self.bgw_metrics,
             'query': "select {metrics_columns} FROM pg_stat_bgwriter",
             'relation': False,
+            'name': 'bgw_metrics',
         }
 
     def get_count_metrics(self):
@@ -159,6 +160,7 @@ class PostgresMetricsCache:
             'metrics': self.archiver_metrics,
             'query': "select {metrics_columns} FROM pg_stat_archiver",
             'relation': False,
+            'name': 'archiver_metrics',
         }
 
     def get_replication_metrics(self, version, is_aurora):
@@ -239,4 +241,5 @@ class PostgresMetricsCache:
             'metrics': metrics,
             'query': query,
             'relation': False,
+            'name': 'activity_metrics',
         }

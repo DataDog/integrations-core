@@ -24,6 +24,8 @@ _Server Properties_ -> _Security_ -> _SQL Server and Windows Authentication mode
 
 **Note**: To install Database Monitoring for SQL Server, select your hosting solution on the [documentation site](https://docs.datadoghq.com/database_monitoring/#sqlserver) for instructions.
 
+Supported versions of SQL Server for the SQL Server check are the same as for Database Monitoring. Visit the [Setting up SQL Server page](https://docs.datadoghq.com/database_monitoring/setup_sql_server/) to see the currently supported versions under the **Self-hosted** heading.
+
 Proceed with the following steps in this guide only if you are installing the standard integration alone.
 
 1. Create a read-only login to connect to your server:
@@ -167,6 +169,23 @@ See [service_checks.json][16] for a list of service checks provided by this inte
 ## Troubleshooting
 
 Need help? Contact [Datadog support][17].
+
+If you are running the Agent on an ARM aarch64 processor, there is a known issue starting in version 14.0.0 of this check, which is bundled with Agent version 7.48.0. A Python dependency fails to load, and you'll see the following message when running [the Agent's status subcommand][14]:
+
+```
+Loading Errors
+  ==============
+    sqlserver
+    ---------
+      Core Check Loader:
+        Check sqlserver not found in Catalog
+      JMX Check Loader:
+        check is not a jmx check, or unable to determine if it's so
+      Python Check Loader:
+        unable to import module 'sqlserver': No module named 'sqlserver'
+```
+
+A fix for this is currently being developed, and in the meantime Agent versions 7.47 and below will continue to function properly.
 
 ## Further Reading
 

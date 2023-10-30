@@ -1,10 +1,73 @@
 # CHANGELOG - ddev
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 6.0.0 / 2023-10-26
+
+***Changed***:
+
+* Generate changelogs from fragment files using towncrier.
+  There are no changes to the ddev commands, only to their outputs.
+  We are making this change to avoid merge conflicts in high-traffic packages where people used to have to modify one CHANGELOG.md file. ([#15983](https://github.com/DataDog/integrations-core/pull/15983))
+* Bump datadog_checks_dev dependency to 28.0+. ([#16098](https://github.com/DataDog/integrations-core/pull/16098))
+
+## 5.3.0 / 2023-10-26
+
+***Added***:
+
+* Improve the upgrade-python script ([#16000](https://github.com/DataDog/integrations-core/pull/16000))
+
+***Fixed***:
+
+* Fix `ddev env test` so that tests run for all environments properly when no environment is specified ([#16054](https://github.com/DataDog/integrations-core/pull/16054))
+* Fix e2e test env detection to use `platforms`, not `platform` ([#16063](https://github.com/DataDog/integrations-core/pull/16063))
+* Include ddev's source code when measuring its coverage ([#16057](https://github.com/DataDog/integrations-core/pull/16057))
+* Fix Github API search query ([#15943](https://github.com/DataDog/integrations-core/pull/15943))
+* Do not modify the Agent build name if provided by the user when running the e2e environments ([#16052](https://github.com/DataDog/integrations-core/pull/16052))
+* Bump the Python version in the dependency provider when bumping the Python version ([#16070](https://github.com/DataDog/integrations-core/pull/16070))
+
+## 5.2.1 / 2023-10-12
+
+***Fixed***:
+
+* Fix environment metadata accessor ([#16009](https://github.com/DataDog/integrations-core/pull/16009))
+
+## 5.2.0 / 2023-10-12
+
+***Added***:
+
+* Migrate E2E features ([#15931](https://github.com/DataDog/integrations-core/pull/15931))
+* Bump the minimum supported version of datadog-checks-dev ([#16006](https://github.com/DataDog/integrations-core/pull/16006))
+
+## 5.1.1 / 2023-09-29
+
+***Fixed***:
+
+* Trigger tests on JMX metrics.yaml updates ([#15877](https://github.com/DataDog/integrations-core/pull/15877))
+
+## 5.1.0 / 2023-09-20
+
+***Added***:
+
+* Add color output to tests in CI ([#15774](https://github.com/DataDog/integrations-core/pull/15774))
+* Migrate `ddev dep` to `ddev` ([#15830](https://github.com/DataDog/integrations-core/pull/15830))
+
+***Fixed***:
+
+* Make sure repo override in envvar makes it into config ([#15782](https://github.com/DataDog/integrations-core/pull/15782))
+* Bump the `target-version` to python 3.9 for ruff and black ([#15824](https://github.com/DataDog/integrations-core/pull/15824))
+* Bump the `datadog-checks-dev` version to ~=25 ([#15823](https://github.com/DataDog/integrations-core/pull/15823))
+* Fix the `--compat` option of the `test` command ([#15815](https://github.com/DataDog/integrations-core/pull/15815))
+
+## 5.0.0 / 2023-09-06
 
 ***Removed***:
 
 * Remove `release agent requirements` subcommand ([#15621](https://github.com/DataDog/integrations-core/pull/15621))
+
+***Added***:
+
+* Migrate test command ([#15762](https://github.com/DataDog/integrations-core/pull/15762))
 
 ***Fixed***:
 

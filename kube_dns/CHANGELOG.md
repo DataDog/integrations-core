@@ -1,8 +1,8 @@
  - Kube-dns
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 4.2.1 / 2023-08-18
+## 4.2.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:
 

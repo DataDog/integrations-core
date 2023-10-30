@@ -1,8 +1,14 @@
 # CHANGELOG - Datadog Checks Downloader
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 4.3.0 / 2023-08-25
+## 4.3.1 / 2023-09-29
+
+***Fixed***:
+
+* Override the default test options for some integrations ([#15779](https://github.com/DataDog/integrations-core/pull/15779))
+
+## 4.3.0 / 2023-08-25 / Agent 7.48.0
 
 ***Security***:
 
@@ -10,7 +16,7 @@
   * in-toto: 2.0.0
   * securesystemslib: 0.28.0
 
-## 4.2.2 / 2023-07-10
+## 4.2.2 / 2023-07-10 / Agent 7.47.0
 
 ***Fixed***:
 

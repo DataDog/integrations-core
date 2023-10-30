@@ -50,6 +50,10 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
         + variables.COMMON_PERFORMANCE_VARS
     )
 
+    operation_time_metrics = (
+        variables.SIMPLE_OPERATION_TIME_METRICS + variables.COMMON_PERFORMANCE_OPERATION_TIME_METRICS
+    )
+
     for mname in testable_metrics:
         # Adding condition to no longer test for innodb_os_log_fsyncs in mariadb 10.8+
         # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_os_log_fsyncs)
@@ -80,8 +84,13 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
     )
 
     _test_optional_metrics(aggregator, optional_metrics)
+
+    _test_operation_time_metrics(aggregator, operation_time_metrics, mysql_check.debug_stats_kwargs()['tags'])
+
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), check_submission_type=True, exclude=[variables.OPERATION_TIME_METRIC_NAME]
+    )
 
 
 @pytest.mark.integration
@@ -96,7 +105,9 @@ def test_complex_config(aggregator, dd_run_check, instance_complex):
         tags.METRIC_TAGS_WITH_RESOURCE,
     )
     aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(), check_submission_type=True, exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
+        get_metadata_metrics(),
+        check_submission_type=True,
+        exclude=['alice.age', 'bob.age', variables.OPERATION_TIME_METRIC_NAME] + variables.STATEMENT_VARS,
     )
 
 
@@ -108,13 +119,15 @@ def test_e2e(dd_agent_check, dd_default_hostname, instance_complex):
         tags.SC_TAGS + [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=dd_default_hostname)],
         tags.METRIC_TAGS,
         hostname=dd_default_hostname,
+        e2e=True,
     )
     aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(), exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
+        get_metadata_metrics(),
+        exclude=['alice.age', 'bob.age'] + variables.E2E_OPERATION_TIME_METRIC_NAME + variables.STATEMENT_VARS,
     )
 
 
-def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname='stubbed.hostname'):
+def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname='stubbed.hostname', e2e=False):
     # Test service check
     aggregator.assert_service_check(
         'mysql.can_connect',
@@ -149,6 +162,9 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
         + variables.TABLE_VARS
         + variables.ROW_TABLE_STATS_VARS
     )
+
+    operation_time_metrics = variables.SIMPLE_OPERATION_TIME_METRICS + variables.COMPLEX_OPERATION_TIME_METRICS
+
     if MYSQL_REPLICATION == 'group':
         testable_metrics.extend(variables.GROUP_REPLICATION_VARS)
         aggregator.assert_service_check(
@@ -158,9 +174,15 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
             + ['channel_name:group_replication_applier', 'member_role:PRIMARY', 'member_state:ONLINE'],
             count=1,
         )
+        operation_time_metrics.extend(variables.GROUP_REPLICATION_OPERATION_TIME_METRICS)
+    else:
+        testable_metrics.extend(variables.REPLICATION_OPERATION_TIME_METRICS)
 
     if MYSQL_VERSION_PARSED >= parse_version('5.6'):
         testable_metrics.extend(variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS)
+        operation_time_metrics.extend(
+            variables.COMMON_PERFORMANCE_OPERATION_TIME_METRICS + variables.PERFORMANCE_OPERATION_TIME_METRICS
+        )
 
     # Test metrics
     for mname in testable_metrics:
@@ -217,6 +239,10 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
     # Note, this assertion will pass even if some metrics are not present.
     # Manual testing is required for optional metrics
     _test_optional_metrics(aggregator, optional_metrics)
+
+    _test_operation_time_metrics(
+        aggregator, operation_time_metrics, metric_tags + ['agent_hostname:{}'.format(hostname)], e2e=e2e
+    )
 
     # Raises when coverage < 100%
     aggregator.assert_all_metrics_covered()
@@ -276,8 +302,17 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         + variables.ROW_TABLE_STATS_VARS
     )
 
+    operation_time_metrics = (
+        variables.SIMPLE_OPERATION_TIME_METRICS
+        + variables.COMPLEX_OPERATION_TIME_METRICS
+        + variables.REPLICATION_OPERATION_TIME_METRICS
+    )
+
     if MYSQL_VERSION_PARSED >= parse_version('5.6') and environ.get('MYSQL_FLAVOR') != 'mariadb':
         testable_metrics.extend(variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS)
+        operation_time_metrics.extend(
+            variables.COMMON_PERFORMANCE_OPERATION_TIME_METRICS + variables.PERFORMANCE_OPERATION_TIME_METRICS
+        )
 
     # Test metrics
     for mname in testable_metrics:
@@ -336,10 +371,14 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
     # Manual testing is required for optional metrics
     _test_optional_metrics(aggregator, optional_metrics)
 
+    _test_operation_time_metrics(aggregator, operation_time_metrics, mysql_check.debug_stats_kwargs()['tags'])
+
     # Raises when coverage < 100%
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(), check_submission_type=True, exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
+        get_metadata_metrics(),
+        check_submission_type=True,
+        exclude=['alice.age', 'bob.age', variables.OPERATION_TIME_METRIC_NAME] + variables.STATEMENT_VARS,
     )
 
     # Make sure group replication is not detected
@@ -358,6 +397,12 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
 )
 def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, aggregator, dd_run_check, instance_basic):
     instance_basic['dbm'] = dbm_enabled
+    if dbm_enabled:
+        # set a very small collection interval so the tests go fast
+        instance_basic['collect_settings'] = {'collection_interval': 0.1}
+        instance_basic['query_activity'] = {'collection_interval': 0.1}
+        instance_basic['query_samples'] = {'collection_interval': 0.1}
+        instance_basic['query_metrics'] = {'collection_interval': 0.1}
     instance_basic['disable_generic_tags'] = False  # This flag also affects the hostname
     instance_basic['reported_hostname'] = reported_hostname
 
@@ -424,6 +469,23 @@ def _test_optional_metrics(aggregator, optional_metrics):
     after = len(aggregator.not_asserted())
 
     assert before > after
+
+
+def _test_operation_time_metrics(aggregator, operation_time_metrics, tags, e2e=False):
+    for operation_time_metric in operation_time_metrics:
+        if e2e:
+            for metric_name in variables.E2E_OPERATION_TIME_METRIC_NAME:
+                aggregator.assert_metric(
+                    metric_name,
+                    tags=tags + ['operation:{}'.format(operation_time_metric)],
+                    count=1,
+                )
+        else:
+            aggregator.assert_metric(
+                variables.OPERATION_TIME_METRIC_NAME,
+                tags=tags + ['operation:{}'.format(operation_time_metric)],
+                count=1,
+            )
 
 
 @requires_static_version
@@ -656,6 +718,12 @@ def test_set_resources(aggregator, dd_run_check, instance_basic, cloud_metadata,
 @pytest.mark.usefixtures('dd_environment')
 def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, dbm_enabled, reported_hostname):
     instance_complex['dbm'] = dbm_enabled
+    if dbm_enabled:
+        # set a very small collection interval so the tests go fast
+        instance_complex['collect_settings'] = {'collection_interval': 0.1}
+        instance_complex['query_activity'] = {'collection_interval': 0.1}
+        instance_complex['query_samples'] = {'collection_interval': 0.1}
+        instance_complex['query_metrics'] = {'collection_interval': 0.1}
     if reported_hostname:
         instance_complex['reported_hostname'] = reported_hostname
     expected_host = reported_hostname if reported_hostname else 'stubbed.hostname'

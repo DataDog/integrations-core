@@ -96,6 +96,17 @@ class ObfuscatorOptions(BaseModel):
     replace_digits: Optional[bool] = None
 
 
+class ProcedureMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    dm_exec_procedure_stats_row_limit: Optional[int] = None
+    enabled: Optional[bool] = None
+    max_procedures: Optional[int] = None
+
+
 class QueryActivity(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -154,9 +165,11 @@ class InstanceConfig(BaseModel):
     include_ao_metrics: Optional[bool] = None
     include_db_fragmentation_metrics: Optional[bool] = None
     include_fci_metrics: Optional[bool] = None
+    include_index_usage_metrics: Optional[bool] = None
     include_instance_metrics: Optional[bool] = None
     include_master_files_metrics: Optional[bool] = None
     include_task_scheduler_metrics: Optional[bool] = None
+    include_tempdb_file_space_usage_metrics: Optional[bool] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
     managed_identity: Optional[ManagedIdentity] = None
@@ -168,6 +181,7 @@ class InstanceConfig(BaseModel):
     password: Optional[str] = None
     proc_only_if: Optional[str] = None
     proc_only_if_database: Optional[str] = None
+    procedure_metrics: Optional[ProcedureMetrics] = None
     query_activity: Optional[QueryActivity] = None
     query_metrics: Optional[QueryMetrics] = None
     reported_hostname: Optional[str] = None

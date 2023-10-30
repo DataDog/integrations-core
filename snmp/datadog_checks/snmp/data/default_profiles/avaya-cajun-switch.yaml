@@ -23,11 +23,11 @@ metrics:
       - name: avaya.genPort
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: avaya.genPortId
           OID: 1.3.6.1.4.1.81.9.1.1.2
         tag: avaya_gen_port_id
-      - column:
+      - symbol:
           name: avaya.genPortFunctionality
           OID: 1.3.6.1.4.1.81.9.1.1.3
         tag: avaya_gen_port_functionality
@@ -62,8 +62,8 @@ metrics:
           28: a100_base_tx
           29: a100_base_fx
           30: oc3
-          31: an_atm-_main
-          32: an_atm-_secondary
+          31: an_atm_main
+          32: an_atm_secondary
           33: a1000_base_fx
           40: sonet
           41: fim_voice
@@ -78,13 +78,13 @@ metrics:
           50: eth1000_base_cx
           51: g_bic_not_present
           52: g_bic_not_supported
-          53: eth1000_base_x-_proprietary
+          53: eth1000_base_x_proprietary
           54: oc12
-          55: s_fp-_not_present
-          56: s_fp-_not_supported
+          55: s_fp_not_present
+          56: s_fp_not_supported
           57: eth10_base_tw_in_pwr
           58: eth100_base_t_xw_in_pwr
-      - column:
+      - symbol:
           name: avaya.genPortType
           OID: 1.3.6.1.4.1.81.9.1.1.4
         tag: avaya_gen_port_type
@@ -309,25 +309,25 @@ metrics:
           2514: cajun_p120-1000_base_sx-gbic
           2515: cajun_p120-1000_base_lx-gbic
           2516: cajun_p120-1000_base_t-gbic
-          2517: cajun_p120-gbic-_not_present
-          2518: cajun_p120-gbic-_unknown
-          2519: cajun_p120-gbic-_other
-          2520: cajun_p120-_fibre_channel-gbic
+          2517: cajun_p120-gbic_not_present
+          2518: cajun_p120-gbic_unknown
+          2519: cajun_p120-gbic_other
+          2520: cajun_p120_fibre_channel-gbic
           2521: cajun_p120-1000_base_tx
           2522: cajun_p330-1000_tx_port
           2523: cajun_p330-1000_sx-gbic
           2524: cajun_p330-1000_lx-gbic
           2525: cajun_p330-1000_t-gbic
           2526: cajun_p330-1000_cx-gbic
-          2527: cajun_p330-gbic-_not_present
-          2528: cajun_p330-gbic-_not_supported
+          2527: cajun_p330-gbic_not_present
+          2528: cajun_p330-gbic_not_supported
           2530: cajun_p130-10or100_base_tx_port
           2531: cajun_p130-100_base_fx_port
           2532: cajun_p130-1000_base_sx-gbic_port
           2533: cajun_p130-1000_base_lx-gbic_port
-          2534: cajun_p130-1000_base_x-_proprietary-gbic_port
-          2535: cajun_p130-gbic-_not_supported
-          2536: cajun_p130-gbic-_not_present
+          2534: cajun_p130-1000_base_x_proprietary-gbic_port
+          2535: cajun_p130-gbic_not_supported
+          2536: cajun_p130-gbic_not_present
           2537: cajun_p130-lag100
           2538: cajun_p130-lag1000
           2539: cajun_p130-1000_base_t_port
@@ -338,8 +338,8 @@ metrics:
           2544: cajun_p330-ml-lag1000
           2545: cajun_p330-ml-100or1000_t_port
           2546: cajun_p330-ml-10or100_t_port
-          2547: cajun_p330-ml-sfp-_not_present
-          2548: cajun_p330-ml-sfp-_not_supported
+          2547: cajun_p330-ml-sfp_not_present
+          2548: cajun_p330-ml-sfp_not_supported
           2549: cajun_p330-10or100_t_port_and_in_pwr
           2550: cajun_p330-ml-1000_tx-sfp
           2640: avaya_c360-lag
@@ -349,8 +349,8 @@ metrics:
           2644: avaya_c360-lag1000
           2645: avaya_c360-100or1000_tport
           2646: avaya_c360-10or100_tport
-          2647: avaya_c360-sfp-_not_present
-          2648: avaya_c360-sfp-_not_supported
+          2647: avaya_c360-sfp_not_present
+          2648: avaya_c360-sfp_not_supported
           2649: avaya_c360-10or100_t_port_and_in_pwr
           2650: avaya_c360-1000_tx-sfp
           2811: avaya_g250-10or100_t_port_and_in_pwr
@@ -362,8 +362,8 @@ metrics:
           2906: avaya_g350-lag1000
           2907: avaya_g350-100or1000_t_port
           2908: avaya_g350-10or100_t_port
-          2909: avaya_g350-sfp-_not_present
-          2910: avaya_g350-sfp-_not_supported
+          2909: avaya_g350-sfp_not_present
+          2910: avaya_g350-sfp_not_supported
           2911: avaya_g350-10or100_t_port_and_in_pwr
           2912: avaya_g350-1000_tx-sfp
           2913: avaya_g350-10or100or1000_t_port
@@ -382,16 +382,16 @@ metrics:
           3504: avaya_c460-lag1000
           3505: avaya_c460-1000_t_port
           3506: avaya_c460-10or100_tport
-          3507: avaya_c460-sfp-_not_present
-          3508: avaya_c460-sfp-_not_supported
+          3507: avaya_c460-sfp_not_present
+          3508: avaya_c460-sfp_not_supported
           3509: avaya_c460-10or100_t_port_and_in_pwr
           3640: avaya_w310-lag
           3641: avaya_w310-1000_sx-sfp
           3642: avaya_w310-1000_lx-sfp
           3643: avaya_w310-lag100
           3644: avaya_w310-lag1000
-          3647: avaya_w310-sfp-_not_present
-          3648: avaya_w310-sfp-_not_supported
+          3647: avaya_w310-sfp_not_present
+          3648: avaya_w310-sfp_not_supported
           3649: avaya_w310-10or100_t_port_and_in_pwr
           3650: avaya_w310-1000_tx-sfp
           4000: avaya_communication_manager_branch_editioni40-10or100_t_port_and_in_pwr
@@ -403,8 +403,8 @@ metrics:
           4006: avaya_communication_manager_branch_editioni120-lag1000
           4007: avaya_communication_manager_branch_editioni120-100or1000_t_port
           4008: avaya_communication_manager_branch_editioni120-10or100_t_port
-          4009: avaya_communication_manager_branch_editioni120-sfp-_not_present
-          4010: avaya_communication_manager_branch_editioni120-sfp-_not_supported
+          4009: avaya_communication_manager_branch_editioni120-sfp_not_present
+          4010: avaya_communication_manager_branch_editioni120-sfp_not_supported
           4011: avaya_communication_manager_branch_editioni120-10or100_t_port_and_in_pwr
           4012: avaya_communication_manager_branch_editioni120-1000_tx-sfp
           4013: avaya_communication_manager_branch_editioni120-10or100or1000_t_port
@@ -414,15 +414,15 @@ metrics:
           4019: avaya_communication_manager_branch_edition_g430-10or100_t_port_and_in_pwr
           4020: avaya_g430-10or100_tport
           4021: avaya_g430-10or100_t_port_and_in_pwr
-      - column:
+      - symbol:
           name: avaya.genPortDescr
           OID: 1.3.6.1.4.1.81.9.1.1.5
         tag: avaya_gen_port_descr
-      - column:
+      - symbol:
           name: avaya.genPortName
           OID: 1.3.6.1.4.1.81.9.1.1.21
         tag: avaya_gen_port_name
-      - column:
+      - symbol:
           name: avaya.genPortClassification
           OID: 1.3.6.1.4.1.81.9.1.1.22
         tag: avaya_gen_port_classification
@@ -430,7 +430,7 @@ metrics:
           1: regular
           2: valuable
           255: not_supported
-      - column:
+      - symbol:
           name: avaya.scEthPortMode
           OID: 1.3.6.1.4.1.81.28.2.1.1.1.28
         tag: avaya_sc_eth_port_mode
@@ -444,7 +444,7 @@ metrics:
           7: full_duplex_sym_pause
           8: full_duplex_asym_rx_pause
           255: not_supported
-      - column:
+      - symbol:
           name: avaya.scEthPortSpeed
           OID: 1.3.6.1.4.1.81.28.2.1.1.1.29
         tag: avaya_sc_eth_port_speed
@@ -455,14 +455,14 @@ metrics:
           4: a155_mbps
           5: a622_mbps
           255: not_supported
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.81.9.1.1.10
           name: avaya.genPortAdminStatus
         tag: avaya_gen_port_admin_status
         mapping:
           1: enabled
           2: disabled
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.81.28.2.1.1.1.27
           name: avaya.scEthPortFunctionalStatus
         tag: avaya_sc_eth_port_functional_status

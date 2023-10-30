@@ -28,7 +28,7 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=32.6.0",
+    "datadog-checks-base>=34.1.0",
 ]
 dynamic = [
     "version",
@@ -37,11 +37,10 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "boto3==1.28.27; python_version > '3.0'",
     "azure-identity==1.14.0; python_version > '3.0'",
+    "boto3==1.28.55; python_version > '3.0'",
     "cachetools==5.3.1; python_version > '3.0'",
-    "psycopg[binary]==3.1.10; python_version > '3.0'",
-    "psycopg-pool==3.1.7; python_version > '3.0'",
+    "psycopg2-binary==2.9.8; python_version > '3.0'",
     "semver==3.0.1; python_version > '3.0'",
 ]
 

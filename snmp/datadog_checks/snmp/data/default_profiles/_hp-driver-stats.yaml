@@ -23,11 +23,11 @@ metrics:
       - OID: 1.3.6.1.4.1.232.3.2.5.1.1.21
         name: cpqDaPhyDrvSeekErrs
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.3.2.5.1.1.1
           name: cpqDaPhyDrvCntlrIndex
         tag: drive_cntrl_idx
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.3.2.5.1.1.2
           name: cpqDaPhyDrvIndex
         tag: drive_index
@@ -49,11 +49,11 @@ metrics:
       - OID: 1.3.6.1.4.1.232.3.2.5.1.1.70
         name: cpqDaPhyDrvCurrentTemperature
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.3.2.5.1.1.1
           name: cpqDaPhyDrvCntlrIndex
         tag: drive_cntrl_idx
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.3.2.5.1.1.2
           name: cpqDaPhyDrvIndex
         tag: drive_index

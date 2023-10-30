@@ -11,23 +11,23 @@ metrics:
       - OID: 1.3.6.1.2.1.14.10.1.8
         name: ospfNbrLsRetransQLen
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.14.10.1.3
           name: ospfNbrRtrId
         tag: neighbor_id
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.14.10.1.1
           name: ospfNbrIpAddr
         tag: neighbor_ip
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.14.10.1.6
           name: ospfNbrState
         mapping:
           1: down
           2: attempt
           3: init
-          4: twoWay
-          5: exchangeStart
+          4: two_way
+          5: exchange_start
           6: exchange
           7: loading
           8: full
@@ -40,23 +40,23 @@ metrics:
       - name: ospfNbr
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.14.10.1.3
           name: ospfNbrRtrId
         tag: neighbor_id
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.14.10.1.1
           name: ospfNbrIpAddr
         tag: neighbor_ip
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.14.10.1.6
           name: ospfNbrState
         mapping:
           1: down
           2: attempt
           3: init
-          4: twoWay
-          5: exchangeStart
+          4: two_way
+          5: exchange_start
           6: exchange
           7: loading
           8: full
@@ -73,23 +73,23 @@ metrics:
       - OID: 1.3.6.1.2.1.14.11.1.7
         name: ospfVirtNbrLsRetransQLen
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.14.11.1.3
           name: ospfVirtNbrIpAddr
         tag: neighbor_ip
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.14.11.1.2
           name: ospfVirtNbrRtrId
         tag: neighbor_id
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.14.11.1.5
           name: ospfVirtNbrState
         mapping:
           1: down
           2: attempt
           3: init
-          4: twoWay
-          5: exchangeStart
+          4: two_way
+          5: exchange_start
           6: exchange
           7: loading
           8: full
@@ -102,23 +102,23 @@ metrics:
       - name: ospfVirtNbr
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.14.11.1.3
           name: ospfVirtNbrIpAddr
         tag: neighbor_ip
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.14.11.1.2
           name: ospfVirtNbrRtrId
         tag: neighbor_id
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.14.11.1.5
           name: ospfVirtNbrState
         mapping:
           1: down
           2: attempt
           3: init
-          4: twoWay
-          5: exchangeStart
+          4: two_way
+          5: exchange_start
           6: exchange
           7: loading
           8: full
@@ -135,27 +135,27 @@ metrics:
       - OID: 1.3.6.1.2.1.14.7.1.21
         name: ospfIfLsaCount
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.14.7.1.1
           name: ospfIfIpAddress
         tag: ospf_ip_addr
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.14.10.1.3
           name: ospfNbrRtrId
         table: ospfNbrTable
         MIB: OSPF-MIB
         tag: neighbor_id
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.14.7.1.12
           name: ospfIfState
         mapping:
           1: down
           2: loopback
           3: waiting
-          4: pointToPoint
-          5: designatedRouter
-          6: backupDesignatedRouter
-          7: otherDesignatedRouter
+          4: point_to_point
+          5: designated_router
+          6: backup_designated_router
+          7: other_designated_router
         tag: if_state
   - MIB: OSPF-MIB
     table:
@@ -165,27 +165,27 @@ metrics:
       - name: ospfIf
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.14.7.1.1
           name: ospfIfIpAddress
         tag: ospf_ip_addr
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.14.10.1.3
           name: ospfNbrRtrId
         table: ospfNbrTable
         MIB: OSPF-MIB
         tag: neighbor_id
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.14.7.1.12
           name: ospfIfState
         mapping:
           1: down
           2: loopback
           3: waiting
-          4: pointToPoint
-          5: designatedRouter
-          6: backupDesignatedRouter
-          7: otherDesignatedRouter
+          4: point_to_point
+          5: designated_router
+          6: backup_designated_router
+          7: other_designated_router
         tag: if_state
   - MIB: OSPF-MIB
     table:
@@ -199,18 +199,18 @@ metrics:
       - OID: 1.3.6.1.2.1.14.9.1.12
         name: ospfVirtIfLsaCount
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.14.11.1.2
           name: ospfVirtNbrRtrId
         table: ospfVirtNbrTable
         MIB: OSPF-MIB
         tag: neighbor_id
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.14.9.1.7
           name: ospfVirtIfState
         mapping:
           1: down
-          4: pointToPoint
+          4: point_to_point
         tag: if_state
   - MIB: OSPF-MIB
     table:
@@ -220,16 +220,16 @@ metrics:
       - name: ospfVirtIf
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.14.11.1.2
           name: ospfVirtNbrRtrId
         table: ospfVirtNbrTable
         MIB: OSPF-MIB
         tag: neighbor_id
-      - column:
+      - symbol:
           OID: 1.3.6.1.2.1.14.9.1.7
           name: ospfVirtIfState
         mapping:
           1: down
-          4: pointToPoint
+          4: point_to_point
         tag: if_state

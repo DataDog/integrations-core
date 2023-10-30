@@ -51,47 +51,16 @@ Edit the `teamcity.d/conf.yaml` in the `conf.d/` folder at the root of your [Age
 
 The TeamCity check offers two methods of data collection. To optimally monitor your TeamCity environment, configure two separate instances to collect metrics from each method. 
 
-1. OpenMetricsV2 method (requires Python version 3):
+1. OpenMetrics method (requires Python version 3):
 
    Enable `use_openmetrics: true` to collect metrics from the TeamCity `/metrics` Prometheus endpoint.
 
-
    ```yaml
-   init_config:
-   
-   instances:
-       ## @param server - string - required
-       ## Specify the server name of your TeamCity instance.
-       ## Enable Guest Authentication on your instance or enable the
-       ## optional `basic_http_authentication` config param to collect data.
-       ## If using `basic_http_authentication`, specify:
-       ##
-       ## server: http://<USER>:<PASSWORD>@teamcity.<ACCOUNT_NAME>.com
-       #
-     - server: http://teamcity.<ACCOUNT_NAME>.com
-       ## @param use_openmetrics - boolean - optional - default: false
-       ## Use the latest OpenMetrics V2 implementation to collect metrics from
-       ## the TeamCity server's Prometheus metrics endpoint.
-       ## Requires Python version 3.
-       ##
-       ## Enable in a separate instance to collect Prometheus metrics.
-       ## This option does not collect events, service checks, or metrics from the TeamCity REST API.
-       #
-       use_openmetrics: true
-   ```
-**Note:** To collect [OpenMetrics-compliant][16] histogram and summary metrics (available starting in TeamCity Server 2022.10+), add the internal property, `teamcity.metrics.followOpenMetricsSpec=true`. See, [TeamCity Internal Properties][25].
+   init_config: 
 
-2. TeamCity Server REST API method:
-
-   Configure a separate instance in the `teamcity.d/conf.yaml` file to collect additional build-specific metrics, service checks, and build status events from the TeamCity server's REST API. Specify your projects and build configurations using the `projects` option (requires Python version 3):
-
-
-   ```yaml
-   init_config:
-   
    instances:
      - server: http://teamcity.<ACCOUNT_NAME>.com
-   
+
        ## @param projects - mapping - optional
        ## Mapping of TeamCity projects and build configurations to
        ## collect events and metrics from the TeamCity REST API.
@@ -108,26 +77,52 @@ The TeamCity check offers two methods of data collection. To optimally monitor y
            - <BUILD_CONFIG_D>
          <PROJECT_C>: {}
    ```
+  
+  To collect [OpenMetrics-compliant][16] histogram and summary metrics (available starting in TeamCity Server 2022.10+), add the internal property, `teamcity.metrics.followOpenMetricsSpec=true`. See, [TeamCity Internal Properties][25].
 
-
-   Customize each project's build configuration monitoring using the optional `include` and `exclude` filters to specify build configuration IDs to include or exclude from monitoring, respectively. RegEx patterns are supported in the `include` and `exclude` keys to specify build configuration ID matching patterns. If both `include` and `exclude` filters are omitted, all build configurations are monitored for the specified project. 
-
-   For Python version 2, configure one build configuration ID per instance using the `build_configuration` option:
-
-
+2. TeamCity Server REST API method (requires Python version 3):
+   
+   Configure a separate instance in the `teamcity.d/conf.yaml` file to collect additional build-specific metrics, service checks, and build status events from the TeamCity server's REST API. Specify your projects and build configurations using the `projects` option.
+   
    ```yaml
    init_config:
-   
+
    instances:
      - server: http://teamcity.<ACCOUNT_NAME>.com
-   
+
        ## @param projects - mapping - optional
        ## Mapping of TeamCity projects and build configurations to
        ## collect events and metrics from the TeamCity REST API.
        #
-       build_configuration: <BUILD_CONFIGURATION_ID>
-   ```
+       projects:
+         <PROJECT_A>:
+           include:    
+           - <BUILD_CONFIG_A>
+           - <BUILD_CONFIG_B>
+           exclude:
+           - <BUILD_CONFIG_C>
+         <PROJECT_B>:
+           include:
+           - <BUILD_CONFIG_D>
+         <PROJECT_C>: {}
+    ```
 
+Customize each project's build configuration monitoring using the optional `include` and `exclude` filters to specify build configuration IDs to include or exclude from monitoring, respectively. Regular expression patterns are supported in the `include` and `exclude` keys to specify build configuration ID matching patterns. If both `include` and `exclude` filters are omitted, all build configurations are monitored for the specified project. 
+
+For Python version 2, configure one build configuration ID per instance using the `build_configuration` option:
+
+```yaml
+init_config:
+
+instances:
+  - server: http://teamcity.<ACCOUNT_NAME>.com
+
+    ## @param projects - mapping - optional
+    ## Mapping of TeamCity projects and build configurations to
+    ## collect events and metrics from the TeamCity REST API.
+    #
+    build_configuration: <BUILD_CONFIGURATION_ID>
+```
 
 [Restart the Agent][5] to start collecting and sending TeamCity events to Datadog.
 
@@ -223,7 +218,7 @@ Need help? Contact [Datadog support][12].
 
 ## Further Reading
 
-- [Track performance impact of code changes with TeamCity and Datadog.][13]
+- [Track performance impact of code changes with TeamCity and Datadog][13]
 
 [1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://www.jetbrains.com/help/teamcity/enabling-guest-login.html

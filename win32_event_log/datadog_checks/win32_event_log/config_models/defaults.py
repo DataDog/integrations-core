@@ -20,6 +20,10 @@ def shared_interpret_messages():
     return True
 
 
+def shared_legacy_mode():
+    return True
+
+
 def shared_tag_event_id():
     return False
 

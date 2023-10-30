@@ -27,6 +27,10 @@ class KafkaConfig:
             if self._consumer_groups_regex
             else ""
         )
+        # Optimization to avoid OOM kill:
+        # https://github.com/confluentinc/confluent-kafka-python/issues/759
+        self._consumer_queued_max_messages_kbytes = instance.get('consumer_queued_max_messages_kbytes', 1024)
+        self._close_admin_client = instance.get('close_admin_client', True)
 
         self._kafka_connect_str = instance.get('kafka_connect_str')
         self._kafka_version = instance.get('kafka_client_api_version')

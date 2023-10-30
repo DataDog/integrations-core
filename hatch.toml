@@ -1,21 +1,21 @@
 [envs.docs]
 dependencies = [
   "mkdocs~=1.5.2",
-  "mkdocs-material~=9.2.0b3",
+  "mkdocs-material~=9.4.6",
   # Plugins
-  "mkdocs-minify-plugin~=0.6.4",
+  "mkdocs-minify-plugin~=0.7.1",
   "mkdocs-git-revision-date-localized-plugin~=1.2.0",
-  "mkdocstrings-python~=1.3.0",
+  "mkdocstrings-python~=1.7.0",
   "mkdocs-redirects~=1.2.1",
   "mkdocs-glightbox~=0.3.4",
   "mkdocs-pdf-export-plugin~=0.5.10",
   "weasyprint~=56.1.0",
   # Extensions
   "mkdocs-click~=0.8.0",
-  "pymdown-extensions~=10.1.0",
+  "pymdown-extensions~=10.3.0",
   "mkpatcher~=1.0.2",
   # Necessary for syntax highlighting in code blocks
-  "pygments~=2.15.1",
+  "pygments~=2.16.1",
   # Validation
   # https://github.com/linkchecker/linkchecker/pull/669#issuecomment-1267236287
   "linkchecker @ git+https://github.com/linkchecker/linkchecker.git@d9265bb71c2054bf57b8c5734a4825d62505c779",

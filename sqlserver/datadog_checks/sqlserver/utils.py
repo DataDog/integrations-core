@@ -73,14 +73,14 @@ def _get_index_for_keyword(text, keyword):
         return -1
 
 
-def extract_sql_comments(text):
+def extract_sql_comments_and_procedure_name(text):
     if not text:
-        return []
+        return [], False, None
     in_single_line_comment = False
     in_multi_line_comment = False
     comment_start = None
     result = []
-
+    stripped_text = ""
     for i in range(len(text)):
         if in_multi_line_comment:
             if i < len(text) - 1 and text[i : i + 2] == '*/':
@@ -91,8 +91,7 @@ def extract_sql_comments(text):
         elif in_single_line_comment:
             if text[i] == '\n':
                 in_single_line_comment = False
-                # strip any extra whitespace at the end
-                # of the single line comment
+                # strip any extra whitespace at the end of the single line comment
                 result.append(text[comment_start:i].rstrip())
         else:
             if i < len(text) - 1 and text[i : i + 2] == '--':
@@ -101,8 +100,10 @@ def extract_sql_comments(text):
             elif i < len(text) - 1 and text[i : i + 2] == '/*':
                 in_multi_line_comment = True
                 comment_start = i
-
-    return result
+            else:
+                stripped_text += text[i]
+    is_proc, name = is_statement_proc(stripped_text)
+    return result, is_proc, name
 
 
 def parse_sqlserver_major_version(version):

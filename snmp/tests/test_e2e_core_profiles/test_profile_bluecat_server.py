@@ -9,6 +9,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
+    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     assert_extend_generic_host_resources_base,
     assert_extend_generic_if,
@@ -21,7 +22,8 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_bluecat_server(dd_agent_check):
-    config = create_e2e_core_test_config('bluecat-server')
+    profile = 'bluecat-server'
+    config = create_e2e_core_test_config(profile)
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -30,7 +32,11 @@ def test_e2e_profile_bluecat_server(dd_agent_check):
         'snmp_host:bluecat-server.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
-    ] + []
+    ] + [
+        'bcn_sys_id_product:1.3.6.1.4.1.13315.2.1',
+        'bcn_sys_id_os_release:OS v1.2.3',
+        'bcn_sys_id_platform:BCN Platform X',
+    ]
 
     # --- TEST EXTENDED METRICS ---
     # Examples:
@@ -97,5 +103,6 @@ def test_e2e_profile_bluecat_server(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
+    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

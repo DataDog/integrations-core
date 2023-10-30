@@ -2,14 +2,21 @@
 
 [envs.default]
 # If you bump the `confluent-kafka` version, also bump the `librdkafka` version in the `32_install_kerberos.sh` file
+# Also bump the LIBRDKAFKA_VERSION version in this file
 post-install-commands = [
   "python -m pip uninstall -y confluent-kafka",
-  "python -m pip install --no-binary confluent-kafka confluent-kafka==2.2.0",
+  "python -m pip install --no-binary confluent-kafka confluent-kafka==2.3.0",
 ]
 
 [envs.default.env-vars]
 ZK_VERSION = "3.6.4"
 AUTHENTICATION = "noauth"
+# The format is MMmmrr with MM = Major version, mm = minor version, rr = revision
+# This is needed to manually install the right version of librdkafka when we bump confluent-kafka
+# Thanks to this, the kerberos tests will be green even if the agent is still shipped with an older version
+# Bump them when you bump the confluent-kafka version
+LIBRDKAFKA_VERSION = "020300"
+CONFLUENT_KAFKA_VERSION = "2.3.0"
 
 [[envs.default.matrix]]
 python = ["3.9"]
@@ -30,3 +37,6 @@ matrix.auth.env-vars = "AUTHENTICATION"
 [envs.latest.env-vars]
 KAFKA_VERSION = "latest"
 ZK_VERSION = "3.6.4"
+# Bump them when you bump the confluent-kafka version
+LIBRDKAFKA_VERSION = "020300"
+CONFLUENT_KAFKA_VERSION = "2.3.0"

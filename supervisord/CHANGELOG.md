@@ -1,8 +1,8 @@
 # CHANGELOG - supervisord
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 2.5.2 / 2023-08-24
+## 2.5.2 / 2023-08-24 / Agent 7.48.0
 
 ***Fixed***:
 

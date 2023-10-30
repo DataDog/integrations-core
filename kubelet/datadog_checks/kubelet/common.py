@@ -4,6 +4,8 @@
 
 import re
 
+from kubeutil import get_connection_info
+
 from datadog_checks.base.utils.tagging import tagger
 
 try:
@@ -102,6 +104,15 @@ def get_container_label(labels, l_name):
     """
     if l_name in labels:
         return labels[l_name]
+
+
+def get_prometheus_url(default_url):
+    kubelet_conn_info = get_connection_info()
+    kubelet_conn_info = {} if kubelet_conn_info is None else kubelet_conn_info
+    error = kubelet_conn_info.get("err")
+    if error:
+        log.warning(error)
+    return kubelet_conn_info.get("url", default_url)
 
 
 class PodListUtils(object):

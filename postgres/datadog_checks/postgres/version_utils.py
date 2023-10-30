@@ -26,7 +26,7 @@ class VersionUtils(object):
 
     @staticmethod
     def get_raw_version(db):
-        with db.connection() as conn:
+        with db as conn:
             with conn.cursor() as cursor:
                 cursor.execute('SHOW SERVER_VERSION;')
                 raw_version = cursor.fetchone()[0]
@@ -35,17 +35,19 @@ class VersionUtils(object):
     def is_aurora(self, db):
         if self._seen_aurora_exception:
             return False
-        try:
-            with db.connection() as conn:
-                with conn.cursor() as cursor:
-                    # This query will pollute PG logs in non aurora versions,
-                    # but is the only reliable way to detect aurora
+        with db as conn:
+            with conn.cursor() as cursor:
+                # This query will pollute PG logs in non aurora versions,
+                # but is the only reliable way to detect aurora
+                try:
                     cursor.execute('select AURORA_VERSION();')
                     return True
-        except Exception as e:
-            self.log.debug("Captured exception %s while determining if the DB is aurora. Assuming is not", str(e))
-            self._seen_aurora_exception = True
-            return False
+                except Exception as e:
+                    self.log.debug(
+                        "Captured exception %s while determining if the DB is aurora. Assuming is not", str(e)
+                    )
+                    self._seen_aurora_exception = True
+                    return False
 
     @staticmethod
     def parse_version(raw_version):

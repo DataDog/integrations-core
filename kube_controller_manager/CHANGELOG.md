@@ -1,12 +1,14 @@
 # CHANGELOG - Kube_controller_manager
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 4.5.0 / 2023-09-29
 
 ***Added***:
 
 * Capture node_collector_evictions_total metric in kube controller manager ([#15737](https://github.com/DataDog/integrations-core/pull/15737))
 
-## 4.4.0 / 2023-08-10
+## 4.4.0 / 2023-08-10 / Agent 7.48.0
 
 ***Added***:
 

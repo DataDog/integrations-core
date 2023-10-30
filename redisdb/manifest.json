@@ -13,7 +13,7 @@
     "media": [],
     "classifier_tags": [
       "Category::Caching",
-      "Category::Data Store",
+      "Category::Data Stores",
       "Category::Log Collection",
       "Category::Tracing",
       "Supported OS::Linux",
@@ -45,9 +45,7 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": [
-        "redis-server"
-      ]
+      "process_signatures": ["redis-server"]
     },
     "dashboards": {
       "redis": "assets/dashboards/overview.json"

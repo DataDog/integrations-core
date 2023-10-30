@@ -60,6 +60,14 @@ APPLICATION_CONTROLLER = {
     'workqueue_work_duration_seconds': 'workqueue.work.duration.seconds',
 }
 
+APPSET_CONTROLLER = {
+    'controller_runtime_active_workers': 'active.workers',
+    'controller_runtime_max_concurrent_reconciles': 'max.concurrent.reconciles',
+    'controller_runtime_reconcile_errors_total': 'reconcile.errors.total',
+    'controller_runtime_reconcile_time_seconds': 'reconcile.time_seconds',
+    'controller_runtime_reconcile_total': 'runtime.reconcile.total',
+}
+
 API_SERVER = {
     'argocd_redis_request_duration': 'redis.request.duration',
     'grpc_server_handled': 'grpc.server.handled',
@@ -82,6 +90,7 @@ NOTIFICATIONS_CONTROLLER = {
 }
 
 APPLICATION_CONTROLLER_METRICS = [{**APPLICATION_CONTROLLER, **GENERAL_METRICS}]
+APPSET_CONTROLLER_METRICS = [{**APPSET_CONTROLLER, **GENERAL_METRICS}]
 API_SERVER_METRICS = [{**API_SERVER, **GENERAL_METRICS}]
 REPO_SERVER_METRICS = [{**REPO_SERVER, **GENERAL_METRICS}]
 NOTIFICATIONS_CONTROLLER_METRICS = [{**NOTIFICATIONS_CONTROLLER, **GENERAL_METRICS}]

@@ -1,8 +1,14 @@
 # CHANGELOG - Cilium
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 3.0.0 / 2023-08-10
+## 3.1.0 / 2023-10-26
+
+***Added***:
+
+* Add missing Azure metrics ([#16073](https://github.com/DataDog/integrations-core/pull/16073))
+
+## 3.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 

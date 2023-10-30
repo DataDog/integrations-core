@@ -76,7 +76,7 @@ cli = [
     "pip-tools",
     "pathspec>=0.10.0",
     "platformdirs>=2.0.0a3",
-    "pydantic>=2.0.2",
+    "pydantic>=2.0.2, <2.4.0",
     "pysmi>=0.3.4",
     "securesystemslib[crypto]==0.28.0",
     "semver>=2.13.0",
@@ -85,6 +85,8 @@ cli = [
     "tomli>=1.1.0",
     "tomli-w>=1.0.0",
     "tox>=3.12.1, <4.0.0",
+    # Move towncrier dependency to ddev once we migrate changelog-related commands.
+    "towncrier==23.10.0",
     "twine>=1.11.0",
     "virtualenv<20.22.0",
     # TODO: Remove once every check has a pyproject.toml
@@ -118,3 +120,6 @@ include = [
 dev-mode-dirs = [
     ".",
 ]
+
+[tool.pytest.ini_options]
+testpaths = "tests"

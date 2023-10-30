@@ -12,8 +12,7 @@
     "title": "Airbyte",
     "media": [],
     "classifier_tags": [
-      "Category::AI",
-      "Category::Machine Learning & LLM",
+      "Category::AI/ML",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS"

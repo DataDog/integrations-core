@@ -1,8 +1,16 @@
 # CHANGELOG - Kube_apiserver_metrics
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 4.0.0 / 2023-08-10
+## 4.1.0 / 2023-10-26
+
+***Added***:
+
+* Add etcd.db.total_size for Kubernetes 1.26, 1.27, and 1.28 ([#15940](https://github.com/DataDog/integrations-core/pull/15940))
+* Add apiserver_flowcontrol_current_inqueue_requests and apiserver_flowcontrol_dispatched_requests_total for Kubernetes >= 1.23 ([#15981](https://github.com/DataDog/integrations-core/pull/15981))
+* Add etcd_requests_total and etcd_request_errors_total for Kubernetes >= 1.28 ([#15986](https://github.com/DataDog/integrations-core/pull/15986))
+
+## 4.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 

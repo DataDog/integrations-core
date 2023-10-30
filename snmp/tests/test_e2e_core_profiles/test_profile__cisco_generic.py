@@ -9,6 +9,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
+    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     assert_extend_cisco_cpu_memory,
     assert_extend_generic_bgp4,
@@ -25,7 +26,8 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile__cisco_generic(dd_agent_check):
-    config = create_e2e_core_test_config('_cisco-generic')
+    profile = '_cisco-generic'
+    config = create_e2e_core_test_config(profile)
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -53,6 +55,7 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         ['fru:16'],
@@ -98,11 +101,15 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
             'snmp.cpmCPUTotalMonIntervalValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
-    aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.COUNT, tags=common_tags)
+    tag_rows = [
+        ['interface:le0'],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['temp_index:15', 'temp_state:6'],
-        ['temp_index:20', 'temp_state:2'],
+        ['temp_index:15', 'temp_state:not_functioning'],
+        ['temp_index:20', 'temp_state:warning'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -110,8 +117,8 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         )
 
     tag_rows = [
-        ['power_source:2', 'power_status_descr:kept Jaded oxen Jaded their'],
-        ['power_source:5', 'power_status_descr:their'],
+        ['power_source:ac', 'power_status_descr:kept Jaded oxen Jaded their'],
+        ['power_source:internal_redundant', 'power_status_descr:their'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -119,8 +126,8 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         )
 
     tag_rows = [
-        ['cisco_env_mon_supply_state:critical', 'power_source:5', 'power_status_descr:their'],
-        ['cisco_env_mon_supply_state:shutdown', 'power_source:2', 'power_status_descr:kept Jaded oxen Jaded their'],
+        ['cisco_env_mon_supply_state:critical', 'power_source:internal_redundant', 'power_status_descr:their'],
+        ['cisco_env_mon_supply_state:shutdown', 'power_source:ac', 'power_status_descr:kept Jaded oxen Jaded their'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -204,11 +211,10 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         aggregator.assert_metric(
             'snmp.ciscoMemoryPoolLargestFree', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-
-    aggregator.assert_metric('snmp.ciscoMemoryPoolUsed', metric_type=aggregator.GAUGE, tags=common_tags)
+        aggregator.assert_metric('snmp.ciscoMemoryPoolUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['connection_type:5'],
+        ['connection_type:current_half_open'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -235,8 +241,8 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         aggregator.assert_metric('snmp.cvsChassisUpTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['rtt_index:2'],
-        ['rtt_index:5'],
+        ['rtt_index:26', 'rtt_state:inactive', 'rtt_type:tcp_connect'],
+        ['rtt_index:30', 'rtt_state:orderly_stop', 'rtt_type:script'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -247,8 +253,8 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         )
 
     tag_rows = [
-        ['rtt_index:26', 'rtt_state:5'],
-        ['rtt_index:30', 'rtt_state:2', 'rtt_type:4'],
+        ['rtt_index:26', 'rtt_state:inactive', 'rtt_type:tcp_connect'],
+        ['rtt_index:30', 'rtt_state:orderly_stop', 'rtt_type:script'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -271,5 +277,6 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
+    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

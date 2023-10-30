@@ -112,6 +112,7 @@ class InstanceConfig(BaseModel):
     tls_validate_hostname: Optional[bool] = None
     tls_verify: Optional[bool] = None
     url: str
+    use_cert_from_response: Optional[bool] = None
     use_legacy_auth_encoding: Optional[bool] = None
     username: Optional[str] = None
 

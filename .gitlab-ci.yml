@@ -102,7 +102,7 @@ trigger-agent-build:
 validate-agent-build:
   stage: validate
   image: $VALIDATE_AGENT_BUILD
-  timeout: 2 hours
+  timeout: 3 hours
   cache:
     <<: *slack-cache
   script:
@@ -125,7 +125,7 @@ validate-agent-build:
           echo $BUILD_SUCCESS
           if [[ "$BUILD_SUCCESS" = "true" ]]; then
               echo "Agent build was successful!"
-              postmessage "$SLACK_AUTHOR" "Build was successful, you can merge your PR!" success
+              postmessage "$SLACK_AUTHOR" "Build ${CI_JOB_URL} was successful, you can merge your PR!" success
           else
               echo "Agent build failed."
               postmessage "$SLACK_AUTHOR" "The build failed, you might want to retry this job: ${CI_JOB_URL}" alert
@@ -169,7 +169,7 @@ notify-failed-pipeline:
   script:
     - export SLACK_CACHE_DIR="${PWD}/.slack-cache"
     - |
-      MESSAGE="The pipeline encountered an unexpected error."
+      MESSAGE="The pipeline encountered an unexpected error in job $CI_JOB_NAME. Please investigate $CI_JOB_URL for errors."
       postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
   tags: [ "runner:main" ]
 

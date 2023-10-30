@@ -1,12 +1,18 @@
 # CHANGELOG - vsphere
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 7.1.0 / 2023-09-29
+
+***Added***:
+
+* Decouple resource groups and collection type ([#15670](https://github.com/DataDog/integrations-core/pull/15670))
 
 ***Fixed***:
 
 * Add ability to filter property metrics ([#15474](https://github.com/DataDog/integrations-core/pull/15474))
 
-## 7.0.0 / 2023-08-10
+## 7.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 

@@ -1,20 +1,54 @@
 # CHANGELOG - sqlserver
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 15.1.0 / 2023-10-26
+
+***Added***:
+
+* Add support for reporting SQL obfuscation errors ([#15990](https://github.com/DataDog/integrations-core/pull/15990))
+* Emit SQLServer metrics queries operation time ([#16066](https://github.com/DataDog/integrations-core/pull/16066))
+
+***Fixed***:
+
+* Properly decode query_hash when statement_text is None ([#15974](https://github.com/DataDog/integrations-core/pull/15974))
+* Strip sql comments before parsing procedure name ([#16004](https://github.com/DataDog/integrations-core/pull/16004))
+* Bump the `pyodbc` version to 5.0.1 ([#16041](https://github.com/DataDog/integrations-core/pull/16041))
+* Fix config option `dbm_enabled` type to ensure it is a boolean ([#16078](https://github.com/DataDog/integrations-core/pull/16078))
+
+## 15.0.1 / 2023-10-06
+
+***Fixed***
+
+* Set stored procedure collection to `run_sync=False`, fixing the delay in collection of other SQLServer telemetry. ([#15967](https://github.com/DataDog/integrations-core/pull/15967))
+
+## 15.0.0 / 2023-09-29
 
 ***Changed***:
 
 * Cache performance counter type to prevent querying for the same counter multiple times (especially for the per-db counters) ([#15714](https://github.com/DataDog/integrations-core/pull/15714))
+* Add the `db` tag to every metric also using `database` or `database_name` for consistency ([#15792](https://github.com/DataDog/integrations-core/pull/15792))
+* Updates the namespace for version store performance metrics added in ([#15879](https://github.com/DataDog/integrations-core/pull/15879)) to be `sqlserver.transactions.xyz`. ([#15904](https://github.com/DataDog/integrations-core/pull/15904))
+* Updates metric documentation in `metadata.csv` to add performance counter information when applicable, and provide a more complete description of available tags per metric. ([15840](https://github.com/DataDog/integrations-core/pull/15840))
 
 ***Added***:
 
+* Only collect `SqlDbFileSpaceUsage` metrics for `tempdb` ([#15906](https://github.com/DataDog/integrations-core/pull/15906))
+* Add TempDB version store performance counters ([#15879](https://github.com/DataDog/integrations-core/pull/15879))
+* Add TempDB page counts metrics ([#15873](https://github.com/DataDog/integrations-core/pull/15873))
 * Add `index_name` tag to `.database.avg_fragmentation_in_percent`, `.database.fragment_count`, `.database.avg_fragment_size_in_pages` metrics. Also add a new metric `sqlserver.database.index_page_count`, tagged by `database_name`, `object_name`, `index_id` and `index_name`. ([#15721](https://github.com/DataDog/integrations-core/pull/15721))
+* When DBM is enabled, starts collecting stored procedure metrics from sys.dm_exec_procedure_stats at 60s interval (configurable). Also adds the corresponding `procedure_metrics` section to the config file. The new DBM-only metrics are `sqlserver.procedures.count`, `sqlserver.procedures.time`, `sqlserver.procedures.worker_time`, `sqlserver.procedures.physical_reads`, `sqlserver.procedures.logical_reads`, `sqlserver.procedures.logical_writes` and `sqlserver.procedures.spills`. ([#15805](https://github.com/DataDog/integrations-core/pull/15805))
+* Add additional SQL Server performance counter metrics ([#15818](https://github.com/DataDog/integrations-core/pull/15818))
+* Add Index Usage Metrics for SQL Server ([#15905](https://github.com/DataDog/integrations-core/pull/15905))
 
 ***Fixed***:
 
+* Restore the logic for the lookback time in the statement metrics query. It was previously the connection interval * 2, but was removed during a refactor. ([#15857](https://github.com/DataDog/integrations-core/pull/15857))
+* Fix type `bytes` is not JSON serializable for dbm events ([#15763](https://github.com/DataDog/integrations-core/pull/15763))
 * Fix sqlserver file stats metrics for Azure SQL DB ([#15695](https://github.com/DataDog/integrations-core/pull/15695))
+* Fix calculation for performance counters that require a corresponding [base counter type](https://learn.microsoft.com/en-us/windows/win32/wmisdk/base-counter-types) which were previously emitting a constant 100% value (such as `sqlserver.buffer.cache_hit_ratio`). ([#15846](https://github.com/DataDog/integrations-core/pull/15846))
 
-## 14.0.0 / 2023-08-18
+## 14.0.0 / 2023-08-18 / Agent 7.48.0
 
 ***Changed***:
 

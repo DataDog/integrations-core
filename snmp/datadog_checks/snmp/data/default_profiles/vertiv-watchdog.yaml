@@ -15,11 +15,11 @@ metrics:
       - OID: 1.3.6.1.4.1.21239.5.1.2.1.7
         name: vertiv.internalDewPoint
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.21239.5.1.2.1.2
           name: vertiv.internalSerial
         tag: vertiv_internal_serial
-#      - column:
+#      - symbol:
 #          OID: 1.3.6.1.4.1.21239.5.1.1.7.0
 #          name: vertiv.temperatureUnits
 #        tag: vertiv_temperature_units
@@ -27,7 +27,7 @@ metrics:
 #          0: fahrenheit
 #          1: celsius
 # TODO : Add this tag back when tagging by scalar symbol is implemented NDM-2247
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.21239.5.1.2.1.4
           name: vertiv.internalAvail
         tag: vertiv_internal_avail
@@ -44,15 +44,15 @@ metrics:
       - OID: 1.3.6.1.4.1.21239.5.1.4.1.5
         name: vertiv.tempSensorTemp
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.21239.5.1.4.1.2
           name: vertiv.tempSensorSerial
         tag: vertiv_temp_sensor_serial
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.21239.5.1.4.1.3
-          name: vertiv.tempSensorName
-        tag: vertiv_temp_sensor_name
-      - column:
+          name: vertiv.tempSensorLabel
+        tag: vertiv_temp_sensor_label
+      - symbol:
           OID: 1.3.6.1.4.1.21239.5.1.4.1.4
           name: vertiv.tempSensorAvail
         tag: vertiv_temp_sensor_avail

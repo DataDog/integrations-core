@@ -1,8 +1,8 @@
 # CHANGELOG - Weaviate
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 2.1.0 / 2023-08-18
+## 2.1.0 / 2023-08-18 / Agent 7.48.0
 
 ***Added***:
 

@@ -16,14 +16,14 @@ The core premise is that you define a function that accepts a query (usually a `
 
 All the functionality is exposed by the `Query` and `QueryManager` classes.
 
-::: datadog_checks.base.utils.db.Query
+::: datadog_checks.base.utils.db.query.Query
     options:
       heading_level: 3
       members:
         - __init__
         - compile
 
-::: datadog_checks.base.utils.db.QueryManager
+::: datadog_checks.base.utils.db.core.QueryManager
     options:
       heading_level: 3
       members:

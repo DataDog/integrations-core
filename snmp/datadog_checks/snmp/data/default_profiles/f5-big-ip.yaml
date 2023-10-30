@@ -104,7 +104,7 @@ metrics:
       - OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.11
         name: sysMultiHostCpuUsageRatio
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.3
           name: sysMultiHostCpuId
         tag: cpu
@@ -129,7 +129,7 @@ metrics:
       - OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.10
         name: sysMultiHostCpuIowait
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.3
           name: sysMultiHostCpuId
         tag: cpu
@@ -252,7 +252,7 @@ metrics:
         name: ltmVirtualServConnLimit
     metric_tags:
       - tag: server
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.10.1.2.1.1
           name: ltmVirtualServName
 
@@ -266,7 +266,7 @@ metrics:
         constant_value_one: true
     metric_tags:
       - tag: ltm_vs_status_avail_state
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.10.13.2.1.2
           name: ltmVsStatusAvailState
         mapping:
@@ -277,11 +277,11 @@ metrics:
           4: blue
           5: gray
       - tag: ltm_vs_status_name
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.10.13.2.1.1
           name: ltmVsStatusName
       - tag: ltm_vs_status_enabled_state
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.10.13.2.1.3
           name: ltmVsStatusEnabledState
         mapping:
@@ -318,7 +318,7 @@ metrics:
         name: ltmVirtualServStatDurationRateExceeded
     metric_tags:
       - tag: server
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.10.2.3.1.1
           name: ltmVirtualServStatName
 
@@ -340,7 +340,7 @@ metrics:
     metric_type: monotonic_count
     metric_tags:
       - tag: server
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.10.2.3.1.1
           name: ltmVirtualServStatName
 
@@ -371,7 +371,7 @@ metrics:
         name: ltmNodeAddrSessionStatus
     metric_tags:
       - tag: node
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.4.1.2.1.17
           name: ltmNodeAddrName
 
@@ -385,11 +385,11 @@ metrics:
         constant_value_one: true
     metric_tags:
       - tag: node
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.4.1.2.1.17
           name: ltmNodeAddrName
       - tag: monitor_state
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.4.1.2.1.6
           name: ltmNodeAddrMonitorState
         mapping:
@@ -409,7 +409,7 @@ metrics:
           28: fqdn_up
           29: fqdn_up_no_address
       - tag: monitor_status
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.4.1.2.1.7
           name: ltmNodeAddrMonitorStatus
         mapping:
@@ -454,7 +454,7 @@ metrics:
         name: ltmNodeAddrStatDurationRateExceeded
     metric_tags:
       - tag: node
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.4.2.3.1.20
           name: ltmNodeAddrStatNodeName
 
@@ -470,7 +470,7 @@ metrics:
     metric_type: monotonic_count
     metric_tags:
       - tag: node
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.4.2.3.1.20
           name: ltmNodeAddrStatNodeName
 
@@ -495,7 +495,7 @@ metrics:
         name: ltmPoolMemberCnt
     metric_tags:
       - tag: pool
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.1
           name: ltmPoolName
 
@@ -524,7 +524,7 @@ metrics:
         name: ltmPoolStatCurSessions
     metric_tags:
       - tag: pool
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.1
           name: ltmPoolStatName
 
@@ -542,7 +542,7 @@ metrics:
     metric_type: monotonic_count
     metric_tags:
       - tag: pool
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.1
           name: ltmPoolStatName
 
@@ -573,11 +573,11 @@ metrics:
         name: ltmPoolMemberSessionStatus
     metric_tags:
       - tag: pool
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.5.3.2.1.1
           name: ltmPoolMemberPoolName
       - tag: node
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.5.3.2.1.19
           name: ltmPoolMemberNodeName
 
@@ -591,15 +591,15 @@ metrics:
         constant_value_one: true
     metric_tags:
       - tag: pool
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.5.3.2.1.1
           name: ltmPoolMemberPoolName
       - tag: node
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.5.3.2.1.19
           name: ltmPoolMemberNodeName
       - tag: monitor_state
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.5.3.2.1.10
           name: ltmPoolMemberMonitorState
         mapping:
@@ -643,11 +643,11 @@ metrics:
         name: ltmPoolMemberStatDurationRateExceeded
     metric_tags:
       - tag: pool
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.1
           name: ltmPoolMemberStatPoolName
       - tag: node
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.28
           name: ltmPoolMemberStatNodeName
 
@@ -665,10 +665,10 @@ metrics:
     metric_type: monotonic_count
     metric_tags:
       - tag: pool
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.1
           name: ltmPoolMemberStatPoolName
       - tag: node
-        column:
+        symbol:
           OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.28
           name: ltmPoolMemberStatNodeName

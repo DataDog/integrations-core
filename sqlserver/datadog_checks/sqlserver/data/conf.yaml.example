@@ -37,10 +37,10 @@ init_config:
 instances:
 
     ## @param host - string - required
-    ## Host and port of your SQL server. If a port is ommitted, a default port of 1433 will be used. 
+    ## Host and port of your SQL server. If a port is ommitted, a default port of 1433 will be used.
     ## If you use Sql Server Browser Service or a similar port autodiscovery service, pass in a port
-    ## of 0 to omit port from your connection string. This should allow SSBS to autodiscover the 
-    ## correct database port. 
+    ## of 0 to omit port from your connection string. This should allow SSBS to autodiscover the
+    ## correct database port.
     #
   - host: <HOST>,<PORT>
 
@@ -55,7 +55,7 @@ instances:
     # password: <PASSWORD>
 
     ## @param server_version - string - optional - default: 2014
-    ## Server version year of sqlserver the agent will connect to. 
+    ## Server version year of sqlserver the agent will connect to.
     ## Important for validating connection string attributes for older sqlserver versions.
     ##
     ## This is required if connecting to a SQLServer instance older than 2014.
@@ -74,7 +74,7 @@ instances:
     # reported_hostname: <REPORTED_HOSTNAME>
 
     ## @param database_autodiscovery - boolean - optional - default: false
-    ## Auto-discover and monitor databases. Supported for the metrics check. 
+    ## Auto-discover and monitor databases. Supported for the metrics check.
     ## If `true`, overrides `database` option.
     ## Can be combined with `autodiscovery_include` and `autodiscovery_exclude` options.
     #
@@ -105,6 +105,8 @@ instances:
     # autodiscovery_exclude:
     #   - model
     #   - msdb
+    #   - model_replicatedmaster
+    #   - model_msdb
 
     ## @param database_autodiscovery_interval - integer - optional - default: 3600
     ## Frequency in seconds of scans for new databases.  Defaults to `3600`.
@@ -171,12 +173,25 @@ instances:
     #
     # include_db_fragmentation_metrics: false
 
+    ## @param include_index_usage_metrics - boolean - optional - default: true
+    ## Configure the collection of user table index usage statistics from the `sys.dm_db_index_usage_stats` DMV.
+    ##
+    ## Because the `sys.dm_db_index_usage_stats` view is scoped to the current database, enable 
+    ## `database_autodiscovery` or set `database`.
+    #
+    # include_index_usage_metrics: true
+
     ## @param db_fragmentation_object_names - list of strings - optional
     ## Fragmentation metrics normally emit metrics for all objects within a database.
     ## This option allows you to specify database object names to query for fragmentation metrics.
     ## Note: Each object name is unique to each database.
     #
     # db_fragmentation_object_names: []
+
+    ## @param include_tempdb_file_space_usage_metrics - boolean - optional - default: true
+    ## Include tempdb file space usage metrics for how space is used in tempdb data files. 
+    #
+    # include_tempdb_file_space_usage_metrics: true
 
     ## @param adoprovider - string - optional - default: SQLOLEDB
     ## Choose the ADO provider.  Note that the (default) provider
@@ -264,6 +279,28 @@ instances:
         #
         # samples_per_hour_per_query: 4
 
+    ## Configure collection of procedure metrics
+    #
+    # procedure_metrics:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of procedure metrics. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 60
+        ## Set the procedure metric collection interval (in seconds). Each collection involves one query to
+        ## sys.dm_exec_procedure_stats. If a non-default value is chosen then that exact same value must
+        ## be used for *every* check instance. Running different instances with different collection intervals
+        ## is not supported.
+        #
+        # collection_interval: 60
+
+        ## @param dm_exec_procedure_stats_row_limit - integer - optional - default: 10000
+        ## Set the maximum number of procedure stats rows that can be retrieved in a single check run.
+        #
+        # dm_exec_procedure_stats_row_limit: 10000
+
     ## Configure collection of active sessions monitoring
     #
     # query_activity:
@@ -281,10 +318,10 @@ instances:
         #
         # collection_interval: 10
 
-    ## This block defines the configuration for AWS RDS and Aurora instances. 
+    ## This block defines the configuration for AWS RDS and Aurora instances.
     ##
-    ## Complete this section if you have installed the Datadog AWS Integration 
-    ## (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances 
+    ## Complete this section if you have installed the Datadog AWS Integration
+    ## (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances
     ## with SQL Server integration telemetry.
     ##
     ## These values are only applied when `dbm: true` option is set.
@@ -292,18 +329,18 @@ instances:
     # aws:
 
         ## @param instance_endpoint - string - optional - default: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
-        ## Equal to the Endpoint.Address of the instance the agent is connecting to. 
+        ## Equal to the Endpoint.Address of the instance the agent is connecting to.
         ## This value is optional if the value of `host` is already configured to the instance endpoint.
         ##
-        ## For more information on instance endpoints, 
+        ## For more information on instance endpoints,
         ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
         #
         # instance_endpoint: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
 
     ## This block defines the configuration for Google Cloud SQL instances.
     ##
-    ## Complete this section if you have installed the Datadog GCP Integration 
-    ## (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances 
+    ## Complete this section if you have installed the Datadog GCP Integration
+    ## (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances
     ## with SQL Server integration telemetry.
     ##
     ## These values are only applied when `dbm: true` option is set.
@@ -326,11 +363,11 @@ instances:
         #
         # instance_id: foo-database
 
-    ## This block defines the configuration for Azure Managed Instance, Azure SQL Database or 
+    ## This block defines the configuration for Azure Managed Instance, Azure SQL Database or
     ## SQLServer on Virtual Machines.
     ##
-    ## Complete this section if you have installed the Datadog Azure Integration 
-    ## (https://docs.datadoghq.com/integrations/azure) to enrich instances 
+    ## Complete this section if you have installed the Datadog Azure Integration
+    ## (https://docs.datadoghq.com/integrations/azure) to enrich instances
     ## with SQL Server integration telemetry.
     ##
     ## These values are only applied when `dbm: true` option is set.
@@ -338,10 +375,10 @@ instances:
     # azure:
 
         ## @param deployment_type - string - optional - default: sql_database
-        ## Equal to the deployment type for the managed database. 
+        ## Equal to the deployment type for the managed database.
         ##
         ## Acceptable values are:
-        ##   - `sql_database` 
+        ##   - `sql_database`
         ##   - `managed_instance`
         ##   - `virtual_machine`
         ##

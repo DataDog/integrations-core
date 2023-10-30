@@ -4,10 +4,11 @@
 from __future__ import annotations
 
 import os
+from functools import cached_property
 from typing import cast
 
 from ddev.cli.terminal import Terminal
-from ddev.config.constants import AppEnvVars, VerbosityLevels
+from ddev.config.constants import AppEnvVars, ConfigEnvVars, VerbosityLevels
 from ddev.config.file import ConfigFile, RootConfig
 from ddev.repo.core import Repository
 from ddev.utils.fs import Path
@@ -18,7 +19,7 @@ from ddev.utils.platform import Platform
 class Application(Terminal):
     def __init__(self, exit_func, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.platform = Platform(self.display_raw)
+        self.platform = Platform(self.output)
         self.__exit_func = exit_func
 
         self.config_file = ConfigFile()
@@ -39,6 +40,12 @@ class Application(Terminal):
     @property
     def repo(self) -> Repository:
         return self.__repo
+
+    @cached_property
+    def data_dir(self) -> Path:
+        from platformdirs import user_data_dir
+
+        return Path(os.getenv(ConfigEnvVars.DATA) or user_data_dir('ddev', appauthor=False)).expand()
 
     @property
     def github(self) -> GitHubManager:
@@ -87,8 +94,13 @@ class Application(Terminal):
         self.__config['color'] = not self.console.no_color
         self.__config['dd_api_key'] = self.config.orgs.get('default', {}).get('api_key', '')
         self.__config['dd_app_key'] = self.config.orgs.get('default', {}).get('app_key', '')
-
-        kwargs = {'here' if self.repo.name == 'local' else self.repo.name: True}
+        # Make sure that envvar overrides of repo make it into config.
+        self.__config['repo'] = self.repo.name
+        # Transfer the -x/--here flag to the old CLI.
+        # In the new CLI that flag turns into a repo named "local" but the old CLI expects a bool kwarg "here".
+        kwargs = {}
+        if self.repo.name == 'local':
+            kwargs['here'] = True
         initialize_root(self.__config, **kwargs)
 
     def copy(self):

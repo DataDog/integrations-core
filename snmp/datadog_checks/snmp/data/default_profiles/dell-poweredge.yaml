@@ -53,7 +53,7 @@ metrics:
       - OID: 1.3.6.1.4.1.674.10892.1.200.10.1.50
         name: systemStateProcessorDeviceStatusCombined
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.200.10.1.1
           name: systemStatechassisIndex
         tag: chassis_index
@@ -65,7 +65,7 @@ metrics:
       - name: systemState
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.200.10.1.9
           name: systemStatePowerSupplyStatusCombined
         tag: system_state_power_supply_status_combined
@@ -76,7 +76,7 @@ metrics:
           4: non_critical
           5: critical
           6: non_recoverable
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.200.10.1.1
           name: systemStatechassisIndex
         tag: chassis_index
@@ -96,7 +96,7 @@ metrics:
       - OID: 1.3.6.1.4.1.674.10892.1.400.20.1.10
         name: operatingSystemMemoryAvailableVirtualSize
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.400.20.1.1
           name: operatingSystemMemorychassisIndex
         tag: chassis_index
@@ -110,15 +110,15 @@ metrics:
       - OID: 1.3.6.1.4.1.674.10892.1.600.50.1.6
         name: batteryReading
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.600.50.1.1
           name: batteryChassisIndex
         tag: chassis_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.600.50.1.2
           name: batteryIndex
         tag: battery_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.600.50.1.7
           name: batteryLocationName
         tag: battery_location_name
@@ -130,11 +130,11 @@ metrics:
       - OID: 1.3.6.1.4.1.674.10892.1.1100.80.1.5
         name: pCIDeviceStatus
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.1100.80.1.9
           name: pCIDeviceDescriptionName
         tag: device_descr_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.1100.80.1.1
           name: pCIDevicechassisIndex
         tag: chassis_index
@@ -146,11 +146,11 @@ metrics:
       - OID: 1.3.6.1.4.1.674.10892.1.300.50.1.5
         name: systemBIOSStatus
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.300.50.1.1
           name: systemBIOSchassisIndex
         tag: chassis_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.300.50.1.2
           name: systemBIOSIndex
         tag: system_bios_index
@@ -164,15 +164,15 @@ metrics:
       - OID: 1.3.6.1.4.1.674.10892.1.300.70.1.6
         name: intrusionReading
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.300.70.1.1
           name: intrusionchassisIndex
         tag: chassis_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.300.70.1.2
           name: intrusionIndex
         tag: intrusion_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.300.70.1.8
           name: intrusionLocationName
         tag: intrusion_location_name
@@ -186,18 +186,38 @@ metrics:
       - OID: 1.3.6.1.4.1.674.10892.1.600.20.1.6
         name: voltageProbeReading
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.600.20.1.1
           name: voltageProbechassisIndex
         tag: chassis_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.600.20.1.2
           name: voltageProbeIndex
         tag: voltage_probe_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.600.20.1.7
           name: voltageProbeType
         tag: probe_type
+        mapping:
+            1: voltage_probe_type_is_other
+            2: voltage_probe_type_is_unknown
+            3: voltage_probe_type_is_1point5_volt   # 1.5 volt
+            4: voltage_probe_type_is_3point3_volt   # 3.3 volt
+            5: voltage_probe_type_is_5_volt         # 5 volt
+            6: voltage_probe_type_is_minus5_volt    # -5 volt
+            7: voltage_probe_type_is_12_volt        # 12 volt
+            8: voltage_probe_type_is_minus12_volt   # -12 volt
+            9: voltage_probe_type_is_io
+            10: voltage_probe_type_is_core
+            11: voltage_probe_type_is_flea
+            12: voltage_probe_type_is_battery
+            13: voltage_probe_type_is_terminator
+            14: voltage_probe_type_is_2point5_volt  # 2.5 volt
+            15: voltage_probe_type_is_gtl
+            16: voltage_probe_type_is_discrete
+            17: voltage_probe_type_is_generic_discrete
+            18: voltage_probe_type_is_ps_voltage
+            19: voltage_probe_type_is_memory_status
   - MIB: MIB-Dell-10892
     table:
       OID: 1.3.6.1.4.1.674.10892.1.600.30
@@ -208,15 +228,36 @@ metrics:
       - OID: 1.3.6.1.4.1.674.10892.1.600.30.1.6
         name: amperageProbeReading
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.600.30.1.7
           name: amperageProbeType
         tag: probe_type
-      - column:
+        mapping:
+            1: amperage_probe_type_is_other
+            2: amperage_probe_type_is_unknown
+            3: amperage_probe_type_is_1point5_volt    # 1.5 volt
+            4: amperage_probe_type_is_3point3_volt    # 3.3 volt
+            5: amperage_probe_type_is_5_volt          # 5 volt
+            6: amperage_probe_type_is_minus5_volt     # -5 volt
+            7: amperage_probe_type_is_12_volt         # 12 volt
+            8: amperage_probe_type_is_minus12_volt    # -12 volt
+            9: amperage_probe_type_is_io
+            10: amperage_probe_type_is_core
+            11: amperage_probe_type_is_flea
+            12: amperage_probe_type_is_battery
+            13: amperage_probe_type_is_terminator
+            14: amperage_probe_type_is_2point5_volt   # 2.5 volt
+            15: amperage_probe_type_is_gtl
+            16: amperage_probe_type_is_discrete
+            23: amperage_probe_type_is_power_supply_amps
+            24: amperage_probe_type_is_power_supply_watts
+            25: amperage_probe_type_is_system_amps
+            26: amperage_probe_type_is_system_watts
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.600.30.1.1
           name: amperageProbechassisIndex
         tag: chassis_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.600.30.1.2
           name: amperageProbeIndex
         tag: amperage_probe_index
@@ -235,11 +276,11 @@ metrics:
       - OID: 1.3.6.1.4.1.674.10892.1.600.12.1.16
         name: powerSupplyCurrentInputVoltage
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.600.12.1.1
           name: powerSupplychassisIndex
         tag: chassis_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.600.12.1.2
           name: powerSupplyIndex
         tag: index
@@ -251,15 +292,15 @@ metrics:
       - OID: 1.3.6.1.4.1.674.10892.1.600.60.1.5
         name: powerUsageStatus
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.600.60.1.1
           name: powerUsageChassisIndex
         tag: chassis_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.600.60.1.2
           name: powerUsageIndex
         tag: power_usage_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.600.60.1.6
           name: powerUsageEntityName
         tag: power_usage_entity_name
@@ -273,15 +314,15 @@ metrics:
       - OID: 1.3.6.1.4.1.674.10892.1.700.10.1.8
         name: coolingUnitStatus
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.700.10.1.1
           name: coolingUnitchassisIndex
         tag: chassis_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.700.10.1.2
           name: coolingUnitIndex
         tag: cooling_unit_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.700.10.1.7
           name: coolingUnitName
         tag: cooling_unit_name
@@ -297,19 +338,31 @@ metrics:
       - OID: 1.3.6.1.4.1.674.10892.1.700.12.1.18
         name: coolingDeviceDiscreteReading
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.700.12.1.1
           name: coolingDevicechassisIndex
         tag: chassis_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.700.12.1.2
           name: coolingDeviceIndex
         tag: cooling_device_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.700.12.1.7
           name: coolingDeviceType
         tag: cooling_device_type
-      - column:
+        mapping:
+          1: cooling_device_type_is_other
+          2: cooling_device_type_is_unknown
+          3: cooling_device_type_is_a_fan
+          4: cooling_device_type_is_a_blower
+          5: cooling_device_type_is_a_chip_fan
+          6: cooling_device_type_is_a_cabinet_fan
+          7: cooling_device_type_is_a_power_supply_fan
+          8: cooling_device_type_is_a_heat_pipe
+          9: cooling_device_type_is_refrigeration
+          10: cooling_device_type_is_active_cooling
+          11: cooling_device_type_is_passive_cooling
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.700.12.1.8
           name: coolingDeviceLocationName
         tag: cooling_device_location_name
@@ -324,19 +377,24 @@ metrics:
       - OID: 1.3.6.1.4.1.674.10892.1.700.20.1.6
         name: temperatureProbeReading
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.700.20.1.1
           name: temperatureProbechassisIndex
         tag: chassis_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.700.20.1.2
           name: temperatureProbeIndex
         tag: index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.700.20.1.7
           name: temperatureProbeType
         tag: temperature_probe_type
-      - column:
+        mapping:
+          1: temperature_probe_type_is_other
+          2: temperature_probe_type_is_unknown
+          3: temperature_probe_type_is_ambient_esm
+          16: temperature_probe_type_is_discrete
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.700.20.1.8
           name: temperatureProbeLocationName
         tag: temperature_probe_location_name
@@ -351,11 +409,11 @@ metrics:
       - OID: 1.3.6.1.4.1.674.10892.1.1100.30.1.19
         name: processorDeviceThreadCount
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.1100.30.1.1
           name: processorDevicechassisIndex
         tag: chassis_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.1100.30.1.2
           name: processorDeviceIndex
         tag: index
@@ -369,15 +427,15 @@ metrics:
       - OID: 1.3.6.1.4.1.674.10892.1.1100.32.1.6
         name: processorDeviceStatusReading
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.1100.32.1.1
           name: processorDeviceStatusChassisIndex
         tag: chassis_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.1100.32.1.2
           name: processorDeviceStatusIndex
         tag: processor_device_status_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.1100.32.1.7
           name: processorDeviceStatusLocationName
         tag: processor_device_status_location_name
@@ -394,11 +452,11 @@ metrics:
       - OID: 1.3.6.1.4.1.674.10892.1.1100.40.1.13
         name: cacheDeviceCurrentSize
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.1100.40.1.1
           name: cacheDevicechassisIndex
         tag: chassis_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.1100.40.1.2
           name: cacheDeviceIndex
         tag: index
@@ -420,15 +478,15 @@ metrics:
         # (8) -- ECC single bit correction logging disabled
         # (16) -- device disabled because of spare activation
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.1100.50.1.1
           name: memoryDevicechassisIndex
         tag: chassis_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.5.4.1100.50.1.2
           name: memoryDeviceIndex
         tag: device_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.1100.50.1.23
           name: memoryDeviceSerialNumberName
         tag: serial_number_name
@@ -441,7 +499,7 @@ metrics:
       - OID: 1.3.6.1.4.1.674.10892.1.1100.90.1.3
         name: networkDeviceStatus
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.1100.90.1.11
           name: networkDeviceIPAddress
         tag: ip_address
@@ -453,11 +511,11 @@ metrics:
       - OID: 1.3.6.1.4.1.674.10892.1.1200.10.1.5
         name: systemSlotStatus
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.1200.10.1.8
           name: systemSlotSlotExternalSlotName
         tag: slot_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.1200.10.1.1
           name: systemSlotchassisIndex
         tag: chassis_index
@@ -469,11 +527,11 @@ metrics:
       - OID: 1.3.6.1.4.1.674.10892.1.2000.10.1.3
         name: fruInformationStatus
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.2000.10.1.1
           name: fruChassisIndex
         tag: chassis_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.674.10892.1.2000.10.1.2
           name: fruIndex
         tag: fru_index
