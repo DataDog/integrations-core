@@ -335,7 +335,7 @@ def test_activity_metrics_no_application_aggregation(aggregator, integration_che
 
 def test_activity_metrics_no_aggregations(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
-    # datname is a required aggregation because our activity metric query is always grouping by database id. 
+    # datname is a required aggregation because our activity metric query is always grouping by database id.
     # Setting it should issue a warning, be ignored and still produce an aggregation by db
     pg_instance['activity_metrics_excluded_aggregations'] = ['datname', 'application_name', 'usename']
     check = integration_check(pg_instance)
@@ -547,7 +547,7 @@ def test_wal_metrics(aggregator, integration_check, pg_instance, is_aurora):
     expected_wal_size = expected_num_wals * wal_size
     dd_agent_tags = _get_expected_tags(check, pg_instance)
     aggregator.assert_metric('postgresql.wal_count', count=1, value=expected_num_wals, tags=dd_agent_tags)
-    aggregator.assert_metric('postgresql.wal_size', count=1, value=expected_wal_size, tags=dd_agent_tags)    
+    aggregator.assert_metric('postgresql.wal_size', count=1, value=expected_wal_size, tags=dd_agent_tags)
 
 
 def test_pg_control(aggregator, integration_check, pg_instance):
