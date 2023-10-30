@@ -140,7 +140,6 @@ LOG_SHIPPING_SECONDARY = {
 }
 
 
-
 def get_query_ao_availability_groups(sqlserver_major_version):
     """
     Construct the sys.availability_groups QueryExecutor configuration based on the SQL Server major version
