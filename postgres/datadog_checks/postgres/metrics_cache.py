@@ -203,6 +203,10 @@ class PostgresMetricsCache:
             default_descriptors = [('application_name', 'app'), ('datname', 'db'), ('usename', 'user')]
             default_aggregations = [d[0] for d in default_descriptors]
 
+            if 'datname' in excluded_aggregations:
+                excluded_aggregations.remove('datname')
+                logger.warning("datname is a required aggregation but was set in activity_metrics_excluded_aggregations. Ignoring it and using the following instead: %s", excluded_aggregations)                
+            
             aggregation_columns = [a for a in default_aggregations if a not in excluded_aggregations]
             descriptors = [d for d in default_descriptors if d[0] not in excluded_aggregations]
 

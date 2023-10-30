@@ -335,7 +335,9 @@ def test_activity_metrics_no_application_aggregation(aggregator, integration_che
 
 def test_activity_metrics_no_aggregations(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
-    pg_instance['activity_metrics_excluded_aggregations'] = ['application_name', 'usename']
+    # datname is a required aggregation because our activity metric query is always grouping by database id. 
+    # Setting it should issue a warning, be ignored and still produce an aggregation by db
+    pg_instance['activity_metrics_excluded_aggregations'] = ['datname', 'application_name', 'usename']
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
