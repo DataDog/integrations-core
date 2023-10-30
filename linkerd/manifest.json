@@ -37,7 +37,10 @@
       },
       "metrics": {
         "prefix": "linkerd.",
-        "check": "linkerd.prometheus.health",
+        "check": [
+          "linkerd.prometheus.health",
+          "linkerd.openmetrics.health"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
