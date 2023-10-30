@@ -292,6 +292,44 @@ def test_trigger_count_failure(aggregator, check, instance_trigger_start, caplog
         assert 'OSError: [WinError 1] Incorrect function' in caplog.text
 
 
+def test_name_regex_order(aggregator, check, instance_name_regex_prefix):
+    """
+    This helps us check that we handle an issue that results from configs like the following
+    services:
+        - foobar
+        - foobarbaz
+    Since the name regex is executed as a PREFIX match, `foobar` will match for both `foobar` and `foobarbaz`.
+    This sends a status metric for both/all services that match.
+    Since the service patterns are "first come first serve", now `foobarbaz` pattern does not match
+    any of the remaining services, and will report UNKNOWN.
+    Sorting in reverse order puts the more specific (longer) prefix first.
+    See https://github.com/DataDog/integrations-core/pull/4503
+    """
+    c = check(instance_name_regex_prefix)
+    c.check(instance_name_regex_prefix)
+
+    # More specific names should match
+    aggregator.assert_service_check(
+        WindowsService.SERVICE_CHECK_NAME,
+        status=WindowsService.OK,
+        tags=['windows_service:EventLog'],
+        count=1,
+    )
+    aggregator.assert_service_check(
+        WindowsService.SERVICE_CHECK_NAME,
+        status=WindowsService.OK,
+        tags=['windows_service:EventSystem'],
+        count=1,
+    )
+    # The prefix match should go unmatched, even though it is listed first in the config
+    aggregator.assert_service_check(
+        WindowsService.SERVICE_CHECK_NAME,
+        status=WindowsService.UNKNOWN,
+        tags=['windows_service:event'],
+        count=1,
+    )
+
+
 @pytest.mark.e2e
 def test_basic_e2e(dd_agent_check, check, instance_basic):
     aggregator = dd_agent_check(instance_basic)

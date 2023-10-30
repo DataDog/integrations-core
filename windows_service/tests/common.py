@@ -30,7 +30,16 @@ INSTANCE_WILDCARD_DICT = {
     'disable_legacy_service_tag': True,
 }
 INSTANCE_ALL = {'services': ['ALL']}
-
+INSTANCE_PREFIX_MATCH = {
+    'services': [
+        # Intentionally use different letter cases to test the sorting
+        'event',
+        'EventLog',
+        'EventSystem',
+        {'startup_type': 'automatic'},
+    ],
+    'disable_legacy_service_tag': True,
+}
 INSTANCE_TRIGGER_START = {
     'services': [
         {'name': 'eventlog', 'startup_type': 'automatic', 'trigger_start': False},
