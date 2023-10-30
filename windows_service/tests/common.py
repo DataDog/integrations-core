@@ -32,11 +32,15 @@ INSTANCE_WILDCARD_DICT = {
 INSTANCE_ALL = {'services': ['ALL']}
 INSTANCE_PREFIX_MATCH = {
     'services': [
+        # Include a non-name filter that should match to test that it isn't
+        # responsible for the match.
+        {'startup_type': 'automatic'},
         # Intentionally use different letter cases to test the sorting
         'event',
+        # The more specific filters should come last so our check must
+        # do something to ensure they are responsible for the match.
         'EventLog',
         'EventSystem',
-        {'startup_type': 'automatic'},
     ],
     'disable_legacy_service_tag': True,
 }
