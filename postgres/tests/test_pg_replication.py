@@ -144,7 +144,7 @@ def test_conflicts_snapshot(aggregator, integration_check, pg_instance, pg_repli
     conn.set_session(autocommit=True)
     cur = conn.cursor()
     cur.execute('update persons SET personid = 1 where personid = 1;')
-    time.sleep(0.2)
+    time.sleep(1.2)
     cur.execute('vacuum verbose persons;')
     time.sleep(0.2)
 
