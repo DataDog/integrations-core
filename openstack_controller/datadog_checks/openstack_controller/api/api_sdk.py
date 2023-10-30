@@ -148,8 +148,8 @@ class ApiSdk(Api):
     def get_identity_limits(self):
         return [limit.to_dict(original_names=True) for limit in self.connection.identity.limits()]
 
-    def get_compute_limits(self):
-        return self.connection.compute.get_limits().to_dict(original_names=True)
+    def get_compute_limits(self, project_id):
+        return self.connection.compute.get_limits(tenant_id=project_id).to_dict(original_names=True)
 
     def get_compute_services(self):
         return [service.to_dict(original_names=True) for service in self.connection.compute.services()]

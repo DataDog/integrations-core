@@ -372,12 +372,12 @@ def connection_compute(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
 
-    def get_limits():
+    def get_limits(project_id):
         if http_error and 'limits' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['limits'])
         return mock.MagicMock(
             to_dict=mock.MagicMock(
-                return_value=mock_responses('GET', '/compute/v2.1/limits')['limits'],
+                return_value=mock_responses('GET', f'/compute/v2.1/limits?tenant_id={project_id}')['limits'],
             )
         )
 

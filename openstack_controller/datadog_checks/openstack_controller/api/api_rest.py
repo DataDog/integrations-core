@@ -194,8 +194,12 @@ class ApiRest(Api):
         response.raise_for_status()
         return response.json().get('limits', [])
 
-    def get_compute_limits(self):
-        response = self.http.get('{}/limits'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value)))
+    def get_compute_limits(self, project_id):
+        response = self.http.get(
+            '{}/limits?tenant_id={}'.format(
+                self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value), project_id
+            )
+        )
         response.raise_for_status()
         return response.json().get('limits', {})
 

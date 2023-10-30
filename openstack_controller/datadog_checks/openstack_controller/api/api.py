@@ -59,7 +59,7 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_compute_limits(self):
+    def get_compute_limits(self, project_id):
         pass  # pragma: no cover
 
     @abstractmethod

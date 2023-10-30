@@ -65,12 +65,13 @@ class Compute(Component):
         self.check.log.debug("`%s` response time: %s", Compute.ID.value, response_time)
         self.check.gauge(NOVA_RESPONSE_TIME, response_time, tags=tags)
 
-    @Component.register_global_metrics(ID)
+    @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_limits(self, config, tags):
+    def _report_limits(self, project_id, tags, config):
         report_limits = config.get('limits', True)
         if report_limits:
-            item = self.check.api.get_compute_limits()
+            item = self.check.api.get_compute_limits(project_id)
+
             limits = get_metrics_and_tags(
                 item,
                 tags=NOVA_LIMITS_TAGS,

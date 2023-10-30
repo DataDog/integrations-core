@@ -362,7 +362,8 @@ def test_limits_exception(aggregator, check, dd_run_check, mock_http_get, connec
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8774/compute/v2.1/limits') == 2
+        num_calls = sum('http://127.0.0.1:8774/compute/v2.1/limits?tenant_id=' in arg for arg in args_list)
+        assert num_calls == 2
     if api_type == ApiType.SDK:
         assert connection_compute.get_limits.call_count == 2
 

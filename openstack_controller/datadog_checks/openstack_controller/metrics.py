@@ -513,6 +513,7 @@ OCTAVIA_AMPHORA_COUNT = f"{OCTAVIA_AMPHORA_METRICS_PREFIX}.count"
 OCTAVIA_AMPHORA_TAGS = {
     'id': 'amphora_id',
     'loadbalancer_id': 'loadbalancer_id',
+    'status': 'status',
 }
 OCTAVIA_AMPHORA_METRICS = {}
 OCTAVIA_AMPHORA_STATS_METRICS_PREFIX = f"{OCTAVIA_AMPHORA_METRICS_PREFIX}.stats"
