@@ -324,13 +324,14 @@ class Connection(object):
                 tcp_connection_status,
                 exception_msg,
                 host=self._check.resolved_hostname,
+                connection_host=host,
                 database=database,
                 code=conn_warn_msg.value,
                 connector=self.connector,
                 driver=driver,
             )
             self.service_check_handler(
-                AgentCheck.CRITICAL, self._check.resolved_hostname, database, check_err_message, is_default=is_default
+                AgentCheck.CRITICAL, host, database, check_err_message, is_default=is_default
             )
 
             # Only raise exception on the default instance database
