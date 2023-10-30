@@ -97,7 +97,7 @@ QUERY_FAILOVER_CLUSTER_INSTANCE = {
     ],
 }
 
-LOG_SHIPPING_PRIMARY = {
+QUERY_LOG_SHIPPING_PRIMARY = {
     'name': 'msdb.dbo.log_shipping_monitor_primary',
     'query': """
         SELECT primary_id
@@ -114,7 +114,7 @@ LOG_SHIPPING_PRIMARY = {
     ],
 }
 
-LOG_SHIPPING_SECONDARY = {
+QUERY_LOG_SHIPPING_SECONDARY = {
     'name': 'msdb.dbo.log_shipping_monitor_secondary',
     'query': """
         SELECT secondary_server
