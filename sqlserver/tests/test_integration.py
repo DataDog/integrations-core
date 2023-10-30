@@ -49,7 +49,12 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
     aggregator.assert_service_check(
         'sqlserver.can_connect',
         status=sqlserver_check.CRITICAL,
-        tags=['sqlserver_host:{}'.format(sqlserver_check.resolved_hostname), 'db:master', 'connection_host:{}'.format(instance_docker.get('host'))] + instance_tags,
+        tags=[
+            'sqlserver_host:{}'.format(sqlserver_check.resolved_hostname),
+            'db:master',
+            'connection_host:{}'.format(instance_docker.get('host')),
+        ]
+        + instance_tags,
         message=str(excinfo.value),
     )
 
