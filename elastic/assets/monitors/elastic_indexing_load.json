@@ -21,7 +21,6 @@
                 "warning": 60
             },
             "notify_audit": false,
-            "on_missing_data": "default",
             "include_tags": false,
             "renotify_interval": 30,
             "renotify_statuses": [
