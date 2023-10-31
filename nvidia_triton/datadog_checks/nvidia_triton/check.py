@@ -36,9 +36,10 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
             self.base_url = parts._replace(path="")
             # Replace the openmetrics port by the server port
             self.server_info_api = self.base_url._replace(netloc=parts.hostname + ':' + self.server_port).geturl()
-        else:    
+        else:
             self.log.debug("Collecting server info through API is disabled.")
             return
+
     def get_default_config(self):
         return {
             "metrics": [METRICS_MAP],
