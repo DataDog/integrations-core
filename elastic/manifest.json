@@ -54,7 +54,8 @@
       "[ElasticSearch] Unsuccessful requests rate is high": "assets/monitors/elastic_requests.json",
       "[ElasticSearch] Query load is high": "assets/monitors/elastic_query_load_high.json",
       "[ElasticSearch] Time spent on queries is high": "assets/monitors/elastic_query_latency_high.json",
-      "[ElasticSearch] Number of pending tasks is high": "assets/monitors/elastic_pending_tasks_high.json"
+      "[ElasticSearch] Number of pending tasks is high": "assets/monitors/elastic_pending_tasks_high.json",
+      "[ElasticSearch] Current Indexing Load is high": "assets/monitors/elastic_indexing_load.json"
     },
     "saved_views": {
       "elasticsearch_processes": "assets/saved_views/elasticsearch_processes.json"
