@@ -172,9 +172,9 @@ files:
         example: false
     - name: include_secondary_log_shipping_metrics
       description: |
-        Include log_shipping_secondary metrics for a log shipping setup. Requires to run
-        against a secondary instance in a Transaction Log Shipping configuration. Note that
-        the datadog user needs to be present in msdb and requires to be added to the db_datareader role.
+        Include log_shipping_secondary metrics for a log shipping setup. Required to run
+        against a secondary instance in a transaction log shipping configuration. Note that
+        the Datadog user needs to be present in msdb and must be added to the db_datareader role.
       value:
         type: boolean
         example: false
