@@ -15,7 +15,7 @@
                         "id": 4949590841397250,
                         "definition": {
                             "type": "image",
-                            "url": "/static/images/logos/nvidia_triton_large.svg",
+                            "url": "/static/images/logos/nvidia-triton_small.svg",
                             "sizing": "none",
                             "has_background": true,
                             "has_border": true,
