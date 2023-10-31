@@ -441,7 +441,11 @@ def test_check_local(aggregator, dd_run_check, init_config, instance_docker):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
     check_tags = instance_docker.get('tags', [])
-    expected_tags = check_tags + ['sqlserver_host:{}'.format(DOCKER_SERVER), 'db:master']
+    expected_tags = check_tags + [
+        'sqlserver_host:{}'.format(instance_docker.get('reported_hostname')),
+        'connection_host:{}'.format(DOCKER_SERVER),
+        'db:master',
+    ]
     assert_metrics(instance_docker, aggregator, check_tags, expected_tags, hostname=sqlserver_check.resolved_hostname)
 
 
