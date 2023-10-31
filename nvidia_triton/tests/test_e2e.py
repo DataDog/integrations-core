@@ -7,10 +7,8 @@ from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
 
-"""
-Use Caddy for testing due to the CUDA limitation preventing the spin of a Triton docker container.
-https://docs.nvidia.com/deeplearning/triton-inference-server/archives/triton_inference_server_1150/user-guide/docs/build.html#cuda-cublas-cudnn
-"""
+# Use Caddy for testing due to the CUDA limitation preventing the spin of a Triton docker container.
+# https://docs.nvidia.com/deeplearning/triton-inference-server/archives/triton_inference_server_1150/user-guide/docs/build.html#cuda-cublas-cudnn
 
 
 def test_check_nvidia_triton(dd_agent_check, instance):
