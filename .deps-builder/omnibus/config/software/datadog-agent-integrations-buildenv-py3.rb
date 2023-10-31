@@ -1,6 +1,8 @@
+require './lib/paths.rb'
+
 name 'datadog-agent-integrations-buildenv-py3'
 
-source file: '/integrations-core/.deps/build_dependencies.txt'
+source file: File.join(integrations_core_root, '.deps/build_dependencies.txt')
 
 dependency "datadog-agent-prepare"
 dependency "python3"

@@ -1,0 +1,19 @@
+name: Build and resolve dependencies
+
+on:
+  pull_request:
+    paths:
+      - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
+
+jobs:
+  build-and-resolve-dependencies:
+    name: "Build and resolve dependencies for a specific platform"
+    runs-on: "ubuntu-22.04"
+    container:
+      image: "datadog/agent-buildimages-deb_x64:v20878799-a2f77ae"
+    steps:
+      - uses: actions/checkout@v3
+      - run: "bash .deps-builder/build.sh"
+        env:
+          INTEGRATIONS_CORE_PATH: ${{ github.workspace }} 
+        shell: bash --login -eo pipefail {0}

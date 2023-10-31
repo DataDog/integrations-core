@@ -1,7 +1,8 @@
+require './lib/paths.rb'
+
 name 'agent-requirements-constraints'
 
-agent_requirements_in = 'agent_requirements.in'
-source file: "/integrations-core/datadog_checks_base/datadog_checks/base/data/#{agent_requirements_in}"
+source file: agent_requirements_path
 
 build do
   # Create a constraints.txt file from the original requirements, for
