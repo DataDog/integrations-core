@@ -35,7 +35,7 @@ The Nvidia Triton integration does not include any events.
 
 ### Service Checks
 
-The Nvidia Triton integration does not include any service checks.
+The Nvidia Triton integration includes tow service checks.
 
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
@@ -44,7 +44,7 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][9].
 
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://www.nvidia.com/en-us/ai-data-science/products/triton-inference-server/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/nvidia_triton/datadog_checks/nvidia_triton/data/conf.yaml.example

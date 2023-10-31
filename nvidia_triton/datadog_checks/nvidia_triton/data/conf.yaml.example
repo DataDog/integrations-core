@@ -21,6 +21,7 @@ instances:
 
     ## @param collect_server_info - boolean - optional - default: true
     ## Wether to collect server status and metadata the HTTP endpoint of Nvidia Triton API.
+    ## https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/protocol/README.html
     #
     # collect_server_info: true
 
