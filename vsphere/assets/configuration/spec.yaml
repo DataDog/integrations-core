@@ -269,6 +269,23 @@ files:
               type: array
               items:
                 type: string
+      - name: event_resource_filters
+        description: |
+          Which resource types to collect AlarmStatusChangedEvent events for.
+          Available resource types are vm, host, datastore, datacenter, and cluster.
+
+          By default, the integration will only collect these events for VMs and Hosts.
+        value:
+          example:
+            - 'vm'
+            - 'host'
+            - 'datastore'
+            - 'datacenter'
+            - 'cluster'
+          type: array
+          display_default: ['vm', 'host']
+          items:
+            type: string
       - name: collect_tags
         description: |
           If true, the vSphere Tags will be collected.
