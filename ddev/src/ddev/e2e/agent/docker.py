@@ -219,9 +219,7 @@ class DockerAgent(AgentInterface):
                 process = self._run_command(formatted_command)
                 if process.returncode:
                     self._show_logs()
-                    raise RuntimeError(
-                        f'Unable to run start-up command in Agent container `{self._container_name}`'
-                    )
+                    raise RuntimeError(f'Unable to run start-up command in Agent container `{self._container_name}`')
 
         if local_packages:
             base_pip_command = self._format_command(
