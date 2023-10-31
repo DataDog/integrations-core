@@ -987,4 +987,8 @@
 
 ***Added***:
 
+***Fixed***:
+
+* DBMON-2773 Fix edge-case causing potentially duplicate/wrong time series for activity metrics when `activity_metrics_excluded_aggregations` included `datname` ([#16106](https://github.com/DataDog/integrations-core/pull/16106))
+
 * adds postgres integration.
