@@ -8,7 +8,7 @@
 name "snowflake-connector-python-py3"
 default_version "3.1.0"
 
-dependency "pip3"
+dependency "agent-requirements-constraints"
 
 source :url => "https://github.com/snowflakedb/snowflake-connector-python/archive/refs/tags/v#{version}.tar.gz",
        :sha256 => "fb2477b653bd58edd0366b4d6395d109fd4e238b85ce5685d7944455e0d48dab",
@@ -41,5 +41,5 @@ build do
   # We can remove the oscrypto pinning once the fix becomes part of a new release
   oscrypto_commit = "d5f3437ed24257895ae1edd9e503cfb352e635a8"
 
-  command "#{pip} install . \"oscrypto @ git+https://github.com/wbond/oscrypto.git@#{oscrypto_commit}\"", :env => build_env
+  python_build_env.wheel ". \"oscrypto @ git+https://github.com/wbond/oscrypto.git@#{oscrypto_commit}\"", :env => build_env
 end

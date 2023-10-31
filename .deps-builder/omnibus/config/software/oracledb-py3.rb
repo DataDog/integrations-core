@@ -1,7 +1,7 @@
 name "oracledb-py3"
 default_version "1.3.2"
 
-dependency "pip3"
+dependency "agent-requirements-constraints"
 
 # The github repository contains a submodule which is not shipped with their released file.
 # Grabbing the tar from PyPi instead
@@ -17,5 +17,5 @@ build do
 
   command "sed -i 's/cython/cython<3.0.0/g' pyproject.toml"
 
-  command "#{install_dir}/embedded/bin/pip3 install ."
+  python_build_env.wheel "."
 end

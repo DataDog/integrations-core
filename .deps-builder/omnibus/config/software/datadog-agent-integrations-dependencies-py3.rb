@@ -4,9 +4,10 @@ agent_requirements_in = 'agent_requirements.in'
 source file: "/integrations-core/datadog_checks_base/datadog_checks/base/data/#{agent_requirements_in}"
 
 dependency "datadog-agent-integrations-buildenv-py3"
+dependency "agent-requirements-constraints"
 
-# dependency 'snowflake-connector-python-py3'
-# dependency 'confluent-kafka-python'
+dependency 'snowflake-connector-python-py3'
+dependency 'confluent-kafka-python'
 
 if arm?
   # libffi to build the cffi wheel
@@ -245,21 +246,18 @@ build do
   end
 
   # Build dependencies
-  wheels_path = File.join(install_dir, "wheels")
   # First we install the dependencies that need specific flags
   specific_build_env.each do |lib, env|
-    python_build_env.wheels_for_requirements requirements_custom[lib]["req_file_path"], wheels_path, env: env
+    python_build_env.wheel "-r #{requirements_custom[lib]['req_file_path']}", env: env
   end
 
   # Then the ones requiring their own environment variables
-  python_build_env.wheels_for_requirements static_reqs_out_file, wheels_path, env: build_env
+  python_build_env.wheel "-r #{static_reqs_out_file}", env: build_env
 
   # Produce a lockfile
   # TODO Move this to some constant so that we can reference the same name when "packaging"
   lockfile_path = File.join(install_dir, "frozen.txt")
-  # TODO: Remove this assignment once we build all separate definitions as well
-  agent_requirements_in = static_reqs_out_file
   command "#{python_build_env.build_env_python} -m piptools compile --generate-hashes " \
           "--no-header --no-index --no-emit-find-links --generate-hashes " \
-          "-f #{wheels_path} -o #{lockfile_path} #{agent_requirements_in}"
+          "-f #{python_build_env.wheels_dir} -o #{lockfile_path} #{agent_requirements_in}"
 end

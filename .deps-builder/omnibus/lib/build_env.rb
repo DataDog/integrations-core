@@ -8,6 +8,13 @@ module Omnibus
 end
 
 class PythonBuildEnvironment
+  # Class to interact with the Python build environment in a way that is convenient
+  # for implementing the Python dependency resolution and building model that we
+  # use for Agent integration dependencies.
+  # Note that the Python build environment itself is assumed to be a global (per-project) entity,
+  # and instances of the class are expected to use the same data for the most part,
+  # they exist as instances mostly to hold a reference to the current builder.
+
   def initialize(builder)
     @builder = builder
   end
@@ -26,40 +33,38 @@ class PythonBuildEnvironment
     File.join(runtime_root, "bin", "python")
   end
 
-  # Run pip install on a requirements file with PYTHONPATH set to this build environment
-  # `options` are passed to the `shellout!` function used to run commands
-  def install_requirements(requirements_file, **options)
-    # Builder#block uses `instance_eval`, therefore the scope inside the block is as if it were running
-    # within the builder instance; that's why we need to access methods via `python_build_env`.
-    @builder.block "Install Python requirements from #{requirements_file}" do
-      # TODO: This current approach is py3 only, find some reasonable alternative for py2.
-      get_site_script = 'import site; import os; print(os.pathsep.join(site .getsitepackages()))'
-
-      # Set PYTHONPATH to the `site_path` of the build environment
-      site_path = shellout!("#{python_build_env.build_env_python} -c '#{get_site_script}'").stdout.strip
-      env = {"PYTHONPATH" => site_path}.merge(options[:env])
-      options = options.merge({env: env})
-
-      shellout! "#{python_build_env.runtime_python} -m pip install --no-build-isolation -r #{requirements_file}", **options
-    end
+  # Set a constraint file (for all instances)
+  def constrain(val)
+    @@constraint_file = val
   end
 
-  # Run pip wheel on a requirements file with PYTHONPATH set to this build environment
+  def constraint_file
+    @@constraint_file
+  end
+
+  # Run pip wheel with PYTHONPATH set to this build environment and store the produced wheels
+  # inside the project's `installdir`. Apply constraint file if set.
   # `options` are passed to the `shellout!` function used to run commands
-  def wheels_for_requirements(requirements_file, output_dir, **options)
+  def wheel(arg, **options)
     # Builder#block uses `instance_eval`, therefore the scope inside the block is as if it were running
     # within the builder instance; that's why we need to access methods via `python_build_env`.
-    @builder.block "Install Python requirements from #{requirements_file}" do
+    @builder.block "Build wheels for #{arg}" do
       # TODO: This current approach is py3 only, find some reasonable alternative for py2.
       get_site_script = 'import site; import os; print(os.pathsep.join(site.getsitepackages()))'
 
       # Set PYTHONPATH to the `site_path` of the build environment
       site_path = shellout!("#{python_build_env.build_env_python} -c '#{get_site_script}'").stdout.strip
-      env = {"PYTHONPATH" => site_path}.merge(options[:env])
+      env = {"PYTHONPATH" => site_path}.merge(options[:env] || {})
       options = options.merge({env: env})
 
-      shellout! "#{python_build_env.runtime_python} -m pip wheel --no-build-isolation -w #{output_dir} -r #{requirements_file}", **options
+      constraint_arg = python_build_env.constraint_file && "-c #{python_build_env.constraint_file}" || ""
+
+      shellout! "#{python_build_env.runtime_python} -m pip wheel --no-build-isolation #{constraint_arg} -w #{python_build_env.wheels_dir} #{arg}", **options
     end
+  end
+
+  def wheels_dir
+    File.join(@builder.install_dir, "wheels")
   end
 
   private

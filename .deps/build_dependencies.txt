@@ -4,5 +4,5 @@ wheel==0.38.4
 setuptools_scm
 setuptools_rust
 maturin
-cython
+cython<3.0.0
 pip-tools==7.3.0
