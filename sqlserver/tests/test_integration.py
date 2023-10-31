@@ -61,7 +61,7 @@ def test_check_dbm_enabled_config(aggregator, dd_run_check, init_config, instanc
     if dbm_enabled is not None:
         instance_docker['dbm'] = dbm_enabled
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
-    assert isinstance(sqlserver_check.dbm_enabled, bool)
+    assert isinstance(sqlserver_check._config.dbm_enabled, bool)
 
 
 @pytest.mark.integration
@@ -457,7 +457,7 @@ def test_custom_metrics_fraction_counters(aggregator, dd_run_check, instance_doc
     dd_run_check(sqlserver_check)
     seen_plan_type = set()
     for m in aggregator.metrics("sqlserver.custom.plan_cache_test"):
-        tags_by_key = {k: v for k, v in [t.split(':') for t in m.tags if not t.startswith('dd.internal')]}
+        tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
         seen_plan_type.add(tags_by_key['plan_type'])
         assert tags_by_key['optional_tag'].lower() == 'tagx'
     assert 'SQL Plans' in seen_plan_type
@@ -473,7 +473,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
     dd_run_check(sqlserver_check)
     seen_databases = set()
     for m in aggregator.metrics("sqlserver.tempdb.file_space_usage.free_space"):
-        tags_by_key = {k: v for k, v in [t.split(':') for t in m.tags if not t.startswith('dd.internal')]}
+        tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
         seen_databases.add(tags_by_key['database'])
         assert tags_by_key['database_id']
 
