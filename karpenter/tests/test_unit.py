@@ -2,25 +2,46 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from typing import Any, Callable, Dict  # noqa: F401
+import pytest
 
-from datadog_checks.base import AgentCheck  # noqa: F401
-from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
+from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.karpenter import KarpenterCheck
 
+from .common import MOCKED_INSTANCE, TEST_METRICS, get_fixture_path
 
-def test_check(dd_run_check, aggregator, instance):
-    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-    check = KarpenterCheck('karpenter', {}, [instance])
+pytestmark = pytest.mark.unit
+
+
+def test_check_mock_karpenter_openmetrics(dd_run_check, aggregator, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('karpenter_metrics.txt'))
+    check = KarpenterCheck('karpenter', {}, [MOCKED_INSTANCE])
     dd_run_check(check)
+
+    for metric in TEST_METRICS:
+        aggregator.assert_metric(metric)
+        aggregator.assert_metric_has_tag(metric, 'test:tag')
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_service_check('karpenter.openmetrics.health', ServiceCheck.OK)
 
 
-def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance):
-    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-    check = KarpenterCheck('karpenter', {}, [instance])
-    dd_run_check(check)
-    aggregator.assert_service_check('karpenter.can_connect', KarpenterCheck.CRITICAL)
+def test_empty_instance(dd_run_check):
+    with pytest.raises(
+        Exception,
+        match='InstanceConfig`:\nopenmetrics_endpoint\n  Field required',
+    ):
+        check = KarpenterCheck('karpenter', {}, [{}])
+        dd_run_check(check)
+
+
+def test_custom_validation(dd_run_check):
+    instance = {'openmetrics_endpoint': 'karpenter:2112/metrics'}
+    for k, v in instance.items():
+        with pytest.raises(
+            Exception,
+            match=f'{k}: {v} is incorrectly configured',
+        ):
+            check = KarpenterCheck('karpenter', {}, [instance])
+            dd_run_check(check)

@@ -14,9 +14,9 @@ def get_fixture_path(filename):
     return os.path.join(HERE, 'fixtures', filename)
 
 
-INSTANCE = {
+MOCKED_INSTANCE = {
     "openmetrics_endpoint": f"http://{HOST}:{PORT}/metrics",
-    'tags': ['test:test'],
+    'tags': ['test:tag'],
 }
 
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
