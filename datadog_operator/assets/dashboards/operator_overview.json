@@ -400,7 +400,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "avg:kubernetes.memory.rss{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_app_name:datadog-agent-deployment} by {kube_cluster_name}",
+                                            "query": "avg:kubernetes.memory.rss{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_app_component:agent} by {kube_cluster_name,kube_namespace}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "last"
@@ -435,7 +435,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes.memory.rss{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_app_instance:datadog-cluster-agent,kube_deployment:*} by {kube_deployment,kube_cluster_name,kube_namespace}",
+                                            "query": "sum:kubernetes.memory.rss{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_app_component:cluster-agent} by {kube_cluster_name,kube_namespace}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "last"
@@ -470,7 +470,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes.memory.rss{$scope,$cluster,kube_app_component:cluster-checks-runner,kube_app_managed_by:datadog-operator,kube_deployment:*} by {kube_deployment,kube_cluster_name,kube_namespace}",
+                                            "query": "sum:kubernetes.memory.rss{$scope,$cluster,kube_app_managed_by:datadog-operator, kube_app_component:cluster-checks-runner} by {kube_cluster_name,kube_namespace}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "last"
@@ -575,7 +575,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes.pods.running{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_app_instance:datadog-agent}",
+                                            "query": "avg:kubernetes.memory.rss{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_app_component:agent} by {pod_name}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "last"
@@ -583,7 +583,7 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "count_not_null(query1)"
                                         }
                                     ]
                                 }
@@ -609,13 +609,13 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "count_not_null(query1)"
                                         }
                                     ],
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes.pods.running{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_app_instance:datadog-cluster-agent}",
+                                            "query": "avg:kubernetes.memory.rss{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_app_component:cluster-agent} by {pod_name}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "last"
@@ -644,13 +644,13 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "count_not_null(query1)"
                                         }
                                     ],
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes.pods.running{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_deployment:*,kube_app_instance:datadog-cluster-checks-runner}",
+                                            "query": "avg:kubernetes.memory.rss{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_app_component:cluster-checks-runner} by {pod_name}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "last"

@@ -1,6 +1,16 @@
 # CHANGELOG - Datadog Checks Dev
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 28.0.0 / 2023-10-26
+
+***Changed***:
+
+* Generate changelogs from fragment files using towncrier.
+  There are no changes to the ddev commands, only to their outputs.
+  We are making this change to avoid merge conflicts in high-traffic packages where people used to have to modify one CHANGELOG.md file. ([#15983](https://github.com/DataDog/integrations-core/pull/15983))
+
+## 27.0.1 / 2023-10-26
 
 ***Fixed***:
 

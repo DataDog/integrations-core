@@ -10,6 +10,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.sqlserver.config import SQLServerConfig
 
 try:
     import datadog_agent
@@ -46,7 +47,7 @@ SQL_COLS_CAST_TYPE = {
 
 
 def agent_check_getter(self):
-    return self.check
+    return self._check
 
 
 class SqlserverMetadata(DBMAsyncJob):
@@ -55,33 +56,33 @@ class SqlserverMetadata(DBMAsyncJob):
         1. collection of sqlserver instance settings
     """
 
-    def __init__(self, check):
-        self.check = check
+    def __init__(self, check, config: SQLServerConfig):
         # do not emit any dd.internal metrics for DBM specific check code
-        self.tags = [t for t in self.check.tags if not t.startswith('dd.internal')]
+        self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
         self.log = check.log
-        self.collection_interval = check.settings_config.get(
+        self._config = config
+        self.collection_interval = self._config.settings_config.get(
             'collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL
         )
 
         super(SqlserverMetadata, self).__init__(
             check,
-            run_sync=is_affirmative(check.settings_config.get('run_sync', False)),
-            enabled=is_affirmative(check.settings_config.get('enabled', False)),
+            run_sync=is_affirmative(self._config.settings_config.get('run_sync', False)),
+            enabled=is_affirmative(self._config.settings_config.get('enabled', False)),
             expected_db_exceptions=(),
-            min_collection_interval=check.min_collection_interval,
+            min_collection_interval=self._config.min_collection_interval,
             dbms="sqlserver",
             rate_limit=1 / float(self.collection_interval),
             job_name="database-metadata",
             shutdown_callback=self._close_db_conn,
         )
         self.disable_secondary_tags = is_affirmative(
-            check.statement_metrics_config.get('disable_secondary_tags', False)
+            self._config.statement_metrics_config.get('disable_secondary_tags', False)
         )
         self._conn_key_prefix = "dbm-metadata-"
         self._settings_query = None
         self._time_since_last_settings_query = 0
-        self._max_query_metrics = check.statement_metrics_config.get("max_queries", 250)
+        self._max_query_metrics = self._config.statement_metrics_config.get("max_queries", 250)
 
     def _close_db_conn(self):
         pass
@@ -130,22 +131,22 @@ class SqlserverMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def report_sqlserver_metadata(self):
-        with self.check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
-            with self.check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+        with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
+            with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 settings_rows = self._load_settings_rows(cursor)
                 event = {
-                    "host": self.check.resolved_hostname,
+                    "host": self._check.resolved_hostname,
                     "agent_version": datadog_agent.get_version(),
                     "dbms": "sqlserver",
                     "kind": "sqlserver_configs",
                     "collection_interval": self.collection_interval,
                     'dbms_version': "{},{}".format(
-                        self.check.static_info_cache.get(STATIC_INFO_VERSION, ""),
-                        self.check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
+                        self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
+                        self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
                     ),
                     "tags": self.tags,
                     "timestamp": time.time() * 1000,
-                    "cloud_metadata": self.check.cloud_metadata,
+                    "cloud_metadata": self._config.cloud_metadata,
                     "metadata": settings_rows,
                 }
                 self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))

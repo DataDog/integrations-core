@@ -1,6 +1,8 @@
 # CHANGELOG - windows_service
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 4.7.0 / 2023-10-26
 
 ***Added***:
 

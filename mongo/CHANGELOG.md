@@ -1,6 +1,6 @@
 # CHANGELOG - mongo
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 6.0.1 / 2023-08-18 / Agent 7.48.0
 

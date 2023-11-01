@@ -82,6 +82,9 @@ class DockerAgent(AgentInterface):
         with EnvVars({'DOCKER_CLI_HINTS': 'false'}):
             return self.platform.run_command(command, **kwargs)
 
+    def _show_logs(self) -> None:
+        self._run_command(['docker', 'logs', self._container_name])
+
     def get_id(self) -> str:
         return self._container_name
 
@@ -213,10 +216,8 @@ class DockerAgent(AgentInterface):
                 formatted_command = self._format_command(self.platform.modules.shlex.split(start_command))
                 process = self._run_command(formatted_command)
                 if process.returncode:
-                    raise RuntimeError(
-                        f'Unable to run start-up command in Agent container `{self._container_name}`: '
-                        f'{process.stdout.decode("utf-8")}'
-                    )
+                    self._show_logs()
+                    raise RuntimeError(f'Unable to run start-up command in Agent container `{self._container_name}`')
 
         if local_packages:
             base_pip_command = self._format_command(
@@ -226,9 +227,10 @@ class DockerAgent(AgentInterface):
                 package_mount = f'{self._package_mount_dir}{local_package.name}{features}'
                 process = self._run_command([*base_pip_command, package_mount])
                 if process.returncode:
+                    self._show_logs()
                     raise RuntimeError(
                         f'Unable to install package `{local_package.name}` in Agent container '
-                        f'`{self._container_name}`: {process.stdout.decode("utf-8")}'
+                        f'`{self._container_name}`'
                     )
 
         post_install_commands = self.metadata.get('post_install_commands', [])
@@ -237,9 +239,9 @@ class DockerAgent(AgentInterface):
                 formatted_command = self._format_command(self.platform.modules.shlex.split(post_install_command))
                 process = self._run_command(formatted_command)
                 if process.returncode:
+                    self._show_logs()
                     raise RuntimeError(
-                        f'Unable to run post-install command in Agent container `{self._container_name}`: '
-                        f'{process.stdout.decode("utf-8")}'
+                        f'Unable to run post-install command in Agent container `{self._container_name}`'
                     )
 
         if local_packages or start_commands or post_install_commands:
@@ -252,10 +254,8 @@ class DockerAgent(AgentInterface):
                 formatted_command = self._format_command(self.platform.modules.shlex.split(stop_command))
                 process = self._run_command(formatted_command)
                 if process.returncode:
-                    raise RuntimeError(
-                        f'Unable to run stop command in Agent container `{self._container_name}`: '
-                        f'{process.stdout.decode("utf-8")}'
-                    )
+                    self._show_logs()
+                    raise RuntimeError(f'Unable to run stop command in Agent container `{self._container_name}`')
 
         for command in (
             ['docker', 'stop', '-t', '0', self._container_name],

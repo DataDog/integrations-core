@@ -1,6 +1,6 @@
 # CHANGELOG - Kube_controller_manager
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 4.5.0 / 2023-09-29
 

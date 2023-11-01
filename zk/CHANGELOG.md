@@ -1,6 +1,8 @@
 # CHANGELOG - zk
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 4.4.0 / 2023-10-26
 
 ***Added***:
 
@@ -222,4 +224,3 @@
 ***Added***:
 
 * adds zk integration.
-

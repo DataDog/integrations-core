@@ -34,7 +34,15 @@ E2E_METADATA = {
     'docker_volumes': [
         f'{HERE}/docker/ssl/certificate:/tmp/certificate',
         f'{HERE}/docker/kerberos/kdc/krb5_agent.conf:/etc/krb5.conf',
+        f'{HERE}/docker/scripts/install_librdkafka.bash:/tmp/install_librdkafka.bash',
     ],
+    'start_commands': [
+        'bash /tmp/install_librdkafka.bash',
+    ],
+    'env_vars': {
+        'LIBRDKAFKA_VERSION': os.environ["LIBRDKAFKA_VERSION"],
+        'CONFLUENT_KAFKA_VERSION': os.environ["CONFLUENT_KAFKA_VERSION"],
+    },
 }
 
 if AUTHENTICATION == "ssl":

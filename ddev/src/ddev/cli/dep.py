@@ -34,6 +34,8 @@ IGNORED_DEPS = {
     'pymongo',
     # We need pydantic 2.0.2 for the rpm x64 agent build (see https://github.com/DataDog/datadog-agent/pull/18303)
     'pydantic',
+    # https://github.com/DataDog/integrations-core/pull/16080
+    'lxml',
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others

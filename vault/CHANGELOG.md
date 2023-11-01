@@ -1,6 +1,6 @@
 # CHANGELOG - Vault
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 4.0.1 / 2023-08-18 / Agent 7.48.0
 

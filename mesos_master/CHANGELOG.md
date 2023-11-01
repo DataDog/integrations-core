@@ -1,6 +1,6 @@
 # CHANGELOG - mesos_master
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 3.2.1 / 2023-08-18 / Agent 7.48.0
 

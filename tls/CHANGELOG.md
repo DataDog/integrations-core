@@ -1,6 +1,12 @@
 # CHANGELOG - TLS
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 2.13.1 / 2023-10-26
+
+***Fixed***:
+
+* Bump the `cryptography` version to 41.0.5 ([#16083](https://github.com/DataDog/integrations-core/pull/16083))
 
 ## 2.13.0 / 2023-09-29
 

@@ -1,6 +1,8 @@
 # CHANGELOG - IBM i
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 2.0.1 / 2023-10-26
 
 ***Fixed***:
 

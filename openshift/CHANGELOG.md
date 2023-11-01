@@ -1,4 +1,3 @@
 # CHANGELOG - OpenShift
 
-## Unreleased
-
+<!-- towncrier release notes start -->
