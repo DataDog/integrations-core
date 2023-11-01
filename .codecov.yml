@@ -638,6 +638,10 @@ coverage:
         target: 75
         flags:
         - etcd
+      fluxcd:
+        target: 75
+        flags:
+        - fluxcd
       vSphere:
         target: 75
         flags:
@@ -894,6 +898,11 @@ flags:
     paths:
     - fluentd/datadog_checks/fluentd
     - fluentd/tests
+  fluxcd:
+    carryforward: true
+    paths:
+    - fluxcd/datadog_checks/fluxcd
+    - fluxcd/tests
   foundationdb:
     carryforward: true
     paths:
