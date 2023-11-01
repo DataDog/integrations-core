@@ -71,71 +71,6 @@ To find the channel name for an Event Log in the Windows Event Viewer, open the 
 
 <!-- xxx tabs xxx -->
 
-<!-- xxx tab "Events" xxx -->
-
-#### Event collection using the Event Log API (Recommended)
-
-The Datadog Agent can be configured to collect Windows Event Logs as Datadog events using the Event Log API. Datadog recommends using the Event Log API because it has better performance than the legacy method below. Note, each method has its own configuration syntax for channels and for filters. For more information, see [Filtering Events](?tab=events#filtering-events). 
-
-To collect Windows Event Logs as Datadog events, configure channels under the `instances:` section of your `win32_event_log.d/conf.yaml` configuration file. 
-
-  </br> Set `legacy_mode: false` in each instance. If `legacy_mode: false` is set, the `path` is required to be set in the `\win32_event_log.d\conf.yaml` file. 
-
-  </br> This example shows entries for the `Security` and `<CHANNEL_2>` channels:
-
-  ```yaml
-  init_config:
-  instances:
-    - # Event Log API 
-      path: Security
-      legacy_mode: false
-      filters: {}
-
-    - path: "<CHANNEL_2>" 
-      legacy_mode: false
-      filters: {}
-  ```
-
-Agent versions 7.49 and later support setting `legacy_mode` in the shared `init_config` section. This sets the default for all instances and no longer requires you to set `legacy_mode` individually for each instance. However, the option can still be set on a per-instance basis.
-
-  ```yaml
-  init_config:
-      legacy_mode: false
-  instances:
-    - # Event Log API
-      path: Security
-      filters: {}
-
-    - path: "<CHANNEL_2>"
-      filters: {}
-  ```
-
-#### Event collection using Legacy Mode (Deprecated)
-
-The legacy method uses WMI (Windows Management Instrumentation) and was deprecated in Agent version 7.20. 
-
-To collect Windows Event Logs as Datadog events, configure channels under the `instances:` section of your `win32_event_log.d/conf.yaml` configuration file.
-  
-  </br> To use Legacy Mode, set `legacy_mode` to `true`. Then, set at least one of the following filters: `source_name`, `event_id`, `message_filters`, `log_file`, or `type`.
-
-  </br> This example shows entries for the `Security` and `<CHANNEL_2>` channels:
-
-  ```yaml
-  init_config:
-  instances:
-    - # WMI (default)
-      legacy_mode: true
-      log_file:
-        - Security
-        
-    - legacy_mode: true
-      log_file:
-        - "<CHANNEL_2>"
-  ```
-  
-  For more information, see [Add event log files to the `Win32_NTLogEvent` WMI class][28].
-
-<!-- xxz tab xxx -->
 <!-- xxx tab "Logs" xxx -->
 
 #### Log collection
@@ -413,6 +348,72 @@ logs:
         name: include_x01
         pattern: '"EventID":"(101|201|301)"'
 ```
+
+<!-- xxz tab xxx -->
+
+<!-- xxx tab "Events" xxx -->
+
+#### Event collection using the Event Log API (Recommended)
+
+The Datadog Agent can be configured to collect Windows Event Logs as Datadog events using the Event Log API. Datadog recommends using the Event Log API because it has better performance than the legacy method below. Note, each method has its own configuration syntax for channels and for filters. For more information, see [Filtering Events](?tab=events#filtering-events). 
+
+To collect Windows Event Logs as Datadog events, configure channels under the `instances:` section of your `win32_event_log.d/conf.yaml` configuration file. 
+
+  </br> Set `legacy_mode: false` in each instance. If `legacy_mode: false` is set, the `path` is required to be set in the `\win32_event_log.d\conf.yaml` file. 
+
+  </br> This example shows entries for the `Security` and `<CHANNEL_2>` channels:
+
+  ```yaml
+  init_config:
+  instances:
+    - # Event Log API 
+      path: Security
+      legacy_mode: false
+      filters: {}
+
+    - path: "<CHANNEL_2>" 
+      legacy_mode: false
+      filters: {}
+  ```
+
+Agent versions 7.49 and later support setting `legacy_mode` in the shared `init_config` section. This sets the default for all instances and no longer requires you to set `legacy_mode` individually for each instance. However, the option can still be set on a per-instance basis.
+
+  ```yaml
+  init_config:
+      legacy_mode: false
+  instances:
+    - # Event Log API
+      path: Security
+      filters: {}
+
+    - path: "<CHANNEL_2>"
+      filters: {}
+  ```
+
+#### Event collection using Legacy Mode (Deprecated)
+
+The legacy method uses WMI (Windows Management Instrumentation) and was deprecated in Agent version 7.20. 
+
+To collect Windows Event Logs as Datadog events, configure channels under the `instances:` section of your `win32_event_log.d/conf.yaml` configuration file.
+  
+  </br> To use Legacy Mode, set `legacy_mode` to `true`. Then, set at least one of the following filters: `source_name`, `event_id`, `message_filters`, `log_file`, or `type`.
+
+  </br> This example shows entries for the `Security` and `<CHANNEL_2>` channels:
+
+  ```yaml
+  init_config:
+  instances:
+    - # WMI (default)
+      legacy_mode: true
+      log_file:
+        - Security
+        
+    - legacy_mode: true
+      log_file:
+        - "<CHANNEL_2>"
+  ```
+  
+  For more information, see [Add event log files to the `Win32_NTLogEvent` WMI class][28].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
