@@ -12,6 +12,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.sqlserver.config import SQLServerConfig
 
 try:
     import datadog_agent
@@ -62,41 +63,41 @@ def _row_key(row):
 
 
 def agent_check_getter(self):
-    return self.check
+    return self._check
 
 
 class SqlserverProcedureMetrics(DBMAsyncJob):
     """Collects stored procedure metrics"""
 
-    def __init__(self, check):
+    def __init__(self, check, config: SQLServerConfig):
         self.log = check.log
-        self.check = check
+        self._config = config
         # do not emit any dd.internal metrics for DBM specific check code
-        self.tags = [t for t in self.check.tags if not t.startswith('dd.internal')]
+        self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
         collection_interval = float(
-            check.procedure_metrics_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
+            self._config.procedure_metrics_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
         )
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
         self.collection_interval = collection_interval
         super(SqlserverProcedureMetrics, self).__init__(
             check,
-            run_sync=is_affirmative(check.procedure_metrics_config.get('run_sync', False)),
-            enabled=is_affirmative(check.procedure_metrics_config.get('enabled', True)),
+            run_sync=is_affirmative(self._config.procedure_metrics_config.get('run_sync', False)),
+            enabled=is_affirmative(self._config.procedure_metrics_config.get('enabled', True)),
             expected_db_exceptions=(),
-            min_collection_interval=check.min_collection_interval,
+            min_collection_interval=self._config.min_collection_interval,
             dbms="sqlserver",
             rate_limit=1 / float(collection_interval),
             job_name="procedure-metrics",
             shutdown_callback=self._close_db_conn,
         )
         self.dm_exec_procedure_stats_row_limit = int(
-            check.procedure_metrics_config.get('dm_exec_procedure_stats_row_limit', 10000)
+            self._config.procedure_metrics_config.get('dm_exec_procedure_stats_row_limit', 10000)
         )
         self._state = StatementMetrics()
         self._conn_key_prefix = "dbm-procedures"
         self._procedure_metrics_query = None
-        self._max_procedure_metrics = check.procedure_metrics_config.get("max_procedures", 250)
+        self._max_procedure_metrics = self._config.procedure_metrics_config.get("max_procedures", 250)
 
     def _close_db_conn(self):
         pass
@@ -147,15 +148,15 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
         rows = sorted(rows, key=lambda i: i['total_elapsed_time'], reverse=True)
         rows = rows[:max_queries]
         return {
-            'host': self.check.resolved_hostname,
+            'host': self._check.resolved_hostname,
             'timestamp': time.time() * 1000,
             'min_collection_interval': self.collection_interval,
             'tags': self.tags,
-            'cloud_metadata': self.check.cloud_metadata,
+            'cloud_metadata': self._config.cloud_metadata,
             'kind': 'procedure_metrics',
             'sqlserver_rows': rows,
-            'sqlserver_version': self.check.static_info_cache.get(STATIC_INFO_VERSION, ""),
-            'sqlserver_engine_edition': self.check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
+            'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
+            'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             'ddagentversion': datadog_agent.get_version(),
             'ddagenthostname': self._check.agent_hostname,
         }
@@ -168,14 +169,14 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
         """
         # re-use the check's conn module, but set extra_key=dbm- to ensure we get our own
         # raw connection. adodbapi and pyodbc modules are thread safe, but connections are not.
-        with self.check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
-            with self.check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+        with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
+            with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 rows = self._collect_metrics_rows(cursor)
                 if not rows:
                     self.log.debug("collect_procedure_metrics: no rows returned")
                     return
                 payload = self._to_metrics_payload(rows, self._max_procedure_metrics)
-                self.check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
+                self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
 
     def run_job(self):
         self.collect_procedure_metrics()
