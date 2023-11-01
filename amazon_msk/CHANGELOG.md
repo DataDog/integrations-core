@@ -1,6 +1,6 @@
 # CHANGELOG - Amazon MSK
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 4.2.0 / 2023-09-29
 

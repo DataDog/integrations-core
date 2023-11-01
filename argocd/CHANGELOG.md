@@ -1,6 +1,6 @@
 # CHANGELOG - Argo CD
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 2.1.0 / 2023-09-29
 

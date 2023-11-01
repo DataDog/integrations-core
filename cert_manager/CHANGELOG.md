@@ -1,6 +1,6 @@
 # CHANGELOG - cert_manager
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 3.1.1 / 2023-07-10 / Agent 7.47.0
 
@@ -60,5 +60,3 @@
 ***Added***:
 
 * First release for cert_manager integration
-
- 

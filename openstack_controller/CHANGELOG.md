@@ -1,16 +1,12 @@
 # CHANGELOG - Openstack_controller
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 5.0.0 / 2023-09-29
 
 ***Changed***:
 
 * Upgrade to openstacksdk version 1.5.0 ([#15919](https://github.com/DataDog/integrations-core/pull/15919))
-
-***Added***:
-
-* Refactor integration and add support for Ironic and Octavia components ([#15918](https://github.com/DataDog/integrations-core/pull/15918))
 
 ## 4.0.0 / 2023-08-10 / Agent 7.48.0
 

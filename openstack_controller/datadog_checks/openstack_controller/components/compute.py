@@ -179,6 +179,7 @@ class Compute(Component):
                         self.check.log.debug(
                             "Skipping uptime metrics for bare metal hypervisor `%s`", item['hypervisor_hostname']
                         )
+                self.check.external_tags.append((item['hypervisor_hostname'], {'openstack': ['host_type:hypervisor']}))
 
     @Component.http_error()
     def _report_hypervisor_uptime(self, hypervisor, tags):
@@ -256,6 +257,8 @@ class Compute(Component):
                     (None, server.get('name'), server, None)
                     for server in self.check.api.get_compute_servers(project_id)
                 ]
+            aggregates = self.check.api.get_compute_aggregates()
+            self.check.log.debug("aggregates: %s", aggregates)
             for _pattern, _item_name, item, item_config in discovered_servers:
                 self.check.log.debug("item: %s", item)
                 self.check.log.debug("item_config: %s", item_config)
@@ -283,6 +286,9 @@ class Compute(Component):
                 collect_diagnostics = item_config.get('diagnostics', True) if item_config else True
                 if collect_diagnostics:
                     self._report_server_diagnostics(item, tags + server['tags'])
+                report_external_tags = item_config.get('external_tags', True) if item_config else True
+                if report_external_tags:
+                    self._report_external_tags(item, aggregates)
 
     @Component.http_error()
     def _report_server_flavor(self, server, tags):
@@ -360,3 +366,17 @@ class Compute(Component):
                     tags=tags + diagnostic['tags'] + nic_detail['tags'],
                     hostname=server['id'],
                 )
+
+    def _report_external_tags(self, server, aggregates):
+        external_tags = ['host_type:server']
+        hypervisor_hostname = server.get('OS-EXT-SRV-ATTR:hypervisor_hostname')
+        external_tags.append(f"availability_zone:{server['OS-EXT-AZ:availability_zone']}")
+        if hypervisor_hostname:
+            for aggregate in aggregates:
+                self.check.log.debug("aggregate: %s", aggregate)
+                if hypervisor_hostname in aggregate['hosts']:
+                    external_tags.append(f"aggregate:{aggregate['name']}")
+                    availability_zone_tag = f"availability_zone:{aggregate['availability_zone']}"
+                    if availability_zone_tag not in external_tags:
+                        external_tags.append(availability_zone_tag)
+        self.check.external_tags.append((server['id'], {'openstack': external_tags}))

@@ -1,6 +1,6 @@
 # CHANGELOG - JBoss/WildFly
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 2.1.1 / 2023-08-18 / Agent 7.48.0
 

@@ -83,6 +83,7 @@ class BareMetal(Component):
             self.check.gauge(IRONIC_NODE_COUNT, 1, tags=tags + node['tags'], hostname=item['uuid'])
             for metric, value in node['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + node['tags'], hostname=item['uuid'])
+            self.check.external_tags.append((item['uuid'], {'openstack': ['host_type:baremetal']}))
 
     @Component.register_global_metrics(ID)
     @Component.http_error()

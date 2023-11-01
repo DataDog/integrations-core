@@ -1,6 +1,6 @@
 # CHANGELOG - IBM WAS
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 3.1.0 / 2023-08-18 / Agent 7.48.0
 

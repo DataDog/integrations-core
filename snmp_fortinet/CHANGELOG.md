@@ -1,4 +1,3 @@
 # CHANGELOG - Fortinet
 
-## Unreleased
-
+<!-- towncrier release notes start -->
