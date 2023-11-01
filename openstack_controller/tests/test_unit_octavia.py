@@ -2194,6 +2194,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
             'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
+            'status:ALLOCATED',
         ],
     )
     aggregator.assert_metric(
@@ -2207,6 +2208,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
             'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
+            'status:ALLOCATED',
         ],
     )
     aggregator.assert_metric(
@@ -2220,6 +2222,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
             'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
+            'status:ALLOCATED',
         ],
     )
     aggregator.assert_metric(
@@ -2233,6 +2236,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
             'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
+            'status:ALLOCATED',
         ],
     )
     aggregator.assert_metric(
@@ -2246,6 +2250,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
             'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
+            'status:ALLOCATED',
         ],
     )
     aggregator.assert_metric(
@@ -2259,6 +2264,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
             'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
+            'status:ALLOCATED',
         ],
     )
     aggregator.assert_metric(
@@ -2272,6 +2278,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
             'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
+            'status:ALLOCATED',
         ],
     )
     aggregator.assert_metric(
@@ -2285,6 +2292,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
             'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
+            'status:ALLOCATED',
         ],
     )
     aggregator.assert_metric(
@@ -2298,6 +2306,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
             'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
+            'status:ALLOCATED',
         ],
     )
     aggregator.assert_metric(
@@ -2311,6 +2320,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
             'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
+            'status:ALLOCATED',
         ],
     )
     aggregator.assert_metric(
@@ -2324,6 +2334,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
             'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
+            'status:ALLOCATED',
         ],
     )
     aggregator.assert_metric(
@@ -2336,6 +2347,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
             'loadbalancer_id:ae54877c-b186-4b90-b71c-d331b9e732bc',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
+            'status:ALLOCATED',
         ],
     )
     aggregator.assert_metric(
@@ -2349,6 +2361,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
             'loadbalancer_id:ae54877c-b186-4b90-b71c-d331b9e732bc',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
+            'status:ALLOCATED',
         ],
     )
     aggregator.assert_metric(
@@ -2362,6 +2375,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
             'loadbalancer_id:ae54877c-b186-4b90-b71c-d331b9e732bc',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
+            'status:ALLOCATED',
         ],
     )
     aggregator.assert_metric(
@@ -2375,6 +2389,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
             'loadbalancer_id:ae54877c-b186-4b90-b71c-d331b9e732bc',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
+            'status:ALLOCATED',
         ],
     )
     aggregator.assert_metric(
@@ -2388,6 +2403,7 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
             'loadbalancer_id:ae54877c-b186-4b90-b71c-d331b9e732bc',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
+            'status:ALLOCATED',
         ],
     )
     aggregator.assert_metric(
@@ -2401,5 +2417,6 @@ def test_amphorae_metrics(aggregator, check, dd_run_check):
             'loadbalancer_id:ae54877c-b186-4b90-b71c-d331b9e732bc',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
+            'status:ALLOCATED',
         ],
     )

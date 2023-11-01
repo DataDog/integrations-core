@@ -322,7 +322,12 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
     ('mock_http_get', 'connection_compute', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/compute/v2.1/limits': MockResponse(status_code=500)}},
+            {
+                'http_error': {
+                    '/compute/v2.1/limits?tenant_id=1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
+                    '/compute/v2.1/limits?tenant_id=6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                }
+            },
             None,
             configs.REST,
             ApiType.REST,
@@ -330,7 +335,14 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
         ),
         pytest.param(
             None,
-            {'http_error': {'limits': MockResponse(status_code=500)}},
+            {
+                'http_error': {
+                    'limits': {
+                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                    }
+                }
+            },
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -395,57 +407,232 @@ def test_limits_metrics(aggregator, check, dd_run_check):
     aggregator.assert_metric(
         'openstack.nova.limit.absolute.max_total_instances',
         value=10,
-        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_name:admin',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.limit.absolute.max_total_instances',
+        value=10,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+        ],
+    )
+
+    aggregator.assert_metric(
+        'openstack.nova.limit.absolute.max_total_cores',
+        value=20,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_name:admin',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
     )
     aggregator.assert_metric(
         'openstack.nova.limit.absolute.max_total_cores',
         value=20,
-        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+        ],
+    )
+
+    aggregator.assert_metric(
+        'openstack.nova.limit.absolute.max_total_ram_size',
+        value=51200,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_name:admin',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
     )
     aggregator.assert_metric(
         'openstack.nova.limit.absolute.max_total_ram_size',
         value=51200,
-        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+        ],
+    )
+
+    aggregator.assert_metric(
+        'openstack.nova.limit.absolute.max_server_meta',
+        value=128,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_name:admin',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
     )
     aggregator.assert_metric(
         'openstack.nova.limit.absolute.max_server_meta',
         value=128,
-        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+        ],
+    )
+
+    aggregator.assert_metric(
+        'openstack.nova.limit.absolute.max_total_keypairs',
+        value=100,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_name:admin',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
     )
     aggregator.assert_metric(
         'openstack.nova.limit.absolute.max_total_keypairs',
         value=100,
-        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+        ],
+    )
+
+    aggregator.assert_metric(
+        'openstack.nova.limit.absolute.max_server_groups',
+        value=10,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_name:admin',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
     )
     aggregator.assert_metric(
         'openstack.nova.limit.absolute.max_server_groups',
         value=10,
-        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+        ],
+    )
+
+    aggregator.assert_metric(
+        'openstack.nova.limit.absolute.max_server_group_members',
+        value=10,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_name:admin',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
     )
     aggregator.assert_metric(
         'openstack.nova.limit.absolute.max_server_group_members',
         value=10,
-        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+        ],
+    )
+
+    aggregator.assert_metric(
+        'openstack.nova.limit.absolute.total_ram_used',
+        value=2048,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_name:admin',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
     )
     aggregator.assert_metric(
         'openstack.nova.limit.absolute.total_ram_used',
         value=2048,
-        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+        ],
+    )
+
+    aggregator.assert_metric(
+        'openstack.nova.limit.absolute.total_cores_used',
+        value=8,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_name:admin',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
     )
     aggregator.assert_metric(
         'openstack.nova.limit.absolute.total_cores_used',
         value=8,
-        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+        ],
+    )
+
+    aggregator.assert_metric(
+        'openstack.nova.limit.absolute.total_instances_used',
+        value=8,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_name:admin',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
     )
     aggregator.assert_metric(
         'openstack.nova.limit.absolute.total_instances_used',
         value=8,
-        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+        ],
+    )
+
+    aggregator.assert_metric(
+        'openstack.nova.limit.absolute.total_server_groups_used',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_name:admin',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+        ],
     )
     aggregator.assert_metric(
         'openstack.nova.limit.absolute.total_server_groups_used',
         value=0,
-        tags=['keystone_server:http://127.0.0.1:8080/identity'],
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+        ],
     )
 
 
