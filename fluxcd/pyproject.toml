@@ -1,7 +1,6 @@
 [build-system]
 requires = [
     "hatchling>=0.13.0",
-    "setuptools<61",
 ]
 build-backend = "hatchling.build"
 
@@ -17,14 +16,14 @@ keywords = [
     "fluxcd",
 ]
 authors = [
-    { name = "Melchior MOULIN", email = "melchior.moulin@blablacar.com" },
+    { name = "Datadog", email = "packages@datadoghq.com" },
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
 ]
@@ -39,7 +38,7 @@ dynamic = [
 deps = []
 
 [project.urls]
-Source = "https://github.com/DataDog/integrations-extras"
+Source = "https://github.com/DataDog/integrations-core"
 
 [tool.hatch.version]
 path = "datadog_checks/fluxcd/__about__.py"
