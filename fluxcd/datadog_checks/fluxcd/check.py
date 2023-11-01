@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2023-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.fluxcd.config_models import ConfigMixin
 from datadog_checks.fluxcd.metrics import METRIC_MAP
