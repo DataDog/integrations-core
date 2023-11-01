@@ -638,6 +638,10 @@ coverage:
         target: 75
         flags:
         - etcd
+      karpenter:
+        target: 75
+        flags:
+        - karpenter
       vSphere:
         target: 75
         flags:
@@ -1004,6 +1008,11 @@ flags:
     paths:
     - kafka_consumer/datadog_checks/kafka_consumer
     - kafka_consumer/tests
+  karpenter:
+    carryforward: true
+    paths:
+    - karpenter/datadog_checks/karpenter
+    - karpenter/tests
   kong:
     carryforward: true
     paths:
