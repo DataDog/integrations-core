@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from concurrent.futures import ThreadPoolExecutor
+
 import pytest
 
 from datadog_checks.sqlserver import SQLServer
@@ -319,6 +321,47 @@ def test_check_tempdb_file_space_usage_metrics(
     for metric_name, _, _ in TEMPDB_FILE_SPACE_USAGE_METRICS:
         expected_tags = tags + ['database:tempdb', 'database_id:2', 'db:tempdb']
         aggregator.assert_metric(metric_name, tags=expected_tags, hostname=sqlserver_check.resolved_hostname, count=1)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_check_incr_fraction_metrics(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+    bob_conn,
+):
+    instance_docker_metrics['database'] = 'datadog_test'
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    sqlserver_check.run()
+
+    # Creating a test case to assert changes in the "Average Latch Wait Time (ms)" may be a bit tricky
+    # since latches are internal mechanisms used by SQL Server to manage access to its data structures.
+    # However, we can try to generate latch contention artificially by execute from multiple threads to
+    # increase the chance of getting a non-zero value
+    executor = ThreadPoolExecutor(max_workers=5)
+    for _ in range(5):
+        executor.submit(
+            bob_conn.execute_with_retries,
+            query="SELECT * FROM datadog_test.dbo.ϑings WHERE name = 'foo'",
+            database=instance_docker_metrics['database'],
+            retries=1,
+            return_result=False,
+        )
+    executor.shutdown(wait=True)
+
+    sqlserver_check.run()
+
+    tags = instance_docker_metrics.get('tags', [])
+
+    check_sqlserver_can_connect(aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags)
+
+    for metric_name in INCR_FRACTION_METRICS:
+        aggregator.assert_metric(metric_name, tags=tags, hostname=sqlserver_check.resolved_hostname, count=1)
+
+    sqlserver_check.cancel()
 
 
 def check_sqlserver_can_connect(aggregator, host, resolved_hostname, tags):
