@@ -145,14 +145,26 @@ def datadog_conn_docker(instance_docker):
 
 
 @pytest.fixture
-def bob_conn(instance_docker):
-    # Make DB connection
-
+def bob_conn_str(instance_docker):
     conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
         instance_docker['driver'], instance_docker['host'], "bob", "Password12!"
     )
-    conn = SelfHealingConnection(conn_str)
+    return conn_str
+
+
+@pytest.fixture
+def bob_conn(bob_conn_str):
+    # Make DB connection
+    conn = SelfHealingConnection(bob_conn_str)
     conn.reconnect()
+    yield conn
+    conn.close()
+
+
+@pytest.fixture
+def bob_conn_raw(bob_conn_str):
+    # Make DB connection
+    conn = _common_pyodbc_connect(bob_conn_str)
     yield conn
     conn.close()
 

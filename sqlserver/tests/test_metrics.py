@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from concurrent.futures import ThreadPoolExecutor
+import copy
 
 import pytest
 
@@ -13,11 +13,13 @@ from datadog_checks.sqlserver.const import (
     DATABASE_FRAGMENTATION_METRICS,
     DATABASE_INDEX_METRICS,
     DATABASE_MASTER_FILES,
+    DATABASE_SERVICE_CHECK_NAME,
     DATABASE_STATS_METRICS,
     DBM_MIGRATED_METRICS,
     INSTANCE_METRICS,
     INSTANCE_METRICS_DATABASE,
     OS_SCHEDULER_METRICS,
+    SERVICE_CHECK_NAME,
     TASK_SCHEDULER_METRICS,
     TEMPDB_FILE_SPACE_USAGE_METRICS,
 )
@@ -74,7 +76,9 @@ def test_check_instance_metrics(
 
     tags = instance_docker_metrics.get('tags', [])
 
-    check_sqlserver_can_connect(aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags)
+    check_sqlserver_can_connect(
+        aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags, database_autodiscovery
+    )
 
     for metric_name, _, _ in INSTANCE_METRICS:
         # TODO: we should find a better way to test these metrics
@@ -119,7 +123,9 @@ def test_check_database_metrics(
 
     tags = instance_docker_metrics.get('tags', [])
 
-    check_sqlserver_can_connect(aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags)
+    check_sqlserver_can_connect(
+        aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags, database_autodiscovery
+    )
 
     dbs = AUTODISCOVERY_DBS if database_autodiscovery else ['master']
 
@@ -288,7 +294,9 @@ def test_check_db_fragmentation_metrics(
 
     tags = instance_docker_metrics.get('tags', [])
 
-    check_sqlserver_can_connect(aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags)
+    check_sqlserver_can_connect(
+        aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags, database_autodiscovery
+    )
 
     dbs = AUTODISCOVERY_DBS if database_autodiscovery else ['master']
 
@@ -330,44 +338,62 @@ def test_check_incr_fraction_metrics(
     dd_run_check,
     init_config,
     instance_docker_metrics,
-    bob_conn,
+    bob_conn_raw,
 ):
     instance_docker_metrics['database'] = 'datadog_test'
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
 
     sqlserver_check.run()
+    previous_value = copy.deepcopy(sqlserver_check.sqlserver_incr_fraction_metric_previous_values)
+
+    cursor = bob_conn_raw.cursor()
 
     # Creating a test case to assert changes in the "Average Latch Wait Time (ms)" may be a bit tricky
     # since latches are internal mechanisms used by SQL Server to manage access to its data structures.
-    # However, we can try to generate latch contention artificially by execute from multiple threads to
-    # increase the chance of getting a non-zero value
-    executor = ThreadPoolExecutor(max_workers=5)
-    for _ in range(5):
-        executor.submit(
-            bob_conn.execute_with_retries,
-            query="SELECT * FROM datadog_test.dbo.ϑings WHERE name = 'foo'",
-            database=instance_docker_metrics['database'],
-            retries=1,
-            return_result=False,
-        )
-    executor.shutdown(wait=True)
+    # However, we can try to generate latch contention artificially by creating a hot spot in tempdb and
+    # aggressively manipulating temporary tables. But this approach does not guarantee that the latch
+    # contention will be high enough to trigger a change in the "Average Latch Wait Time (ms)" metric.
+    cursor.execute(
+        '''
+    BEGIN
+        CREATE TABLE #TempContention (
+            ID INT IDENTITY PRIMARY KEY,
+            SomeData CHAR(8000) -- Large row size to consume more space
+        );
 
+        DECLARE @i INT = 0;
+        WHILE @i < 10000
+        BEGIN
+            INSERT INTO #TempContention (SomeData) VALUES (REPLICATE('X',8000));
+            SET @i = @i + 1;
+        END
+        DROP TABLE #TempContention;
+    END
+    '''
+    )
     sqlserver_check.run()
+    print(sqlserver_check.sqlserver_incr_fraction_metric_previous_values)
+    cursor.close()
 
     tags = instance_docker_metrics.get('tags', [])
 
     check_sqlserver_can_connect(aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags)
 
     for metric_name in INCR_FRACTION_METRICS:
+        key = "{}:{}".format(metric_name, "".join(tags))
+        if previous_value[key] == sqlserver_check.sqlserver_incr_fraction_metric_previous_values[key]:
+            continue
         aggregator.assert_metric(metric_name, tags=tags, hostname=sqlserver_check.resolved_hostname, count=1)
 
     sqlserver_check.cancel()
 
 
-def check_sqlserver_can_connect(aggregator, host, resolved_hostname, tags):
+def check_sqlserver_can_connect(aggregator, host, resolved_hostname, tags, autodiscovery=False):
     expected_tags = tags + [
         'connection_host:{}'.format(host),
         'sqlserver_host:{}'.format(resolved_hostname),
         'db:master',
     ]
-    aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK, tags=expected_tags)
+    aggregator.assert_service_check(SERVICE_CHECK_NAME, status=SQLServer.OK, tags=expected_tags)
+    if autodiscovery:
+        aggregator.assert_service_check(DATABASE_SERVICE_CHECK_NAME, status=SQLServer.OK, tags=expected_tags)
