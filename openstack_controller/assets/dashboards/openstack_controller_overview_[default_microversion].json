@@ -1517,7 +1517,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": " ",
                             "title_align": "left",
                             "title_size": "16",
@@ -1565,7 +1564,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:openstack.ironic.conductor.up{$Keystone_Server_URL,$RegionId} by {conductor_hostname}"
+                                            "query": "sum:openstack.ironic.conductor.up{$Keystone_Server_URL,$RegionId}"
                                         },
                                         {
                                             "aggregator": "last",
@@ -1776,7 +1775,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Conductors Status",
                             "title_align": "left",
                             "title_size": "16",
@@ -1820,7 +1818,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Node Status",
                             "title_align": "left",
                             "title_size": "16",
@@ -2276,31 +2273,30 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.nova.server.flavor.vcpus{$Domain,$Project,$Server,$Hypervisor,$Flavor,$Server_Status,$Keystone_Server_URL,$RegionId} by {domain_id,project_name,server_id,server_name,server_status,instance_hostname}"
+                                            "query": "avg:openstack.nova.server.flavor.vcpus{$Domain,$Project,$Server,$Hypervisor,$Flavor,$Server_Status,$Keystone_Server_URL,$RegionId} by {project_name,server_id,server_name,server_status,instance_hostname,instance_name}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:openstack.nova.server.flavor.ram{$Domain,$Project,$Server,$Hypervisor,$Flavor,$Server_Status,$Keystone_Server_URL,$RegionId} by {domain_id,project_name,server_id,server_name,server_status,instance_hostname}"
+                                            "query": "avg:openstack.nova.server.flavor.ram{$Domain,$Project,$Server,$Hypervisor,$Flavor,$Server_Status,$Keystone_Server_URL,$RegionId} by {project_name,server_id,server_name,server_status,instance_hostname}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "avg:openstack.nova.server.flavor.disk{$Domain,$Project,$Server,$Hypervisor,$Flavor,$Server_Status,$Keystone_Server_URL,$RegionId} by {domain_id,project_name,server_id,server_name,server_status,instance_hostname}"
+                                            "query": "avg:openstack.nova.server.flavor.disk{$Domain,$Project,$Server,$Hypervisor,$Flavor,$Server_Status,$Keystone_Server_URL,$RegionId} by {project_name,server_id,server_name,server_status,instance_hostname}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query4",
-                                            "query": "avg:openstack.nova.server.diagnostic.uptime{$Domain,$Project,$Server,$Hypervisor,$Flavor,$Server_Status,$Keystone_Server_URL,$RegionId} by {domain_id,project_name,server_id,server_name,server_status,instance_hostname}"
+                                            "query": "avg:openstack.nova.server.diagnostic.uptime{$Domain,$Project,$Server,$Hypervisor,$Flavor,$Server_Status,$Keystone_Server_URL,$RegionId} by {project_name,server_id,server_name,server_status,instance_hostname}"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Servers",
                             "title_align": "left",
                             "title_size": "16",
@@ -3344,7 +3340,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:openstack.octavia.loadbalancer.admin_state_up{$Keystone_Server_URL,$Domain,$Project,$RegionId} by {loadbalancer_id}"
+                                            "query": "sum:openstack.octavia.loadbalancer.count{$Keystone_Server_URL,$Domain,$Project,$RegionId}"
                                         },
                                         {
                                             "aggregator": "last",
@@ -3356,10 +3352,11 @@
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
-                                    "include_zero": false
+                                    "include_zero": true
                                 }
                             },
                             "title": "Number of Load Balancers",
@@ -3398,7 +3395,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:openstack.octavia.loadbalancer.admin_state_up{$Keystone_Server_URL,$Domain,$Project,provisioning_status:active,$RegionId} by {loadbalancer_id}"
+                                            "query": "avg:openstack.octavia.loadbalancer.admin_state_up{$Keystone_Server_URL,$Domain,$Project,provisioning_status:active,$RegionId}"
                                         },
                                         {
                                             "aggregator": "last",
@@ -3452,7 +3449,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.octavia.loadbalancer.active_connections{$Keystone_Server_URL,$Domain,$Project,$LoadBalancer,$Listener,$RegionId} by {loadbalancer_name}"
+                                            "query": "avg:openstack.octavia.loadbalancer.stats.active_connections{$Keystone_Server_URL,$Domain,$Project,$LoadBalancer,$Listener,$RegionId} by {loadbalancer_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -3500,7 +3497,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.octavia.loadbalancer.total_connections{$Keystone_Server_URL,$Domain,$Project,$LoadBalancer,$Listener,$RegionId} by {loadbalancer_id}"
+                                            "query": "avg:openstack.octavia.loadbalancer.stats.total_connections{$Keystone_Server_URL,$Domain,$Project,$LoadBalancer,$Listener,$RegionId} by {loadbalancer_id}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -3600,7 +3597,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.octavia.loadbalancer.bytes_in{$Keystone_Server_URL,$Domain,$Project,$LoadBalancer,$Listener,$RegionId} by {loadbalancer_name}"
+                                            "query": "avg:openstack.octavia.loadbalancer.stats.bytes_in{$Keystone_Server_URL,$Domain,$Project,$LoadBalancer,$Listener,$RegionId} by {loadbalancer_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -3648,7 +3645,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.octavia.loadbalancer.bytes_out{$Keystone_Server_URL,$Domain,$Project,$LoadBalancer,$Listener,$RegionId} by {loadbalancer_name}"
+                                            "query": "avg:openstack.octavia.loadbalancer.stats.bytes_out{$Keystone_Server_URL,$Domain,$Project,$LoadBalancer,$Listener,$RegionId} by {loadbalancer_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -3696,7 +3693,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.octavia.loadbalancer.request_errors{$Keystone_Server_URL,$Domain,$Project,$LoadBalancer,$Listener,$RegionId} by {loadbalancer_name}"
+                                            "query": "avg:openstack.octavia.loadbalancer.stats.request_errors{$Keystone_Server_URL,$Domain,$Project,$LoadBalancer,$Listener,$RegionId} by {loadbalancer_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -3755,13 +3752,13 @@
                                     ],
                                     "queries": [
                                         {
-                                            "aggregator": "last",
+                                            "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:openstack.octavia.listener.active_connections{$Keystone_Server_URL,$Domain,$Project,$RegionId} by {listener_id}"
+                                            "query": "sum:openstack.octavia.listener.count{$Keystone_Server_URL,$Domain,$Project,$RegionId}"
                                         },
                                         {
-                                            "aggregator": "last",
+                                            "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query2",
                                             "query": "sum:openstack.controller{$Keystone_Server_URL,$RegionId}"
@@ -3771,10 +3768,7 @@
                                 }
                             ],
                             "timeseries_background": {
-                                "type": "area",
-                                "yaxis": {
-                                    "include_zero": false
-                                }
+                                "type": "area"
                             },
                             "title": "Number of Listeners",
                             "title_align": "left",
@@ -3887,7 +3881,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.octavia.listener.active_connections{$Keystone_Server_URL,$Domain,$Project,$Listener,$LoadBalancer,$RegionId} by {listener_name}"
+                                            "query": "avg:openstack.octavia.listener.stats.active_connections{$Keystone_Server_URL,$Domain,$Project,$Listener,$LoadBalancer,$RegionId} by {listener_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -3935,7 +3929,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.octavia.listener.total_connections{$Keystone_Server_URL,$Domain,$Project,$Listener,$LoadBalancer,$RegionId} by {listener_name}"
+                                            "query": "avg:openstack.octavia.listener.stats.total_connections{$Keystone_Server_URL,$Domain,$Project,$Listener,$LoadBalancer,$RegionId} by {listener_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -3981,7 +3975,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.octavia.listener.active_connections{$Keystone_Server_URL,$Domain,$Project,$Listener,$LoadBalancer,$RegionId} by {domain_id,project_name,listener_name,listener_id,loadbalancer_name,loadbalancer_id}"
+                                            "query": "avg:openstack.octavia.listener.stats.active_connections{$Keystone_Server_URL,$Domain,$Project,$Listener,$LoadBalancer,$RegionId} by {domain_id,project_name,listener_name,listener_id,loadbalancer_id}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -4023,7 +4017,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.octavia.listener.bytes_in{$Keystone_Server_URL,$Domain,$Project,$Listener,$LoadBalancer,$RegionId} by {listener_name}"
+                                            "query": "avg:openstack.octavia.listener.stats.bytes_in{$Keystone_Server_URL,$Domain,$Project,$Listener,$LoadBalancer,$RegionId} by {listener_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -4071,7 +4065,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.octavia.listener.bytes_out{$Keystone_Server_URL,$Domain,$Project,$Listener,$LoadBalancer,$RegionId} by {listener_name}"
+                                            "query": "avg:openstack.octavia.listener.stats.bytes_out{$Keystone_Server_URL,$Domain,$Project,$Listener,$LoadBalancer,$RegionId} by {listener_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -4119,7 +4113,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.octavia.listener.request_errors{$Keystone_Server_URL,$Domain,$Project,$Listener,$LoadBalancer,$RegionId} by {listener_name}"
+                                            "query": "avg:openstack.octavia.listener.stats.request_errors{$Keystone_Server_URL,$Domain,$Project,$Listener,$LoadBalancer,$RegionId} by {listener_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -4181,7 +4175,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:openstack.octavia.pool.admin_state_up{$Keystone_Server_URL,$Domain,$Project,$RegionId} by {pool_id}"
+                                            "query": "sum:openstack.octavia.pool.count{$Keystone_Server_URL,$Domain,$Project,$RegionId}"
                                         },
                                         {
                                             "aggregator": "last",
@@ -4193,10 +4187,11 @@
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
-                                    "include_zero": false
+                                    "include_zero": true
                                 }
                             },
                             "title": "Number of Pools",
@@ -4218,13 +4213,6 @@
                             "precision": 2,
                             "requests": [
                                 {
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "palette": "white_on_green",
-                                            "value": 0
-                                        }
-                                    ],
                                     "formulas": [
                                         {
                                             "formula": "query1 / query2"
@@ -4235,10 +4223,10 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:openstack.octavia.pool.admin_state_up{$Keystone_Server_URL,$Domain,$Project,operating_status:online,$RegionId} by {pool_name}"
+                                            "query": "sum:openstack.octavia.pool.admin_state_up{$Keystone_Server_URL,$Domain,$Project,operating_status:online,$RegionId}"
                                         },
                                         {
-                                            "aggregator": "last",
+                                            "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query2",
                                             "query": "sum:openstack.controller{$Keystone_Server_URL,$RegionId}"
@@ -4247,6 +4235,13 @@
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            },
                             "title": "Pools Online",
                             "title_align": "left",
                             "title_size": "16",
@@ -4283,7 +4278,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:openstack.octavia.pool.admin_state_up{$Keystone_Server_URL,$Domain,$Project,provisioning_status:active,$RegionId} by {pool_id}"
+                                            "query": "sum:openstack.octavia.pool.admin_state_up{$Keystone_Server_URL,$Domain,$Project,provisioning_status:active,$RegionId}"
                                         },
                                         {
                                             "aggregator": "last",
@@ -4295,10 +4290,11 @@
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
-                                    "include_zero": false
+                                    "include_zero": true
                                 }
                             },
                             "title": "Pools Provisioned",
@@ -4337,7 +4333,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:openstack.octavia.pool.admin_state_up{$Keystone_Server_URL,$Domain,$Project,operating_status:error,$RegionId} by {pool_id}"
+                                            "query": "sum:openstack.octavia.pool.admin_state_up{$Keystone_Server_URL,$Domain,$Project,operating_status:error,$RegionId}"
                                         },
                                         {
                                             "aggregator": "last",
@@ -4349,10 +4345,11 @@
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
-                                    "include_zero": false
+                                    "include_zero": true
                                 }
                             },
                             "title": "Pools Error",
@@ -4389,7 +4386,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.octavia.pool.admin_state_up{$Keystone_Server_URL,$Domain,$Project,$Pool,$Listener,$HealthMonitor,$RegionId} by {domain_id,project_name,pool_name,pool_id,listener_name,healthmonitor_name,provisioning_status,operating_status}"
+                                            "query": "avg:openstack.octavia.pool.admin_state_up{$Keystone_Server_URL,$Domain,$Project,$Pool,$Listener,$HealthMonitor,$RegionId} by {domain_id,project_name,pool_name,pool_id,provisioning_status,operating_status}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -4445,7 +4442,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:openstack.octavia.member.admin_state_up{$Keystone_Server_URL,$Domain,$Project,$RegionId}"
+                                            "query": "sum:openstack.octavia.pool.member.count{$Keystone_Server_URL,$Domain,$Project,$RegionId}"
                                         },
                                         {
                                             "aggregator": "last",
@@ -4499,7 +4496,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:openstack.octavia.member.admin_state_up{$Keystone_Server_URL,$Domain,$Project,operating_status:online,$RegionId} by {member_id}"
+                                            "query": "sum:openstack.octavia.pool.member.admin_state_up{$Keystone_Server_URL,$Domain,$Project,operating_status:online,$RegionId}"
                                         },
                                         {
                                             "aggregator": "last",
@@ -4512,7 +4509,7 @@
                                 }
                             ],
                             "timeseries_background": {
-                                "type": "area",
+                                "type": "bars",
                                 "yaxis": {
                                     "include_zero": false
                                 }
@@ -4553,7 +4550,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.octavia.member.weight{$Keystone_Server_URL,$Domain,$Project,$Pool,$HealthMonitor,$RegionId} by {member_name}"
+                                            "query": "avg:openstack.octavia.pool.member.weight{$Keystone_Server_URL,$Domain,$Project,$Pool,$HealthMonitor,$RegionId} by {member_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -4599,7 +4596,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.octavia.pool.admin_state_up{$Keystone_Server_URL,$Domain,$Project,$Pool,$HealthMonitor,$RegionId} by {domain_id,project_name,member_name,member_id,pool_name,healthmonitor_name,operating_status,provisioning_status}"
+                                            "query": "avg:openstack.octavia.pool.member.admin_state_up{$Keystone_Server_URL,$Domain,$Project,$Pool,$HealthMonitor,$RegionId} by {domain_id,project_name,pool_name,operating_status,provisioning_status,pool_id}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -4655,7 +4652,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:openstack.octavia.healthmonitor.admin_state_up{$Keystone_Server_URL,$Domain,$Project,$RegionId} by {healthmonitor_id}"
+                                            "query": "sum:openstack.octavia.healthmonitor.count{$Keystone_Server_URL,$Domain,$Project,$RegionId}"
                                         },
                                         {
                                             "aggregator": "last",
@@ -4667,10 +4664,11 @@
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
-                                    "include_zero": false
+                                    "include_zero": true
                                 }
                             },
                             "title": "Number of Health Monitors",
@@ -4709,7 +4707,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:openstack.octavia.healthmonitor.admin_state_up{$Keystone_Server_URL,$Domain,$Project,provisioning_status:active,$RegionId} by {healthmonitor_id}"
+                                            "query": "sum:openstack.octavia.healthmonitor.admin_state_up{$Keystone_Server_URL,$Domain,$Project,provisioning_status:active,$RegionId}"
                                         },
                                         {
                                             "aggregator": "last",
@@ -4809,7 +4807,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.octavia.healthmonitor.admin_state_up{$Keystone_Server_URL,$Domain,$Project,$HealthMonitor,$Pool,$RegionId} by {domain_id,project_name,healthmonitor_name,healthmonitor_id,pool_name,type,operating_status,provisioning_status}"
+                                            "query": "avg:openstack.octavia.healthmonitor.admin_state_up{$Keystone_Server_URL,$Domain,$Project,$HealthMonitor,$Pool,$RegionId} by {domain_id,project_name,healthmonitor_name,healthmonitor_id,type,operating_status,provisioning_status}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -4970,7 +4968,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:openstack.octavia.amphora.active_connections{$Keystone_Server_URL,$Domain,$Project,$RegionId} by {amphora_id}"
+                                            "query": "sum:openstack.octavia.amphora.count{$Keystone_Server_URL,$Domain,$Project,$RegionId}"
                                         },
                                         {
                                             "aggregator": "last",
@@ -4982,10 +4980,11 @@
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
-                                    "include_zero": false
+                                    "include_zero": true
                                 }
                             },
                             "title": "Number of Amphora",
@@ -5024,7 +5023,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:openstack.octavia.amphora.active_connections{$Keystone_Server_URL,$Domain,$Project,status:allocated,$RegionId} by {amphora_id}"
+                                            "query": "sum:openstack.octavia.amphora.count{$Keystone_Server_URL,$Domain,$Project,$RegionId, status:allocated}"
                                         },
                                         {
                                             "aggregator": "last",
@@ -5036,10 +5035,11 @@
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
-                                    "include_zero": false
+                                    "include_zero": true
                                 }
                             },
                             "title": "Amphorae Up",
@@ -5078,7 +5078,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.octavia.amphora.active_connections{$Keystone_Server_URL,$Domain,$Project,$RegionId} by {amphora_id}"
+                                            "query": "avg:openstack.octavia.amphora.stats.active_connections{$Keystone_Server_URL,$Domain,$Project,$RegionId} by {amphora_id}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -5126,7 +5126,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.octavia.amphora.total_connections{$Keystone_Server_URL,$Domain,$Project,$RegionId} by {amphora_id}"
+                                            "query": "avg:openstack.octavia.amphora.stats.total_connections{$Keystone_Server_URL,$Domain,$Project,$RegionId} by {amphora_id}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -5172,7 +5172,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.octavia.amphora.active_connections{$Keystone_Server_URL,$Domain,$Project,$RegionId} by {domain_id,project_name,amphora_id,amphora_compute_id,status}"
+                                            "query": "avg:openstack.octavia.amphora.stats.active_connections{$Keystone_Server_URL,$Domain,$Project,$RegionId} by {domain_id,project_name,amphora_id,status}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -5214,7 +5214,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.octavia.amphora.bytes_in{$Keystone_Server_URL,$Domain,$Project,$RegionId} by {amphora_id}"
+                                            "query": "avg:openstack.octavia.amphora.stats.bytes_in{$Keystone_Server_URL,$Domain,$Project,$RegionId} by {amphora_id}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -5262,7 +5262,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.octavia.amphora.bytes_out{$Keystone_Server_URL,$Domain,$Project,$RegionId} by {amphora_id}"
+                                            "query": "avg:openstack.octavia.amphora.stats.bytes_out{$Keystone_Server_URL,$Domain,$Project,$RegionId} by {amphora_id}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -5310,7 +5310,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.octavia.amphora.request_errors{$Keystone_Server_URL,$Domain,$Project,$RegionId} by {amphora_id}"
+                                            "query": "avg:openstack.octavia.amphora.stats.request_errors{$Keystone_Server_URL,$Domain,$Project,$RegionId} by {amphora_id}"
                                         }
                                     ],
                                     "response_format": "timeseries",
