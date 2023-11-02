@@ -74,7 +74,7 @@ def _get_index_for_keyword(text, keyword):
 
 def extract_sql_comments(text):
     if not text:
-        return [], False, None
+        return [], None
     in_single_line_comment = False
     in_multi_line_comment = False
     comment_start = None
