@@ -118,6 +118,7 @@
               "title": "Under Replicated ",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -148,7 +149,7 @@
                       "aggregator": "avg",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:dd.kafka.replication.under_replicated_partitions{$datacenter}.weighted()"
+                      "query": "sum:kafka.replication.under_replicated_partitions{$datacenter}.weighted()"
                     }
                   ],
                   "response_format": "scalar"
@@ -589,12 +590,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kafka.net.bytes_in.rate{$datacenter,$kafka_node}.weighted()"
+                      "query": "sum:kafka.net.bytes_in.rate{$datacenter}.weighted()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:kafka.net.bytes_out.rate{$datacenter,$kafka_node}.weighted()"
+                      "query": "sum:kafka.net.bytes_out.rate{$datacenter}.weighted()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1582,7 +1583,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:jvm.gc.cms.count{$datacenter,$kafka_node} by {host}.weighted()"
+                      "query": "sum:jvm.gc.cms.count{$datacenter} by {host}.weighted()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1621,7 +1622,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "max:jvm.gc.parnew.time{$datacenter,$kafka_node} by {host}"
+                      "query": "max:jvm.gc.parnew.time{$datacenter} by {host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1665,7 +1666,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:jvm.gc.collectors.old.collection_time{$datacenter,$kafka_node} by {host}"
+                      "query": "sum:jvm.gc.collectors.old.collection_time{$datacenter} by {host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1853,12 +1854,6 @@
     }
   ],
   "template_variables": [
-    {
-      "name": "kafka_node",
-      "prefix": "kafka",
-      "available_values": [],
-      "default": "*"
-    },
     {
       "name": "consumer_group",
       "prefix": "consumer_group",

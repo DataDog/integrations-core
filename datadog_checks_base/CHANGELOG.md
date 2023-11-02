@@ -2,6 +2,14 @@
 
 <!-- towncrier release notes start -->
 
+## 34.1.2 / 2023-11-02
+
+***Fixed***:
+
+* Bump librdkafka and confluent-kafka to v2.3.0 ([#16088](https://github.com/DataDog/integrations-core/pull/16088))
+* Add the ability to assert the `external_tags` when running tests ([#16089](https://github.com/DataDog/integrations-core/pull/16089))
+* Do not verify the tags order by default when testing the external tags ([#16105](https://github.com/DataDog/integrations-core/pull/16105))
+
 ## 34.1.1 / 2023-10-26
 
 ***Fixed***:
