@@ -364,7 +364,7 @@ def test_statement_metrics_and_plans(
         assert 'statement_text' not in row, "statement_text field should not be forwarded"
         assert row['is_encrypted'] == is_encrypted
         if not is_encrypted:
-            assert (row['object_name'] is not None) == is_proc
+            assert row['is_proc'] == is_proc
         if is_proc and not is_encrypted:
             assert row['procedure_signature'], "missing proc signature"
             assert row['procedure_name'], "missing proc name"

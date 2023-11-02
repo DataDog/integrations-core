@@ -22,7 +22,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.utils import PROC_CHAR_LIMIT, extract_sql_comments
+from datadog_checks.sqlserver.utils import PROC_CHAR_LIMIT, extract_sql_comments_and_procedure_name
 
 try:
     import datadog_agent
@@ -101,8 +101,6 @@ select
         ELSE statement_end_offset END
             - statement_start_offset) / 2) + 1) AS statement_text,
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
-    OBJECT_NAME(sproc_object_id, s.dbid) as object_name,
-    OBJECT_SCHEMA_NAME(sproc_object_id, s.dbid) as schema_name,
     encrypted as is_encrypted,
     s.* from qstats_aggr_split s
     cross apply sys.dm_exec_sql_text(s.plan_handle) qt
@@ -140,8 +138,6 @@ select
         ELSE statement_end_offset
     END - statement_start_offset) / 2) + 1) AS statement_text,
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
-    OBJECT_NAME(sproc_object_id, sproc_database_id) as object_name,
-    OBJECT_SCHEMA_NAME(sproc_object_id, sproc_database_id) as schema_name,
     encrypted as is_encrypted,
     s.* from qstats_aggr_split s
     cross apply sys.dm_exec_sql_text(s.plan_handle) qt
@@ -313,23 +309,22 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         normalized_rows = []
 
         for row in rows:
-            is_proc = row['object_name'] is not None
 
             try:
                 # Attempt to obfuscate SQL statement with metadata
                 procedure_statement = None
                 statement = obfuscate_sql_with_metadata(row['statement_text'], self._config.obfuscator_options)
-                comments, _ = extract_sql_comments(row['text'])
+                comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
 
-                if is_proc:
+                if row['is_proc']:
                     procedure_statement = obfuscate_sql_with_metadata(row['text'], self._config.obfuscator_options)
 
             except Exception as e:
                 if self._config.log_unobfuscated_queries:
-                    raw_query_text = row['text'] if is_proc else row['statement_text']
+                    raw_query_text = row['text'] if row.get('is_proc', False) else row['statement_text']
                     self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", raw_query_text, e)
                 else:
-                    self.log.debug("Failed to obfuscate query | err=[%s] | query=[%s]", e, row['text'])
+                    self.log.debug("Failed to obfuscate query | err=[%s]", e)
                 self._check.count(
                     "dd.sqlserver.statements.error",
                     1,
@@ -349,8 +344,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             if procedure_statement:
                 row['procedure_text'] = procedure_statement['query']
                 row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
-            if is_proc:
-                row['procedure_name'] = '[{}].[{}]'.format(row['schema_name'], row['object_name'])
+            if procedure_name:
+                row['procedure_name'] = procedure_name
 
             row['text'] = obfuscated_statement
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
@@ -498,7 +493,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_plans(self, rows, cursor, deadline):
         for row in rows:
-            is_proc = row['object_name'] is not None
             if self.enforce_collection_interval_deadline and time.time() > deadline:
                 self.log.debug("ending plan collection early because check deadline has been exceeded")
                 self._check.count("dd.sqlserver.statements.deadline_exceeded", 1, **self._check.debug_stats_kwargs())
@@ -507,7 +501,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             # for stored procedures, we only want to look up plans for the entire procedure
             # not every query that is executed within the proc. In order to accomplish this,
             # we use the plan handle
-            if is_proc or row['is_encrypted']:
+            if row['is_proc'] or row['is_encrypted']:
                 plan_key = row['plan_handle']
             if self._seen_plans_ratelimiter.acquire(plan_key):
                 raw_plan, is_plan_encrypted = self._load_plan(row['plan_handle'], cursor)
@@ -536,12 +530,12 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 # events with the full procedure text, not the text
                 # for the individual statement encapsulated within the proc
                 text_key = 'text'
-                if is_proc:
+                if row['is_proc']:
                     text_key = 'procedure_text'
                 query_signature = row['query_signature']
                 # for procedure plans, it only makes sense to send the
                 # procedure_signature
-                if is_proc:
+                if row['is_proc']:
                     query_signature = None
                 if 'database_name' in row:
                     tags += ["db:{}".format(row['database_name'])]
