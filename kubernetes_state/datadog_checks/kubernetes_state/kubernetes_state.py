@@ -33,6 +33,7 @@ ALLOWED_WAITING_REASONS = [
     'containercreating',
     'createcontainererror',
     'invalidimagename',
+    'createcontainerconfigerror',
 ]
 ALLOWED_TERMINATED_REASONS = ['oomkilled', 'containercannotrun', 'error']
 
