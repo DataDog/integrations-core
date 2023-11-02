@@ -5,8 +5,6 @@ import re
 
 from datadog_checks.base import AgentCheck
 
-HYPERVISOR_SERVICE_CHECK = {'up': AgentCheck.OK, 'down': AgentCheck.CRITICAL}
-
 KEYSTONE_METRICS_PREFIX = "openstack.keystone"
 KEYSTONE_SERVICE_CHECK = f"{KEYSTONE_METRICS_PREFIX}.api.up"
 KEYSTONE_RESPONSE_TIME = f"{KEYSTONE_METRICS_PREFIX}.response_time"
@@ -267,7 +265,7 @@ NOVA_FLAVORS_METRICS = {
 }
 
 NOVA_HYPERVISOR_METRICS_PREFIX = f"{NOVA_METRICS_PREFIX}.hypervisor"
-NOVA_HYPERVISOR_SERVICE_CHECK = f"{NOVA_HYPERVISOR_METRICS_PREFIX}.up"
+NOVA_HYPERVISOR_COUNT = f"{NOVA_HYPERVISOR_METRICS_PREFIX}.count"
 NOVA_HYPERVISOR_TAGS = {
     'id': 'hypervisor_id',
     'hypervisor_hostname': 'hypervisor_name',

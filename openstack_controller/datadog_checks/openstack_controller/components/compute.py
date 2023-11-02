@@ -10,6 +10,7 @@ from datadog_checks.openstack_controller.metrics import (
     NOVA_FLAVORS_METRICS,
     NOVA_FLAVORS_METRICS_PREFIX,
     NOVA_FLAVORS_TAGS,
+    NOVA_HYPERVISOR_COUNT,
     NOVA_HYPERVISOR_METRICS,
     NOVA_HYPERVISOR_METRICS_PREFIX,
     NOVA_HYPERVISOR_TAGS,
@@ -164,12 +165,15 @@ class Compute(Component):
                     else value,
                 )
                 self.check.log.debug("hypervisor: %s", hypervisor)
+                hypervisor_hostname = item['hypervisor_hostname']
+                hypervisor_tags = hypervisor['tags']
+                self.check.gauge(NOVA_HYPERVISOR_COUNT, 1, tags=tags + hypervisor_tags, hostname=hypervisor_hostname)
                 for metric, value in hypervisor['metrics'].items():
                     self.check.gauge(
                         metric,
                         value,
-                        tags=tags + hypervisor['tags'],
-                        hostname=item['hypervisor_hostname'],
+                        tags=tags + hypervisor_tags,
+                        hostname=hypervisor_hostname,
                     )
                 collect_uptime = item_config.get('uptime', True) if item_config else True
                 if collect_uptime:

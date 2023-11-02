@@ -16,6 +16,7 @@ NOVA_HYPERVISOR_METRICS = {
     'openstack.nova.hypervisor.vcpus',
     'openstack.nova.hypervisor.vcpus_used',
     'openstack.nova.hypervisor.up',
+    'openstack.nova.hypervisor.count',
 }
 
 NOVA_HYPERVISOR_UPTIME_METRICS = {
@@ -395,6 +396,20 @@ COMPUTE_HYPERVISORS_NOVA_MICROVERSION_DEFAULT = [
         'hostname': 'agent-integrations-openstack-default',
     },
     {
+        'name': 'openstack.nova.hypervisor.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'hypervisor_id:1',
+            'hypervisor_name:agent-integrations-openstack-default',
+            'hypervisor_state:up',
+            'hypervisor_status:enabled',
+            'hypervisor_type:QEMU',
+        ],
+        'hostname': 'agent-integrations-openstack-default',
+    },
+    {
         'name': 'openstack.nova.hypervisor.load_1',
         'count': 1,
         'value': 0.29,
@@ -441,6 +456,20 @@ COMPUTE_HYPERVISORS_NOVA_MICROVERSION_DEFAULT = [
 COMPUTE_HYPERVISORS_NOVA_MICROVERSION_2_93 = [
     {
         'name': 'openstack.nova.hypervisor.up',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'hypervisor_id:d884b51a-e464-49dc-916c-766da0237661',
+            'hypervisor_name:agent-integrations-openstack-default',
+            'hypervisor_state:up',
+            'hypervisor_status:enabled',
+            'hypervisor_type:QEMU',
+        ],
+        'hostname': 'agent-integrations-openstack-default',
+    },
+    {
+        'name': 'openstack.nova.hypervisor.count',
         'count': 1,
         'value': 1,
         'tags': [
