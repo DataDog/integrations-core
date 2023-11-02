@@ -316,7 +316,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 # Attempt to obfuscate SQL statement with metadata
                 procedure_statement = None
                 statement = obfuscate_sql_with_metadata(row['statement_text'], self.check.obfuscator_options)
-                comments = extract_sql_comments(row['text'])
+                comments, _ = extract_sql_comments(row['text'])
 
                 if is_proc:
                     procedure_statement = obfuscate_sql_with_metadata(row['text'], self._config.obfuscator_options)
