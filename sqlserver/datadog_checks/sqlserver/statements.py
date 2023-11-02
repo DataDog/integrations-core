@@ -61,11 +61,11 @@ with qstats as (
         qs.last_execution_time,
         qs.last_elapsed_time,
         CONCAT(
-            CONVERT(VARCHAR(64), CONVERT(binary(64), plan_handle), 1),
-            CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_start_offset), 1),
-            CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_end_offset), 1)) as plan_handle_and_offsets,
-           (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
-           eps.object_id as sproc_object_id
+            CONVERT(VARCHAR(64), CONVERT(binary(64), qs.plan_handle), 1),
+            CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_start_offset), 1),
+            CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_end_offset), 1)) as plan_handle_and_offsets,
+           (select value from sys.dm_exec_plan_attributes(qs.plan_handle) where attribute = 'dbid') as dbid,
+           eps.object_id as sproc_object_id,
            {query_metrics_columns}
     from sys.dm_exec_query_stats qs
     left join sys.dm_exec_procedure_stats eps ON eps.plan_handle = qs.plan_handle
@@ -74,15 +74,16 @@ qstats_aggr as (
     select
         query_hash,
         query_plan_hash,
-        CAST(S.dbid as int) as dbid,
+        CAST(qs.dbid as int) as dbid,
         D.name as database_name,
         max(plan_handle_and_offsets) as plan_handle_and_offsets,
         max(last_execution_time) as last_execution_time,
         max(last_elapsed_time) as last_elapsed_time,
+        sproc_object_id,
         {query_metrics_column_sums}
-    from qstats S
-    left join sys.databases D on S.dbid = D.database_id
-    group by query_hash, query_plan_hash, S.dbid, D.name
+    from qstats qs
+    left join sys.databases D on qs.dbid = D.database_id
+    group by query_hash, query_plan_hash, qs.dbid, D.name, sproc_object_id
 ),
 qstats_aggr_split as (
     select TOP {limit}
@@ -104,7 +105,7 @@ select
     OBJECT_SCHEMA_NAME(sproc_object_id, s.dbid) as schema_name,
     encrypted as is_encrypted,
     s.* from qstats_aggr_split s
-    cross apply sys.dm_exec_sql_text(plan_handle) qt
+    cross apply sys.dm_exec_sql_text(s.plan_handle) qt
 """
 
 # This query is an optimized version of the statement metrics query
@@ -115,14 +116,16 @@ with qstats_aggr as (
         qs.query_hash,
         qs.query_plan_hash,
         max(CONCAT(
-            CONVERT(VARCHAR(64), CONVERT(binary(64), plan_handle), 1),
-            CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_start_offset), 1),
-            CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_end_offset), 1))) as plan_handle_and_offsets,
+            CONVERT(VARCHAR(64), CONVERT(binary(64), qs.plan_handle), 1),
+            CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_start_offset), 1),
+            CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_end_offset), 1))) as plan_handle_and_offsets,
+        eps.object_id as sproc_object_id,
+        eps.database_id as sproc_database_id,
         {query_metrics_column_sums}
         from sys.dm_exec_query_stats qs
-        where last_execution_time > dateadd(second, -?, getdate())
         left join sys.dm_exec_procedure_stats eps ON eps.plan_handle = qs.plan_handle
-        group by qs.query_hash, qs.query_plan_hash
+        where qs.last_execution_time > dateadd(second, -?, getdate())
+        group by qs.query_hash, qs.query_plan_hash, eps.object_id, eps.database_id
 ),
 qstats_aggr_split as (select
     convert(varbinary(64), convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1)) as plan_handle,
@@ -137,11 +140,11 @@ select
         ELSE statement_end_offset
     END - statement_start_offset) / 2) + 1) AS statement_text,
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
-    OBJECT_NAME(sproc_object_id, s.dbid) as object_name,
-    OBJECT_SCHEMA_NAME(sproc_object_id, s.dbid) as schema_name,
+    OBJECT_NAME(sproc_object_id, sproc_database_id) as object_name,
+    OBJECT_SCHEMA_NAME(sproc_object_id, sproc_database_id) as schema_name,
     encrypted as is_encrypted,
     s.* from qstats_aggr_split s
-    cross apply sys.dm_exec_sql_text(plan_handle) qt
+    cross apply sys.dm_exec_sql_text(s.plan_handle) qt
 """
 
 PLAN_LOOKUP_QUERY = """\
@@ -281,11 +284,12 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             STATEMENT_METRICS_QUERY_NO_AGGREGATES if self.disable_secondary_tags else STATEMENT_METRICS_QUERY
         )
         self._statement_metrics_query = statements_query.format(
-            query_metrics_columns=', qs.'.join(available_columns),
+            query_metrics_columns=', '.join(['qs.{} as {}'.format(col, col) for col in available_columns]),
             query_metrics_column_sums=', '.join(['sum(qs.{}) as {}'.format(c, c) for c in available_columns]),
             limit=self.dm_exec_query_stats_row_limit,
             proc_char_limit=PROC_CHAR_LIMIT,
         )
+        self.log.info(self._statement_metrics_query)
         return self._statement_metrics_query
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
