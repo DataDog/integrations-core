@@ -134,12 +134,17 @@ INSTANCE_METRICS_DATABASE = [
 
 # AlwaysOn metrics
 # datadog metric name, sql table, column name, tag
-AO_METRICS = [
+AO_AG_SYNC_METRICS = [
     ('sqlserver.ao.ag_sync_health', 'sys.dm_hadr_availability_group_states', 'synchronization_health'),
+]
+AO_REPLICA_SYNC_METRICS = [
     ('sqlserver.ao.replica_sync_state', 'sys.dm_hadr_database_replica_states', 'synchronization_state'),
+]
+AO_REPLICA_FAILOVER_METRICS = [
     ('sqlserver.ao.replica_failover_mode', 'sys.availability_replicas', 'failover_mode'),
     ('sqlserver.ao.replica_failover_readiness', 'sys.availability_replicas', 'is_failover_ready'),
 ]
+AO_METRICS = AO_AG_SYNC_METRICS + AO_REPLICA_SYNC_METRICS + AO_REPLICA_FAILOVER_METRICS
 
 AO_METRICS_PRIMARY = [
     ('sqlserver.ao.primary_replica_health', 'sys.dm_hadr_availability_group_states', 'primary_recovery_health'),

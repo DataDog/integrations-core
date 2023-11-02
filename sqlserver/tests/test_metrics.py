@@ -8,6 +8,11 @@ import pytest
 
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.const import (
+    AO_AG_SYNC_METRICS,
+    AO_METRICS_PRIMARY,
+    AO_METRICS_SECONDARY,
+    AO_REPLICA_FAILOVER_METRICS,
+    AO_REPLICA_SYNC_METRICS,
     DATABASE_BACKUP_METRICS,
     DATABASE_FILES_METRICS,
     DATABASE_FRAGMENTATION_METRICS,
@@ -26,8 +31,14 @@ from datadog_checks.sqlserver.const import (
 
 from .common import (
     CHECK_NAME,
+    EXPECTED_QUERY_EXECUTOR_AO_METRICS_MEMBER_COMMON,
+    EXPECTED_QUERY_EXECUTOR_AO_METRICS_PRIMARY,
+    EXPECTED_QUERY_EXECUTOR_AO_METRICS_QUORUM_COMMON,
+    EXPECTED_QUERY_EXECUTOR_AO_METRICS_REPLICA_COMMON,
+    EXPECTED_QUERY_EXECUTOR_AO_METRICS_SECONDARY,
     SERVER_METRICS,
 )
+from .utils import always_on, not_windows_ci
 
 INCR_FRACTION_METRICS = {'sqlserver.latches.latch_wait_time'}
 AUTODISCOVERY_DBS = ['master', 'msdb', 'datadog_test']
@@ -386,6 +397,179 @@ def test_check_incr_fraction_metrics(
         aggregator.assert_metric(metric_name, tags=tags, hostname=sqlserver_check.resolved_hostname, count=1)
 
     sqlserver_check.cancel()
+
+
+@not_windows_ci
+@always_on
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_check_ao_primary_replica(aggregator, dd_run_check, init_config, instance_ao_docker_primary):
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_ao_docker_primary])
+    dd_run_check(sqlserver_check)
+
+    for metric_name, _, _ in AO_METRICS_PRIMARY:
+        for tag_prefix in ('availability_group', 'availability_group_name', 'synchronization_health_desc'):
+            aggregator.assert_metric_has_tag_prefix(metric_name, tag_prefix=tag_prefix)
+
+    for metric_name, _, _ in AO_AG_SYNC_METRICS:
+        for tag_prefix in ('availability_group', 'availability_group_name', 'synchronization_health_desc'):
+            aggregator.assert_metric_has_tag_prefix(metric_name, tag_prefix=tag_prefix)
+
+    for metric_name, _, _ in AO_REPLICA_SYNC_METRICS:
+        for tag_prefix in (
+            'availability_group',
+            'availability_group_name',
+            'synchronization_state_desc',
+            'replica_server_name',
+        ):
+            aggregator.assert_metric_has_tag_prefix(metric_name, tag_prefix=tag_prefix)
+
+    for metric_name, _, _ in AO_REPLICA_FAILOVER_METRICS:
+        for tag_prefix in (
+            'availability_group',
+            'availability_group_name',
+            'failover_mode_desc',
+            'is_primary_replica',
+            'replica_server_name',
+        ):
+            aggregator.assert_metric_has_tag_prefix(metric_name, tag_prefix=tag_prefix)
+
+    for metric_name in EXPECTED_QUERY_EXECUTOR_AO_METRICS_PRIMARY:
+        for tag_prefix in (
+            'availability_group',
+            'availability_group_name',
+            'availability_mode',
+            'database_id',
+            'database_name',
+            'database_state',
+            'failover_cluster',
+            'failover_mode',
+            'replica_id',
+            'replica_role',
+            'replica_server_name',
+            'synchronization_state',
+        ):
+            aggregator.assert_metric_has_tag_prefix(metric_name, tag_prefix=tag_prefix)
+
+    for metric_name in EXPECTED_QUERY_EXECUTOR_AO_METRICS_REPLICA_COMMON:
+        for tag_prefix in (
+            'availability_group',
+            'availability_group_name',
+            'availability_mode',
+            'database_id',
+            'database_name',
+            'database_state',
+            'failover_cluster',
+            'failover_mode',
+            'replica_id',
+            'replica_role',
+            'replica_server_name',
+            'synchronization_state',
+        ):
+            aggregator.assert_metric_has_tag_prefix(metric_name, tag_prefix=tag_prefix)
+
+    for metric_name in EXPECTED_QUERY_EXECUTOR_AO_METRICS_QUORUM_COMMON:
+        for tag_prefix in (
+            'quorum_type',
+            'quorum_state',
+            'failover_cluster',
+        ):
+            aggregator.assert_metric_has_tag_prefix(metric_name, tag_prefix=tag_prefix)
+
+    for metric_name in EXPECTED_QUERY_EXECUTOR_AO_METRICS_MEMBER_COMMON:
+        for tag_prefix in (
+            'member_name',
+            'member_type',
+            'member_state',
+            'failover_cluster',
+        ):
+            aggregator.assert_metric_has_tag_prefix(metric_name, tag_prefix=tag_prefix)
+
+    for metric_name, _, _ in AO_METRICS_SECONDARY:
+        aggregator.assert_metric(metric_name, count=0)
+
+
+@not_windows_ci
+@always_on
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_check_ao_secondary_replica(aggregator, dd_run_check, init_config, instance_ao_docker_secondary):
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_ao_docker_secondary])
+    dd_run_check(sqlserver_check)
+
+    for metric_name, _, _ in AO_METRICS_SECONDARY:
+        for tag_prefix in ('availability_group', 'availability_group_name', 'synchronization_health_desc'):
+            aggregator.assert_metric_has_tag_prefix(metric_name, tag_prefix=tag_prefix)
+
+    for metric_name, _, _ in AO_AG_SYNC_METRICS:
+        for tag_prefix in ('availability_group', 'availability_group_name', 'synchronization_health_desc'):
+            aggregator.assert_metric_has_tag_prefix(metric_name, tag_prefix=tag_prefix)
+
+    for metric_name, _, _ in AO_REPLICA_SYNC_METRICS:
+        for tag_prefix in (
+            'availability_group',
+            'availability_group_name',
+            'synchronization_state_desc',
+            'replica_server_name',
+        ):
+            aggregator.assert_metric_has_tag_prefix(metric_name, tag_prefix=tag_prefix)
+
+    for metric_name in EXPECTED_QUERY_EXECUTOR_AO_METRICS_SECONDARY:
+        for tag_prefix in (
+            'availability_group',
+            'availability_group_name',
+            'availability_mode',
+            'database_id',
+            'database_name',
+            'database_state',
+            'failover_cluster',
+            'failover_mode',
+            'replica_id',
+            'replica_role',
+            'replica_server_name',
+            'synchronization_state',
+        ):
+            aggregator.assert_metric_has_tag_prefix(metric_name, tag_prefix=tag_prefix)
+
+    for metric_name in EXPECTED_QUERY_EXECUTOR_AO_METRICS_REPLICA_COMMON:
+        for tag_prefix in (
+            'availability_group',
+            'availability_group_name',
+            'availability_mode',
+            'database_id',
+            'database_name',
+            'database_state',
+            'failover_cluster',
+            'failover_mode',
+            'replica_id',
+            'replica_role',
+            'replica_server_name',
+            'synchronization_state',
+        ):
+            aggregator.assert_metric_has_tag_prefix(metric_name, tag_prefix=tag_prefix)
+
+    for metric_name in EXPECTED_QUERY_EXECUTOR_AO_METRICS_QUORUM_COMMON:
+        for tag_prefix in (
+            'quorum_type',
+            'quorum_state',
+            'failover_cluster',
+        ):
+            aggregator.assert_metric_has_tag_prefix(metric_name, tag_prefix=tag_prefix)
+
+    for metric_name in EXPECTED_QUERY_EXECUTOR_AO_METRICS_MEMBER_COMMON:
+        for tag_prefix in (
+            'member_name',
+            'member_type',
+            'member_state',
+            'failover_cluster',
+        ):
+            aggregator.assert_metric_has_tag_prefix(metric_name, tag_prefix=tag_prefix)
+
+    for metric_name, _, _ in AO_METRICS_PRIMARY:
+        aggregator.assert_metric(metric_name, count=0)
+
+    for metric_name in EXPECTED_QUERY_EXECUTOR_AO_METRICS_PRIMARY:
+        aggregator.assert_metric(metric_name, count=0)
 
 
 def check_sqlserver_can_connect(aggregator, host, resolved_hostname, tags, autodiscovery=False):
