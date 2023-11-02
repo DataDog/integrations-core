@@ -27,6 +27,6 @@
             "host"
                 ],
         "name": "Health Status of Nvidia Triton",
-        "description": "Returns `CRITICAL` if the Server is having a 4xx or 5xx response, `OK` if the response is 200, and unknown for everything else."
+        "description": "Returns `CRITICAL` if the Server is having a 4xx or 5xx response, `OK` if the response is 200, and `unknown` for everything else."
     }
 ]

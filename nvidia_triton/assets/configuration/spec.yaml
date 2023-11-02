@@ -19,7 +19,7 @@ files:
     - name: collect_server_info
       display_priority: 1
       description: |
-        Wether to collect server status and metadata the HTTP endpoint of Nvidia Triton API.
+        Whether to collect server status and metadata the HTTP endpoint of Nvidia Triton API.
         https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/protocol/README.html
       value:
         display_default: true
@@ -27,7 +27,8 @@ files:
         type: boolean
     - name: server_port
       description: |
-        The port exposing HTTP Endpoint of Nvidia Triton API. This will be ignored if `collect_server_info` is false.
+        The port exposing the HTTP Endpoint of the Nvidia Triton API.
+        This will be ignored if `collect_server_info` is false.
       value:
         display_default: 8000
         type: integer

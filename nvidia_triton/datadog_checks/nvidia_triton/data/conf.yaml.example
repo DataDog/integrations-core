@@ -20,7 +20,7 @@ instances:
   - openmetrics_endpoint: http://localhost:8002/metrics
 
     ## @param collect_server_info - boolean - optional - default: true
-    ## Wether to collect server status and metadata the HTTP endpoint of Nvidia Triton API.
+    ## Whether to collect server status and metadata the HTTP endpoint of Nvidia Triton API.
     ## https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/protocol/README.html
     #
     # collect_server_info: true
@@ -595,6 +595,7 @@ instances:
     #   - <EXCLUDE_REGEX>
 
     ## @param server_port - integer - optional - default: 8000
-    ## The port exposing HTTP Endpoint of Nvidia Triton API. This will be ignored if `collect_server_info` is false.
+    ## The port exposing the HTTP Endpoint of the Nvidia Triton API.
+    ## This will be ignored if `collect_server_info` is false.
     #
     # server_port: <SERVER_PORT>
