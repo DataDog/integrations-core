@@ -1,1 +1,0 @@
-Do not validate the codecov file in marketplace when running the `validate ci` command
