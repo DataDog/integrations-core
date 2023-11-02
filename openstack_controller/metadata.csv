@@ -110,3 +110,8 @@ openstack.nova.quota_set.security_group_rules,gauge,,,,The number of allowed rul
 openstack.nova.quota_set.security_groups,gauge,,,,The number of allowed security groups for each tenant,0,openstack_controller,nova quota set security groups,
 openstack.nova.quota_set.server_group_members,gauge,,,,The number of allowed members for each server group,0,openstack_controller,nova quota set server group members,
 openstack.nova.quota_set.server_groups,gauge,,,,The number of allowed server groups for each tenant,0,openstack_controller,nova quota set server groups,
+openstack.nova.server.count,gauge,,,,The number of servers in each tenant,0,openstack_controller,nova server count,
+openstack.nova.server.active,gauge,,,,If set to 1 server status is active,0,openstack_controller,nova server active,
+openstack.nova.server.error,gauge,,,,If set to 1 server status is error,0,openstack_controller,nova server error,
+openstack.nova.server.flavor.os_flv_ext_data_ephemeral,gauge,,gigabyte,,The size of the ephemeral disk that was created,0,openstack_controller,nova server flavor ephemeral,
+openstack.nova.server.flavor.rxtx_factor,gauge,,,,The receive / transmit factor,0,openstack_controller,nova server flavor rxtx factor,
