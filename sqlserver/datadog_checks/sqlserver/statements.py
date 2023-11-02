@@ -22,7 +22,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.utils import extract_sql_comments
+from datadog_checks.sqlserver.utils import extract_sql_comments, PROC_CHAR_LIMIT
 
 try:
     import datadog_agent
