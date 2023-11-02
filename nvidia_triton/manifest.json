@@ -1,27 +1,25 @@
 {
   "manifest_version": "2.0.0",
-  "app_uuid": "bae260a0-91be-4dc4-9767-61f072f82d76",
-  "app_id": "ray",
-  "display_on_public_website": true,
+  "app_uuid": "72d17043-fa30-4f5c-95cb-939906d86fb7",
+  "app_id": "nvidia-triton",
+  "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Monitor the health and performance of Ray",
-    "title": "Ray",
+    "description": "NVIDIA Triton Inference Server is open source inference-serving software",
+    "title": "Nvidia Triton",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS",
-      "Category::AI/ML",
-      "Category::Log Collection"
+      "Supported OS::macOS"
     ]
   },
   "assets": {
     "integration": {
-      "source_type_name": "Ray",
+      "source_type_name": "Nvidia Triton",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
@@ -29,23 +27,25 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "ray.",
-        "check": "ray.process.open_fds",
+        "prefix": "nvidia_triton.",
+        "check": "nvidia_triton.cpu.memory.total_bytes",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
       "process_signatures": [
-        "python -m ray.util.client.server",
-        "gcs_server",
-        "raylet"
+        "tritonserver"
       ]
     },
-    "logs": {
-      "source": "ray"
-    }
-  },
+    "dashboards": {"nvidia_triton": "assets/dashboards/nvidia_triton_overview.json"},
+    "monitors": {
+      "[Nvidia Triton] GPU utilization is high": "assets/monitors/gpu_utilization.json",
+      "[Nvidia Triton] CPU Memory Usage is high": "assets/monitors/cpu_memory.json"
+
+    },
+    "logs": {"source": "nvidia_triton"}
+    },
   "author": {
     "support_email": "help@datadoghq.com",
     "name": "Datadog",

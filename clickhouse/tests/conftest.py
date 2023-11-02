@@ -7,7 +7,7 @@ import clickhouse_driver
 import pytest
 
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
+from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints, WaitFor
 
 from . import common
 
@@ -25,11 +25,13 @@ def dd_environment():
         )
 
     conditions.append(
-        ping_clickhouse(
-            common.CONFIG['server'],
-            common.CONFIG['port'],
-            common.CONFIG['username'],
-            common.CONFIG['password'],
+        WaitFor(
+            ping_clickhouse(
+                common.CONFIG['server'],
+                common.CONFIG['port'],
+                common.CONFIG['username'],
+                common.CONFIG['password'],
+            )
         )
     )
 
