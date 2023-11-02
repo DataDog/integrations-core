@@ -1,3 +1,33 @@
+## Datadog Agent version [7.49.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7490)
+
+* Amazon Kafka [4.2.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* ArgoCD [2.1.0](https://github.com/DataDog/integrations-core/blob/master/argocd/CHANGELOG.md)
+* Datadog Checks Base [34.0.2](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md) **BREAKING CHANGE**
+* Datadog Checks Downloader [4.3.1](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md)
+* Cisco ACI [2.4.1](https://github.com/DataDog/integrations-core/blob/master/cisco_aci/CHANGELOG.md)
+* ClickHouse [3.1.0](https://github.com/DataDog/integrations-core/blob/master/clickhouse/CHANGELOG.md)
+* Envoy [3.1.0](https://github.com/DataDog/integrations-core/blob/master/envoy/CHANGELOG.md)
+* Harbor [3.0.0](https://github.com/DataDog/integrations-core/blob/master/harbor/CHANGELOG.md) **BREAKING CHANGE**
+* HTTP [9.2.1](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
+* IBM MQ [6.0.0](https://github.com/DataDog/integrations-core/blob/master/ibm_mq/CHANGELOG.md) **BREAKING CHANGE**
+* Istio [5.2.0](https://github.com/DataDog/integrations-core/blob/master/istio/CHANGELOG.md)
+* Kubernetes Controller Manager [4.5.0](https://github.com/DataDog/integrations-core/blob/master/kube_controller_manager/CHANGELOG.md)
+* Kubernetes Scheduler [4.7.1](https://github.com/DataDog/integrations-core/blob/master/kube_scheduler/CHANGELOG.md)
+* Kubelet [7.9.2](https://github.com/DataDog/integrations-core/blob/master/kubelet/CHANGELOG.md)
+* MySQL [11.2.1](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+* OpenStack Controller [5.0.0](https://github.com/DataDog/integrations-core/blob/master/openstack_controller/CHANGELOG.md) **BREAKING CHANGE**
+* Postgres [15.1.1](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md) **BREAKING CHANGE**
+* Ray [1.0.1](https://github.com/DataDog/integrations-core/blob/master/ray/CHANGELOG.md)
+* Redis [5.2.0](https://github.com/DataDog/integrations-core/blob/master/redisdb/CHANGELOG.md)
+* SNMP [7.0.0](https://github.com/DataDog/integrations-core/blob/master/snmp/CHANGELOG.md) **BREAKING CHANGE**
+* SQL Server [15.0.2](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md) **BREAKING CHANGE**
+* TeamCity [4.0.1](https://github.com/DataDog/integrations-core/blob/master/teamcity/CHANGELOG.md)
+* TLS [2.13.1](https://github.com/DataDog/integrations-core/blob/master/tls/CHANGELOG.md)
+* Tomcat [1.12.2](https://github.com/DataDog/integrations-core/blob/master/tomcat/CHANGELOG.md)
+* Vertica [4.2.0](https://github.com/DataDog/integrations-core/blob/master/vertica/CHANGELOG.md)
+* vSphere [7.1.0](https://github.com/DataDog/integrations-core/blob/master/vsphere/CHANGELOG.md)
+* Windows Event Log [3.1.0](https://github.com/DataDog/integrations-core/blob/master/win32_event_log/CHANGELOG.md)
+
 ## Datadog Agent version [7.48.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7481)
 
 * Kafka Consumer [4.1.3](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md)
@@ -404,7 +434,7 @@
 * Amazon Kafka [3.3.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
 * Apache [4.2.1](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md)
 * Avi Vantage [3.2.1](https://github.com/DataDog/integrations-core/blob/master/avi_vantage/CHANGELOG.md)
-* Datadog Checks Base [31.0.2](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md) **BREAKING CHANGE**
+* Datadog Checks Base [31.0.1](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md) **BREAKING CHANGE**
 * CoreDNS [2.3.1](https://github.com/DataDog/integrations-core/blob/master/coredns/CHANGELOG.md)
 * Datadog Cluster Agent [2.6.0](https://github.com/DataDog/integrations-core/blob/master/datadog_cluster_agent/CHANGELOG.md)
 * Directory [1.14.2](https://github.com/DataDog/integrations-core/blob/master/directory/CHANGELOG.md)

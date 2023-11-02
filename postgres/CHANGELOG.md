@@ -17,7 +17,7 @@
 * Bump the minimum base check version to 34.1.0 ([#16062](https://github.com/DataDog/integrations-core/pull/16062))
 * Collect Postgres size metrics for auto-discovered databases ([#16076](https://github.com/DataDog/integrations-core/pull/16076))
 
-## 15.1.1 / 2023-10-17
+## 15.1.1 / 2023-10-17 / Agent 7.49.0
 
 ***Fixed***:
 
