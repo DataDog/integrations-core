@@ -289,7 +289,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             limit=self.dm_exec_query_stats_row_limit,
             proc_char_limit=PROC_CHAR_LIMIT,
         )
-        self.log.info(self._statement_metrics_query)
         return self._statement_metrics_query
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
@@ -319,7 +318,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             try:
                 # Attempt to obfuscate SQL statement with metadata
                 procedure_statement = None
-                statement = obfuscate_sql_with_metadata(row['statement_text'], self.check.obfuscator_options)
+                statement = obfuscate_sql_with_metadata(row['statement_text'], self._config.obfuscator_options)
                 comments, _ = extract_sql_comments(row['text'])
 
                 if is_proc:
@@ -330,7 +329,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     raw_query_text = row['text'] if is_proc else row['statement_text']
                     self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", raw_query_text, e)
                 else:
-                    self.log.debug("Failed to obfuscate query | err=[%s]", e)
+                    self.log.debug("Failed to obfuscate query | err=[%s] | query=[%s]", e, row['text'])
                 self._check.count(
                     "dd.sqlserver.statements.error",
                     1,
