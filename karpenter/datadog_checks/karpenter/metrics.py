@@ -16,7 +16,7 @@ METRIC_MAP = {
     'go_gc_duration_seconds': 'go.gc.duration_seconds',
     'go_goroutines': 'go_goroutines',
     'go_info': 'go_info',
-    'go_memstats_alloc_bytes': 'go.memstats.alloc_bytes',
+    'go_memstats_alloc_bytes': {'name': 'go.memstats.alloc_bytes', 'type': 'native_dynamic'},
     'go_memstats_buck_hash_sys_bytes': 'go.memstats.buck.hash.sys_bytes',
     'go_memstats_frees': 'go.memstats.frees',
     'go_memstats_gc_sys_bytes': 'go.memstats.gc.sys_bytes',

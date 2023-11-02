@@ -35,6 +35,7 @@ TEST_METRICS = [
     'karpenter.go.gc.duration_seconds.quantile',
     'karpenter.go.gc.duration_seconds.sum',
     'karpenter.go.memstats.alloc_bytes',
+    'karpenter.go.memstats.alloc_bytes.count',
     'karpenter.go.memstats.buck.hash.sys_bytes',
     'karpenter.go.memstats.frees.count',
     'karpenter.go.memstats.gc.sys_bytes',
