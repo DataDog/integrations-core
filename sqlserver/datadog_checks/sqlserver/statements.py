@@ -22,7 +22,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.utils import PROC_CHAR_LIMIT, extract_sql_comments_and_procedure_name
+from datadog_checks.sqlserver.utils import extract_sql_comments
 
 try:
     import datadog_agent
@@ -55,30 +55,42 @@ SQL_SERVER_QUERY_METRICS_COLUMNS = [
 
 STATEMENT_METRICS_QUERY = """\
 with qstats as (
-    select query_hash, query_plan_hash, last_execution_time, last_elapsed_time,
-            CONCAT(
-                CONVERT(VARCHAR(64), CONVERT(binary(64), plan_handle), 1),
-                CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_start_offset), 1),
-                CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_end_offset), 1)) as plan_handle_and_offsets,
+    select
+        qs.query_hash,
+        qs.query_plan_hash,
+        qs.last_execution_time,
+        qs.last_elapsed_time,
+        CONCAT(
+            CONVERT(VARCHAR(64), CONVERT(binary(64), plan_handle), 1),
+            CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_start_offset), 1),
+            CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_end_offset), 1)) as plan_handle_and_offsets,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
+           eps.object_id as sproc_object_id
            {query_metrics_columns}
-    from sys.dm_exec_query_stats
+    from sys.dm_exec_query_stats qs
+    left join sys.dm_exec_procedure_stats eps ON eps.plan_handle = qs.plan_handle
 ),
 qstats_aggr as (
-    select query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
-       D.name as database_name, max(plan_handle_and_offsets) as plan_handle_and_offsets,
-       max(last_execution_time) as last_execution_time,
-       max(last_elapsed_time) as last_elapsed_time,
-    {query_metrics_column_sums}
+    select
+        query_hash,
+        query_plan_hash,
+        CAST(S.dbid as int) as dbid,
+        D.name as database_name,
+        max(plan_handle_and_offsets) as plan_handle_and_offsets,
+        max(last_execution_time) as last_execution_time,
+        max(last_elapsed_time) as last_elapsed_time,
+        {query_metrics_column_sums}
     from qstats S
     left join sys.databases D on S.dbid = D.database_id
     group by query_hash, query_plan_hash, S.dbid, D.name
 ),
-qstats_aggr_split as (select TOP {limit}
-    convert(varbinary(64), convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1)) as plan_handle,
-    convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+1, 10), 1)) as statement_start_offset,
-    convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+11, 10), 1)) as statement_end_offset,
-    * from qstats_aggr
+qstats_aggr_split as (
+    select TOP {limit}
+        convert(varbinary(64), convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1)) as plan_handle,
+        convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+1, 10), 1)) as statement_start_offset,
+        convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+11, 10), 1)) as statement_end_offset,
+        *
+    from qstats_aggr
     where DATEADD(ms, last_elapsed_time / 1000, last_execution_time) > dateadd(second, -?, getdate())
 )
 select
@@ -88,6 +100,8 @@ select
         ELSE statement_end_offset END
             - statement_start_offset) / 2) + 1) AS statement_text,
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
+    OBJECT_NAME(sproc_object_id, s.dbid) as object_name,
+    OBJECT_SCHEMA_NAME(sproc_object_id, s.dbid) as schema_name,
     encrypted as is_encrypted,
     s.* from qstats_aggr_split s
     cross apply sys.dm_exec_sql_text(plan_handle) qt
@@ -97,15 +111,18 @@ select
 # which removes the additional database aggregate dimension
 STATEMENT_METRICS_QUERY_NO_AGGREGATES = """\
 with qstats_aggr as (
-    select TOP {limit} query_hash, query_plan_hash,
+    select TOP {limit}
+        qs.query_hash,
+        qs.query_plan_hash,
         max(CONCAT(
             CONVERT(VARCHAR(64), CONVERT(binary(64), plan_handle), 1),
             CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_start_offset), 1),
             CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_end_offset), 1))) as plan_handle_and_offsets,
         {query_metrics_column_sums}
-        from sys.dm_exec_query_stats S
+        from sys.dm_exec_query_stats qs
         where last_execution_time > dateadd(second, -?, getdate())
-        group by query_hash, query_plan_hash
+        left join sys.dm_exec_procedure_stats eps ON eps.plan_handle = qs.plan_handle
+        group by qs.query_hash, qs.query_plan_hash
 ),
 qstats_aggr_split as (select
     convert(varbinary(64), convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1)) as plan_handle,
@@ -120,6 +137,8 @@ select
         ELSE statement_end_offset
     END - statement_start_offset) / 2) + 1) AS statement_text,
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
+    OBJECT_NAME(sproc_object_id, s.dbid) as object_name,
+    OBJECT_SCHEMA_NAME(sproc_object_id, s.dbid) as schema_name,
     encrypted as is_encrypted,
     s.* from qstats_aggr_split s
     cross apply sys.dm_exec_sql_text(plan_handle) qt
@@ -262,8 +281,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             STATEMENT_METRICS_QUERY_NO_AGGREGATES if self.disable_secondary_tags else STATEMENT_METRICS_QUERY
         )
         self._statement_metrics_query = statements_query.format(
-            query_metrics_columns=', '.join(available_columns),
-            query_metrics_column_sums=', '.join(['sum({}) as {}'.format(c, c) for c in available_columns]),
+            query_metrics_columns=', qs.'.join(available_columns),
+            query_metrics_column_sums=', '.join(['sum(qs.{}) as {}'.format(c, c) for c in available_columns]),
             limit=self.dm_exec_query_stats_row_limit,
             proc_char_limit=PROC_CHAR_LIMIT,
         )
@@ -289,16 +308,22 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
     def _normalize_queries(self, rows):
         normalized_rows = []
+
         for row in rows:
+            is_proc = row['object_name'] is not None
+
             try:
-                statement = obfuscate_sql_with_metadata(row['statement_text'], self._config.obfuscator_options)
+                # Attempt to obfuscate SQL statement with metadata
                 procedure_statement = None
-                comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
-                if row['is_proc']:
+                statement = obfuscate_sql_with_metadata(row['statement_text'], self.check.obfuscator_options)
+                comments = extract_sql_comments(row['text'])
+
+                if is_proc:
                     procedure_statement = obfuscate_sql_with_metadata(row['text'], self._config.obfuscator_options)
+
             except Exception as e:
                 if self._config.log_unobfuscated_queries:
-                    raw_query_text = row['text'] if row.get('is_proc', False) else row['statement_text']
+                    raw_query_text = row['text'] if is_proc else row['statement_text']
                     self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", raw_query_text, e)
                 else:
                     self.log.debug("Failed to obfuscate query | err=[%s]", e)
@@ -313,24 +338,30 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     **self._check.debug_stats_kwargs(tags=["error:{}".format(type(e)), "error_msg:{}".format(e)])
                 )
                 continue
+
+            # Extract obfuscated statement and update row fields
             obfuscated_statement = statement['query']
             row['dd_comments'] = comments
-            # update 'text' field to be obfuscated stmt
-            row['text'] = obfuscated_statement
+
             if procedure_statement:
                 row['procedure_text'] = procedure_statement['query']
                 row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
-            if procedure_name:
-                row['procedure_name'] = procedure_name
+            if is_proc:
+                row['procedure_name'] = '[{}].[{}]'.format(row['schema_name'], row['object_name'])
+
+            row['text'] = obfuscated_statement
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
             row['query_hash'] = _hash_to_hex(row['query_hash'])
             row['query_plan_hash'] = _hash_to_hex(row['query_plan_hash'])
             row['plan_handle'] = _hash_to_hex(row['plan_handle'])
+
             metadata = statement['metadata']
             row['dd_tables'] = metadata.get('tables', None)
             row['dd_commands'] = metadata.get('commands', None)
+
             if not comments:
                 row['dd_comments'] = metadata.get('comments', None)
+
             normalized_rows.append(row)
         return normalized_rows
 
@@ -464,6 +495,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_plans(self, rows, cursor, deadline):
         for row in rows:
+            is_proc = row['object_name'] is not None
             if self.enforce_collection_interval_deadline and time.time() > deadline:
                 self.log.debug("ending plan collection early because check deadline has been exceeded")
                 self._check.count("dd.sqlserver.statements.deadline_exceeded", 1, **self._check.debug_stats_kwargs())
@@ -472,7 +504,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             # for stored procedures, we only want to look up plans for the entire procedure
             # not every query that is executed within the proc. In order to accomplish this,
             # we use the plan handle
-            if row['is_proc'] or row['is_encrypted']:
+            if is_proc or row['is_encrypted']:
                 plan_key = row['plan_handle']
             if self._seen_plans_ratelimiter.acquire(plan_key):
                 raw_plan, is_plan_encrypted = self._load_plan(row['plan_handle'], cursor)
@@ -501,12 +533,12 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 # events with the full procedure text, not the text
                 # for the individual statement encapsulated within the proc
                 text_key = 'text'
-                if row['is_proc']:
+                if is_proc:
                     text_key = 'procedure_text'
                 query_signature = row['query_signature']
                 # for procedure plans, it only makes sense to send the
                 # procedure_signature
-                if row['is_proc']:
+                if is_proc:
                     query_signature = None
                 if 'database_name' in row:
                     tags += ["db:{}".format(row['database_name'])]
