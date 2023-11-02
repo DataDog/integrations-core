@@ -73,6 +73,20 @@ def instance_docker_defaults(instance_session_default):
 
 
 @pytest.fixture
+def instance_docker_metrics(instance_session_default):
+    '''
+    This fixture is used to test the metrics that are emitted from the integration main check.
+    We disable all DBM checks and only care about the main check metrics.
+    '''
+    instance = deepcopy(instance_session_default)
+    instance['query_metrics'] = {'enabled': False}
+    instance['procedure_metrics'] = {'enabled': False}
+    instance['query_activity'] = {'enabled': False}
+    instance['collect_settings'] = {'enabled': False}
+    return instance
+
+
+@pytest.fixture
 def instance_minimal_defaults():
     return {
         'host': DOCKER_SERVER,
@@ -178,6 +192,7 @@ class SelfHealingConnection:
                     cursor.execute(query, params)
                     if return_result:
                         return cursor.fetchall()
+                    return
             except Exception:
                 tracebacks.append(",".join(traceback.format_exception(*sys.exc_info())))
                 logging.exception("failed to execute query attempt=%s", attempt)
