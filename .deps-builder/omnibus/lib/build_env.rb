@@ -1,3 +1,6 @@
+require './lib/ostools.rb'
+
+
 module Omnibus
   class Builder
     def python_build_env
@@ -51,13 +54,25 @@ class PythonBuildEnvironment
   # inside the project's `installdir`. Apply constraints file if set.
   # `options` are passed to the `shellout!` function used to run commands
   def wheel(arg, **options)
+    root = build_root
     # We need to use a block here to ensure an order of execution that is consistent wrt how we set the `constraints_file`.
     # Builder#block uses `instance_eval`, therefore the scope inside the block is as if it were running
     # within the builder instance; that's why we need to access methods via `python_build_env`.
     @builder.block "Build wheels for #{arg}" do
+      # Add the virtual environment's binary path to PATH
+      bin_path = File.join(root, windows? ? 'Scripts' : 'bin')
+      paths = (options.dig(:env, "PATH") || ENV["PATH"])&.split(File::PATH_SEPARATOR) || []
+      paths.prepend(bin_path)
+      options[:env] = options.fetch(:env, {}).merge({"PATH" => paths.join(File::PATH_SEPARATOR)})
+
+      # This forces the dependency resolution to ensure that the global constraints are respected
       constraints_arg = python_build_env.constraints_file && "-c #{python_build_env.constraints_file}" || ""
 
-      shellout! "#{python_build_env.python} -m pip wheel --no-build-isolation #{constraints_arg} -w #{python_build_env.wheels_dir} #{arg}", **options
+      # We pass the `wheels_dir` to `--find-links` to avoid rebuilding wheels that we already have
+      shellout! "#{python_build_env.python} -m pip wheel --no-build-isolation " \
+                "--find-links #{python_build_env.wheels_dir} " \
+                "#{constraints_arg} -w #{python_build_env.wheels_dir} #{arg}",
+                **options
     end
   end
 

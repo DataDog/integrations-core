@@ -2,7 +2,8 @@ hatchling==0.25.1
 setuptools==66.1.1
 wheel==0.38.4
 setuptools_scm
-setuptools_rust
+setuptools-rust>=1.7.0
+cffi>=1.12
 maturin
 cython<3.0.0
 pip-tools==7.3.0
