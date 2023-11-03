@@ -2,7 +2,7 @@
 set -ex
 
 omnibus_project=python-dependencies
-cd .deps-builder/omnibus
+cd /integrations-core/.deps-builder/omnibus
 bundle install
 PACKAGE_VERSION=$(git rev-parse --short HEAD) \
-               bundle exec omnibus build ${omnibus_project}
+               bundle exec omnibus build ${omnibus_project} --log-level=debug

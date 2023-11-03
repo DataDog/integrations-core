@@ -1,16 +1,21 @@
 # Build dependencies for a specific system. Must be run from root of integrations-core.
-set -ex
+set -exu
 
-target_platform="$1"
-image_version="v20878799-a2f77ae"
-docker_image="486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-buildimages/${target_platform}:${image_version}"
-build_script=".deps-builder/build.sh"
-# This is only necessary for running amd64 linux images on M1 as part of experimenting locally
-platform_flag="--platform=linux/amd64"
+target_platform="${TARGET_PLATFORM}"
+image_version="${AGENT_BUILD_IMAGE_VERSION:-latest}"
 
+integrations_core_path="/integrations-core"
+docker_image="datadog/agent-buildimages-${target_platform}:v20878799-a2f77ae"
+build_script="/integrations-core/.deps-builder/build.sh"
+
+# Docker login
+if [ ! -z ${DOCKER_USERNAME:-} ];
+then echo $DOCKER_ACCESS_TOKEN | docker login ${DOCKER_REGISTRY:-} -u $DOCKER_USERNAME --password-stdin
+fi
+
+# Run the omnibus build on the builder image
 docker run \
-       --mount type=bind,source="$(pwd)",target=/integrations-core \
+       --mount type=bind,source="$(pwd)",target="${integrations_core_path}" \
        --name "agent-integrations-dependencies-builder" \
-       ${platform_flag} \
        "${docker_image}" \
-       bash -c "cd /integrations-core && bash ${build_script}"
+       bash "${build_script}"

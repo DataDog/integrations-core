@@ -12,14 +12,12 @@ jobs:
       matrix:
         os: ["deb_x64", "rpm_x64"]
     runs-on: "ubuntu-22.04"
-    container:
-      image: "datadog/agent-buildimages-${{ matrix.os }}:v20878799-a2f77ae"
-      credentials:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
     steps:
-      - uses: actions/checkout@v3
-      - run: "bash .deps-builder/build.sh"
+      - uses: actions/checkout@v4
+      - run: "bash .deps-builder/build-dependencies.sh"
         env:
-          INTEGRATIONS_CORE_PATH: ${{ github.workspace }} 
-        shell: bash --login -eo pipefail {0}
+          TARGET_PLATFORM: ${{ matrix.os }}
+          AGENT_BUILD_IMAGE_VERSION: "v20878799-a2f77ae"
+          INTEGRATIONS_CORE_PATH: ${{ github.workspace }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_ACCESS_TOKEN }}
