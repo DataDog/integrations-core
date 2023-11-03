@@ -9,6 +9,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
+    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     create_e2e_core_test_config,
     get_device_ip_from_config,
@@ -18,7 +19,8 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_apc_netbotz(dd_agent_check):
-    config = create_e2e_core_test_config('apc-netbotz')
+    profile = 'apc-netbotz'
+    config = create_e2e_core_test_config(profile)
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -362,7 +364,7 @@ def test_e2e_profile_apc_netbotz(dd_agent_check):
             'netbotz_error_cond_enc_id:quaintly quaintly acted their',
             'netbotz_error_cond_id:their acted forward forward their',
             'netbotz_error_cond_index:2828061222',
-            'netbotz_error_cond_resolved:none',
+            'netbotz_error_cond_resolved:null',
             'netbotz_error_cond_sensor_id:but Jaded kept driving but',
             'netbotz_error_cond_severity:critical',
             'netbotz_error_cond_type_id:kept acted zombies their but their Jaded their',
@@ -371,7 +373,7 @@ def test_e2e_profile_apc_netbotz(dd_agent_check):
             'netbotz_error_cond_enc_id:their oxen their kept oxen quaintly but',
             'netbotz_error_cond_id:zombies oxen driving',
             'netbotz_error_cond_index:813439363',
-            'netbotz_error_cond_resolved:none',
+            'netbotz_error_cond_resolved:null',
             'netbotz_error_cond_sensor_id:driving',
             'netbotz_error_cond_severity:normal',
             'netbotz_error_cond_type_id:forward zombies kept',
@@ -406,5 +408,6 @@ def test_e2e_profile_apc_netbotz(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
+    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

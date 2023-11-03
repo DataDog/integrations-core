@@ -8,6 +8,7 @@ mypy-args = [
 python = "3.9"
 e2e-env = false
 dependencies = [
+  "pyyaml",
   "vcrpy",
 ]
 # TODO: remove this when the old CLI is gone

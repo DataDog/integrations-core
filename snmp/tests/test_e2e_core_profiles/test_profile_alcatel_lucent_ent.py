@@ -9,6 +9,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
+    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     assert_extend_generic_if,
     create_e2e_core_test_config,
@@ -19,7 +20,8 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_alcatel_lucent_ent(dd_agent_check):
-    config = create_e2e_core_test_config('alcatel-lucent-ent')
+    profile = 'alcatel-lucent-ent'
+    config = create_e2e_core_test_config(profile)
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -52,7 +54,12 @@ def test_e2e_profile_alcatel_lucent_ent(dd_agent_check):
 
     tag_rows = [
         [
+            'ent_physical_class:other',
+            'ent_physical_name:name1',
+            'ent_physical_serial_num:ALC12345XYZ67890',
+            'ent_physical_model_name:ALC-7504',
             'chas_ent_phys_admin_status:standby',
+            'chas_ent_phys_oper_status:unknown',
             'chas_ent_phys_led_status_backup_ps:green_on',
             'chas_ent_phys_led_status_control:amber_blink',
             'chas_ent_phys_led_status_fabric:amber_blink',
@@ -66,7 +73,12 @@ def test_e2e_profile_alcatel_lucent_ent(dd_agent_check):
             'chas_ent_phys_led_status_temperature:green_on',
         ],
         [
+            'ent_physical_class:storage_drive',
+            'ent_physical_name:name2',
+            'ent_physical_serial_num:ALC12345XYZ67891',
+            'ent_physical_model_name:ALC-7505',
             'chas_ent_phys_admin_status:unknown',
+            'chas_ent_phys_oper_status:idle',
             'chas_ent_phys_led_status_backup_ps:green_on',
             'chas_ent_phys_led_status_control:green_on',
             'chas_ent_phys_led_status_fabric:amber_blink',
@@ -86,8 +98,20 @@ def test_e2e_profile_alcatel_lucent_ent(dd_agent_check):
         )
 
     tag_rows = [
-        ['chas_ent_temp_status:not_present'],
-        ['chas_ent_temp_status:unknown'],
+        [
+            'chas_ent_temp_status:not_present',
+            'ent_physical_model_name:ALC-7504',
+            'ent_physical_name:name1',
+            'ent_physical_serial_num:ALC12345XYZ67890',
+            'ent_physical_class:unknown',
+        ],
+        [
+            'chas_ent_temp_status:unknown',
+            'ent_physical_model_name:ALC-7505',
+            'ent_physical_name:name2',
+            'ent_physical_serial_num:ALC12345XYZ67891',
+            'ent_physical_class:energy_object',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -135,5 +159,6 @@ def test_e2e_profile_alcatel_lucent_ent(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
+    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

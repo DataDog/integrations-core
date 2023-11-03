@@ -3,6 +3,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from copy import deepcopy
 from itertools import chain
 
 from datadog_checks.dev import get_docker_hostname, get_here
@@ -13,12 +14,14 @@ from datadog_checks.sqlserver.const import (
     AO_METRICS_PRIMARY,
     AO_METRICS_SECONDARY,
     DATABASE_FRAGMENTATION_METRICS,
+    DATABASE_INDEX_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DBM_MIGRATED_METRICS,
     INSTANCE_METRICS,
     INSTANCE_METRICS_DATABASE,
     TASK_SCHEDULER_METRICS,
+    TEMPDB_FILE_SPACE_USAGE_METRICS,
 )
 from datadog_checks.sqlserver.queries import get_query_file_stats
 
@@ -64,14 +67,23 @@ def get_expected_file_stats_metrics():
 
 EXPECTED_FILE_STATS_METRICS = get_expected_file_stats_metrics()
 
+# SQL Server incremental sql fraction metrics require diffs in order to calculate
+# & report the metric, which means this requires a special unit/integration test coverage
+inc_perf_counter_metrics = [
+    ('sqlserver.latches.latch_wait_time', 'Average Latch Wait Time (ms)', ''),
+]
+
+EXPECTED_INSTANCE_METRICS = [metric for metric in INSTANCE_METRICS if metric not in inc_perf_counter_metrics]
+
 EXPECTED_DEFAULT_METRICS = (
     [
         m[0]
         for m in chain(
-            INSTANCE_METRICS,
+            EXPECTED_INSTANCE_METRICS,
             DBM_MIGRATED_METRICS,
             INSTANCE_METRICS_DATABASE,
             DATABASE_METRICS,
+            TEMPDB_FILE_SPACE_USAGE_METRICS,
         )
     ]
     + SERVER_METRICS
@@ -208,9 +220,33 @@ INIT_CONFIG_ALT_TABLES = {
     ]
 }
 
+OPERATION_TIME_METRICS = [
+    'simple_metrics',
+    'database_stats_metrics',
+    'fraction_metrics',
+    'db_file_space_usage_metrics',
+    'database_backup_metrics',
+    'database_file_stats_metrics',
+    'incr_fraction_metrics',
+    'db_index_usage_stats_metrics',
+]
+
+OPERATION_TIME_METRIC_NAME = 'dd.sqlserver.operation.time'
+
+E2E_OPERATION_TIME_METRIC_NAME = [
+    'dd.sqlserver.operation.time.{}'.format(suffix) for suffix in ('avg', 'max', '95percentile', 'count', 'median')
+]
+
 
 def assert_metrics(
-    aggregator, check_tags, service_tags, dbm_enabled=False, hostname=None, database_autodiscovery=False, dbs=None
+    instance,
+    aggregator,
+    check_tags,
+    service_tags,
+    dbm_enabled=False,
+    hostname=None,
+    database_autodiscovery=False,
+    dbs=None,
 ):
     """
     Boilerplate asserting all the expected metrics and service checks.
@@ -222,6 +258,12 @@ def assert_metrics(
     # as they are emitted from the DBM backend
     if dbm_enabled:
         expected_metrics = [m for m in expected_metrics if m not in DBM_MIGRATED_METRICS_NAMES]
+
+    # remove index usage metrics, which require extra setup & will be tested separately
+    for m in DATABASE_INDEX_METRICS:
+        if m[0] in aggregator._metrics:
+            del aggregator._metrics[m[0]]
+
     if database_autodiscovery:
         # when autodiscovery is enabled, we should not double emit metrics,
         # so we should assert for these separately with the proper tags
@@ -234,5 +276,32 @@ def assert_metrics(
         assert hostname is not None, "hostname must be explicitly specified for all metrics"
         aggregator.assert_metric(mname, hostname=hostname)
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK, tags=service_tags)
+
+    operation_time_metric_tags = check_tags + ['agent_hostname:{}'.format(hostname)]
+    for operation_name in get_operation_time_metrics(instance):
+        aggregator.assert_metric(
+            OPERATION_TIME_METRIC_NAME,
+            tags=['operation:{}'.format(operation_name)] + operation_time_metric_tags,
+            hostname=hostname,
+            count=1,
+        )
+
     aggregator.assert_all_metrics_covered()
     aggregator.assert_no_duplicate_metrics()
+
+
+def get_operation_time_metrics(instance):
+    """
+    Return a list of all operation time metrics
+    """
+    operation_time_metrics = deepcopy(OPERATION_TIME_METRICS)
+    if instance.get('include_task_scheduler_metrics', False):
+        operation_time_metrics.append('os_schedulers_metrics')
+        operation_time_metrics.append('os_tasks_metrics')
+    if instance.get('include_db_fragmentation_metrics', False):
+        operation_time_metrics.append('db_fragmentation_metrics')
+    if instance.get('include_ao_metrics', False):
+        operation_time_metrics.append('availability_groups_metrics')
+    if instance.get('include_master_files_metrics', False):
+        operation_time_metrics.append('master_database_file_stats_metrics')
+    return operation_time_metrics

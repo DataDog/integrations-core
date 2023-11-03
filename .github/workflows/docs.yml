@@ -41,8 +41,11 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends libkrb5-dev
 
+    - name: Validate documentation
+      run: ddev -v docs build --check
+
     - name: Build documentation
-      run: ddev docs build -v
+      run: ddev -v docs build
 
     - uses: actions/upload-artifact@v2
       with:

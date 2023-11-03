@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import warnings
+from pathlib import Path
 from typing import Dict, List, Tuple
 
 import yaml
@@ -14,6 +15,7 @@ from datamodel_code_generator.parser.openapi import OpenAPIParser
 from datadog_checks.dev.tooling.configuration.consumers.model.model_file import build_model_file
 from datadog_checks.dev.tooling.configuration.consumers.model.model_info import ModelInfo
 from datadog_checks.dev.tooling.configuration.consumers.openapi_document import build_openapi_document
+from datadog_checks.dev.tooling.constants import get_root
 
 PYTHON_VERSION = PythonVersion.PY_39
 
@@ -110,10 +112,8 @@ class ModelConsumer:
                 dump_resolve_reference_action=model_types.dump_resolve_reference_action,
                 enum_field_as_literal=LiteralType.All,
                 encoding='utf-8',
-                use_generic_container_types=True,
                 enable_faux_immutability=True,
-                # TODO: uncomment when the Agent upgrades Python to 3.9
-                # use_standard_collections=True,
+                use_standard_collections=True,
                 strip_default_none=True,
                 # https://github.com/koxudaxi/datamodel-code-generator/pull/173
                 field_constraints=True,
@@ -209,7 +209,8 @@ class ModelConsumer:
 
     @staticmethod
     def create_code_formatter():
-        return CodeFormatter(PYTHON_VERSION)
+        path = Path(get_root())
+        return CodeFormatter(PYTHON_VERSION, settings_path=path if path.is_dir() else None)
 
     def _build_deprecation_file(self, deprecation_data):
         file_needs_formatting = False

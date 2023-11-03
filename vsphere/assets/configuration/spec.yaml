@@ -62,8 +62,9 @@ files:
       - name: collection_type
         description: |
           Should be either 'realtime' or 'historical'
-          Use 'realtime' to collect metrics about Hosts and VMs.
-          Use 'historical' to collect metrics about Datastores, Datacenters and Clusters.
+          Use 'realtime' to collect metrics that are about the past hour. Realtime metrics are about Hosts and VMs.
+          Use 'historical' to collect metrics that are about longer time frames such as a day, week, or month.
+          Historical metrics are about VMs, Datastores, Datacenters and Clusters.
           If you want both, we suggest creating an additional instance connecting to the same vCenter
           in this configuration file, but you can also set this field to 'both'. This is not recommended
           as the collection of historical metrics will negatively impact the collection of your realtime metrics.
@@ -139,7 +140,7 @@ files:
                if VMware tools are installed)
           Note1: 'datastore', 'datacenter' and 'cluster' filters are ignored when collecting realtime metrics as those
                   resources do not have realtime metrics
-          Note2: 'vm' and 'host' filters are ignored when collecting historical metrics as those resources do not have
+          Note2: 'host' filters are ignored when collecting historical metrics as this resource does not have
                   historical metrics
 
         value:
@@ -194,12 +195,12 @@ files:
           for the list of collected metrics (do not prefix them with `vsphere`)
           Note1: 'datastore', 'datacenter' and 'cluster' filters are ignored when collecting realtime metrics as those
                   resources do not have realtime metrics. They will work only with "collection_type: historical".
-          Note2: 'vm' and 'host' filters are ignored when collecting historical metrics as those resources do no
+          Note2: 'host' filters are ignored when collecting historical metrics as this resource does not
                   have historical metrics. They will work only with "collection_type: realtime".
         value:
           example:
             vm:
-              - <VM_REGEX>                 # Only possible with "collection_type: realtime"
+              - <VM_REGEX>
             host:
               - <HOST_REGEX>               # Only possible with "collection_type: realtime"
             datastore:
@@ -238,12 +239,12 @@ files:
           See https://github.com/DataDog/integrations-core/blob/master/vsphere/datadog_checks/vsphere/metrics.py
           for the list of collected metrics (do not prefix them with `vsphere`)
           Note1: 'datastore' and 'cluster' are possible only with "collection_type: historical"
-          Note2: 'vm' and 'host' are possible only with "collection_type: realtime"
+          Note2: 'host' are possible only with "collection_type: realtime"
           /!\ Use with parsimony, collecting per-instance metrics might be very expensive for big environments.
         value:
           example:
             vm:
-              - <VM_REGEX>                 # Only possible with "collection_type: realtime"
+              - <VM_REGEX>
             host:
               - <HOST_REGEX>               # Only possible with "collection_type: realtime"
             datastore:
@@ -268,6 +269,23 @@ files:
               type: array
               items:
                 type: string
+      - name: event_resource_filters
+        description: |
+          Which resource types to collect AlarmStatusChangedEvent events for.
+          Available resource types are vm, host, datastore, datacenter, and cluster.
+
+          By default, the integration will only collect these events for VMs and Hosts.
+        value:
+          example:
+            - 'vm'
+            - 'host'
+            - 'datastore'
+            - 'datacenter'
+            - 'cluster'
+          type: array
+          display_default: ['vm', 'host']
+          items:
+            type: string
       - name: collect_tags
         description: |
           If true, the vSphere Tags will be collected.

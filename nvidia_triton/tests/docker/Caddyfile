@@ -1,0 +1,8 @@
+:8002 {
+  root * /metrics
+  file_server
+}
+:8000 {
+  root * /v2
+  file_server
+}

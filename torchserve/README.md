@@ -1,9 +1,5 @@
 # Agent Check: TorchServe
 
-<div class="alert alert-info">
-Coming soon: This integration is included in the upcoming 7.47.0 release of the Datadog Agent.
-</div>
-
 ## Overview
 
 This check monitors [TorchServe][1] through the Datadog Agent. 
@@ -47,7 +43,7 @@ This configuration file exposes the three different endpoints that can be used b
 To enable the Prometheus endpoint, you need to configure two options: 
 
 - `metrics_address`: Metrics API binding address. Defaults to `http://127.0.0.1:8082`
-- `metrics_mode`: Two metric modes are supported: `log` and `prometheus`. Defaults to `log`. You have to set it to `prometheus` to collect metrics from this endpoint.
+- `metrics_mode`: Two metric modes are supported by TorchServe: `log` and `prometheus`. Defaults to `log`. You have to set it to `prometheus` to collect metrics from this endpoint.
 
 For instance:
 
@@ -77,7 +73,7 @@ instances:
 
 For more options, see the [sample `torchserve.d/conf.yaml` file][4].
 
-TorchServe allows the custom service code to emit [metrics that will be available based on the configured `metrics_mode`][11]. You can configure this integration to collect these metrics using the `extra_metrics` option. These metrics will have the `torchserver.openmetrics` prefix, just like any other metrics coming from this endpoint.
+TorchServe allows the custom service code to emit [metrics that will be available based on the configured `metrics_mode`][11]. You can configure this integration to collect these metrics using the `extra_metrics` option. These metrics will have the `torchserve.openmetrics` prefix, just like any other metrics coming from this endpoint.
 
 <div class="alert alert-info">These custom TorchServe metrics are considered standard metrics in Datadog.</div>
 
@@ -147,6 +143,9 @@ By default, the integration retrieves the full list of the models every time the
 
 #### Complete configuration 
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 This example demonstrates the complete configuration leveraging the three different APIs described in the previous sections:
 
 ```yaml
@@ -170,6 +169,63 @@ instances:
 ```
 
 [Restart the Agent][5] after modifying the configuration.
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Docker" xxx -->
+
+This example demonstrates the complete configuration leveraging the three different APIs described in the previous sections as a Docker label inside `docker-compose.yml`:
+
+```yaml
+labels:
+  com.datadoghq.ad.checks: '{"torchserve":{"instances":[{"openmetrics_endpoint":"http://%%host%%:8082/metrics","extra_metrics":["my_custom_torchserve_metric"]},{"inference_api_url":"http://%%host%%:8080"},{"management_api_url":"http://%%host%%:8081","include":["my_models.*"],"exclude":[".*-test"],"interval":3600}]}}'
+```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
+This example demonstrates the complete configuration leveraging the three different APIs described in the previous sections as Kubernetes annotations on your Torchserve pods:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: '<POD_NAME>'
+  annotations:
+    ad.datadoghq.com/torchserve.checks: |-
+      {
+        "torchserve": {
+          "instances": [
+            {
+              "openmetrics_endpoint": "http://%%host%%:8082/metrics",
+              "extra_metrics": [
+                "my_custom_torchserve_metric"
+              ]
+            },
+            {
+              "inference_api_url": "http://%%host%%:8080"
+            },
+            {
+              "management_api_url": "http://%%host%%:8081",
+              "include": [
+                ".*"
+              ],
+              "exclude": [
+                ".*-test"
+              ],
+              "interval": 3600
+            }
+          ]
+        }
+      }
+    # (...)
+spec:
+  containers:
+    - name: 'torchserve'
+# (...)
+```
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -226,7 +282,7 @@ The TorchServe integration can collect logs from the TorchServe service and forw
 
 See [the example configuration file][4] on how to collect all logs.
 
-For more information about the logging configuration with TorchServer, see the [official TorchServe documentation][16].
+For more information about the logging configuration with TorchServe, see the [official TorchServe documentation][16].
 
 <div class="alert alert-warning">You can also collect logs from the `access_log.log` file. However, these logs are included in the `ts_log.log` file, leading you to duplicated logs in Datadog if you configure both files.</div>
 

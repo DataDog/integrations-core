@@ -119,7 +119,6 @@ Edit the `mysql.d/conf.yaml` file, in the `conf.d/` folder at the root of your [
         galera_cluster: true
         extra_status_metrics: true
         extra_innodb_metrics: true
-        extra_performance_metrics: true
         schema_size_metrics: false
         disable_innodb_metrics: false
   ```

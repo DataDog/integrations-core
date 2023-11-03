@@ -12,6 +12,10 @@ def instance_connect_timeout():
     return 10
 
 
+def instance_database_instance_collection_interval():
+    return False
+
+
 def instance_dbm():
     return False
 

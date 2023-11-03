@@ -4,7 +4,7 @@
 
 
 extends:
-  - _base.yaml
+  - _dell.yaml
   - _dell-rac.yaml
   - _intel-lan-adapters.yaml
 

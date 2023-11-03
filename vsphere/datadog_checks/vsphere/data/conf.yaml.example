@@ -94,8 +94,9 @@ instances:
 
     ## @param collection_type - string - optional - default: realtime
     ## Should be either 'realtime' or 'historical'
-    ## Use 'realtime' to collect metrics about Hosts and VMs.
-    ## Use 'historical' to collect metrics about Datastores, Datacenters and Clusters.
+    ## Use 'realtime' to collect metrics that are about the past hour. Realtime metrics are about Hosts and VMs.
+    ## Use 'historical' to collect metrics that are about longer time frames such as a day, week, or month.
+    ## Historical metrics are about VMs, Datastores, Datacenters and Clusters.
     ## If you want both, we suggest creating an additional instance connecting to the same vCenter
     ## in this configuration file, but you can also set this field to 'both'. This is not recommended
     ## as the collection of historical metrics will negatively impact the collection of your realtime metrics.
@@ -165,7 +166,7 @@ instances:
     ##      if VMware tools are installed)
     ## Note1: 'datastore', 'datacenter' and 'cluster' filters are ignored when collecting realtime metrics as those
     ##         resources do not have realtime metrics
-    ## Note2: 'vm' and 'host' filters are ignored when collecting historical metrics as those resources do not have
+    ## Note2: 'host' filters are ignored when collecting historical metrics as this resource does not have
     ##         historical metrics
     #
     # resource_filters:
@@ -205,7 +206,7 @@ instances:
     ## for the list of collected metrics (do not prefix them with `vsphere`)
     ## Note1: 'datastore', 'datacenter' and 'cluster' filters are ignored when collecting realtime metrics as those
     ##         resources do not have realtime metrics. They will work only with "collection_type: historical".
-    ## Note2: 'vm' and 'host' filters are ignored when collecting historical metrics as those resources do no
+    ## Note2: 'host' filters are ignored when collecting historical metrics as this resource does not
     ##         have historical metrics. They will work only with "collection_type: realtime".
     #
     # metric_filters:
@@ -227,7 +228,7 @@ instances:
     ## See https://github.com/DataDog/integrations-core/blob/master/vsphere/datadog_checks/vsphere/metrics.py
     ## for the list of collected metrics (do not prefix them with `vsphere`)
     ## Note1: 'datastore' and 'cluster' are possible only with "collection_type: historical"
-    ## Note2: 'vm' and 'host' are possible only with "collection_type: realtime"
+    ## Note2: 'host' are possible only with "collection_type: realtime"
     ## /!\ Use with parsimony, collecting per-instance metrics might be very expensive for big environments.
     #
     # collect_per_instance_filters:
@@ -239,6 +240,19 @@ instances:
     #   - <DATASTORE_REGEX>
     #   cluster:
     #   - <CLUSTER_REGEX>
+
+    ## @param event_resource_filters - list of strings - optional - default: ['vm', 'host']
+    ## Which resource types to collect AlarmStatusChangedEvent events for.
+    ## Available resource types are vm, host, datastore, datacenter, and cluster.
+    ##
+    ## By default, the integration will only collect these events for VMs and Hosts.
+    #
+    # event_resource_filters:
+    #   - vm
+    #   - host
+    #   - datastore
+    #   - datacenter
+    #   - cluster
 
     ## @param collect_tags - boolean - optional - default: false
     ## If true, the vSphere Tags will be collected.

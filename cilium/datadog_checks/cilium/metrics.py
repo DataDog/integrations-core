@@ -58,6 +58,7 @@ AGENT_METRICS = {
     'cilium_event_ts': 'event_timestamp',
     'cilium_kvstore_operations_duration_seconds': 'kvstore.operations_duration.seconds',
     'cilium_kvstore_events_queue_seconds': 'kvstore.events_queue.seconds',
+    'cilium_kvstore_quorum_errors_total': 'kvstore.quorum_errors.total',
     'cilium_policy_implementation_delay': 'policy.implementation_delay',
     # Cilium <= 1.7
     'cilium_policy_l7_denied_total': 'policy.l7_denied.total',
@@ -89,6 +90,9 @@ AGENT_METRICS = {
     'cilium_ipcache_errors_total': 'ipcache.errors.total',
     'cilium_k8s_event_lag_seconds': 'k8s_event.lag.seconds',
     'cilium_k8s_terminating_endpoints_events_total': 'k8s_terminating.endpoints_events.total',
+    # Cilium 1.14+
+    'cilium_kvstore_sync_queue_size': 'kvstore.sync_queue_size',
+    'cilium_kvstore_initial_sync_completed': 'kvstore.initial_sync_completed',
 }
 
 OPERATOR_V2_OVERRIDES = {
@@ -146,6 +150,8 @@ OPERATOR_METRICS = {
     'cilium_operator_ipam_k8s_sync_queued_total': 'operator.ipam.k8s_sync.queued.total',
     'cilium_operator_ipam_nodes': 'operator.ipam.nodes',
     # Cilium 1.9+
+    'cilium_operator_azure_api_duration_seconds': 'operator.azure.api.duration.seconds',
+    'cilium_operator_azure_api_rate_limit_duration_seconds': 'operator.azure.api.rate_limit.duration.seconds',
     'cilium_operator_ec2_api_duration_seconds': 'operator.ec2.api.duration.seconds',
     'cilium_operator_ec2_api_rate_limit_duration_seconds': 'operator.ec2.api.rate_limit.duration.seconds',
     'cilium_operator_ipam_resync_duration_seconds': 'operator.ipam.resync.duration.seconds',

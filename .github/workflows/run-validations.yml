@@ -86,10 +86,6 @@ on:
         required: false
         default: false
         type: boolean
-      recommended-monitors:
-        required: false
-        default: false
-        type: boolean
       saved-views:
         required: false
         default: false
@@ -214,10 +210,6 @@ jobs:
     - name: Validate README files
       if: inputs.readmes
       run: ddev validate readmes $TARGET
-
-    - name: Validate recommended monitors
-      if: inputs.recommended-monitors
-      run: ddev validate recommended-monitors $TARGET
 
     - name: Validate saved views
       if: inputs.saved-views

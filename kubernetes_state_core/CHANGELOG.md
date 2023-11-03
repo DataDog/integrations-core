@@ -1,4 +1,3 @@
 # CHANGELOG - Kubernetes State Core
 
-## Unreleased
-
+<!-- towncrier release notes start -->

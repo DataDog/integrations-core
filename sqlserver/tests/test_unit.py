@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import os
+import re
 from collections import namedtuple
 
 import mock
@@ -12,9 +13,14 @@ from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
-from datadog_checks.sqlserver.metrics import SqlMasterDatabaseFileStats
+from datadog_checks.sqlserver.metrics import SqlDbIndexUsageStats, SqlFractionMetric, SqlMasterDatabaseFileStats
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
-from datadog_checks.sqlserver.utils import Database, parse_sqlserver_major_version, set_default_driver_conf
+from datadog_checks.sqlserver.utils import (
+    Database,
+    extract_sql_comments_and_procedure_name,
+    parse_sqlserver_major_version,
+    set_default_driver_conf,
+)
 
 from .common import CHECK_NAME, DOCKER_SERVER, assert_metrics
 from .utils import windows_ci
@@ -248,6 +254,133 @@ def test_SqlMasterDatabaseFileStats_fetch_metric(col_val_row_1, col_val_row_2, c
         assert errors < 1
 
 
+@pytest.mark.parametrize(
+    'col_val_row_1, col_val_row_2, col_val_row_3',
+    [
+        pytest.param(256, 1024, 1720, id='Valid column value 0'),
+        pytest.param(0, None, 1024, id='NoneType column value 1, should not raise error'),
+        pytest.param(512, 0, 256, id='Valid column value 2'),
+        pytest.param(None, 256, 0, id='NoneType column value 3, should not raise error'),
+    ],
+)
+def test_SqlDbIndexUsageStats_fetch_metric(col_val_row_1, col_val_row_2, col_val_row_3):
+    Row = namedtuple(
+        'Row', ['db', 'index_name', 'table_name', "user_seeks", "user_scans", "user_lookups", "user_updates"]
+    )
+    mock_rows = [
+        Row('foo_db', "my-index", "table_a", 23, col_val_row_1, 12453, 1234),
+        Row('foo_db', "foo-index", "table_a", 23, col_val_row_2, 12, 1234),
+        Row('foo_db', "bar-index", "table_b", 23, col_val_row_3, 123, 1234),
+    ]
+    mock_cols = ['db', 'index_name', 'table_name', "user_seeks", "user_scans", "user_lookups", "user_updates"]
+    report_function = mock.MagicMock()
+    mock_metric_obj = SqlDbIndexUsageStats(
+        cfg_instance=mock.MagicMock(dict),
+        base_name=None,
+        report_function=report_function,
+        column='user_scans',
+        logger=None,
+    )
+    with mock.patch.object(
+        SqlDbIndexUsageStats, 'fetch_metric', wraps=mock_metric_obj.fetch_metric
+    ) as mock_fetch_metric:
+        errors = 0
+        try:
+            mock_fetch_metric(mock_rows, mock_cols)
+        except Exception as e:
+            errors += 1
+            raise AssertionError('{}'.format(e))
+        assert errors < 1
+
+
+def test_SqlFractionMetric_base(caplog):
+    Row = namedtuple('Row', ['counter_name', 'cntr_type', 'cntr_value', 'instance_name', 'object_name'])
+    fetchall_results = [
+        Row('Buffer cache hit ratio', 537003264, 33453, '', 'SQLServer:Buffer Manager'),
+        Row('Buffer cache hit ratio base', 1073939712, 33531, '', 'SQLServer:Buffer Manager'),
+        Row('some random counter', 1073939712, 1111, '', 'SQLServer:Buffer Manager'),
+        Row('some random counter base', 1073939712, 33531, '', 'SQLServer:Buffer Manager'),
+    ]
+    mock_cursor = mock.MagicMock()
+    mock_cursor.fetchall.return_value = fetchall_results
+
+    report_function = mock.MagicMock()
+    metric_obj = SqlFractionMetric(
+        cfg_instance={
+            'name': 'sqlserver.buffer.cache_hit_ratio',
+            'counter_name': 'Buffer cache hit ratio',
+            'instance_name': '',
+            'physical_db_name': None,
+            'tags': ['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname'],
+            'hostname': 'stubbed.hostname',
+        },
+        base_name='Buffer cache hit ratio base',
+        report_function=report_function,
+        column=None,
+        logger=mock.MagicMock(),
+    )
+    results_rows, results_cols = SqlFractionMetric.fetch_all_values(
+        mock_cursor, ['Buffer cache hit ratio', 'Buffer cache hit ratio base'], mock.mock.MagicMock()
+    )
+    metric_obj.fetch_metric(results_rows, results_cols)
+    report_function.assert_called_with(
+        'sqlserver.buffer.cache_hit_ratio',
+        0.9976737943992127,
+        raw=True,
+        hostname='stubbed.hostname',
+        tags=['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname'],
+    )
+
+
+def test_SqlFractionMetric_group_by_instance(caplog):
+    Row = namedtuple('Row', ['counter_name', 'cntr_type', 'cntr_value', 'instance_name', 'object_name'])
+    fetchall_results = [
+        Row('Buffer cache hit ratio', 537003264, 33453, '', 'SQLServer:Buffer Manager'),
+        Row('Buffer cache hit ratio base', 1073939712, 33531, '', 'SQLServer:Buffer Manager'),
+        Row('Foo counter', 537003264, 1, 'bar', 'SQLServer:Buffer Manager'),
+        Row('Foo counter base', 1073939712, 50, 'bar', 'SQLServer:Buffer Manager'),
+        Row('Foo counter', 537003264, 5, 'zoo', 'SQLServer:Buffer Manager'),
+        Row('Foo counter base', 1073939712, 100, 'zoo', 'SQLServer:Buffer Manager'),
+    ]
+    mock_cursor = mock.MagicMock()
+    mock_cursor.fetchall.return_value = fetchall_results
+
+    report_function = mock.MagicMock()
+    metric_obj = SqlFractionMetric(
+        cfg_instance={
+            'name': 'sqlserver.test.metric',
+            'counter_name': 'Foo counter',
+            'instance_name': 'ALL',
+            'physical_db_name': None,
+            'tags': ['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname'],
+            'hostname': 'stubbed.hostname',
+            'tag_by': 'db',
+        },
+        base_name='Foo counter base',
+        report_function=report_function,
+        column=None,
+        logger=mock.MagicMock(),
+    )
+    results_rows, results_cols = SqlFractionMetric.fetch_all_values(
+        mock_cursor, ['Foo counter base', 'Foo counter'], mock.mock.MagicMock()
+    )
+    metric_obj.fetch_metric(results_rows, results_cols)
+    report_function.assert_any_call(
+        'sqlserver.test.metric',
+        0.02,
+        raw=True,
+        hostname='stubbed.hostname',
+        tags=['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname', 'db:bar'],
+    )
+    report_function.assert_any_call(
+        'sqlserver.test.metric',
+        0.05,
+        raw=True,
+        hostname='stubbed.hostname',
+        tags=['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname', 'db:zoo'],
+    )
+
+
 def _mock_database_list():
     Row = namedtuple('Row', 'name')
     fetchall_results = [
@@ -308,8 +441,12 @@ def test_check_local(aggregator, dd_run_check, init_config, instance_docker):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
     check_tags = instance_docker.get('tags', [])
-    expected_tags = check_tags + ['sqlserver_host:{}'.format(DOCKER_SERVER), 'db:master']
-    assert_metrics(aggregator, check_tags, expected_tags, hostname=sqlserver_check.resolved_hostname)
+    expected_tags = check_tags + [
+        'sqlserver_host:{}'.format(sqlserver_check.resolved_hostname),
+        'connection_host:{}'.format(DOCKER_SERVER),
+        'db:master',
+    ]
+    assert_metrics(instance_docker, aggregator, check_tags, expected_tags, hostname=sqlserver_check.resolved_hostname)
 
 
 SQL_SERVER_2012_VERSION_EXAMPLE = """\
@@ -356,5 +493,240 @@ def test_database_state(aggregator, dd_run_check, init_config, instance_docker):
         'database_recovery_model_desc:SIMPLE',
         'database_state_desc:ONLINE',
         'database:{}'.format(instance_docker['database']),
+        'db:{}'.format(instance_docker['database']),
     ]
     aggregator.assert_metric('sqlserver.database.state', tags=expected_tags, hostname=sqlserver_check.resolved_hostname)
+
+
+@pytest.mark.parametrize(
+    "query,expected_comments,is_proc,expected_name",
+    [
+        [
+            None,
+            [],
+            False,
+            None,
+        ],
+        [
+            "",
+            [],
+            False,
+            None,
+        ],
+        [
+            "/*",
+            [],
+            False,
+            None,
+        ],
+        [
+            "--",
+            [],
+            False,
+            None,
+        ],
+        [
+            "/*justonecomment*/",
+            ["/*justonecomment*/"],
+            False,
+            None,
+        ],
+        [
+            """\
+            /* a comment */
+            -- Single comment
+            """,
+            ["/* a comment */", "-- Single comment"],
+            False,
+            None,
+        ],
+        [
+            "/*tag=foo*/ SELECT * FROM foo;",
+            ["/*tag=foo*/"],
+            False,
+            None,
+        ],
+        [
+            "/*tag=foo*/ SELECT * FROM /*other=tag,incomment=yes*/ foo;",
+            ["/*tag=foo*/", "/*other=tag,incomment=yes*/"],
+            False,
+            None,
+        ],
+        [
+            "/*tag=foo*/ SELECT * FROM /*other=tag,incomment=yes*/ foo /*lastword=yes*/",
+            ["/*tag=foo*/", "/*other=tag,incomment=yes*/", "/*lastword=yes*/"],
+            False,
+            None,
+        ],
+        [
+            """\
+            -- My Comment
+            CREATE PROCEDURE bobProcedure
+            BEGIN
+                SELECT name FROM bob
+            END;
+            """,
+            ["-- My Comment"],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            -- My procedure
+            CREATE PROCEDURE bobProcedure
+            BEGIN
+                SELECT name FROM bob
+            END;
+            """,
+            ["-- My procedure"],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            -- My Comment
+            CREATE PROCEDURE bobProcedure
+            -- In the middle
+            BEGIN
+                SELECT name FROM bob
+            END;
+            """,
+            ["-- My Comment", "-- In the middle"],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            -- My Comment
+            CREATE PROCEDURE bobProcedure
+            -- this procedure does foo
+            BEGIN
+                SELECT name FROM bob
+            END;
+            """,
+            ["-- My Comment", "-- this procedure does foo"],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            -- My Comment
+            CREATE PROCEDURE bobProcedure
+            -- In the middle
+            BEGIN
+                SELECT name FROM bob
+            END;
+            -- And at the end
+            """,
+            ["-- My Comment", "-- In the middle", "-- And at the end"],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            -- My Comment
+            CREATE PROCEDURE bobProcedure
+            -- In the middle
+            /*mixed with mult-line foo*/
+            BEGIN
+                SELECT name FROM bob
+            END;
+            -- And at the end
+            """,
+            ["-- My Comment", "-- In the middle", "/*mixed with mult-line foo*/", "-- And at the end"],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            -- My procedure
+            CREATE PROCEDURE bobProcedure
+            -- In the middle
+            /*mixed with procedure foo*/
+            BEGIN
+                SELECT name FROM bob
+            END;
+            -- And at the end
+            """,
+            ["-- My procedure", "-- In the middle", "/*mixed with procedure foo*/", "-- And at the end"],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            /* hello
+            this is a mult-line-comment
+            tag=foo,blah=tag
+            */
+            /*
+            second multi-line
+            comment
+            */
+            CREATE PROCEDURE bobProcedure
+            BEGIN
+                SELECT name FROM bob
+            END;
+            -- And at the end
+            """,
+            [
+                "/* hello this is a mult-line-comment tag=foo,blah=tag */",
+                "/* second multi-line comment */",
+                "-- And at the end",
+            ],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            /* hello
+            this is a mult-line-comment
+            tag=foo,blah=tag
+            */
+            /*
+            second multi-line
+            for procedure foo
+            */
+            CREATE PROCEDURE bobProcedure
+            BEGIN
+                SELECT name FROM bob
+            END;
+            -- And at the end
+            """,
+            [
+                "/* hello this is a mult-line-comment tag=foo,blah=tag */",
+                "/* second multi-line for procedure foo */",
+                "-- And at the end",
+            ],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            /* hello
+            this is a mult-line-commet
+            tag=foo,blah=tag
+            */
+            CREATE PROCEDURE bobProcedure
+            -- In the middle
+            /*mixed with mult-line foo*/
+            BEGIN
+                SELECT name FROM bob
+            END;
+            -- And at the end
+            """,
+            [
+                "/* hello this is a mult-line-commet tag=foo,blah=tag */",
+                "-- In the middle",
+                "/*mixed with mult-line foo*/",
+                "-- And at the end",
+            ],
+            True,
+            "bobProcedure",
+        ],
+    ],
+)
+def test_extract_sql_comments_and_procedure_name(query, expected_comments, is_proc, expected_name):
+    comments, p, name = extract_sql_comments_and_procedure_name(query)
+    assert comments == expected_comments
+    assert p == is_proc
+    assert re.match(name, expected_name, re.IGNORECASE) if expected_name else expected_name == name

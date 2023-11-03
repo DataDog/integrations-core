@@ -98,6 +98,7 @@ compressor__total_payloads 12
 # HELP datadog_requests Counter of requests made to Datadog
 # TYPE datadog_requests counter
 datadog_requests{join_leader="true",status="error"} 2
+datadog_requests{join_leader="true",status="rate_limit_error"} 2
 datadog_requests{join_leader="true",status="success"} 13006
 # HELP external_metrics Number of external metrics tagged.
 # TYPE external_metrics gauge

@@ -51,8 +51,15 @@ class Path(_PathBase):
         kwargs.setdefault('encoding', 'utf-8')
         return super().write_text(*args, **kwargs)
 
+    def stream_lines(self, encoding='utf-8') -> Generator[str, None, None]:
+        if self.exists():
+            with self.open(encoding=encoding) as f:
+                yield from f
+
     def open(self, **kwargs):
-        kwargs.setdefault('encoding', 'utf-8')
+        if not kwargs.get('mode', 'r')[1:].startswith('b'):
+            kwargs.setdefault('encoding', 'utf-8')
+
         return super().open(**kwargs)
 
     def remove(self):

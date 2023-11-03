@@ -12,6 +12,10 @@ For more in-depth monitoring of your GitLab pipelines, check out [CI Pipeline Vi
 
 ## Setup
 
+This OpenMetrics-based integration has a latest mode (enabled by setting `openmetrics_endpoint` to point to the target endpoint) and a legacy mode (enabled by setting `prometheus_url` instead). To get all the most up-to-date features, Datadog recommends enabling the latest mode. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][18].
+
+Metrics marked as `[OpenMetricsV1]` or `[OpenMetricsV2]` are only available using the corresponding mode of the GitLab integration. All other metrics are collected by both modes. 
+
 ### Installation
 
 The GitLab check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your GitLab servers.
@@ -105,8 +109,6 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 See [metadata.csv][12] for a list of metrics provided by this integration. 
 
-**Note**: Metrics marked as `[Legacy]`, `[OpenMetricsV1]`, or `[OpenMetricsV2]` are only available using the corresponding implementation of the GitLab integration. Metrics not marked are collected by all three implementations.
-
 ### Events
 
 The GitLab check does not include any events.
@@ -136,3 +138,4 @@ Need help? Contact [Datadog support][14].
 [15]: https://docs.gitlab.com/ee/user/admin_area/monitoring/health_check.html#readiness
 [16]: https://github.com/DataDog/integrations-core/blob/7.43.x/gitlab/datadog_checks/gitlab/data/conf.yaml.example
 [17]: https://app.datadoghq.com/ci/getting-started
+[18]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations

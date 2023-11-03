@@ -132,10 +132,10 @@ def make(ctx, checks, version, end, initial_release, skip_sign, sign_only, exclu
             if check == 'ddev':
                 cur_version = get_version_string(check)
                 _, changelog_types = ctx.invoke(
-                    changes, check=check, tag_pattern='ddev-v.+', tag_prefix='ddev-v', end=end, dry_run=True
+                    changes, check=check, tag_pattern='ddev-v.+', tag_prefix='ddev-v', dry_run=True
                 )
             else:
-                cur_version, changelog_types = ctx.invoke(changes, check=check, end=end, dry_run=True)
+                cur_version, changelog_types = ctx.invoke(changes, check=check, dry_run=True)
 
             echo_debug(f'Current version: {cur_version}. Changes: {changelog_types}')
             if not changelog_types:
@@ -147,29 +147,26 @@ def make(ctx, checks, version, end, initial_release, skip_sign, sign_only, exclu
         if initial_release:
             echo_success(f'Check `{check}`')
 
+        # update the CHANGELOG
+        echo_waiting('Updating the changelog... ', nl=False)
+        ctx.invoke(
+            changelog,
+            check=check,
+            version=version,
+            old_version=None if check == 'ddev' else cur_version,
+            quiet=True,
+            dry_run=False,
+            tag_pattern='ddev-v.+' if check == 'ddev' else None,
+            tag_prefix='ddev-v' if check == 'ddev' else 'v',
+        )
+        echo_success('success!')
+
         # update the version number
         if check != 'ddev':
             echo_info(f'Current version of check {check}: {cur_version}')
             echo_waiting(f'Bumping to {version}... ', nl=False)
             update_version_module(check, cur_version, version)
             echo_success('success!')
-
-        # update the CHANGELOG
-        echo_waiting('Updating the changelog... ', nl=False)
-        # TODO: Avoid double GitHub API calls when bumping all checks at once
-        ctx.invoke(
-            changelog,
-            check=check,
-            version=version,
-            old_version=None if check == 'ddev' else cur_version,
-            end=end,
-            initial=initial_release,
-            tag_pattern='ddev-v.+' if check == 'ddev' else None,
-            tag_prefix='ddev-v' if check == 'ddev' else 'v',
-            quiet=True,
-            dry_run=False,
-        )
-        echo_success('success!')
 
         commit_targets = [check]
         updated_checks.append(check)

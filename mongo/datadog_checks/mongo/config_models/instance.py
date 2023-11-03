@@ -9,7 +9,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence, Union
+from types import MappingProxyType
+from typing import Any, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
@@ -21,6 +22,7 @@ from . import defaults, deprecations, validators
 
 class Field(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
     field_name: Optional[str] = None
@@ -30,46 +32,49 @@ class Field(BaseModel):
 
 class CustomQuery(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
     database: Optional[str] = None
-    fields: Optional[Sequence[Field]] = None
+    fields: Optional[tuple[Field, ...]] = None
     metric_prefix: Optional[str] = None
-    query: Optional[Mapping[str, Any]] = None
-    tags: Optional[Sequence[str]] = None
+    query: Optional[MappingProxyType[str, Any]] = None
+    tags: Optional[tuple[str, ...]] = None
 
 
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
-    exclude: Optional[Sequence[str]] = None
-    include: Optional[Sequence[str]] = None
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
 
 
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
+        arbitrary_types_allowed=True,
         frozen=True,
     )
-    additional_metrics: Optional[Sequence[str]] = None
-    collections: Optional[Sequence[str]] = None
+    additional_metrics: Optional[tuple[str, ...]] = None
+    collections: Optional[tuple[str, ...]] = None
     collections_indexes_stats: Optional[bool] = None
     connection_scheme: Optional[str] = None
-    custom_queries: Optional[Sequence[CustomQuery]] = None
+    custom_queries: Optional[tuple[CustomQuery, ...]] = None
     database: Optional[str] = None
-    dbnames: Optional[Sequence[str]] = None
+    dbnames: Optional[tuple[str, ...]] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
-    hosts: Optional[Union[str, Sequence[str]]] = None
+    hosts: Optional[Union[str, tuple[str, ...]]] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
-    options: Optional[Mapping[str, Any]] = None
+    options: Optional[MappingProxyType[str, Any]] = None
     password: Optional[str] = None
     replica_check: Optional[bool] = None
     server: Optional[str] = None
     service: Optional[str] = None
-    tags: Optional[Sequence[str]] = None
+    tags: Optional[tuple[str, ...]] = None
     timeout: Optional[int] = None
     tls: Optional[bool] = None
     tls_allow_invalid_certificates: Optional[bool] = None
@@ -89,25 +94,14 @@ class InstanceConfig(BaseModel):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
     @field_validator('*', mode='before')
-    def _ensure_defaults(cls, value, info):
+    def _validate(cls, value, info):
         field = cls.model_fields[info.field_name]
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
-            return value
+            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-        return getattr(defaults, f'instance_{info.field_name}', lambda: value)()
-
-    @field_validator('*')
-    def _run_validations(cls, value, info):
-        field = cls.model_fields[info.field_name]
-        field_name = field.alias or info.field_name
-        if field_name not in info.context['configured_fields']:
-            return value
-
-        return getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
-
-    @field_validator('*', mode='after')
-    def _make_immutable(cls, value):
         return validation.utils.make_immutable(value)
 
     @model_validator(mode='after')

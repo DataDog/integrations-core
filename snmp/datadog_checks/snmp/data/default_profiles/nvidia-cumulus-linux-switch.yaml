@@ -125,7 +125,7 @@ metrics:
       - name: cumulus.clEgressNonQDiscards
         OID: 1.3.6.1.4.1.40310.2.1.2.1.7
     metric_tags:
-      - column:
+      - symbol:
           name: cumulus.clPortName
           OID: 1.3.6.1.4.1.40310.2.1.2.1.1
         tag: cumulus_cl_port_name
@@ -151,7 +151,7 @@ metrics:
       - name: cumulus.clIntOutMcastPkts
         OID: 1.3.6.1.4.1.40310.2.2.2.1.9
     metric_tags:
-      - column:
+      - symbol:
           name: cumulus.clIntPortName
           OID: 1.3.6.1.4.1.40310.2.2.2.1.1
         tag: cumulus_cl_int_port_name
@@ -197,7 +197,7 @@ metrics:
       - name: cumulus.clIntOutPfc7Pkt
         OID: 1.3.6.1.4.1.40310.2.2.3.1.19
     metric_tags:
-      - column:
+      - symbol:
           name: cumulus.clIntPfcPortName
           OID: 1.3.6.1.4.1.40310.2.2.3.1.1
         tag: cumulus_cl_int_pfc_port_name

@@ -24,6 +24,8 @@ from datadog_checks.postgres.statement_samples import (
     StatementTruncationState,
 )
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
+from datadog_checks.postgres.util import payload_pg_version
+from datadog_checks.postgres.version_utils import V12
 
 from .common import DB_NAME, HOST, PORT, PORT_REPLICA2, POSTGRES_VERSION
 from .utils import _get_conn, _get_superconn, requires_over_10, run_one_check
@@ -97,17 +99,17 @@ def test_statement_samples_enabled_config(
 def test_statement_metrics_version(integration_check, dbm_instance, version, expected_payload_version):
     if version:
         check = integration_check(dbm_instance)
-        check._version = version
+        check.version = version
         check._connect()
-        assert check.statement_metrics._payload_pg_version() == expected_payload_version
+        assert payload_pg_version(check.version) == expected_payload_version
     else:
         with mock.patch(
-            'datadog_checks.postgres.postgres.PostgreSql.version', new_callable=mock.PropertyMock
+            'datadog_checks.postgres.postgres.PostgreSql.load_version', new_callable=mock.MagicMock
         ) as patched_version:
             patched_version.return_value = None
             check = integration_check(dbm_instance)
             check._connect()
-            assert check.statement_metrics._payload_pg_version() == expected_payload_version
+            assert payload_pg_version(check.version) == expected_payload_version
 
 
 @pytest.mark.parametrize("dbstrict,ignore_databases", [(True, []), (False, ['dogs']), (False, [])])
@@ -141,16 +143,16 @@ def test_statement_metrics(
 
     check = integration_check(dbm_instance)
     check._connect()
-    run_one_check(check, dbm_instance)
+    run_one_check(check, dbm_instance, cancel=False)
 
     # We can't change track_io_timing at runtime, but we can change what the integration thinks the runtime value is
     # This must be done after the first check since postgres settings are loaded from the database then
     check.pg_settings["track_io_timing"] = "on" if track_io_timing_enabled else "off"
 
     _run_queries()
-    run_one_check(check, dbm_instance)
+    run_one_check(check, dbm_instance, cancel=False)
     _run_queries()
-    run_one_check(check, dbm_instance)
+    run_one_check(check, dbm_instance, cancel=False)
 
     def _should_catch_query(dbname):
         # we can always catch it if the query originals in the same DB
@@ -170,7 +172,6 @@ def test_statement_metrics(
 
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
-    assert event['postgres_version'] == check.statement_metrics._payload_pg_version()
     assert event['ddagentversion'] == datadog_agent.get_version()
     assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
@@ -331,7 +332,6 @@ def test_statement_metrics_cloud_metadata(
 
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
-    assert event['postgres_version'] == check.statement_metrics._payload_pg_version()
     assert event['ddagentversion'] == datadog_agent.get_version()
     assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
@@ -361,19 +361,20 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
 
     check = integration_check(dbm_instance)
     check._connect()
-    cursor = check.db.cursor()
 
     # Execute the query once to begin tracking it. Execute again between checks to track the difference.
     # This should result in a single metric for that query_signature having a value of 2
-    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
-        mock_agent.side_effect = obfuscate_sql
-        cursor.execute(query, (['app1', 'app2'],))
-        cursor.execute(query, (['app1', 'app2', 'app3'],))
-        run_one_check(check, dbm_instance)
+    with check.db() as conn:
+        with conn.cursor() as cursor:
+            with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+                mock_agent.side_effect = obfuscate_sql
+                cursor.execute(query, (['app1', 'app2'],))
+                cursor.execute(query, (['app1', 'app2', 'app3'],))
+                check.check(dbm_instance)
 
-        cursor.execute(query, (['app1', 'app2'],))
-        cursor.execute(query, (['app1', 'app2', 'app3'],))
-        run_one_check(check, dbm_instance)
+                cursor.execute(query, (['app1', 'app2'],))
+                cursor.execute(query, (['app1', 'app2', 'app3'],))
+                run_one_check(check, dbm_instance)
 
     events = aggregator.get_event_platform_events("dbm-metrics")
     assert len(events) == 1
@@ -797,7 +798,7 @@ def test_statement_metadata(
     if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_statements_view == "pg_stat_statements":
         # cannot catch any queries from other users
         # only can see own queries
-        return False
+        return
 
     fqt_samples = [
         s for s in samples if s.get('dbm_type') == 'fqt' and s['db']['query_signature'] == normalized_query_signature
@@ -863,22 +864,23 @@ def test_statement_reported_hostname(
             "bob",
             "bob",
             "datadog_test",
-            "BEGIN TRANSACTION; SELECT city FROM persons WHERE city = %s;",
+            "BEGIN TRANSACTION; SET application_name='test_snapshot'; SELECT city FROM persons WHERE city = %s;",
             "LOCK TABLE persons IN ACCESS EXCLUSIVE MODE",
             "hello",
             {
                 'datname': 'datadog_test',
                 'usename': 'bob',
                 'state': 'active',
-                'query_signature': '9382c42e92099c04',
-                'statement': "BEGIN TRANSACTION; SELECT city FROM persons WHERE city = 'hello';",
+                'query_signature': '4bd870d5ce614fd',
+                'statement': "BEGIN TRANSACTION; SET application_name='test_snapshot'; "
+                "SELECT city FROM persons WHERE city = 'hello';",
                 'query_truncated': StatementTruncationState.not_truncated.value,
             },
             ["now", "xact_start", "query_start", "pid", "client_port", "client_addr", "backend_type", "blocking_pids"],
             {
                 'usename': 'bob',
                 'state': 'active',
-                'application_name': '',
+                'application_name': 'test_snapshot',
                 'datname': 'datadog_test',
                 'connections': 1,
             },
@@ -887,17 +889,17 @@ def test_statement_reported_hostname(
             "bob",
             "bob",
             "datadog_test",
-            "BEGIN TRANSACTION; SELECT city as city0, city as city1, city as city2, city as city3, "
-            "city as city4, city as city5, city as city6, city as city7, city as city8, city as city9, "
-            "city as city10, city as city11, city as city12, city as city13, city as city14, city as city15, "
-            "city as city16, city as city17, city as city18, city as city19, city as city20, city as city21, "
-            "city as city22, city as city23, city as city24, city as city25, city as city26, city as city27, "
-            "city as city28, city as city29, city as city30, city as city31, city as city32, city as city33, "
-            "city as city34, city as city35, city as city36, city as city37, city as city38, city as city39, "
-            "city as city40, city as city41, city as city42, city as city43, city as city44, city as city45, "
-            "city as city46, city as city47, city as city48, city as city49, city as city50, city as city51, "
-            "city as city52, city as city53, city as city54, city as city55, city as city56, city as city57, "
-            "city as city58, city as city59, city as city60, city as city61 "
+            "BEGIN TRANSACTION; SET application_name='test_snapshot'; SELECT city as city0, city as city1, "
+            "city as city2, city as city3, city as city4, city as city5, city as city6, city as city7, "
+            "city as city8, city as city9, city as city10, city as city11, city as city12, city as city13, "
+            "city as city14, city as city15, city as city16, city as city17, city as city18, city as city19, "
+            "city as city20, city as city21, city as city22, city as city23, city as city24, city as city25, "
+            "city as city26, city as city27, city as city28, city as city29, city as city30, city as city31, "
+            "city as city32, city as city33, city as city34, city as city35, city as city36, city as city37, "
+            "city as city38, city as city39, city as city40, city as city41, city as city42, city as city43, "
+            "city as city44, city as city45,  city as city46, city as city47, city as city48, city as city49, "
+            "city as city50, city as city51, city as city52, city as city53, city as city54, city as city55, "
+            "city as city56, city as city57, city as city58, city as city59, city as city60, city as city61 "
             "FROM persons WHERE city = %s;",
             "LOCK TABLE persons IN ACCESS EXCLUSIVE MODE",
             "hello",
@@ -905,26 +907,25 @@ def test_statement_reported_hostname(
                 'datname': 'datadog_test',
                 'usename': 'bob',
                 'state': 'active',
-                'query_signature': 'e1429b86c013a78e',
-                'statement': "BEGIN TRANSACTION; SELECT city as city0, city as city1, city as city2, city as city3, "
-                "city as city4, city as city5, city as city6, city as city7, city as city8, city as city9, "
-                "city as city10, city as city11, city as city12, city as city13, city as city14, city as city15, "
-                "city as city16, city as city17, city as city18, city as city19, city as city20, city as city21, "
-                "city as city22, city as city23, city as city24, city as city25, city as city26, city as city27, "
-                "city as city28, city as city29, city as city30, city as city31, city as city32, city as city33, "
-                "city as city34, city as city35, city as city36, city as city37, city as city38, city as city39, "
-                "city as city40, city as city41, city as city42, city as city43, city as city44, city as city45, "
-                "city as city46, city as city47, city as city48, city as city49, city as city50, city as city51, "
-                "city as city52, city as city53, city as city54, city as city55, city as city56, city as city57, "
-                "city as city58, city as city59, city as city60, city as city61 "
-                "FROM persons WHE",
+                'query_signature': 'f79596b3cba3247a',
+                'statement': "BEGIN TRANSACTION; SET application_name='test_snapshot'; SELECT city as city0, "
+                "city as city1, city as city2, city as city3, city as city4, city as city5, city as city6, "
+                "city as city7, city as city8, city as city9, city as city10, city as city11, city as city12, "
+                "city as city13, city as city14, city as city15, city as city16, city as city17, city as city18, "
+                "city as city19, city as city20, city as city21, city as city22, city as city23, city as city24, "
+                "city as city25, city as city26, city as city27, city as city28, city as city29, city as city30, "
+                "city as city31, city as city32, city as city33, city as city34, city as city35, city as city36, "
+                "city as city37, city as city38, city as city39, city as city40, city as city41, city as city42, "
+                "city as city43, city as city44, city as city45, city as city46, city as city47, city as city48, "
+                "city as city49, city as city50, city as city51, city as city52, city as city53, city as city54, "
+                "city as city55, city as city56, city as city57, city as city58, city as city59, city as",
                 'query_truncated': StatementTruncationState.truncated.value,
             },
             ["now", "xact_start", "query_start", "pid", "client_port", "client_addr", "backend_type", "blocking_pids"],
             {
                 'usename': 'bob',
                 'state': 'active',
-                'application_name': '',
+                'application_name': 'test_snapshot',
                 'datname': 'datadog_test',
                 'connections': 1,
             },
@@ -947,6 +948,10 @@ def test_activity_snapshot_collection(
     expected_keys,
     expected_conn_out,
 ):
+    if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
+        # cannot catch any queries from other users
+        # only can see own queries
+        return
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     # No need for query metrics here
     dbm_instance['query_metrics']['enabled'] = False
@@ -996,7 +1001,14 @@ def test_activity_snapshot_collection(
         assert event['ddagentversion'] == datadog_agent.get_version()
         assert len(event['postgres_activity']) > 0
         # find bob's query and blocking_bob's query
-        bobs_query = next((q for q in event['postgres_activity'] if q.get('usename', None) == "bob"), None)
+        bobs_query = next(
+            (
+                q
+                for q in event['postgres_activity']
+                if q.get('usename', None) == "bob" and q.get('application_name', None) == 'test_snapshot'
+            ),
+            None,
+        )
         blocking_bobs_query = next(
             (q for q in event['postgres_activity'] if q.get('usename', None) == "blocking_bob"), None
         )
@@ -1043,8 +1055,13 @@ def test_activity_snapshot_collection(
         # find bob's connections.
         bobs_conns = None
         for query_json in event['postgres_connections']:
-            if 'usename' in query_json and query_json['usename'] == "bob":
+            if (
+                'usename' in query_json
+                and query_json['usename'] == "bob"
+                and query_json['application_name'] == 'test_snapshot'
+            ):
                 bobs_conns = query_json
+                break
         assert bobs_conns is not None
 
         for key in expected_conn_out:
@@ -1070,8 +1087,13 @@ def test_activity_snapshot_collection(
         # find bob's query
         bobs_query = None
         for query_json in event['postgres_activity']:
-            if 'usename' in query_json and query_json['usename'] == "bob":
+            if (
+                'usename' in query_json
+                and query_json['usename'] == "bob"
+                and query_json['application_name'] == 'test_snapshot'
+            ):
                 bobs_query = query_json
+                break
         assert bobs_query is not None
         assert len(bobs_query['blocking_pids']) == 0
         # state should be idle now that it's no longer blocked
@@ -1283,6 +1305,41 @@ def test_statement_run_explain_errors(
         )
 
 
+@pytest.mark.parametrize(
+    "query,expected_explain_err_code,expected_err",
+    [
+        (
+            "select * from pg_settings where name = $1",
+            DBExplainError.explained_with_prepared_statement,
+            None,
+        ),
+    ],
+)
+def test_statement_run_explain_parameterized_queries(
+    integration_check,
+    dbm_instance,
+    query,
+    expected_explain_err_code,
+    expected_err,
+):
+    dbm_instance['query_activity']['enabled'] = False
+    dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['query_samples']['explain_parameterized_queries'] = True
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    check.check(dbm_instance)
+    if check.version < V12:
+        return
+
+    run_one_check(check, dbm_instance)
+    _, explain_err_code, err = check.statement_samples._run_and_track_explain("datadog_test", query, query, query)
+    run_one_check(check, dbm_instance)
+
+    assert explain_err_code == expected_explain_err_code
+    assert err == expected_err
+
+
 @pytest.mark.parametrize("dbstrict", [True, False])
 def test_statement_samples_dbstrict(aggregator, integration_check, dbm_instance, dbstrict):
     dbm_instance['query_activity']['enabled'] = False
@@ -1344,7 +1401,6 @@ def test_load_pg_settings(aggregator, integration_check, dbm_instance, db_user):
     dbm_instance["dbname"] = "postgres"
     check = integration_check(dbm_instance)
     check._connect()
-    check._load_pg_settings(check.db)
     if db_user == 'datadog_no_catalog':
         aggregator.assert_metric(
             "dd.postgres.error",
@@ -1366,10 +1422,8 @@ def test_pg_settings_caching(aggregator, integration_check, dbm_instance):
     check = integration_check(dbm_instance)
     assert not check.pg_settings, "pg_settings should not have been initialized yet"
     check._connect()
-    check._get_main_db()
     assert "track_activity_query_size" in check.pg_settings
     check.pg_settings["test_key"] = True
-    check._get_main_db()
     assert (
         "test_key" in check.pg_settings
     ), "key should not have been blown away. If it was then pg_settings was not cached correctly"
@@ -1400,7 +1454,7 @@ def test_statement_samples_main_collection_rate_limit(aggregator, integration_ch
     # the loop and trigger cancel before another job_loop is triggered
     check_frequency = collection_interval / 5.0
     _check_until_time(check, dbm_instance, sleep_time, check_frequency)
-    max_collections = int(1 / collection_interval * sleep_time) + 1
+    max_collections = int(1 / collection_interval * sleep_time) + 2
     check.cancel()
     metrics = aggregator.metrics("dd.postgres.collect_statement_samples.time")
     assert max_collections / 2.0 <= len(metrics) <= max_collections

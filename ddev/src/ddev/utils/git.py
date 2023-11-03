@@ -47,7 +47,8 @@ class GitManager:
 
     @cached_property
     def latest_commit(self) -> GitCommit:
-        return GitCommit(self.capture('rev-parse', 'HEAD').strip())
+        sha, subject = self.capture('log', '-1', '--format=%H%n%s').splitlines()
+        return GitCommit(sha, subject=subject)
 
     def get_latest_commit(self) -> GitCommit:
         with suppress(AttributeError):
@@ -100,6 +101,9 @@ class GitManager:
 
         tags = self.__filtered_tags[pattern] = [tag for tag in self.tags if re.search(pattern, tag)]
         return tags
+
+    def show_file(self, path: str, ref: str) -> str:
+        return self.capture('show', f'{ref}:{path}')
 
     def run(self, *args):
         import subprocess

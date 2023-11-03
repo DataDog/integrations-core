@@ -9,8 +9,9 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
+    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
-    assert_extend_entity_sensor,
+    assert_extend_generic_entity_sensor,
     assert_extend_generic_if,
     assert_extend_generic_ucd,
     create_e2e_core_test_config,
@@ -21,7 +22,8 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_nvidia_cumulus_linux_switch(dd_agent_check):
-    config = create_e2e_core_test_config('nvidia-cumulus-linux-switch')
+    profile = 'nvidia-cumulus-linux-switch'
+    config = create_e2e_core_test_config(profile)
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -35,7 +37,7 @@ def test_e2e_profile_nvidia_cumulus_linux_switch(dd_agent_check):
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
     assert_extend_generic_ucd(aggregator, common_tags)
-    assert_extend_entity_sensor(aggregator, common_tags)
+    assert_extend_generic_entity_sensor(aggregator, common_tags)
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
@@ -203,5 +205,6 @@ def test_e2e_profile_nvidia_cumulus_linux_switch(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
+    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

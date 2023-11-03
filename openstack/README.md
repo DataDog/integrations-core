@@ -4,7 +4,7 @@
 
 ## Overview
 
-**Note**: This integration only applies to OpenStack v12 and below (non-containerized OpenStack). If you are looking to collect metrics from OpenStack v13+ (containerized OpenStack), use the [OpenStack Controller integration][2].
+**Note**: This integration only applies to OpenStack v12 and below. If you are looking to collect metrics from OpenStack v13+, use the [OpenStack Controller integration][2].
 
 Get metrics from OpenStack service in real time to:
 

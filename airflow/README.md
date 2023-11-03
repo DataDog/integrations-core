@@ -177,16 +177,18 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
            name: "airflow.task.instance_created"
            tags:
              task_class: "$1"
-         - match: "airflow.ti.start.*.*"
-           name: "airflow.ti.start"
-           tags:
-             dag_id: "$1"
-             task_id: "$2"
-         - match: "airflow.ti.finish.*.*.*"
-           name: "airflow.ti.finish"
-           tags:
-             dag_id: "$1"
-             task_id: "$2"
+         - match: 'airflow\.ti\.start\.(.+)\.(\w+)'
+           match_type: regex
+           name: airflow.ti.start
+           tags: 
+             dagid: "$1"
+             taskid: "$2"
+         - match: 'airflow\.ti\.finish\.(\w+)\.(.+)\.(\w+)'
+           name: airflow.ti.finish
+           match_type: regex
+           tags: 
+             dagid: "$1"
+             taskid: "$2"
              state: "$3"
    ```
 

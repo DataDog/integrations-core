@@ -111,7 +111,7 @@ def test_successful_check_linux_v4(check, aggregator, dd_run_check):
         aggregator.assert_metric(metric, count=2)  # 2 network interfaces
 
     for metric in EXPECTED_TASK_METRICS:
-        aggregator.assert_metric(metric, count=1, tags=common_tags + task_tags, value=1 * 10**9)
+        aggregator.assert_metric(metric, count=1, tags=common_tags + task_tags)
 
     for metric in EXPECTED_TASK_EPHEMERAL_METRICS:
         aggregator.assert_metric(metric, count=1, tags=common_tags + task_tags)

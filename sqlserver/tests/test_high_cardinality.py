@@ -18,7 +18,9 @@ from .utils import HighCardinalityQueries, high_cardinality_only
 def dbm_instance(instance_docker):
     instance_docker['dbm'] = True
     instance_docker['query_metrics'] = {'enabled': True, 'run_sync': True}
+    instance_docker['procedure_metrics'] = {'enabled': True, 'run_sync': True}
     instance_docker['query_activity'] = {'enabled': True, 'run_sync': True}
+    instance_docker['collect_settings'] = {'enabled': False}
     return copy(instance_docker)
 
 

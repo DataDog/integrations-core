@@ -109,6 +109,39 @@ spec:
 # (...)
 ```
 
+##### Troubleshooting 
+
+**Clashing Tag Names**:
+The Argo CD integration attaches a name tag derived from the application name OpenMetrics label when available. This could sometimes lead to querying issues if a name tag is already attached to a host, as seen in the example `name: host_a, app_a`. To prevent any unwanted behavior when querying, it is advisable to [remap the name label][13] to something more unique, such as `argocd_app_name` if the host happens to already have a name tag. Below is an example configuration:
+
+**Application Controller**:
+```yaml
+apiVersion: v1
+kind: Pod
+# (...)
+metadata:
+  name: '<POD_NAME>'
+  annotations:
+    ad.datadoghq.com/argocd-application-controller.checks: |
+      {
+        "argocd": {
+          "init_config": {},
+          "instances": [
+            {
+              "app_controller_endpoint": "http://%%host%%:8082/metrics",
+              "rename_labels": {
+                "name": "argocd_app_name"
+              }
+            }
+          ]
+        }
+      }
+    # (...)
+spec:
+  containers:
+    - name: 'argocd-application-controller'
+# (...)
+```
 
 ##### Log collection
 
@@ -120,7 +153,7 @@ See the [Autodiscovery Integration Templates][3] for guidance on applying the pa
 
 | Parameter      | Value                                                |
 | -------------- | ---------------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "argocd", "service": "<SERVICE_NAME>"}`   |
+| `<LOG_CONFIG>` | `{"source": "argocd", "service": "<SERVICE_NAME>"}`  |
 
 ### Validation
 
@@ -157,4 +190,5 @@ Need help? Contact [Datadog support][9].
 [10]: https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/
 [11]: https://docs.datadoghq.com/integrations/openmetrics/
 [12]: https://github.com/DataDog/integrations-core/blob/master/argocd/datadog_checks/argocd/data/conf.yaml.example
+[13]: https://github.com/DataDog/integrations-core/blob/7.45.x/argocd/datadog_checks/argocd/data/conf.yaml.example#L164-L166
 

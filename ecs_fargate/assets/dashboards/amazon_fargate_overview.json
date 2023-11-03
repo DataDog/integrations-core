@@ -781,6 +781,119 @@
                     }
                 ]
             }
+        },
+        {
+            "id": 2841847602733776,
+            "layout": {
+                "x": 98,
+                "y": 82,
+                "width": 96,
+                "height": 5
+            },
+            "definition": {
+                "type": "note",
+                "content": "Task",
+                "background_color": "gray",
+                "font_size": "24",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            }
+        },
+        {
+            "id": 2968193745830470,
+            "layout": {
+                "x": 98,
+                "y": 89,
+                "width": 47,
+                "height": 15
+            },
+            "definition": {
+                "title": "Task CPU Limit (shared by all containers)",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "avg:ecs.fargate.cpu.task.limit{*}"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 4420041363122044,
+            "layout": {
+                "x": 147,
+                "y": 89,
+                "width": 47,
+                "height": 15
+            },
+            "definition": {
+                "title": "Task Memory Limit (shared by all containers)",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "avg:ecs.fargate.mem.task.limit{*}"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            }
         }
     ],
 "template_variables": [],

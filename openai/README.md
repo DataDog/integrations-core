@@ -173,6 +173,20 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 }
 ```
 
+<!-- xxz tabs xxx -->
+<!-- xxx tab "API Key" xxx -->
+
+### Installation
+
+1. Login to your [OpenAI Account][10].
+2. Navigate to **View API Keys** under account settings.
+3. Click the **Create a new secret key** button.
+4. Copy the created API Key to your clipboard.
+
+### Configuration
+
+1. Navigate to the configuration tab inside Datadog [OpenAI integration tile][11].
+2. Enter an account name and OpenAI API key copied above in the accounts configuration.
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -212,3 +226,5 @@ Additional helpful documentation, links, and articles:
 [7]: https://www.datadoghq.com/blog/monitor-azure-openai-with-datadog/
 [8]: https://datadoghq.dev/dd-trace-js/interfaces/plugins.openai.html
 [9]: https://github.com/DataDog/dd-trace-js
+[10]: https://platform.openai.com/
+[11]: https://app.datadoghq.com/integrations/openai
