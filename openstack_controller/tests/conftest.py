@@ -372,7 +372,7 @@ def connection_compute(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
 
-    def get_limits(tenant_id=None):
+    def get_limits(tenant_id):
         if http_error and 'limits' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['limits'])
         return mock.MagicMock(
