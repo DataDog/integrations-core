@@ -36,6 +36,8 @@ Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` 
 
 2. [Restart the Agent][5]
 
+**Note**: If you are upgrading the integration v6.0.0 or newer from v5.0.0 or below, you will need to enable the `use_legacy_check_version` flag to use newer features. You may also need to make changes to your configuration to maintain compatibility. See the [sample openstack controller.d/conf.yaml][4] for details.  
+
 ##### Log collection
 
 1. Collecting logs is disabled by default in the Datadog Agent, you can enable it in `datadog.yaml`:
