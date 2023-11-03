@@ -175,3 +175,6 @@ openstack.neutron.quota.security_group,gauge,,,,"The number of security groups a
 openstack.neutron.quota.security_group_rule,gauge,,,,"The number of security group rules allowed for each project. A value of -1 means no limit.",0,openstack_controller,neutron quota sec group rule,
 openstack.neutron.quota.subnet,gauge,,,,"The number of subnets allowed for each project. A value of -1 means no limit.",0,openstack_controller,neutron quota subnet,
 openstack.neutron.quota.subnetpool,gauge,,,,"The number of subnet pools allowed for each project. A value of -1 means no limit.",0,openstack_controller,neutron quota subnet pools,
+openstack.neutron.agent.count,gauge,,,,"Number of network agents",0,openstack_controller,neutron agent ct,
+openstack.neutron.agent.alive,gauge,,,,"If the agent is alive and running.",0,openstack_controller,neutron agent alive,
+openstack.neutron.agent.admin_state_up,gauge,,,,"The administrative state of the agent.",0,openstack_controller,neutron agent up,
