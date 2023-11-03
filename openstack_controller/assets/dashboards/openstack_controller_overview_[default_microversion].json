@@ -2938,21 +2938,47 @@
                     },
                     {
                         "definition": {
-                            "check": "openstack.nova.api.up",
-                            "group_by": [
-                                "keystone_server"
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:openstack.nova.hypervisor.count{*}"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:openstack.controller{*}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
                             ],
-                            "grouping": "cluster",
-                            "tags": [],
-                            "title": "Status",
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            },
+                            "title": "Number of Hypervisors",
                             "title_align": "left",
                             "title_size": "16",
-                            "type": "check_status"
+                            "type": "query_value"
                         },
-                        "id": 1069740071171818,
+                        "id": 8866499660765004,
                         "layout": {
                             "height": 2,
-                            "width": 1,
+                            "width": 2,
                             "x": 0,
                             "y": 17
                         }
@@ -3010,7 +3036,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Load",
+                            "title": "Hypervisor Load",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"
@@ -3018,8 +3044,8 @@
                         "id": 2113318735504040,
                         "layout": {
                             "height": 2,
-                            "width": 5,
-                            "x": 1,
+                            "width": 4,
+                            "x": 2,
                             "y": 17
                         }
                     },
@@ -3352,7 +3378,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
@@ -4187,7 +4212,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
@@ -4235,7 +4259,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
@@ -4290,7 +4313,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
@@ -4345,7 +4367,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
@@ -4664,7 +4685,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
@@ -4987,7 +5007,7 @@
                                     "include_zero": true
                                 }
                             },
-                            "title": "Number of Amphora",
+                            "title": "Number of Amphorae",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_value"
