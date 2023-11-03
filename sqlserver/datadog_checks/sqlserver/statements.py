@@ -118,12 +118,11 @@ with qstats_aggr as (
             CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_start_offset), 1),
             CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_end_offset), 1))) as plan_handle_and_offsets,
         eps.object_id as sproc_object_id,
-        eps.database_id as sproc_database_id,
         {query_metrics_column_sums}
         from sys.dm_exec_query_stats qs
         left join sys.dm_exec_procedure_stats eps ON eps.plan_handle = qs.plan_handle
         where qs.last_execution_time > dateadd(second, -?, getdate())
-        group by qs.query_hash, qs.query_plan_hash, eps.object_id, eps.database_id
+        group by qs.query_hash, qs.query_plan_hash, eps.object_id
 ),
 qstats_aggr_split as (select
     convert(varbinary(64), convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1)) as plan_handle,
