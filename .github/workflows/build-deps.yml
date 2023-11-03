@@ -10,7 +10,7 @@ jobs:
     name: "Build and resolve dependencies for Linux platforms"
     strategy:
       matrix:
-        os: ["deb_x64", "rpm_x64"]
+        os: ["deb_x64", "rpm_x64", "suse_x64"]
     runs-on: "ubuntu-22.04"
     steps:
       - uses: actions/checkout@v4

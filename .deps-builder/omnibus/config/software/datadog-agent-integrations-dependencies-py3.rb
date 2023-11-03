@@ -58,23 +58,13 @@ excluded_packages = Array.new
 excluded_packages.push(/^snowflake-connector-python==/)
 excluded_packages.push(/^confluent-kafka==/)
 
-if suse?
-  # Temporarily exclude Aerospike until builder supports new dependency
-  excluded_packages.push(/^aerospike==/)
-  excluded_folders.push('aerospike')
-end
-
 if osx?
   # Temporarily exclude Aerospike until builder supports new dependency
   excluded_packages.push(/^aerospike==/)
-  excluded_folders.push('aerospike')
-  excluded_folders.push('teradata')
 end
 
 if arm?
   # This doesn't build on ARM
-  excluded_folders.push('ibm_ace')
-  excluded_folders.push('ibm_mq')
   excluded_packages.push(/^pymqi==/)
 end
 
