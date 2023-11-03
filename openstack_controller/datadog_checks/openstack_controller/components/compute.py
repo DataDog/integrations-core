@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+import re
 
 from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.openstack_controller.components.component import Component
@@ -47,6 +47,7 @@ from datadog_checks.openstack_controller.metrics import (
     NOVA_SERVICES_METRICS_PREFIX,
     NOVA_SERVICES_TAGS,
     get_metrics_and_tags,
+    is_interface_metric,
 )
 
 
@@ -327,7 +328,21 @@ class Compute(Component):
         )
         self.check.log.debug("diagnostic: %s", diagnostic)
         for metric, value in diagnostic['metrics'].items():
-            self.check.gauge(metric, value, tags=tags + diagnostic['tags'], hostname=server['id'])
+
+            if is_interface_metric(metric):
+                metric_pre = re.split("(_rx|_tx)", metric)
+
+                interface = "interface:{}".format(metric_pre[0])
+                self.check.gauge(
+                    "{}.{}{}".format(
+                        NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX, metric_pre[1].replace("_", ""), metric_pre[2]
+                    ),
+                    value,
+                    tags=tags + diagnostic['tags'] + [interface],
+                    hostname=server['id'],
+                )
+            else:
+                self.check.gauge(metric, value, tags=tags + diagnostic['tags'], hostname=server['id'])
         for item_disk_details in item_diagnostic.get('disk_details', []):
             disk_detail = get_metrics_and_tags(
                 item_disk_details,

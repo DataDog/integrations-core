@@ -1369,6 +1369,42 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT = [
         ],
         'hostname': '67ca710a-e73f-4801-a12f-d0c55ccb8955',
     },
+    {
+        'name': 'openstack.nova.server.diagnostic.rx',
+        'count': 1,
+        'value': 73628,
+        'tags': [
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'server_id:67ca710a-e73f-4801-a12f-d0c55ccb8955',
+            'server_name:demo-1',
+            'server_status:ACTIVE',
+            'hypervisor:agent-integrations-openstack-default',
+            'instance_name:instance-0000004c',
+            'interface:tap455c2c46-84',
+        ],
+        'hostname': '67ca710a-e73f-4801-a12f-d0c55ccb8955',
+    },
+    {
+        'name': 'openstack.nova.server.diagnostic.tx_errors',
+        'count': 1,
+        'value': 0,
+        'tags': [
+            'domain_id:default',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+            'server_id:67ca710a-e73f-4801-a12f-d0c55ccb8955',
+            'server_name:demo-1',
+            'server_status:ACTIVE',
+            'hypervisor:agent-integrations-openstack-default',
+            'instance_name:instance-0000004c',
+            'interface:tap455c2c46-84',
+        ],
+        'hostname': '67ca710a-e73f-4801-a12f-d0c55ccb8955',
+    },
 ]
 
 COMPUTE_SERVERS_NOVA_MICROVERSION_2_93 = [

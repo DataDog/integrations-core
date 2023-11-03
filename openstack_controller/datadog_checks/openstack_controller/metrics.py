@@ -213,6 +213,14 @@ NOVA_SERVER_DIAGNOSTIC_METRICS = {
     f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.num_cpus",
     f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.num_nics",
     f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.num_disks",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.rx",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.rx_packets",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.rx_errors",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.rx_drop",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.tx",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.tx_packets",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.tx_errors",
+    f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.tx_drop",
 }
 NOVA_SERVER_DIAGNOSTIC_DISK_DETAILS_METRICS_PREFIX = f"{NOVA_SERVER_DIAGNOSTIC_METRICS_PREFIX}.disk_details"
 NOVA_SERVER_DIAGNOSTIC_DISK_DETAILS_TAGS = {}
@@ -525,6 +533,10 @@ OCTAVIA_AMPHORA_STATS_METRICS = {
 }
 
 
+def is_interface_metric(label):
+    return any(seg in label for seg in ['_rx', '_tx'])
+
+
 def get_normalized_key(key):
     return re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower().replace("-", "_")
 
@@ -554,6 +566,8 @@ def get_normalized_metrics(data, prefix, metrics, lambda_name=None, lambda_value
             if isinstance(value, (int, float)) and not isinstance(value, bool):
                 if long_metric_name in metrics:
                     normalized_metrics[long_metric_name] = value
+                if is_interface_metric(key):
+                    normalized_metrics[key] = value
             elif isinstance(value, bool):
                 if long_metric_name in metrics:
                     normalized_metrics[long_metric_name] = 1 if value else 0
