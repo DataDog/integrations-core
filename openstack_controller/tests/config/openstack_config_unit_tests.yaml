@@ -4,6 +4,6 @@ clouds:
       auth_url: http://127.0.0.1:8080/identity
       username: admin
       password: password
-      # project_name: admin
+      project_name: admin
       user_domain_name: Default
       project_domain_name: Default
