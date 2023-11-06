@@ -308,7 +308,7 @@ class ApiRest(Api):
                     legacy_microversion = False
                 else:
                     raise e
-            self.log.debug("legacy_microversion=%s", legacy_microversion)
+            self.log.debug("Collecting baremetal nodes with use_legacy_nodes_resource =%s", legacy_microversion)
             return legacy_microversion
 
         self.log.debug("getting baremetal nodes [microversion=%s]", self.config.ironic_microversion)
