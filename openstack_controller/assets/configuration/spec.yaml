@@ -257,7 +257,8 @@ files:
                  functionality compared to the public and internal endpoints.
                  It's meant for cloud operators or administrators.
           value:
-            example: "public"
+            example: "internal"
+            display_default: "public"
             type: string
         - name: endpoint_region_id
           description: |
