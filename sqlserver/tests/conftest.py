@@ -79,10 +79,7 @@ def instance_docker_metrics(instance_session_default):
     We disable all DBM checks and only care about the main check metrics.
     '''
     instance = deepcopy(instance_session_default)
-    instance['query_metrics'] = {'enabled': False}
-    instance['procedure_metrics'] = {'enabled': False}
-    instance['query_activity'] = {'enabled': False}
-    instance['collect_settings'] = {'enabled': False}
+    instance['dbm'] = {'enabled': False}
     return instance
 
 
