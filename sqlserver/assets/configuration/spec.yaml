@@ -209,8 +209,6 @@ files:
       description: |
         Choose the ADO provider. The default provider is MSOLEDBSQL.
         Set the adoprovider to "MSOLEDBSQL19" for version 19 of the driver. Note the provider SQLOLEDB is being deprecated.
-        You can download the provider from
-        https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017
       value:
         type: string
         example: MSOLEDBSQL
