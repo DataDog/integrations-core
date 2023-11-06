@@ -15,7 +15,7 @@
                         "id": 4949590841397250,
                         "definition": {
                             "type": "image",
-                            "url": "/static/images/logos/nvidia-triton_small.svg",
+                            "url": "https://assets.nvidiagrid.net/ngc/logos/Triton-Inference-Server.png",
                             "sizing": "none",
                             "has_background": true,
                             "has_border": true,
@@ -224,6 +224,7 @@
                             "title": "GPU Unused Memory",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "scalar",
@@ -241,13 +242,13 @@
                                             "query": "sum:nvidia_triton.gpu.memory.total_bytes{*} by {gpu_uuid}",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "aggregator": "sum"
+                                            "aggregator": "avg"
                                         },
                                         {
                                             "query": "sum:nvidia_triton.gpu.memory.used_bytes{*} by {gpu_uuid}",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "aggregator": "sum"
+                                            "aggregator": "avg"
                                         }
                                     ],
                                     "style": {
@@ -642,7 +643,7 @@
                 "x": 0,
                 "y": 8,
                 "width": 12,
-                "height": 1
+                "height": 15
             }
         },
         {
@@ -907,9 +908,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 9,
+                "y": 23,
                 "width": 12,
-                "height": 1
+                "height": 7
             }
         },
         {
@@ -1479,9 +1480,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 10,
+                "y": 30,
                 "width": 12,
-                "height": 1,
+                "height": 18,
                 "is_column_break": true
             }
         },
@@ -1895,9 +1896,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 11,
+                "y": 48,
                 "width": 12,
-                "height": 1
+                "height": 8
             }
         }
     ],
@@ -1923,5 +1924,8 @@
     ],
     "layout_type": "ordered",
     "notify_list": [],
-    "reflow_type": "fixed"
+    "reflow_type": "fixed",
+    "tags": [
+        "team:aaawesome-nick-team"
+    ]
 }
