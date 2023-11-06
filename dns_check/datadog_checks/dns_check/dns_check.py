@@ -81,7 +81,7 @@ class DNSCheck(AgentCheck):
                 answer = resolver.query(self.hostname, rdtype=self.record_type)  # dns.resolver.Answer
 
                 items = list(answer.rrset.items.keys()) if PY3 else answer.rrset.items
-                assert items[0].to_text()
+                assert any(it.to_text() for it in items)
 
                 if self.resolves_as_ips:
                     self._check_answer(answer)
