@@ -297,7 +297,7 @@ class ApiRest(Api):
 
     def get_baremetal_nodes(self):
         def use_legacy_nodes_resource(microversion):
-            self.log.debug("microversion=%s", microversion)
+            self.log.debug("Configured ironic microversion: %s", microversion)
             if not microversion:
                 return True
             legacy_microversion = False
