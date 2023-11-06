@@ -18,5 +18,5 @@ def test_check_karpenter_e2e(dd_agent_check, instance):
         aggregator.assert_metric(name=metric)
 
     aggregator.assert_all_metrics_covered()
-    # aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check('karpenter.openmetrics.health', ServiceCheck.OK, count=2)

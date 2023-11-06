@@ -44,7 +44,7 @@ TEST_METRICS = [
     'karpenter.go.memstats.heap.inuse_bytes',
     'karpenter.go.memstats.heap.released_bytes',
     'karpenter.go.memstats.heap.sys_bytes',
-    'karpenter.go.memstats.heap_objects',
+    'karpenter.go.memstats.heap.objects',
     'karpenter.go.memstats.last.gc.time_seconds',
     'karpenter.go.memstats.lookups.count',
     'karpenter.go.memstats.mallocs.count',
@@ -88,4 +88,13 @@ TEST_METRICS = [
     'karpenter.workqueue_adds.count',
     'karpenter.workqueue_depth',
     'karpenter.workqueue_retries.count',
+]
+
+RENAMED_LABELS = [
+    'go_version:go1.20.6',
+    'karpenter_host:10.100.0.1:443',
+    'karpenter_instance_type:buz',
+    'karpenter_capacity_type:qux',
+    'karpenter_zone:quux',
+    'karpenter_region:quuz',
 ]

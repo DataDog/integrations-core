@@ -4,7 +4,7 @@
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
 
-from .metrics import METRIC_MAP
+from .metrics import METRIC_MAP, RENAME_LABELS_MAP
 
 
 class KarpenterCheck(OpenMetricsBaseCheckV2):
@@ -22,12 +22,5 @@ class KarpenterCheck(OpenMetricsBaseCheckV2):
     def get_default_config(self):
         return {
             'metrics': [METRIC_MAP],
-            "rename_labels": {
-                "version": "go_version",
-                'host': 'karpenter_host',
-                'instance_type': 'karpenter_instance_type',
-                'capacity_type': 'karpenter_capacity_type',
-                "zone": "karpenter_zone",
-                "region": "karpenter_region",
-            },
+            "rename_labels": RENAME_LABELS_MAP,
         }
