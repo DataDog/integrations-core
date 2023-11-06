@@ -109,7 +109,7 @@ class DNSCheck(AgentCheck):
 
         assert len(self.resolves_as_ips) == number_of_results
         result_ips = []
-        for rip in answer.rrset.items.keys() if PY3 else answer.rrset.items:
+        for rip in answer.rrset.items:
             result = rip.to_text().lower()
             if result.endswith('.'):
                 result = result[:-1]
