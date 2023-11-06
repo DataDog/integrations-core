@@ -207,7 +207,7 @@ files:
         example: true
     - name: adoprovider
       description: |
-        Choose the ADO provider. The default provider is MSOLEDBSQL.
+        Choose the ADO provider. Default provider is MSOLEDBSQL.
         Set the adoprovider to "MSOLEDBSQL19" for version 19 of the driver. Note the provider SQLOLEDB is being deprecated.
       value:
         type: string
