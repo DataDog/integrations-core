@@ -608,8 +608,11 @@ files:
             all projects will be processed.
 
             The 'include' key will indicate the regular expressions of the projects for which metrics are to be reported
-            and the configuration to be applied to each of them. If no configuration associated with the key is indicated
+            and the configuration to be applied to each of them. Each group may have a 'components'-like configuration,
+            enabling or disabling components or metrics. For further details see previous section 'components'.
+            If no configuration associated with the key is indicated
             with the regular expression, they will be processed with the default configuration.
+
             The projects will be processed in the order indicated in the 'include'.
             If a projects is matched on an 'include' key, it will only be processed there and not in a later 'include'
             that it might match on.
