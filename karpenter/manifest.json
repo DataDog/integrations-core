@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Integration for Karpenter",
-    "title": "karpenter",
+    "title": "Karpenter",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
