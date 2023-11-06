@@ -62,7 +62,7 @@ Datadog sends *credential expiry events*, which grant visibility into credential
 
 
 - **Expiration events** are sent 60, 30, 15, and 1 day(s) before credential expiration, and once after expiration.
-- **Missing permission events** are sent every 15 days. A missing permission event lists the Key Vaults for which Datadog has not been given permissions. If no changes have been made regarding Key Vault permissions in the pervious 15-day cycle, the event notification is not sent again.
+- **Missing permission events** are sent every 15 days. A missing permission event lists the Key Vaults for which Datadog has not been given permissions. If no changes have been made regarding Key Vault permissions in the previous 15-day cycle, the event notification is not sent again.
 
 You can view these events in [Event Explorer][5].
 
