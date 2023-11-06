@@ -383,7 +383,6 @@ def test_check_incr_fraction_metrics(
     '''
     )
     sqlserver_check.run()
-    print(sqlserver_check.sqlserver_incr_fraction_metric_previous_values)
     cursor.close()
 
     tags = instance_docker_metrics.get('tags', [])
