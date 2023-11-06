@@ -300,14 +300,14 @@ class ApiRest(Api):
             self.log.debug("Configured ironic microversion: %s", microversion)
             if not microversion:
                 return True
-            legacy_microversion = False
+            legacy_microversion = True
             try:
                 legacy_microversion = float(microversion) < 1.43
             except Exception as e:
                 if microversion.lower() == 'latest':
                     legacy_microversion = False
                 else:
-                    raise e
+                    raise Exception(f"Invalid ironic microversion, cannot collect baremetal nodes: {str(e)}")
             self.log.debug("Collecting baremetal nodes with use_legacy_nodes_resource =%s", legacy_microversion)
             return legacy_microversion
 
