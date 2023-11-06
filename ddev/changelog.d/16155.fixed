@@ -1,0 +1,1 @@
+Add `oracledb` to the ignored dependencies when we bump them before a release
