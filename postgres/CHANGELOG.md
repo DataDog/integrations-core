@@ -987,8 +987,4 @@
 
 ***Added***:
 
-***Fixed***:
-
-* Database instance metadata payloads should not contain duplicate `db` tags ([#16146](https://github.com/DataDog/integrations-core/pull/16146))
-
 * adds postgres integration.
