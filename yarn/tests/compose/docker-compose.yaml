@@ -1,16 +1,39 @@
 version: "3"
 
 services:
-  hadoop-single-node:
-    image: sequenceiq/hadoop-docker:${YARN_VERSION}
+  resourcemanager:
+    image: apache/hadoop:${YARN_VERSION}
     container_name: dd-yarn
-    hostname: yarn-container
-    environment:
-      - CLUSTER_NAME=SparkCluster
-      - TZ=UTC
+    hostname: resourcemanager
+    command: ["yarn", "resourcemanager"]
+    env_file:
+      - ./hadoop_config.env
     ports:
       - "8088:8088"
     volumes:
-      - ./run_app.sh:/run_app.sh
       - ${DD_LOG_1}:/usr/local/hadoop/logs/yarn-root-nodemanager-yarn-container.log
       - ${DD_LOG_2}:/usr/local/hadoop/logs/yarn--resourcemanager-yarn-container.log
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://resourcemanager:8088/cluster"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+  nodemanager:
+    image: apache/hadoop:${YARN_VERSION}
+    container_name: dd-nodemanager
+    command: ["yarn", "nodemanager"]
+    env_file:
+      - ./hadoop_config.env
+    depends_on:
+      resourcemanager:
+        condition: service_healthy
+    ports:
+      - "8042:8042"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://nodemanager:8042/"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+

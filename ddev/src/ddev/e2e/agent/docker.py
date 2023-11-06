@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import os
+import re
 import sys
 from functools import cache, cached_property
 from typing import TYPE_CHECKING, Callable
@@ -15,6 +16,8 @@ if TYPE_CHECKING:
     import subprocess
 
     from ddev.utils.fs import Path
+
+AGENT_VERSION_REGEX = r'^datadog/agent:\d+(?:$|\.(\d+\.\d(?:$|-jmx$)|$))'
 
 
 class DockerAgent(AgentInterface):
@@ -91,12 +94,7 @@ class DockerAgent(AgentInterface):
 
         if agent_build.startswith("datadog/"):
             # Add a potentially missing `py` suffix for default non-RC builds
-            if (
-                'rc' not in agent_build
-                and 'py' not in agent_build
-                and agent_build != 'datadog/agent:6'
-                and agent_build != 'datadog/agent:7'
-            ):
+            if 'rc' not in agent_build and 'py' not in agent_build and not re.match(AGENT_VERSION_REGEX, agent_build):
                 agent_build = f'{agent_build}-py{self.python_version[0]}'
 
             if self.metadata.get('use_jmx') and not agent_build.endswith('-jmx'):
