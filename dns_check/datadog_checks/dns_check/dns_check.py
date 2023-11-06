@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 from typing import List, Optional  # noqa: F401
 
 import dns.resolver
+from six import PY3
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.time import get_precise_time
@@ -78,7 +79,10 @@ class DNSCheck(AgentCheck):
                     raise AssertionError("Expected an NXDOMAIN, got a result.")
             else:
                 answer = resolver.query(self.hostname, rdtype=self.record_type)  # dns.resolver.Answer
-                assert answer.rrset.items[0].to_text()
+
+                items = list(answer.rrset.items.keys()) if PY3 else answer.rrset.items
+                assert items[0].to_text()
+
                 if self.resolves_as_ips:
                     self._check_answer(answer)
 
@@ -105,7 +109,7 @@ class DNSCheck(AgentCheck):
 
         assert len(self.resolves_as_ips) == number_of_results
         result_ips = []
-        for rip in answer.rrset.items:
+        for rip in answer.rrset.items.keys() if PY3 else answer.rrset.items:
             result = rip.to_text().lower()
             if result.endswith('.'):
                 result = result[:-1]
