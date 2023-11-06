@@ -58,7 +58,7 @@ Azure Active Directory does not include any metrics.
 
 ### Events
 
-Datadog sends *credential expiry events*, which grant visibility into credential expirations for Azure app registrations, Key Vault keys, Key Vault secrets, and Key Vault certificates. The *Azure Active Directory* integration must be installed to receive events for Azure App Registrations.
+Datadog sends credential expiry events, which grant visibility into credential expirations for Azure app registrations, Key Vault keys, Key Vault secrets, and Key Vault certificates. The Azure Active Directory integration must be installed to receive events for Azure App Registrations.
 
 
 - **Expiration events** are sent 60, 30, 15, and 1 day(s) before credential expiration, and once after expiration.
