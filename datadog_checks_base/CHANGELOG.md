@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 34.2.0 / 2023-11-06
+
+***Added***:
+
+* Add exceptions to skip instance configurations ([#16012](https://github.com/DataDog/integrations-core/pull/16012))
+
 ## 34.1.2 / 2023-11-02
 
 ***Fixed***:
