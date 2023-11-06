@@ -667,7 +667,6 @@ files:
         - template: instances/default
           overrides:
             service.hidden: true
-            min_collection_interval.hidden: true
             empty_default_hostname.hidden: true
         - template: instances/http
           overrides:
