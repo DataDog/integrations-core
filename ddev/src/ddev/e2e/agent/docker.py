@@ -9,6 +9,8 @@ import sys
 from functools import cache, cached_property
 from typing import TYPE_CHECKING, Callable
 
+from tenacity import retry, wait_fixed
+
 from ddev.e2e.agent.interface import AgentInterface
 from ddev.utils.structures import EnvVars
 
@@ -165,9 +167,7 @@ class DockerAgent(AgentInterface):
                     volumes[i] = f'/{vm_file}:{remaining}'
 
         if os.getenv('DDEV_E2E_DOCKER_NO_PULL') != '1':
-            process = self._run_command(['docker', 'pull', agent_build])
-            if process.returncode:
-                raise RuntimeError(f'Could not pull image {agent_build}')
+            self.__pull_image(agent_build)
 
         command = [
             'docker',
@@ -281,6 +281,12 @@ class DockerAgent(AgentInterface):
 
     def enter_shell(self) -> None:
         self._run_command(self._format_command(['cmd' if self._is_windows_container else 'bash']), check=True)
+
+    @retry(wait=wait_fixed(2))
+    def __pull_image(self, agent_build):
+        process = self._run_command(['docker', 'pull', agent_build])
+        if process.returncode:
+            raise RuntimeError(f'Could not pull image {agent_build}')
 
 
 @cache
