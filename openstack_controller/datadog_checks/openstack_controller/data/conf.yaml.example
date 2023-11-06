@@ -122,7 +122,7 @@ instances:
     ##       functionality compared to the public and internal endpoints.
     ##       It's meant for cloud operators or administrators.
     #
-    # endpoint_interface: public
+    # endpoint_interface: internal
 
     ## @param endpoint_region_id - string - optional
     ## The region_id that will be used to filter the endpoints to use for each component.
