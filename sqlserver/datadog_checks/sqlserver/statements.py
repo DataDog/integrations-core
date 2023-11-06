@@ -55,30 +55,43 @@ SQL_SERVER_QUERY_METRICS_COLUMNS = [
 
 STATEMENT_METRICS_QUERY = """\
 with qstats as (
-    select query_hash, query_plan_hash, last_execution_time, last_elapsed_time,
-            CONCAT(
-                CONVERT(VARCHAR(64), CONVERT(binary(64), plan_handle), 1),
-                CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_start_offset), 1),
-                CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_end_offset), 1)) as plan_handle_and_offsets,
-           (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
+    select
+        qs.query_hash,
+        qs.query_plan_hash,
+        qs.last_execution_time,
+        qs.last_elapsed_time,
+        CONCAT(
+            CONVERT(VARCHAR(64), CONVERT(binary(64), qs.plan_handle), 1),
+            CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_start_offset), 1),
+            CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_end_offset), 1)) as plan_handle_and_offsets,
+           (select value from sys.dm_exec_plan_attributes(qs.plan_handle) where attribute = 'dbid') as dbid,
+           eps.object_id as sproc_object_id,
            {query_metrics_columns}
-    from sys.dm_exec_query_stats
+    from sys.dm_exec_query_stats qs
+    left join sys.dm_exec_procedure_stats eps ON eps.plan_handle = qs.plan_handle
 ),
 qstats_aggr as (
-    select query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
-       D.name as database_name, max(plan_handle_and_offsets) as plan_handle_and_offsets,
-       max(last_execution_time) as last_execution_time,
-       max(last_elapsed_time) as last_elapsed_time,
-    {query_metrics_column_sums}
-    from qstats S
-    left join sys.databases D on S.dbid = D.database_id
-    group by query_hash, query_plan_hash, S.dbid, D.name
+    select
+        query_hash,
+        query_plan_hash,
+        CAST(qs.dbid as int) as dbid,
+        D.name as database_name,
+        max(plan_handle_and_offsets) as plan_handle_and_offsets,
+        max(last_execution_time) as last_execution_time,
+        max(last_elapsed_time) as last_elapsed_time,
+        sproc_object_id,
+        {query_metrics_column_sums}
+    from qstats qs
+    left join sys.databases D on qs.dbid = D.database_id
+    group by query_hash, query_plan_hash, qs.dbid, D.name, sproc_object_id
 ),
-qstats_aggr_split as (select TOP {limit}
-    convert(varbinary(64), convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1)) as plan_handle,
-    convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+1, 10), 1)) as statement_start_offset,
-    convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+11, 10), 1)) as statement_end_offset,
-    * from qstats_aggr
+qstats_aggr_split as (
+    select TOP {limit}
+        convert(varbinary(64), convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1)) as plan_handle,
+        convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+1, 10), 1)) as statement_start_offset,
+        convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+11, 10), 1)) as statement_end_offset,
+        *
+    from qstats_aggr
     where DATEADD(ms, last_elapsed_time / 1000, last_execution_time) > dateadd(second, -?, getdate())
 )
 select
@@ -90,22 +103,26 @@ select
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
     encrypted as is_encrypted,
     s.* from qstats_aggr_split s
-    cross apply sys.dm_exec_sql_text(plan_handle) qt
+    cross apply sys.dm_exec_sql_text(s.plan_handle) qt
 """
 
 # This query is an optimized version of the statement metrics query
 # which removes the additional database aggregate dimension
 STATEMENT_METRICS_QUERY_NO_AGGREGATES = """\
 with qstats_aggr as (
-    select TOP {limit} query_hash, query_plan_hash,
+    select TOP {limit}
+        qs.query_hash,
+        qs.query_plan_hash,
         max(CONCAT(
-            CONVERT(VARCHAR(64), CONVERT(binary(64), plan_handle), 1),
-            CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_start_offset), 1),
-            CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_end_offset), 1))) as plan_handle_and_offsets,
+            CONVERT(VARCHAR(64), CONVERT(binary(64), qs.plan_handle), 1),
+            CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_start_offset), 1),
+            CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_end_offset), 1))) as plan_handle_and_offsets,
+        eps.object_id as sproc_object_id,
         {query_metrics_column_sums}
-        from sys.dm_exec_query_stats S
-        where last_execution_time > dateadd(second, -?, getdate())
-        group by query_hash, query_plan_hash
+        from sys.dm_exec_query_stats qs
+        left join sys.dm_exec_procedure_stats eps ON eps.plan_handle = qs.plan_handle
+        where qs.last_execution_time > dateadd(second, -?, getdate())
+        group by qs.query_hash, qs.query_plan_hash, eps.object_id
 ),
 qstats_aggr_split as (select
     convert(varbinary(64), convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1)) as plan_handle,
@@ -122,7 +139,7 @@ select
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
     encrypted as is_encrypted,
     s.* from qstats_aggr_split s
-    cross apply sys.dm_exec_sql_text(plan_handle) qt
+    cross apply sys.dm_exec_sql_text(s.plan_handle) qt
 """
 
 PLAN_LOOKUP_QUERY = """\
@@ -262,8 +279,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             STATEMENT_METRICS_QUERY_NO_AGGREGATES if self.disable_secondary_tags else STATEMENT_METRICS_QUERY
         )
         self._statement_metrics_query = statements_query.format(
-            query_metrics_columns=', '.join(available_columns),
-            query_metrics_column_sums=', '.join(['sum({}) as {}'.format(c, c) for c in available_columns]),
+            query_metrics_columns=', '.join(['qs.{} as {}'.format(col, col) for col in available_columns]),
+            query_metrics_column_sums=', '.join(['sum(qs.{}) as {}'.format(c, c) for c in available_columns]),
             limit=self.dm_exec_query_stats_row_limit,
             proc_char_limit=PROC_CHAR_LIMIT,
         )
@@ -289,13 +306,18 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
     def _normalize_queries(self, rows):
         normalized_rows = []
+
         for row in rows:
+
             try:
-                statement = obfuscate_sql_with_metadata(row['statement_text'], self._config.obfuscator_options)
+                # Attempt to obfuscate SQL statement with metadata
                 procedure_statement = None
+                statement = obfuscate_sql_with_metadata(row['statement_text'], self._config.obfuscator_options)
                 comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
+
                 if row['is_proc']:
                     procedure_statement = obfuscate_sql_with_metadata(row['text'], self._config.obfuscator_options)
+
             except Exception as e:
                 if self._config.log_unobfuscated_queries:
                     raw_query_text = row['text'] if row.get('is_proc', False) else row['statement_text']
@@ -313,24 +335,30 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     **self._check.debug_stats_kwargs(tags=["error:{}".format(type(e)), "error_msg:{}".format(e)])
                 )
                 continue
+
+            # Extract obfuscated statement and update row fields
             obfuscated_statement = statement['query']
             row['dd_comments'] = comments
-            # update 'text' field to be obfuscated stmt
-            row['text'] = obfuscated_statement
+
             if procedure_statement:
                 row['procedure_text'] = procedure_statement['query']
                 row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
             if procedure_name:
                 row['procedure_name'] = procedure_name
+
+            row['text'] = obfuscated_statement
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
             row['query_hash'] = _hash_to_hex(row['query_hash'])
             row['query_plan_hash'] = _hash_to_hex(row['query_plan_hash'])
             row['plan_handle'] = _hash_to_hex(row['plan_handle'])
+
             metadata = statement['metadata']
             row['dd_tables'] = metadata.get('tables', None)
             row['dd_commands'] = metadata.get('commands', None)
+
             if not comments:
                 row['dd_comments'] = metadata.get('comments', None)
+
             normalized_rows.append(row)
         return normalized_rows
 
