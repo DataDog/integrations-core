@@ -1721,10 +1721,10 @@ jobs:
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
-  j5648b3b:
+  j77f29c1:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: karpenter
+      job-name: Karpenter
       target: karpenter
       platform: linux
       runner: '["ubuntu-22.04"]'

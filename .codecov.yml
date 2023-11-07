@@ -282,6 +282,10 @@ coverage:
         target: 75
         flags:
         - kafka_consumer
+      Karpenter:
+        target: 75
+        flags:
+        - karpenter
       Kong:
         target: 75
         flags:
@@ -642,10 +646,6 @@ coverage:
         target: 75
         flags:
         - etcd
-      karpenter:
-        target: 75
-        flags:
-        - karpenter
       vSphere:
         target: 75
         flags:
