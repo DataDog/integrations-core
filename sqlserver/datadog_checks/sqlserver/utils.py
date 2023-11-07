@@ -11,6 +11,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DRIVER_CONFIG_DIR = os.path.join(CURRENT_DIR, 'data', 'driver_config')
 PROC_CHAR_LIMIT = 500
 
+
 # Database is used to store both the name and physical_database_name
 # for a database, which is discovered via autodiscovery
 class Database:
@@ -73,9 +74,9 @@ def _get_index_for_keyword(text, keyword):
         return -1
 
 
-def extract_sql_comments_and_procedure_name(text):
+def extract_sql_comments(text):
     if not text:
-        return [], False, None
+        return [], None
     in_single_line_comment = False
     in_multi_line_comment = False
     comment_start = None
@@ -102,6 +103,11 @@ def extract_sql_comments_and_procedure_name(text):
                 comment_start = i
             else:
                 stripped_text += text[i]
+    return result, stripped_text
+
+
+def extract_sql_comments_and_procedure_name(text):
+    result, stripped_text = extract_sql_comments(text)
     is_proc, name = is_statement_proc(stripped_text)
     return result, is_proc, name
 

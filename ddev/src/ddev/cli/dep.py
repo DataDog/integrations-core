@@ -17,7 +17,6 @@ from packaging.version import InvalidVersion, Version
 # Dependencies to ignore when update dependencies
 IGNORED_DEPS = {
     'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
-    'dnspython',
     'pymysql',  # https://github.com/DataDog/integrations-core/pull/12612
     'foundationdb',  # Breaking datadog_checks_base tests
     'openstacksdk',  # Breaking openstack_controller tests
@@ -36,6 +35,10 @@ IGNORED_DEPS = {
     'pydantic',
     # https://github.com/DataDog/integrations-core/pull/16080
     'lxml',
+    # We need to keep an `oracledb` version that uses the same version of odpi that is used in godror in the agent repo.
+    # Somehow we do not load the right version. Until we find out how and why, we need to keep both
+    # libs in sync with the same version of odpi.
+    'oracledb',
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others

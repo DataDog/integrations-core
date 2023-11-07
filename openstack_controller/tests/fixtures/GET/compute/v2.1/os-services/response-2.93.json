@@ -1,0 +1,48 @@
+{
+  "services": [
+    {
+      "binary": "nova-conductor",
+      "host": "agent-integrations-openstack-default",
+      "id": "aadbda65-f523-419a-b3df-c287d196a2c1",
+      "zone": "internal",
+      "status": "enabled",
+      "state": "up",
+      "updated_at": "2023-04-20T07:16:52.000000",
+      "disabled_reason": null,
+      "forced_down": false
+    },
+    {
+      "binary": "nova-compute",
+      "host": "agent-integrations-openstack-default",
+      "id": "7bf08d7e-a939-46c3-bdae-fbe3ebfe78a4",
+      "zone": "availability-zone",
+      "status": "enabled",
+      "state": "up",
+      "updated_at": "2023-04-20T07:16:52.000000",
+      "disabled_reason": null,
+      "forced_down": false
+    },
+    {
+      "binary": "nova-scheduler",
+      "host": "agent-integrations-openstack-default",
+      "id": "2ec2027d-ac70-4e2b-95ed-fb1756d24996",
+      "zone": "internal",
+      "status": "enabled",
+      "state": "up",
+      "updated_at": "2023-04-20T07:16:52.000000",
+      "disabled_reason": null,
+      "forced_down": false
+    },
+    {
+      "binary": "nova-conductor",
+      "host": "agent-integrations-openstack-default",
+      "id": "df55f706-a60e-4d3d-8cd6-30f5b33d79ce",
+      "zone": "internal",
+      "status": "enabled",
+      "state": "up",
+      "updated_at": "2023-04-20T07:16:52.000000",
+      "disabled_reason": null,
+      "forced_down": false
+    }
+  ]
+}
