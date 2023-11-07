@@ -9,7 +9,7 @@ import sys
 from functools import cache, cached_property
 from typing import TYPE_CHECKING, Callable
 
-from tenacity import retry, stop_after_attempt, wait_fixed
+import stamina
 
 from ddev.e2e.agent.interface import AgentInterface
 from ddev.utils.structures import EnvVars
@@ -282,7 +282,7 @@ class DockerAgent(AgentInterface):
     def enter_shell(self) -> None:
         self._run_command(self._format_command(['cmd' if self._is_windows_container else 'bash']), check=True)
 
-    @retry(wait=wait_fixed(2), stop=stop_after_attempt(3))
+    @stamina.retry(on=RuntimeError, attempts=3)
     def __pull_image(self, agent_build):
         process = self._run_command(['docker', 'pull', agent_build])
         if process.returncode:
