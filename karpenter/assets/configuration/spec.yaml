@@ -1,4 +1,4 @@
-name: karpenter
+name: Karpenter
 files:
 - name: karpenter.yaml
   options:
