@@ -38,7 +38,7 @@ The [summary latencies][10] metrics are disabled by default, to enable it:
 tritonserver --metrics-config summary_latencies=true
 ```
 
-The [response cache metrics][11] are not reported by default, to enable them you need to set the cache size with a value greater than zero.
+The [response cache metrics][11] are not reported by default, you will need to enable a cache implementation on the server side by specifying a <cache_implementation> and corresponding configuration.
 
 For instance:
 
