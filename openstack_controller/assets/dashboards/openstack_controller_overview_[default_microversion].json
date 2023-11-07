@@ -2952,18 +2952,19 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:openstack.nova.hypervisor.count{*}"
+                                            "query": "sum:openstack.nova.hypervisor.count{$Keystone_Server_URL, $RegionId, $Domain}"
                                         },
                                         {
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:openstack.controller{*}"
+                                            "query": "sum:openstack.controller{$Keystone_Server_URL, $RegionId, $Domain}"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
@@ -5000,7 +5001,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
@@ -5055,7 +5055,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
