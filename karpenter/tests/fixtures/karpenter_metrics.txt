@@ -2374,3 +2374,156 @@ workqueue_work_duration_seconds_bucket{name="WebhookCertificates-slow",le="10"} 
 workqueue_work_duration_seconds_bucket{name="WebhookCertificates-slow",le="+Inf"} 0
 workqueue_work_duration_seconds_sum{name="WebhookCertificates-slow"} 0
 workqueue_work_duration_seconds_count{name="WebhookCertificates-slow"} 0
+# HELP karpenter_cloudprovider_batcher_batch_size Size of the request batch per batcher
+# TYPE karpenter_cloudprovider_batcher_batch_size histogram
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="1"} 90
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="2"} 94
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="4"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="5"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="10"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="15"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="20"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="25"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="30"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="40"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="50"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="60"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="70"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="80"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="90"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="100"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="125"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="150"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="175"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="200"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="225"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="250"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="275"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="300"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="350"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="400"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="450"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="500"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="550"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="600"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="700"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="800"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="900"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="1000"} 95
+karpenter_cloudprovider_batcher_batch_size_bucket{batcher="create_foo",le="+Inf"} 95
+karpenter_cloudprovider_batcher_batch_size_sum{batcher="create_foo"} 101
+karpenter_cloudprovider_batcher_batch_size_count{batcher="create_foo"} 95
+# HELP karpenter_cloudprovider_batcher_batch_time_seconds Duration of the batching window per batcher
+# TYPE karpenter_cloudprovider_batcher_batch_time_seconds histogram
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="0.005"} 0
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="0.01"} 0
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="0.025"} 0
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="0.05"} 87
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="0.1"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="0.15"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="0.2"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="0.25"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="0.3"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="0.35"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="0.4"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="0.45"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="0.5"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="0.6"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="0.7"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="0.8"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="0.9"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="1"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="1.25"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="1.5"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="1.75"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="2"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="2.5"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="3"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="3.5"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="4"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="4.5"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="5"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="6"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="7"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="8"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="9"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="10"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="15"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="20"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="25"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="30"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="40"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="50"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="60"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="120"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="150"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="300"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="450"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="600"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_bucket{batcher="create_foo",le="+Inf"} 88
+karpenter_cloudprovider_batcher_batch_time_seconds_sum{batcher="create_foo"} 3.157903733
+karpenter_cloudprovider_batcher_batch_time_seconds_count{batcher="create_foo"} 88
+# HELP karpenter_cloudprovider_instance_type_cpu_cores VCPUs cores for a given instance type.
+# TYPE karpenter_cloudprovider_instance_type_cpu_cores gauge
+karpenter_cloudprovider_instance_type_cpu_cores{instance_type="a1.2xlarge"} 8
+karpenter_cloudprovider_instance_type_cpu_cores{instance_type="a1.4xlarge"} 16
+# HELP karpenter_cloudprovider_instance_type_memory_bytes Memory, in bytes, for a given instance type.
+# TYPE karpenter_cloudprovider_instance_type_memory_bytes gauge
+karpenter_cloudprovider_instance_type_memory_bytes{instance_type="a1.2xlarge"} 1.7179869184e+10
+# HELP karpenter_cloudprovider_instance_type_price_estimate Estimated hourly price used when making informed decisions on node cost calculation. This is updated once on startup and then every 12 hours.
+# TYPE karpenter_cloudprovider_instance_type_price_estimate gauge
+karpenter_cloudprovider_instance_type_price_estimate{capacity_type="on-demand",instance_type="a1.2xlarge",region="us-east-1",zone=""} 0.204
+karpenter_cloudprovider_instance_type_price_estimate{capacity_type="on-demand",instance_type="a1.4xlarge",region="us-east-1",zone=""} 0.408
+# HELP karpenter_deprovisioning_actions_performed Number of deprovisioning actions performed. Labeled by deprovisioner.
+# TYPE karpenter_deprovisioning_actions_performed counter
+karpenter_deprovisioning_actions_performed{action="consolidation/delete",deprovisioner="consolidation"} 100
+# HELP karpenter_deprovisioning_eligible_machines Number of machines eligible for deprovisioning by Karpenter. Labeled by deprovisioner
+# TYPE karpenter_deprovisioning_eligible_machines gauge
+karpenter_deprovisioning_eligible_machines{deprovisioner="consolidation"} 11
+# HELP karpenter_interruption_actions_performed Number of notification actions performed. Labeled by action
+# TYPE karpenter_interruption_actions_performed counter
+karpenter_interruption_actions_performed{action_type="foo"} 102
+karpenter_interruption_actions_performed{action_type="buz"} 4
+# HELP karpenter_interruption_received_messages Count of messages received from the SQS queue. Broken down by message type and whether the message was actionable.
+# TYPE karpenter_interruption_received_messages counter
+karpenter_interruption_received_messages{message_type="fiz"} 203
+# HELP karpenter_machines_created Number of machines created in total by Karpenter. Labeled by reason the machine was created and the owning provisioner.
+# TYPE karpenter_machines_created counter
+karpenter_machines_created{provisioner="karpenter-default",reason="provisioning"} 101
+# HELP karpenter_machines_initialized Number of machines initialized in total by Karpenter. Labeled by the owning provisioner.
+# TYPE karpenter_machines_initialized counter
+karpenter_machines_initialized{provisioner="karpenter-default"} 101
+# HELP karpenter_machines_launched Number of machines launched in total by Karpenter. Labeled by the owning provisioner.
+# TYPE karpenter_machines_launched counter
+karpenter_machines_launched{provisioner="karpenter-default"} 101
+# HELP karpenter_machines_registered Number of machines registered in total by Karpenter. Labeled by the owning provisioner.
+# TYPE karpenter_machines_registered counter
+karpenter_machines_registered{provisioner="karpenter-default"} 101
+# HELP karpenter_machines_terminated Number of machines terminated in total by Karpenter. Labeled by reason the machine was terminated and the owning provisioner.
+# TYPE karpenter_machines_terminated counter
+karpenter_machines_terminated{provisioner="karpenter-default",reason="consolidation/delete"} 100
+karpenter_machines_terminated{provisioner="karpenter-default",reason="interruption"} 3
+# HELP karpenter_nodes_terminated Number of nodes terminated in total by Karpenter. Labeled by owning provisioner.
+# TYPE karpenter_nodes_terminated counter
+karpenter_nodes_terminated{nodepool="",provisioner="karpenter-default"} 103
+# HELP karpenter_nodes_termination_time_seconds The time taken between a node's deletion request and the removal of its finalizer
+# TYPE karpenter_nodes_termination_time_seconds summary
+karpenter_nodes_termination_time_seconds{provisioner="karpenter-default",quantile="0"} 0.562311212
+karpenter_nodes_termination_time_seconds{provisioner="karpenter-default",quantile="0.5"} 0.808955457
+karpenter_nodes_termination_time_seconds{provisioner="karpenter-default",quantile="0.9"} 73.000927443
+karpenter_nodes_termination_time_seconds{provisioner="karpenter-default",quantile="0.99"} 73.000927443
+karpenter_nodes_termination_time_seconds{provisioner="karpenter-default",quantile="1"} 73.000927443
+karpenter_nodes_termination_time_seconds_sum{provisioner="karpenter-default"} 3467.370465076999
+karpenter_nodes_termination_time_seconds_count{provisioner="karpenter-default"} 103
+# HELP karpenter_provisioner_limit The Provisioner Limits are the limits specified on the provisioner that restrict the quantity of resources provisioned. Labeled by provisioner name and resource type.
+# TYPE karpenter_provisioner_limit gauge
+karpenter_provisioner_limit{provisioner="karpenter-default",resource_type="cpu"} 1000
+# HELP karpenter_provisioner_usage The Provisioner Usage is the amount of resources that have been provisioned by a particular provisioner. Labeled by provisioner name and resource type.
+# TYPE karpenter_provisioner_usage gauge
+karpenter_provisioner_usage{provisioner="karpenter-default",resource_type="cpu"} 278
+karpenter_provisioner_usage{provisioner="karpenter-default",resource_type="ephemeral_storage"} 2.147281993728e+12
+karpenter_provisioner_usage{provisioner="karpenter-default",resource_type="memory"} 6.12973862912e+11
+karpenter_provisioner_usage{provisioner="karpenter-default",resource_type="pods"} 2307
+# HELP karpenter_provisioner_usage_pct The Provisioner Usage Percentage is the percentage of each resource used based on the resources provisioned and the limits that have been configured in the range [0,100].  Labeled by provisioner name and resource type.
+# TYPE karpenter_provisioner_usage_pct gauge
+karpenter_provisioner_usage_pct{provisioner="karpenter-default",resource_type="cpu"} 27
