@@ -491,6 +491,70 @@ class TestStart:
             ),
         ]
 
+    def test_retry_pull_image(
+        self,
+        platform,
+        temp_dir,
+        default_hostname,
+        get_integration,
+        docker_path,
+        free_port,
+        mocker,
+    ):
+        run = mocker.patch(
+            'subprocess.run',
+            side_effect=[
+                mocker.MagicMock(returncode=1),
+                mocker.MagicMock(returncode=1),
+                mocker.MagicMock(returncode=0),
+                mocker.MagicMock(returncode=0),
+            ],
+        )
+
+        integration = 'postgres'
+        environment = 'py3.12'
+        metadata = {}
+
+        agent = DockerAgent(platform, get_integration(integration), environment, metadata, temp_dir / 'config.yaml')
+        agent.start(agent_build='', local_packages={}, env_vars={})
+
+        assert run.call_args_list == [
+            mocker.call([docker_path, 'pull', 'datadog/agent-dev:master-py3'], shell=False),
+            mocker.call([docker_path, 'pull', 'datadog/agent-dev:master-py3'], shell=False),
+            mocker.call([docker_path, 'pull', 'datadog/agent-dev:master-py3'], shell=False),
+            mocker.call(
+                [
+                    docker_path,
+                    'run',
+                    '-d',
+                    '--name',
+                    f'dd_{integration}_{environment}',
+                    '--network',
+                    'host',
+                    '-v',
+                    '/proc:/host/proc',
+                    '-e',
+                    'DD_API_KEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                    '-e',
+                    'DD_APM_ENABLED=false',
+                    '-e',
+                    f'DD_CMD_PORT={free_port}',
+                    '-e',
+                    'DD_EXPVAR_PORT=5000',
+                    '-e',
+                    f'DD_HOSTNAME={default_hostname}',
+                    '-e',
+                    'DD_TELEMETRY_ENABLED=1',
+                    '-e',
+                    'PYTHONDONTWRITEBYTECODE=1',
+                    'datadog/agent-dev:master-py3',
+                ],
+                shell=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+            ),
+        ]
+
     def test_custom_hosts(
         self,
         platform,
