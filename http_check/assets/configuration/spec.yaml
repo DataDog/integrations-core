@@ -79,6 +79,7 @@ files:
           - type: string
           - type: integer
         example: (1|2|3)\d\d
+        default: (1|2|3)\d\d
     - name: include_content
       description: |
         The include_content parameter will instruct the check
