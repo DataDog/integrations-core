@@ -313,6 +313,9 @@ rate_limit_queries_period{endpoint="/api/v1/query",join_leader="true"} 3600
 # HELP rate_limit_queries_remaining number of queries remaining before next reset
 # TYPE rate_limit_queries_remaining gauge
 rate_limit_queries_remaining{endpoint="/api/v1/query",join_leader="true"} 5473
+# HELP rate_limit_queries_remaining_min minimum number of queries remaining before next reset observed during an expiration interval of 2*refresh period
+# TYPE rate_limit_queries_remaining_min gauge
+rate_limit_queries_remaining_min{endpoint="/api/v1/query",join_leader="true"} 248
 # HELP rate_limit_queries_reset number of seconds before next reset
 # TYPE rate_limit_queries_reset gauge
 rate_limit_queries_reset{endpoint="/api/v1/query",join_leader="true"} 414
