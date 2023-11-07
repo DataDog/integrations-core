@@ -17,7 +17,7 @@ def initialize_instance(values, **kwargs):
 
 
 def validate_url(url, required_path=None, example=None, config=None):
-    # Validates the endpoint to ensure that the components are preents.
+    # Validates the endpoint to ensure that the components are presents.
     # For OpenMetrics: Scheme, netloc and /metrics path
     # For API: Scheme, netloc and no path
     # Logs out troubleshooting errors and example
