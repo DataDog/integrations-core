@@ -47,6 +47,13 @@ IGNORED_DEPS = {
     # We're not ready to switch to v3 of the postgress library, see:
     # https://github.com/DataDog/integrations-core/pull/15859
     'psycopg2-binary',
+    # orjson ... requires rustc 1.65+, but the latest we can have (thanks CentOS 6) is 1.62.
+    # We get the following error when compiling orjson on Centos 6:
+    # error: package `associative-cache v2.0.0` cannot be built because it requires rustc 1.65 or newer,
+    # while the currently active rustc version is 1.62.0-nightly
+    # Here's orjson switching to rustc 1.65:
+    # https://github.com/ijl/orjson/commit/ce9bae876657ed377d761bf1234b040e2cc13d3c
+    'orjson',
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
