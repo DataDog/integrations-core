@@ -308,7 +308,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         normalized_rows = []
 
         for row in rows:
-
             try:
                 # Attempt to obfuscate SQL statement with metadata
                 procedure_statement = None
