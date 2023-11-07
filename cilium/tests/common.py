@@ -363,6 +363,7 @@ ADDL_OPERATOR_METRICS = [
     "cilium.operator.ces.sync_errors.count",
 ]
 
+# Optional metrics for integration tests
 OPTIONAL_METRICS = {
     "cilium.bpf.map_pressure",
     "cilium.datapath.conntrack_dump.resets.count",
@@ -386,4 +387,13 @@ OPTIONAL_METRICS = {
     "cilium.kvstore.quorum_errors.count",
     "cilium.kvstore.sync_queue_size",
     "cilium.kvstore.initial_sync_completed",
+    "cilium.fqdn.active_names",
+    "cilium.fqdn.active_ips",
+    "cilium.fqdn.alive_zombie_connections",
+    "cilium.proxy.redirects",
+    "cilium.proxy.upstream_reply.seconds.bucket",
+    "cilium.proxy.upstream_reply.seconds.count",
+    "cilium.proxy.upstream_reply.seconds.sum",
+    "cilium.proxy.datapath.update_timeout.count",
+    "cilium.policy.l7.count",
 }
