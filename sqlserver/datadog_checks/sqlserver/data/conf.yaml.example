@@ -193,14 +193,14 @@ instances:
     #
     # include_tempdb_file_space_usage_metrics: true
 
-    ## @param adoprovider - string - optional - default: SQLOLEDB
-    ## Choose the ADO provider.  Note that the (default) provider
-    ## SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
-    ## provider, set the adoprovider to "MSOLEDBSQL" below or "MSOLEDBSQL19" for version 19 of the driver.
-    ## You will also need to download the new provider from
+    ## @param adoprovider - string - optional - default: MSOLEDBSQL
+    ## Choose the ADO provider. The default provider is MSOLEDBSQL.
+    ## Set the adoprovider to "MSOLEDBSQL19" for version 19 of the driver.
+    ## Note the provider SQLOLEDB is being deprecated.
+    ## You can download the new provider from
     ## https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017
     #
-    # adoprovider: SQLOLEDB
+    # adoprovider: MSOLEDBSQL
 
     ## @param connector - string - optional - default: adodbapi
     ## Change the connection method from adodbapi (the default) to
