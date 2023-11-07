@@ -1,12 +1,14 @@
 # CHANGELOG - IBM MQ
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 6.0.0 / 2023-09-29 / Agent 7.49.0
 
 ***Changed***:
 
 * Drop Python 2 support ([#15786](https://github.com/DataDog/integrations-core/pull/15786))
 
-## 5.0.0 / 2023-08-10
+## 5.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 

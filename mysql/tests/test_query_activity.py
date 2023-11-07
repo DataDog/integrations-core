@@ -44,6 +44,7 @@ def dbm_instance(instance_complex):
     }
     instance_complex['query_metrics'] = {'enabled': False}
     instance_complex['query_samples'] = {'enabled': False}
+    instance_complex['collect_settings'] = {'enabled': False}
     return copy(instance_complex)
 
 

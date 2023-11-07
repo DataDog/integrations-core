@@ -66,7 +66,15 @@ MEMORY_GAUGE_METRICS = [
     'hierarchical_memsw_limit',
 ]
 MEMORY_RATE_METRICS = ['pgpgin', 'pgpgout', 'pgmajfault', 'pgfault']
+# Linux-only IO metrics
 IO_METRICS = {'io_service_bytes_recursive': 'ecs.fargate.io.bytes.', 'io_serviced_recursive': 'ecs.fargate.io.ops.'}
+# Windows-only IO metrics
+STORAGE_STATS_METRICS = {
+    'read_count_normalized': 'ecs.fargate.io.ops.read',
+    'read_size_bytes': 'ecs.fargate.io.bytes.read',
+    'write_count_normalized': 'ecs.fargate.io.ops.write',
+    'write_size_bytes': 'ecs.fargate.io.bytes.write',
+}
 NETWORK_GAUGE_METRICS = {
     'rx_errors': 'ecs.fargate.net.rcvd_errors',
     'tx_errors': 'ecs.fargate.net.sent_errors',
@@ -334,10 +342,8 @@ class FargateCheck(AgentCheck):
 
                 blkio_stats = container_stats.get("blkio_stats", {}).get(blkio_cat)
                 # In Windows is always "None" (string), so don't report anything
-                if blkio_stats == 'None':
+                if blkio_stats is None or blkio_stats == 'None':
                     continue
-                elif blkio_stats is None:
-                    blkio_stats = []
 
                 for blkio_stat in blkio_stats:
 
@@ -347,6 +353,13 @@ class FargateCheck(AgentCheck):
                         write_counter += blkio_stat["value"]
                 self.rate(metric_name + 'read', read_counter, tags)
                 self.rate(metric_name + 'write', write_counter, tags)
+
+            # Windows I/O metrics
+            storage_stats = container_stats.get('storage_stats', {})
+            for metric, metric_name in STORAGE_STATS_METRICS.items():
+                value = storage_stats.get(metric)
+                if value:
+                    self.rate(metric_name, value, tags)
 
             # Network metrics
             networks = container_stats.get('networks', {})

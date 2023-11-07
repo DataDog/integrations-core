@@ -1,6 +1,12 @@
 # CHANGELOG - vsphere
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+***Added***:
+
+* Add support for configuring what resources to collect events from ([#15992](https://github.com/DataDog/integrations-core/pull/15992))
+
+## 7.1.0 / 2023-09-29 / Agent 7.49.0
 
 ***Added***:
 
@@ -10,7 +16,7 @@
 
 * Add ability to filter property metrics ([#15474](https://github.com/DataDog/integrations-core/pull/15474))
 
-## 7.0.0 / 2023-08-10
+## 7.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 

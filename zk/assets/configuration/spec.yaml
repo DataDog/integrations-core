@@ -34,9 +34,13 @@ files:
               If `expected_mode` is defined, a service check is sent where the
               status is determined by whether the current mode matches the expected.
 
-              Available options are: `leader`, `follower`, `standalone`.
+              Available options are: `leader`, `follower`, `standalone` or an array of one or more of these.
             value:
-              type: string
+              anyOf:
+                - type: string
+                - type: array
+                  items:
+                    type: string
 
           - name: report_instance_mode
             description: |

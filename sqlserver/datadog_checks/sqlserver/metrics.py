@@ -34,6 +34,7 @@ class BaseSqlServerMetric(object):
     TABLE = None
     DEFAULT_METRIC_TYPE = None
     QUERY_BASE = None
+    OPERATION_NAME = 'base_metrics'
 
     # Flag to indicate if this subclass/table is available for custom queries
     CUSTOM_QUERIES_AVAILABLE = True
@@ -94,6 +95,7 @@ class SqlSimpleMetric(BaseSqlServerMetric):
                     from {table} where counter_name in ({{placeholders}})""".format(
         table=TABLE
     )
+    OPERATION_NAME = 'simple_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -131,6 +133,7 @@ class SqlFractionMetric(BaseSqlServerMetric):
                     order by cntr_type;""".format(
         table=TABLE
     )
+    OPERATION_NAME = 'fraction_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -221,6 +224,8 @@ class SqlIncrFractionMetric(SqlFractionMetric):
     the current value and the base value (denominator) between two collection points that are one second apart.
     """
 
+    OPERATION_NAME = 'incr_fraction_metrics'
+
     def report_fraction(self, value, base, metric_tags, previous_values):
         # return if nil is passed as the values cache, as this should be instantiated
         # at check instantiation
@@ -246,6 +251,7 @@ class SqlOsWaitStat(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_wait_stats'
     DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = """select * from {table} where wait_type in ({{placeholders}})""".format(table=TABLE)
+    OPERATION_NAME = 'os_wait_stat_metric'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -277,6 +283,7 @@ class SqlIoVirtualFileStat(BaseSqlServerMetric):
             table=TABLE
         )
     )
+    OPERATION_NAME = 'io_virtual_file_stats_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -336,6 +343,7 @@ class SqlOsMemoryClerksStat(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_memory_clerks'
     DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = """select * from {table} where type in ({{placeholders}})""".format(table=TABLE)
+    OPERATION_NAME = 'os_memory_clerks_stat_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -367,6 +375,7 @@ class SqlOsSchedulers(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_schedulers'
     DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = "select * from {table}".format(table=TABLE)
+    OPERATION_NAME = 'os_schedulers_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -403,6 +412,7 @@ class SqlOsTasks(BaseSqlServerMetric):
     """.format(
         table=TABLE
     )
+    OPERATION_NAME = 'os_tasks_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -435,6 +445,7 @@ class SqlMasterDatabaseFileStats(BaseSqlServerMetric):
         table=TABLE
     )
     DB_TYPE_MAP = {0: 'data', 1: 'transaction_log', 2: 'filestream', 3: 'unknown', 4: 'full_text'}
+    OPERATION_NAME = 'master_database_file_stats_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -480,6 +491,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
     TABLE = 'sys.database_files'
     DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = "select * from {table}".format(table=TABLE)
+    OPERATION_NAME = 'database_file_stats_metrics'
 
     DB_TYPE_MAP = {0: 'data', 1: 'transaction_log', 2: 'filestream', 3: 'unknown', 4: 'full_text'}
 
@@ -581,6 +593,7 @@ class SqlDatabaseStats(BaseSqlServerMetric):
     TABLE = 'sys.databases'
     DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = "select * from {table}".format(table=TABLE)
+    OPERATION_NAME = 'database_stats_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -626,6 +639,7 @@ class SqlDatabaseBackup(BaseSqlServerMetric):
         group by sys.databases.name""".format(
         table=TABLE
     )
+    OPERATION_NAME = 'database_backup_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -676,6 +690,7 @@ class SqlDbFragmentation(BaseSqlServerMetric):
         "AND DDIPS.index_id = I.index_id "
         "WHERE DDIPS.fragment_count is not null".format(table=TABLE)
     )
+    OPERATION_NAME = 'db_fragmentation_metrics'
 
     def __init__(self, cfg_instance, base_name, report_function, column, logger):
         super(SqlDbFragmentation, self).__init__(cfg_instance, base_name, report_function, column, logger)
@@ -761,6 +776,7 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
                  on dhdrs.replica_id = ar.replica_id""".format(
         table=TABLE
     )
+    OPERATION_NAME = 'db_replica_states_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -815,12 +831,13 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
                     on ag.group_id = dhdrcs.group_id""".format(
         table=TABLE
     )
+    OPERATION_NAME = 'availability_groups_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
-    def fetch_metric(self, rows, columns):
+    def fetch_metric(self, rows, columns, values_cache=None):
         value_column_index = columns.index(self.column)
 
         resource_group_id_index = columns.index('resource_group_id')
@@ -868,12 +885,13 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
                     on ag.group_id = ar.group_id""".format(
         table=TABLE
     )
+    OPERATION_NAME = 'availability_replicas_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
-    def fetch_metric(self, rows, columns):
+    def fetch_metric(self, rows, columns, values_cache=None):
         value_column_index = columns.index(self.column)
 
         failover_mode_desc_index = columns.index('failover_mode_desc')
@@ -944,6 +962,7 @@ class SqlDbFileSpaceUsage(BaseSqlServerMetric):
         FROM {table} group by database_id""".format(
         table=TABLE
     )
+    OPERATION_NAME = 'db_file_space_usage_metrics'
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
@@ -986,7 +1005,7 @@ class SqlDbFileSpaceUsage(BaseSqlServerMetric):
 
         return rows, columns
 
-    def fetch_metric(self, rows, columns):
+    def fetch_metric(self, rows, columns, values_cache=None):
         value_column_index = columns.index(self.column)
         database_id_index = columns.index('database_id')
         database_name_index = columns.index('database_name')
@@ -1003,6 +1022,92 @@ class SqlDbFileSpaceUsage(BaseSqlServerMetric):
                 'database:{}'.format(str(database_name)),
                 'db:{}'.format(str(database_name)),
                 'database_id:{}'.format(str(database_id)),
+            ]
+            metric_tags.extend(self.tags)
+            metric_name = '{}'.format(self.metric_name)
+            self.report_function(metric_name, column_val, tags=metric_tags)
+
+
+# https://learn.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-index-usage-stats-transact-sql?view=sql-server-ver15
+class SqlDbIndexUsageStats(BaseSqlServerMetric):
+    CUSTOM_QUERIES_AVAILABLE = False
+    TABLE = 'sys.dm_db_index_usage_stats'
+    DEFAULT_METRIC_TYPE = 'monotonic_count'
+    columns = ["user_seeks", "user_scans", "user_lookups", "user_updates"]
+    QUERY_BASE = """\
+    SELECT
+         DB_NAME(ixus.database_id) as db,
+         CASE
+            WHEN ind.name IS NULL THEN 'HeapIndex_' + OBJECT_NAME(ind.object_id)
+            ELSE ind.name
+         END AS index_name,
+         OBJECT_NAME(ind.object_id) as table_name,
+        {sql_columns}
+    FROM sys.indexes ind
+             INNER JOIN {table} ixus
+             ON ixus.index_id = ind.index_id AND ixus.object_id = ind.object_id
+    WHERE OBJECTPROPERTY(ind.object_id, 'IsUserTable') = 1
+    GROUP BY ixus.database_id, OBJECT_NAME(ind.object_id), ind.name, {sql_columns}
+    """.format(
+        sql_columns=','.join(f'ixus.{col}' for col in columns),
+        table=TABLE,
+    ).strip()
+    OPERATION_NAME = 'db_index_usage_stats_metrics'
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+        rows = []
+        columns = []
+        if databases is None:
+            databases = []
+
+        logger.debug("%s: gathering db file space usage metrics for these databases: %s", cls.__name__, databases)
+
+        for db in databases:
+            ctx = construct_use_statement(db)
+            start = get_precise_time()
+            try:
+                logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
+                cursor.execute(ctx)
+                logger.debug("%s: fetch_all executing query: %s", cls.__name__, cls.QUERY_BASE)
+                cursor.execute(cls.QUERY_BASE)
+                data = cursor.fetchall()
+            except Exception as e:
+                logger.warning("Error when trying to query db %s - skipping.  Error: %s", db, e)
+                continue
+            elapsed = get_precise_time() - start
+
+            query_columns = [i[0] for i in cursor.description]
+            if columns:
+                if columns != query_columns:
+                    raise CheckException('Assertion error: {} != {}'.format(columns, query_columns))
+            else:
+                columns = query_columns
+
+            rows.extend(data)
+            logger.debug("%s: received %d rows for db %s, elapsed time: %.4f sec", cls.__name__, len(data), db, elapsed)
+
+        return rows, columns
+
+    def fetch_metric(self, rows, columns, values_cache=None):
+        value_column_index = columns.index(self.column)
+        database_index = columns.index('db')
+        index_name_index = columns.index('index_name')
+        table_name_index = columns.index('table_name')
+
+        for row in rows:
+            database = row[database_index]
+            index = row[index_name_index]
+            table = row[table_name_index]
+            column_val = row[value_column_index]
+
+            if database != self.instance:
+                continue
+
+            metric_tags = [
+                'db:{}'.format(str(database)),
+                'index_name:{}'.format(str(index)),
+                'table:{}'.format(str(table)),
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.metric_name)

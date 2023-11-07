@@ -30,3 +30,12 @@ INSTANCE_WILDCARD_DICT = {
     'disable_legacy_service_tag': True,
 }
 INSTANCE_ALL = {'services': ['ALL']}
+
+INSTANCE_TRIGGER_START = {
+    'services': [
+        {'name': 'eventlog', 'startup_type': 'automatic', 'trigger_start': False},
+        {'name': 'dnscache', 'startup_type': 'automatic', 'trigger_start': False},
+    ],
+    'tags': ['optional:tag1'],
+    'disable_legacy_service_tag': True,
+}

@@ -241,6 +241,19 @@ instances:
     #   cluster:
     #   - <CLUSTER_REGEX>
 
+    ## @param event_resource_filters - list of strings - optional - default: ['vm', 'host']
+    ## Which resource types to collect AlarmStatusChangedEvent events for.
+    ## Available resource types are vm, host, datastore, datacenter, and cluster.
+    ##
+    ## By default, the integration will only collect these events for VMs and Hosts.
+    #
+    # event_resource_filters:
+    #   - vm
+    #   - host
+    #   - datastore
+    #   - datacenter
+    #   - cluster
+
     ## @param collect_tags - boolean - optional - default: false
     ## If true, the vSphere Tags will be collected.
     ## The final tag sent to Datadog is composed of the vSphere tags prefix + vSphere tag category as key and

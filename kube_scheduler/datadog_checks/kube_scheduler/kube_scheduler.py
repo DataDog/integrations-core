@@ -213,7 +213,7 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, SliMetricsScraperMixin, OpenMe
 
         if self._slis_available:
             self.log.debug('processing kube scheduler sli metrics')
-            self.process(self.slis_scraper_config)
+            self.process(self.slis_scraper_config, metric_transformers=self.sli_transformers)
 
     def _perform_service_check(self, instance):
         url = instance.get('health_url')

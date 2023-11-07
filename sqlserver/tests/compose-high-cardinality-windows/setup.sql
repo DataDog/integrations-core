@@ -42,6 +42,7 @@ GO
 -- correctly support unicode throughout the integration.
 CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));
 INSERT INTO datadog_test.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
+CREATE CLUSTERED INDEX thingsindex ON datadog_test.dbo.ϑings (name);
 CREATE USER bob FOR LOGIN bob;
 CREATE USER fred FOR LOGIN fred;
 -- we don't need to recreate the datadog user in this new DB because it already exists in the model

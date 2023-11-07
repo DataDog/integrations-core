@@ -222,7 +222,7 @@ instances:
     #
     # domain: <DOMAIN>
 
-    ## @param timeout - number - optional - default: 5
+    ## @param timeout - integer - optional - default: 5
     ## The number of seconds to wait for new event signals.
     #
     # timeout: 5

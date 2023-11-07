@@ -1,8 +1,14 @@
 # CHANGELOG - IBM Db2
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 2.0.0 / 2023-08-10
+## 2.1.0 / 2023-10-26
+
+***Added***:
+
+* Add option to control the connection timeout ([#14110](https://github.com/DataDog/integrations-core/pull/14110))
+
+## 2.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 

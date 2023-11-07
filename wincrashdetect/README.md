@@ -10,15 +10,19 @@ Get Datadog events upon Windows system crash to create monitors in Datadog.
 
 ### Installation
 
-The Windows Crash Detection integration is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers.
+The Windows Crash Detection integration is included in the [Datadog Agent][1] package. No additional installation is needed.
 
 ### Configuration
 
-1. Edit the `wincrashdetect.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample wincrashdetect.d/conf.yaml.example][3] for all available configuration options.
+1. Edit the `wincrashdetect.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to set `enabled: true`. See the [sample wincrashdetect.d/conf.yaml.example][3] for all available configuration options.
 
-2. Edit the `system-probe.yaml` folder at the root of your [Agent's configuration directory][2], to enable the system probe module.
+2. Enable the Windows Crash Detection module in `C:\ProgramData\Datadog\system-probe.yaml` by setting the enabled flag to 'true':
 
-2. [Restart the Agent][4].
+   ```yaml
+    windows_crash_detection:
+        enabled: true
+    ```
+3. [Restart the Agent][4].
 
 ### Validation
 
@@ -47,4 +51,4 @@ Need help? Contact [Datadog support][5].
 [3]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/wincrashdetect.d/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/help/
-[6]: https://github.com/DataDog/integrations-core/blob/master/wincrashdetect/metadata.csv
+[6]: https://docs.datadoghq.com/agent/basic_agent_usage/windows/?tab=gui#agent-status-and-information

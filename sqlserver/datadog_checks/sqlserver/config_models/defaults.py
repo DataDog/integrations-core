@@ -72,6 +72,10 @@ def instance_include_fci_metrics():
     return False
 
 
+def instance_include_index_usage_metrics():
+    return True
+
+
 def instance_include_instance_metrics():
     return True
 

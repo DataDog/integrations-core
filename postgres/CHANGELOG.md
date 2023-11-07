@@ -1,17 +1,51 @@
 # CHANGELOG - postgres
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 15.2.0 / 2023-10-26
+
+***Added***:
+
+* Upgrade `psycopg2-binary` to `v2.9.8` ([#15949](https://github.com/DataDog/integrations-core/pull/15949))
+* Add support for reporting SQL obfuscation errors ([#15990](https://github.com/DataDog/integrations-core/pull/15990))
+* Emit postgres metrics queries operation time ([#16040](https://github.com/DataDog/integrations-core/pull/16040))
+* Add obfuscation_mode config option to allow enabling obfuscation with go-sqllexer ([#16071](https://github.com/DataDog/integrations-core/pull/16071))
+
+***Fixed***:
+
+* Add cloudsqladmin to default list of databases to exclude from autodiscovery and databases to ignore to prevent failures on Postgres 15 on Google CloudSQL ([#16027](https://github.com/DataDog/integrations-core/pull/16027))
+* Bump the minimum base check version to 34.1.0 ([#16062](https://github.com/DataDog/integrations-core/pull/16062))
+* Collect Postgres size metrics for auto-discovered databases ([#16076](https://github.com/DataDog/integrations-core/pull/16076))
+
+## 15.1.1 / 2023-10-17 / Agent 7.49.0
+
+***Fixed***:
+
+* Fix check cancellation timeout due to `DBMAsyncJob` cancellation being blocked ([#16028](https://github.com/DataDog/integrations-core/pull/16028))
+
+## 15.1.0 / 2023-10-06
+
+***Added***:
+
+* Establish a dedicated main db connection to prevent the main thread db from closing prematurely ([#15962](https://github.com/DataDog/integrations-core/pull/15962))
+
+## 15.0.0 / 2023-09-29
 
 ***Changed***:
 
 * Update `ssl` default configuration to 'allow' ([#15917](https://github.com/DataDog/integrations-core/pull/15917))
 
+***Added***:
+
+* Update dependencies ([#15922](https://github.com/DataDog/integrations-core/pull/15922))
+
 ***Fixed***:
 
+* Revise `postgresql.replication_delay` to function with archive WAL-driven replica ([#15925](https://github.com/DataDog/integrations-core/pull/15925))
 * Prevent Postgres integration from collecting WAL metrics from Aurora instances that cannot be collected ([#15896](https://github.com/DataDog/integrations-core/pull/15896))
 * Set lower log level for relations metrics truncated ([#15903](https://github.com/DataDog/integrations-core/pull/15903))
 
-## 14.4.0 / 2023-09-19
+## 14.4.0 / 2023-09-19 / Agent 7.48.0
 
 ***Added***:
 
@@ -43,7 +77,6 @@
 
 ***Fixed***:
 
-* Revise postgresql.replication_delay to Function with Archive WAL-driven PostgreSQL Replica ([#15629](https://github.com/DataDog/integrations-core/pull/15629))
 * Pass timeout when connection pool closes ([#15724](https://github.com/DataDog/integrations-core/pull/15724))
 
 ## 14.2.1 / 2023-08-29
@@ -69,7 +102,7 @@
 
 ***Fixed***:
 
-* Fix InstanceConfig loading error for `ssl` config ([#15611](https://github.com/DataDog/integrations-core/pull/15611))
+* Fix InstanceConfig loading error for `ssl` config because `true` is not a valid value. Please, use `require` instead of `true` ([#15611](https://github.com/DataDog/integrations-core/pull/15611))
 
 ## 14.1.0 / 2023-08-10
 

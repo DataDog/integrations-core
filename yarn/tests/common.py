@@ -59,6 +59,7 @@ EXPECTED_METRICS = [
     "yarn.metrics.lost_nodes",
     "yarn.metrics.unhealthy_nodes",
     "yarn.metrics.decommissioned_nodes",
+    "yarn.metrics.decommissioning_nodes",
     "yarn.metrics.rebooted_nodes",
     "yarn.queue.root.max_capacity",
     "yarn.queue.root.used_capacity",
@@ -251,6 +252,7 @@ YARN_CLUSTER_METRICS_VALUES = {
     'yarn.metrics.lost_nodes': 0,
     'yarn.metrics.unhealthy_nodes': 0,
     'yarn.metrics.decommissioned_nodes': 0,
+    'yarn.metrics.decommissioning_nodes': 0,
     'yarn.metrics.rebooted_nodes': 0,
 }
 

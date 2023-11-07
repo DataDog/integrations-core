@@ -95,6 +95,7 @@ class PostgresMetricsCache:
             "FROM pg_stat_database psd "
             "JOIN pg_database pd ON psd.datname = pd.datname",
             'relation': False,
+            'name': 'instance_metrics',
         }
 
         res["query"] += " WHERE " + " AND ".join(
@@ -128,6 +129,7 @@ class PostgresMetricsCache:
             'metrics': self.bgw_metrics,
             'query': "select {metrics_columns} FROM pg_stat_bgwriter",
             'relation': False,
+            'name': 'bgw_metrics',
         }
 
     def get_count_metrics(self):
@@ -158,6 +160,7 @@ class PostgresMetricsCache:
             'metrics': self.archiver_metrics,
             'query': "select {metrics_columns} FROM pg_stat_archiver",
             'relation': False,
+            'name': 'archiver_metrics',
         }
 
     def get_replication_metrics(self, version, is_aurora):
@@ -200,6 +203,14 @@ class PostgresMetricsCache:
             default_descriptors = [('application_name', 'app'), ('datname', 'db'), ('usename', 'user')]
             default_aggregations = [d[0] for d in default_descriptors]
 
+            if 'datname' in excluded_aggregations:
+                excluded_aggregations.remove('datname')
+                logger.warning(
+                    "datname is a required aggregation but was set in activity_metrics_excluded_aggregations. "
+                    "Ignoring it and using the following instead: %s",
+                    excluded_aggregations,
+                )
+
             aggregation_columns = [a for a in default_aggregations if a not in excluded_aggregations]
             descriptors = [d for d in default_descriptors if d[0] not in excluded_aggregations]
 
@@ -238,4 +249,5 @@ class PostgresMetricsCache:
             'metrics': metrics,
             'query': query,
             'relation': False,
+            'name': 'activity_metrics',
         }

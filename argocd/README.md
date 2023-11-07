@@ -128,7 +128,7 @@ metadata:
           "init_config": {},
           "instances": [
             {
-              "app_controller_endpoint": "http://%%host%%:8082/metrics"
+              "app_controller_endpoint": "http://%%host%%:8082/metrics",
               "rename_labels": {
                 "name": "argocd_app_name"
               }

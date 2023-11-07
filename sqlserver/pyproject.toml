@@ -28,7 +28,7 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=32.6.0",
+    "datadog-checks-base>=34.1.0",
 ]
 dynamic = [
     "version",
@@ -38,7 +38,7 @@ license = "BSD-3-Clause"
 [project.optional-dependencies]
 deps = [
     "lxml==4.9.3",
-    "pyodbc==4.0.32; sys_platform != 'darwin' or platform_machine != 'arm64'",
+    "pyodbc==5.0.1; (sys_platform != 'darwin' or platform_machine != 'arm64') and python_version > '3.0'",
     "pyro4==4.82; sys_platform == 'win32'",
     "pywin32==306; sys_platform == 'win32' and python_version > '3.0'",
     "serpent==1.41; sys_platform == 'win32' and python_version > '3.0'",

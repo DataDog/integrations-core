@@ -587,30 +587,30 @@ metrics:
       - name: sfosIPSecVpnActiveTunnel
         OID: 1.3.6.1.4.1.2604.5.1.6.1.1.1.1.8
     metric_tags:
-      - column:
+      - symbol:
           name: sfosIPSecVpnConnName
           OID: 1.3.6.1.4.1.2604.5.1.6.1.1.1.1.2
         tag: sfos_ip_sec_vpn_conn_name
-      - column:
+      - symbol:
           name: sfosIPSecVpnConnDes
           OID: 1.3.6.1.4.1.2604.5.1.6.1.1.1.1.3
         tag: sfos_ip_sec_vpn_conn_des
-      - column:
+      - symbol:
           name: sfosIPSecVpnPolicyName
           OID: 1.3.6.1.4.1.2604.5.1.6.1.1.1.1.4
         tag: sfos_ip_sec_vpn_policy_name
-      - column:
+      - symbol:
           name: sfosIPSecVpnConnMode
           OID: 1.3.6.1.4.1.2604.5.1.6.1.1.1.1.5
         tag: sfos_ip_sec_vpn_conn_mode
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2604.5.1.6.1.1.1.1.6
           name: sfosIPSecVpnConnType
         tag: sfos_ip_sec_vpn_conn_type
         mapping:
           1: host-to-host
           2: site-to-site
-      - column:
+      - symbol:
           name: sfosIPSecVpnLocalgwPort
           OID: 1.3.6.1.4.1.2604.5.1.6.1.1.1.1.7
         tag: sfos_ip_sec_vpn_localgw_port

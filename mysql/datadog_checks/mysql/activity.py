@@ -96,7 +96,6 @@ def agent_check_getter(self):
 
 
 class MySQLActivity(DBMAsyncJob):
-
     DEFAULT_COLLECTION_INTERVAL = 10
     MAX_PAYLOAD_BYTES = 19e6
 
@@ -213,6 +212,12 @@ class MySQLActivity(DBMAsyncJob):
             else:
                 self._log.debug("Failed to obfuscate query | err=[%s]", e)
             row["sql_text"] = "ERROR: failed to obfuscate"
+            self._check.count(
+                "dd.mysql.obfuscation.error",
+                1,
+                tags=self.tags + ["error:{}".format(type(e)), "error_msg:{}".format(e)] + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
         return row
 
     @staticmethod

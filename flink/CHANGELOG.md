@@ -1,6 +1,6 @@
 # CHANGELOG - Flink
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 1.4.1 / 2023-07-10 / Agent 7.47.0
 
@@ -63,4 +63,3 @@
 ***Added***:
 
 * Add flink integration ([#5613](https://github.com/DataDog/integrations-core/pull/5613))
-

@@ -11,6 +11,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DRIVER_CONFIG_DIR = os.path.join(CURRENT_DIR, 'data', 'driver_config')
 PROC_CHAR_LIMIT = 500
 
+
 # Database is used to store both the name and physical_database_name
 # for a database, which is discovered via autodiscovery
 class Database:
@@ -75,12 +76,12 @@ def _get_index_for_keyword(text, keyword):
 
 def extract_sql_comments(text):
     if not text:
-        return []
+        return [], None
     in_single_line_comment = False
     in_multi_line_comment = False
     comment_start = None
     result = []
-
+    stripped_text = ""
     for i in range(len(text)):
         if in_multi_line_comment:
             if i < len(text) - 1 and text[i : i + 2] == '*/':
@@ -91,8 +92,7 @@ def extract_sql_comments(text):
         elif in_single_line_comment:
             if text[i] == '\n':
                 in_single_line_comment = False
-                # strip any extra whitespace at the end
-                # of the single line comment
+                # strip any extra whitespace at the end of the single line comment
                 result.append(text[comment_start:i].rstrip())
         else:
             if i < len(text) - 1 and text[i : i + 2] == '--':
@@ -101,8 +101,15 @@ def extract_sql_comments(text):
             elif i < len(text) - 1 and text[i : i + 2] == '/*':
                 in_multi_line_comment = True
                 comment_start = i
+            else:
+                stripped_text += text[i]
+    return result, stripped_text
 
-    return result
+
+def extract_sql_comments_and_procedure_name(text):
+    result, stripped_text = extract_sql_comments(text)
+    is_proc, name = is_statement_proc(stripped_text)
+    return result, is_proc, name
 
 
 def parse_sqlserver_major_version(version):

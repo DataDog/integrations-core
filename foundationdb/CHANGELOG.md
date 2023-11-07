@@ -1,8 +1,8 @@
 # CHANGELOG - FoundationDB
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 1.3.1 / 2023-08-18
+## 1.3.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:
 

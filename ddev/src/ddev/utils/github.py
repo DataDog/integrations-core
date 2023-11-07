@@ -88,7 +88,7 @@ class GitHubManager:
         response = self.__api_get(
             self.ISSUE_SEARCH_API,
             # https://docs.github.com/en/search-github/searching-on-github/searching-issues-and-pull-requests
-            params={'q': f'sha:{sha}+repo:{self.repo_id}'},
+            params={'q': f'sha:{sha} repo:{self.repo_id}'},
         )
         data = loads(response.text)
         if not data['items']:

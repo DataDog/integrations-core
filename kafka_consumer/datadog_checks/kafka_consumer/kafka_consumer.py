@@ -26,6 +26,13 @@ class KafkaCheck(AgentCheck):
         consumer_offsets = {}
 
         try:
+            self.client.request_metadata_update()
+        except:
+            raise Exception(
+                "Unable to connect to the AdminClient. This is likely due to an error in the configuration."
+            )
+
+        try:
             # Fetch consumer offsets
             # Expected format: {(consumer_group, topic, partition): offset}
             consumer_offsets = self.client.get_consumer_offsets()
@@ -45,6 +52,8 @@ class KafkaCheck(AgentCheck):
         except Exception:
             self.log.exception("There was a problem collecting the highwater mark offsets.")
             # Unlike consumer offsets, fail immediately because we can't calculate consumer lag w/o highwater_offsets
+            if self.config._close_admin_client:
+                self.client.close_admin_client()
             raise
 
         total_contexts = len(consumer_offsets) + len(highwater_offsets)
@@ -67,6 +76,8 @@ class KafkaCheck(AgentCheck):
         self.report_consumer_offsets_and_lag(
             consumer_offsets, highwater_offsets, self._context_limit - len(highwater_offsets)
         )
+        if self.config._close_admin_client:
+            self.client.close_admin_client()
 
     def report_highwater_offsets(self, highwater_offsets, contexts_limit):
         """Report the broker highwater offsets."""

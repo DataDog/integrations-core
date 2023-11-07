@@ -1,0 +1,28 @@
+{
+  "versions": [
+    {
+      "id": "v3.0",
+      "status": "CURRENT",
+      "version": "3.70",
+      "min_version": "3.0",
+      "updated": "2022-08-31T00:00:00Z",
+      "links": [
+        {
+          "rel": "describedby",
+          "type": "text/html",
+          "href": "https://docs.openstack.org/"
+        },
+        {
+          "rel": "self",
+          "href": "http://34.91.114.145/volume/v3/"
+        }
+      ],
+      "media-types": [
+        {
+          "base": "application/json",
+          "type": "application/vnd.openstack.volume+json;version=3"
+        }
+      ]
+    }
+  ]
+}

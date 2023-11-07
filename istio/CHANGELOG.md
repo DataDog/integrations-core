@@ -1,8 +1,14 @@
 # CHANGELOG - istio
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 5.1.0 / 2023-08-18
+## 5.2.0 / 2023-09-29 / Agent 7.49.0
+
+***Added***:
+
+* Add additional Istio metrics ([#15820](https://github.com/DataDog/integrations-core/pull/15820))
+
+## 5.1.0 / 2023-08-18 / Agent 7.48.0
 
 ***Added***:
 

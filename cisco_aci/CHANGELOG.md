@@ -1,8 +1,20 @@
 # CHANGELOG - cisco_aci
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 2.3.1 / 2023-08-18
+## 2.4.1 / 2023-10-26 / Agent 7.49.0
+
+***Fixed***:
+
+* Bump the `cryptography` version to 41.0.5 ([#16083](https://github.com/DataDog/integrations-core/pull/16083))
+
+## 2.4.0 / 2023-09-29
+
+***Added***:
+
+* Update Cryptography to 41.0.4 ([#15922](https://github.com/DataDog/integrations-core/pull/15922))
+
+## 2.3.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:
 

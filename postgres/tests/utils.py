@@ -52,16 +52,17 @@ def _wait_for_value(db_instance, lower_threshold, query):
             while value <= lower_threshold:
                 cur.execute(query)
                 value = cur.fetchall()[0][0]
-            time.sleep(0.1)
+                time.sleep(0.1)
 
 
-def run_one_check(check, db_instance):
+def run_one_check(check, db_instance, cancel=True):
     """
     Run check and immediately cancel.
     Waits for all threads to close before continuing.
     """
     check.check(db_instance)
-    check.cancel()
+    if cancel:
+        check.cancel()
     if check.statement_samples._job_loop_future is not None:
         check.statement_samples._job_loop_future.result()
     if check.statement_metrics._job_loop_future is not None:

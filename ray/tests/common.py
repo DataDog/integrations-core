@@ -273,6 +273,12 @@ OPTIONAL_METRICS = [
     'pull_manager.object_request_time.sum',
     'pull_manager.object_request_time.bucket',
     'pull_manager.object_request_time.count',
+    'object_store.size.sum',
+    'object_store.size.count',
+    'object_store.size.bucket',
+    'worker.register_time.sum',
+    'worker.register_time.count',
+    'worker.register_time.bucket',
 ]
 OPTIONAL_METRICS = ['ray.' + m for m in OPTIONAL_METRICS]
 

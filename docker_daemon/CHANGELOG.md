@@ -1,6 +1,6 @@
 # CHANGELOG - docker_daemon
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 1.12.0 / 2020-01-13
 
@@ -145,4 +145,3 @@
 ***Added***:
 
 * adds docker_daemon integration.
-

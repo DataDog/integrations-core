@@ -1,12 +1,14 @@
 # CHANGELOG - tomcat
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 1.12.2 / 2023-09-29 / Agent 7.49.0
 
 ***Fixed***:
 
 * Make JMX metrics available on both standalone and embedded Tomcat versions ([#15761](https://github.com/DataDog/integrations-core/pull/15761))
 
-## 1.12.1 / 2023-08-18
+## 1.12.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:
 

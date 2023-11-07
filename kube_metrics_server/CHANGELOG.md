@@ -1,8 +1,8 @@
 # CHANGELOG - Kube Metrics Server
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 3.1.1 / 2023-08-18
+## 3.1.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:
 
@@ -127,4 +127,3 @@
 ***Added***:
 
 * Add Kube metrics server integration ([#3666](https://github.com/DataDog/integrations-core/pull/3666))
-

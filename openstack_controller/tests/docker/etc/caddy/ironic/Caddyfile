@@ -4,22 +4,30 @@
 }
 :80 {
     root * /usr/share/caddy/
-    @get_v1_conductors {
+    @get_baremetal {
         method GET
-        header X-Auth-Token "demo_test"
-        path /v1/conductors
+        path /baremetal
     }
-    route @get_v1_conductors {
-        rewrite /v1/conductors /v1/conductors/get.json
+    route @get_baremetal {
+        rewrite * /GET{http.request.uri.path}/response.json
         file_server
     }
-    @get_v1_nodes {
+    @get_baremetal_v1_nodes {
         method GET
         header X-Auth-Token "demo_test"
-        path /v1/nodes
+        path /baremetal/v1/nodes/detail
     }
-    route @get_v1_nodes {
-        rewrite /v1/nodes /v1/nodes/get.json
+    route @get_baremetal_v1_nodes {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+    @get_baremetal_v1_conductors {
+        method GET
+        header X-Auth-Token "demo_test"
+        path /baremetal/v1/conductors
+    }
+    route @get_baremetal_v1_conductors {
+        rewrite * /GET{http.request.uri.path}/response.json
         file_server
     }
     file_server browse

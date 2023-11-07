@@ -1,7 +1,9 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import contextlib
 import copy
+import functools
 import os
 from time import time
 
@@ -13,6 +15,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.utils import (
     default_json_event_encoding,
+    tracked_query,
 )
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.base.utils.serialization import json
@@ -77,9 +80,9 @@ class PostgreSql(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(PostgreSql, self).__init__(name, init_config, instances)
-        self.db = None
         self._resolved_hostname = None
         self._agent_hostname = None
+        self._db = None
         self.version = None
         self.is_aurora = None
         self._version_utils = VersionUtils()
@@ -112,7 +115,7 @@ class PostgreSql(AgentCheck):
         self.check_initializations.append(self.initialize_is_aurora)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         self.autodiscovery = self._build_autodiscovery()
-        self._dynamic_queries = None
+        self._dynamic_queries = []
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
             maxsize=1,
@@ -170,20 +173,53 @@ class PostgreSql(AgentCheck):
             )
         )
 
-    def _new_query_executor(self, queries):
+    def _new_query_executor(self, queries, db):
         return QueryExecutor(
-            self.execute_query_raw,
+            functools.partial(self.execute_query_raw, db=db),
             self,
             queries=queries,
             tags=self.tags_without_db,
             hostname=self.resolved_hostname,
+            track_operation_time=True,
         )
 
-    def execute_query_raw(self, query):
-        with self._get_main_db().cursor() as cursor:
-            cursor.execute(query)
-            rows = cursor.fetchall()
-            return rows
+    def execute_query_raw(self, query, db):
+        with db() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query)
+                rows = cursor.fetchall()
+                return rows
+
+    @contextlib.contextmanager
+    def db(self):
+        """
+        db context manager that yields a healthy connection to the main database
+        """
+        if not self._db or self._db.closed:
+            # if the connection is closed, we need to reinitialize the connection
+            self._db = self._new_connection(self._config.dbname)
+            # once the connection is reinitialized, we need to reload the pg_settings
+            self._load_pg_settings(self._db)
+        if self._db.status != psycopg2.extensions.STATUS_READY:
+            self._db.rollback()
+        try:
+            yield self._db
+        except (psycopg2.InterfaceError, InterruptedError):
+            # if we get an interface error or an interrupted error,
+            # we gracefully close the connection
+            self.log.warning(
+                "Connection to the database %s has been interrupted, closing connection", self._config.dbname
+            )
+            try:
+                self._db.close()
+            except Exception:
+                pass
+            finally:
+                self._db = None
+            raise
+        except Exception:
+            self.log.exception("Unhandled exception while using database connection %s", self._config.dbname)
+            raise
 
     @property
     def dynamic_queries(self):
@@ -196,6 +232,7 @@ class PostgreSql(AgentCheck):
 
         self.log.debug("Generating dynamic queries")
         queries = []
+        per_database_queries = []  # queries that need to be run per database, used for autodiscovery
         if self.version >= V9_2:
             q_pg_stat_database = copy.deepcopy(QUERY_PG_STAT_DATABASE)
             if len(self._config.ignore_databases) > 0:
@@ -246,26 +283,35 @@ class PostgreSql(AgentCheck):
                 query = copy.copy(query)
                 formatted_query = self._relations_manager.filter_relation_query(query['query'], 'nspname')
                 query['query'] = formatted_query
-                queries.append(query)
+                per_database_queries.append(query)
 
-        self._dynamic_queries = self._new_query_executor(queries)
-        self._dynamic_queries.compile_queries()
+        if self.autodiscovery:
+            self._collect_dynamic_queries_autodiscovery(per_database_queries)
+        else:
+            queries.extend(per_database_queries)
+        self._dynamic_queries.append(self._new_query_executor(queries, db=self.db))
+        for dynamic_query in self._dynamic_queries:
+            dynamic_query.compile_queries()
         self.log.debug("initialized %s dynamic querie(s)", len(queries))
 
         return self._dynamic_queries
 
     def cancel(self):
         """
-        Cancels and waits for all threads to stop.
+        Cancels and sends cancel signal to all threads.
         """
-        self.statement_samples.cancel()
-        self.statement_metrics.cancel()
-        self.metadata_samples.cancel()
+        if self._config.dbm_enabled:
+            self.statement_samples.cancel()
+            self.statement_metrics.cancel()
+            self.metadata_samples.cancel()
+        self._close_db_pool()
+        if self._db:
+            self._db.close()
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
         self.metrics_cache.clean_state()
-        self._dynamic_queries = None
+        self._dynamic_queries = []
 
     def _get_debug_tags(self):
         return ['agent_hostname:{}'.format(self.agent_hostname)]
@@ -276,11 +322,12 @@ class PostgreSql(AgentCheck):
         return list(service_check_tags)
 
     def _get_replication_role(self):
-        with self.db.cursor() as cursor:
-            cursor.execute('SELECT pg_is_in_recovery();')
-            role = cursor.fetchone()[0]
-            # value fetched for role is of <type 'bool'>
-            return "standby" if role else "master"
+        with self.db() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute('SELECT pg_is_in_recovery();')
+                role = cursor.fetchone()[0]
+                # value fetched for role is of <type 'bool'>
+                return "standby" if role else "master"
 
     def _collect_wal_metrics(self, instance_tags):
         if self.version >= V10:
@@ -326,14 +373,14 @@ class PostgreSql(AgentCheck):
         return oldest_file_age
 
     def load_version(self):
-        raw_version = self._version_utils.get_raw_version(self.db)
+        raw_version = self._version_utils.get_raw_version(self.db())
         self.version = self._version_utils.parse_version(raw_version)
         self.set_metadata('version', raw_version)
         return self.version
 
     def initialize_is_aurora(self):
         if self.is_aurora is None:
-            self.is_aurora = self._version_utils.is_aurora(self.db)
+            self.is_aurora = self._version_utils.is_aurora(self.db())
         return self.is_aurora
 
     @property
@@ -379,20 +426,20 @@ class PostgreSql(AgentCheck):
         is_relations = scope.get('relation') and self._relations_manager.has_relations
         try:
             query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
-            # if this is a relation-specific query, we need to list all relations last
-            if is_relations:
-                schema_field = get_schema_field(descriptors)
-                formatted_query = self._relations_manager.filter_relation_query(query, schema_field)
-                cursor.execute(formatted_query)
-            else:
-                self.log.debug("Running query: %s", str(query))
-                cursor.execute(query.replace(r'%', r'%%'))
+            with tracked_query(check=self, operation='custom_metrics' if is_custom_metrics else scope['name']):
+                # if this is a relation-specific query, we need to list all relations last
+                if is_relations:
+                    schema_field = get_schema_field(descriptors)
+                    formatted_query = self._relations_manager.filter_relation_query(query, schema_field)
+                    cursor.execute(formatted_query)
+                else:
+                    self.log.debug("Running query: %s", str(query))
+                    cursor.execute(query.replace(r'%', r'%%'))
 
-            results = cursor.fetchall()
+                results = cursor.fetchall()
         except psycopg2.errors.FeatureNotSupported as e:
             # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
-            self.db.rollback()
             self.log.debug("Disabling replication metrics")
             self.is_aurora = False
             self.metrics_cache.replication_metrics = {}
@@ -403,10 +450,8 @@ class PostgreSql(AgentCheck):
                 "A reattempt to identify the right version will happen on next agent run." % self.version
             )
             self._clean_state()
-            self.db.rollback()
         except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
             log_func("Not all metrics may be available: %s" % str(e))
-            self.db.rollback()
 
         if not results:
             return None
@@ -548,6 +593,17 @@ class PostgreSql(AgentCheck):
                 ),
             )
 
+    def _collect_dynamic_queries_autodiscovery(self, queries):
+        if not self.autodiscovery:
+            return
+
+        databases = self.autodiscovery.get_items()
+        for dbname in databases:
+            db = functools.partial(
+                self.db_pool.get_connection, dbname=dbname, ttl_ms=self._config.idle_connection_timeout
+            )
+            self._dynamic_queries.append(self._new_query_executor(queries, db=db))
+
     def _collect_stats(self, instance_tags):
         """Query pg_stat_* for various metrics
         If relations is not an empty list, gather per-relation metrics
@@ -591,28 +647,38 @@ class PostgreSql(AgentCheck):
         if replication_stats_metrics:
             metric_scope.append(replication_stats_metrics)
 
-        with self.db.cursor() as cursor:
-            results_len = self._query_scope(cursor, db_instance_metrics, instance_tags, False)
-            if results_len is not None:
-                self.gauge(
-                    "postgresql.db.count",
-                    results_len,
-                    tags=copy.copy(self.tags_without_db),
-                    hostname=self.resolved_hostname,
-                )
+        with self.db() as conn:
+            with conn.cursor() as cursor:
+                results_len = self._query_scope(cursor, db_instance_metrics, instance_tags, False)
+                if results_len is not None:
+                    self.gauge(
+                        "postgresql.db.count",
+                        results_len,
+                        tags=copy.copy(self.tags_without_db),
+                        hostname=self.resolved_hostname,
+                    )
 
-            self._query_scope(cursor, bgw_instance_metrics, instance_tags, False)
-            self._query_scope(cursor, archiver_instance_metrics, instance_tags, False)
+            with conn.cursor() as cursor:
+                self._query_scope(cursor, bgw_instance_metrics, instance_tags, False)
+            with conn.cursor() as cursor:
+                self._query_scope(cursor, archiver_instance_metrics, instance_tags, False)
 
             if self._config.collect_activity_metrics:
                 activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
-                self._query_scope(cursor, activity_metrics, instance_tags, False)
+                with conn.cursor() as cursor:
+                    self._query_scope(cursor, activity_metrics, instance_tags, False)
 
-            for scope in list(metric_scope) + self._config.custom_metrics:
-                self._query_scope(cursor, scope, instance_tags, scope in self._config.custom_metrics)
+            for scope in list(metric_scope):
+                with conn.cursor() as cursor:
+                    self._query_scope(cursor, scope, instance_tags, False)
 
-            if self.dynamic_queries:
-                self.dynamic_queries.execute()
+            for scope in self._config.custom_metrics:
+                with conn.cursor() as cursor:
+                    self._query_scope(cursor, scope, instance_tags, True)
+
+        if self.dynamic_queries:
+            for dynamic_query in self.dynamic_queries:
+                dynamic_query.execute()
 
     def _new_connection(self, dbname):
         if self._config.host == 'localhost' and self._config.password == '':
@@ -671,12 +737,8 @@ class PostgreSql(AgentCheck):
         The connection created here will be persistent. It will not be automatically
         evicted from the connection pool.
         """
-        if self.db and self.db.closed:
-            # Reset the connection object to retry to connect
-            self.db = None
-
-        if not self.db:
-            self.db = self._get_main_db()
+        with self.db():
+            pass
 
     # Reload pg_settings on a new connection to the main db
     def _load_pg_settings(self, db):
@@ -708,13 +770,12 @@ class PostgreSql(AgentCheck):
         :return: a psycopg2 connection
         """
         # reload settings for the main DB only once every time the connection is reestablished
-        conn = self.db_pool._get_connection_raw(
+        return self.db_pool.get_connection(
             self._config.dbname,
             self._config.idle_connection_timeout,
             startup_fn=self._load_pg_settings,
             persistent=True,
         )
-        return conn
 
     def _close_db_pool(self):
         self.db_pool.close_all_connections()
@@ -740,79 +801,84 @@ class PostgreSql(AgentCheck):
                 self.log.error("custom query field `columns` is required for metric_prefix `%s`", metric_prefix)
                 continue
 
-            with self.db.cursor() as cursor:
-                try:
-                    self.log.debug("Running query: %s", query)
-                    cursor.execute(query)
-                except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
-                    self.log.error("Error executing query for metric_prefix %s: %s", metric_prefix, str(e))
-                    self.db.rollback()
-                    continue
-
-                for row in cursor:
-                    if not row:
-                        self.log.debug("query result for metric_prefix %s: returned an empty result", metric_prefix)
+            with self.db() as conn:
+                with conn.cursor() as cursor:
+                    try:
+                        self.log.debug("Running query: %s", query)
+                        with tracked_query(
+                            check=self, operation='custom_queries', tags=['metric_prefix:{}'.format(metric_prefix)]
+                        ):
+                            cursor.execute(query)
+                    except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
+                        self.log.error("Error executing query for metric_prefix %s: %s", metric_prefix, str(e))
                         continue
 
-                    if len(columns) != len(row):
-                        self.log.error(
-                            "query result for metric_prefix %s: expected %s columns, got %s",
-                            metric_prefix,
-                            len(columns),
-                            len(row),
-                        )
-                        continue
-
-                    metric_info = []
-                    query_tags = list(custom_query.get('tags', []))
-                    query_tags.extend(tags)
-
-                    for column, value in zip(columns, row):
-                        # Columns can be ignored via configuration.
-                        if not column:
+                    for row in cursor:
+                        if not row:
+                            self.log.debug("query result for metric_prefix %s: returned an empty result", metric_prefix)
                             continue
 
-                        name = column.get('name')
-                        if not name:
-                            self.log.error("column field `name` is required for metric_prefix `%s`", metric_prefix)
-                            break
-
-                        column_type = column.get('type')
-                        if not column_type:
+                        if len(columns) != len(row):
                             self.log.error(
-                                "column field `type` is required for column `%s` of metric_prefix `%s`",
-                                name,
+                                "query result for metric_prefix %s: expected %s columns, got %s",
                                 metric_prefix,
+                                len(columns),
+                                len(row),
                             )
-                            break
+                            continue
 
-                        if column_type == 'tag':
-                            query_tags.append('{}:{}'.format(name, value))
+                        metric_info = []
+                        query_tags = list(custom_query.get('tags', []))
+                        query_tags.extend(tags)
+
+                        for column, value in zip(columns, row):
+                            # Columns can be ignored via configuration.
+                            if not column:
+                                continue
+
+                            name = column.get('name')
+                            if not name:
+                                self.log.error("column field `name` is required for metric_prefix `%s`", metric_prefix)
+                                break
+
+                            column_type = column.get('type')
+                            if not column_type:
+                                self.log.error(
+                                    "column field `type` is required for column `%s` of metric_prefix `%s`",
+                                    name,
+                                    metric_prefix,
+                                )
+                                break
+
+                            if column_type == 'tag':
+                                query_tags.append('{}:{}'.format(name, value))
+                            else:
+                                if not hasattr(self, column_type):
+                                    self.log.error(
+                                        "invalid submission method `%s` for column `%s` of metric_prefix `%s`",
+                                        column_type,
+                                        name,
+                                        metric_prefix,
+                                    )
+                                    break
+                                try:
+                                    metric_info.append(('{}.{}'.format(metric_prefix, name), float(value), column_type))
+                                except (ValueError, TypeError):
+                                    self.log.error(
+                                        "non-numeric value `%s` for metric column `%s` of metric_prefix `%s`",
+                                        value,
+                                        name,
+                                        metric_prefix,
+                                    )
+                                    break
+
+                        # Only submit metrics if there were absolutely no errors - all or nothing.
                         else:
-                            if not hasattr(self, column_type):
-                                self.log.error(
-                                    "invalid submission method `%s` for column `%s` of metric_prefix `%s`",
-                                    column_type,
-                                    name,
-                                    metric_prefix,
+                            for info in metric_info:
+                                metric, value, method = info
+                                getattr(self, method)(
+                                    metric, value, tags=set(query_tags), hostname=self.resolved_hostname
                                 )
-                                break
-                            try:
-                                metric_info.append(('{}.{}'.format(metric_prefix, name), float(value), column_type))
-                            except (ValueError, TypeError):
-                                self.log.error(
-                                    "non-numeric value `%s` for metric column `%s` of metric_prefix `%s`",
-                                    value,
-                                    name,
-                                    metric_prefix,
-                                )
-                                break
-
-                    # Only submit metrics if there were absolutely no errors - all or nothing.
-                    else:
-                        for info in metric_info:
-                            metric, value, method = info
-                            getattr(self, method)(metric, value, tags=set(query_tags), hostname=self.resolved_hostname)
 
     def record_warning(self, code, message):
         # type: (DatabaseConfigurationError, str) -> None
@@ -836,7 +902,7 @@ class PostgreSql(AgentCheck):
                 "collection_interval": self._config.database_instance_collection_interval,
                 'dbms_version': payload_pg_version(self.version),
                 'integration_version': __version__,
-                "tags": self._non_internal_tags,
+                "tags": [t for t in self._non_internal_tags if not t.startswith('db:')],
                 "timestamp": time() * 1000,
                 "cloud_metadata": self._config.cloud_metadata,
                 "metadata": {
@@ -846,6 +912,13 @@ class PostgreSql(AgentCheck):
             }
             self._database_instance_emitted[self.resolved_hostname] = event
             self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+
+    def debug_stats_kwargs(self, tags=None):
+        tags = self.tags + self._get_debug_tags() + (tags or [])
+        return {
+            'tags': tags,
+            "hostname": self.resolved_hostname,
+        }
 
     def check(self, _):
         tags = copy.copy(self.tags)
@@ -875,7 +948,6 @@ class PostgreSql(AgentCheck):
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")
             self._clean_state()
-            self.db = None
             message = u'Error establishing connection to postgres://{}:{}/{}, error is {}'.format(
                 self._config.host, self._config.port, self._config.dbname, str(e)
             )
@@ -894,11 +966,6 @@ class PostgreSql(AgentCheck):
                 tags=self._get_service_check_tags(),
                 hostname=self.resolved_hostname,
             )
-            try:
-                # commit to close the current query transaction
-                self.db.commit()
-            except Exception as e:
-                self.log.warning("Unable to commit: %s", e)
         finally:
             # Add the warnings saved during the execution of the check
             self._report_warnings()

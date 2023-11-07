@@ -1,12 +1,14 @@
 # CHANGELOG - Argo CD
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 2.1.0 / 2023-09-29 / Agent 7.49.0
 
 ***Added***:
 
 * Collect metrics for ArgoCD ApplicationSet ([#15308](https://github.com/DataDog/integrations-core/pull/15308))
 
-## 2.0.0 / 2023-08-10
+## 2.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 

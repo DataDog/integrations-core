@@ -17,16 +17,16 @@ metrics:
       - name: huawei.hwBgpPeerFsmEstablishedTime
         OID: 1.3.6.1.4.1.2011.5.25.177.1.1.2.1.7
     metric_tags:
-      - column:
+      - symbol:
           name: huawei.hwBgpPeerVrfName
           OID: 1.3.6.1.4.1.2011.5.25.177.1.1.1.1.6
         tag: huawei_hw_bgp_peer_vrf_name
-      - column:
+      - symbol:
           name: huawei.hwBgpPeerRemoteAddr
           OID: 1.3.6.1.4.1.2011.5.25.177.1.1.2.1.4
           format: ip_address
         tag: huawei_hw_bgp_peer_remote_addr
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.177.1.1.2.1.5
           name: huawei.hwBgpPeerState
         tag: huawei_hw_bgp_peer_state
@@ -37,7 +37,7 @@ metrics:
           4: opensent
           5: openconfirm
           6: established
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.177.1.1.2.1.10
           name: huawei.hwBgpPeerUnAvaiReason
         tag: huawei_hw_bgp_peer_un_avai_reason
@@ -65,11 +65,11 @@ metrics:
         OID: 1.3.6.1.4.1.2011.5.25.177.1.1.3.1.3
         metric_type: monotonic_count
     metric_tags:
-      - column:
+      - symbol:
           name: huawei.hwBgpPeerVrfName
           OID: 1.3.6.1.4.1.2011.5.25.177.1.1.1.1.6
         tag: huawei_hw_bgp_peer_vrf_name
-      - column:
+      - symbol:
           name: huawei.hwBgpPeerRemoteAddr
           OID: 1.3.6.1.4.1.2011.5.25.177.1.1.2.1.4
           format: ip_address
@@ -116,11 +116,11 @@ metrics:
         OID: 1.3.6.1.4.1.2011.5.25.177.1.1.4.1.12
         metric_type: monotonic_count
     metric_tags:
-      - column:
+      - symbol:
           name: huawei.hwBgpPeerVrfName
           OID: 1.3.6.1.4.1.2011.5.25.177.1.1.1.1.6
         tag: huawei_hw_bgp_peer_vrf_name
-      - column:
+      - symbol:
           name: huawei.hwBgpPeerRemoteAddr
           OID: 1.3.6.1.4.1.2011.5.25.177.1.1.2.1.4
           format: ip_address
@@ -133,15 +133,15 @@ metrics:
       - name: huawei.hwDnsTtl
         OID: 1.3.6.1.4.1.2011.5.25.194.1.1.1.3
     metric_tags:
-      - column:
+      - symbol:
           name: huawei.hwDnsDomainName
           OID: 1.3.6.1.4.1.2011.5.25.194.1.1.1.1
         tag: huawei_hw_dns_domain_name
-      - column:
+      - symbol:
           name: huawei.hwDnsIpAddress
           OID: 1.3.6.1.4.1.2011.5.25.194.1.1.1.2
         tag: huawei_hw_dns_ip_address
-      - column:
+      - symbol:
           name: huawei.hwDnsAlias
           OID: 1.3.6.1.4.1.2011.5.25.194.1.1.1.4
         tag: huawei_hw_dns_alias
@@ -153,11 +153,11 @@ metrics:
       - name: huawei.hwDnsServerAddr
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: huawei.hwServerAddr
           OID: 1.3.6.1.4.1.2011.5.25.194.1.4.1.1
         tag: huawei_hw_server_addr
-      # - column:
+      # - symbol:
       #     OID: 1.3.6.1.4.1.2011.5.25.194.1.4.1.2
       #     name: huawei.hwServerStatus
       #   tag: huawei_hw_server_status
@@ -173,31 +173,31 @@ metrics:
       - name: huawei.hwFwNetEvents
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.222.1.1.2.4.1.4
           name: huawei.hwFwNetEventSrcIpAddress
         tag: huawei_hw_fw_net_event_src_ip_address
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.222.1.1.2.4.1.7
           name: huawei.hwFwNetEventDstIpAddress
         tag: huawei_hw_fw_net_event_dst_ip_address
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.222.1.1.2.4.1.2
           name: huawei.hwFwNetEventInterface
         tag: huawei_hw_fw_net_event_interface
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.222.1.1.2.4.1.3
           name: huawei.hwFwNetEventSrcVrfName
         tag: huawei_hw_fw_net_event_src_vrf_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.222.1.1.2.4.1.9
           name: huawei.hwFwNetEventSrcIpPort
         tag: huawei_hw_fw_net_event_src_ip_port
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.222.1.1.2.4.1.11
           name: huawei.hwFwNetEventDstIpPort
         tag: huawei_hw_fw_net_event_dst_ip_port
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.222.1.1.2.4.1.16
           name: huawei.hwFwNetEventDescription
         tag: huawei_hw_fw_net_event_description
@@ -209,7 +209,7 @@ metrics:
       - name: huawei.hwFwConnectionStatCount
         OID: 1.3.6.1.4.1.2011.5.25.222.1.2.2.2.1.4
     metric_tags:
-      - column:
+      - symbol:
           name: huawei.hwFwConnectionStatDescription
           OID: 1.3.6.1.4.1.2011.5.25.222.1.2.2.2.1.3
         tag: huawei_hw_fw_connection_stat_description
@@ -221,17 +221,17 @@ metrics:
       - name: huawei.hwNatAddrPoolRefTimes
         OID: 1.3.6.1.4.1.2011.5.25.226.2.3.2.1.4
     metric_tags:
-      - column:
+      - symbol:
           name: huawei.hwNatAddrPoolStartAddr
           OID: 1.3.6.1.4.1.2011.5.25.226.2.3.2.1.2
         tag: huawei_hw_nat_addr_pool_start_addr
-      - column:
+      - symbol:
           name: huawei.hwNatAddrPoolEndAddr
           OID: 1.3.6.1.4.1.2011.5.25.226.2.3.2.1.3
         tag: huawei_hw_nat_addr_pool_end_addr
       # the mapping value is ambiguous, difference between the type definition and the metric description
       # keep this commented until further investigated
-      # - column:
+      # - symbol:
       #     name: huawei.hwNatAddrPoolRefType
       #     OID: 1.3.6.1.4.1.2011.5.25.226.2.3.2.1.5
       #   tag: huawei_hw_nat_addr_pool_ref_type
@@ -247,39 +247,39 @@ metrics:
       - name: huawei.hwNatSession
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.226.2.14.2.1.1
           name: huawei.hwNatSessionSrcLocalAddr
         tag: huawei_hw_nat_session_src_local_addr
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.226.2.14.2.1.2
           name: huawei.hwNatSessionDstLocalAddr
         tag: huawei_hw_nat_session_dst_local_addr
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.226.2.14.2.1.3
           name: huawei.hwNatSessionSrcLocalPort
         tag: huawei_hw_nat_session_src_local_port
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.226.2.14.2.1.4
           name: huawei.hwNatSessionDstLocalPort
         tag: huawei_hw_nat_session_dst_local_port
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.226.2.14.2.1.6
           name: huawei.hwNatSessionSrcGlobalAddr
         tag: huawei_hw_nat_session_src_global_addr
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.226.2.14.2.1.7
           name: huawei.hwNatSessionDstGlobalAddr
         tag: huawei_hw_nat_session_dst_global_addr
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.226.2.14.2.1.8
           name: huawei.hwNatSessionSrcGlobalPort
         tag: huawei_hw_nat_session_src_global_port
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.226.2.14.2.1.9
           name: huawei.hwNatSessionDstGlobalPort
         tag: huawei_hw_nat_session_dst_global_port
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.226.2.14.2.1.5
           name: huawei.hwNatSessionProtocol
         tag: huawei_hw_nat_session_protocol
@@ -288,15 +288,15 @@ metrics:
           2: icmp
           3: udp
           4: tcp
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.226.2.14.2.1.10
           name: huawei.hwNatSessionSrcVPN
         tag: huawei_hw_nat_session_src_vpn
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.226.2.14.2.1.11
           name: huawei.hwNatSessionDstVPN
         tag: huawei_hw_nat_session_dst_vpn
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.2011.5.25.226.2.14.2.1.12
           name: huawei.hwNatSessionStatus
         tag: huawei_hw_nat_session_status

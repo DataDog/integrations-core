@@ -73,7 +73,7 @@ instances:
 
 For more options, see the [sample `torchserve.d/conf.yaml` file][4].
 
-TorchServe allows the custom service code to emit [metrics that will be available based on the configured `metrics_mode`][11]. You can configure this integration to collect these metrics using the `extra_metrics` option. These metrics will have the `torchserver.openmetrics` prefix, just like any other metrics coming from this endpoint.
+TorchServe allows the custom service code to emit [metrics that will be available based on the configured `metrics_mode`][11]. You can configure this integration to collect these metrics using the `extra_metrics` option. These metrics will have the `torchserve.openmetrics` prefix, just like any other metrics coming from this endpoint.
 
 <div class="alert alert-info">These custom TorchServe metrics are considered standard metrics in Datadog.</div>
 
@@ -282,7 +282,7 @@ The TorchServe integration can collect logs from the TorchServe service and forw
 
 See [the example configuration file][4] on how to collect all logs.
 
-For more information about the logging configuration with TorchServer, see the [official TorchServe documentation][16].
+For more information about the logging configuration with TorchServe, see the [official TorchServe documentation][16].
 
 <div class="alert alert-warning">You can also collect logs from the `access_log.log` file. However, these logs are included in the `ts_log.log` file, leading you to duplicated logs in Datadog if you configure both files.</div>
 

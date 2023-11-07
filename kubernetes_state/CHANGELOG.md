@@ -1,6 +1,6 @@
 # CHANGELOG - kubernetes_state
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 7.5.0 / 2023-07-10 / Agent 7.47.0
 

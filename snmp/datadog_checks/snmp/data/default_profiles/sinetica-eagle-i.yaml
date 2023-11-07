@@ -18,11 +18,11 @@ metrics:
       - name: hawk.i2.ipTHAValue
         OID: 1.3.6.1.4.1.3711.24.1.1.1.2.2.1.7
     metric_tags:
-      - column:
+      - symbol:
           name: hawk.i2.ipTHAName
           OID: 1.3.6.1.4.1.3711.24.1.1.1.2.2.1.3
         tag: hawk_i2_ip_tha_name
-      - column:
+      - symbol:
           name: hawk.i2.ipTHALocn
           OID: 1.3.6.1.4.1.3711.24.1.1.1.2.2.1.4
         tag: hawk_i2_ip_tha_locn
@@ -34,22 +34,22 @@ metrics:
       - name: hawk.i2.ipCont
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: hawk.i2.ipContName
           OID: 1.3.6.1.4.1.3711.24.1.1.1.3.1.1.3
         tag: hawk_i2_ip_cont_name
-      - column:
+      - symbol:
           name: hawk.i2.ipContLocn
           OID: 1.3.6.1.4.1.3711.24.1.1.1.3.1.1.4
         tag: hawk_i2_ip_cont_locn
-      - column:
+      - symbol:
           name: hawk.i2.ipContNormState
           OID: 1.3.6.1.4.1.3711.24.1.1.1.3.1.1.6
         tag: hawk_i2_ip_cont_norm_state
         mapping:
           1: open
           2: closed
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.3711.24.1.1.1.3.1.1.7
           name: hawk.i2.ipContCurrState
         tag: hawk_i2_ip_cont_curr_state
@@ -66,29 +66,29 @@ metrics:
       - name: hawk.i2.op
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: hawk.i2.opName
           OID: 1.3.6.1.4.1.3711.24.1.1.2.2.1.3
         tag: hawk_i2_op_name
-      - column:
+      - symbol:
           name: hawk.i2.opLocn
           OID: 1.3.6.1.4.1.3711.24.1.1.2.2.1.4
         tag: hawk_i2_op_locn
-      - column:
+      - symbol:
           name: hawk.i2.opNormState
           OID: 1.3.6.1.4.1.3711.24.1.1.2.2.1.5
         tag: hawk_i2_op_norm_state
         mapping:
           1: on
           2: off
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.3711.24.1.1.2.2.1.6
           name: hawk.i2.opCurrState
         tag: hawk_i2_op_curr_state
         mapping:
           1: on
           2: off
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.3711.24.1.1.2.2.1.12
           name: hawk.i2.opControlState
         tag: hawk_i2_op_control_state
@@ -108,7 +108,7 @@ metrics:
       - name: hawk.i2.pduTotalEnergyValue
         OID: 1.3.6.1.4.1.3711.24.1.1.7.3.1.1.5
     metric_tags:
-      - column:
+      - symbol:
           name: hawk.i2.pduName
           OID: 1.3.6.1.4.1.3711.24.1.1.7.1.2.1.3
         tag: hawk_i2_pdu_name

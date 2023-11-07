@@ -66,7 +66,7 @@ jira_statuses = [
 github_team = "network-device-monitoring"
 
 [teams."Windows Agent"]
-jira_project = "WA"
+jira_project = "WINA"
 jira_issue_type = "QA Task"
 jira_statuses = [
   "To Do",
