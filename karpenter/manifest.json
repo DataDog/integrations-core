@@ -24,7 +24,7 @@
   },
   "assets": {
     "integration": {
-      "source_type_name": "karpenter",
+      "source_type_name": "Karpenter",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
