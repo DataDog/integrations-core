@@ -75,7 +75,9 @@ files:
         The check will report as DOWN if status code returned differs.
         This defaults to 1xx, 2xx and 3xx HTTP status code.
       value:
-        type: string
+        anyOf:
+          - type: string
+          - type: integer
         example: (1|2|3)\d\d
     - name: include_content
       description: |

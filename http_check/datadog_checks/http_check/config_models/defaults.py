@@ -40,10 +40,6 @@ def instance_empty_default_hostname():
     return False
 
 
-def instance_http_response_status_code():
-    return '(1|2|3)\\d\\d'
-
-
 def instance_include_content():
     return False
 
