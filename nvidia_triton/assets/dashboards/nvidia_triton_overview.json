@@ -16,9 +16,10 @@
                         "definition": {
                             "type": "image",
                             "url": "/static/images/logos/nvidia-triton_small.svg",
-                            "sizing": "none",
-                            "has_background": true,
-                            "has_border": true,
+                            "sizing": "contain",
+                            "margin": "md",
+                            "has_background": false,
+                            "has_border": false,
                             "vertical_align": "center",
                             "horizontal_align": "center"
                         },
@@ -33,7 +34,7 @@
                         "id": 5698943260180544,
                         "definition": {
                             "type": "note",
-                            "content": "**Refer to the following resources for more information**\n\n- [Datadog Nvidia Triton documentation]()\n\n- [Available Nvidia Triton metrics]()\n\n- [Nvidia Triton metric collection](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/metrics.html) ",
+                            "content": "**Refer to the following resources for more information**\n\n- [Nvidia Triton metric collection](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/metrics.html) ",
                             "background_color": "white",
                             "font_size": "16",
                             "text_align": "left",
@@ -224,7 +225,6 @@
                             "title": "GPU Unused Memory",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "scalar",
