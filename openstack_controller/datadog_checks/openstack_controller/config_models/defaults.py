@@ -56,8 +56,16 @@ def instance_disable_generic_tags():
     return False
 
 
+def instance_domain_id():
+    return 'default'
+
+
 def instance_empty_default_hostname():
     return False
+
+
+def instance_endpoint_interface():
+    return 'public'
 
 
 def instance_exclude_network_ids():
@@ -126,6 +134,10 @@ def instance_use_agent_proxy():
 
 def instance_use_legacy_auth_encoding():
     return True
+
+
+def instance_use_legacy_check_version():
+    return False
 
 
 def instance_use_shortname():

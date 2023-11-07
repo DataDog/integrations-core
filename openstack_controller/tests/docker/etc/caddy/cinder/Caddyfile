@@ -1,0 +1,16 @@
+{
+    debug
+    admin :2019
+}
+:80 {
+    root * /usr/share/caddy/
+    @get_volume_v3 {
+        method GET
+        path /volume/v3/
+    }
+    route @get_volume_v3 {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+    file_server browse
+}
