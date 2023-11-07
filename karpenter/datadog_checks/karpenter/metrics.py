@@ -115,9 +115,5 @@ METRIC_MAP = {
 
 RENAME_LABELS_MAP = {
     "version": "go_version",
-    'host': 'karpenter_host',
-    'instance_type': 'karpenter_instance_type',
-    'capacity_type': 'karpenter_capacity_type',
-    "zone": "karpenter_zone",
-    "region": "karpenter_region",
+    'host': 'client_host',
 }

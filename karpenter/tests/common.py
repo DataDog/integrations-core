@@ -119,9 +119,5 @@ TEST_METRICS = [
 
 RENAMED_LABELS = [
     'go_version:go1.20.6',
-    'karpenter_host:10.100.0.1:443',
-    'karpenter_instance_type:buz',
-    'karpenter_capacity_type:qux',
-    'karpenter_zone:quux',
-    'karpenter_region:quuz',
+    'client_host:10.100.0.1:443',
 ]
