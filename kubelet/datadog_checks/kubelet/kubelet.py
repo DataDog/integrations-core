@@ -69,6 +69,7 @@ WHITELISTED_CONTAINER_STATE_REASONS = {
         'containercreating',
         'createcontainererror',
         'invalidimagename',
+        'createcontainerconfigerror',
     ],
     'terminated': ['oomkilled', 'containercannotrun', 'error'],
 }
