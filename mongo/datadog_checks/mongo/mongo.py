@@ -97,10 +97,11 @@ class MongoDb(AgentCheck):
             potential_collectors.append(JumboStatsCollector(self, tags))
         if 'top' in self._config.additional_metrics:
             potential_collectors.append(TopCollector(self, tags))
-        if Version(self._mongo_version) >= Version("3.6"):
+        assert self._mongo_version is not None, "No MongoDB version is set, make sure you refreshed the metadata."
+        if self._mongo_version_parsed >= Version("3.6"):
             potential_collectors.append(SessionStatsCollector(self, tags))
         if self._config.collections_indexes_stats:
-            if Version(self._mongo_version) >= Version("3.2"):
+            if self._mongo_version_parsed >= Version("3.2"):
                 potential_collectors.append(
                     IndexStatsCollector(self, self._config.db_name, tags, self._config.coll_names)
                 )
@@ -182,6 +183,7 @@ class MongoDb(AgentCheck):
         if self._mongo_version is None:
             self.log.debug('No metadata present, refreshing it.')
             self._mongo_version = self.api_client.server_info().get('version', '0.0')
+            self._mongo_version_parsed = Version(self._mongo_version.split("-")[0])
             self.set_metadata('version', self._mongo_version)
             self.log.debug('version: %s', self._mongo_version)
 
