@@ -63,6 +63,7 @@ rules:
     resources:
     - nodes
     - namespaces
+    - endpoints
     verbs:
     - get
     - list
@@ -183,6 +184,9 @@ agents:
 clusterAgent:
   enabled: true
   replicas: 2
+  env:
+    - name: DD_EKS_FARGATE
+      value: "true"
 ```
 
 

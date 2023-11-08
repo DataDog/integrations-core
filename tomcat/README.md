@@ -224,11 +224,15 @@ See [service_checks.json][14] for a list of service checks provided by this inte
 ## Troubleshooting
 
 ### Missing `tomcat.*` metrics
-The integration collects default Tomcat metrics from the `Catalina` bean domain name. If exposed Tomcat metrics are prefixed with a different bean domain name, such as `Tomcat`, copy the default metrics from the `metrics.yaml` to the `conf` section of the `tomcat.d/conf.yaml` and modify the `domain` filter to use the applicable bean domain name. 
+
+The Datadog agent collects JMX metrics with either `Catalina` or `Tomcat` as bean domain names.
+Standalone Tomcat deployments have metrics under domain `Catalina`, but embedded Tomcat deployments (such as with Spring Boot) have metrics under domain `Tomcat`.
+
+If the Datadog agent is older than **7.47.0**, and if the exposed Tomcat metrics are prefixed with a different bean domain name, such as `Tomcat`, copy the default metrics from the `metrics.yaml` file to the `conf` section of the `tomcat.d/conf.yaml` file and modify the `domain` filter to use the applicable bean domain name.
 
 ```yaml
 - include:
-    domain: Tomcat      # default: Catalina
+    domain: Tomcat
     type: ThreadPool
     attribute:
       maxThreads:
@@ -269,7 +273,7 @@ Additional helpful documentation, links, and articles:
 - [Key metrics for monitoring Tomcat][16]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/tomcat/images/tomcat_dashboard.png
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://tomcat.apache.org/tomcat-6.0-doc/monitoring.html
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/tomcat/datadog_checks/tomcat/data/conf.yaml.example

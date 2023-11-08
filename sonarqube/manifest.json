@@ -49,7 +49,7 @@
       "Sonarqube Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "SonarQube vulnerabilities": "assets/recommended_monitors/vulnerabilities.json"
+      "SonarQube vulnerabilities": "assets/monitors/vulnerabilities.json"
     },
     "saved_views": {
       "status_overview": "assets/saved_views/status_overview.json"

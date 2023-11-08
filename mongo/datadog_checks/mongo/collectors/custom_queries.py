@@ -10,6 +10,7 @@ import dateutil.parser
 import pymongo
 from dateutil.tz import tzutc
 
+from datadog_checks.mongo.api import CRITICAL_FAILURE
 from datadog_checks.mongo.collectors.base import MongoCollector
 from datadog_checks.mongo.common import (
     ALLOWED_CUSTOM_METRICS_TYPES,
@@ -62,6 +63,7 @@ class CustomQueriesCollector(MongoCollector):
         # Can theoretically be run on any node as long as it contains data.
         # i.e Arbiters are ruled out
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
+            self.log.debug("CustomQueriesCollector cannot be run on arbiter nodes.")
             return False
         return True
 
@@ -201,6 +203,8 @@ class CustomQueriesCollector(MongoCollector):
         for raw_query in self.custom_queries:
             try:
                 self._collect_custom_metrics_for_query(api, raw_query)
+            except CRITICAL_FAILURE as e:
+                raise e  # Critical failures must bubble up to trigger a CRITICAL service check.
             except Exception as e:
                 metric_prefix = raw_query.get('metric_prefix')
                 self.log.warning("Errors while collecting custom metrics with prefix %s", metric_prefix, exc_info=e)

@@ -77,6 +77,39 @@ class TestColumnTransformers:
         )
         aggregator.assert_all_metrics_covered()
 
+    def test_tag_not_null(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [
+                    {'name': 'test', 'type': 'tag'},
+                    {'name': 'foo_tag', 'type': 'tag_not_null'},
+                    {'name': 'test.foo', 'type': 'gauge'},
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['tag2', 'tagA', 7], ['tag3', None, 9]]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        aggregator.assert_metric(
+            'test.foo',
+            7,
+            metric_type=aggregator.GAUGE,
+            tags=['test:foo', 'test:bar', 'test:tag2', 'foo_tag:tagA'],
+        )
+
+        aggregator.assert_metric(
+            'test.foo',
+            9,
+            metric_type=aggregator.GAUGE,
+            tags=['test:foo', 'test:bar', 'test:tag3'],
+        )
+        aggregator.assert_all_metrics_covered()
+
     def test_monotonic_gauge(self, aggregator):
         query_manager = create_query_manager(
             {

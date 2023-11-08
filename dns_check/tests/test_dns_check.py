@@ -124,11 +124,28 @@ def test_instance_timeout(mocked_query, mocked_time, aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_invalid_config(aggregator):
-    for instance, message in common.CONFIG_INVALID:
-        integration = DNSCheck('dns_check', {}, [instance])
-        integration.check(instance)
-        aggregator.assert_service_check(DNSCheck.SERVICE_CHECK_NAME, status=DNSCheck.CRITICAL, count=1, message=message)
-
-        # Assert coverage for this check on this instance
-        aggregator.assert_all_metrics_covered()
+@pytest.mark.parametrize(
+    'instance, message',
+    [
+        pytest.param(
+            {'name': 'invalid_hostname', 'hostname': 'example'},
+            "DNS resolution of example has failed",
+            id='invalid hostname',
+        ),
+        pytest.param(
+            {'name': 'invalid_rcrd_type', 'hostname': 'www.example.org', 'record_type': 'FOO'},
+            "DNS resolution of www.example.org has failed",
+            id='invalid record type',
+        ),
+        pytest.param(
+            {'name': 'valid_domain_for_nxdomain_type', 'hostname': 'example.com', 'record_type': 'NXDOMAIN'},
+            "DNS resolution of example.com has failed",
+            id='valid domain when NXDOMAIN is expected',
+        ),
+    ],
+)
+def test_invalid_config(aggregator, instance, message):
+    integration = DNSCheck('dns_check', {}, [instance])
+    integration.check(instance)
+    aggregator.assert_service_check(DNSCheck.SERVICE_CHECK_NAME, status=DNSCheck.CRITICAL, count=1, message=message)
+    aggregator.assert_all_metrics_covered()

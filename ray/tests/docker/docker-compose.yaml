@@ -1,0 +1,126 @@
+version: '3.9'
+
+services:
+  ray-head:
+    container_name: ray-head
+    hostname: ray-head
+    image: rayproject/ray-ml:${RAY_VERSION}-cpu
+    command:
+      - /bin/bash
+      - -c
+      - |
+        ray --logging-level debug start  -v --port=6379 --dashboard-host=0.0.0.0 --metrics-export-port=8080 --head &> /tmp/logs/ray.log
+        python add.py
+        python hello.py
+        sleep infinity
+    ports:
+      - "6379:6379"
+      - "${SERVE_PORT}:8000"
+      - "${HEAD_METRICS_PORT}:8080"
+      - "${HEAD_DASHBOARD_PORT}:8265"
+      - "10001:10001"
+    working_dir: "/home/ray/serve"
+    healthcheck:
+      test: python /home/ray/ping.py "http://localhost:8000/hello" || exit 1
+      interval: 3s
+      retries: 20
+      start_period: 5s
+      timeout: 5s
+    environment:
+      RAY_LOG_TO_STDERR: 1
+    volumes:
+      - ./ping.py:/home/ray/ping.py
+      - ./serve_tasks:/home/ray/serve
+      - ${RAY_LOG_FOLDER}:/tmp/logs
+  ray-worker-1:
+    container_name: ray-worker-1
+    hostname: ray-worker-1
+    image: rayproject/ray-ml:${RAY_VERSION}-cpu
+    command: bash -c "ray start --address=ray-head:6379 --num-cpus=2 --metrics-export-port=8080 --block"
+    ports:
+      - "${WORKER1_METRICS_PORT}:8080"
+    depends_on:
+      ray-head:
+        condition: service_healthy
+    healthcheck:
+      test: python /home/ray/ping.py "http://localhost:8080" || exit 1
+      interval: 3s
+      retries: 20
+      start_period: 5s
+      timeout: 5s
+    volumes:
+      - ./ping.py:/home/ray/ping.py
+  ray-worker-2:
+    container_name: ray-worker-2
+    hostname: ray-worker-2
+    image: rayproject/ray-ml:${RAY_VERSION}-cpu
+    command: bash -c "ray start --address=ray-head:6379 --num-cpus=2 --metrics-export-port=8080 --block"
+    ports:
+      - "${WORKER2_METRICS_PORT}:8080"
+    depends_on:
+      ray-head:
+        condition: service_healthy
+    healthcheck:
+      test: python /home/ray/ping.py "http://localhost:8080" || exit 1
+      interval: 3s
+      retries: 20
+      start_period: 5s
+      timeout: 5s
+    volumes:
+      - ./ping.py:/home/ray/ping.py
+  ray-worker-3:
+    container_name: ray-worker-3
+    hostname: ray-worker-3
+    image: rayproject/ray-ml:${RAY_VERSION}-cpu
+    command: bash -c "ray start --address=ray-head:6379 --num-cpus=2 --metrics-export-port=8080 --block"
+    ports:
+      - "${WORKER3_METRICS_PORT}:8080"
+    depends_on:
+      ray-head:
+        condition: service_healthy
+    healthcheck:
+      test: python /home/ray/ping.py "http://localhost:8080" || exit 1
+      interval: 3s
+      retries: 20
+      start_period: 5s
+      timeout: 5s
+    volumes:
+      - ./ping.py:/home/ray/ping.py
+  ray-echo-task:
+    container_name: ray-echo-task
+    hostname: ray-echo-task
+    image: rayproject/ray-ml:${RAY_VERSION}-cpu
+    command: bash -c "python /home/ray/echo.py"
+    healthcheck:
+      test: bash -c "[ -f /tmp/running ]"
+      interval: 3s
+      retries: 20
+      start_period: 5s
+      timeout: 5s
+    depends_on:
+      ray-head:
+        condition: service_healthy
+      ray-worker-1:
+        condition: service_healthy
+      ray-worker-2:
+        condition: service_healthy
+      ray-worker-3:
+        condition: service_healthy
+    volumes:
+      - ./echo_task/main.py:/home/ray/echo.py
+  ray-call-apis:
+    container_name: ray-call-apis
+    hostname: ray-call-apis
+    image: rayproject/ray-ml:${RAY_VERSION}-cpu
+    command: bash -c "python /home/ray/call_apis.py"
+    depends_on:
+      ray-head:
+        condition: service_healthy
+      ray-worker-1:
+        condition: service_healthy
+      ray-worker-2:
+        condition: service_healthy
+      ray-worker-3:
+        condition: service_healthy
+    volumes:
+      - ./call_apis.py:/home/ray/call_apis.py

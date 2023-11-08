@@ -51,12 +51,15 @@ DEFAULT_METRICS = {
     'rate_limit_queries_limit': 'datadog.rate_limit_queries.limit',
     'rate_limit_queries_period': 'datadog.rate_limit_queries.period',
     'rate_limit_queries_remaining': 'datadog.rate_limit_queries.remaining',
+    'rate_limit_queries_remaining_min': 'datadog.rate_limit_queries.remaining_min',
     'rate_limit_queries_reset': 'datadog.rate_limit_queries.reset',
     'secret_backend__elapsed_ms': 'secret_backend.elapsed',
 }
 
 
 class DatadogClusterAgentCheck(OpenMetricsBaseCheck):
+    DEFAULT_METRIC_LIMIT = 0
+
     def __init__(self, name, init_config, instances):
         super(DatadogClusterAgentCheck, self).__init__(
             name,

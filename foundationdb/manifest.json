@@ -15,7 +15,7 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Store",
+      "Category::Data Stores",
       "Category::Log Collection"
     ]
   },
@@ -37,10 +37,7 @@
       },
       "metrics": {
         "prefix": "foundationdb.",
-        "check": [
-          "foundationdb.processes",
-          "foundationdb.instances"
-        ],
+        "check": ["foundationdb.processes", "foundationdb.instances"],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
@@ -51,6 +48,9 @@
       "FoundationDB Latency Probe": "assets/dashboards/foundationdb_latency_probe.json",
       "FoundationDB Processes and Utilization": "assets/dashboards/foundationdb_processes_and_utilization.json",
       "FoundationDB Transactions and Queues": "assets/dashboards/foundationdb_transactions_and_queues.json"
+    },
+    "logs": {
+      "source": "foundationdb"
     },
     "monitors": {
       "FoundationDB Status Check": "assets/monitors/service_check.json",

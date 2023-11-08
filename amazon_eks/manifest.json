@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Amazon EKS is a managed service that makes it easy to run Kubernetes on AWS",
-    "title": "Amazon-EKS",
+    "title": "Amazon EKS",
     "media": [],
     "classifier_tags": [
       "Category::AWS",

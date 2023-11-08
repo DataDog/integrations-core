@@ -1,7 +1,10 @@
 version: '3'
 services:
   solr:
-    image: solr:${SOLR_VERSION}
+    build:
+      context: .
+      args:
+        SOLR_VERSION: ${SOLR_VERSION}
     ports:
      - 8983:8983
      - 18983:18983

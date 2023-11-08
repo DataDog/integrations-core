@@ -25,4 +25,6 @@ def test_e2e(dd_agent_check):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-    aggregator.assert_service_check('envoy.openmetrics.health', Envoy.OK)
+    aggregator.assert_service_check(
+        'envoy.openmetrics.health', Envoy.OK, tags=['endpoint:{}'.format(DEFAULT_INSTANCE['openmetrics_endpoint'])]
+    )

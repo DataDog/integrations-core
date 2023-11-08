@@ -4,11 +4,17 @@
 
 Integration that allows to:
 
-- Visualize and monitor metrics collected with GitLab through Prometheus
+- Visualize and monitor metrics collected with GitLab and Gitaly through Prometheus
 
 See [Monitoring GitLab with Prometheus][1] for more information.
 
+For more in-depth monitoring of your GitLab pipelines, check out [CI Pipeline Visibility][17]. CI Pipeline Visibility provides granular insights into your user workflow, lets you access detailed Git metadata, and tracks pipeline performance over time.
+
 ## Setup
+
+This OpenMetrics-based integration has a latest mode (enabled by setting `openmetrics_endpoint` to point to the target endpoint) and a legacy mode (enabled by setting `prometheus_url` instead). To get all the most up-to-date features, Datadog recommends enabling the latest mode. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][18].
+
+Metrics marked as `[OpenMetricsV1]` or `[OpenMetricsV2]` are only available using the corresponding mode of the GitLab integration. All other metrics are collected by both modes. 
 
 ### Installation
 
@@ -101,7 +107,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Metrics
 
-See [metadata.csv][12] for a list of metrics provided by this integration.
+See [metadata.csv][12] for a list of metrics provided by this integration. 
 
 ### Events
 
@@ -116,7 +122,7 @@ See [service_checks.json][13] for a list of service checks provided by this inte
 Need help? Contact [Datadog support][14].
 
 [1]: https://docs.gitlab.com/ee/administration/monitoring/prometheus
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://docs.gitlab.com/ee/administration/monitoring/prometheus/gitlab_metrics.html#collecting-the-metrics
 [5]: https://github.com/DataDog/integrations-core/blob/master/gitlab/datadog_checks/gitlab/data/conf.yaml.example
@@ -131,3 +137,5 @@ Need help? Contact [Datadog support][14].
 [14]: https://docs.datadoghq.com/help/
 [15]: https://docs.gitlab.com/ee/user/admin_area/monitoring/health_check.html#readiness
 [16]: https://github.com/DataDog/integrations-core/blob/7.43.x/gitlab/datadog_checks/gitlab/data/conf.yaml.example
+[17]: https://app.datadoghq.com/ci/getting-started
+[18]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations

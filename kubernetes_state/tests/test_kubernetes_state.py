@@ -161,6 +161,7 @@ TAGS = {
         'reason:imagepullbackoff',
         'reason:createcontainererror',
         'reason:invalidimagename',
+        'reason:createcontainerconfigerror',
         'pod:kube-dns-1326421443-hj4hx',
         'pod:hello-1509998340-k4f8q',
     ],
@@ -965,15 +966,15 @@ def test_telemetry(aggregator, instance):
 
     for _ in range(2):
         check.check(instance)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=99255.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=1068.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1400.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=101457.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=1096.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1428.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.blacklist.count', tags=['optional:tag1'], value=24.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=332.0)
     aggregator.assert_metric(
         NAMESPACE + '.telemetry.collector.metrics.count',
         tags=['resource_name:pod', 'resource_namespace:default', 'optional:tag1'],
-        value=638.0,
+        value=666.0,
     )
     aggregator.assert_metric(
         NAMESPACE + '.telemetry.collector.metrics.count',

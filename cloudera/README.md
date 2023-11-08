@@ -15,6 +15,9 @@ No additional installation is needed on your server.
 
 ### Configuration
 
+#### Requirements
+The Cloudera check requires version 7 of Cloudera Manager.
+
 #### Prepare Cloudera Manager
 1. In Cloudera Data Platform, navigate to the Management Console and click on the **User Management** tab.
 ![User Management][10]
@@ -200,9 +203,14 @@ You need to change the ownership of the `conf.yaml` to `dd-agent`:
 
 Need help? Contact [Datadog support][9].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Gain visibility into your Cloudera clusters with Datadog][15]
 
 [1]: https://www.cloudera.com/products/cloudera-data-platform.html
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/cloudera/datadog_checks/cloudera/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -215,3 +223,4 @@ Need help? Contact [Datadog support][9].
 [12]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cloudera/images/set_workload_password.png
 [13]: https://docs.cloudera.com/data-hub/cloud/access-clusters/topics/mc-accessing-cluster-via-ssh.html
 [14]: https://docs.cloudera.com/cloudera-manager/7.9.0/monitoring-and-diagnostics/topics/cm-tsquery-syntax.html
+[15]: https://www.datadoghq.com/blog/cloudera-integration-announcement/

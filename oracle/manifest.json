@@ -12,7 +12,7 @@
     "title": "Oracle",
     "media": [],
     "classifier_tags": [
-      "Category::Data Store",
+      "Category::Data Stores",
       "Category::Network",
       "Category::Oracle",
       "Supported OS::Linux",
@@ -46,7 +46,8 @@
       }
     },
     "dashboards": {
-      "oracle": "assets/dashboards/oracle_overview.json"
+      "oracle": "assets/dashboards/oracle_overview.json",
+      "DBM Oracle Database Overview": "assets/dashboards/dbm_oracle_database_overview.json"
     }
   }
 }

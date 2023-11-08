@@ -1,10 +1,10 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["3.8"]
+python = ["3.9"]
 
 [[envs.default.matrix]]
-python = ["3.8"]
+python = ["3.9"]
 protocol = ["tls"]
 
 [envs.default]

@@ -1,14 +1,12 @@
 [build-system]
-requires = [
-    "hatchling>=1.5.0",
-]
+requires = ["hatchling>=1.17.1", "hatch-vcs>=0.3.0"]
 build-backend = "hatchling.build"
 
 [project]
 name = "ddev"
 description = "The Datadog Agent integration developer tool"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = "BSD-3-Clause"
 keywords = [
     "datadog",
@@ -25,48 +23,64 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
 ]
 dependencies = [
-    "datadog-checks-dev[cli]~=19.0",
+    "click~=8.1.6",
+    "coverage",
+    "datadog-checks-dev[cli]~=28.0",
     "hatch>=1.6.3",
     "httpx",
     "jsonpointer",
-    "pyperclip",
+    "pluggy",
     "rich>=12.5.1",
+    "stamina==23.2.0",
     "tomli; python_version < '3.11'",
     "tomli-w",
     "tomlkit",
+    "tqdm",
 ]
 dynamic = ["version"]
+
+[project.urls]
+Source = "https://github.com/DataDog/integrations-core"
 
 [project.scripts]
 ddev = "ddev.cli:main"
 ddev-starship = "ddev.plugin.external.starship.prompt:main"
 
-[project.urls]
-Source = "https://github.com/DataDog/integrations-core"
+[project.entry-points.hatch]
+datadog_checks = "ddev.plugin.external.hatch"
 
 [tool.hatch.version]
-path = "src/ddev/__about__.py"
+source = "vcs"
+
+[tool.hatch.version.raw-options]
+root = ".."
+version_scheme = "python-simplified-semver"
+local_scheme = "no-local-version"
+parentdir_prefix_version = "ddev-"
+git_describe_command = ["git", "describe", "--dirty", "--tags", "--long", "--match", "ddev-v*"]
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/ddev/_version.py"
+
+[tool.hatch.build.targets.sdist]
+include = ["src"]
+
+[tool.hatch.build.targets.app]
+scripts = ["ddev"]
 
 [tool.black]
 include = '\.pyi?$'
 line-length = 120
 skip-string-normalization = true
-target-version = ["py38"]
+target-version = ["py39"]
+extend-exclude = "src/ddev/_version.py"
 
 [tool.ruff]
-exclude = [
-    ".eggs",
-    ".tox",
-    "build",
-    "compat.py",
-    "__init__.py",
-    "**/datadog_checks/dev/tooling/templates/*",
-    "**/datadog_checks/*/vendor/*",
-]
-target-version = "py38"
+exclude = []
+target-version = "py39"
 line-length = 120
 # Rules were ported over from the legacy flake8 settings for parity
 # All the rules can be found here: https://beta.ruff.rs/docs/rules/
@@ -96,7 +110,7 @@ unfixable = [
 ]
 
 [tool.ruff.isort]
-known-first-party = ["{template_config['package_name']}"]
+known-first-party = ["ddev"]
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"

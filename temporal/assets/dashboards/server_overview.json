@@ -34,8 +34,8 @@
                         },
                         "id": 3088992460770358,
                         "layout": {
-                            "height": 2,
-                            "width": 4,
+                            "height": 3,
+                            "width": 6,
                             "x": 0,
                             "y": 0
                         }
@@ -509,7 +509,7 @@
                         },
                         "id": 8859936409751990,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 3,
                             "x": 0,
                             "y": 0
@@ -555,7 +555,7 @@
                         },
                         "id": 8644412359036364,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 3,
                             "x": 3,
                             "y": 0
@@ -576,6 +576,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Frontend latency",
                                             "formula": "autosmooth(query1 / query2)"
                                         }
                                     ],
@@ -607,7 +608,7 @@
                         },
                         "id": 2169880286703202,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 6,
                             "x": 6,
                             "y": 0
@@ -628,10 +629,10 @@
                         },
                         "id": 7611873784497000,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 3,
                             "x": 0,
-                            "y": 2
+                            "y": 3
                         }
                     },
                     {
@@ -674,10 +675,10 @@
                         },
                         "id": 4024759452321276,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 3,
                             "x": 3,
-                            "y": 2
+                            "y": 3
                         }
                     },
                     {
@@ -695,6 +696,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Persistence latency",
                                             "formula": "autosmooth(query1 / query2)"
                                         }
                                     ],
@@ -726,10 +728,10 @@
                         },
                         "id": 8395886377472554,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 6,
                             "x": 6,
-                            "y": 2
+                            "y": 3
                         }
                     },
                     {
@@ -747,10 +749,10 @@
                         },
                         "id": 8119931121935024,
                         "layout": {
-                            "height": 1,
+                            "height": 2,
                             "width": 4,
                             "x": 0,
-                            "y": 4
+                            "y": 6
                         }
                     },
                     {
@@ -768,10 +770,10 @@
                         },
                         "id": 8347705435328040,
                         "layout": {
-                            "height": 1,
+                            "height": 2,
                             "width": 4,
                             "x": 4,
-                            "y": 4
+                            "y": 6
                         }
                     },
                     {
@@ -789,10 +791,10 @@
                         },
                         "id": 1296678725031694,
                         "layout": {
-                            "height": 1,
+                            "height": 2,
                             "width": 4,
                             "x": 8,
-                            "y": 4
+                            "y": 6
                         }
                     },
                     {
@@ -810,7 +812,8 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
-                                            "formula": "query1 / query2"
+                                            "alias": "Cache latency",
+                                            "formula": "default_zero(query1 / query2)"
                                         }
                                     ],
                                     "queries": [
@@ -834,6 +837,7 @@
                                 }
                             ],
                             "show_legend": false,
+                            "time": {},
                             "title": "Average History Cache Latency",
                             "title_align": "left",
                             "title_size": "16",
@@ -841,10 +845,10 @@
                         },
                         "id": 5774474517142672,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 4,
                             "x": 0,
-                            "y": 5
+                            "y": 8
                         }
                     },
                     {
@@ -862,6 +866,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Shard latency",
                                             "formula": "query1 / query2"
                                         }
                                     ],
@@ -893,10 +898,10 @@
                         },
                         "id": 43492724107422,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 4,
                             "x": 4,
-                            "y": 5
+                            "y": 8
                         }
                     },
                     {
@@ -914,7 +919,8 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
-                                            "formula": "query1 / query2"
+                                            "alias": "Visibility latency",
+                                            "formula": "default_zero(query1 / query2)"
                                         }
                                     ],
                                     "queries": [
@@ -938,6 +944,7 @@
                                 }
                             ],
                             "show_legend": false,
+                            "time": {},
                             "title": "Average Visibility Latency",
                             "title_align": "left",
                             "title_size": "16",
@@ -945,17 +952,17 @@
                         },
                         "id": 2823144235071874,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 4,
                             "x": 8,
-                            "y": 5
+                            "y": 8
                         }
                     }
                 ]
             },
             "id": 2816922315594016,
             "layout": {
-                "height": 8,
+                "height": 12,
                 "width": 12,
                 "x": 0,
                 "y": 6
@@ -984,7 +991,7 @@
                         },
                         "id": 4451197166214416,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 4,
                             "x": 0,
                             "y": 0
@@ -1005,8 +1012,8 @@
                         },
                         "id": 8654107361584298,
                         "layout": {
-                            "height": 2,
-                            "width": 5,
+                            "height": 3,
+                            "width": 4,
                             "x": 4,
                             "y": 0
                         }
@@ -1051,9 +1058,9 @@
                         },
                         "id": 8491411777441728,
                         "layout": {
-                            "height": 2,
-                            "width": 3,
-                            "x": 9,
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
                             "y": 0
                         }
                     },
@@ -1072,6 +1079,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Task creation",
                                             "formula": "autosmooth(query1)"
                                         }
                                     ],
@@ -1098,10 +1106,10 @@
                         },
                         "id": 4681063577363464,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 6,
                             "x": 0,
-                            "y": 2
+                            "y": 3
                         }
                     },
                     {
@@ -1119,6 +1127,7 @@
                                     "display_type": "area",
                                     "formulas": [
                                         {
+                                            "alias": "Sync match",
                                             "formula": "query1 / query2 * 100"
                                         }
                                     ],
@@ -1150,20 +1159,20 @@
                         },
                         "id": 4053053364505978,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 6,
                             "x": 6,
-                            "y": 2
+                            "y": 3
                         }
                     }
                 ]
             },
             "id": 5524473896093710,
             "layout": {
-                "height": 5,
+                "height": 7,
                 "width": 12,
                 "x": 0,
-                "y": 14
+                "y": 18
             }
         },
         {
@@ -1186,12 +1195,14 @@
                             "legend_layout": "auto",
                             "requests": [
                                 {
-                                    "display_type": "area",
+                                    "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Request rate",
                                             "formula": "query1"
                                         },
                                         {
+                                            "alias": "Error rate",
                                             "formula": "query2",
                                             "style": {
                                                 "palette": "red"
@@ -1219,6 +1230,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Frontend",
                             "title_align": "left",
                             "title_size": "16",
@@ -1226,7 +1238,7 @@
                         },
                         "id": 716131960253898,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 4,
                             "x": 0,
                             "y": 0
@@ -1244,12 +1256,14 @@
                             "legend_layout": "auto",
                             "requests": [
                                 {
-                                    "display_type": "area",
+                                    "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Request rate",
                                             "formula": "query1"
                                         },
                                         {
+                                            "alias": "Error rate",
                                             "formula": "query2",
                                             "style": {
                                                 "palette": "red"
@@ -1284,7 +1298,7 @@
                         },
                         "id": 3941707998470626,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 4,
                             "x": 4,
                             "y": 0
@@ -1305,6 +1319,7 @@
                                     "display_type": "bars",
                                     "formulas": [
                                         {
+                                            "alias": "Exhausted resources",
                                             "formula": "query1"
                                         }
                                     ],
@@ -1331,7 +1346,7 @@
                         },
                         "id": 5887550792480324,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 4,
                             "x": 8,
                             "y": 0
@@ -1349,12 +1364,14 @@
                             "legend_layout": "auto",
                             "requests": [
                                 {
-                                    "display_type": "area",
+                                    "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Request rate",
                                             "formula": "query1"
                                         },
                                         {
+                                            "alias": "Error rate",
                                             "formula": "query2",
                                             "style": {
                                                 "palette": "red"
@@ -1389,10 +1406,10 @@
                         },
                         "id": 2385401648063962,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 4,
                             "x": 0,
-                            "y": 2
+                            "y": 3
                         }
                     },
                     {
@@ -1407,12 +1424,14 @@
                             "legend_layout": "auto",
                             "requests": [
                                 {
-                                    "display_type": "area",
+                                    "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Request rate",
                                             "formula": "query1"
                                         },
                                         {
+                                            "alias": "Error rate",
                                             "formula": "query2",
                                             "style": {
                                                 "palette": "red"
@@ -1440,6 +1459,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Matching Service",
                             "title_align": "left",
                             "title_size": "16",
@@ -1447,10 +1467,10 @@
                         },
                         "id": 950684109487582,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 4,
                             "x": 4,
-                            "y": 2
+                            "y": 3
                         }
                     },
                     {
@@ -1468,20 +1488,21 @@
                         },
                         "id": 3281921218483188,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 4,
                             "x": 8,
-                            "y": 2
+                            "y": 3
                         }
                     }
                 ]
             },
             "id": 1776700993343694,
             "layout": {
-                "height": 5,
+                "height": 7,
+                "is_column_break": true,
                 "width": 12,
                 "x": 0,
-                "y": 19
+                "y": 25
             }
         },
         {
@@ -1575,7 +1596,6 @@
                                     "response_format": "event_list"
                                 }
                             ],
-                            "time": {},
                             "title": "Matching",
                             "title_align": "left",
                             "title_size": "16",
@@ -1624,7 +1644,6 @@
                                     "response_format": "event_list"
                                 }
                             ],
-                            "time": {},
                             "title": "History",
                             "title_align": "left",
                             "title_size": "16",
@@ -1673,7 +1692,6 @@
                                     "response_format": "event_list"
                                 }
                             ],
-                            "time": {},
                             "title": "Other Logs",
                             "title_align": "left",
                             "title_size": "16",
@@ -1694,7 +1712,7 @@
                 "height": 11,
                 "width": 12,
                 "x": 0,
-                "y": 24
+                "y": 32
             }
         }
     ]

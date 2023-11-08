@@ -92,28 +92,17 @@ def test():
 
     defaults_contents, defaults_errors = files['defaults.py']
     assert not defaults_errors
-    assert defaults_contents == normalize_yaml(
+    assert defaults_contents == '\n' + normalize_yaml(
         """
-        from datadog_checks.base.utils.models.fields import get_default_field_value
-
-
-        def instance_default_precedence(field, value):
+        def instance_default_precedence():
             return 'baz'
 
 
-        def instance_example(field, value):
+        def instance_example():
             return 'bar'
 
 
-        def instance_example_ignored_array(field, value):
-            return get_default_field_value(field, value)
-
-
-        def instance_example_ignored_object(field, value):
-            return get_default_field_value(field, value)
-
-
-        def instance_long_default_formatted(field, value):
+        def instance_long_default_formatted():
             return [
                 ['01', '02', '03', '04', '05'],
                 ['06', '07', '08', '09', '10'],
@@ -130,9 +119,10 @@ def test():
         """
         from __future__ import annotations
 
-        from typing import Any, Mapping, Optional, Sequence
+        from types import MappingProxyType
+        from typing import Any, Optional
 
-        from pydantic import BaseModel, root_validator, validator
+        from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
         from datadog_checks.base.utils.functions import identity
         from datadog_checks.base.utils.models import validation
@@ -141,36 +131,35 @@ def test():
 
 
         class InstanceConfig(BaseModel):
-            class Config:
-                allow_mutation = False
-
-            default_precedence: Optional[str]
-            example: Optional[str]
-            example_ignored_array: Optional[Sequence[str]]
-            example_ignored_object: Optional[Mapping[str, Any]]
+            model_config = ConfigDict(
+                validate_default=True,
+                arbitrary_types_allowed=True,
+                frozen=True,
+            )
+            default_precedence: Optional[str] = None
+            example: Optional[str] = None
+            example_ignored_array: Optional[tuple[str, ...]] = None
+            example_ignored_object: Optional[MappingProxyType[str, Any]] = None
             foo: str
-            long_default_formatted: Optional[Sequence[Sequence[str]]]
+            long_default_formatted: Optional[tuple[tuple[str, ...], ...]] = None
 
-            @root_validator(pre=True)
+            @model_validator(mode='before')
             def _initial_validation(cls, values):
                 return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
-            @validator('*', pre=True, always=True)
-            def _ensure_defaults(cls, v, field):
-                if v is not None or field.required:
-                    return v
+            @field_validator('*', mode='before')
+            def _validate(cls, value, info):
+                field = cls.model_fields[info.field_name]
+                field_name = field.alias or info.field_name
+                if field_name in info.context['configured_fields']:
+                    value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+                else:
+                    value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-                return getattr(defaults, f'instance_{field.name}')(field, v)
+                return validation.utils.make_immutable(value)
 
-            @validator('*')
-            def _run_validations(cls, v, field):
-                if not v:
-                    return v
-
-                return getattr(validators, f'instance_{field.name}', identity)(v, field=field)
-
-            @root_validator(pre=False)
-            def _final_validation(cls, values):
-                return validation.core.finalize_config(getattr(validators, 'finalize_instance', identity)(values))
+            @model_validator(mode='after')
+            def _final_validation(cls, model):
+                return validation.core.check_model(getattr(validators, 'check_instance', identity)(model))
         """
     )

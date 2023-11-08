@@ -7,12 +7,9 @@ from .common import (
     HEALTH_URL,
     PING_URL,
     PROJECTS_URL,
-    REGISTRIES_PING_PRE_1_8_URL,
     REGISTRIES_PING_URL,
-    REGISTRIES_PRE_1_8_URL,
     REGISTRIES_URL,
     SYSTEM_INFO_URL,
-    VERSION_1_8,
     VOLUME_INFO_URL,
 )
 
@@ -44,17 +41,11 @@ class HarborAPI(object):
         return self._make_paginated_get_request(PROJECTS_URL)
 
     def registries(self):
-        if self.harbor_version >= VERSION_1_8:
-            return self._make_paginated_get_request(REGISTRIES_URL)
-        else:
-            return self._make_paginated_get_request(REGISTRIES_PRE_1_8_URL)
+        return self._make_paginated_get_request(REGISTRIES_URL)
 
     def registry_health(self, registry_id):
         data = {"id": registry_id}
-        if self.harbor_version >= VERSION_1_8:
-            return self._make_post_request(REGISTRIES_PING_URL, data=data)
-        else:
-            return self._make_post_request(REGISTRIES_PING_PRE_1_8_URL, data=data)
+        return self._make_post_request(REGISTRIES_PING_URL, data=data)
 
     def volume_info(self):
         return self._make_get_request(VOLUME_INFO_URL)

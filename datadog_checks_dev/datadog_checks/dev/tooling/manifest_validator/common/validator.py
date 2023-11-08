@@ -283,6 +283,7 @@ class LogsCategoryValidator(BaseManifestValidator):
         'altostra',
         'hasura_cloud',
         'sqreen',
+        'openai',  # Logs are submitted to the logs intake API
     }
 
     def validate(self, check_name, decoded, fix):

@@ -273,3 +273,30 @@ GROUP_REPLICATION_VARS = [
     'mysql.replication.group.transactions_rollback',
     'mysql.replication.group.transactions_validating',
 ]
+
+SIMPLE_OPERATION_TIME_METRICS = [
+    'status_metrics',
+    'innodb_metrics',
+    'variables_metrics',
+    'binary_log_metrics',
+]
+
+COMPLEX_OPERATION_TIME_METRICS = [
+    'schema_size_metrics',
+    'system_table_size_metrics',
+    'table_size_metrics',
+]
+
+REPLICATION_OPERATION_TIME_METRICS = ['replication_metrics']
+
+GROUP_REPLICATION_OPERATION_TIME_METRICS = ['group_replication_metrics']
+
+PERFORMANCE_OPERATION_TIME_METRICS = ['exec_time_95th_metrics', 'exec_time_per_schema_metrics']
+
+COMMON_PERFORMANCE_OPERATION_TIME_METRICS = ['performance_schema.threads']
+
+OPERATION_TIME_METRIC_NAME = 'dd.mysql.operation.time'
+
+E2E_OPERATION_TIME_METRIC_NAME = [
+    'dd.mysql.operation.time.{}'.format(suffix) for suffix in ('avg', 'max', '95percentile', 'count', 'median')
+]

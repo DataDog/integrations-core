@@ -104,7 +104,11 @@ def main():
         for filename in filenames_for_target(signer_file, f'simple/datadog-{INTEGRATION}/index.html'):
             download_file(filename)
 
+        download_file(f'targets/simple/datadog-{INTEGRATION}/index.html')
+
         wheel_name = f'datadog_{INTEGRATION.replace("-", "_")}-{INTEGRATION_VERSION}-py2.py3-none-any.whl'
+        download_file(f'targets/simple/datadog-{INTEGRATION}/{wheel_name}')
+
         for filename in filenames_for_target(signer_file, f'simple/datadog-{INTEGRATION}/{wheel_name}'):
             download_file(filename)
 

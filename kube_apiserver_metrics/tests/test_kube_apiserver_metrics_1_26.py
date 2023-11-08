@@ -22,6 +22,7 @@ class TestKubeAPIServerMetrics:
     """Basic Test for kube_apiserver integration."""
 
     METRICS = [
+        'longrunning_gauge',
         'current_inflight_requests',
         'audit_event',
         'go_threads',
@@ -47,6 +48,7 @@ class TestKubeAPIServerMetrics:
         'request_duration_seconds.count',
         'process_resident_memory_bytes',
         'process_virtual_memory_bytes',
+        'etcd.db.total_size',
         'etcd_request_duration_seconds.sum',
         'etcd_request_duration_seconds.count',
         'watch_events_sizes.sum',
@@ -61,6 +63,12 @@ class TestKubeAPIServerMetrics:
         'storage_list_returned_objects_total',
         'requested_deprecated_apis',
         'kubernetes_feature_enabled',
+        'aggregator_unavailable_apiservice',
+        'envelope_encryption_dek_cache_fill_percent',
+        'flowcontrol_current_executing_requests',
+        'flowcontrol_request_concurrency_limit',
+        'flowcontrol_current_inqueue_requests',
+        'flowcontrol_dispatched_requests_total',
     ]
     COUNT_METRICS = [
         'audit_event.count',
@@ -86,4 +94,6 @@ class TestKubeAPIServerMetrics:
             metric_to_assert = NAMESPACE + "." + metric
             aggregator.assert_metric(metric_to_assert)
             aggregator.assert_metric_has_tag(metric_to_assert, customtag)
+            if "aggregator_unavailable_apiservice" in metric:
+                aggregator.assert_metric_has_tag(metric_to_assert, "apiservice_name:v1.")
         aggregator.assert_all_metrics_covered()

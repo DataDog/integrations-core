@@ -77,16 +77,26 @@ class SnowflakeCheck(AgentCheck):
         )
         self.metric_queries = []
         self.errors = []
+
+        # Collect queries corresponding to groups provided in the config
         for mgroup in self._config.metric_groups:
             try:
-                if not self._config.aggregate_last_24_hours:
-                    for query in range(len(metric_groups[mgroup])):
-                        metric_groups[mgroup][query]['query'] = metric_groups[mgroup][query]['query'].replace(
-                            'DATEADD(hour, -24, current_timestamp())', 'date_trunc(day, current_date)'
-                        )
                 self.metric_queries.extend(metric_groups[mgroup])
             except KeyError:
                 self.errors.append(mgroup)
+                continue
+
+        if not self._config.aggregate_last_24_hours:
+            # Modify queries to use legacy time aggregation behavior
+            self.metric_queries = [
+                {
+                    **query,
+                    'query': query['query'].replace(
+                        'DATEADD(hour, -24, current_timestamp())', 'date_trunc(day, current_date)'
+                    ),
+                }
+                for query in self.metric_queries
+            ]
 
         if self.errors:
             self.log.warning(
@@ -155,8 +165,9 @@ class SnowflakeCheck(AgentCheck):
 
             if cursor.rowcount is None or cursor.rowcount < 1:
                 self.log.debug("Failed to fetch records from query: `%s`", query)
-                return []
-            return cursor.fetchall()
+                return
+            # Iterating on the cursor provides one row at a time without loading all of them at once
+            yield from cursor
 
     def connect(self):
         self.log.debug(
@@ -209,8 +220,8 @@ class SnowflakeCheck(AgentCheck):
     @AgentCheck.metadata_entrypoint
     def _collect_version(self):
         try:
-            raw_version = self.execute_query_raw("select current_version();")
-            version = raw_version[0][0]
+            raw_version = next(self.execute_query_raw("select current_version();"))
+            version = raw_version[0]
         except Exception as e:
             self.log.error("Error collecting version for Snowflake: %s", e)
         else:
