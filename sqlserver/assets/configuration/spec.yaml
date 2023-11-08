@@ -162,6 +162,22 @@ files:
       value:
         type: boolean
         example: false
+    - name: include_primary_log_shipping_metrics
+      description: |
+        Include log_shipping_primary metrics for a log shipping setup. Required to run
+        against the primary instance in a transaction log shipping configuration. Note that
+        the Datadog user needs to be present in msdb and must be added to the db_datareader role.
+      value:
+        type: boolean
+        example: false
+    - name: include_secondary_log_shipping_metrics
+      description: |
+        Include log_shipping_secondary metrics for a log shipping setup. Required to run
+        against a secondary instance in a transaction log shipping configuration. Note that
+        the Datadog user needs to be present in msdb and must be added to the db_datareader role.
+      value:
+        type: boolean
+        example: false
     - name: include_instance_metrics
       description: |
         Include server-level instance metrics.  When setting up multiple instances for
@@ -184,8 +200,8 @@ files:
     - name: include_index_usage_metrics
       description: |
         Configure the collection of user table index usage statistics from the `sys.dm_db_index_usage_stats` DMV.
-        
-        Because the `sys.dm_db_index_usage_stats` view is scoped to the current database, enable 
+
+        Because the `sys.dm_db_index_usage_stats` view is scoped to the current database, enable
         `database_autodiscovery` or set `database`.
       value:
         type: boolean
@@ -201,7 +217,7 @@ files:
           type: string
     - name: include_tempdb_file_space_usage_metrics
       description: |
-        Include tempdb file space usage metrics for how space is used in tempdb data files. 
+        Include tempdb file space usage metrics for how space is used in tempdb data files.
       value:
         type: boolean
         example: true

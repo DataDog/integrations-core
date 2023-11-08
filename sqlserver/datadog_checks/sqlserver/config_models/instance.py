@@ -168,6 +168,8 @@ class InstanceConfig(BaseModel):
     include_index_usage_metrics: Optional[bool] = None
     include_instance_metrics: Optional[bool] = None
     include_master_files_metrics: Optional[bool] = None
+    include_primary_log_shipping_metrics: Optional[bool] = None
+    include_secondary_log_shipping_metrics: Optional[bool] = None
     include_task_scheduler_metrics: Optional[bool] = None
     include_tempdb_file_space_usage_metrics: Optional[bool] = None
     log_unobfuscated_plans: Optional[bool] = None
