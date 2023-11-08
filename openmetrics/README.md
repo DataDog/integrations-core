@@ -74,11 +74,15 @@ By default, the integration skips metrics that come without a type on a Promethe
 
 Remember that metric names can be specified as regular expressions, making it possible to specify the type for a set of metrics without listing all of them individually.
 
-### Errors parsing the OpenMetrics payload with Agent 7.46 and above
+### Errors parsing the OpenMetrics payload with Agent 7.46
 
-Starting with version 3.0.0 of this integration, which is shipped by default with Agent 7.46 and above, the integration sends by default the `Accept` header set to `application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1;q=0.75,text/plain;version=0.0.4;q=0.5,*/*;q=0.1`. Previous versions set the `Accept` header to `text/plain`. The integration then dynamically determines which scraper to use based on the `Content-type` it receives from the server.
+The version of this integration shipped with version 7.46 of the Agent gives preference by default to the OpenMetrics format when requesting metrics from the metrics endpoint. It does so by setting the `Accept` header to `application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1;q=0.75,text/plain;version=0.0.4;q=0.5,*/*;q=0.1`. This was done in combination with dynamically determining which scraper to use based on the `Content-Type` it receives from the server, to reduce the need for manual setup.
 
-If you see errors scraping the OpenMetrics endpoint with this new version because the scraper is stricter than before, manually set the `Accept` header that the integration sends to `text/plain` using the `headers` option in the [configuration file][14]. For instance: 
+Previous versions defaulted to `text/plain`, which normally results in the server returning metrics in the Prometheus exposition format. This means that updating to this version of the integration may result in switching from the Prometheus format to the OpenMetrics format.
+
+Although the behavior should remain the same in most circumstances, some applications return metrics in a format that is not fully OpenMetrics-compliant, despite setting the `Content-Type` to signal the use of the OpenMetrics standard format. This may cause our integration to report errors while parsing the metrics payload.
+
+If you see parsing errors when scraping the OpenMetrics endpoint with this new version, you can force the use of the less strict Prometheus format by manually setting the `Accept` header that the integration sends to `text/plain` using the `headers` option in the [configuration file][14]. For instance: 
 
 ```yaml
 ## All options defined here are available to all instances.
@@ -91,12 +95,6 @@ instances:
     headers:
       Accept: text/plain
 ```
-
-With this configuration, the endpoint returns the `Content-type` set to `text/plain`, causing the integration to use the previous scraper.
-
-The OpenMetrics integration reports an error parsing the payload when the system you are monitoring sends data that does not match their `Content-type` header. Setting the integration to accept `text/plain` content creates a workaround to address the problem in the short term.
-
-To fix the root cause of the problem, reach out to the maintainers of the upstream system. Submit a bug report and ask them to fix the system so the payload and the Content-type set in the header match.
 
 Need help? Contact [Datadog support][8].
 
