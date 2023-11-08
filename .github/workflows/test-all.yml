@@ -2135,8 +2135,8 @@ jobs:
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
+      test-py2: false
+      test-py3: true
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
   j5df646e:
@@ -2876,8 +2876,8 @@ jobs:
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
+      test-py2: false
+      test-py3: true
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
   j3a8e004:
@@ -2895,8 +2895,8 @@ jobs:
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
+      test-py2: false
+      test-py3: true
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
   jaf4b616:
