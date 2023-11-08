@@ -22,7 +22,7 @@ To enable all metrics reportings:
 tritonserver --allow-metrics=true
 ```
 
-To change the metric endpoint, `--metrics-address` option can be used.
+To change the metric endpoint, use the `--metrics-address` option.
 
 Example:
 
@@ -32,13 +32,13 @@ tritonserver --metrics-address=http://0.0.0.0:8002
 
 In this case, the OpenMetrics endpoint is exposed at this URL: `http://<NVIDIA_TRITON_ADDRESS>:8002/metrics`.
 
-The [summary latencies][10] metrics are disabled by default, to enable it:
+The [latency summary][10] metrics are disabled by default. To enable summary metrics for latencies, use the command below:
 
 ```
 tritonserver --metrics-config summary_latencies=true
 ```
 
-The [response cache metrics][11] are not reported by default, you will need to enable a cache implementation on the server side by specifying a <cache_implementation> and corresponding configuration.
+The [response cache metrics][11] are not reported by default. You need to enable a cache implementation on the server side by specifying a <cache_implementation> and corresponding configuration.
 
 For instance:
 
@@ -46,8 +46,7 @@ For instance:
 tritonserver --cache-config local,size=1048576
 ```
 
-Nvidia Triton also offers the possibility to expose [custom metrics][12] through their Openemtrics endpoint, these can be also collected by datadog using the extra_metrics option.
-
+Nvidia Triton also offers the possibility to expose [custom metrics][12] through their Openemtrics endpoint. Datadog can also collect these custom metrics using the `extra_metrics` option.
 <div class="alert alert-warning">These custom Nvidia Triton metrics are considered standard metrics in Datadog.</div>
 
 ### Configuration
