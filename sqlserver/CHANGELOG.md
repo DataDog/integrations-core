@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 15.0.3 / 2023-11-08
+
 ***Fixed***
 
 * Fix `aarch64` compatibility of the `sqlserver` check by downgrading `lxml` to version 4.9.2 ([16080](https://github.com/DataDog/integrations-core/pull/16080))
