@@ -1,8 +1,24 @@
 # CHANGELOG - vsphere
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 7.0.0 / 2023-08-10
+## 7.2.0 / 2023-11-07
+
+***Added***:
+
+* Add support for configuring what resources to collect events for. ([#15992](https://github.com/DataDog/integrations-core/pull/15992))
+
+## 7.1.0 / 2023-09-29 / Agent 7.49.0
+
+***Added***:
+
+* Decouple resource groups and collection type ([#15670](https://github.com/DataDog/integrations-core/pull/15670))
+
+***Fixed***:
+
+* Add ability to filter property metrics ([#15474](https://github.com/DataDog/integrations-core/pull/15474))
+
+## 7.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 
@@ -20,7 +36,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 6.3.0 / 2023-07-10
+## 6.3.0 / 2023-07-10 / Agent 7.47.0
 
 ***Added***:
 

@@ -12,7 +12,7 @@
     "title": "ElasticSearch",
     "media": [],
     "classifier_tags": [
-      "Category::Data Store",
+      "Category::Data Stores",
       "Category::Log Collection",
       "Category::Tracing",
       "Supported OS::Linux",
@@ -44,9 +44,7 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": [
-        "java org.elasticsearch.bootstrap.Elasticsearch"
-      ]
+      "process_signatures": ["java org.elasticsearch.bootstrap.Elasticsearch"]
     },
     "dashboards": {
       "elasticsearch": "assets/dashboards/overview.json",
@@ -56,7 +54,9 @@
       "[ElasticSearch] Unsuccessful requests rate is high": "assets/monitors/elastic_requests.json",
       "[ElasticSearch] Query load is high": "assets/monitors/elastic_query_load_high.json",
       "[ElasticSearch] Time spent on queries is high": "assets/monitors/elastic_query_latency_high.json",
-      "[ElasticSearch] Number of pending tasks is high": "assets/monitors/elastic_pending_tasks_high.json"
+      "[ElasticSearch] Number of pending tasks is high": "assets/monitors/elastic_pending_tasks_high.json",
+      "[ElasticSearch] Current indexing load is high": "assets/monitors/elastic_indexing_load.json",
+      "[ElasticSearch] Average query latency is high": "assets/monitors/elastic_average_search_latency.json"
     },
     "saved_views": {
       "elasticsearch_processes": "assets/saved_views/elasticsearch_processes.json"

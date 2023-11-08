@@ -13,6 +13,11 @@ from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.http import RequestsWrapper
 
+NEW_1_24_COUNTERS = {
+    # This metric replaces the deprecated node_collector_evictions_number metric as of k8s v1.24+
+    'node_collector_evictions_total': 'nodes.evictions',
+}
+
 
 class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
@@ -127,6 +132,7 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
                             "tracking_finalizer_total": "job_controller.terminated"
                             "_pods_tracking_finalizer"
                         },
+                        NEW_1_24_COUNTERS,
                     ],
                 }
             },

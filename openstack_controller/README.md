@@ -14,7 +14,7 @@ The OpenStack Controller check is included in the [Datadog Agent][3] package, so
 
 ### Configuration
 
-The OpenStack Controller integration is designed to collect information from all compute nodes and the servers running it. The integration should be run from a single Agent to monitor your OpenStack environment, and can be deployed on your controller node or an adjacent server that has access to the Keystone and Nova endpoints.
+The OpenStack Controller integration is designed to collect information from all compute nodes and the servers running it. The integration should be run from a single Agent to monitor your OpenStack environment, and can be deployed on your controller node or an adjacent server that has access to the Keystone, Nova, Neutron, Cinder, Ironic, and Octavia endpoints.
 
 #### Prepare OpenStack
 
@@ -28,27 +28,15 @@ Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` 
    init_config:
 
    instances:
-     ## @param name - string - required
-     ## Unique identifier for this instance.
-     #
-     - name: "<INSTANCE_NAME>"
-
-       ## @param user - object - required
-       ## Password authentication is the only auth method supported
-       ## User expects username, password, and user domain id
-       ## `user` should resolve to a structure like
-       ## {'password': '<PASSWORD>', 'name': '<USER_NAME>', 'domain': {'id': '<DOMAIN_ID>'}}
-       ## The check uses the Unscoped token method to collect information about
-       ## all available projects to the user.
-       #
-       user:
-         password: "<PASSWORD>"
-         name: "<USER_NAME>"
-         domain:
-           id: "<DOMAIN_ID>"
+     - keystone_server_url: "<AUTH_URL>"
+       password: "<PASSWORD>"
+       username: "<USER_NAME>"
+       domain_id: "<DOMAIN_ID>"
    ```
 
 2. [Restart the Agent][5]
+
+**Note**: If you are upgrading the integration to v6.0.0 or later from v5.0.0 or older, you need to enable the `use_legacy_check_version` flag to use newer features. You may also need to make changes to your configuration to maintain compatibility. See the [sample openstack controller.d/conf.yaml][4] for details.  
 
 ##### Log collection
 

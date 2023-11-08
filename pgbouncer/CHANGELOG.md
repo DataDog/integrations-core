@@ -1,8 +1,18 @@
 # CHANGELOG - pgbouncer
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 5.0.0 / 2023-08-10
+## 6.0.0 / 2023-10-26
+
+***Changed***:
+
+* Drop support for Python 2 ([#15949](https://github.com/DataDog/integrations-core/pull/15949))
+
+***Added***:
+
+* Upgrade `psycopg2-binary` to `v2.9.8` ([#15949](https://github.com/DataDog/integrations-core/pull/15949))
+
+## 5.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 
@@ -16,7 +26,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 4.4.2 / 2023-07-10
+## 4.4.2 / 2023-07-10 / Agent 7.47.0
 
 ***Fixed***:
 

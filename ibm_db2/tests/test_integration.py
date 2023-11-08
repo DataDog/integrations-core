@@ -16,6 +16,7 @@ pytestmark = pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_bad_config(aggregator, instance, dd_run_check):
     instance['port'] = '60000'
+    instance["connection_timeout"] = 1
     check = IbmDb2Check('ibm_db2', {}, [instance])
     dd_run_check(check)
 

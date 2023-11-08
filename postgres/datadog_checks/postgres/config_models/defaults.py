@@ -77,7 +77,7 @@ def instance_idle_connection_timeout():
 
 
 def instance_ignore_databases():
-    return ['template%', 'rdsadmin', 'azure_maintenance']
+    return ['template%', 'rdsadmin', 'azure_maintenance', 'cloudsqladmin']
 
 
 def instance_log_unobfuscated_plans():
@@ -113,23 +113,7 @@ def instance_query_timeout():
 
 
 def instance_ssl():
-    return 'false'
-
-
-def instance_ssl_cert():
-    return 'false'
-
-
-def instance_ssl_key():
-    return 'false'
-
-
-def instance_ssl_password():
-    return 'false'
-
-
-def instance_ssl_root_cert():
-    return 'false'
+    return 'allow'
 
 
 def instance_table_count_limit():

@@ -1,10 +1,25 @@
 # CHANGELOG - TLS
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 2.13.1 / 2023-10-26 / Agent 7.49.0
+
+***Fixed***:
+
+* Bump the `cryptography` version to 41.0.5 ([#16083](https://github.com/DataDog/integrations-core/pull/16083))
+
+## 2.13.0 / 2023-09-29
+
+***Added***:
+
+* Update Cryptography dependency ([#15922](https://github.com/DataDog/integrations-core/pull/15922))
+
+## 2.12.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:
 
 * Bump cryptography to 41.0.3 ([#15517](https://github.com/DataDog/integrations-core/pull/15517))
+* Update datadog-checks-base dependency version to 32.6.0 ([#15604](https://github.com/DataDog/integrations-core/pull/15604))
 
 ## 2.12.0 / 2023-08-10
 
@@ -16,7 +31,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 2.11.0 / 2023-07-10
+## 2.11.0 / 2023-07-10 / Agent 7.47.0
 
 ***Added***:
 

@@ -78,9 +78,9 @@ files:
             example: [<PROCESS_NAME_EXCLUDE_1>, <PROCESS_NAME_EXCLUDE_2>]
         - name: status_mapping_override
           description: |
-            The process status mapping override between Supervisord status and Datadog status.
+            The process status mapping override between supervisord status and Datadog status.
 
-            This setting overrides default mapping (Supervisord => Datadog):
+            This setting overrides default mapping (supervisord => Datadog):
               RUNNING  => up
               BACKOFF  => down
               STOPPING => down

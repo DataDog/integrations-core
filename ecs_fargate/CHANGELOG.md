@@ -1,6 +1,22 @@
 # CHANGELOG - ECS Fargate
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 4.1.0 / 2023-10-26
+
+***Added***:
+
+* Add storage_stats support for Windows ([#16014](https://github.com/DataDog/integrations-core/pull/16014))
+
+***Fixed***:
+
+* Fix blkio_stats bad metrics for Windows ([#16014](https://github.com/DataDog/integrations-core/pull/16014))
+
+## 4.0.1 / 2023-08-25 / Agent 7.48.0
+
+***Fixed***:
+
+* Fix ECS Fargate memory task limit units ([#15656](https://github.com/DataDog/integrations-core/pull/15656))
 
 ## 4.0.0 / 2023-08-10
 
@@ -17,7 +33,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 3.4.0 / 2023-07-10
+## 3.4.0 / 2023-07-10 / Agent 7.47.0
 
 ***Added***:
 

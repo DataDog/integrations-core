@@ -1,8 +1,14 @@
 # CHANGELOG - SingleStore
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 2.0.0 / 2023-08-10
+## 2.0.1 / 2023-10-26
+
+***Fixed***:
+
+* Bump the `pymysql` version to 1.1.0 on Python 3 ([#16042](https://github.com/DataDog/integrations-core/pull/16042))
+
+## 2.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 
@@ -16,7 +22,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 1.3.2 / 2023-07-10
+## 1.3.2 / 2023-07-10 / Agent 7.47.0
 
 ***Fixed***:
 

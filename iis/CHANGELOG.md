@@ -1,8 +1,8 @@
 # CHANGELOG - iis
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 3.0.0 / 2023-08-10
+## 3.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 
@@ -16,7 +16,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 2.19.1 / 2023-07-13
+## 2.19.1 / 2023-07-13 / Agent 7.47.0
 
 ***Fixed***:
 
@@ -288,4 +288,3 @@
 ***Added***:
 
 * adds iis integration.
-

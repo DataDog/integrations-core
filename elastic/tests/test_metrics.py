@@ -28,7 +28,7 @@ from datadog_checks.elastic.metrics import (
         pytest.param([5, 0, 0], False, 250, id='v5'),
         pytest.param([6, 3, 0], False, 250, id='v6.3.0'),
         pytest.param([7, 2, 0], False, 244, id='v7.2.0'),
-        pytest.param([8, 6, 2], False, 249, id='v8.6.0'),
+        pytest.param([8, 6, 2], False, 252, id='v8.6.0'),
         pytest.param([0, 90, 0], True, 199, id='v0.90'),
         pytest.param([0, 90, 5], True, 202, id='v0.90.5'),
         pytest.param([0, 90, 10], True, 204, id='v0.90.10'),

@@ -8,8 +8,3 @@ e2e-env = false
 platforms = [
   "windows",
 ]
-
-[envs.default.overrides]
-matrix.python.scripts = [
-  { key = "test", value = "pytest -v --benchmark-skip tests/legacy", if = ["2.7"] },
-]

@@ -5,19 +5,18 @@ import os
 
 import click
 
-from .....fs import stream_file_lines
 from ....constants import get_root
 from ....utils import complete_valid_checks, get_valid_checks, get_version_string
 from ...console import (
     CONTEXT_SETTINGS,
     abort,
+    echo_info,
     validate_check_arg,
 )
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Show all the pending PRs for a given check.')
 @click.argument('check', shell_complete=complete_valid_checks, callback=validate_check_arg)
-@click.option('--organization', '-r', default='DataDog', help="The Github organization the repository belongs to")
 @click.option(
     '--tag-pattern',
     default=None,
@@ -30,10 +29,7 @@ from ...console import (
 @click.option(
     '--since', default=None, help="The git ref to use instead of auto-detecting the tag to view changes since"
 )
-@click.option('--end')
-@click.option('--exclude-branch', default=None, help="Exclude changes comming from a specific branch")
-@click.pass_context
-def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization, since, end, exclude_branch):
+def changes(check, tag_pattern, tag_prefix, dry_run, since):
     """Show all the pending PRs for a given check."""
     if not dry_run and check and check not in get_valid_checks():
         abort(f'Check `{check}` is not an Agent-based Integration')
@@ -46,26 +42,18 @@ def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization, since, e
             'following SemVer and matches the provided tag_prefix and/or tag_pattern.'
         )
 
-    if check:
-        changelog_path = os.path.join(get_root(), check, 'CHANGELOG.md')
-    else:
-        changelog_path = os.path.join(get_root(), 'CHANGELOG.md')
-    log = list(stream_file_lines(changelog_path))
-
-    header_index = 2
-    for index in range(2, len(log)):
-        if log[index].startswith("##") and "## Unreleased" not in log[index]:
-            header_index = index
-            break
-
-    if header_index == 4:
-        abort('There are no changes for this integration')
-
-    unreleased = log[4:header_index]
-    applicable_changelog_types = []
-
-    for line in unreleased:
-        if line.startswith('***'):
-            applicable_changelog_types.append(line[3:-5])
+    applicable_changelog_types = set()
+    fragment_dir = os.path.join(get_root(), check, 'changelog.d')
+    if not os.path.exists(fragment_dir):
+        echo_info('No changes for this check.')
+        return cur_version, applicable_changelog_types
+    changes_to_report = []
+    for fname in os.listdir(fragment_dir):
+        applicable_changelog_types.add(fname.split(".")[1])
+        changes_to_report.append(f'{os.path.join(check, "changelog.d", fname)}:')
+        fpath = os.path.join(fragment_dir, fname)
+        with open(fpath, mode='r') as fh:
+            changes_to_report.append(fh.read() + '\n')
+    echo_info('\n'.join(changes_to_report).rstrip())
 
     return cur_version, applicable_changelog_types

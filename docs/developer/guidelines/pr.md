@@ -1,5 +1,10 @@
 # Pull requests
 
+!!! warning
+    The formatting notes do NOT apply if you are contributing to [integrations-core](https://github.com/DataDog/integrations-core).
+    In that case use the [`release changelog new`](../ddev/cli.md#ddev-release-changelog-new) command.
+    Add the `changelog/no-changelog` label if you don't need a changelog.
+
 -----
 
 ## Changelog entries
@@ -89,7 +94,4 @@ should the need arise.
 
 ## Merges
 
-We only allow GitHub's [squash and merge][github-squash-and-merge], for 2 reasons:
-
-1. To keep a clean Git history
-1. Our release tooling relies on commits being suffixed with the PR number in order to list changes between versions
+We only allow GitHub's [squash and merge][github-squash-and-merge] to keep a clean Git history.

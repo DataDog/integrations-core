@@ -72,6 +72,10 @@ def instance_include_fci_metrics():
     return False
 
 
+def instance_include_index_usage_metrics():
+    return True
+
+
 def instance_include_instance_metrics():
     return True
 
@@ -82,6 +86,10 @@ def instance_include_master_files_metrics():
 
 def instance_include_task_scheduler_metrics():
     return False
+
+
+def instance_include_tempdb_file_space_usage_metrics():
+    return True
 
 
 def instance_log_unobfuscated_plans():

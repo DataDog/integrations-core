@@ -390,6 +390,10 @@ coverage:
         target: 75
         flags:
         - network
+      Nvidia_Triton:
+        target: 75
+        flags:
+        - nvidia_triton
       OpenLDAP:
         target: 75
         flags:
@@ -454,6 +458,10 @@ coverage:
         target: 75
         flags:
         - rabbitmq
+      Ray:
+        target: 75
+        flags:
+        - ray
       Redis:
         target: 75
         flags:
@@ -1135,6 +1143,11 @@ flags:
     paths:
     - nginx_ingress_controller/datadog_checks/nginx_ingress_controller
     - nginx_ingress_controller/tests
+  nvidia_triton:
+    carryforward: true
+    paths:
+    - nvidia_triton/datadog_checks/nvidia_triton
+    - nvidia_triton/tests
   openldap:
     carryforward: true
     paths:
@@ -1215,6 +1228,11 @@ flags:
     paths:
     - rabbitmq/datadog_checks/rabbitmq
     - rabbitmq/tests
+  ray:
+    carryforward: true
+    paths:
+    - ray/datadog_checks/ray
+    - ray/tests
   redisdb:
     carryforward: true
     paths:

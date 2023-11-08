@@ -1,15 +1,95 @@
 # CHANGELOG - datadog_checks_base
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 34.2.0 / 2023-11-06
+
+***Added***:
+
+* Add exceptions to skip instance configurations ([#16012](https://github.com/DataDog/integrations-core/pull/16012))
+
+## 34.1.2 / 2023-11-02
+
+***Fixed***:
+
+* Bump librdkafka and confluent-kafka to v2.3.0 ([#16088](https://github.com/DataDog/integrations-core/pull/16088))
+* Add the ability to assert the `external_tags` when running tests ([#16089](https://github.com/DataDog/integrations-core/pull/16089))
+* Do not verify the tags order by default when testing the external tags ([#16105](https://github.com/DataDog/integrations-core/pull/16105))
+
+## 34.1.1 / 2023-10-26
+
+***Fixed***:
+
+* Bump the `cryptography` version to 41.0.5 ([#16083](https://github.com/DataDog/integrations-core/pull/16083))
+
+## 34.1.0 / 2023-10-20
+
+***Added***:
+
+* Add util to track db query operation time ([#16040](https://github.com/DataDog/integrations-core/pull/16040))
+
+***Fixed***:
+
+* Bump the `pymysql` version to 1.1.0 on Python 3 ([#16042](https://github.com/DataDog/integrations-core/pull/16042))
+* Bump the `pyodbc` version to 5.0.1 ([#16041](https://github.com/DataDog/integrations-core/pull/16041))
+
+## 34.0.1 / 2023-10-17
+
+***Fixed***:
+
+* Fix check cancellation timeout due to `DBMAsyncJob` cancellation being blocked ([#16028](https://github.com/DataDog/integrations-core/pull/16028))
+
+## 34.0.0 / 2023-09-29
+
+***Changed***:
+
+* Upgrade to openstacksdk version 1.5.0 ([#15919](https://github.com/DataDog/integrations-core/pull/15919))
+
+***Added***:
+
+* Upgrade clickhouse-driver to 0.2.6 on Python 3 ([#15726](https://github.com/DataDog/integrations-core/pull/15726))
+* Upgrade lz4 to 4.3.2 on Python 3 ([#15746](https://github.com/DataDog/integrations-core/pull/15746))
+* Update dependencies ([#15922](https://github.com/DataDog/integrations-core/pull/15922))
+
+***Fixed***:
+
+* Fix type `bytes` is not JSON serializable for dbm events ([#15763](https://github.com/DataDog/integrations-core/pull/15763))
+
+## 33.1.0 / 2023-08-25
+
+***Security***:
+
+* Update security dependencies ([#15667](https://github.com/DataDog/integrations-core/pull/15667))
+  * in-toto: 2.0.0
+  * securesystemslib: 0.28.0
+
+## 33.0.1 / 2023-08-24
+
+***Fixed***:
+
+* Use `DD_TRACE_ENABLED` to disable ddtrace on Windows when using `process_isolation` ([#15635](https://github.com/DataDog/integrations-core/pull/15635))
+
+## 33.0.0 / 2023-08-18
+
+***Changed***:
+
+* Remove python 2 references from SQL Server integration ([#15606](https://github.com/DataDog/integrations-core/pull/15606))
 
 ***Added***:
 
 * Dependency update for 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
 * Improve documentation of APIs ([#15582](https://github.com/DataDog/integrations-core/pull/15582))
 
+***Added***:
+
+* Support Auth through Azure AD MI / Service Principal ([#15591](https://github.com/DataDog/integrations-core/pull/15591))
+
 ***Fixed***:
 
+* Downgrade pydantic to 2.0.2 ([#15596](https://github.com/DataDog/integrations-core/pull/15596))
 * Bump cryptography to 41.0.3 ([#15517](https://github.com/DataDog/integrations-core/pull/15517))
+* Prevent `command already in progress` errors in the Postgres integration ([#15489](https://github.com/DataDog/integrations-core/pull/15489))
+* Disable ddtrace when using process_isolation on Windows ([#15622](https://github.com/DataDog/integrations-core/pull/15622))
 
 ## 32.7.0 / 2023-08-10
 

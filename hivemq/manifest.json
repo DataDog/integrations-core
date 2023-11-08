@@ -12,9 +12,9 @@
     "title": "HiveMQ",
     "media": [],
     "classifier_tags": [
-      "Category::IOT",
+      "Category::IoT",
       "Category::Log Collection",
-      "Category::Messaging",
+      "Category::Message Queues",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS"

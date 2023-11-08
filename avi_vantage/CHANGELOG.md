@@ -1,8 +1,8 @@
 # CHANGELOG - Avi Vantage
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 4.0.0 / 2023-08-10
+## 4.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 
@@ -16,7 +16,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 3.3.2 / 2023-07-13
+## 3.3.2 / 2023-07-13 / Agent 7.47.0
 
 ***Fixed***:
 
@@ -140,4 +140,3 @@
 ***Added***:
 
 * Add Avi Vantage integration ([#9481](https://github.com/DataDog/integrations-core/pull/9481))
-

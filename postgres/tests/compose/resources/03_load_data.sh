@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL   
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     CREATE TABLE cities (city VARCHAR(255), country VARCHAR(255), PRIMARY KEY(city));
     INSERT INTO cities VALUES ('New York', 'USA'), ('Beautiful city of lights', 'France');
     CREATE TABLE persons (personid SERIAL, lastname VARCHAR(255), firstname VARCHAR(255), address VARCHAR(255), city VARCHAR(255) DEFAULT 'New York',  CONSTRAINT fk_city FOREIGN KEY (city) REFERENCES cities(city));

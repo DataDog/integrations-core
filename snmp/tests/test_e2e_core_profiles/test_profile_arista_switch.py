@@ -9,14 +9,12 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
+    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     assert_extend_generic_bgp4,
-    assert_extend_generic_host_resources,
+    assert_extend_generic_entity_sensor,
     assert_extend_generic_if,
-    assert_extend_generic_ip,
     assert_extend_generic_ospf,
-    assert_extend_generic_tcp,
-    assert_extend_generic_udp,
     create_e2e_core_test_config,
     get_device_ip_from_config,
 )
@@ -25,7 +23,8 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_arista_switch(dd_agent_check):
-    config = create_e2e_core_test_config('arista-switch')
+    profile = 'arista-switch'
+    config = create_e2e_core_test_config(profile)
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -37,13 +36,10 @@ def test_e2e_profile_arista_switch(dd_agent_check):
     ]
 
     # --- TEST EXTENDED METRICS ---
+    assert_extend_generic_entity_sensor(aggregator, common_tags)
     assert_extend_generic_if(aggregator, common_tags)
-    assert_extend_generic_ip(aggregator, common_tags)
-    assert_extend_generic_host_resources(aggregator, common_tags)
     assert_extend_generic_ospf(aggregator, common_tags)
     assert_extend_generic_bgp4(aggregator, common_tags)
-    assert_extend_generic_tcp(aggregator, common_tags)
-    assert_extend_generic_udp(aggregator, common_tags)
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
@@ -103,6 +99,11 @@ def test_e2e_profile_arista_switch(dd_agent_check):
         tags=common_tags + ['arista_if_rate_interval:764721249'],
     )
 
+    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
+
     # --- TEST METADATA ---
     device = {
         'description': 'arista-switch Device Description',
@@ -119,5 +120,6 @@ def test_e2e_profile_arista_switch(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
+    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

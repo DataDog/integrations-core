@@ -37,7 +37,7 @@ metrics:
     metric_tags:
       - index: 1
         tag: fan_num
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.43.45.1.2.23.1.9.1.1.1.2
           name: hwDevMFanStatus
         tag: fan_status
@@ -56,7 +56,7 @@ metrics:
     metric_tags:
       - index: 1
         tag: power_num
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.43.45.1.2.23.1.9.1.2.1.2
           name: hwDevMPowerStatus
         tag: power_status

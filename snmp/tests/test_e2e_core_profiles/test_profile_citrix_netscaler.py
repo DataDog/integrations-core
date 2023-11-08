@@ -9,6 +9,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
+    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     assert_extend_generic_if,
     create_e2e_core_test_config,
@@ -19,7 +20,8 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_citrix_netscaler(dd_agent_check):
-    config = create_e2e_core_test_config('citrix-netscaler')
+    profile = 'citrix-netscaler'
+    config = create_e2e_core_test_config(profile)
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -90,12 +92,14 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
     aggregator.assert_metric('snmp.netscaler.vsvrSvcGrpBindCount', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
         [
+            'netscaler_vsvr_ip_address:210.102.241.146',
             'netscaler_vsvr_name:acted oxen driving their forward their kept Jaded',
             'netscaler_vsvr_port:12',
             'netscaler_vsvr_state:transition_to_out_of_service',
             'netscaler_vsvr_type:sslvpn_udp',
         ],
         [
+            'netscaler_vsvr_ip_address:53.144.47.94',
             'netscaler_vsvr_name:oxen kept their driving',
             'netscaler_vsvr_port:8',
             'netscaler_vsvr_state:up',
@@ -279,12 +283,14 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
 
     tag_rows = [
         [
+            'netscaler_svc_ip_address:42.229.1.138',
             'netscaler_svc_port:13',
             'netscaler_svc_service_full_name:zombies quaintly acted zombies kept driving driving Jaded',
             'netscaler_svc_service_name:quaintly driving quaintly their acted',
             'netscaler_svc_service_type:httpserver',
         ],
         [
+            'netscaler_svc_ip_address:215.131.83.58',
             'netscaler_svc_port:19',
             'netscaler_svc_service_full_name:quaintly kept Jaded Jaded zombies quaintly but',
             'netscaler_svc_service_name:their oxen zombies kept oxen Jaded zombies forward forward',
@@ -343,10 +349,15 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
 
     tag_rows = [
         [
+            'netscaler_server_ip_address:220.157.222.120',
             'netscaler_server_name:acted forward acted but their oxen Jaded quaintly quaintly',
             'netscaler_server_state:unknown',
         ],
-        ['netscaler_server_name:quaintly kept kept but driving oxen', 'netscaler_server_state:unknown'],
+        [
+            'netscaler_server_ip_address:18.109.172.33',
+            'netscaler_server_name:quaintly kept kept but driving oxen',
+            'netscaler_server_state:unknown',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.netscaler.server', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -369,5 +380,6 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
+    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

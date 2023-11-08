@@ -2,8 +2,6 @@
 
 ## Overview
 
-**Coming soon**: This integration is included in the upcoming 7.47.0 release of the Datadog Agent.
-
 This check monitors [Weaviate][1] through the Datadog Agent. For more information, see [Weaviate monitoring][10].
 
 ## Setup

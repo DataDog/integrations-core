@@ -82,7 +82,6 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
     DD_API_KEY=\$DD_API_KEY \
     DD_HOST_TAGS=\$DD_TAGS \
     DD_HOSTNAME="\$(hostname | xargs)" \
-    DD_LOGS_ENABLED=true \
     DD_SITE="\${DD_SITE:-datadoghq.com}" \
     bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
 
@@ -121,6 +120,9 @@ logs:
           pattern: \d{2,4}[\-\/]\d{2,4}[\-\/]\d{2,4}.*" > /etc/datadog-agent/conf.d/spark.d/spark.yaml
 
   echo "Spark integration configured"
+
+  # ENABLE LOGS IN datadog.yaml TO COLLECT DRIVER LOGS
+  sed -i '/.*logs_enabled:.*/a logs_enabled: true' /etc/datadog-agent/datadog.yaml
 fi
 
 echo "Restart the agent"
@@ -162,7 +164,6 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
     DD_API_KEY=\$DD_API_KEY \
     DD_HOST_TAGS=\$DD_TAGS \
     DD_HOSTNAME="\$(hostname | xargs)" \
-    DD_LOGS_ENABLED=true \
     DD_SITE="\${DD_SITE:-datadoghq.com}" \
     bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
 
@@ -198,6 +199,9 @@ logs:
           pattern: \d{2,4}[\-\/]\d{2,4}[\-\/]\d{2,4}.*" > /etc/datadog-agent/conf.d/spark.d/spark.yaml
 
   echo "Spark integration configured"
+
+  # ENABLE LOGS IN datadog.yaml TO COLLECT DRIVER LOGS
+  sed -i '/.*logs_enabled:.*/a logs_enabled: true' /etc/datadog-agent/datadog.yaml
 else
   echo "Installing Datadog Agent on the worker."
 
@@ -277,7 +281,6 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
     DD_API_KEY=\$DD_API_KEY \
     DD_HOST_TAGS=\$DD_TAGS \
     DD_HOSTNAME="\$(hostname | xargs)" \
-    DD_LOGS_ENABLED=true \
     DD_SITE="\${DD_SITE:-datadoghq.com}" \
     bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
 
@@ -316,7 +319,11 @@ logs:
           pattern: \d{2,4}[\-\/]\d{2,4}[\-\/]\d{2,4}.*" > /etc/datadog-agent/conf.d/spark.d/spark.yaml
 
   echo "Spark integration configured"
+
+  # ENABLE LOGS IN datadog.yaml TO COLLECT DRIVER LOGS
+  sed -i '/.*logs_enabled:.*/a logs_enabled: true' /etc/datadog-agent/datadog.yaml
 fi
+
 
 echo "Restart the agent"
 sudo service datadog-agent restart
@@ -354,7 +361,6 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
     DD_API_KEY=\$DD_API_KEY \
     DD_HOST_TAGS=\$DD_TAGS \
     DD_HOSTNAME="\$(hostname | xargs)" \
-    DD_LOGS_ENABLED=true \
     DD_SITE="\${DD_SITE:-datadoghq.com}" \
     bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
 
@@ -390,6 +396,9 @@ logs:
           pattern: \d{2,4}[\-\/]\d{2,4}[\-\/]\d{2,4}.*" > /etc/datadog-agent/conf.d/spark.d/spark.yaml
 
   echo "Spark integration configured"
+
+  # ENABLE LOGS IN datadog.yaml TO COLLECT DRIVER LOGS
+  sed -i '/.*logs_enabled:.*/a logs_enabled: true' /etc/datadog-agent/datadog.yaml
 else
   echo "Installing Datadog Agent on the worker."
 
@@ -434,6 +443,8 @@ The Databricks integration does not include any events.
 
 ## Troubleshooting
 
+You can troubleshoot issues yourself by enabling the [Databricks web terminal][18] or by using a [Databricks Notebook][19]. Consult the [Agent Troubleshooting][20] documentation for information on useful troubleshooting steps. 
+
 Need help? Contact [Datadog support][10].
 
 ## Further Reading
@@ -455,3 +466,6 @@ Need help? Contact [Datadog support][10].
 [15]: https://docs.datadoghq.com/getting_started/site/
 [16]: https://docs.databricks.com/clusters/init-scripts.html#global-init-scripts
 [17]: https://docs.databricks.com/clusters/init-scripts.html#cluster-scoped-init-scripts
+[18]: https://docs.databricks.com/en/clusters/web-terminal.html
+[19]: https://docs.databricks.com/en/notebooks/index.html
+[20]: https://docs.datadoghq.com/agent/troubleshooting/

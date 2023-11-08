@@ -1,6 +1,25 @@
 # CHANGELOG - Kube_scheduler
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 4.7.1 / 2023-10-11 / Agent 7.49.0
+
+***Fixed***:
+
+* Update kube_scheduler SLI metrics implementation for consistency across components ([#15929](https://github.com/DataDog/integrations-core/pull/15929))
+
+## 4.7.0 / 2023-09-29
+
+***Added***:
+
+* Add goroutine_by_scheduling_operation metric to kube_scheduler check ([#15697](https://github.com/DataDog/integrations-core/pull/15697))
+* Add support for kube_scheduler SLI metrics ([#15731](https://github.com/DataDog/integrations-core/pull/15731))
+
+## 4.6.1 / 2023-08-18 / Agent 7.48.0
+
+***Fixed***:
+
+* Update datadog-checks-base dependency version to 32.6.0 ([#15604](https://github.com/DataDog/integrations-core/pull/15604))
 
 ## 4.6.0 / 2023-08-10
 
@@ -12,7 +31,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 4.5.1 / 2023-07-10
+## 4.5.1 / 2023-07-10 / Agent 7.47.0
 
 ***Fixed***:
 

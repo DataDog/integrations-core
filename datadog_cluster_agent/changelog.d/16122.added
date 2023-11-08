@@ -1,0 +1,1 @@
+Add `datadog.rate_limit_queries.remaining_min` to default metrics of `datadog_cluster_agent` integration 

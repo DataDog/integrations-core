@@ -76,7 +76,7 @@ class InstanceConfig(BaseModel):
     tag_event_id: Optional[bool] = None
     tag_sid: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
-    timeout: Optional[float] = None
+    timeout: Optional[int] = None
     type: Optional[tuple[str, ...]] = None
     user: Optional[str] = None
 

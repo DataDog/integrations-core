@@ -1,6 +1,12 @@
 # CHANGELOG - DCGM Exporter
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 2.1.0 / 2023-08-18 / Agent 7.48.0
+
+***Added***:
+
+* Add full support for cheap profiling metrics ([#15602](https://github.com/DataDog/integrations-core/pull/15602))
 
 ## 2.0.0 / 2023-08-10
 
@@ -16,7 +22,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 1.0.0 / 2023-07-07
+## 1.0.0 / 2023-07-07 / Agent 7.47.0
 
 ***Added***:
 

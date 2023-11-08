@@ -4,7 +4,7 @@ version: "3.5"
 # - https://github.com/mesosphere/docker-containers/tree/master/mesos
 services:
   zookeeper:
-    image: zookeeper
+    image: zookeeper:3.8.1
     environment:
       ZOO_SYNC_LIMIT: 5
       ZOO_INIT_LIMIT: 10

@@ -16,6 +16,7 @@ from datadog_checks.dev.tooling.utils import set_root
 from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars
 from ddev.config.file import ConfigFile
+from ddev.e2e.constants import E2EEnvVars
 from ddev.repo.core import Repository
 from ddev.utils.ci import running_in_ci
 from ddev.utils.fs import Path, temp_directory
@@ -73,6 +74,11 @@ def platform() -> Platform:
 
 
 @pytest.fixture(scope='session')
+def docker_path(platform):
+    return platform.format_for_subprocess(['docker'], shell=False)[0]
+
+
+@pytest.fixture(scope='session')
 def terminal() -> Terminal:
     return Terminal(verbosity=0, enable_color=False, interactive=False)
 
@@ -94,21 +100,36 @@ def valid_integration(valid_integrations) -> str:
 
 
 @pytest.fixture(autouse=True)
-def config_file(tmp_path, monkeypatch) -> ConfigFile:
+def config_file(tmp_path, monkeypatch, local_repo) -> ConfigFile:
     for env_var in (
+        'FORCE_COLOR',
+        'DD_ENV',
+        'DD_SERVICE',
         'DD_SITE',
         'DD_LOGS_CONFIG_DD_URL',
         'DD_DD_URL',
         'DD_API_KEY',
         'DD_APP_KEY',
         'DDEV_REPO',
+        'DDEV_TEST_ENABLE_TRACING',
+        'PYTHON_FILTER',
+        E2EEnvVars.AGENT_BUILD,
+        E2EEnvVars.AGENT_BUILD_PY2,
+        'HATCH_VERBOSE',
+        'HATCH_QUIET',
     ):
         monkeypatch.delenv(env_var, raising=False)
 
     path = Path(tmp_path, 'config.toml')
     monkeypatch.setenv(ConfigEnvVars.CONFIG, str(path))
+
     config = ConfigFile(path)
-    config.restore()
+    config.reset()
+
+    # Provide a real default for times when tests have no need to modify the repo
+    config.model.repos['core'] = str(local_repo)
+    config.save()
+
     return config
 
 
@@ -122,7 +143,16 @@ def temp_dir(tmp_path) -> Path:
 @pytest.fixture(scope='session', autouse=True)
 def isolation() -> Generator[Path, None, None]:
     with temp_directory() as d:
-        default_env_vars = {AppEnvVars.NO_COLOR: '1'}
+        data_dir = d / 'data'
+        data_dir.mkdir()
+
+        default_env_vars = {
+            'DDEV_SELF_TESTING': 'true',
+            ConfigEnvVars.DATA: str(data_dir),
+            AppEnvVars.NO_COLOR: '1',
+            'COLUMNS': '80',
+            'LINES': '24',
+        }
         with d.as_cwd(default_env_vars):
             yield d
 
@@ -155,6 +185,13 @@ def repository(local_clone, config_file) -> Generator[ClonedRepo, None, None]:
     finally:
         set_root('')
         local_clone.reset_branch()
+
+
+@pytest.fixture(scope='session')
+def default_hostname():
+    import socket
+
+    return socket.gethostname().lower()
 
 
 @pytest.fixture

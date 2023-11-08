@@ -1,6 +1,18 @@
 # CHANGELOG - istio
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 5.2.0 / 2023-09-29 / Agent 7.49.0
+
+***Added***:
+
+* Add additional Istio metrics ([#15820](https://github.com/DataDog/integrations-core/pull/15820))
+
+## 5.1.0 / 2023-08-18 / Agent 7.48.0
+
+***Added***:
+
+* Add support for namespace in istio check ([#14611](https://github.com/DataDog/integrations-core/pull/14611))
 
 ## 5.0.0 / 2023-08-10
 
@@ -16,7 +28,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 4.4.1 / 2023-07-10
+## 4.4.1 / 2023-07-10 / Agent 7.47.0
 
 ***Fixed***:
 

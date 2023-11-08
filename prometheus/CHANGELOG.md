@@ -1,6 +1,12 @@
 # CHANGELOG - Prometheus
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 3.5.1 / 2023-08-18 / Agent 7.48.0
+
+***Fixed***:
+
+* Update datadog-checks-base dependency version to 32.6.0 ([#15604](https://github.com/DataDog/integrations-core/pull/15604))
 
 ## 3.5.0 / 2023-08-10
 
@@ -12,7 +18,7 @@
 
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 3.4.1 / 2023-07-10
+## 3.4.1 / 2023-07-10 / Agent 7.47.0
 
 ***Fixed***:
 

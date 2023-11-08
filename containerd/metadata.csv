@@ -20,5 +20,6 @@ containerd.cpu.user,rate,,nanosecond,,The total user CPU time,0,containerd,cpu_u
 containerd.storage.read,rate,,byte,,Read bytes (Windows only),0,containerd,storage_read,
 containerd.storage.write,rate,,byte,,Write bytes (Windows only),0,containerd,storage_write,
 containerd.image.size,gauge,,byte,,The size of the container image,0,containerd,image size,
+containerd.image.pull,count,,byte,,The number of image pull requests,0,containerd,image pull,
 containerd.proc.open_fds,gauge,,file,,The number of open file descriptors,0,containerd,open_fds,
 containerd.uptime,gauge,,second,,Time since the container was started,0,containerd,uptime,

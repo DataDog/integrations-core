@@ -1,6 +1,12 @@
 # CHANGELOG - elastic
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 6.1.0 / 2023-08-18 / Agent 7.48.0
+
+***Added***:
+
+* Support inflight_requests stats since v8 ([#15259](https://github.com/DataDog/integrations-core/pull/15259))
 
 ***Fixed***:
 
@@ -22,7 +28,7 @@
 * Lower logging level if there's an error scraping the template endpoint to DEBUG ([#15381](https://github.com/DataDog/integrations-core/pull/15381))
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 
-## 5.5.0 / 2023-07-10
+## 5.5.0 / 2023-07-10 / Agent 7.47.0
 
 ***Added***:
 

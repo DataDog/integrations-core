@@ -1,8 +1,8 @@
 # CHANGELOG - openstack
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 1.13.2 / 2023-07-10
+## 1.13.2 / 2023-07-10 / Agent 7.47.0
 
 ***Fixed***:
 
