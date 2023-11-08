@@ -902,7 +902,7 @@ class PostgreSql(AgentCheck):
                 "collection_interval": self._config.database_instance_collection_interval,
                 'dbms_version': payload_pg_version(self.version),
                 'integration_version': __version__,
-                "tags": self._non_internal_tags,
+                "tags": [t for t in self._non_internal_tags if not t.startswith('db:')],
                 "timestamp": time() * 1000,
                 "cloud_metadata": self._config.cloud_metadata,
                 "metadata": {

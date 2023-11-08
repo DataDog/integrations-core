@@ -1,0 +1,88 @@
+{
+  "services": [
+    {
+      "name": "placement",
+      "description": "Placement Service",
+      "id": "155d28a57a054d5fae86410b566ffca1",
+      "type": "placement",
+      "enabled": true,
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/services/155d28a57a054d5fae86410b566ffca1"
+      }
+    },
+    {
+      "name": "nova_legacy",
+      "description": "Nova Compute Service (Legacy 2.0)",
+      "id": "17d8088bf93b41b19ae971eb6f2aa7a5",
+      "type": "compute_legacy",
+      "enabled": true,
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/services/17d8088bf93b41b19ae971eb6f2aa7a5"
+      }
+    },
+    {
+      "name": "keystone",
+      "id": "271afc4cc62e493592b6be9b87bfb108",
+      "type": "identity",
+      "enabled": true,
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/services/271afc4cc62e493592b6be9b87bfb108"
+      }
+    },
+    {
+      "name": "cinderv3",
+      "description": "Cinder Volume Service V3",
+      "id": "3ef836a26c2c40acabb07a6415384f20",
+      "type": "volumev3",
+      "enabled": true,
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/services/3ef836a26c2c40acabb07a6415384f20"
+      }
+    },
+    {
+      "name": "cinder",
+      "description": "Cinder Volume Service",
+      "id": "55b21161725a461793a2222749229306",
+      "type": "block-storage",
+      "enabled": true,
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/services/55b21161725a461793a2222749229306"
+      }
+    },
+    {
+      "name": "neutron",
+      "description": "Neutron Service",
+      "id": "7dca0a2e55d74d66995f3105ed69608f",
+      "type": "network",
+      "enabled": true,
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/services/7dca0a2e55d74d66995f3105ed69608f"
+      }
+    },
+    {
+      "name": "glance",
+      "description": "Glance Image Service",
+      "id": "82624ab61fb04f058d043facf315fa3c",
+      "type": "image",
+      "enabled": true,
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/services/82624ab61fb04f058d043facf315fa3c"
+      }
+    },
+    {
+      "name": "nova",
+      "description": "Nova Compute Service",
+      "id": "9aca42df11e84366924013b2f1a1259b",
+      "type": "compute",
+      "enabled": true,
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/services/9aca42df11e84366924013b2f1a1259b"
+      }
+    }
+  ],
+  "links": {
+    "next": null,
+    "self": "http://10.164.0.11/identity/v3/services",
+    "previous": null
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "hypervisors": [
+    {
+      "id": "d884b51a-e464-49dc-916c-766da0237661",
+      "hypervisor_hostname": "agent-integrations-openstack-default",
+      "state": "up",
+      "status": "enabled",
+      "hypervisor_type": "QEMU",
+      "hypervisor_version": 4002001,
+      "host_ip": "10.164.0.11",
+      "service": {
+        "id": "7bf08d7e-a939-46c3-bdae-fbe3ebfe78a4",
+        "host": "agent-integrations-openstack-default",
+        "disabled_reason": null
+      },
+      "uptime": " 12:18:59 up 36 days, 7 min,  0 users,  load average: 0.28, 0.35, 0.35\n"
+    }
+  ]
+}

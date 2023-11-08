@@ -581,6 +581,15 @@ cilium_forward_count_total{direction="INGRESS"} 1.455756e+06
 # HELP cilium_fqdn_gc_deletions_total Number of FQDNs that have been cleaned on FQDN Garbage collector job
 # TYPE cilium_fqdn_gc_deletions_total counter
 cilium_fqdn_gc_deletions_total 0
+# HELP cilium_fqdn_active_names Number of domains inside the DNS cache that have not expired (by TTL), per endpoint
+# TYPE cilium_fqdn_active_names gauge
+cilium_fqdn_active_names{endpoint="123"} 1
+# HELP cilium_fqdn_active_ips Number of IPs inside the DNS cache associated with a domain that has not expired (by TTL), per endpoint
+# TYPE cilium_fqdn_active_ips gauge
+cilium_fqdn_active_ips{endpoint="123"} 1
+# HELP cilium_fqdn_alive_zombie_connections Number of IPs associated with domains that have expired (by TTL) yet still associated with an active connection (aka zombie), per endpoint
+# TYPE cilium_fqdn_alive_zombie_connections gauge
+cilium_fqdn_alive_zombie_connections{endpoint="123"} 0
 # HELP cilium_identity_count Number of identities currently allocated
 # TYPE cilium_identity_count gauge
 cilium_identity_count 13
@@ -960,6 +969,88 @@ cilium_policy_endpoint_enforcement_status{enforcement="none"} 2
 # HELP cilium_policy_import_errors Number of times a policy import has failed
 # TYPE cilium_policy_import_errors counter
 cilium_policy_import_errors 0
+# HELP cilium_proxy_redirects Number of redirects installed for endpoints, labeled by protocol
+# TYPE cilium_proxy_redirects gauge
+cilium_proxy_redirects{protocol_l7="dns"} 18
+# HELP cilium_proxy_upstream_reply_seconds Seconds waited to get a reply from a upstream server
+# TYPE cilium_proxy_upstream_reply_seconds histogram
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="dataplaneTime",le="0.005"} 65310
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="dataplaneTime",le="0.01"} 67455
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="dataplaneTime",le="0.025"} 86203
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="dataplaneTime",le="0.05"} 86727
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="dataplaneTime",le="0.1"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="dataplaneTime",le="0.25"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="dataplaneTime",le="0.5"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="dataplaneTime",le="1"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="dataplaneTime",le="2.5"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="dataplaneTime",le="5"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="dataplaneTime",le="10"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="dataplaneTime",le="+Inf"} 86734
+cilium_proxy_upstream_reply_seconds_sum{error="allow",protocol_l7="dns",scope="dataplaneTime"} 319.95475046600376
+cilium_proxy_upstream_reply_seconds_count{error="allow",protocol_l7="dns",scope="dataplaneTime"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="policyCheckTime",le="0.005"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="policyCheckTime",le="0.01"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="policyCheckTime",le="0.025"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="policyCheckTime",le="0.05"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="policyCheckTime",le="0.1"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="policyCheckTime",le="0.25"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="policyCheckTime",le="0.5"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="policyCheckTime",le="1"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="policyCheckTime",le="2.5"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="policyCheckTime",le="5"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="policyCheckTime",le="10"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="policyCheckTime",le="+Inf"} 86734
+cilium_proxy_upstream_reply_seconds_sum{error="allow",protocol_l7="dns",scope="policyCheckTime"} 0.7216416319999959
+cilium_proxy_upstream_reply_seconds_count{error="allow",protocol_l7="dns",scope="policyCheckTime"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="processingTime",le="0.005"} 65308
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="processingTime",le="0.01"} 67248
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="processingTime",le="0.025"} 86186
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="processingTime",le="0.05"} 86725
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="processingTime",le="0.1"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="processingTime",le="0.25"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="processingTime",le="0.5"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="processingTime",le="1"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="processingTime",le="2.5"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="processingTime",le="5"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="processingTime",le="10"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="processingTime",le="+Inf"} 86734
+cilium_proxy_upstream_reply_seconds_sum{error="allow",protocol_l7="dns",scope="processingTime"} 337.8281641690027
+cilium_proxy_upstream_reply_seconds_count{error="allow",protocol_l7="dns",scope="processingTime"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="semaphoreTime",le="0.005"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="semaphoreTime",le="0.01"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="semaphoreTime",le="0.025"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="semaphoreTime",le="0.05"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="semaphoreTime",le="0.1"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="semaphoreTime",le="0.25"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="semaphoreTime",le="0.5"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="semaphoreTime",le="1"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="semaphoreTime",le="2.5"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="semaphoreTime",le="5"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="semaphoreTime",le="10"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="allow",protocol_l7="dns",scope="semaphoreTime",le="+Inf"} 86734
+cilium_proxy_upstream_reply_seconds_sum{error="allow",protocol_l7="dns",scope="semaphoreTime"} 0
+cilium_proxy_upstream_reply_seconds_count{error="allow",protocol_l7="dns",scope="semaphoreTime"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="timeout",protocol_l7="dns",scope="upstreamTime",le="0.005"} 86461
+cilium_proxy_upstream_reply_seconds_bucket{error="timeout",protocol_l7="dns",scope="upstreamTime",le="0.01"} 86683
+cilium_proxy_upstream_reply_seconds_bucket{error="timeout",protocol_l7="dns",scope="upstreamTime",le="0.025"} 86733
+cilium_proxy_upstream_reply_seconds_bucket{error="timeout",protocol_l7="dns",scope="upstreamTime",le="0.05"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="timeout",protocol_l7="dns",scope="upstreamTime",le="0.1"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="timeout",protocol_l7="dns",scope="upstreamTime",le="0.25"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="timeout",protocol_l7="dns",scope="upstreamTime",le="0.5"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="timeout",protocol_l7="dns",scope="upstreamTime",le="1"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="timeout",protocol_l7="dns",scope="upstreamTime",le="2.5"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="timeout",protocol_l7="dns",scope="upstreamTime",le="5"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="timeout",protocol_l7="dns",scope="upstreamTime",le="10"} 86734
+cilium_proxy_upstream_reply_seconds_bucket{error="timeout",protocol_l7="dns",scope="upstreamTime",le="+Inf"} 86734
+cilium_proxy_upstream_reply_seconds_sum{error="timeout",protocol_l7="dns",scope="upstreamTime"} 64.2562496679994
+cilium_proxy_upstream_reply_seconds_count{error="timeout",protocol_l7="dns",scope="upstreamTime"} 86734
+# HELP cilium_proxy_datapath_update_timeout_total Number of total datapath update timeouts due to FQDN IP updates
+# TYPE cilium_proxy_datapath_update_timeout_total counter
+cilium_proxy_datapath_update_timeout_total 2
+# HELP cilium_policy_l7_total Number of total proxy requests handled
+# TYPE cilium_policy_l7_total counter
+cilium_policy_l7_total{rule="forwarded"} 700864
+cilium_policy_l7_total{rule="received"} 700864
 # HELP cilium_policy_l7_denied_total Number of total L7 denied requests/responses due to policy
 # TYPE cilium_policy_l7_denied_total counter
 cilium_policy_l7_denied_total 0
