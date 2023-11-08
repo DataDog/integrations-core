@@ -84,6 +84,14 @@ def instance_include_master_files_metrics():
     return False
 
 
+def instance_include_primary_log_shipping_metrics():
+    return False
+
+
+def instance_include_secondary_log_shipping_metrics():
+    return False
+
+
 def instance_include_task_scheduler_metrics():
     return False
 
