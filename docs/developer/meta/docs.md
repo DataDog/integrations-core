@@ -63,7 +63,7 @@ We use some [scripts][docs-scripts] to dynamically modify pages before being pro
 
 We [configure][root-tox-config] a [tox][tox-github] environment called `docs` that provides all the dependencies necessary to build the documentation.
 
-To build and view the documentation in your browser, run the [serve](../ddev/cli.md#serve) command (the first invocation may take a few extra moments):
+To build and view the documentation in your browser, run the [serve](../ddev/cli.md#ddev-docs-serve) command (the first invocation may take a few extra moments):
 
 ```
 ddev docs serve

@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import contextlib
 import copy
 
 import mock
@@ -13,7 +14,8 @@ from six import iteritems
 
 from datadog_checks.postgres import PostgreSql, util
 
-from .common import PORT
+from .common import PORT, check_performance_metrics
+from .utils import requires_over_10
 
 pytestmark = pytest.mark.unit
 
@@ -79,8 +81,8 @@ def test_get_instance_with_default(pg_instance, collect_default_database):
     """
     pg_instance['collect_default_database'] = collect_default_database
     check = PostgreSql('postgres', {}, [pg_instance])
-    check._version = VersionInfo(9, 2, 0)
-    res = check.metrics_cache.get_instance_metrics(check._version)
+    check.version = VersionInfo(9, 2, 0)
+    res = check.metrics_cache.get_instance_metrics(check.version)
     dbfilter = " AND psd.datname not ilike 'postgres'"
     if collect_default_database:
         assert dbfilter not in res['query']
@@ -94,7 +96,12 @@ def test_malformed_get_custom_queries(check):
     """
     check.log = MagicMock()
     db = MagicMock()
-    check.db = db
+
+    @contextlib.contextmanager
+    def mock_db():
+        yield db
+
+    check.db = mock_db
 
     check._config.custom_queries = [{}]
 
@@ -124,7 +131,7 @@ def test_malformed_get_custom_queries(check):
     # Make sure we gracefully handle an error while performing custom queries
     malformed_custom_query_column = {}
     malformed_custom_query['columns'] = [malformed_custom_query_column]
-    db.cursor().execute.side_effect = psycopg2.ProgrammingError('FOO')
+    db.cursor().__enter__().execute.side_effect = psycopg2.ProgrammingError('FOO')
     check._collect_custom_queries([])
     check.log.error.assert_called_once_with(
         "Error executing query for metric_prefix %s: %s", malformed_custom_query['metric_prefix'], 'FOO'
@@ -135,8 +142,8 @@ def test_malformed_get_custom_queries(check):
     malformed_custom_query_column = {}
     malformed_custom_query['columns'] = [malformed_custom_query_column]
     query_return = ['num', 1337]
-    db.cursor().execute.side_effect = None
-    db.cursor().__iter__.return_value = iter([query_return])
+    db.cursor().__enter__().execute.side_effect = None
+    db.cursor().__enter__().__iter__.return_value = iter([query_return])
     check._collect_custom_queries([])
     check.log.error.assert_called_once_with(
         "query result for metric_prefix %s: expected %s columns, got %s",
@@ -147,7 +154,7 @@ def test_malformed_get_custom_queries(check):
     check.log.reset_mock()
 
     # Make sure the query does not return an empty result
-    db.cursor().__iter__.return_value = iter([[]])
+    db.cursor().__enter__().__iter__.return_value = iter([[]])
     check._collect_custom_queries([])
     check.log.debug.assert_called_with(
         "query result for metric_prefix %s: returned an empty result", malformed_custom_query['metric_prefix']
@@ -156,7 +163,7 @@ def test_malformed_get_custom_queries(check):
 
     # Make sure 'name' is defined in each column
     malformed_custom_query_column['some_key'] = 'some value'
-    db.cursor().__iter__.return_value = iter([[1337]])
+    db.cursor().__enter__().__iter__.return_value = iter([[1337]])
     check._collect_custom_queries([])
     check.log.error.assert_called_once_with(
         "column field `name` is required for metric_prefix `%s`", malformed_custom_query['metric_prefix']
@@ -165,7 +172,7 @@ def test_malformed_get_custom_queries(check):
 
     # Make sure 'type' is defined in each column
     malformed_custom_query_column['name'] = 'num'
-    db.cursor().__iter__.return_value = iter([[1337]])
+    db.cursor().__enter__().__iter__.return_value = iter([[1337]])
     check._collect_custom_queries([])
     check.log.error.assert_called_once_with(
         "column field `type` is required for column `%s` of metric_prefix `%s`",
@@ -176,7 +183,7 @@ def test_malformed_get_custom_queries(check):
 
     # Make sure 'type' is a valid metric type
     malformed_custom_query_column['type'] = 'invalid_type'
-    db.cursor().__iter__.return_value = iter([[1337]])
+    db.cursor().__enter__().__iter__.return_value = iter([[1337]])
     check._collect_custom_queries([])
     check.log.error.assert_called_once_with(
         "invalid submission method `%s` for column `%s` of metric_prefix `%s`",
@@ -190,7 +197,7 @@ def test_malformed_get_custom_queries(check):
     malformed_custom_query_column['type'] = 'gauge'
     query_return = MagicMock()
     query_return.__float__.side_effect = ValueError('Mocked exception')
-    db.cursor().__iter__.return_value = iter([[query_return]])
+    db.cursor().__enter__().__iter__.return_value = iter([[query_return]])
     check._collect_custom_queries([])
     check.log.error.assert_called_once_with(
         "non-numeric value `%s` for metric column `%s` of metric_prefix `%s`",
@@ -234,24 +241,36 @@ def test_resolved_hostname_metadata(check, test_case):
         m.assert_any_call('test:123', 'resolved_hostname', test_case)
 
 
+@requires_over_10
 @pytest.mark.usefixtures('mock_cursor_for_replica_stats')
 def test_replication_stats(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
-    base_tags = ['foo:bar', 'port:5432', 'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname)]
+    base_tags = [
+        'foo:bar',
+        'port:5432',
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
     app1_tags = base_tags + [
         'wal_sync_state:async',
         'wal_state:streaming',
         'wal_app_name:app1',
         'wal_client_addr:1.1.1.1',
     ]
-    app2_tags = base_tags + ['wal_sync_state:sync', 'wal_state:backup', 'wal_app_name:app2', 'wal_client_addr:1.1.1.1']
+    app2_tags = base_tags + [
+        'wal_sync_state:sync',
+        'wal_state:backup',
+        'wal_app_name:app2',
+        'wal_client_addr:1.1.1.1',
+    ]
 
     aggregator.assert_metric('postgresql.db.count', 0, base_tags)
     for suffix in ('wal_write_lag', 'wal_flush_lag', 'wal_replay_lag', 'backend_xmin_age'):
         metric_name = 'postgresql.replication.{}'.format(suffix)
         aggregator.assert_metric(metric_name, 12, app1_tags)
         aggregator.assert_metric(metric_name, 13, app2_tags)
+
+    check_performance_metrics(aggregator, check.debug_stats_kwargs()['tags'])
 
     aggregator.assert_all_metrics_covered()
 
@@ -293,7 +312,7 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
 
     check = integration_check(pg_instance)
     try:
-        check._connect()
+        check.db_pool.get_connection(pg_instance['dbname'], 100)
     except psycopg2.ProgrammingError as e:
         fail(str(e))
     except psycopg2.OperationalError:

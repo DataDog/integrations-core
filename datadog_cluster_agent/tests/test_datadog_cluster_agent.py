@@ -48,6 +48,7 @@ METRICS = [
     'datadog.rate_limit_queries.limit',
     'datadog.rate_limit_queries.period',
     'datadog.rate_limit_queries.remaining',
+    'datadog.rate_limit_queries.remaining_min',
     'datadog.rate_limit_queries.reset',
     'datadog.requests',
     'endpoint_checks.configs_dispatched',

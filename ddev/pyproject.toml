@@ -26,24 +26,31 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
 ]
 dependencies = [
-    "datadog-checks-dev[cli]~=21.0",
+    "click~=8.1.6",
+    "coverage",
+    "datadog-checks-dev[cli]~=28.0",
     "hatch>=1.6.3",
     "httpx",
     "jsonpointer",
     "pluggy",
     "rich>=12.5.1",
+    "stamina==23.2.0",
     "tomli; python_version < '3.11'",
     "tomli-w",
     "tomlkit",
+    "tqdm",
 ]
 dynamic = ["version"]
+
+[project.urls]
+Source = "https://github.com/DataDog/integrations-core"
 
 [project.scripts]
 ddev = "ddev.cli:main"
 ddev-starship = "ddev.plugin.external.starship.prompt:main"
 
-[project.urls]
-Source = "https://github.com/DataDog/integrations-core"
+[project.entry-points.hatch]
+datadog_checks = "ddev.plugin.external.hatch"
 
 [tool.hatch.version]
 source = "vcs"
@@ -58,6 +65,9 @@ git_describe_command = ["git", "describe", "--dirty", "--tags", "--long", "--mat
 [tool.hatch.build.hooks.vcs]
 version-file = "src/ddev/_version.py"
 
+[tool.hatch.build.targets.sdist]
+include = ["src"]
+
 [tool.hatch.build.targets.app]
 scripts = ["ddev"]
 
@@ -65,11 +75,12 @@ scripts = ["ddev"]
 include = '\.pyi?$'
 line-length = 120
 skip-string-normalization = true
-target-version = ["py38"]
+target-version = ["py39"]
+extend-exclude = "src/ddev/_version.py"
 
 [tool.ruff]
 exclude = []
-target-version = "py38"
+target-version = "py39"
 line-length = 120
 # Rules were ported over from the legacy flake8 settings for parity
 # All the rules can be found here: https://beta.ruff.rs/docs/rules/
@@ -99,7 +110,7 @@ unfixable = [
 ]
 
 [tool.ruff.isort]
-known-first-party = ["{template_config['package_name']}"]
+known-first-party = ["ddev"]
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"

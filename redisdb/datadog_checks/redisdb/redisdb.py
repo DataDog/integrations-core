@@ -71,6 +71,9 @@ class Redis(AgentCheck):
         'bytes_sent_per_sec': 'redis.bytes_sent_per_sec',
         # Note: 'bytes_received_per_sec' and 'bytes_sent_per_sec' are only
         # available on Azure Redis
+        'instantaneous_input_kbps': 'redis.net.instantaneous_input',
+        'instantaneous_output_kbps': 'redis.net.instantaneous_output',
+        'total_connections_received': 'redis.net.total_connections_received',
         # pubsub
         'pubsub_channels': 'redis.pubsub.channels',
         'pubsub_patterns': 'redis.pubsub.patterns',

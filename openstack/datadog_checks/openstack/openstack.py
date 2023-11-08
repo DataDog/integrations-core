@@ -144,7 +144,7 @@ class OpenStackScope(object):
         auth_url = urljoin(keystone_server_url, "{0}/auth/tokens".format(DEFAULT_KEYSTONE_API_VERSION))
         headers = {'Content-Type': 'application/json'}
 
-        resp = requests.post(
+        resp = requests.post(  # SKIP_HTTP_VALIDATION
             auth_url,
             headers=headers,
             data=json.dumps(payload),

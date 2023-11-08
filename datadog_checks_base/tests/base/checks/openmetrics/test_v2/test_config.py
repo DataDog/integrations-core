@@ -429,7 +429,4 @@ class TestUseLatestSpec:
         check = get_check({'use_latest_spec': False})
         check.configure_scrapers()
         scraper = check.scrapers['test']
-        assert scraper.http.options['headers']['Accept'] == (
-            'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1;q=0.75,'
-            'text/plain;version=0.0.4;q=0.5,*/*;q=0.1'
-        )
+        assert scraper.http.options['headers']['Accept'] == 'text/plain'

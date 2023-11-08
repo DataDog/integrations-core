@@ -49,7 +49,7 @@ pushd $TMP_DIR
 
   tar -zxvf ./*.tar.gz
   pushd MQServer
-    sudo ./mqlicense.sh -text_only -accept
+    for i in 2 4 8 16 32; do sudo ./mqlicense.sh -text_only -accept && break || sleep $i; done
     sudo rpm -ivh --force-debian *.rpm
     sudo /opt/mqm/bin/setmqinst -p /opt/mqm -i
   popd

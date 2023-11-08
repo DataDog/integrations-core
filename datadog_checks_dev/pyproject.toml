@@ -63,12 +63,12 @@ cli = [
     "atomicwrites",
     "beautifulsoup4>=4.9.3",
     "build>=0.7.0",
-    "click~=8.1",
+    "click~=8.1.6",
     "codespell",
     "colorama",
-    "datamodel-code-generator~=0.20.0",
+    "datamodel-code-generator~=0.21.4",
     "hatch>=1.5.0",
-    "in-toto==1.0.1",
+    "in-toto==2.0.0",
     "jsonschema",
     "markdown",
     "orjson",
@@ -76,14 +76,17 @@ cli = [
     "pip-tools",
     "pathspec>=0.10.0",
     "platformdirs>=2.0.0a3",
+    "pydantic>=2.0.2, <2.4.0",
     "pysmi>=0.3.4",
-    "securesystemslib[crypto]==0.20.1",
+    "securesystemslib[crypto]==0.28.0",
     "semver>=2.13.0",
     "tabulate>=0.8.9",
     "toml>=0.9.4, <1.0.0",
     "tomli>=1.1.0",
     "tomli-w>=1.0.0",
     "tox>=3.12.1, <4.0.0",
+    # Move towncrier dependency to ddev once we migrate changelog-related commands.
+    "towncrier==23.10.0",
     "twine>=1.11.0",
     "virtualenv<20.22.0",
     # TODO: Remove once every check has a pyproject.toml
@@ -97,9 +100,6 @@ datadog_checks = "datadog_checks.dev.plugin.pytest"
 
 [project.entry-points.tox]
 datadog_checks = "datadog_checks.dev.plugin.tox"
-
-[project.entry-points.hatch]
-datadog_checks = "datadog_checks.dev.plugin.hatch"
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"
@@ -120,3 +120,6 @@ include = [
 dev-mode-dirs = [
     ".",
 ]
+
+[tool.pytest.ini_options]
+testpaths = "tests"

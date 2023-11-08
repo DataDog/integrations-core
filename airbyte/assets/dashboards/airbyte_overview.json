@@ -1,0 +1,1264 @@
+{
+  "title": "Airbyte Overview",
+  "description": "**Airbyte**\n\nThis dashboard provides an overview of your [Airbyte](https://airbyte.com/) deployment.\nIt focuses on the jobs that run every time you synchronize data from source to destination in your connections.\n\n**Useful Links**\n\n* [Integration Docs](https://docs.datadoghq.com/integrations/airbyte)\n* [How Datadog monitors Airbyte and other AI stack technologies](https://www.datadoghq.com/blog/ai-integrations)\n* [Airbyte Open Source Deployment](https://docs.airbyte.com/quickstart/deploy-airbyte/)\n* [Airbyte Core Concepts](https://docs.airbyte.com/cloud/core-concepts)",
+  "widgets": [{
+    "id": 5398344842010224,
+    "definition": {
+      "title": "New group",
+      "banner_img": "/static/images/logos/airbyte_large.svg",
+      "show_title": false,
+      "type": "group",
+      "layout_type": "ordered",
+      "widgets": [{
+        "id": 5478983280988798,
+        "definition": {
+          "type": "note",
+          "content": "**Airbyte**\n\nThis dashboard provides an overview of your [Airbyte](https://airbyte.com/) deployment.\nIt focuses on the jobs that run every time you synchronize data from source to destination in your connections.",
+          "background_color": "white",
+          "font_size": "14",
+          "text_align": "left",
+          "vertical_align": "top",
+          "show_tick": false,
+          "tick_pos": "50%",
+          "tick_edge": "left",
+          "has_padding": true
+        },
+        "layout": {
+          "x": 0,
+          "y": 0,
+          "width": 3,
+          "height": 3
+        }
+      }, {
+        "id": 6394363111995732,
+        "definition": {
+          "type": "note",
+          "content": "**Useful Links**\n\n* [Integration Docs](https://docs.datadoghq.com/integrations/airbyte)\n* [How Datadog monitors Airbyte and other AI stack technologies](https://www.datadoghq.com/blog/ai-integrations)\n* [Airbyte Open Source Deployment](https://docs.airbyte.com/quickstart/deploy-airbyte/)\n* [Airbyte Core Concepts](https://docs.airbyte.com/cloud/core-concepts)",
+          "background_color": "white",
+          "font_size": "16",
+          "text_align": "left",
+          "vertical_align": "top",
+          "show_tick": false,
+          "tick_pos": "50%",
+          "tick_edge": "left",
+          "has_padding": true
+        },
+        "layout": {
+          "x": 3,
+          "y": 0,
+          "width": 3,
+          "height": 3
+        }
+      }]
+    },
+    "layout": {
+      "x": 0,
+      "y": 0,
+      "width": 6,
+      "height": 6
+    }
+  }, {
+    "id": 7752646698053128,
+    "definition": {
+      "title": "Overview",
+      "background_color": "vivid_purple",
+      "show_title": true,
+      "type": "group",
+      "layout_type": "ordered",
+      "widgets": [{
+        "id": 3949807862436880,
+        "definition": {
+          "type": "note",
+          "content": "The overview section gives you a high-level overview of your system, specifically monitors with active alerts on the health of you Airbyte instance. ",
+          "background_color": "purple",
+          "font_size": "14",
+          "text_align": "center",
+          "vertical_align": "center",
+          "show_tick": false,
+          "tick_pos": "50%",
+          "tick_edge": "left",
+          "has_padding": true
+        },
+        "layout": {
+          "x": 0,
+          "y": 0,
+          "width": 6,
+          "height": 1
+        }
+      }, {
+        "id": 3109476567828664,
+        "definition": {
+          "title": "Airbyte Monitor Summary",
+          "type": "manage_status",
+          "display_format": "countsAndList",
+          "color_preference": "text",
+          "hide_zero_counts": true,
+          "query": "tag:(integration:airbyte)",
+          "sort": "status,asc",
+          "count": 50,
+          "start": 0,
+          "summary_type": "monitors",
+          "show_priority": false,
+          "show_last_triggered": false
+        },
+        "layout": {
+          "x": 0,
+          "y": 1,
+          "width": 6,
+          "height": 3
+        }
+      }]
+    },
+    "layout": {
+      "x": 6,
+      "y": 0,
+      "width": 6,
+      "height": 6
+    }
+  }, {
+    "id": 6518790764913386,
+    "definition": {
+      "title": "Jobs Snapshot",
+      "background_color": "vivid_purple",
+      "show_title": true,
+      "type": "group",
+      "layout_type": "ordered",
+      "widgets": [{
+        "id": 2154332464605546,
+        "definition": {
+          "type": "note",
+          "content": "Metrics like number of persisting jobs, running jobs, oldest jobs, and succeeded jobs are useful for monitoring your Airbyte instance because they provide insights into the platform's performance, job processing efficiency, and data synchronization success to ensure smooth data integration workflows. ",
+          "background_color": "purple",
+          "font_size": "14",
+          "text_align": "center",
+          "vertical_align": "center",
+          "show_tick": false,
+          "tick_pos": "50%",
+          "tick_edge": "left",
+          "has_padding": true
+        },
+        "layout": {
+          "x": 0,
+          "y": 0,
+          "width": 12,
+          "height": 1
+        }
+      }, {
+        "id": 6329913229296406,
+        "definition": {
+          "title": "Number of jobs run unusually long",
+          "title_size": "16",
+          "title_align": "left",
+          "type": "query_value",
+          "requests": [{
+            "formulas": [{
+              "formula": "query1"
+            }],
+            "conditional_formats": [{
+              "palette": "white_on_red",
+              "value": 15,
+              "comparator": ">="
+            }, {
+              "palette": "green_on_white",
+              "value": 15,
+              "comparator": "<"
+            }],
+            "response_format": "scalar",
+            "queries": [{
+              "query": "avg:airbyte.metrics_reporter.num_unusually_long_syncs{*}.rollup(max, 1800)",
+              "data_source": "metrics",
+              "name": "query1",
+              "aggregator": "last"
+            }]
+          }],
+          "autoscale": true,
+          "precision": 2,
+          "timeseries_background": {
+            "type": "area",
+            "yaxis": {
+              "include_zero": false
+            }
+          }
+        },
+        "layout": {
+          "x": 0,
+          "y": 1,
+          "width": 6,
+          "height": 2
+        }
+      }, {
+        "id": 4596888485669944,
+        "definition": {
+          "title": "Jobs Succeeded",
+          "title_size": "16",
+          "title_align": "left",
+          "type": "query_value",
+          "requests": [{
+            "response_format": "scalar",
+            "queries": [{
+              "name": "query1",
+              "data_source": "metrics",
+              "query": "sum:airbyte.worker.job.succeeded_by_release_stage{*}.as_count()",
+              "aggregator": "avg"
+            }],
+            "formulas": [{
+              "formula": "query1"
+            }]
+          }],
+          "autoscale": true,
+          "precision": 2,
+          "timeseries_background": {
+            "type": "area",
+            "yaxis": {
+              "include_zero": false
+            }
+          }
+        },
+        "layout": {
+          "x": 6,
+          "y": 1,
+          "width": 6,
+          "height": 2
+        }
+      }, {
+        "id": 6410201189458864,
+        "definition": {
+          "title": "Num Running Jobs",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "1w"
+          },
+          "type": "query_value",
+          "requests": [{
+            "response_format": "scalar",
+            "queries": [{
+              "name": "query1",
+              "data_source": "metrics",
+              "query": "sum:airbyte.metrics_reporter.num_running_jobs{*}",
+              "aggregator": "avg"
+            }],
+            "formulas": [{
+              "formula": "query1"
+            }]
+          }],
+          "autoscale": true,
+          "precision": 2
+        },
+        "layout": {
+          "x": 0,
+          "y": 3,
+          "width": 3,
+          "height": 2
+        }
+      }, {
+        "id": 7878591377976400,
+        "definition": {
+          "title": "Oldest Pending Job (Secs)",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "1w"
+          },
+          "type": "query_value",
+          "requests": [{
+            "response_format": "scalar",
+            "queries": [{
+              "name": "query1",
+              "data_source": "metrics",
+              "query": "sum:airbyte.metrics_reporter.oldest_pending_job_age_secs{*}",
+              "aggregator": "avg"
+            }],
+            "formulas": [{
+              "formula": "query1"
+            }]
+          }],
+          "autoscale": true,
+          "precision": 2
+        },
+        "layout": {
+          "x": 3,
+          "y": 3,
+          "width": 3,
+          "height": 2
+        }
+      }, {
+        "id": 1860952508595386,
+        "definition": {
+          "title": "Num Pending Jobs",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "1w"
+          },
+          "type": "query_value",
+          "requests": [{
+            "response_format": "scalar",
+            "queries": [{
+              "name": "query1",
+              "data_source": "metrics",
+              "query": "sum:airbyte.metrics_reporter.num_pending_jobs{*}",
+              "aggregator": "avg"
+            }],
+            "formulas": [{
+              "formula": "query1"
+            }]
+          }],
+          "autoscale": true,
+          "precision": 2
+        },
+        "layout": {
+          "x": 6,
+          "y": 3,
+          "width": 3,
+          "height": 2
+        }
+      }, {
+        "id": 5199843168598220,
+        "definition": {
+          "title": "Oldest Running Job (Secs)",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "1w"
+          },
+          "type": "query_value",
+          "requests": [{
+            "response_format": "scalar",
+            "queries": [{
+              "name": "query1",
+              "data_source": "metrics",
+              "query": "sum:airbyte.metrics_reporter.oldest_running_job_age_secs{*}",
+              "aggregator": "avg"
+            }],
+            "formulas": [{
+              "formula": "query1"
+            }]
+          }],
+          "autoscale": true,
+          "precision": 2
+        },
+        "layout": {
+          "x": 9,
+          "y": 3,
+          "width": 3,
+          "height": 2
+        }
+      }]
+    },
+    "layout": {
+      "x": 0,
+      "y": 6,
+      "width": 12,
+      "height": 6
+    }
+  }, {
+    "id": 2334998541778104,
+    "definition": {
+      "title": "Failed Jobs",
+      "background_color": "vivid_purple",
+      "show_title": true,
+      "type": "group",
+      "layout_type": "ordered",
+      "widgets": [{
+        "id": 6759302537047694,
+        "definition": {
+          "type": "note",
+          "content": "A central place for all failure related metrics gives you an understanding of where issues and resource contention exist in your workflows so you can reduce failure rates through an improved understanding of their location and source. ",
+          "background_color": "purple",
+          "font_size": "14",
+          "text_align": "center",
+          "vertical_align": "center",
+          "show_tick": false,
+          "tick_pos": "50%",
+          "tick_edge": "left",
+          "has_padding": true
+        },
+        "layout": {
+          "x": 0,
+          "y": 0,
+          "width": 12,
+          "height": 1
+        }
+      }, {
+        "id": 899162631147318,
+        "definition": {
+          "title": "Jobs failure rate",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": ["avg", "min", "max", "value", "sum"],
+          "type": "timeseries",
+          "requests": [{
+            "formulas": [{
+              "formula": "query1 / (query1 + query2) * 100"
+            }],
+            "response_format": "timeseries",
+            "queries": [{
+              "query": "sum:airbyte.worker.job.failed_by_release_stage{*}.as_count().rollup(sum, 3600)",
+              "data_source": "metrics",
+              "name": "query1"
+            }, {
+              "query": "sum:airbyte.worker.job.succeeded_by_release_stage{*}.as_count().rollup(sum, 3600)",
+              "data_source": "metrics",
+              "name": "query2"
+            }],
+            "style": {
+              "palette": "purple",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }, {
+            "response_format": "timeseries",
+            "queries": [{
+              "data_source": "events",
+              "name": "query1",
+              "indexes": ["*"],
+              "compute": {
+                "aggregation": "count"
+              },
+              "group_by": [],
+              "search": {
+                "query": "event:deploy env:prod"
+              }
+            }],
+            "formulas": [{
+              "formula": "query1"
+            }],
+            "display_type": "overlay"
+          }],
+          "markers": [{
+            "value": "y = 25",
+            "display_type": "error dashed"
+          }]
+        },
+        "layout": {
+          "x": 0,
+          "y": 1,
+          "width": 6,
+          "height": 3
+        }
+      }, {
+        "id": 333246056843454,
+        "definition": {
+          "title": "Platform related failure count",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": ["avg", "min", "max", "value", "sum"],
+          "type": "timeseries",
+          "requests": [{
+            "formulas": [{
+              "formula": "query1"
+            }],
+            "response_format": "timeseries",
+            "queries": [{
+              "query": "sum:airbyte.worker.attempt.failed_by_failure_origin{* AND failure_origin IN (replication,airbyte_platform,unknown,persistence)}.as_count()",
+              "data_source": "metrics",
+              "name": "query1"
+            }],
+            "style": {
+              "palette": "warm",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }, {
+            "response_format": "timeseries",
+            "queries": [{
+              "name": "query1",
+              "search": {
+                "query": "event:deploy env:prod"
+              },
+              "data_source": "events",
+              "compute": {
+                "aggregation": "count"
+              }
+            }],
+            "display_type": "overlay"
+          }],
+          "markers": []
+        },
+        "layout": {
+          "x": 6,
+          "y": 1,
+          "width": 6,
+          "height": 3
+        }
+      }, {
+        "id": 433035555191070,
+        "definition": {
+          "title": "Normalization related failure count",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": ["avg", "min", "max", "value", "sum"],
+          "type": "timeseries",
+          "requests": [{
+            "formulas": [{
+              "formula": "query1"
+            }],
+            "response_format": "timeseries",
+            "queries": [{
+              "query": "sum:airbyte.worker.attempt.failed_by_failure_origin{* AND failure_origin IN (normalization)}.as_count()",
+              "data_source": "metrics",
+              "name": "query1"
+            }],
+            "style": {
+              "palette": "warm",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }, {
+            "response_format": "timeseries",
+            "queries": [{
+              "data_source": "events",
+              "name": "query1",
+              "indexes": ["*"],
+              "compute": {
+                "aggregation": "count"
+              },
+              "group_by": [],
+              "search": {
+                "query": "event:deploy env:prod"
+              }
+            }],
+            "formulas": [{
+              "formula": "query1"
+            }],
+            "display_type": "overlay"
+          }],
+          "markers": []
+        },
+        "layout": {
+          "x": 0,
+          "y": 4,
+          "width": 6,
+          "height": 3
+        }
+      }, {
+        "id": 7210952781736860,
+        "definition": {
+          "title": "Connectors related failure count",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": ["avg", "min", "max", "value", "sum"],
+          "type": "timeseries",
+          "requests": [{
+            "formulas": [{
+              "formula": "query1"
+            }],
+            "response_format": "timeseries",
+            "queries": [{
+              "query": "sum:airbyte.worker.attempt.failed_by_failure_origin{* AND failure_origin IN (source,destination)}.as_count()",
+              "data_source": "metrics",
+              "name": "query1"
+            }],
+            "style": {
+              "palette": "warm",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }, {
+            "response_format": "timeseries",
+            "queries": [{
+              "name": "query1",
+              "search": {
+                "query": "event:deploy env:prod"
+              },
+              "data_source": "events",
+              "compute": {
+                "aggregation": "count"
+              }
+            }],
+            "display_type": "overlay"
+          }],
+          "markers": []
+        },
+        "layout": {
+          "x": 6,
+          "y": 4,
+          "width": 6,
+          "height": 3
+        }
+      }]
+    },
+    "layout": {
+      "x": 0,
+      "y": 12,
+      "width": 12,
+      "height": 8
+    }
+  }, {
+    "id": 5344709264082736,
+    "definition": {
+      "title": "Jobs State",
+      "background_color": "vivid_purple",
+      "show_title": true,
+      "type": "group",
+      "layout_type": "ordered",
+      "widgets": [{
+        "id": 2258539896034342,
+        "definition": {
+          "type": "note",
+          "content": "This provides a detailed view of job state, which is crucial for understanding data integration stability, error-prone components, and the overall reliability of the platform's job processing.",
+          "background_color": "purple",
+          "font_size": "14",
+          "text_align": "center",
+          "vertical_align": "center",
+          "show_tick": false,
+          "tick_pos": "50%",
+          "tick_edge": "left",
+          "has_padding": true
+        },
+        "layout": {
+          "x": 0,
+          "y": 0,
+          "width": 12,
+          "height": 1
+        }
+      }, {
+        "id": 7267421884417542,
+        "definition": {
+          "title": "Job Created by Release Stage",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": ["avg", "min", "max", "value", "sum"],
+          "type": "timeseries",
+          "requests": [{
+            "formulas": [{
+              "formula": "query1"
+            }],
+            "queries": [{
+              "query": "sum:airbyte.worker.job.created_by_release_stage{*}.as_count()",
+              "data_source": "metrics",
+              "name": "query1"
+            }],
+            "response_format": "timeseries",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }]
+        },
+        "layout": {
+          "x": 0,
+          "y": 1,
+          "width": 4,
+          "height": 2
+        }
+      }, {
+        "id": 2484418597719962,
+        "definition": {
+          "title": "Job Succeeded by Release Stage",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": ["avg", "min", "max", "value", "sum"],
+          "type": "timeseries",
+          "requests": [{
+            "formulas": [{
+              "formula": "query1"
+            }],
+            "queries": [{
+              "query": "sum:airbyte.worker.job.succeeded_by_release_stage{*}.as_count()",
+              "data_source": "metrics",
+              "name": "query1"
+            }],
+            "response_format": "timeseries",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }, {
+            "response_format": "timeseries",
+            "queries": [{
+              "data_source": "events",
+              "name": "query1",
+              "indexes": ["*"],
+              "compute": {
+                "aggregation": "count"
+              },
+              "group_by": [],
+              "search": {
+                "query": "event:deploy"
+              }
+            }],
+            "formulas": [{
+              "formula": "query1"
+            }],
+            "display_type": "overlay"
+          }]
+        },
+        "layout": {
+          "x": 4,
+          "y": 1,
+          "width": 4,
+          "height": 2
+        }
+      }, {
+        "id": 7021729622793768,
+        "definition": {
+          "title": "Job Failed by Release Stage",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": ["avg", "min", "max", "value", "sum"],
+          "type": "timeseries",
+          "requests": [{
+            "formulas": [{
+              "formula": "query1"
+            }],
+            "queries": [{
+              "query": "sum:airbyte.worker.job.failed_by_release_stage{*}.as_count()",
+              "data_source": "metrics",
+              "name": "query1"
+            }],
+            "response_format": "timeseries",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }]
+        },
+        "layout": {
+          "x": 8,
+          "y": 1,
+          "width": 4,
+          "height": 2
+        }
+      }, {
+        "id": 8675174088396478,
+        "definition": {
+          "title": "Job Cancelled by Release Stage",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": ["avg", "min", "max", "value", "sum"],
+          "type": "timeseries",
+          "requests": [{
+            "formulas": [{
+              "formula": "query1"
+            }],
+            "queries": [{
+              "query": "sum:airbyte.worker.job.cancelled_by_release_stage{*}.as_count()",
+              "data_source": "metrics",
+              "name": "query1"
+            }],
+            "response_format": "timeseries",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }]
+        },
+        "layout": {
+          "x": 0,
+          "y": 3,
+          "width": 4,
+          "height": 2
+        }
+      }, {
+        "id": 8835789031493078,
+        "definition": {
+          "title": "Attempt Created by Release Stage",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": ["avg", "min", "max", "value", "sum"],
+          "type": "timeseries",
+          "requests": [{
+            "formulas": [{
+              "formula": "query1"
+            }],
+            "queries": [{
+              "query": "sum:airbyte.worker.attempt_created_by_release_stage{*}.as_count()",
+              "data_source": "metrics",
+              "name": "query1"
+            }],
+            "response_format": "timeseries",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }]
+        },
+        "layout": {
+          "x": 4,
+          "y": 3,
+          "width": 4,
+          "height": 2
+        }
+      }, {
+        "id": 5159608230706216,
+        "definition": {
+          "title": "Attempt Succeeded by Release Stage",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": ["avg", "min", "max", "value", "sum"],
+          "type": "timeseries",
+          "requests": [{
+            "formulas": [{
+              "formula": "query1"
+            }],
+            "queries": [{
+              "query": "sum:airbyte.worker.attempt_succeeded_by_release_stage{*}.as_count()",
+              "data_source": "metrics",
+              "name": "query1"
+            }],
+            "response_format": "timeseries",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }]
+        },
+        "layout": {
+          "x": 8,
+          "y": 3,
+          "width": 4,
+          "height": 2
+        }
+      }, {
+        "id": 2463699740659076,
+        "definition": {
+          "title": "Attempt Failed by Release Stage",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": ["avg", "min", "max", "value", "sum"],
+          "type": "timeseries",
+          "requests": [{
+            "formulas": [{
+              "formula": "query1"
+            }],
+            "queries": [{
+              "query": "sum:airbyte.worker.attempt_failed_by_release_stage{*}.as_count()",
+              "data_source": "metrics",
+              "name": "query1"
+            }],
+            "response_format": "timeseries",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }]
+        },
+        "layout": {
+          "x": 0,
+          "y": 5,
+          "width": 4,
+          "height": 2
+        }
+      }, {
+        "id": 3648014975737232,
+        "definition": {
+          "title": "Jobs Created Count",
+          "title_size": "16",
+          "title_align": "left",
+          "type": "query_value",
+          "requests": [{
+            "formulas": [{
+              "formula": "query1"
+            }],
+            "response_format": "scalar",
+            "queries": [{
+              "query": "avg:airbyte.worker.job.created_by_release_stage{*}.as_count()",
+              "data_source": "metrics",
+              "name": "query1",
+              "aggregator": "sum"
+            }]
+          }],
+          "autoscale": true,
+          "precision": 2
+        },
+        "layout": {
+          "x": 4,
+          "y": 5,
+          "width": 3,
+          "height": 2
+        }
+      }, {
+        "id": 4812458952427816,
+        "definition": {
+          "title": "Jobs Succeeded Count",
+          "title_size": "16",
+          "title_align": "left",
+          "type": "query_value",
+          "requests": [{
+            "formulas": [{
+              "formula": "query1"
+            }],
+            "response_format": "scalar",
+            "queries": [{
+              "query": "avg:airbyte.worker.job.succeeded_by_release_stage{*}.as_count()",
+              "data_source": "metrics",
+              "name": "query1",
+              "aggregator": "sum"
+            }]
+          }],
+          "autoscale": true,
+          "precision": 2
+        },
+        "layout": {
+          "x": 7,
+          "y": 5,
+          "width": 3,
+          "height": 2
+        }
+      }, {
+        "id": 8187115153860558,
+        "definition": {
+          "title": "Jobs Failed Count",
+          "title_size": "16",
+          "title_align": "left",
+          "type": "query_value",
+          "requests": [{
+            "formulas": [{
+              "formula": "query1"
+            }],
+            "response_format": "scalar",
+            "queries": [{
+              "query": "avg:airbyte.worker.job.failed_by_release_stage{*}.as_count()",
+              "data_source": "metrics",
+              "name": "query1",
+              "aggregator": "sum"
+            }]
+          }],
+          "autoscale": true,
+          "precision": 2
+        },
+        "layout": {
+          "x": 10,
+          "y": 5,
+          "width": 2,
+          "height": 2
+        }
+      }, {
+        "id": 5017186160192716,
+        "definition": {
+          "title": "Attempt Failed by Failure Origin",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": ["avg", "min", "max", "value", "sum"],
+          "type": "timeseries",
+          "requests": [{
+            "formulas": [{
+              "formula": "query1"
+            }],
+            "queries": [{
+              "query": "sum:airbyte.worker.attempt.failed_by_failure_origin{*} by {failure_origin}.as_count()",
+              "data_source": "metrics",
+              "name": "query1"
+            }],
+            "response_format": "timeseries",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }]
+        },
+        "layout": {
+          "x": 0,
+          "y": 7,
+          "width": 4,
+          "height": 2
+        }
+      }, {
+        "id": 4161384218360972,
+        "definition": {
+          "title": "Overall Job Runtime by Terminal State (Secs)",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": ["avg", "min", "max", "value", "sum"],
+          "type": "timeseries",
+          "requests": [{
+            "formulas": [{
+              "formula": "query1"
+            }, {
+              "formula": "query2"
+            }, {
+              "formula": "query3"
+            }, {
+              "formula": "query4"
+            }],
+            "response_format": "timeseries",
+            "queries": [{
+              "query": "p50:airbyte.metrics_reporter.overall_job_runtime_in_last_hour_by_terminal_state_secs{*} by {job_status}",
+              "data_source": "metrics",
+              "name": "query1"
+            }, {
+              "query": "p75:airbyte.metrics_reporter.overall_job_runtime_in_last_hour_by_terminal_state_secs{*} by {job_status}",
+              "data_source": "metrics",
+              "name": "query2"
+            }, {
+              "query": "p90:airbyte.metrics_reporter.overall_job_runtime_in_last_hour_by_terminal_state_secs{*} by {job_status}",
+              "data_source": "metrics",
+              "name": "query3"
+            }, {
+              "query": "p95:airbyte.metrics_reporter.overall_job_runtime_in_last_hour_by_terminal_state_secs{*} by {job_status}",
+              "data_source": "metrics",
+              "name": "query4"
+            }],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }]
+        },
+        "layout": {
+          "x": 4,
+          "y": 7,
+          "width": 4,
+          "height": 2
+        }
+      }, {
+        "id": 5107909486482044,
+        "definition": {
+          "title": "Number of jobs run unusually long",
+          "title_size": "16",
+          "title_align": "left",
+          "type": "query_value",
+          "requests": [{
+            "formulas": [{
+              "formula": "query1"
+            }],
+            "response_format": "scalar",
+            "queries": [{
+              "query": "avg:airbyte.metrics_reporter.num_unusually_long_syncs{*}.rollup(max, 1800)",
+              "data_source": "metrics",
+              "name": "query1",
+              "aggregator": "last"
+            }]
+          }],
+          "autoscale": true,
+          "precision": 2,
+          "timeseries_background": {
+            "type": "area",
+            "yaxis": {
+              "include_zero": false
+            }
+          }
+        },
+        "layout": {
+          "x": 8,
+          "y": 7,
+          "width": 4,
+          "height": 2
+        }
+      }]
+    },
+    "layout": {
+      "x": 0,
+      "y": 20,
+      "width": 12,
+      "height": 10,
+      "is_column_break": true
+    }
+  }, {
+    "id": 3168918098536612,
+    "definition": {
+      "title": "Sync Persistence",
+      "background_color": "vivid_purple",
+      "show_title": true,
+      "type": "group",
+      "layout_type": "ordered",
+      "widgets": [{
+        "id": 4009540728688622,
+        "definition": {
+          "type": "note",
+          "content": "The SyncPersistence metrics in this section provide data into the number of attempts made to save synchronization state, the amount of data awaiting commitment to storage, and the final successful data flush.",
+          "background_color": "purple",
+          "font_size": "14",
+          "text_align": "center",
+          "vertical_align": "center",
+          "show_tick": false,
+          "tick_pos": "50%",
+          "tick_edge": "left",
+          "has_padding": true
+        },
+        "layout": {
+          "x": 0,
+          "y": 0,
+          "width": 12,
+          "height": 1
+        }
+      }, {
+        "id": 7253574744586676,
+        "definition": {
+          "title": "State Commit Attempts",
+          "show_legend": true,
+          "legend_layout": "horizontal",
+          "legend_columns": ["avg", "min", "max", "value", "sum"],
+          "type": "timeseries",
+          "requests": [{
+            "formulas": [{
+              "alias": "attempt",
+              "formula": "attempt"
+            }, {
+              "alias": "successful",
+              "formula": "successful"
+            }, {
+              "alias": "failed",
+              "formula": "failed"
+            }, {
+              "alias": "not attempted",
+              "formula": "not_attempted"
+            }],
+            "queries": [{
+              "data_source": "metrics",
+              "name": "attempt",
+              "query": "sum:airbyte.worker.state_commit.attempt{*}.as_count()"
+            }, {
+              "data_source": "metrics",
+              "name": "successful",
+              "query": "sum:airbyte.worker.state_commit.attempt_successful{*}.as_count()"
+            }, {
+              "data_source": "metrics",
+              "name": "failed",
+              "query": "sum:airbyte.worker.state_commit.attempt_failed{*}.as_count()"
+            }, {
+              "data_source": "metrics",
+              "name": "not_attempted",
+              "query": "sum:airbyte.worker.state_commit.not_attempted{*}.as_count()"
+            }],
+            "response_format": "timeseries",
+            "style": {
+              "palette": "dog_classic"
+            },
+            "display_type": "line"
+          }]
+        },
+        "layout": {
+          "x": 0,
+          "y": 1,
+          "width": 6,
+          "height": 3
+        }
+      }, {
+        "id": 8045473871209916,
+        "definition": {
+          "title": "State Buffered for Commit",
+          "show_legend": true,
+          "legend_layout": "horizontal",
+          "legend_columns": ["avg", "min", "max", "value", "sum"],
+          "type": "timeseries",
+          "requests": [{
+            "formulas": [{
+              "alias": "state_buffered",
+              "formula": "state_buffered"
+            }],
+            "queries": [{
+              "data_source": "metrics",
+              "name": "state_buffered",
+              "query": "sum:airbyte.worker.state_buffering{*}.as_count()"
+            }],
+            "response_format": "timeseries",
+            "style": {
+              "palette": "dog_classic"
+            },
+            "display_type": "line"
+          }]
+        },
+        "layout": {
+          "x": 6,
+          "y": 1,
+          "width": 3,
+          "height": 3
+        }
+      }, {
+        "id": 3468777261531490,
+        "definition": {
+          "title": "State Final Flush",
+          "show_legend": true,
+          "legend_layout": "horizontal",
+          "legend_columns": ["avg", "min", "max", "value", "sum"],
+          "type": "timeseries",
+          "requests": [{
+            "formulas": [{
+              "alias": "success",
+              "formula": "state_buffered"
+            }, {
+              "alias": "failure",
+              "formula": "query1"
+            }],
+            "queries": [{
+              "data_source": "metrics",
+              "name": "state_buffered",
+              "query": "sum:airbyte.worker.state_commit.close_successful{*}.as_count()"
+            }, {
+              "data_source": "metrics",
+              "name": "query1",
+              "query": "sum:airbyte.worker.state_commit.not_attempted{*}.as_count()"
+            }],
+            "response_format": "timeseries",
+            "style": {
+              "palette": "dog_classic"
+            },
+            "display_type": "line"
+          }]
+        },
+        "layout": {
+          "x": 9,
+          "y": 1,
+          "width": 3,
+          "height": 3
+        }
+      }]
+    },
+    "layout": {
+      "x": 0,
+      "y": 30,
+      "width": 12,
+      "height": 5
+    }
+  }],
+  "template_variables": [{
+    "name": "service",
+    "prefix": "service",
+    "available_values": [],
+    "default": "*"
+  }],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

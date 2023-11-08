@@ -1,14 +1,23 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from .helpers import get_initialization_data
+from types import MappingProxyType
 
 
-def handle_deprecations(config_section, deprecations, values):
-    warning_method = get_initialization_data(values)['warning']
+def make_immutable(obj):
+    if isinstance(obj, list):
+        return tuple(make_immutable(item) for item in obj)
+    elif isinstance(obj, dict):
+        return MappingProxyType({k: make_immutable(v) for k, v in obj.items()})
+
+    return obj
+
+
+def handle_deprecations(config_section, deprecations, fields, context):
+    warning_method = context['warning']
 
     for option, data in deprecations.items():
-        if option not in values:
+        if option not in fields:
             continue
 
         message = f'Option `{option}` in `{config_section}` is deprecated ->\n'

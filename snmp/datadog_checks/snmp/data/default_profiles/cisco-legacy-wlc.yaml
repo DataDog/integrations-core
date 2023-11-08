@@ -7,6 +7,7 @@ extends:
   - _generic-tcp.yaml
   - _generic-udp.yaml
   - _cisco-wlc.yaml
+  - _cisco-metadata.yaml
 
 device:
   vendor: "cisco"
@@ -30,8 +31,6 @@ sysobjectid:
 metadata:
   device:
     fields:
-      vendor:
-        value: "cisco"
       serial_number:
         symbol:
           OID: 1.3.6.1.4.1.14179.1.1.1.4

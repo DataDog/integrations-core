@@ -41,6 +41,7 @@ class TestKubeAPIServerMetrics:
     CHECK_NAME = 'kube_apiserver_metrics'
     NAMESPACE = 'kube_apiserver'
     METRICS = [
+        NAMESPACE + '.longrunning_gauge',
         NAMESPACE + '.current_inflight_requests',
         NAMESPACE + '.audit_event',
         NAMESPACE + '.go_threads',
@@ -89,6 +90,8 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.flowcontrol_request_concurrency_limit',
         NAMESPACE + '.flowcontrol_current_executing_requests',
         NAMESPACE + '.flowcontrol_rejected_requests_total',
+        NAMESPACE + '.flowcontrol_current_inqueue_requests',
+        NAMESPACE + '.flowcontrol_dispatched_requests_total',
     ]
     COUNT_METRICS = [
         NAMESPACE + '.audit_event.count',

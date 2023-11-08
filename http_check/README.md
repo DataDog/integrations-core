@@ -85,7 +85,7 @@ To disable `http.ssl_cert`, set `check_certificate_expiration` to false.
 
 Need help? Contact [Datadog support][12].
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/http_check/datadog_checks/http_check/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/developers/write_agent_check/#collection-interval

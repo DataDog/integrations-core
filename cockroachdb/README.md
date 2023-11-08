@@ -11,6 +11,10 @@ The CockroachDB check monitors the overall health and performance of a [Cockroac
 The CockroachDB check is included in the [Datadog Agent][2] package, so you do not
 need to install anything else on your server.
 
+Starting with version 1.9.0, this OpenMetrics-based integration has a latest mode (enabled by setting `openmetrics_endpoint` to point to the target endpoint) and a legacy mode (enabled by setting `prometheus_url` instead). To get all the most up-to-date features, Datadog recommends enabling the latest mode. Note that the latest mode requires Python 3. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][14].
+
+For hosts unable to use Python 3, or to use legacy mode, see the following [configuration][13].
+
 ### Configuration
 
 <!-- xxx tabs xxx -->
@@ -34,13 +38,11 @@ To configure this check for an Agent running on a host:
      - openmetrics_endpoint: http://localhost:8080/_status/vars
    ```
 
-2. [Restart the Agent][5]
-
-**Note**: The current version of the check (1.9.0+) uses a newer implementation of [OpenMetrics][12] for metric collection, which requires Python 3. For hosts unable to use Python 3, or to use a legacy version of this check, see the following [config][13].
+2. [Restart the Agent][5].
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
+_Available for Agent version 6.0 or later_
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
 
@@ -121,7 +123,7 @@ Additional helpful documentation, links, and articles:
 - [Monitor CockroachDB performance metrics with Datadog][11]
 
 [1]: https://www.cockroachlabs.com/product/cockroachdb
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
 [4]: https://github.com/DataDog/integrations-core/blob/master/cockroachdb/datadog_checks/cockroachdb/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -133,3 +135,4 @@ Additional helpful documentation, links, and articles:
 [11]: https://www.datadoghq.com/blog/monitor-cockroachdb-performance-metrics-with-datadog
 [12]: https://docs.datadoghq.com/integrations/openmetrics/
 [13]: https://github.com/DataDog/integrations-core/blob/7.33.x/cockroachdb/datadog_checks/cockroachdb/data/conf.yaml.example
+[14]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations

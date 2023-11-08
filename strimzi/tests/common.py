@@ -165,7 +165,6 @@ TOPIC_OPERATOR_METRICS = (
 )
 
 USER_OPERATOR_METRICS = (
-    "strimzi.user_operator.jvm.gc.memory_promoted_bytes.count",
     "strimzi.user_operator.jvm.buffer.count_buffers",
     "strimzi.user_operator.jvm.buffer.memory_used_bytes",
     "strimzi.user_operator.jvm.buffer.total_capacity_bytes",
@@ -174,6 +173,7 @@ USER_OPERATOR_METRICS = (
     "strimzi.user_operator.jvm.gc.live_data_size_bytes",
     "strimzi.user_operator.jvm.gc.max_data_size_bytes",
     "strimzi.user_operator.jvm.gc.memory_allocated_bytes.count",
+    "strimzi.user_operator.jvm.gc.memory_promoted_bytes.count",
     "strimzi.user_operator.jvm.gc.pause_seconds.count",
     "strimzi.user_operator.jvm.gc.pause_seconds.max",
     "strimzi.user_operator.jvm.gc.pause_seconds.sum",
@@ -191,7 +191,9 @@ USER_OPERATOR_METRICS = (
     "strimzi.user_operator.reconciliations.duration_seconds.max",
     "strimzi.user_operator.reconciliations.duration_seconds.sum",
     "strimzi.user_operator.reconciliations.failed.count",
+    "strimzi.user_operator.reconciliations.locked.count",
     "strimzi.user_operator.reconciliations.periodical.count",
+    "strimzi.user_operator.reconciliations.successful.count",
     "strimzi.user_operator.resources",
     "strimzi.user_operator.system.cpu_count",
     "strimzi.user_operator.system.cpu_usage",
@@ -223,5 +225,7 @@ FLAKY_E2E_METRICS = (
     "strimzi.cluster_operator.vertx.http_server.errors.count",
     "strimzi.cluster_operator.vertx.http_server.request_resets.count",
     "strimzi.topic_operator.vertx.http_server.errors.count",
+    "strimzi.user_operator.reconciliations.locked.count",
     "strimzi.user_operator.reconciliations.periodical.count",
+    "strimzi.user_operator.reconciliations.successful.count",
 )

@@ -323,7 +323,7 @@ Need help? Contact [Datadog support][8].
 
 
 [1]: https://www.sonarqube.org
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/sonarqube/datadog_checks/sonarqube/data/metrics.yaml
 [4]: https://docs.sonarqube.org/latest/instance-administration/monitoring/
 [5]: https://docs.sonarqube.org/latest/instance-administration/monitoring/#header-4

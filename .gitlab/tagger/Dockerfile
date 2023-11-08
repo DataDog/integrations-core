@@ -45,4 +45,4 @@ RUN curl -sSL https://bootstrap.pypa.io/get-pip.py | python3 \
  # Install ddev for release tagging
  && pip3 install --no-cache-dir ddev.tar.gz \
  # Install awscli for access to GitHub deploy key stored in SSM
- && pip3 install --no-cache-dir awscli==1.27.159
+ && pip3 install --no-cache-dir awscli==1.29.7

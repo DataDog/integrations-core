@@ -110,7 +110,7 @@ Aerospike does not include any events.
 Need help? Contact [Datadog support][9].
 
 [1]: https://download.aerospike.com/download/client/python/notes.html#5.0.0
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/aerospike/datadog_checks/aerospike/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/kubernetes/integrations/

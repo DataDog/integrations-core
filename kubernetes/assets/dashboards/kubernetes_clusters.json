@@ -786,6 +786,41 @@
                             "x": 10,
                             "y": 2
                         }
+                    },
+                    {
+                        "id": 112162236360634,
+                        "definition": {
+                            "title": "CRDs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.crd.count{$scope,$cluster}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 2,
+                            "height": 2
+                        }
                     }
                 ]
             },

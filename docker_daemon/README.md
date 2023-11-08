@@ -169,11 +169,11 @@ Need help? Contact [Datadog support][22].
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/docker_daemon/images/docker.png
 [2]: https://github.com/DataDog/docker-dd-agent
 [3]: https://github.com/DataDog/docker-dd-agent#cgroups
-[4]: https://app.datadoghq.com/account/settings#agent
+[4]: https://app.datadoghq.com/account/settings/agent/latest
 [5]: https://app.datadoghq.com/account/settings#integrations/docker
 [6]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/datadog_checks/docker_daemon/data/conf.yaml.example
 [7]: https://raw.githubusercontent.com/DataDog/integrations-core/master/docker_daemon/images/integrations-docker-dockerps.png
-[8]: https://app.datadoghq.com/account/settings#agent/docker
+[8]: https://app.datadoghq.com/account/settings/agent/latest?platform=docker
 [9]: https://github.com/DataDog/dd-agent/wiki/Proxy-Configuration#using-the-agent-as-a-proxy
 [10]: https://github.com/DataDog/dd-agent/wiki/Network-Traffic-and-Proxy-Configuration
 [11]: https://github.com/DataDog/dd-agent/wiki/Proxy-Configuration#using-a-web-proxy-as-proxy

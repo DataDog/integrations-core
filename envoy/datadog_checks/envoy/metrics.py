@@ -353,6 +353,21 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_cluster_outlier_detection_ejections_detected_failure_percentage_local_origin': 'cluster.outlier_detection.ejections_detected_failure_percentage_local_origin',  # noqa: E501
     'envoy_access_logs_grpc_access_log_logs_dropped': 'access_logs.grpc_access_log.logs_dropped',
     'envoy_access_logs_grpc_access_log_logs_written': 'access_logs.grpc_access_log.logs_written',
+    'envoy_tcp_downstream_cx': 'tcp.downstream_cx',
+    'envoy_tcp_downstream_cx_no_route': 'tcp.downstream_cx_no_route',
+    'envoy_tcp_downstream_cx_tx_bytes': 'tcp.downstream_cx_tx_bytes',
+    'envoy_tcp_downstream_cx_tx_bytes_buffered': 'tcp.downstream_cx_tx_bytes_buffered',
+    'envoy_tcp_downstream_cx_rx_bytes': 'tcp.downstream_cx_rx_bytes',
+    'envoy_tcp_downstream_cx_rx_bytes_buffered': 'tcp.downstream_cx_rx_bytes_buffered',
+    'envoy_tcp_downstream_flow_control_paused_reading_': 'tcp.downstream_flow_control_paused_reading',
+    'envoy_tcp_downstream_flow_control_resumed_reading': 'tcp.downstream_flow_control_resumed_reading',
+    'envoy_tcp_idle_timeout': 'tcp.idle_timeout',
+    'envoy_tcp_on_demand_cluster_attempt': 'tcp.on_demand_cluster_attempt',
+    'envoy_tcp_on_demand_cluster_missing': 'tcp.on_demand_cluster_missing',
+    'envoy_tcp_on_demand_cluster_success': 'tcp.on_demand_cluster_success',
+    'envoy_tcp_on_demand_cluster_timeout': 'tcp.on_demand_cluster_timeout',
+    'envoy_tcp_upstream_flush': 'tcp.upstream_flush',
+    'envoy_tcp_upstream_flush_active': 'tcp.upstream_flush_active',
 }
 
 # fmt: off

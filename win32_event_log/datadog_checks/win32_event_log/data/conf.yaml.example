@@ -36,6 +36,16 @@ init_config:
     #
     # default_event_priority: normal
 
+    ## @param legacy_mode - boolean - optional - default: true
+    ## Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
+    ##
+    ##   /\ WARNING /\
+    ##   This mode, by nature of the underlying technology, is significantly more resource intensive.
+    ##
+    ## Setting this option to `false` is only supported on Agent versions 7 and above.
+    #
+    legacy_mode: false
+
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##
@@ -102,7 +112,7 @@ instances:
     ##   /\ WARNING /\
     ##   Due to a limitation in the Windows events API, the maximum filtering on event IDs is 20 IDs per instance.
     ##   Because of this, you may need to split the ID filtering into multiple instances.
-    ##   
+    ##
     ## For advanced and more granular filtering, define a `query`.
     ##
     ## If `filters` nor `query` is specified, then all events from the subscribed `path` will be collected.
@@ -212,7 +222,7 @@ instances:
     #
     # domain: <DOMAIN>
 
-    ## @param timeout - number - optional - default: 5
+    ## @param timeout - integer - optional - default: 5
     ## The number of seconds to wait for new event signals.
     #
     # timeout: 5
@@ -224,7 +234,7 @@ instances:
     #
     # payload_size: 10
 
-    ## @param bookmark_frequency - integer - optional - default: <PAYLOAD_SIZE>
+    ## @param bookmark_frequency - integer - optional
     ## How often to save the last seen event as a factor of the number of seen events.
     ## By default, the value of `payload_size` will be used.
     ##
@@ -235,12 +245,12 @@ instances:
     ## @param legacy_mode - boolean - optional - default: true
     ## Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
     ##
-    ##    /\ WARNING /\
-    ## This mode, by nature of the underlying technology, is significantly more resource intensive.
+    ##   /\ WARNING /\
+    ##   This mode, by nature of the underlying technology, is significantly more resource intensive.
     ##
     ## Setting this option to `false` is only supported on Agent versions 7 and above.
     #
-    legacy_mode: false
+    # legacy_mode: true
 
     ## @param host - string - optional - default: localhost
     ## By default, the local machine's event logs are captured. To capture a remote

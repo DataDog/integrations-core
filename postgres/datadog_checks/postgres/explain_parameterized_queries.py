@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
+import re
 
 import psycopg2
 
@@ -157,12 +158,23 @@ class ExplainParameterizedQueries:
             )
 
     def _execute_query(self, dbname, query):
-        with self._check._get_db(dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
-            logger.debug('Executing query=[%s]', query)
-            cursor.execute(query)
+        # Psycopg2 connections do not get closed when context ends;
+        # leaving context will just mark the connection as inactive in MultiDatabaseConnectionPool
+        with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+                logger.debug('Executing query=[%s]', query)
+                cursor.execute(query)
 
     def _execute_query_and_fetch_rows(self, dbname, query):
-        with self._check._get_db(dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
-            logger.debug('Executing query=[%s] and fetching rows', query)
-            cursor.execute(query)
-            return cursor.fetchall()
+        with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+                cursor.execute(query)
+                return cursor.fetchall()
+
+    def _is_parameterized_query(self, statement: str) -> bool:
+        # Use regex to match $1 to determine if a query is parameterized
+        # BUT single quoted string '$1' should not be considered as a parameter
+        # e.g. SELECT * FROM products WHERE id = $1; -- $1 is a parameter
+        # e.g. SELECT * FROM products WHERE id = '$1'; -- '$1' is not a parameter
+        parameterized_query_pattern = r"(?<!')\$(?!'\$')[\d]+(?!')"
+        return re.search(parameterized_query_pattern, statement) is not None

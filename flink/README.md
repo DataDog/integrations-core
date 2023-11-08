@@ -114,7 +114,7 @@ Need help? Contact [Datadog support][12].
 [1]: https://flink.apache.org/
 [2]: https://nightlies.apache.org/flink/flink-docs-release-1.16/docs/deployment/metric_reporters/#datadog
 [3]: https://docs.datadoghq.com/api/?lang=bash#api-reference
-[4]: https://app.datadoghq.com/account/settings#agent
+[4]: https://app.datadoghq.com/account/settings/agent/latest
 [5]: https://app.datadoghq.com/organization-settings/api-keys
 [6]: https://github.com/apache/flink/tree/release-1.16/flink-dist/src/main/flink-bin/conf
 [7]: https://docs.datadoghq.com/logs/processing/#integration-pipelines

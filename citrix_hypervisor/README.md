@@ -77,7 +77,7 @@ Additional helpful documentation, links, and articles:
 
 [1]: https://www.citrix.com/products/citrix-hypervisor/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://app.datadoghq.com/account/settings#agent
+[3]: https://app.datadoghq.com/account/settings/agent/latest
 [4]: https://docs.citrix.com/en-us/xencenter/7-1/rbac-roles.html
 [5]: https://github.com/DataDog/integrations-core/blob/master/citrix_hypervisor/datadog_checks/citrix_hypervisor/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

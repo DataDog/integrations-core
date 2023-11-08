@@ -31,7 +31,7 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=25.1.0",
+    "datadog-checks-base>=32.6.0",
 ]
 dynamic = [
     "version",
@@ -40,7 +40,7 @@ dynamic = [
 [project.optional-dependencies]
 deps = [
     "python-binary-memcached==0.26.1; sys_platform != 'win32' and python_version < '3.0'",
-    "python-binary-memcached==0.31.1; sys_platform != 'win32' and python_version > '3.0'",
+    "python-binary-memcached==0.31.2; sys_platform != 'win32' and python_version > '3.0'",
 ]
 
 [project.urls]

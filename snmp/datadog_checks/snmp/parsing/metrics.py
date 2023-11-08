@@ -45,6 +45,12 @@ def parse_metrics(metrics, resolver, logger, bulk_threshold=0):
     parsed_metrics = []  # type: List[ParsedMetric]
 
     for metric in metrics:
+        # Backward compatibility layer for python related to renaming of forced_type to metric_type
+        # https://github.com/DataDog/datadog-agent/pull/17900
+        metric_type = metric.get('metric_type')
+        if metric_type is not None:
+            metric['forced_type'] = metric_type
+
         result = _parse_metric(metric, logger)
 
         for oid in result.oids_to_fetch:
@@ -450,6 +456,14 @@ def _parse_table_metric_tag(mib, parsed_table, metric_tag):
         index: 2
     ```
     """
+
+    # Renamed `symbol` to `column` for backward compatibility with this change:
+    #   Deprecate `metric_tags[].column` in favour of `symbol`
+    #   https://github.com/DataDog/datadog-agent/pull/20030
+    if 'symbol' in metric_tag:
+        metric_tag['column'] = metric_tag['symbol']
+        del metric_tag['symbol']
+
     if 'column' in metric_tag:
         metric_tag = cast(ColumnTableMetricTag, metric_tag)
         metric_tag_mib = metric_tag.get('MIB', mib)

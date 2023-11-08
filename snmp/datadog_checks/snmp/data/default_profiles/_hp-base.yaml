@@ -1,8 +1,7 @@
+# Profile defining metadata for HP servers
 metadata:
   device:
     fields:
-      vendor:
-        value: "hp"
       serial_number:
         symbol:
           MIB: CPQSINFO-MIB

@@ -69,10 +69,7 @@ def test_openmetrics(aggregator, dd_run_check, request, poll_mock_fixture):
     aggregator.assert_all_metrics_covered()
 
     assert check.http.options['headers']['Accept'] == '*/*'
-    assert scraper.http.options['headers']['Accept'] == (
-        'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1;q=0.75,'
-        'text/plain;version=0.0.4;q=0.5,*/*;q=0.1'
-    )
+    assert scraper.http.options['headers']['Accept'] == 'text/plain'
 
 
 def test_openmetrics_use_latest_spec(aggregator, dd_run_check, mock_http_response, openmetrics_payload, caplog):

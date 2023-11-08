@@ -229,6 +229,6 @@ class TestAIAChasing:
             with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.handle_auth_token'):
                 with pytest.raises(SSLError):
                     with mock.patch('requests.get', side_effect=SSLError):
-                        http.get(f"https://localhost:{port}")
+                        http.get('https://localhost:{}'.format(port))
 
         mock_create_socket_connection.assert_called_with('localhost', port)

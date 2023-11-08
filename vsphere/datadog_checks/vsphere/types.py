@@ -5,7 +5,7 @@
 from typing import Any, Dict, List, Optional, Pattern, Type, TypedDict
 
 # CONFIG ALIASES
-from pyVmomi import vim
+from pyVmomi import VmomiSupport, vim
 
 ResourceFilterConfig = TypedDict(
     'ResourceFilterConfig', {'resource': str, 'property': str, 'type': str, 'patterns': List[str]}
@@ -52,6 +52,8 @@ InstanceConfig = TypedDict(
 MetricName = str
 CounterId = int
 
+VmomiObject = VmomiSupport.Object
+
 InfrastructureDataItem = TypedDict(
     'InfrastructureDataItem',
     {
@@ -59,6 +61,19 @@ InfrastructureDataItem = TypedDict(
         'runtime.host': vim.ManagedEntity,
         'guest.hostName': str,
         'runtime.powerState': str,
+        'summary.config.numCpu': int,
+        'summary.config.memorySizeMB': int,
+        'summary.config.numEthernetCards': int,
+        'summary.config.numVirtualDisks': int,
+        'summary.quickStats.uptimeSeconds': int,
+        'guest.guestFullName': str,
+        'guest.disk': List[VmomiObject],
+        'guest.net': List[VmomiObject],
+        'guest.ipStack': List[VmomiObject],
+        'guest.toolsRunningStatus': str,
+        'guest.toolsVersionStatus2': str,
+        'guest.toolsVersion': str,
+        'config.hardware.numCoresPerSocket': str,
         'parent': Optional[vim.ManagedEntity],
         'attributes': List[str],
     },
