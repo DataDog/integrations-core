@@ -4574,3 +4574,5 @@ wasm.envoy.wasm.runtime.null.created: 0
 wasm_vm.envoy.wasm.runtime.null.active: 0
 wasm_vm.envoy.wasm.runtime.null.cloned: 0
 wasm_vm.envoy.wasm.runtime.null.created: 0
+access_logs.grpc_access_log.logs_dropped: 5
+access_logs.grpc_access_log.logs_written: 10

@@ -14,6 +14,8 @@ For other systems, you can follow the instructions [here](https://github.com/con
 
 Once done, you can run `ddev test kafka_consumer`, the `confluent-kafka` will be built from source.
 
+Note: On CI, the dependencies are built in the `32_install_kerberos.sh` script.
+
 ## Troubleshooting
 
 ### fatal error: 'librdkafka/rdkafka.h' file not found
@@ -27,4 +29,8 @@ If you face this issue:
 ```
 
 1. Make sure you installed `librdkafka` (see the previous section).
-2. You might need to set the `C_INCLUDE_PATH` and `LIBRARY_PATH` environments variable to load `librdkafka` when bulding `confluent-kafka`. For instance: `C_INCLUDE_PATH=/opt/homebrew/Cellar/librdkafka/2.0.2/include/ LIBRARY_PATH=/opt/homebrew/Cellar/librdkafka/2.0.2/lib ddev test kafka_consumer`. Setting these environment variables is only needed when the test environment is built (or rebuilt with the `--force-env-rebuild` option).  
+2. You might need to set the `C_INCLUDE_PATH` and `LIBRARY_PATH` environments variable to load `librdkafka` when building `confluent-kafka`. For instance: `C_INCLUDE_PATH=/opt/homebrew/Cellar/librdkafka/2.1.1/include/ LIBRARY_PATH=/opt/homebrew/Cellar/librdkafka/2.1.1/lib ddev test kafka_consumer`. (be sure to use the same version as declared in the `pyproject.toml` file). Setting these environment variables is only needed when the test environment is built (or rebuilt with the `--recreate` option).  
+
+### Barebones connection
+
+If you are unable to connect to your Kafka cluster in your Agent, you can use the script in `tests/python_client/script.py` to run a barebones connection directly to the cluster for debugging. This script will attempt a connection and then fetch all of the consumer groups for that configuration.

@@ -39,6 +39,7 @@ services:
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: false
       KAFKA_CFG_SSL_PRINCIPAL_MAPPING_RULES: 'RULE:^CN=(.*?),OU=ServiceUsers.*$/$1/,RULE:^CN=(.*?),OU=(.*?),O=(.*?),L=(.*?),ST=(.*?),C=(.*?)$/$1@$2/L,RULE:^.*[Cc][Nn]=([a-zA-Z0-9.]*).*$/$1/L,DEFAULT'
       ALLOW_PLAINTEXT_LISTENER: yes
+      KAFKA_ENABLE_KRAFT: false
     volumes:
       - ./truststore/kafka.truststore.jks:/bitnami/kafka/config/certs/kafka.truststore.jks
       - ./keystore/kafka1.server.keystore.jks:/bitnami/kafka/config/certs/kafka.keystore.jks
@@ -71,6 +72,7 @@ services:
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: false
       KAFKA_CFG_SSL_PRINCIPAL_MAPPING_RULES: 'RULE:^CN=(.*?),OU=ServiceUsers.*$/$1/,RULE:^CN=(.*?),OU=(.*?),O=(.*?),L=(.*?),ST=(.*?),C=(.*?)$/$1@$2/L,RULE:^.*[Cc][Nn]=([a-zA-Z0-9.]*).*$/$1/L,DEFAULT'
       ALLOW_PLAINTEXT_LISTENER: yes
+      KAFKA_ENABLE_KRAFT: false
     volumes:
       - ./truststore/kafka.truststore.jks:/bitnami/kafka/config/certs/kafka.truststore.jks
       - ./keystore/kafka2.server.keystore.jks:/bitnami/kafka/config/certs/kafka.keystore.jks

@@ -1,0 +1,90 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - api.github.com
+      user-agent:
+      - python-httpx/0.24.1
+      x-github-api-version:
+      - '2022-11-28'
+    method: GET
+    uri: https://api.github.com/search/issues?q=sha%3Aed4909414c5aedeba347b523b3c40ecd651896ab%20repo%3ADataDog%2Fintegrations-core
+  response:
+    content: '{"total_count":1,"incomplete_results":false,"items":[{"url":"https://api.github.com/repos/DataDog/integrations-core/issues/15520","repository_url":"https://api.github.com/repos/DataDog/integrations-core","labels_url":"https://api.github.com/repos/DataDog/integrations-core/issues/15520/labels{/name}","comments_url":"https://api.github.com/repos/DataDog/integrations-core/issues/15520/comments","events_url":"https://api.github.com/repos/DataDog/integrations-core/issues/15520/events","html_url":"https://github.com/DataDog/integrations-core/pull/15520","id":1843390772,"node_id":"PR_kwDOAtBC5c5Xi0tE","number":15520,"title":"Register
+      custom marker","user":{"login":"iliakur","id":899591,"node_id":"MDQ6VXNlcjg5OTU5MQ==","avatar_url":"https://avatars.githubusercontent.com/u/899591?v=4","gravatar_id":"","url":"https://api.github.com/users/iliakur","html_url":"https://github.com/iliakur","followers_url":"https://api.github.com/users/iliakur/followers","following_url":"https://api.github.com/users/iliakur/following{/other_user}","gists_url":"https://api.github.com/users/iliakur/gists{/gist_id}","starred_url":"https://api.github.com/users/iliakur/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/iliakur/subscriptions","organizations_url":"https://api.github.com/users/iliakur/orgs","repos_url":"https://api.github.com/users/iliakur/repos","events_url":"https://api.github.com/users/iliakur/events{/privacy}","received_events_url":"https://api.github.com/users/iliakur/received_events","type":"User","site_admin":false},"labels":[{"id":932725515,"node_id":"MDU6TGFiZWw5MzI3MjU1MTU=","url":"https://api.github.com/repos/DataDog/integrations-core/labels/changelog/no-changelog","name":"changelog/no-changelog","color":"eeeeee","default":false,"description":""},{"id":4541502693,"node_id":"LA_kwDOAtBC5c8AAAABDrHU5Q","url":"https://api.github.com/repos/DataDog/integrations-core/labels/ddev","name":"ddev","color":"ededed","default":false,"description":null}],"state":"open","locked":false,"assignee":null,"assignees":[],"milestone":null,"comments":2,"created_at":"2023-08-09T14:31:14Z","updated_at":"2023-08-09T22:39:43Z","closed_at":null,"author_association":"MEMBER","active_lock_reason":null,"draft":false,"pull_request":{"url":"https://api.github.com/repos/DataDog/integrations-core/pulls/15520","html_url":"https://github.com/DataDog/integrations-core/pull/15520","diff_url":"https://github.com/DataDog/integrations-core/pull/15520.diff","patch_url":"https://github.com/DataDog/integrations-core/pull/15520.patch","merged_at":null},"body":"###
+      What does this PR do?\r\n<!-- A brief description of the change being made with
+      this pull request. -->\r\n\r\n### Motivation\r\n<!-- What inspired you to submit
+      this pull request? -->\r\n\r\n### Additional Notes\r\n<!-- Anything else we
+      should know when reviewing? -->\r\n\r\n### Review checklist (to be filled by
+      reviewers)\r\n\r\n- [ ] Feature or bugfix MUST have appropriate tests (unit,
+      integration, e2e)\r\n- [ ] PR title must be written as a CHANGELOG entry [(see
+      why)](https://github.com/DataDog/integrations-core/blob/master/CONTRIBUTING.md#pull-request-title)\r\n-
+      [ ] Files changes must correspond to the primary purpose of the PR as described
+      in the title (small unrelated changes should have their own PR)\r\n- [ ] PR
+      must have `changelog/` and `integration/` labels attached\r\n- [ ] If the PR
+      doesn''t need to be tested during QA, please add a `qa/skip-qa` label.","reactions":{"url":"https://api.github.com/repos/DataDog/integrations-core/issues/15520/reactions","total_count":0,"+1":0,"-1":0,"laugh":0,"hooray":0,"confused":0,"heart":0,"rocket":0,"eyes":0},"timeline_url":"https://api.github.com/repos/DataDog/integrations-core/issues/15520/timeline","performed_via_github_app":null,"state_reason":null,"score":1.0}]}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
+      Cache-Control:
+      - no-cache
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 09 Aug 2023 22:43:20 GMT
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-OAuth-Scopes:
+      - ''
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-GitHub-Media-Type:
+      - github.v3; format=json
+      X-GitHub-Request-Id:
+      - E4AC:0BBE:3887653:72CA36F:64D41688
+      X-OAuth-Scopes:
+      - read:org, repo
+      X-RateLimit-Limit:
+      - '30'
+      X-RateLimit-Remaining:
+      - '29'
+      X-RateLimit-Reset:
+      - '1691621060'
+      X-RateLimit-Resource:
+      - search
+      X-RateLimit-Used:
+      - '1'
+      X-XSS-Protection:
+      - '0'
+      x-github-api-version-selected:
+      - '2022-11-28'
+    http_version: HTTP/1.1
+    status_code: 200
+version: 1

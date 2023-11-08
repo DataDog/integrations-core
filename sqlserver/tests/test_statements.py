@@ -9,8 +9,10 @@ import math
 import os
 import re
 import time
+from collections import namedtuple
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
+from unittest.mock import ANY
 
 import mock
 import pytest
@@ -28,7 +30,7 @@ from datadog_checks.sqlserver.const import (
 )
 from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
 
-from .common import CHECK_NAME
+from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME
 
 try:
     import pyodbc
@@ -54,6 +56,9 @@ def stop_orphaned_threads():
 def dbm_instance(instance_docker):
     instance_docker['dbm'] = True
     instance_docker['min_collection_interval'] = 1
+    instance_docker['procedure_metrics'] = {'enabled': False}
+    instance_docker['collect_settings'] = {'enabled': False}
+    instance_docker['query_activity'] = {'enabled': False}
     # set a very small collection interval so the tests go fast
     instance_docker['query_metrics'] = {
         'enabled': True,
@@ -295,6 +300,7 @@ def test_statement_metrics_and_plans(
     caplog.set_level(logging.INFO)
     if disable_secondary_tags:
         dbm_instance['query_metrics']['disable_secondary_tags'] = True
+    dbm_instance['query_activity'] = {'enabled': True, 'collection_interval': 2}
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     # the check must be run three times:
@@ -320,18 +326,21 @@ def test_statement_metrics_and_plans(
                 cursor, SQL_SERVER_QUERY_METRICS_COLUMNS
             )
 
-    expected_instance_tags = set(dbm_instance.get('tags', []))
-    expected_instance_tags_with_db = set(dbm_instance.get('tags', [])) | {"db:{}".format(database)}
+    instance_tags = dbm_instance.get('tags', [])
+    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
+    expected_instance_tags_with_db = expected_instance_tags | {"db:{}".format(database)}
 
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
-    payload = dbm_metrics[0]
+    payload = next((n for n in dbm_metrics if n.get('kind') == 'query_metrics'), None)
     # host metadata
     assert payload['sqlserver_version'].startswith("Microsoft SQL Server"), "invalid version"
     assert payload['host'] == "stubbed.hostname", "wrong hostname"
     assert payload['ddagenthostname'] == datadog_agent.get_hostname()
-    assert set(payload['tags']) == expected_instance_tags, "wrong instance tags for dbm-metrics event"
+    tags = set(payload['tags'])
+    assert tags == expected_instance_tags, "wrong instance tags for dbm-metrics event"
+    assert not any("dd.internal" in m for m in tags), "emitted dd.internal metrics from check"
     assert type(payload['min_collection_interval']) in (float, int), "invalid min_collection_interval"
     # metrics rows
     sqlserver_rows = payload.get('sqlserver_rows', [])
@@ -423,10 +432,56 @@ def test_statement_metrics_and_plans(
 
     # internal debug metrics
     aggregator.assert_metric(
-        "dd.sqlserver.operation.time",
+        OPERATION_TIME_METRIC_NAME,
         tags=['agent_hostname:stubbed.hostname', 'operation:collect_statement_metrics_and_plans']
         + _expected_dbm_instance_tags(dbm_instance),
     )
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "database,query,expected_queries_patterns,",
+    [
+        [
+            "master",
+            "EXEC multiQueryProc",
+            [
+                r"select @total = @total \+ count\(\*\) from sys\.databases where name like '%_'",
+                r"select @total = @total \+ count\(\*\) from sys\.sysobjects where type = 'U'",
+            ],
+        ]
+    ],
+)
+def test_statement_metrics_limit(
+    aggregator, dd_run_check, dbm_instance, bob_conn, database, query, expected_queries_patterns
+):
+    dbm_instance['query_metrics']['max_queries'] = 5
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    # the check must be run three times:
+    # 1) set _last_stats_query_time (this needs to happen before the 1st test queries to ensure the query time
+    # interval is correct)
+    # 2) load the test queries into the StatementMetrics state
+    # 3) emit the query metrics based on the diff of current and last state
+    dd_run_check(check)
+    bob_conn.execute_with_retries(query, (), database=database)
+    dd_run_check(check)
+    aggregator.reset()
+    bob_conn.execute_with_retries(query, (), database=database)
+    dd_run_check(check)
+
+    # dbm-metrics
+    dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
+    payload = next((n for n in dbm_metrics if n.get('kind') == 'query_metrics'), None)
+    # metrics rows
+    sqlserver_rows = payload.get('sqlserver_rows', [])
+    assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
+    assert len(sqlserver_rows) == dbm_instance['query_metrics']['max_queries']
+
+    # check that it's sorted
+    assert sqlserver_rows == sorted(sqlserver_rows, key=lambda i: i['total_elapsed_time'], reverse=True)
 
 
 @pytest.mark.integration
@@ -451,7 +506,7 @@ def test_statement_metadata(
 
     query = '''
     -- Test comment
-    select * from sys.databases'''
+    select * from sys.sysusers'''
     query_signature = '6d1d070f9b6c5647'
 
     def _run_query():
@@ -499,36 +554,80 @@ def test_statement_metadata(
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
-    "cloud_metadata",
+    "input_cloud_metadata,output_cloud_metadata",
     [
-        {},
-        {
-            'azure': {
-                'deployment_type': 'managed_instance',
-                'database_name': 'my-instance',
+        ({}, {}),
+        (
+            {
+                'azure': {
+                    'deployment_type': 'managed_instance',
+                    'name': 'my-instance.abcea3661b20.database.windows.net',
+                },
             },
-        },
-        {
-            'aws': {
-                'instance_endpoint': 'foo.aws.com',
+            {
+                'azure': {
+                    'deployment_type': 'managed_instance',
+                    'name': 'my-instance.abcea3661b20.database.windows.net',
+                },
             },
-            'azure': {
-                'deployment_type': 'managed_instance',
-                'database_name': 'my-instance',
+        ),
+        (
+            {
+                'azure': {
+                    'deployment_type': 'managed_instance',
+                    'fully_qualified_domain_name': 'my-instance.abcea3661b20.database.windows.net',
+                },
             },
-        },
-        {
-            'gcp': {
-                'project_id': 'foo-project',
-                'instance_id': 'bar',
-                'extra_field': 'included',
+            {
+                'azure': {
+                    'deployment_type': 'managed_instance',
+                    'name': 'my-instance.abcea3661b20.database.windows.net',
+                },
             },
-        },
+        ),
+        (
+            {
+                'aws': {
+                    'instance_endpoint': 'foo.aws.com',
+                },
+                'azure': {
+                    'deployment_type': 'managed_instance',
+                    'name': 'my-instance.abcea3661b20.database.windows.net',
+                },
+            },
+            {
+                'aws': {
+                    'instance_endpoint': 'foo.aws.com',
+                },
+                'azure': {
+                    'deployment_type': 'managed_instance',
+                    'name': 'my-instance.abcea3661b20.database.windows.net',
+                },
+            },
+        ),
+        (
+            {
+                'gcp': {
+                    'project_id': 'foo-project',
+                    'instance_id': 'bar',
+                    'extra_field': 'included',
+                },
+            },
+            {
+                'gcp': {
+                    'project_id': 'foo-project',
+                    'instance_id': 'bar',
+                    'extra_field': 'included',
+                },
+            },
+        ),
     ],
 )
-def test_statement_cloud_metadata(aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, cloud_metadata):
-    if cloud_metadata:
-        for k, v in cloud_metadata.items():
+def test_statement_cloud_metadata(
+    aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, input_cloud_metadata, output_cloud_metadata
+):
+    if input_cloud_metadata:
+        for k, v in input_cloud_metadata.items():
             dbm_instance[k] = v
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
@@ -552,15 +651,15 @@ def test_statement_cloud_metadata(aggregator, dd_run_check, dbm_instance, bob_co
 
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(dbm_metrics) == 1, "should have collected exactly one metrics payload"
-    payload = dbm_metrics[0]
+    payload = next((n for n in dbm_metrics if n.get('kind') == 'query_metrics'), None)
     # host metadata
     assert payload['sqlserver_version'].startswith("Microsoft SQL Server"), "invalid version"
     assert payload['host'] == "stubbed.hostname", "wrong hostname"
     assert payload['ddagenthostname'] == datadog_agent.get_hostname()
     # cloud metadata
-    assert payload['cloud_metadata'] == cloud_metadata, "wrong cloud_metadata"
+    assert payload['cloud_metadata'] == output_cloud_metadata, "wrong cloud_metadata"
     # test that we're reading the edition out of the db instance. Note that this edition is what
-    # is running in our test docker containers so it's not expected to match the test cloud metadata
+    # is running in our test docker containers, so it's not expected to match the test cloud metadata
     assert payload['sqlserver_engine_edition'] in SELF_HOSTED_ENGINE_EDITIONS, "wrong edition"
 
 
@@ -620,7 +719,8 @@ def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
     # without the cast this is expected to fail with
     # pyodbc.ProgrammingError: ('ODBC SQL type -150 is not yet supported.  column-index=77  type=-150', 'HY106')
     with datadog_conn_docker.cursor() as cursor:
-        params = (math.ceil(time.time() - now),)
+        lookback_seconds = math.ceil(time.time() - now) + 60
+        params = (lookback_seconds,)
         logging.debug("running statement_metrics_query [%s] %s", statement_metrics_query, params)
         cursor.execute(statement_metrics_query, params)
 
@@ -760,3 +860,79 @@ def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
         "dd.sqlserver.async_job.cancel",
         tags=_expected_dbm_instance_tags(dbm_instance) + ['job:query-metrics'],
     )
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "database,query,",
+    [
+        [
+            "master",
+            "EXEC conditionalPlanTest @Switch = 1",
+        ]
+    ],
+)
+def test_statement_conditional_stored_procedure_with_temp_table(
+    aggregator, dd_run_check, dbm_instance, bob_conn, database, query
+):
+    # This test covers a very special case where a stored procedure has a conditional branch
+    # and uses temp tables. The plan will be NULL if there are any statements involving temp tables that
+    # have not been executed. We simulate the case by running the stored procedure with a parameter that
+    # only executes the first branch of the conditional. The second branch will not be executed and the
+    # plan will be NULL. That being said, ALL executed statements in the stored procedure will have NULL plan.
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    dd_run_check(check)
+    bob_conn.execute_with_retries(query, (), database=database)
+    dd_run_check(check)
+    aggregator.reset()
+    bob_conn.execute_with_retries(query, (), database=database)
+    dd_run_check(check)
+
+    # dbm-metrics
+    dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
+    payload = dbm_metrics[0]
+    # metrics rows
+    sqlserver_rows = payload.get('sqlserver_rows', [])
+    assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
+
+    dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+    assert dbm_samples, "should have collected at least one sample"
+
+    matched_events = [s for s in dbm_samples if s['dbm_type'] == "plan" and "#Ids" in s['db']['statement']]
+    assert matched_events, "should have collected plan event"
+
+    for event in matched_events:
+        assert event['db']['plan']['definition'] is None
+        assert event['sqlserver']['plan_handle'] is not None
+        assert event['sqlserver']['query_hash'] is not None
+        assert event['sqlserver']['query_plan_hash'] is not None
+
+
+def _mock_database_list():
+    Row = namedtuple('Row', 'name')
+    fetchall_results = [
+        Row('master'),
+        Row('tempdb'),
+        Row('msdb'),
+        Row('AdventureWorks2017'),
+        Row('CaseSensitive2018'),
+        Row('Fancy2020db'),
+    ]
+    mock_cursor = mock.MagicMock()
+    mock_cursor.fetchall.return_value = iter(fetchall_results)
+    # check excluded overrides included
+    mock_cursor.fetchall.return_value = iter(fetchall_results)
+    return fetchall_results, mock_cursor
+
+
+@pytest.mark.unit
+def test_metrics_lookback_multiplier(instance_docker):
+    instance_docker['query_metrics'] = {'collection_interval': 3}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    _, mock_cursor = _mock_database_list()
+
+    check.statement_metrics._load_raw_query_metrics_rows(mock_cursor)
+    mock_cursor.execute.assert_called_with(ANY, (6,))

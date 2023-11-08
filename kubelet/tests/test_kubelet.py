@@ -72,6 +72,10 @@ EXPECTED_METRICS_COMMON = [
     'kubernetes.kubelet.cpu.usage',
     'kubernetes.kubelet.memory.usage',
     'kubernetes.kubelet.memory.rss',
+    'kubernetes.node.filesystem.usage',
+    'kubernetes.node.filesystem.usage_pct',
+    'kubernetes.node.image.filesystem.usage',
+    'kubernetes.node.image.filesystem.usage_pct',
 ]
 
 EXPECTED_METRICS_PROMETHEUS = [
@@ -178,6 +182,10 @@ EXPECTED_METRICS_PROMETHEUS_1_21 = [
     'kubernetes.runtime.cpu.usage',
     'kubernetes.runtime.memory.usage',
     'kubernetes.runtime.memory.rss',
+    'kubernetes.node.filesystem.usage',
+    'kubernetes.node.filesystem.usage_pct',
+    'kubernetes.node.image.filesystem.usage',
+    'kubernetes.node.image.filesystem.usage_pct',
 ]
 
 COMMON_TAGS = {
@@ -893,6 +901,10 @@ def test_no_tags_no_metrics(monkeypatch, aggregator, tagger):
     aggregator.assert_metric('kubernetes.rest.client.latency.count')
     aggregator.assert_metric('kubernetes.rest.client.latency.sum')
     aggregator.assert_metric('kubernetes.rest.client.requests')
+    aggregator.assert_metric('kubernetes.node.filesystem.usage')
+    aggregator.assert_metric('kubernetes.node.filesystem.usage_pct')
+    aggregator.assert_metric('kubernetes.node.image.filesystem.usage')
+    aggregator.assert_metric('kubernetes.node.image.filesystem.usage_pct')
     aggregator.assert_all_metrics_covered()
 
 
@@ -1226,6 +1238,7 @@ def test_process_stats_summary_as_source_filtering_by_namespace(monkeypatch):
     monkeypatch.setattr(check, 'rate', mock.Mock())
     pod_list_utils = PodListUtils(json.loads(mock_from_file('pods_windows.json')))
     stats = json.loads(mock_from_file('stats_summary_windows.json'))
+    del stats['node']
 
     # Namespace is excluded, so it shouldn't report any metrics
     monkeypatch.setattr(pod_list_utils, 'is_namespace_excluded', mock.Mock(return_value=True))
@@ -1443,6 +1456,18 @@ def test_probe_metrics(monkeypatch, aggregator, tagger):
         ['kube_container_name:dnsmasq', 'kube_namespace:kube-system', 'pod_name:kube-dns-c598bd956-wgf4n'],
     )
 
+    aggregator.assert_metric(
+        'kubernetes.startup_probe.success.total',
+        70,
+        ['kube_container_name:kubedns', 'kube_namespace:kube-system', 'pod_name:kube-dns-c598bd956-wgf4n'],
+    )
+
+    aggregator.assert_metric(
+        'kubernetes.startup_probe.failure.total',
+        70,
+        ['kube_container_name:kubedns', 'kube_namespace:kube-system', 'pod_name:kube-dns-c598bd956-wgf4n'],
+    )
+
 
 @pytest.fixture()
 def mock_request():
@@ -1525,3 +1550,14 @@ def test_sanitize_url_label():
     )
     expected = "/api/v1/namespaces/%7Bnamespace%7D/configmaps"
     assert KubeletCheck._sanitize_url_label(input) == expected
+
+
+def test_kubelet_unavailable_check_can_init(monkeypatch):
+    instance = {
+        'kubelet_metrics_endpoint': 'http://10.8.0.1:10255/metrics',
+        'cadvisor_metrics_endpoint': 'http://10.8.0.1:10255/metrics/cadvisor',
+    }
+    kubelet_conn_info = {}
+    with mock.patch('datadog_checks.kubelet.kubelet.get_connection_info', return_value=kubelet_conn_info):
+        check = mock_kubelet_check(monkeypatch, [instance], kube_version=None)
+        assert check is not None

@@ -18,3 +18,6 @@ KAFKA_INTERNAL_TOPICS = {
     '_confluent-telemetry-metrics',
     '_confluent-command',
 }
+
+# https://github.com/confluentinc/confluent-kafka-python/issues/1329#issuecomment-1109627240
+OFFSET_INVALID = -1001

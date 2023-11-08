@@ -15,6 +15,8 @@ TO_SNAKE_CASE_PATTERN = re.compile('(?!^)([A-Z]+)')
 class ImpalaCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'impala'
 
+    DEFAULT_METRIC_LIMIT = 0
+
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
         self.check_initializations.append(self.configure_additional_transformers)

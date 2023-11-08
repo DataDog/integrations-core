@@ -1,1356 +1,1795 @@
 {
     "title": "Kubernetes Deployments Overview",
-    "description": "Our Kubernetes dashboard gives you broad visibility into the scale, status, and resource usage of your cluster and its containers. Further reading for Kubernetes monitoring:\n\n- [Autoscale Kubernetes workloads with any Datadog metric](https://www.datadoghq.com/blog/autoscale-kubernetes-datadog/)\n\n- [How to monitor Kubernetes + Docker with Datadog](https://www.datadoghq.com/blog/monitor-kubernetes-docker/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n\n- [Monitoring Kubernetes performance metrics](https://www.datadoghq.com/blog/monitoring-kubernetes-performance-metrics/)\n\n- [Collecting metrics with built-in Kubernetes monitoring tools](https://www.datadoghq.com/blog/how-to-collect-and-graph-kubernetes-metrics/)\n\n- [Monitoring Kubernetes with Datadog](https://www.datadoghq.com/blog/monitoring-kubernetes-with-datadog/)\n\n- [Datadog's Kubernetes integration docs](https://docs.datadoghq.com/integrations/kubernetes/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "description": "Our Kubernetes Deployments dashboard gives you broad visibility into the scale, status, and resource usage of your deployment workloads. \nFurther reading for Kubernetes monitoring:\n\n- [Autoscale Kubernetes workloads with any Datadog metric](https://www.datadoghq.com/blog/autoscale-kubernetes-datadog/)\n\n- [How to monitor Kubernetes + Docker with Datadog](https://www.datadoghq.com/blog/monitor-kubernetes-docker/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n\n- [Monitoring Kubernetes performance metrics](https://www.datadoghq.com/blog/monitoring-kubernetes-performance-metrics/)\n\n- [Collecting metrics with built-in Kubernetes monitoring tools](https://www.datadoghq.com/blog/how-to-collect-and-graph-kubernetes-metrics/)\n\n- [Monitoring Kubernetes with Datadog](https://www.datadoghq.com/blog/monitoring-kubernetes-with-datadog/)\n\n- [Datadog's Kubernetes integration docs](https://docs.datadoghq.com/integrations/kubernetes/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
     "widgets": [
         {
-            "id": 0,
+            "id": 7055697993101880,
             "definition": {
-                "type": "query_value",
-                "requests": [
+                "title": "Overview",
+                "banner_img": "/static/images/integration_dashboard/kubernetes_hero_2.jpeg",
+                "show_title": false,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas_available{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 0,
-                                "palette": "green_on_white"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Available",
-                "title_size": "16",
-                "title_align": "left",
-                "autoscale": true,
-                "precision": 0
-            },
-            "layout": {
-                "x": 45,
-                "y": 6,
-                "width": 14,
-                "height": 14
-            }
-        },
-        {
-            "id": 1,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.deployment.replicas_available{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "green",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                        "id": 6607616231283734,
+                        "definition": {
+                            "type": "note",
+                            "content": "## Our Kubernetes Deployments dashboard gives you broad visibility into the scale, status, and resource usage of your deployment workloads. \n\n----\n\nFurther reading for Kubernetes monitoring:\n\n- [Autoscale Kubernetes workloads with any Datadog metric](https://www.datadoghq.com/blog/autoscale-kubernetes-datadog/)\n\n- [How to monitor Kubernetes + Docker with Datadog](https://www.datadoghq.com/blog/monitor-kubernetes-docker/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n\n- [Monitoring Kubernetes performance metrics](https://www.datadoghq.com/blog/monitoring-kubernetes-performance-metrics/)\n\n- [Collecting metrics with built-in Kubernetes monitoring tools](https://www.datadoghq.com/blog/how-to-collect-and-graph-kubernetes-metrics/)\n\n- [Monitoring Kubernetes with Datadog](https://www.datadoghq.com/blog/monitoring-kubernetes-with-datadog/)\n\n- [Datadog's Kubernetes integration docs](https://docs.datadoghq.com/integrations/kubernetes/)",
+                            "background_color": "transparent",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 6
                         }
                     }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "title": "Replicas Available",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 0,
-                "y": 57,
-                "width": 59,
-                "height": 14
-            }
-        },
-        {
-            "id": 2,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 0,
-                                "palette": "green_on_white",
-                                "custom_fg_color": "#6a53a1"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Replicas",
-                "title_size": "16",
-                "title_align": "left",
-                "autoscale": true,
-                "precision": 0
-            },
-            "layout": {
-                "x": 15,
-                "y": 6,
-                "width": 14,
-                "height": 14
-            }
-        },
-        {
-            "id": 3,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace} by {kube_deployment}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "title": "Replicas",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 0,
-                "y": 42,
-                "width": 59,
-                "height": 14
-            }
-        },
-        {
-            "id": 4,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.deployment.replicas_unavailable{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 0,
-                                "palette": "red_on_white"
-                            },
-                            {
-                                "comparator": "<=",
-                                "value": 0,
-                                "palette": "green_on_white"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Unavailable",
-                "title_size": "16",
-                "title_align": "left",
-                "autoscale": true,
-                "precision": 0
-            },
-            "layout": {
-                "x": 75,
-                "y": 6,
-                "width": 14,
-                "height": 14
-            }
-        },
-        {
-            "id": 5,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.deployment.replicas_unavailable{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_cluster_name,kube_namespace,kube_deployment}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "orange",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "right_yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto"
-                },
-                "title": "Replicas Unavailable",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 0,
-                "y": 72,
-                "width": 59,
-                "height": 14
-            }
-        },
-        {
-            "id": 6,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 0,
-                                "palette": "green_on_white"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Desired",
-                "title_size": "16",
-                "title_align": "left",
-                "autoscale": true,
-                "precision": 0
-            },
-            "layout": {
-                "x": 30,
-                "y": 6,
-                "width": 14,
-                "height": 14
-            }
-        },
-        {
-            "id": 7,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "cool",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "title": "Replicas Desired",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 60,
-                "y": 42,
-                "width": 59,
-                "height": 14
-            }
-        },
-        {
-            "id": 8,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.deployment.replicas_updated{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 0,
-                                "palette": "green_on_white"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Updated",
-                "title_size": "16",
-                "title_align": "left",
-                "autoscale": true,
-                "precision": 0
-            },
-            "layout": {
-                "x": 60,
-                "y": 6,
-                "width": 14,
-                "height": 14
-            }
-        },
-        {
-            "id": 9,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.deployment.replicas_updated{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "right_yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto"
-                },
-                "title": "Replicas Updated",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 60,
-                "y": 57,
-                "width": 59,
-                "height": 14
-            }
-        },
-        {
-            "id": 10,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.deployment.rollingupdate.max_unavailable{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "warm",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "title": "Max Unavailable Replicas in Rolling Update (spec strategy)",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 60,
-                "y": 87,
-                "width": 59,
-                "height": 14
-            }
-        },
-        {
-            "id": 11,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment,kube_cluster_name,kube_namespace}-sum:kubernetes_state.deployment.replicas_available{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment,kube_cluster_name,kube_namespace}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "warm",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "right_yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto"
-                },
-                "title": "Replicas Desired but Not Available",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 0,
-                "y": 87,
-                "width": 59,
-                "height": 14
-            }
-        },
-        {
-            "id": 12,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.deployment.replicas{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}-sum:kubernetes_state.deployment.replicas_updated{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "orange",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "markers": [
-                    {
-                        "value": "y = 0",
-                        "display_type": "ok dashed",
-                        "label": "y = 0"
-                    }
-                ],
-                "title": "Replicas Outdated",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 60,
-                "y": 72,
-                "width": 59,
-                "height": 14
-            }
-        },
-        {
-            "id": 13,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}-sum:kubernetes_state.deployment.replicas_updated{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">=",
-                                "value": 0,
-                                "palette": "yellow_on_white"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Outdated",
-                "title_size": "16",
-                "title_align": "left",
-                "autoscale": true,
-                "precision": 0
-            },
-            "layout": {
-                "x": 105,
-                "y": 6,
-                "width": 14,
-                "height": 14
-            }
-        },
-        {
-            "id": 14,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}-sum:kubernetes_state.deployment.replicas_available{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 0,
-                                "palette": "red_on_white"
-                            },
-                            {
-                                "comparator": "<=",
-                                "value": 0,
-                                "palette": "green_on_white"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Desired Not Available",
-                "title_size": "16",
-                "title_align": "left",
-                "autoscale": true,
-                "precision": 0
-            },
-            "layout": {
-                "x": 90,
-                "y": 6,
-                "width": 14,
-                "height": 14
-            }
-        },
-        {
-            "id": 15,
-            "definition": {
-                "type": "note",
-                "content": "Overview",
-                "background_color": "gray",
-                "font_size": "18",
-                "text_align": "center",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
+                ]
             },
             "layout": {
                 "x": 0,
                 "y": 0,
-                "width": 119,
-                "height": 5
+                "width": 4,
+                "height": 9
             }
         },
         {
-            "id": 16,
+            "id": 1974509092541634,
             "definition": {
-                "type": "timeseries",
-                "requests": [
+                "title": "Overview",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                        "q": "count_nonzero(avg:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,kube_namespace,kube_deployment})",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                        "id": 38,
+                        "definition": {
+                            "title": "Deployments",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_green"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace} by {kube_deployment}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "count_nonzero(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
                         }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "right_yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto"
-                },
-                "title": "Deployments",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 0,
-                "y": 21,
-                "width": 29,
-                "height": 14
-            }
-        },
-        {
-            "id": 17,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
+                    },
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,kube_namespace,kube_deployment}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                        "id": 2,
+                        "definition": {
+                            "title": "Replicas",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "green_on_white",
+                                            "custom_fg_color": "#6a53a1"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
                         }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "right_yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto"
-                },
-                "title": "Replicas per Deployments",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 30,
-                "y": 21,
-                "width": 29,
-                "height": 14
-            }
-        },
-        {
-            "id": 18,
-            "definition": {
-                "type": "change",
-                "requests": [
+                    },
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,kube_namespace,kube_deployment}",
-                        "change_type": "absolute",
-                        "compare_to": "week_before",
-                        "increase_good": true,
-                        "order_by": "change",
-                        "order_dir": "desc"
-                    }
-                ],
-                "custom_links": [],
-                "title": "Replicas per Deployments",
-                "title_size": "16",
-                "title_align": "left"
-            },
-            "layout": {
-                "x": 60,
-                "y": 21,
-                "width": 29,
-                "height": 14
-            }
-        },
-        {
-            "id": 19,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}-sum:kubernetes_state.deployment.replicas_available{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                        "id": 6,
+                        "definition": {
+                            "title": "Desired",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "green_on_white"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
                         }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "right_yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto"
-                },
-                "title": "Replicas Desired but Not Available",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 90,
-                "y": 21,
-                "width": 29,
-                "height": 14
-            }
-        },
-        {
-            "id": 20,
-            "definition": {
-                "type": "note",
-                "content": "Replicas by Deployment",
-                "background_color": "gray",
-                "font_size": "18",
-                "text_align": "center",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 0,
-                "y": 36,
-                "width": 119,
-                "height": 5
-            }
-        },
-        {
-            "id": 21,
-            "definition": {
-                "type": "note",
-                "content": "Resources",
-                "background_color": "gray",
-                "font_size": "18",
-                "text_align": "center",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 0,
-                "y": 102,
-                "width": 119,
-                "height": 5
-            }
-        },
-        {
-            "id": 22,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
+                    },
                     {
-                        "q": "exclude_null(sum:kubernetes.cpu.usage.total{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_cluster_name,kube_namespace,kube_deployment})",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                        "id": 0,
+                        "definition": {
+                            "title": "Available",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "green_on_white"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas_available{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
                         }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "right_yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto"
-                },
-                "title": "CPU Usage by Deployment",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 0,
-                "y": 114,
-                "width": 59,
-                "height": 24
-            }
-        },
-        {
-            "id": 23,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
+                    },
                     {
-                        "q": "exclude_null(avg:kubernetes.memory.usage{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name})",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                        "id": 8,
+                        "definition": {
+                            "title": "Updated",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "green_on_white"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas_updated{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
                         }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "right_yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto"
-                },
-                "title": "Memory Usage by Deployment",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 60,
-                "y": 114,
-                "width": 59,
-                "height": 24
-            }
-        },
-        {
-            "id": 24,
-            "definition": {
-                "type": "toplist",
-                "requests": [
+                    },
                     {
-                        "q": "top(sum:kubernetes.memory.usage{$scope,$kube_namespace,$kube_deployment,!pod_name:no_pod,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}, 10, 'mean', 'desc')"
-                    }
-                ],
-                "custom_links": [],
-                "title": "Most memory-intensive Deployments",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                }
-            },
-            "layout": {
-                "x": 60,
-                "y": 139,
-                "width": 59,
-                "height": 24
-            }
-        },
-        {
-            "id": 25,
-            "definition": {
-                "type": "toplist",
-                "requests": [
+                        "id": 4,
+                        "definition": {
+                            "title": "Unavailable",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "red_on_white"
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "value": 0,
+                                            "palette": "green_on_white"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas_unavailable{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
                     {
-                        "q": "top(sum:kubernetes.cpu.usage.total{$scope,$kube_namespace,$kube_deployment,!pod_name:no_pod,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}, 10, 'mean', 'desc')"
-                    }
-                ],
-                "custom_links": [],
-                "title": "Most CPU-intensive Deployments",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                }
-            },
-            "layout": {
-                "x": 0,
-                "y": 139,
-                "width": 59,
-                "height": 24
-            }
-        },
-        {
-            "id": 26,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
+                        "id": 14,
+                        "definition": {
+                            "title": "Desired Not Available",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "red_on_white"
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "value": 0,
+                                            "palette": "green_on_white"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes_state.deployment.replicas_available{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 - query2"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
                     {
-                        "q": "sum:kubernetes.cpu.requests{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}, sum:kubernetes.cpu.usage.total{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}, sum:kubernetes.cpu.limits{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}",
-                        "metadata": [
-                            {
-                                "expression": "sum:kubernetes.cpu.requests{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}",
-                                "alias_name": "Requests"
+                        "id": 13,
+                        "definition": {
+                            "title": "Outdated",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "yellow_on_white"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes_state.deployment.replicas_updated{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 - query2"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 16,
+                        "definition": {
+                            "title": "Deployments",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,kube_namespace,kube_deployment}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "count_nonzero(query1)"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
                             },
-                            {
-                                "expression": "sum:kubernetes.cpu.limits{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}",
-                                "alias_name": "Limits"
+                            "right_yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "min": "auto",
+                                "max": "auto"
                             },
-                            {
-                                "expression": "sum:kubernetes.cpu.usage.total{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}",
-                                "alias_name": "Usage"
-                            }
-                        ],
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 4,
+                            "height": 2
                         }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "right_yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto"
-                },
-                "title": "CPU requests, limits and usage",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 0,
-                "y": 164,
-                "width": 59,
-                "height": 24
-            }
-        },
-        {
-            "id": 27,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
+                    },
                     {
-                        "q": "sum:kubernetes.memory.requests{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}, sum:kubernetes.memory.rss{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}, sum:kubernetes.memory.limits{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}",
-                        "metadata": [
-                            {
-                                "expression": "sum:kubernetes.memory.limits{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}",
-                                "alias_name": "Limits"
+                        "id": 17,
+                        "definition": {
+                            "title": "Replicas per Deployments",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,kube_namespace,kube_deployment}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
                             },
-                            {
-                                "expression": "sum:kubernetes.memory.requests{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}",
-                                "alias_name": "Requests"
+                            "right_yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "min": "auto",
+                                "max": "auto"
                             },
-                            {
-                                "expression": "sum:kubernetes.memory.rss{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}",
-                                "alias_name": "Usage"
-                            }
-                        ],
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 4,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 18,
+                        "definition": {
+                            "title": "Replicas per Deployments",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "change",
+                            "custom_links": [],
+                            "requests": [
+                                {
+                                    "change_type": "absolute",
+                                    "increase_good": true,
+                                    "order_by": "change",
+                                    "order_dir": "desc",
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "week_before(query1)"
+                                        },
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,kube_namespace,kube_deployment}",
+                                            "aggregator": "sum"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 19,
+                        "definition": {
+                            "title": "Replicas Desired but Not Available",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes_state.deployment.replicas_available{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 - query2"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "right_yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 6,
+                            "width": 4,
+                            "height": 2
                         }
                     }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "right_yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto"
-                },
-                "title": "Memory requests, limits and usage",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_size": "0"
+                ]
             },
             "layout": {
-                "x": 60,
-                "y": 164,
-                "width": 59,
-                "height": 24
+                "x": 4,
+                "y": 0,
+                "width": 8,
+                "height": 9
             }
         },
         {
-            "id": 28,
+            "id": 7007539085612432,
             "definition": {
-                "type": "note",
-                "content": "CPU",
-                "background_color": "gray",
-                "font_size": "18",
-                "text_align": "center",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
+                "title": "Replicas by Deployment",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 3,
+                        "definition": {
+                            "title": "Replicas",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace} by {kube_deployment}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7,
+                        "definition": {
+                            "title": "Replicas Desired",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1,
+                        "definition": {
+                            "title": "Replicas Available",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas_available{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 9,
+                        "definition": {
+                            "title": "Replicas Updated",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas_updated{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "right_yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5,
+                        "definition": {
+                            "title": "Replicas Unavailable",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas_unavailable{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_cluster_name,kube_namespace,kube_deployment}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "red",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 12,
+                        "definition": {
+                            "title": "Replicas Outdated",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes_state.deployment.replicas_updated{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 - query2"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "red",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": [
+                                {
+                                    "label": "y = 0",
+                                    "value": "y = 0",
+                                    "display_type": "ok dashed"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 11,
+                        "definition": {
+                            "title": "Replicas Desired but Not Available",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment,kube_cluster_name,kube_namespace}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes_state.deployment.replicas_available{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment,kube_cluster_name,kube_namespace}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 - query2"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "red",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 10,
+                        "definition": {
+                            "title": "Max Unavailable Replicas in Rolling Update (spec strategy)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.rollingupdate.max_unavailable{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 6,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
             },
             "layout": {
                 "x": 0,
-                "y": 108,
-                "width": 59,
-                "height": 5
+                "y": 9,
+                "width": 12,
+                "height": 9
             }
         },
         {
-            "id": 29,
+            "id": 6070238886353704,
             "definition": {
-                "type": "note",
-                "content": "Memory",
-                "background_color": "gray",
-                "font_size": "18",
-                "text_align": "center",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 60,
-                "y": 108,
-                "width": 59,
-                "height": 5
-            }
-        },
-        {
-            "id": 30,
-            "definition": {
-                "type": "note",
-                "content": "Disk",
-                "background_color": "gray",
-                "font_size": "18",
-                "text_align": "center",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
+                "title": "CPU Resources",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 22,
+                        "definition": {
+                            "title": "CPU Usage by Deployment",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.cpu.usage.total{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_cluster_name,kube_namespace,kube_deployment}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "right_yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 25,
+                        "definition": {
+                            "title": "Most CPU-intensive Deployments",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.cpu.usage.total{$scope,$kube_namespace,$kube_deployment,!pod_name:no_pod,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 26,
+                        "definition": {
+                            "title": "CPU requests, limits and usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.cpu.requests{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes.cpu.usage.total{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:kubernetes.cpu.limits{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "alias": "Requests"
+                                        },
+                                        {
+                                            "formula": "query2",
+                                            "alias": "Usage"
+                                        },
+                                        {
+                                            "formula": "query3",
+                                            "alias": "Limits"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "right_yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
             },
             "layout": {
                 "x": 0,
-                "y": 189,
-                "width": 59,
-                "height": 5
+                "y": 0,
+                "width": 6,
+                "height": 7,
+                "is_column_break": true
             }
         },
         {
-            "id": 31,
+            "id": 3174841784622732,
             "definition": {
-                "type": "note",
-                "content": "Network",
-                "background_color": "gray",
-                "font_size": "18",
-                "text_align": "center",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 60,
-                "y": 189,
-                "width": 59,
-                "height": 5
-            }
-        },
-        {
-            "id": 32,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
+                "title": "Memory Resources",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                        "q": "sum:kubernetes.network.rx_bytes{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}, sum:kubernetes.network.tx_bytes{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                        "id": 23,
+                        "definition": {
+                            "title": "Memory Usage by Deployment",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:kubernetes.memory.usage{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "right_yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 24,
+                        "definition": {
+                            "title": "Most memory-intensive Deployments",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.memory.usage{$scope,$kube_namespace,$kube_deployment,!pod_name:no_pod,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 27,
+                        "definition": {
+                            "title": "Memory requests, limits and usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.memory.requests{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes.memory.rss{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:kubernetes.memory.limits{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "alias": "Requests"
+                                        },
+                                        {
+                                            "formula": "query2",
+                                            "alias": "Usage"
+                                        },
+                                        {
+                                            "formula": "query3",
+                                            "alias": "Limits"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "right_yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 2
                         }
                     }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "title": "Network Usage (Rx / Tx rate)",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_size": "0"
+                ]
             },
             "layout": {
-                "x": 60,
-                "y": 195,
-                "width": 59,
-                "height": 24
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 7
             }
         },
         {
-            "id": 33,
+            "id": 8717452295670104,
             "definition": {
-                "type": "timeseries",
-                "requests": [
+                "title": "Disk Resources",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                        "q": "sum:kubernetes.network.rx_errors{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}, sum:kubernetes.network.tx_errors{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                        "id": 34,
+                        "definition": {
+                            "title": "Disk Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.filesystem.usage{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "right_yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 35,
+                        "definition": {
+                            "title": "Disk Usage %",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.filesystem.usage_pct{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "right_yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": [
+                                {
+                                    "label": "100%",
+                                    "value": "y = 100",
+                                    "display_type": "error dashed"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 36,
+                        "definition": {
+                            "title": "Most Disk-intensive Deployments",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.filesystem.usage{$scope,$kube_namespace,$kube_deployment,!pod_name:no_pod,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 2
                         }
                     }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "right_yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto"
-                },
-                "markers": [
-                    {
-                        "value": "y = 0",
-                        "display_type": "ok dashed",
-                        "label": "y = 0"
-                    }
-                ],
-                "title": "Network Errors",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 60,
-                "y": 220,
-                "width": 59,
-                "height": 24
-            }
-        },
-        {
-            "id": 34,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes.filesystem.usage{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "right_yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto"
-                },
-                "title": "Disk Usage",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_size": "0"
+                ]
             },
             "layout": {
                 "x": 0,
-                "y": 195,
-                "width": 59,
-                "height": 24
+                "y": 0,
+                "width": 6,
+                "height": 7
             }
         },
         {
-            "id": 35,
+            "id": 4633251376424678,
             "definition": {
-                "type": "timeseries",
-                "requests": [
+                "title": "Network Resources",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                        "q": "sum:kubernetes.filesystem.usage_pct{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}*100",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                        "id": 32,
+                        "definition": {
+                            "title": "Network Usage (Rx / Tx rate)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.network.rx_bytes{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes.network.tx_bytes{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 33,
+                        "definition": {
+                            "title": "Network Errors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.network.rx_errors{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes.network.tx_errors{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "right_yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": [
+                                {
+                                    "label": "y = 0",
+                                    "value": "y = 0",
+                                    "display_type": "ok dashed"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 37,
+                        "definition": {
+                            "title": "Most Network-intensive Deployments",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.network.tx_bytes{$scope,$kube_namespace,$kube_deployment,!pod_name:no_pod,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 2
                         }
                     }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "right_yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto"
-                },
-                "markers": [
-                    {
-                        "value": "y = 100",
-                        "display_type": "error dashed",
-                        "label": " 100% "
-                    }
-                ],
-                "title": "Disk Usage %",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_size": "0"
+                ]
             },
             "layout": {
-                "x": 0,
-                "y": 220,
-                "width": 59,
-                "height": 24
-            }
-        },
-        {
-            "id": 36,
-            "definition": {
-                "type": "toplist",
-                "requests": [
-                    {
-                        "q": "top(sum:kubernetes.filesystem.usage{$scope,$kube_namespace,$kube_deployment,!pod_name:no_pod,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}, 10, 'mean', 'desc')"
-                    }
-                ],
-                "custom_links": [],
-                "title": "Most Disk-intensive Deployments",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                }
-            },
-            "layout": {
-                "x": -1,
-                "y": 245,
-                "width": 59,
-                "height": 24
-            }
-        },
-        {
-            "id": 37,
-            "definition": {
-                "type": "toplist",
-                "requests": [
-                    {
-                        "q": "top(sum:kubernetes.network.tx_bytes{$scope,$kube_namespace,$kube_deployment,!pod_name:no_pod,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}, 10, 'mean', 'desc')"
-                    }
-                ],
-                "custom_links": [],
-                "title": "Most Network-intensive Deployments",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                }
-            },
-            "layout": {
-                "x": 60,
-                "y": 245,
-                "width": 59,
-                "height": 24
-            }
-        },
-        {
-            "id": 38,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "count_nonzero(sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace} by {kube_deployment})",
-                        "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 0,
-                                "palette": "white_on_green"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Deployments",
-                "title_size": "16",
-                "title_align": "left",
-                "precision": 0
-            },
-            "layout": {
-                "x": 0,
-                "y": 6,
-                "width": 14,
-                "height": 14
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 7
             }
         }
     ],
     "template_variables": [
         {
             "name": "scope",
-            "default": "*",
-            "prefix": null
+            "available_values": [],
+            "default": "*"
         },
         {
             "name": "kube_cluster_name",
-            "default": "*",
-            "prefix": "kube_cluster_name"
+            "prefix": "kube_cluster_name",
+            "available_values": [],
+            "default": "*"
         },
         {
             "name": "kube_namespace",
-            "default": "*",
-            "prefix": "kube_namespace"
+            "prefix": "kube_namespace",
+            "available_values": [],
+            "default": "*"
         },
         {
             "name": "kube_deployment",
-            "default": "*",
-            "prefix": "kube_deployment"
+            "prefix": "kube_deployment",
+            "available_values": [],
+            "default": "*"
         }
     ],
-    "layout_type": "free",
-    "is_read_only": true,
+    "layout_type": "ordered",
     "notify_list": [],
-    "id": 30341
+    "reflow_type": "fixed"
 }

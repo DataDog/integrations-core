@@ -8,7 +8,16 @@ from requests.exceptions import ConnectionError
 from datadog_checks.dev.testing import requires_py3
 from datadog_checks.gitlab import GitlabCheck
 
-from .common import CUSTOM_TAGS, HOST, METRICS_TO_TEST, METRICS_TO_TEST_V2, assert_check
+from .common import (
+    CUSTOM_TAGS,
+    GITALY_METRICS_TO_TEST,
+    GITLAB_GITALY_PROMETHEUS_ENDPOINT,
+    GITLAB_TAGS,
+    HOST,
+    METRICS_TO_TEST,
+    METRICS_TO_TEST_V2,
+    assert_check,
+)
 
 pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 
@@ -19,6 +28,24 @@ def test_check(dd_run_check, aggregator, gitlab_check, get_config, use_openmetri
     dd_run_check(check)
 
     assert_check(aggregator, METRICS_TO_TEST_V2 if use_openmetrics else METRICS_TO_TEST, use_openmetrics)
+
+
+@requires_py3
+def test_check_gitaly(dd_run_check, aggregator, gitlab_check, get_config):
+    from datadog_checks.gitlab.gitlab_v2 import GitlabCheckV2
+
+    config = get_config(True)
+    instance = config['instances'][0]
+    instance["gitaly_server_endpoint"] = GITLAB_GITALY_PROMETHEUS_ENDPOINT
+
+    dd_run_check(gitlab_check(config))
+
+    assert_check(aggregator, METRICS_TO_TEST_V2 + GITALY_METRICS_TO_TEST, True)
+    aggregator.assert_service_check(
+        'gitlab.gitaly.openmetrics.health',
+        status=GitlabCheckV2.OK,
+        tags=GITLAB_TAGS + CUSTOM_TAGS + ['endpoint:{}'.format(GITLAB_GITALY_PROMETHEUS_ENDPOINT)],
+    )
 
 
 def test_connection_failure(aggregator, gitlab_check, get_bad_config):

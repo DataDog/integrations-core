@@ -2318,6 +2318,5 @@
   "layout_type": "ordered",
   "is_read_only": false,
   "notify_list": [],
-  "reflow_type": "fixed",
-  "id": "bfu-7ek-xxa"
+  "reflow_type": "fixed"
 }

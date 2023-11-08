@@ -40,7 +40,60 @@ Linux: Configure the following sudoers rule for this to work:
 dd-agent ALL=NOPASSWD: /usr/sbin/conntrack -S
 ```
 
-Kubernetes: Conntrack metrics are available by default in Kubernetes < v1.11 or when using the `host` networking mode in Kubernetes v1.11+.
+#### Kubernetes  
+
+Conntrack metrics are available by default in Kubernetes < v1.11 or when using the `host` networking mode in Kubernetes v1.11+.  
+
+In order to collect [AWS ENA metrics][12]:
+
+- Update `network` check to enable collection of AWS ENA metrics with `collect_aws_ena_metrics: true`.
+- Update Agent containers to use `host` network mode and add `NET_ADMIN` capabilities. 
+
+For Datadog [Helm Chart][11] deployment, update chart values with:
+
+```yaml
+datadog:
+ # Enable AWS ENA metrics collection for network check
+ confd:
+   network.yaml: |-
+     init_config:
+     instances:
+       - collect_aws_ena_metrics: true
+
+# Have agent containers use host network with NET_ADMIN capability
+agents:
+  useHostNetwork: true
+  containers:
+    agent:
+      securityContext:
+        capabilities:
+          add:
+            - NET_ADMIN
+
+```
+
+For Agents manually deployed with DaemonSet, apply `datadog` DaemonSet patch:
+
+```yaml
+spec:
+  template:
+    spec:
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+      containers:
+        - name: agent
+          ports:
+          - containerPort: 8125
+            hostPort: 8125
+            name: dogstatsdport
+            protocol: UDP
+          securityContext:
+            capabilities:
+              add:
+              - NET_ADMIN
+```
+
+**Note**: You may need to add `hostPort: 8125` for other containers in the DaemonSet as `hostNetwork: true` will apply to all containers.
 
 ### Validation
 
@@ -71,7 +124,7 @@ The Network check does not include any service checks.
 - [Build a network monitor on an HTTP check][10]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/network/images/netdashboard.png
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/network/datadog_checks/network/data/conf.yaml.default
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -80,3 +133,5 @@ The Network check does not include any service checks.
 [8]: https://github.com/DataDog/integrations-core/blob/master/network/CHANGELOG.md#1110--2019-05-14
 [9]: https://docs.datadoghq.com/integrations/guide/send-tcp-udp-host-metrics-to-the-datadog-api/
 [10]: https://docs.datadoghq.com/monitors/monitor_types/network/
+[11]: https://docs.datadoghq.com/containers/kubernetes/installation/?tab=helm#installation
+[12]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/monitoring-network-performance-ena.html

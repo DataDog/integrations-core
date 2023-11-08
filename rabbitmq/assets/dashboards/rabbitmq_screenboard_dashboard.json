@@ -647,6 +647,5 @@
     }],
     "layout_type": "ordered",
     "notify_list": [],
-    "reflow_type": "fixed",
-    "id": "ejq-527-tr6"
+    "reflow_type": "fixed"
 }

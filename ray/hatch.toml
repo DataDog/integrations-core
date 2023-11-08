@@ -1,0 +1,11 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["3.9"]
+version = ["2.6"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  # Does not work well on M1s
+  { key = "RAY_VERSION", value = "2.6.1", if = ["2.6"] },
+]

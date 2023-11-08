@@ -21,8 +21,10 @@ class DbStatCollector(MongoCollector):
         # i.e Arbiters are ruled out
         if self.db_name == 'local':
             if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
+                self.log.debug("DbStatCollector can only be run on mongod nodes, arbiter node detected.")
                 return False
             if isinstance(deployment, MongosDeployment):
+                self.log.debug("DbStatCollector can only be run on mongod nodes, mongos deployment detected.")
                 return False
             return True
         else:

@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import contextlib
 import datetime
 import decimal
 import functools
@@ -10,6 +11,7 @@ import socket
 import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
+from ipaddress import IPv4Address
 from itertools import chain
 from typing import Any, Callable, Dict, List, Tuple  # noqa: F401
 
@@ -101,7 +103,6 @@ def create_extra_transformer(column_transformer, source=None):
 
     # Extra transformers that call regular transformers will want to pass values directly.
     else:
-
         transformer = column_transformer
 
     return transformer
@@ -184,6 +185,10 @@ def default_json_event_encoding(o):
         return float(o)
     if isinstance(o, (datetime.date, datetime.datetime)):
         return o.isoformat()
+    if isinstance(o, IPv4Address):
+        return str(o)
+    if isinstance(o, bytes):
+        return o.decode('utf-8')
     raise TypeError
 
 
@@ -256,6 +261,9 @@ class DBMAsyncJob(object):
         self._job_name = job_name
 
     def cancel(self):
+        """
+        Send a signal to cancel the job loop asynchronously.
+        """
         self._cancel_event.set()
 
     def run_job_loop(self, tags):
@@ -335,7 +343,8 @@ class DBMAsyncJob(object):
 
     def _run_job_rate_limited(self):
         self._run_job_traced()
-        self._rate_limiter.sleep()
+        if not self._cancel_event.isSet():
+            self._rate_limiter.sleep()
 
     @_traced_dbm_async_job_method
     def _run_job_traced(self):
@@ -343,3 +352,33 @@ class DBMAsyncJob(object):
 
     def run_job(self):
         raise NotImplementedError()
+
+
+@contextlib.contextmanager
+def tracked_query(check, operation, tags=None):
+    """
+    A simple context manager that tracks the time spent in a given query operation
+
+    The intention is to use this for context manager is to wrap the execution of a query,
+    that way the time spent waiting for query execution can be tracked as a metric. For example,
+    '''
+    with tracked_query(check, "my_metric_query", tags):
+        cursor.execute(query)
+    '''
+
+    if debug_stats_kwargs is defined on the check instance,
+    it will be called to set additional kwargs when submitting the metric.
+
+    :param check: The check instance
+    :param operation: The name of the query operation being performed.
+    :param tags: A list of tags to apply to the metric.
+    """
+    start_time = time.time()
+    stats_kwargs = {}
+    if hasattr(check, 'debug_stats_kwargs'):
+        stats_kwargs = dict(check.debug_stats_kwargs())
+    stats_kwargs['tags'] = stats_kwargs.get('tags', []) + ["operation:{}".format(operation)] + (tags or [])
+    stats_kwargs['raw'] = True  # always submit as raw to ignore any defined namespace prefix
+    yield
+    elapsed_ms = (time.time() - start_time) * 1000
+    check.histogram("dd.{}.operation.time".format(check.name), elapsed_ms, **stats_kwargs)

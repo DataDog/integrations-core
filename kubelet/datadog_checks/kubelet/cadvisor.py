@@ -51,7 +51,7 @@ class CadvisorScraper(object):
         url = "http://{}:{}{}".format(kubelet_hostname, cadvisor_port, LEGACY_CADVISOR_METRICS_PATH)
 
         # Test the endpoint is present
-        r = requests.head(url, timeout=1)
+        r = requests.head(url, timeout=1)  # SKIP_HTTP_VALIDATION
         r.raise_for_status()
 
         return url

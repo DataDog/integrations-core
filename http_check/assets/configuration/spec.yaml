@@ -75,8 +75,11 @@ files:
         The check will report as DOWN if status code returned differs.
         This defaults to 1xx, 2xx and 3xx HTTP status code.
       value:
-        type: string
+        anyOf:
+          - type: string
+          - type: integer
         example: (1|2|3)\d\d
+        default: (1|2|3)\d\d
     - name: include_content
       description: |
         The include_content parameter will instruct the check
@@ -113,11 +116,22 @@ files:
       value:
         type: boolean
         example: true
+    - name: use_cert_from_response
+      description: |
+        By default, the check makes a direct TCP connection to the server defined by the URL
+        when the `check_certificate_expiration` option is enabled. This connection happens
+        after the HTTP(S) request. When this option is enabled, the check instead uses the
+        certificate from the original response to check the expiration.
+      value:
+        type: boolean
+        example: true
     - name: tls_retrieve_non_validated_cert
       description: |
         When set to true along with enabling `check_certificate_expiration`, this option allows certificates
         to be retrieved from a peer whether or not `tls_verify` is set to true or false. This allows the
         certificate to be examined for an expiration date in either case.
+
+        This option has no effect if `use_cert_from_response` is enabled.
       value:
         type: boolean
         example: false

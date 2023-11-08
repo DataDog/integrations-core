@@ -1,48 +1,42 @@
 [env.collectors.datadog-checks]
 
 [envs.default]
-dependencies = [
-  "datadog_checks_tests_helper @ {root:uri}/../datadog_checks_tests_helper",
-]
-e2e-env = false
+# If you bump the `confluent-kafka` version, also bump the `librdkafka` version in the `32_install_kerberos.sh` file
+# Also bump the LIBRDKAFKA_VERSION version in this file
 post-install-commands = [
   "python -m pip uninstall -y confluent-kafka",
-  "python -m pip install --no-binary confluent-kafka confluent-kafka==2.0.2",
+  "python -m pip install --no-binary confluent-kafka confluent-kafka==2.3.0",
 ]
 
 [envs.default.env-vars]
 ZK_VERSION = "3.6.4"
 AUTHENTICATION = "noauth"
+# The format is MMmmrr with MM = Major version, mm = minor version, rr = revision
+# This is needed to manually install the right version of librdkafka when we bump confluent-kafka
+# Thanks to this, the kerberos tests will be green even if the agent is still shipped with an older version
+# Bump them when you bump the confluent-kafka version
+LIBRDKAFKA_VERSION = "020300"
+CONFLUENT_KAFKA_VERSION = "2.3.0"
 
 [[envs.default.matrix]]
-python = ["3.8"]
-version = ["1.1", "2.3", "3.3"]
+python = ["3.9"]
+version = ["2.6", "3.3"]
 
 [[envs.default.matrix]]
-python = ["3.8"]
-version = ["1.1", "2.3", "3.3"]
-
-[[envs.default.matrix]]
-python = ["3.8"]
-version = ["3.3"]
-auth = ["ssl"]
-
-[[envs.default.matrix]]
-python = ["3.8"]
+python = ["3.9"]
 version = ["3.3"]
 auth = ["ssl", "kerberos"]
 
 [envs.default.overrides]
-matrix.version.e2e-env = { value = true, if = ["3.3"] }
 matrix.version.env-vars = [
-  { key = "KAFKA_VERSION", value = "1.1.1", if = ["1.1"] },
-  { key = "KAFKA_VERSION", value = "2.3.1", if = ["2.3"] },
-  { key = "KAFKA_VERSION", value = "3.3.2", if = ["3.3"] },
+  { key = "KAFKA_VERSION", value = "2.6.0", if = ["2.6"] },
+  { key = "KAFKA_VERSION", value = "3.3.2-debian-11-r175", if = ["3.3"] },
 ]
 matrix.auth.env-vars = "AUTHENTICATION"
-# We can allow kerberos once the agent image contains confluent-kafka built from source
-matrix.auth.e2e-env = { value = false, if = ["kerberos"] }
 
 [envs.latest.env-vars]
 KAFKA_VERSION = "latest"
 ZK_VERSION = "3.6.4"
+# Bump them when you bump the confluent-kafka version
+LIBRDKAFKA_VERSION = "020300"
+CONFLUENT_KAFKA_VERSION = "2.3.0"

@@ -7,6 +7,9 @@ on:
         required: true
         type: string
 
+      ddev-version:
+        required: false
+        type: string
       agent-reqs:
         required: false
         default: false
@@ -71,15 +74,15 @@ on:
         required: false
         default: false
         type: boolean
+      openmetrics:
+        required: false
+        default: false
+        type: boolean
       package:
         required: false
         default: false
         type: boolean
       readmes:
-        required: false
-        default: false
-        type: boolean
-      recommended-monitors:
         required: false
         default: false
         type: boolean
@@ -106,7 +109,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      PYTHON_VERSION: "3.8"
+      PYTHON_VERSION: "3.9"
       TARGET: ${{ github.event_name == 'pull_request' && 'changed' || '' }}
 
     steps:
@@ -127,7 +130,7 @@ jobs:
 
     - name: Install ddev from PyPI
       if: inputs.repo != 'core'
-      run: pip install ddev
+      run: pip install ddev${{ inputs.ddev-version }}
 
     - name: Configure ddev
       run: |
@@ -196,6 +199,10 @@ jobs:
       if: inputs.models
       run: ddev validate models $TARGET
 
+    - name: Validate openmetrics metric limit
+      if: inputs.openmetrics
+      run: ddev validate openmetrics $TARGET
+
     - name: Validate Python project metadata
       if: inputs.package
       run: ddev validate package $TARGET
@@ -203,10 +210,6 @@ jobs:
     - name: Validate README files
       if: inputs.readmes
       run: ddev validate readmes $TARGET
-
-    - name: Validate recommended monitors
-      if: inputs.recommended-monitors
-      run: ddev validate recommended-monitors $TARGET
 
     - name: Validate saved views
       if: inputs.saved-views

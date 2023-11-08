@@ -298,7 +298,7 @@ def _compile_mib_to_json(mib, source_mib_directories, destination_directory, sou
         AnyFileBorrower(borrower_reader, genTexts=True).setOptions(exts=['.json'])
         for borrower_reader in getReadersFromUrls(*[compiled_mibs_path], **{'lowcaseMatching': False})
     ]
-    mib_compiler.addBorrowers(borrowers)
+    mib_compiler.addBorrowers(*borrowers)
 
     processed = mib_compiler.compile(
         mib,

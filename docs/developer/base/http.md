@@ -48,11 +48,6 @@ Some options can be set globally in `init_config` (with `instances` taking prece
 For complete documentation of every option, see the associated configuration templates for the
 [instances][config-spec-template-instances-http] and [init_config][config-spec-template-init-config-http] sections.
 
-::: datadog_checks.base.utils.http.StandardFields
-    rendering:
-      show_root_heading: false
-      show_root_toc_entry: false
-
 ## Future
 
 - Support for configuring cookies! Since they can be set globally, per-domain, and even per-path, the configuration may be complex

@@ -9,7 +9,8 @@ DATADOG_AGENT_PIPELINE_URL = os.environ['DATADOG_AGENT_PIPELINE_URL'].rstrip('/'
 BASE_URL = os.environ['CI_API_V4_URL']
 GITLAB_TOKEN = os.environ['GITLAB_TOKEN']
 STAGES_TO_CHECK = ['deps_fetch', 'source_test', 'binary_build', 'package_build']
-TIMEOUT_IN_SEC = (60+55)*60  # Time out after 1h55, just before gitlab cancels the job.
+TIMEOUT_IN_SEC = (60 * 2 + 55) * 60  # Time out after 2h55, just before gitlab cancels the job.
+
 
 def _get_jobs(pipeline_id, scope=None):
     all_jobs = []
@@ -70,7 +71,7 @@ if __name__ == '__main__':
     retry_failed_jobs(pipeline_id)
 
     # Wait for jobs to end and exit immediately if any failure.
-    # If it takes more than 1h55 minutes, cancel the job. Otherwise gitlab will cancel the job on its own without
+    # If it takes more than 2h55 minutes, cancel the job. Otherwise gitlab will cancel the job on its own without
     # notifying the author.
     while (time.time() - t0) < TIMEOUT_IN_SEC:
         remaining_jobs = get_remaining_jobs(pipeline_id)
@@ -90,10 +91,7 @@ if __name__ == '__main__':
         print("Waiting 1 min before next check.")
         time.sleep(60)
     else:
-        # The job has run for 1h55 minutes and there are still some pending jobs.
+        # The job has run for 2h55 minutes and there are still some pending jobs.
         # Fail and notify the author
         print("Job is timing out, please retry it.")
         sys.exit(1)
-
-
-

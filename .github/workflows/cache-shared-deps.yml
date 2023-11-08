@@ -16,7 +16,7 @@ jobs:
         os: [ubuntu-22.04, windows-2022]
 
     env:
-      PYTHON_VERSION: "3.8"
+      PYTHON_VERSION: "3.9"
 
     steps:
     - uses: actions/checkout@v3
@@ -48,12 +48,20 @@ jobs:
         pip install ./ddev
         pip install ./datadog_checks_dev[cli]
         pip install ./datadog_checks_base[deps]
-
+      
     - name: Set up Python 2.7
       if: steps.cache.outputs.cache-hit != 'true'
-      uses: actions/setup-python@v4
-      with:
-        python-version: "2.7"
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          sudo apt update
+          sudo apt install python2 python2-dev
+          sudo update-alternatives --install /usr/bin/python python /usr/bin/python2 1
+        elif [ "$RUNNER_OS" == "Windows" ]; then
+          choco install python2
+        else
+          echo "$RUNNER_OS not supported"
+          exit 1
+        fi
 
     - name: Install dependencies for Python 2.7
       if: steps.cache.outputs.cache-hit != 'true'

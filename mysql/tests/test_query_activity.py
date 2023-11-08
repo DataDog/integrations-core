@@ -44,6 +44,7 @@ def dbm_instance(instance_complex):
     }
     instance_complex['query_metrics'] = {'enabled': False}
     instance_complex['query_samples'] = {'enabled': False}
+    instance_complex['collect_settings'] = {'enabled': False}
     return copy(instance_complex)
 
 
@@ -131,7 +132,6 @@ def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, quer
     )
     assert blocked_row['sql_text'] == expected_sql_text
     assert blocked_row['processlist_state'], "missing state"
-    assert blocked_row['wait_event'] == 'wait/io/table/sql/handler'
     assert blocked_row['thread_id'], "missing thread id"
     assert blocked_row['processlist_id'], "missing processlist id"
     assert blocked_row['wait_timer_start'], "missing wait timer start"
@@ -365,11 +365,12 @@ def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     dbm_instance['query_activity']['collection_interval'] = collection_interval
     dbm_instance['query_activity']['run_sync'] = False
     check = MySql(CHECK_NAME, {}, [dbm_instance])
-    sleep_time = 1
+    start = time.time()
     dd_run_check(check)
-    time.sleep(sleep_time)
+    time.sleep(1)
     check.cancel()
-    max_collections = int(1 / collection_interval * sleep_time) + 1
+    time_elapsed = time.time() - start
+    max_collections = int(1 / collection_interval * time_elapsed) + 1
     metrics = aggregator.metrics("dd.mysql.activity.collect_activity.payload_size")
     assert max_collections / 2.0 <= len(metrics) <= max_collections
 

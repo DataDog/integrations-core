@@ -32,7 +32,7 @@ TYPES_DEPS = [
     'types-simplejson==3.17.5',
 ]
 # Keep in sync with: /datadog_checks_base/datadog_checks/data/agent_requirements.in and ./hatch/environment_collector.py
-PYDANTIC_DEP = 'pydantic==1.10.4'
+PYDANTIC_DEP = 'pydantic==1.10.8'
 
 
 @tox.hookimpl
@@ -201,7 +201,8 @@ def add_style_formatter(config, sections, make_envconfig, reader):
         # Run formatter AFTER sorting imports
         'commands': '\n'.join(
             [
-                'ruff . --config ../pyproject.toml' 'black . --config ../pyproject.toml',
+                'black --config ../pyproject.toml .',
+                'ruff --config ../pyproject.toml .',
                 'python -c "print(\'\\n[NOTE] ruff may still report style errors for things it cannot fix, '
                 'these will need to be fixed manually.\')"',
             ]

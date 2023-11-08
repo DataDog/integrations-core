@@ -1873,6 +1873,5 @@
   "layout_type": "ordered",
   "is_read_only": false,
   "notify_list": [],
-  "reflow_type": "fixed",
-  "id": "njq-5r3-qb2"
+  "reflow_type": "fixed"
 }

@@ -16,7 +16,7 @@
       "Category::Containers",
       "Category::Log Collection",
       "Category::Network",
-      "Category::Notification",
+      "Category::Notifications",
       "Category::Orchestration",
       "Supported OS::Linux",
       "Supported OS::Windows",

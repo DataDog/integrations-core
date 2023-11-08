@@ -16,7 +16,7 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::Monitoring",
-      "Category::Notification",
+      "Category::Notifications",
       "Category::Network"
     ]
   }},

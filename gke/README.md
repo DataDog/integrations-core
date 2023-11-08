@@ -39,10 +39,7 @@ Choose a mode of operation. A *mode of operation* refers to the level of flexibi
 
 #### Standard
 
-Deploy a [containerized version of the Datadog Agent][7] on your Kubernetes cluster. 
-
-You can deploy the Agent with a [Helm chart][8] or directly with a [DaemonSet][9].
-
+Deploy a [containerized version of the Datadog Agent][7] on your Kubernetes cluster. See [Install the Datadog Agent on Kubernetes][8].
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Autopilot" xxx -->
@@ -84,7 +81,7 @@ You can deploy the Agent with a [Helm chart][8] or directly with a [DaemonSet][9
       datadog/datadog
   ```
 
-  See the [Datadog helm-charts repository][10] for a full list of configurable values.
+  See the [Datadog helm-charts repository][9] for a full list of configurable values.
 
 
 <!-- xxz tab xxx -->
@@ -92,7 +89,7 @@ You can deploy the Agent with a [Helm chart][8] or directly with a [DaemonSet][9
 
 ## Further Reading
 
-- [Announcing support for GKE Autopilot][11]
+- [Announcing support for GKE Autopilot][10]
 
 [1]: https://cloud.google.com/resource-manager/docs/creating-managing-projects
 [2]: https://console.cloud.google.com/apis/api/container.googleapis.com
@@ -100,8 +97,7 @@ You can deploy the Agent with a [Helm chart][8] or directly with a [DaemonSet][9
 [4]: https://cloud.google.com/sdk/docs/initializing
 [5]: /integrations/google_cloud_platform/
 [6]: https://app.datadoghq.com/screen/integration/gce
-[7]: https://app.datadoghq.com/account/settings#agent/kubernetes
-[8]: https://docs.datadoghq.com/agent/kubernetes/?tab=helm
-[9]: https://docs.datadoghq.com/agent/kubernetes/?tab=daemonset
-[10]: https://github.com/DataDog/helm-charts/tree/master/charts/datadog#values
-[11]: https://www.datadoghq.com/blog/gke-autopilot-monitoring/
+[7]: https://app.datadoghq.com/account/settings/agent/latest?platform=kubernetes
+[8]: https://docs.datadoghq.com/containers/kubernetes/installation?tab=operator
+[9]: https://github.com/DataDog/helm-charts/tree/master/charts/datadog#values
+[10]: https://www.datadoghq.com/blog/gke-autopilot-monitoring/

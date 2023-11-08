@@ -14,6 +14,7 @@ HERE = get_here()
 INSTANCE_TAGS = ['foo:bar']
 
 LINUX_STATS_FIXTURE = 'stats_linux.json'
+LINUX_STATS_FIXTURE_V4 = 'stats_linux_v4.json'
 WINDOWS_STATS_FIXTURE = 'stats_windows.json'
 
 EXPECTED_CONTAINER_METRICS_LINUX = [
@@ -47,10 +48,20 @@ EXPECTED_CONTAINER_METRICS_WINDOWS = [
     'ecs.fargate.cpu.limit',
     'ecs.fargate.mem.usage',
     'ecs.fargate.mem.max_usage',
+    'ecs.fargate.io.ops.write',
+    'ecs.fargate.io.bytes.write',
+    'ecs.fargate.io.ops.read',
+    'ecs.fargate.io.bytes.read',
 ]
 
 EXPECTED_TASK_METRICS = [
     "ecs.fargate.cpu.task.limit",
+    "ecs.fargate.mem.task.limit",
+]
+
+EXPECTED_TASK_EPHEMERAL_METRICS = [
+    'ecs.fargate.ephemeral_storage.utilized',
+    'ecs.fargate.ephemeral_storage.reserved',
 ]
 
 EXTRA_EXPECTED_CONTAINER_METRICS_LINUX = [
@@ -70,10 +81,20 @@ EXTRA_NETWORK_METRICS = [
 
 
 def mocked_requests_get_linux(*args, **kwargs):
+    # v2
     if args[0].endswith("/metadata"):
         return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'metadata.json'))
     elif args[0].endswith("/stats"):
         return MockResponse(file_path=os.path.join(HERE, 'fixtures', LINUX_STATS_FIXTURE))
+    else:
+        return MockResponse(status_code=404)
+
+
+def mocked_requests_get_linux_v4(*args, **kwargs):
+    if args[0].endswith("/task"):
+        return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'metadata_v4.json'))
+    elif args[0].endswith("/task/stats"):
+        return MockResponse(file_path=os.path.join(HERE, 'fixtures', LINUX_STATS_FIXTURE_V4))
     else:
         return MockResponse(status_code=404)
 
@@ -143,6 +164,48 @@ def mocked_get_tags(entity, _):
             "task_family:redis-datadog",
             "task_version:1",
             "task_arn:arn:aws:ecs:eu-west-1:172597598159:task/648ca535-cbe0-4de7-b102-28e50b81e888",
+        ],
+    }
+    # Match agent 6.5 behaviour of not accepting None
+    if entity is None:
+        raise ValueError("None is not a valid entity id")
+    return tag_store.get(entity, [])
+
+
+def mocked_get_tags_v4(entity, _):
+    # Values taken from Agent6's TestParseMetadataV10 test
+    tag_store = {
+        "container_id://67cd8a22b533459696d4ccab5278e009-3344678718": [
+            "docker_image:akirahiiro/apmtest-ping:1.0.3",
+            "image_name:akirahiiro/apmtest-ping",
+            "short_image:apmtest-ping",
+            "image_tag:1.0.3",
+            "cluster_name:akira-fargate-check-cluster",
+            "task_family:akira-fargate-check",
+            "task_version:1",
+            "ecs_container_name:apmtest-ping",
+            "container_id:67cd8a22b533459696d4ccab5278e009-3344678718",
+            "container_name:apmtest-ping",
+            "task_arn:arn:aws:ecs:ap-northeast-1:601427279990:task/akira-fargate-check-cluster/67cd8a22b533459696d4ccab5278e009",
+        ],
+        "container_id://67cd8a22b533459696d4ccab5278e009-2860414825": [
+            "docker_image:public.ecr.aws/b1o7r7e0/akira-agent-fgcheck:9",
+            "image_name:public.ecr.aws/b1o7r7e0/akira-agent-fgcheck",
+            "short_image:akira-agent-fgcheck",
+            "image_tag:9",
+            "cluster_name:akira-fargate-check-cluster",
+            "task_family:akira-fargate-check",
+            "task_version:1",
+            "ecs_container_name:dd-agent",
+            "container_id:67cd8a22b533459696d4ccab5278e009-2860414825",
+            "container_name:dd-agent",
+            "task_arn:arn:aws:ecs:ap-northeast-1:601427279990:task/akira-fargate-check-cluster/67cd8a22b533459696d4ccab5278e009",
+        ],
+        "internal://global-entity-id": [
+            "cluster_name:akira-fargate-check-cluster",
+            "task_family:akira-fargate-check",
+            "task_version:1",
+            "task_arn:arn:aws:ecs:ap-northeast-1:601427279990:task/akira-fargate-check-cluster/67cd8a22b533459696d4ccab5278e009",
         ],
     }
     # Match agent 6.5 behaviour of not accepting None

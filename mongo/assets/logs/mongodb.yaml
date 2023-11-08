@@ -146,12 +146,19 @@ pipeline:
           #2019-05-09T13:18:48.741+0000 I COMMAND  [conn26] command db.collection command: find { find: "collection", filter: { scope: "1" }, sort: { discoveryHour: -1 }, limit: 1, singleBatch: true, $readPreference: { mode: "secondaryPreferred" }, $db: "logs" } planSummary: IXSCAN { scope: 1, discoveryHour: 1 } keysExamined:1 docsExamined:1 cursorExhausted:1 numYields:1 nreturned:1 reslen:188 locks:{ Global: { acquireCount: { r: 4 } }, Database: { acquireCount: { r: 2 } }, Collection: { acquireCount: { r: 2 } } } protocol:op_query 284ms
 
     - type: date-remapper
-      name: Define `db.date` as the official date of the log
+      name: Define `db.date`, `t.$date` as the official date of the log
       enabled: true
       sources:
         - db.date
+        - t.$date
     - type: status-remapper
-      name: Define `db.severity` as the official status of the log
+      name: Define `db.severity`, `s` as the official status of the log
       enabled: true
       sources:
         - db.severity
+        - s
+    - type: message-remapper
+      name: Define `msg` as the official message of the log
+      enabled: true
+      sources:
+        - msg

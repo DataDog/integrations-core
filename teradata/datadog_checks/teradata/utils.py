@@ -31,6 +31,9 @@ def create_tables_filter(tables):
     tables_to_collect = set()
     tables_to_exclude = set()
 
+    if tables is None:
+        return tables_to_collect, tables_to_exclude
+
     if isinstance(tables, tuple):
         tables_to_collect = set(tables)
         return tables_to_collect, tables_to_exclude
