@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2022-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 import pytest
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
@@ -20,6 +24,7 @@ def dbm_instance(pg_instance):
     }
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 1}
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 10}
+    pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
 
 
@@ -84,3 +89,24 @@ def test_explain_parameterized_queries_generic_params(integration_check, dbm_ins
     assert expected_generic_values == explain_param_queries._get_number_of_parameters_for_prepared_statement(
         DB_NAME, query_signature
     )
+
+
+@pytest.mark.parametrize(
+    "query,statement_is_parameterized_query",
+    [
+        ("SELECT * FROM products WHERE id = $1", True),
+        ("SELECT * FROM products WHERE id = '$1'", False),
+        ("SELECT * FROM products WHERE id = $1 AND name = $2", True),
+        ("SELECT * FROM products WHERE id = $1 AND name = '$2'", True),
+        ("SELECT * FROM products WHERE id = $1 AND name = $2 AND price = 3", True),
+        ("SELECT * FROM products WHERE id = $1 AND name = $2 AND price = '3'", True),
+        ("SELECT * FROM products WHERE id = $1 AND name = $2 AND price = '$3'", True),
+    ],
+)
+def test_explain_parameterized_queries_is_parameterized_query(
+    integration_check, dbm_instance, query, statement_is_parameterized_query
+):
+    check = integration_check(dbm_instance)
+    check._connect()
+    explain_param_queries = check.statement_samples._explain_parameterized_queries
+    assert statement_is_parameterized_query == explain_param_queries._is_parameterized_query(query)

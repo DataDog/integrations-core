@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 # E501: line too long (XXX > 120 characters)
-# flake8: noqa: E501
+# ruff: noqa: E501
 from datadog_checks.impala.common import counter, gauge
 
 STATESTORE_METRIC_MAP = {

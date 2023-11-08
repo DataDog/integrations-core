@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [IBM MQ][1] versions 8 to 9.0.
+This check monitors [IBM MQ][1] versions 9.1 and above.
 
 ## Setup
 
@@ -14,12 +14,11 @@ To use the IBM MQ check, you need to make sure the [IBM MQ Client][3] 9.1+ is in
 
 #### On Linux
 
-Update your `LD_LIBRARY_PATH` and `C_INCLUDE_PATH` to include the location of the libraries. (Create these two environment variables if they don't exist yet.)
-For example, if you installed it in `/opt`:
+Update your `LD_LIBRARY_PATH` to include the location of the libraries. Create this environment variable if it doesn't exist yet.
+For example, if you installed the client under `/opt`:
 
 ```text
 export LD_LIBRARY_PATH=/opt/mqm/lib64:/opt/mqm/lib:$LD_LIBRARY_PATH
-export C_INCLUDE_PATH=/opt/mqm/inc:$C_INCLUDE_PATH
 ```
 
 **Note**: Agent v6+ uses `upstart`, `systemd` or `launchd` to orchestrate the datadog-agent service. Environment variables may need to be added to the service configuration files at the default locations of:
@@ -306,7 +305,7 @@ Additional helpful documentation, links, and articles:
 - [Monitor IBM MQ metrics and logs with Datadog][13]
 
 [1]: https://www.ibm.com/products/mq
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://www.ibm.com/support/pages/mqc9-ibm-mq-9-clients
 [4]: https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/RuntimeProtections/RuntimeProtections.html#//apple_ref/doc/uid/TP40016462-CH3-SW1
 [5]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/datadog_checks/ibm_mq/data/conf.yaml.example

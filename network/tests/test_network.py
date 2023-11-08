@@ -48,5 +48,5 @@ def test_is_collect_cx_state_runnable(aggregator, check, proc_location, ss_found
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_connection_state'] = True
     check_instance = check(instance)
-    with mock.patch('distutils.spawn.find_executable', lambda x: "/bin/ss" if ss_found else None):
+    with mock.patch('datadog_checks.network.network.find_executable', lambda x: "/bin/ss" if ss_found else None):
         assert check_instance.is_collect_cx_state_runnable(proc_location) == expected

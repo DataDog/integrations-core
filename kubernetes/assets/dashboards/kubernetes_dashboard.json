@@ -3,1684 +3,2126 @@
     "description": "Our Kubernetes dashboard gives you broad visibility into the scale, status, and resource usage of your cluster and its containers. Further reading for Kubernetes monitoring:\n\n- [Autoscale Kubernetes workloads with any Datadog metric](https://www.datadoghq.com/blog/autoscale-kubernetes-datadog/)\n\n- [How to monitor Kubernetes + Docker with Datadog](https://www.datadoghq.com/blog/monitor-kubernetes-docker/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n\n- [Monitoring Kubernetes performance metrics](https://www.datadoghq.com/blog/monitoring-kubernetes-performance-metrics/)\n\n- [Collecting metrics with built-in Kubernetes monitoring tools](https://www.datadoghq.com/blog/how-to-collect-and-graph-kubernetes-metrics/)\n\n- [Monitoring Kubernetes with Datadog](https://www.datadoghq.com/blog/monitoring-kubernetes-with-datadog/)\n\n- [Datadog's Kubernetes integration docs](https://docs.datadoghq.com/integrations/kubernetes/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
     "widgets": [
         {
-            "id": 0,
+            "id": 2212964864025960,
             "definition": {
-                "type": "toplist",
-                "requests": [
+                "title": "Banner",
+                "banner_img": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC0AAAAW0CAMAAABirXIAAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAA2UExURenx/e/1/fT4/vn7/////8za+Zi18jJs5WWR68bX+JOy8WCN65m18rvQ942v8WCO6zJt5Y6v8XTlVw4AACNdSURBVHgB7MGBAAAAAMOg+1MfZNWyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAs3dn22obTRxHCXS1yk6//+tmTjyqkKCRRbz31TccH53L32L9RQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMDPBgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIBfrtfbH67XXy4lAADgem2f3G7rDQ0AAFzb16qEBgAA+bwtoQEAQD6vul4qAAAgn+uEBgAA+Vxb+U4OAACQz9F7/OHeGBoAAORz9OVfmfFNQgMAgK99/qQvX6oTGgAA5PO2hAYAAPm8oktoAADkc6vyWULXAACQz7WMMqEBAEA+S2gAAPgmnz/0ZaMM5wkBAPjJ87n3pbY/oQEAQD77VjsAAOTzx2U/CQ0AgK99ltAAADA/n+uEBgAA+ey2CgAAP53rbXY+S2gAAFxN2a/Xt1UAAEA+O08IAIB8npjQ1wsAAPykV1OcJwQAQD5LaAAAmJfPvhgaAAD5/OsygYQGAMDVlIMTGgAA5LOEBgBAPjtPCACAr32W0McDAEA+O08IAIB8Pj6hAQBAPrutAgCAqykSGgAA+Xx8QltyAAAgn30xNAAA75vPy3wSGgAAV1MkNAAA8nmaEa1FLrOk2yoAALx3PtfG5l/pPCEAAL72ebzkt/abhAYA4D3zuZbtP84TAgAgn+/J+ldLaAAA3jifb32ZrW8PaOcJAQBwNSXaf8KFbwAA5PP+gJbQAADI56MnHEVC20IDAPDifu7LNEVA51I76euEAADwy3E3u3NiQBcyfAgNAMAh/dyX15ob0IX+8oIGAEA/9+XVikMqs/UXFDQAANzavz7k8nJRfwnHq4Yct8sUAABwrT9+Pn9AV7qvswMA4FUDjr4cmrRx7OPaZQIAALjN7+dSP/558z6CBgCA1/ZsEbR59AMvAAAwbcERy0Hy6IBefAQNAMD8BUf+fwO6TwtoAAAoPoB+z4AuCvoCAACTFhz5fw7odEwFAIC5C45Y3j+gCzYcAADMDeh+aEAf/sw+5xohAAAc/2lwtPbDov0CAABTJtDLYUZrP6Cgp4ygAQDgevgEun1mOcwHI2gAAN5yAp3tkyO/yO4dAxoAABPoHO0z3Qj6+wAAMIEeI6J9K2JkLq83L6ABABDQsbxUjtFqMXJ5rbDhAADgLc6ojNG2iUwjaAAA3iKg8/h6rhv6lKdUAACg/e3oei5EGkEDAPAzTqBHe1SkUyoAAPxkZ1RGe0akETQAAG8+gR5jRM7N50Lk9plIpBE0AABnO6My9vzoDLHjUeGUCgAA5zqjEpuPB442S9/+V4URNAAAZ3qHMDdn7WgT5VKKXUfBPzw3ggYAgNvm+IyNHwyPNlfM+KO8RQgAwNET6Ng2rRhtutz2N4URNAAAJ5pA9y3j5NFeITbFepzolAoAAM6o9PaF/nA/x8p/rWT1tB0BHTYcAAA847bjjEr7Ut/fz9F7Lku2LyxLZkSrbXlanumUCgAAzqj0O02brdT7d37u07Mzo1X6vX7uLz+lAgAA9QR6V0GPu/VcBPTfyoaOCf1sBA0AwNwJdC1jvWnHpnquA7pO6Ch+ri+FSadUAADg+m2a1vrare1R5nMZ0EWlF08r+vnIETQAACbQtWhfyKz7uT/wdR4Z9Zdx5Ch+gxE0AAAnOKNS5m1fRp3PewK6TuhcRvWME5xSAQDAGZWigMuvco6+5Z8XP1Sq+/nIETQAAN4hrGU8k7ZR/NiEZ7zqlAoAANyKCq31J9I2Nv5gxhMPOfgtQgAAvENYyx1pWwd0PJzp8cwffgEAgMkT6Fq0Qi4zAnrpuxr9hKdUAAAwgd5Qt7GnvGPDM4qHHDWCBgCA24sCui+lXSGcGz/kNoIGAOAEE+ha3c+b/9mDU5Gl5pQKAADHn1Gp9aKf5wV0/RgjaAAATj+BrtM2Zgf02N/P80+pAADA9emAzke+XS73BfSoBxxG0AAAvMMEup4n93kBPepHGEEDAPA2E+hlbD1xUgd01k+oC/o8p1QAAHBGpZat0GcE9GgFI2gAAN7rHcJolXg+oGPjsfADTqkAAMDtyQ7NVijCuG8s4dHu8BYhAADv9A5htHv6MwE92j3dCBoAgPeZQGe7L/LRgB5tg/c5pQIAgAl0tC36YwE92hb9sBE0AADcngvobNvESr1WHZzRtjGCBgDgvBPoOoOjtxV5L6Bj68fPWaT36U6pAADgjEr9XXTZVvR9AT3WB9W9fcUIGgCA95hAx3ciOLe9S1ivPEa5BSna/JWnVAAA4PpcQLevZL1d7uV4eks/9++/gGgEDQDAO0ygc+VD5Lj/IXQUeV0UeBXuRtAAAJx8Ah1rHdvv3SUcRR6Ptqav/f5+4lMqAAA4o1J/AF0XdOR6I/es8rn19e2IETQAAOd/hzCKIUVv0/Xi1/cDTqkAAMDtufysvoeut8myen2xe4sQAICzv0OYdcTm7H4u+3x5yMcfNoIGAMAEOuv//ymxLHVA59ucUgEAwAR65bdkTO/nTw4fQQMAwO2pgL4fuUtMfH2w/gg6jKABAHiXCXTxW2JiP9cbjnOfUgEAwBmVbQXb5/dzveEwggYA4J0m0PMLum97fn/xKRUAALjOnEDnsqLP72cjaAAA3mACXQd01ahPyAl/wJSABgCANvEdwqh/9EGREwq+lEbQAAAccEalWFBMLOjYM8JOI2gAAN7nHcK+vba3y6XSjzylAgAAtwnhWbTuhoLu+Y+V/3uZH9CTRtAAAHiH8PiA7nf+/5w2Iil83DaCBgCA9rdl3rfYFdq34l5h54TXGJ1SAQDgwAn0tO/AyLKfVwp71p8wYQQNAAC3mQEdS220b+TdxO6HBLQRNAAAkyfQE/YTRT8XI46lFjMD+nYBAIBKOzCgo/h0uSronPAe45EjaAAAnFGZcIhwbDyREvUpwhcHtFMqAABUrkXJTgzoMdp3bb9XGJmTA9oIGgCACRPo+QGdI9qa3HPwOyJ/bEADAEB7cUCP0Sq96OHyg+j5AZ2vHkEDAGACXQd0jmh3RBHQayKyDugzjqABAHBGpQ7oMdoWqx1bi8wioJ1SAQDgtRPoPjmgx2gbZf0bCxFZBPRpRtAAAHiHsA7oMdoOfSVjt4nMWYdUPj35sgYAALZFZ6F9qajnjQEdbZ+IMqCdUgEA4PgJdKHtVhf0aE+K5WG3KRsOAACcUSlEe1ov8vnQgDaCBgBgzgS6EG2CyCKfDw/o2wV4CgA4o1LobYrIIp+PCuhfJ4ygAQBwRqUwop1OxOKUCgAAp3yHMNop9TOOoAEAMIGOdlJdQAMAcLIJdI7RTiwi8/GzMBcAAJg0gc4cY0Q83LV7/2nv/ZmnjfyDUyoAAPyACfQY0R4Xvefyl4wHthiZ8dTTRy5bxPqGAwAAbjsCejydzp88+pV0mf3xjI7DRtAAAHiHMCek8ye9bZTLJ09ndDilAgDAc7ZPoGN/Oveiy9tGyycTMrofM4IGAMAEOtsOZTr/bdpnxplth+W+20s2HADA7+zd0Y4iyREF0Gk6IjJt1/9/ry1LdGq3AAomGZbUOa9up9i3q9C9U7CE04sCdLsrDpr8y7oSNAAA76xAV1XG3rzU25/pllT1zOPPKUEDAHBQ/E6Armr/16vXoyfojIPq0R+WvZ9/V+YzAfo/StAAAEz4jEru0/PQHz1Bz2st562I3PPRSvX4bV+/ngcAgM+oVAxV92JszWlwPP5StmGfobtPqbwWAIDPqAz9VqR9sMORcdxjL2UbdhnatwhnAAAQoKsd0zOr+rFORj1+gK7MGJ58qV/9J6Or2jB/RQgAgAB93IMn6Iy9Grfi33gpJ/6n/PorAACI6QF6qMcO0P36//TcAfp5/xKgAQC4bOLZttXx3LvFTt89M9TMA/QB+YYADQCAAF0PNDjywjvD8SReAjQAAK/vQEeb4fDluMdO3wfopx5qM8TtESEAAAL0v2eeoIfjB+jb79TRh6pN0AVoAACuOO2D5+QT9PED9BA7R6vUbYYUoAEAuOJrQvI8djo+foA+/E6/9GcTxLVPeQMAwIHoOb3EETv97l8cCuLZZtiuHqABAOA06wR9/CZ84I/qyDvbpRw+QQjQAAC87wRdBxocB47UeSA/Z5shbzQ4AADgNLk/vFN3D9D9mSC+xU6fekQ//QIAgAvixTvCqGeay3nnlS1esyDsBwscAAA4QeefSdDxd/2JOeIWKxY4AABQ4tg93A8G3zr2yNDbBHm3wAEAAN9TE3TdTtB5NPjG393Oz9Um2BQ4DgAAIF6foA8coA+foLfYy6kF6Ph1HQAAfE3vQezk0QP0cC1Ab3HBnPysAP0OAACGhHFB9osH6Hrgkj0iuAI0AAArDQl7XFKXrsfthnsPDCU/AwCwypBwqP35uB56ZeRnA0IAAJYdEg65PTT928dt+RkAgEWHhBVH9BmPpAHhkgAAfJFwJ+c8ogC9AAAAXySsuKsfvgvLzwAASNA55Q0F6HcBACD+bILu7T75GQCA9YeExxJ0/v4T1d44IAQAgFOctSl63JDZ2x19y4P5WQF6AQAAatCtZ8STIbpvWwzy88oAACToIeOezG3r/a/ROeO+3hSgAQBYZUg4VLxENvkZAICFhoRDz5ivWjMgBABgqSHhUDFZ9jZJys+TAQCoQU/Qc/752YBwXQAAEnSrF52fFaDfDwCA7/kJeotpSn4GAGD1IWGLiZoBIQAAqw8JY6Le5pCfpwMAkKCzzZExTRoQAgCw/JBwfoBWgAYAYOEhYcaP7BkPyqr4kfIzAACrDwl7DP3Bfxg6q7VWMZQBIQAAiw8Jcx9/e2XcV+c/r4yzMiAEAGDtIWG/En57z7zV27jyLZYyIAQAYOkhYd7K4r33yjwn6fyfquptr6b9nk1+BgDgHzwk7BP61DNP0AaEAAC8RpzVtAP0nARtQAgAwLpDwi3O+qwAXfIzAACrDgl7TFsjxo9uQLgoAABDwtyl3gkn6DQgXBMAgCHhFvMCdIsfZUC4IgAAQ8I+9RvcFT+6AvSCAAAMCTN+9KkBOtfLzwAAGBJuMbQJYigDwuUAABgSxpBtgorBgHA1AACGhFsMfXaALgPCxQAAGBLm7ADdIoanC9C/AADglb6eTMF9aoNjH8kNCJcCAGBI2GPobYqKoRsQLgUAwJCwx9AmiaGvlZ8BADAk3C3+Zp6g04BwMQAAhoQ1wu40cdYNCFcDAGBIWOP/M0vPEeQNCBcDAGBI2DMiq01VGVGlAL0iAABDwldZMz8DAGBI+BoGhIsCADAkfA0DwpUAABgSvp8B4fsBAHCKMwXoFQEAYEgoPwMAIEEbEAIAYEgoPwMAYEhoQAgAwOsZEipAAwCgBi0/AwAgQStAAwDwQQwJ5WcAAAwJDQgBADAkVIAGAECCTvl5LgAADAkVoAEA4HtygpafAQAwJDQgBADgAxgS5q38DAAAhoQGhAAAGBIqQAMAYEgoPwMAYEhYBoQAAHwkQ0L5GQAAQ0IDQgAADAkVoAEAMCSUnwEA+BSGhJsC9OcAADAkLPkZAAA+J0FvYUAIAMBHJejs7W36FgrQAAB8hO/4Uf2952f5GQCADxDDW67Q2xaDAjQAAJ9R4hgytz8mMwb5GQCAj3CK9zMgBABAgpafAQCQoOVnAAD4+haf5wMAQISWnwEA4P0R+iQ+AwDwgb5Op+8/7vRf9u5oq42cWcCoXqBU0vu/7OEMM3+Ehxq14jg0WXvfJcjlaq4+ejVYPQMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADANwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABE7xkvnP6mAQDA9xfRe46/RPv1fkzvDQAAvr2xiParzfFDb3cBAAACGgAABDQAAAjo+wMAAAENAAACGgAABPT9FX+tr90fAAAC+g7p/K7dAAAAAvrOYiwaAAACWkALaAAABLSABgBAQAtoAAAEtIAGAEBAC2gAAAS0gAYA4JsQ0AIaAAABLaABABDQEdGuiojer74g/t96uhrY483lDfr7C84Dej9xK3px9nYAAAR09A/aX/qiPFwHdO/jHxltYz09ssd/H+1jlY/ne88cD0cijjbI2AZ0/yCuTiz0fy3cAAC4b0CPD+a//7PMyCKgHwp219B9XDwePcenfsT9KPyCDWKU+n7i6Pt2X2U2AADuGdD50M/PBXShb+J1H7C9j0peWSFPN3gioLcTF73eFwCA+wR03c+vCOg6H+NycY9ar1fYF2nkZoPzgN5PrIcKaACAmwd0L6rtPKB3YnP7dVOboxZPNPxug/OAjoOGj+1FAQBwj4Cu+vmFAT2iqNdCvxzQV1fI6g5wof9MQMfJBvlNAhoAQEAX/fzSgB5VvRb6xYDOyyv04w3OA/pkg76/KAAA7hTQMT6IFwd0rzYqPBvQ+4TPzfnzgM6T2/BDQH8XAICALvr5BQFdF3QeHd8fm8cJv9/gNKD7yWMksQnt+wAAENDFH+B4fUDX+TjnzKxvAI9SVCtkZnFLudogZpYb7wO6mJjVxHw8+2bOzFsGNACAgK77+fmAzhnRWkSW/Vq8fWQV3A+tHdEi3uv0sxWyvYtZJ3zxDZhXAjo/iIOJ+fn7Z1tEjnYvAAACuu7n5wM6Y03BSz1aVG25/iKKTxP/W1x7JmMWPwvsr7yaOGbxKeDFJd0bAICA7kXsPRnQm9u8+9uv1aR9bRYvnGOR1WbloJOAzmrJuQ3odmsAAAK66OcXBHQbq/h0TlT5mk8H9OMC7crEdYOTgB6LLL9SLHBnAAACuujnVwT03P66XdYh/HxA7x7J2G+wD+jiRDExit6+LwAAAZ1FP78goIsHgNcNYhObvzKgo322Qd9scBDQRRDvvgcjo90KAACjMtsrArp62nkf0LGOejqgi5eeb7AP6DwM6DnGfRMaAIC6n18c0HMsPhsTD35PQI9F/0e8+7mAHotcx73J5UvrxNs2NAAAZT9/aUAXXh/QMa7J84DeyGXj+yY0AABVzf35AZ03DujbJjQAAFWivjyg488P6POJ72Z11V8PAIBR6F8R0HNck39iQBeruQsNAHAvo9J/Z0DHXQJ63iGg6zWiAQDwxUap//5noKdHOP4WqaABAO5p1LpfIiz1l/wS4T6hswEAcJ+AntuCHot4LqBTQG/SOLJ+YwAA7hDQEeOj+E0BnZ+NiVp7VUCfb3AW0HM3cp/QDQCA+wR0i02tjUU/D+jqFVnMr7wkoM83OP8o795OTU9BAwDcOaAfC7q/LKBzLOIOAV3fGH8uoOfuxEakZzgAAG4b0LuCzrF4JqBjrKKIzS8I6FlMrMQ2bud5/u4nAABwl4Busy7oOuWOAzovfIp1fl1AHxT0Nm7jdOL+GgAAuFFAPxb0SwK6jzKgF/kFAd2Kqy/tj48P4smAzgYAwG0Cel+xY5WHAV30c52v2duD6P3FAT03H58dPdvuXvq7uDyxf/xnCOhvBAAQ0EsTFtW5iGhvIvqVgI41nxdZvOAxN6P35fRrA3qREe1dRO/1Tfn1KiN6/ni3s4kxRmbs/2IJAAC3CeioHzqYY+8/e3j38dTjE5nry14c0C3HJ+oNYv/RKPNoYv7vonvvEb3nENAAAHcN6P2jyOcBvTOL3i28PKD3G0Rb7TeNo4m5PwoAwG0CevsQx/zVAZ1F8JbixQG936BfXDh+auL+uwsAwO0COvZ993xAF9mbu9h8dUC3ud9gtT93MjH2P28AAHCfgN4/xDF/bUDP9ii+PKBbHkXs3G96MDH083cEAAjoZx7iODkb1WdX1/LVAb3v3fotfvbnjqtvHQ0AgHsGdNTJGOcBvS/Mg349C+g8D+jt4ldPX58Y1659NgAAbhrQbdbPTUQ+F9D7HIz84oCuNzjp7asT181GbUYDAOC2Ad1yrK7lZc6PkReR+3w+S+g5XxXQ5xss5v7cfuL+EAAAXy0X0VYxV9EeRC6ll7mk84OYmZsarF73SZ+3j4oVF7G48IVN/ueMOvmz2HQzcdaT3H0GAPjTRMTVc3POfDPftKvWF0X7CjHfZM5LG8S73aErEyPyH/U3DAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuLP/Yw8OBAAAAAAE+VsPcvUFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADUHhwLAAAAAAzytx7GngoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAeAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATyCnLtgwe+NgAAAABJRU5ErkJggg==",
+                "show_title": false,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                        "q": "top(sum:kubernetes.memory.usage{$scope,$deployment,$statefulset,$replicaset,$daemonset,$cluster,$namespace,!pod_name:no_pod,$label,$service,$node} by {pod_name}, 10, 'mean', 'desc')",
-                        "style": {
-                            "palette": "cool"
+                        "id": 24,
+                        "definition": {
+                            "type": "note",
+                            "content": "# Kubernetes Overview\n\n**Kubernetes monitoring guides**\n\n[Autoscale Kubernetes workloads with any Datadog metric](https://www.datadoghq.com/blog/autoscale-kubernetes-datadog/)\n\n[How to monitor Kubernetes + Docker with Datadog](https://www.datadoghq.com/blog/monitor-kubernetes-docker/)\n\n[Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n\n[Monitoring Kubernetes performance metrics](https://www.datadoghq.com/blog/monitoring-kubernetes-performance-metrics/)\n\n[Collecting metrics with built-in Kubernetes monitoring tools](https://www.datadoghq.com/blog/how-to-collect-and-graph-kubernetes-metrics/)\n\n[Monitoring Kubernetes with Datadog](https://www.datadoghq.com/blog/monitoring-kubernetes-with-datadog/)",
+                            "background_color": "transparent",
+                            "font_size": "12",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6152894268304392,
+                        "definition": {
+                            "type": "note",
+                            "content": "This dashboard gives you an overview of your Kubernetes infrastructure. Allowing you to have a broad visibility of your scale, status, and resource usage of your cluster and its containers.\n\n[**Datadog Kubernetes integration docs&nbsp;↗**](https://docs.datadoghq.com/integrations/kubernetes/)",
+                            "background_color": "transparent",
+                            "font_size": "18",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
                         }
                     }
-                ],
-                "custom_links": [],
-                "title": "Most memory-intensive pods",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                }
-            },
-            "layout": {
-                "x": 151,
-                "y": 57,
-                "width": 43,
-                "height": 24
-            }
-        },
-        {
-            "id": 1,
-            "definition": {
-                "type": "toplist",
-                "requests": [
-                    {
-                        "q": "top(sum:kubernetes.cpu.usage.total{$scope,$deployment,$statefulset,$replicaset,$daemonset,$cluster,$namespace,!pod_name:no_pod,$label,$service,$node} by {pod_name}, 10, 'mean', 'desc')",
-                        "style": {
-                            "palette": "warm"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Most CPU-intensive pods",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                }
-            },
-            "layout": {
-                "x": 107,
-                "y": 57,
-                "width": 43,
-                "height": 24
-            }
-        },
-        {
-            "id": 2,
-            "definition": {
-                "type": "image",
-                "url": "/static/images/screenboard/integrations/kubernetes.jpg",
-                "sizing": "zoom"
+                ]
             },
             "layout": {
                 "x": 0,
                 "y": 0,
-                "width": 23,
-                "height": 15
+                "width": 6,
+                "height": 6
             }
         },
         {
-            "id": 3,
+            "id": 5046057601424948,
             "definition": {
-                "type": "check_status",
-                "title": "Kubelets up",
-                "title_size": "16",
-                "title_align": "center",
-                "check": "kubernetes.kubelet.check",
-                "grouping": "cluster",
-                "group_by": [],
-                "tags": ["$scope", "$node", "$label"],
-                "time": {
-                    "live_span": "10m"
-                }
-            },
-            "layout": {
-                "x": 80,
-                "y": 0,
-                "width": 13,
-                "height": 7
-            }
-        },
-        {
-            "id": 4,
-            "definition": {
-                "type": "query_value",
-                "requests": [
+                "title": "Overview",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas_available{$scope,$deployment,$cluster,$label,$namespace,$service,$node}",
-                        "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 0,
-                                "palette": "green_on_white"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Pods Available",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "5m"
-                },
-                "autoscale": true,
-                "precision": 0
-            },
-            "layout": {
-                "x": 50,
-                "y": 91,
-                "width": 16,
-                "height": 14
-            }
-        },
-        {
-            "id": 5,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.deployment.replicas_available{$scope,$deployment,$service,$label,$cluster,$namespace,$node} by {kube_deployment}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "green",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                        "id": 46,
+                        "definition": {
+                            "title": "Clusters",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:kubernetes.pods.running{$scope,$label,$node,$service,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster} by {kube_cluster_name}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "count_nonzero(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 2
                         }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Pods available",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 67,
-                "y": 91,
-                "width": 37,
-                "height": 14
-            }
-        },
-        {
-            "id": 6,
-            "definition": {
-                "type": "query_value",
-                "requests": [
+                    },
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$deployment,$cluster,$label,$namespace,$service,$node}",
-                        "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 0,
-                                "palette": "custom_text",
-                                "custom_fg_color": "#6a53a1"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Pods desired",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "5m"
-                },
-                "autoscale": true,
-                "precision": 0
-            },
-            "layout": {
-                "x": 50,
-                "y": 76,
-                "width": 16,
-                "height": 14
-            }
-        },
-        {
-            "id": 7,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$deployment,$cluster,$label,$namespace,$service,$node} by {kube_deployment}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "purple",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                        "id": 51,
+                        "definition": {
+                            "title": "Nodes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.node.count{$scope,$label,$node,$service,$namespace,$cluster}",
+                                            "aggregator": "avg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 3,
+                            "height": 2
                         }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Pods desired",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 67,
-                "y": 76,
-                "width": 37,
-                "height": 14
-            }
-        },
-        {
-            "id": 8,
-            "definition": {
-                "type": "query_value",
-                "requests": [
+                    },
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas_unavailable{$scope,$deployment,$cluster,$label,$namespace,$service,$node}",
-                        "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 0,
-                                "palette": "yellow_on_white"
+                        "id": 47,
+                        "definition": {
+                            "title": "Namespaces",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:kubernetes.pods.running{$scope,$label,$node,$service,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster} by {kube_cluster_name,kube_namespace}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "count_nonzero(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 50,
+                        "definition": {
+                            "title": "DaemonSets",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:kubernetes_state.daemonset.desired{$scope,$label,$node,$service,$daemonset,$namespace,$cluster} by {kube_cluster_name,kube_namespace,kube_daemon_set}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "count_nonzero(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 2,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 49,
+                        "definition": {
+                            "title": "Services",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.service.count{$scope,$label,$node,$service,$namespace,$cluster}",
+                                            "aggregator": "avg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 48,
+                        "definition": {
+                            "title": "Deployments",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:kubernetes_state.deployment.replicas{$scope,$label,$node,$service,$deployment,$replicaset,$namespace,$cluster} by {kube_cluster_name,kube_namespace,kube_deployment}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "count_nonzero(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 4,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 52,
+                        "definition": {
+                            "title": "Pods",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.pods.running{$scope,$label,$node,$service,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster}",
+                                            "aggregator": "avg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [
+                                {
+                                    "link": "https://app.datadoghq.com/screen/integration/30322/kubernetes-pods-overview",
+                                    "label": "View Pods overview"
+                                }
+                            ],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 4,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 53,
+                        "definition": {
+                            "title": "Containers",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.containers.running{$scope,$label,$node,$service,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster}",
+                                            "aggregator": "avg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3,
+                        "definition": {
+                            "title": "Kubelets up",
+                            "title_size": "16",
+                            "title_align": "center",
+                            "time": {
+                                "live_span": "10m"
                             },
-                            {
-                                "comparator": "<=",
-                                "value": 0,
-                                "palette": "green_on_white"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Pods unavailable",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "5m"
-                },
-                "autoscale": true,
-                "precision": 0
-            },
-            "layout": {
-                "x": 50,
-                "y": 106,
-                "width": 16,
-                "height": 14
-            }
-        },
-        {
-            "id": 9,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.deployment.replicas_unavailable{$scope,$deployment,$service,$label,$cluster,$namespace,$node} by {kube_deployment}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "orange",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Pods unavailable",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 67,
-                "y": 106,
-                "width": 37,
-                "height": 14
-            }
-        },
-        {
-            "id": 10,
-            "definition": {
-                "type": "note",
-                "content": "Pods",
-                "background_color": "gray",
-                "font_size": "18",
-                "text_align": "center",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 37,
-                "y": 16,
-                "width": 67,
-                "height": 5
-            }
-        },
-        {
-            "id": 11,
-            "definition": {
-                "type": "note",
-                "content": "[Resource utilization](https://www.datadoghq.com/blog/monitoring-kubernetes-performance-metrics/#toc-resource-utilization6)",
-                "background_color": "gray",
-                "font_size": "18",
-                "text_align": "center",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 107,
-                "y": 16,
-                "width": 87,
-                "height": 5
-            }
-        },
-        {
-            "id": 12,
-            "definition": {
-                "type": "event_stream",
-                "query": "source:kubernetes $node",
-                "event_size": "s",
-                "time": {
-                    "live_span": "1w"
-                }
-            },
-            "layout": {
-                "x": 0,
-                "y": 34,
-                "width": 36,
-                "height": 37
-            }
-        },
-        {
-            "id": 13,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes.pods.running{$scope,$deployment,$statefulset,$replicaset,$daemonset,$label,$cluster,$namespace,$service,$node} by {host}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "title": "Running pods per node",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false
-            },
-            "layout": {
-                "x": 37,
-                "y": 38,
-                "width": 33,
-                "height": 15
-            }
-        },
-        {
-            "id": 14,
-            "definition": {
-                "type": "hostmap",
-                "requests": {
-                    "fill": {
-                        "q": "sum:kubernetes.memory.usage{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}"
-                    }
-                },
-                "custom_links": [],
-                "title": "Memory usage per node",
-                "title_size": "16",
-                "title_align": "left",
-                "no_metric_hosts": false,
-                "no_group_hosts": true,
-                "scope": [
-                    "$scope",
-                    "$node",
-                    "$label",
-                    "$kube_deployment",
-                    "$kube_namespace"
-                ],
-                "style": {
-                    "palette": "hostmap_blues",
-                    "palette_flip": false
-                }
-            },
-            "layout": {
-                "x": 151,
-                "y": 22,
-                "width": 43,
-                "height": 18
-            }
-        },
-        {
-            "id": 15,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes.network.rx_errors{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}",
-                        "display_type": "bars",
-                        "style": {
-                            "palette": "warm"
+                            "type": "check_status",
+                            "check": "kubernetes.kubelet.check",
+                            "grouping": "cluster",
+                            "group_by": [],
+                            "tags": [
+                                "$scope",
+                                "$node",
+                                "$label"
+                            ]
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 6,
+                            "width": 2,
+                            "height": 2
                         }
                     },
                     {
-                        "q": "sum:kubernetes.network.tx_errors{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}",
-                        "display_type": "bars",
-                        "style": {
-                            "palette": "warm"
-                        }
-                    },
-                    {
-                        "q": "sum:kubernetes.network_errors{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}",
-                        "display_type": "bars",
-                        "style": {
-                            "palette": "warm",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Network errors per node",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 107,
-                "y": 121,
-                "width": 43,
-                "height": 16
-            }
-        },
-        {
-            "id": 16,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes.cpu.requests{$scope,$deployment,$statefulset,$replicaset,$daemonset,$cluster,$namespace,$label,$service,$node} by {host}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "warm"
+                        "id": 28,
+                        "definition": {
+                            "title": "Kubelet Ping",
+                            "title_size": "16",
+                            "title_align": "center",
+                            "time": {
+                                "live_span": "10m"
+                            },
+                            "type": "check_status",
+                            "check": "kubernetes.kubelet.check.ping",
+                            "grouping": "cluster",
+                            "group_by": [],
+                            "tags": [
+                                "*",
+                                "$node",
+                                "$label",
+                                "$scope"
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 6,
+                            "width": 2,
+                            "height": 2
                         }
                     }
-                ],
-                "custom_links": [],
-                "title": "Sum Kubernetes CPU requests per node",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                ]
             },
             "layout": {
-                "x": 107,
-                "y": 41,
-                "width": 43,
-                "height": 15
-            }
-        },
-        {
-            "id": 17,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes.memory.requests{$scope,$deployment,$statefulset,$replicaset,$daemonset,$cluster,$namespace,$label,$service,$node} by {host}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "cool"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Sum Kubernetes memory requests per node",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 151,
-                "y": 41,
-                "width": 43,
-                "height": 15
-            }
-        },
-        {
-            "id": 18,
-            "definition": {
-                "type": "note",
-                "content": "Disk I/O & Network",
-                "background_color": "gray",
-                "font_size": "18",
-                "text_align": "center",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 107,
-                "y": 82,
-                "width": 87,
-                "height": 5
-            }
-        },
-        {
-            "id": 19,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes.network.rx_bytes{$scope,$deployment,$statefulset,$replicaset,$daemonset,$cluster,$namespace,$label,$service,$node} by {host}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "purple"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Network in per node",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 107,
-                "y": 88,
-                "width": 43,
-                "height": 16
-            }
-        },
-        {
-            "id": 20,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes.network.tx_bytes{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "green"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Network out per node",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 107,
-                "y": 105,
-                "width": 43,
-                "height": 15
-            }
-        },
-        {
-            "id": 21,
-            "definition": {
-                "type": "note",
-                "content": "[Events](https://www.datadoghq.com/blog/monitoring-kubernetes-performance-metrics/#toc-correlate-with-events10)",
-                "background_color": "gray",
-                "font_size": "18",
-                "text_align": "center",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 0,
-                "y": 16,
-                "width": 36,
-                "height": 5
-            }
-        },
-        {
-            "id": 22,
-            "definition": {
-                "type": "event_timeline",
-                "query": "source:kubernetes $node",
-                "title": "Number of Kubernetes events per node",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "1d"
-                }
-            },
-            "layout": {
-                "x": 0,
-                "y": 22,
-                "width": 36,
+                "x": 6,
+                "y": 0,
+                "width": 6,
                 "height": 9
             }
         },
         {
-            "id": 23,
+            "id": 5091018728069592,
             "definition": {
-                "type": "hostmap",
-                "requests": {
-                    "fill": {
-                        "q": "sum:kubernetes.cpu.usage.total{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}"
-                    }
-                },
-                "custom_links": [],
-                "title": "CPU utilization per node",
-                "title_size": "16",
-                "title_align": "left",
-                "no_metric_hosts": false,
-                "no_group_hosts": true,
-                "scope": [
-                    "$scope",
-                    "$node",
-                    "$label",
-                    "$kube_deployment",
-                    "$kube_namespace"
-                ],
-                "style": {
-                    "palette": "YlOrRd",
-                    "palette_flip": false
-                }
-            },
-            "layout": {
-                "x": 107,
-                "y": 22,
-                "width": 43,
-                "height": 18
-            }
-        },
-        {
-            "id": 24,
-            "definition": {
-                "type": "note",
-                "content": "Read our\n[Monitoring guide for Kubernetes](https://www.datadoghq.com/blog/monitoring-kubernetes-era/).\n \nCheck [the agent documentation](https://docs.datadoghq.com/agent/kubernetes/) if some of the graphs are empty.",
-                "background_color": "yellow",
-                "font_size": "14",
-                "text_align": "center",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left"
-            },
-            "layout": {
-                "x": 95,
-                "y": 0,
-                "width": 16,
-                "height": 15
-            }
-        },
-        {
-            "id": 25,
-            "definition": {
-                "type": "query_value",
-                "requests": [
+                "title": "Events",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                        "q": "sum:kubernetes_state.daemonset.desired{$scope,$daemonset,$cluster,$label,$namespace,$service,$node}",
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 0,
-                                "palette": "custom_text",
-                                "custom_fg_color": "#6a53a1"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Desired",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "5m"
-                },
-                "autoscale": true,
-                "precision": 0
-            },
-            "layout": {
-                "x": 0,
-                "y": 76,
-                "width": 16,
-                "height": 14
-            }
-        },
-        {
-            "id": 26,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.daemonset.desired{$scope,$daemonset,$service,$namespace,$label,$cluster,$node} by {kube_daemon_set}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "purple",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Pods desired",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 17,
-                "y": 76,
-                "width": 32,
-                "height": 14
-            }
-        },
-        {
-            "id": 27,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.daemonset.ready{$scope,$daemonset,$cluster,$label,$namespace,$service,$node}",
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 0,
-                                "palette": "green_on_white"
-                            },
-                            {
-                                "comparator": "<=",
-                                "value": 0,
-                                "palette": "red_on_white"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Ready",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "5m"
-                },
-                "autoscale": true,
-                "precision": 0
-            },
-            "layout": {
-                "x": 0,
-                "y": 91,
-                "width": 16,
-                "height": 14
-            }
-        },
-        {
-            "id": 28,
-            "definition": {
-                "type": "check_status",
-                "title": "Kubelet Ping",
-                "title_size": "16",
-                "title_align": "center",
-                "check": "kubernetes.kubelet.check.ping",
-                "grouping": "cluster",
-                "group_by": [],
-                "tags": ["*", "$node", "$label", "$scope"],
-                "time": {
-                    "live_span": "10m"
-                }
-            },
-            "layout": {
-                "x": 80,
-                "y": 8,
-                "width": 13,
-                "height": 7
-            }
-        },
-        {
-            "id": 29,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.container.running{$scope,$deployment,$statefulset,$replicaset,$daemonset,$service,$namespace,$label,$cluster,$node}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                        "id": 22,
+                        "definition": {
+                            "title": "Events per node",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "event_timeline",
+                            "query": "source:kubernetes $node"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
                         }
                     },
                     {
-                        "q": "sum:kubernetes_state.container.waiting{$scope,$deployment,$statefulset,$replicaset,$daemonset,$service,$namespace,$label,$cluster,$node}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "warm",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    },
-                    {
-                        "q": "sum:kubernetes_state.container.terminated{$scope,$deployment,$statefulset,$replicaset,$daemonset,$service,$namespace,$label,$cluster,$node}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "grey",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    },
-                    {
-                        "q": "sum:kubernetes_state.container.ready{$scope,$deployment,$statefulset,$replicaset,$daemonset,$service,$namespace,$label,$cluster,$node}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "grey",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                        "id": 12,
+                        "definition": {
+                            "title": "Event logs per node",
+                            "requests": [
+                                {
+                                    "query": {
+                                        "query_string": "source:kubernetes $node",
+                                        "data_source": "event_stream",
+                                        "event_size": "s"
+                                    },
+                                    "columns": [],
+                                    "response_format": "event_list"
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 6,
+                            "height": 7
                         }
                     }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "title": "Container states",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 50,
-                "y": 127,
-                "width": 54,
-                "height": 14
-            }
-        },
-        {
-            "id": 30,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.replicaset.replicas_ready{$scope,$service,$namespace,$deployment,$replicaset,$label,$cluster,$node} by {kube_replica_set}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "purple",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Ready",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "1h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 17,
-                "y": 112,
-                "width": 32,
-                "height": 14
-            }
-        },
-        {
-            "id": 31,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.replicaset.replicas_desired{$scope,$service,$namespace,$deployment,$replicaset,$label,$cluster,$node} by {kube_replica_set}-sum:kubernetes_state.replicaset.replicas_ready{$scope,$service,$namespace,$deployment,$replicaset,$label,$cluster,$node} by {kube_replica_set}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "orange",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Not ready",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "1h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 17,
-                "y": 127,
-                "width": 32,
-                "height": 14
-            }
-        },
-        {
-            "id": 32,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes.io.read_bytes{$scope,$service,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$label,$cluster,$node} by {host}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "grey",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Disk reads per node",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 151,
-                "y": 105,
-                "width": 43,
-                "height": 15
-            }
-        },
-        {
-            "id": 33,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes.io.write_bytes{$scope,$service,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$label,$cluster,$node} by {host}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "grey",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Disk writes per node",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 151,
-                "y": 88,
-                "width": 43,
-                "height": 16
-            }
-        },
-        {
-            "id": 34,
-            "definition": {
-                "type": "note",
-                "content": "DaemonSets",
-                "background_color": "gray",
-                "font_size": "18",
-                "text_align": "center",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
+                ]
             },
             "layout": {
                 "x": 0,
-                "y": 70,
-                "width": 49,
-                "height": 5
+                "y": 6,
+                "width": 6,
+                "height": 10
             }
         },
         {
-            "id": 35,
+            "id": 464364823984900,
             "definition": {
-                "type": "note",
-                "content": "Deployments",
-                "background_color": "gray",
-                "font_size": "18",
-                "text_align": "center",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 50,
-                "y": 70,
-                "width": 54,
-                "height": 5
-            }
-        },
-        {
-            "id": 36,
-            "definition": {
-                "type": "note",
-                "content": "ReplicaSets",
-                "background_color": "gray",
-                "font_size": "18",
-                "text_align": "center",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 0,
-                "y": 106,
-                "width": 49,
-                "height": 5
-            }
-        },
-        {
-            "id": 37,
-            "definition": {
-                "type": "note",
-                "content": "Containers",
-                "background_color": "gray",
-                "font_size": "18",
-                "text_align": "center",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 50,
-                "y": 121,
-                "width": 54,
-                "height": 5
-            }
-        },
-        {
-            "id": 38,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.replicaset.replicas_ready{$scope,$deployment,$replicaset,$cluster,$label,$namespace,$service,$node}",
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 0,
-                                "palette": "custom_text",
-                                "custom_fg_color": "#6a53a1"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Ready",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "5m"
-                },
-                "autoscale": true,
-                "precision": 0
-            },
-            "layout": {
-                "x": 0,
-                "y": 112,
-                "width": 16,
-                "height": 14
-            }
-        },
-        {
-            "id": 39,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.replicaset.replicas_desired{$scope,$deployment,$replicaset,$service,$namespace,$label,$cluster,$node}-sum:kubernetes_state.replicaset.replicas_ready{$scope,$deployment,$replicaset,$service,$namespace,$label,$cluster,$node}",
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 0,
-                                "palette": "yellow_on_white",
-                                "custom_fg_color": "#6a53a1"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Not ready",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "5m"
-                },
-                "autoscale": true,
-                "precision": 0
-            },
-            "layout": {
-                "x": 0,
-                "y": 127,
-                "width": 16,
-                "height": 14
-            }
-        },
-        {
-            "id": 40,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.daemonset.ready{$scope,$daemonset,$service,$namespace,$label,$cluster,$node} by {kube_daemon_set}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "green",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Pods ready",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 17,
-                "y": 91,
-                "width": 32,
-                "height": 14
-            }
-        },
-        {
-            "id": 41,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes.pods.running{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$label,$node,$service} by {kube_cluster_name,kube_namespace}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [
-                    {
-                        "link": "https://www.google.com?search={{kube_namespace.value}}",
-                        "label": "Search Namespace on Google"
-                    }
-                ],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "title": "Running pods per namespace",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 37,
-                "y": 22,
-                "width": 33,
-                "height": 15
-            }
-        },
-        {
-            "id": 42,
-            "definition": {
-                "type": "toplist",
-                "requests": [
-                    {
-                        "q": "top(sum:kubernetes_state.pod.status_phase{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,!pod_phase:running,!pod_phase:succeeded,$label,$node,$service} by {kube_cluster_name,kube_namespace,pod_phase}, 100, 'last', 'desc')",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 0,
-                                "palette": "white_on_red"
-                            },
-                            {
-                                "comparator": "<=",
-                                "value": 0,
-                                "palette": "white_on_green"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Pods in bad phase by namespaces",
-                "title_size": "16",
-                "title_align": "left"
-            },
-            "layout": {
-                "x": 37,
-                "y": 54,
-                "width": 33,
-                "height": 15
-            }
-        },
-        {
-            "id": 43,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.container.waiting{$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,reason:crashloopbackoff,$scope,$daemonset,$label,$node,$service} by {pod_name}",
-                        "display_type": "bars",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "markers": [
-                    {
-                        "value": "y = 0",
-                        "display_type": "ok dashed",
-                        "label": "y = 0"
-                    }
-                ],
-                "title": "CrashloopBackOff by Pod",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 71,
-                "y": 54,
-                "width": 33,
-                "height": 15
-            }
-        },
-        {
-            "id": 44,
-            "definition": {
-                "type": "toplist",
-                "requests": [
-                    {
-                        "q": "top(sum:kubernetes.pods.running{$scope,$namespace,$cluster,$deployment,$statefulset,$replicaset,$daemonset,$label,$node,$service} by {kube_cluster_name,kube_namespace}, 100, 'max', 'desc')",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 2000,
-                                "palette": "white_on_red"
-                            },
-                            {
-                                "comparator": ">",
-                                "value": 1500,
-                                "palette": "white_on_yellow"
-                            },
-                            {
-                                "comparator": "<=",
-                                "value": 3000,
-                                "palette": "white_on_green"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Pods running by namespace",
-                "title_size": "16",
-                "title_align": "left"
-            },
-            "layout": {
-                "x": 71,
-                "y": 22,
-                "width": 33,
-                "height": 15
-            }
-        },
-        {
-            "id": 45,
-            "definition": {
-                "type": "toplist",
-                "requests": [
-                    {
-                        "q": "top(sum:kubernetes_state.pod.ready{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,condition:true,$label,$node,$service} by {kubernetes_cluster,host,nodepool}, 10, 'last', 'desc')",
-                        "conditional_formats": [
-                            {
-                                "comparator": "<=",
-                                "value": 24,
-                                "palette": "white_on_green"
-                            },
-                            {
-                                "comparator": ">",
-                                "value": 32,
-                                "palette": "white_on_red"
-                            },
-                            {
-                                "comparator": ">",
-                                "value": 24,
-                                "palette": "white_on_yellow"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Pods in ready state by node",
-                "title_size": "16",
-                "title_align": "left"
-            },
-            "layout": {
-                "x": 71,
-                "y": 38,
-                "width": 33,
-                "height": 15
-            }
-        },
-        {
-            "id": 46,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "count_nonzero(avg:kubernetes.pods.running{$scope,$label,$node,$service,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster} by {kube_cluster_name})",
-                        "aggregator": "avg"
-                    }
-                ],
-                "custom_links": [],
-                "title": "Clusters",
-                "title_size": "16",
-                "title_align": "left",
-                "precision": 0
-            },
-            "layout": {
-                "x": 24,
-                "y": 0,
-                "width": 13,
-                "height": 7
-            }
-        },
-        {
-            "id": 47,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "count_nonzero(avg:kubernetes.pods.running{$scope,$label,$node,$service,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster} by {kube_cluster_name,kube_namespace})",
-                        "aggregator": "avg"
-                    }
-                ],
-                "custom_links": [],
-                "title": "Namespaces",
-                "title_size": "16",
-                "title_align": "left",
-                "precision": 0
-            },
-            "layout": {
-                "x": 38,
-                "y": 0,
-                "width": 13,
-                "height": 7
-            }
-        },
-        {
-            "id": 48,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "count_nonzero(avg:kubernetes_state.deployment.replicas{$scope,$label,$node,$service,$deployment,$replicaset,$namespace,$cluster} by {kube_cluster_name,kube_namespace,kube_deployment})",
-                        "aggregator": "avg"
-                    }
-                ],
-                "custom_links": [],
-                "title": "Deployments",
-                "title_size": "16",
-                "title_align": "left",
-                "precision": 0
-            },
-            "layout": {
-                "x": 52,
-                "y": 8,
-                "width": 13,
-                "height": 7
-            }
-        },
-        {
-            "id": 49,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.service.count{$scope,$label,$node,$service,$namespace,$cluster}",
-                        "aggregator": "avg"
-                    }
-                ],
-                "custom_links": [],
-                "title": "Services",
-                "title_size": "16",
-                "title_align": "left",
-                "precision": 0
-            },
-            "layout": {
-                "x": 52,
-                "y": 0,
-                "width": 13,
-                "height": 7
-            }
-        },
-        {
-            "id": 50,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "count_nonzero(avg:kubernetes_state.daemonset.desired{$scope,$label,$node,$service,$daemonset,$namespace,$cluster} by {kube_cluster_name,kube_namespace,kube_daemon_set})",
-                        "aggregator": "avg"
-                    }
-                ],
-                "custom_links": [],
-                "title": "DaemonSets",
-                "title_size": "16",
-                "title_align": "left",
-                "precision": 0
-            },
-            "layout": {
-                "x": 38,
-                "y": 8,
-                "width": 13,
-                "height": 7
-            }
-        },
-        {
-            "id": 51,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.node.count{$scope,$label,$node,$service,$namespace,$cluster}",
-                        "aggregator": "avg"
-                    }
-                ],
-                "custom_links": [],
-                "title": "Nodes",
-                "title_size": "16",
-                "title_align": "left",
-                "precision": 0
-            },
-            "layout": {
-                "x": 24,
-                "y": 8,
-                "width": 13,
-                "height": 7
-            }
-        },
-        {
-            "id": 52,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes.pods.running{$scope,$label,$node,$service,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster}",
-                        "aggregator": "avg"
-                    }
-                ],
-                "custom_links": [
-                    {
-                        "link": "https://app.datadoghq.com/screen/integration/30322/kubernetes-pods-overview",
-                        "label": "View Pods overview"
-                    }
-                ],
                 "title": "Pods",
-                "title_size": "16",
-                "title_align": "left",
-                "precision": 0
-            },
-            "layout": {
-                "x": 66,
-                "y": 0,
-                "width": 13,
-                "height": 7
-            }
-        },
-        {
-            "id": 53,
-            "definition": {
-                "type": "query_value",
-                "requests": [
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                        "q": "sum:kubernetes.containers.running{$scope,$label,$node,$service,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster}",
-                        "aggregator": "avg"
-                    }
-                ],
-                "custom_links": [],
-                "title": "Containers",
-                "title_size": "16",
-                "title_align": "left",
-                "precision": 0
-            },
-            "layout": {
-                "x": 66,
-                "y": 8,
-                "width": 13,
-                "height": 7
-            }
-        },
-        {
-            "id": 54,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes.network.rx_errors{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {pod_name}",
-                        "display_type": "bars",
-                        "style": {
-                            "palette": "warm",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                        "id": 45,
+                        "definition": {
+                            "title": "Ready state by node",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<=",
+                                            "value": 24,
+                                            "palette": "white_on_green"
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "value": 32,
+                                            "palette": "white_on_red"
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "value": 24,
+                                            "palette": "white_on_yellow"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.pod.ready{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,condition:true,$label,$node,$service} by {kubernetes_cluster,host,nodepool}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 2
                         }
                     },
                     {
-                        "q": "sum:kubernetes.network.tx_errors{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {pod_name}",
-                        "display_type": "bars",
-                        "style": {
-                            "palette": "warm",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                        "id": 13,
+                        "definition": {
+                            "title": "Running pods per node",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.pods.running{$scope,$deployment,$statefulset,$replicaset,$daemonset,$label,$cluster,$namespace,$service,$node} by {host}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 44,
+                        "definition": {
+                            "title": "Running by namespace",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 2000,
+                                            "palette": "white_on_red"
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "value": 1500,
+                                            "palette": "white_on_yellow"
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "value": 3000,
+                                            "palette": "white_on_green"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.pods.running{$scope,$namespace,$cluster,$deployment,$statefulset,$replicaset,$daemonset,$label,$node,$service} by {kube_cluster_name,kube_namespace}",
+                                            "aggregator": "max"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 100,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 41,
+                        "definition": {
+                            "title": "Running pods per namespace",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.pods.running{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$label,$node,$service} by {kube_cluster_name,kube_namespace}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "custom_links": [
+                                {
+                                    "link": "https://www.google.com?search={{kube_namespace.value}}",
+                                    "label": "Search Namespace on Google"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 2,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 42,
+                        "definition": {
+                            "title": "Failure by namespaces",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "value": 0,
+                                            "palette": "white_on_green"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.pod.status_phase{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,!pod_phase:running,!pod_phase:succeeded,$label,$node,$service} by {kube_cluster_name,kube_namespace,pod_phase}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 100,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 43,
+                        "definition": {
+                            "title": "CrashloopBackOff by Pod",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.container.waiting{$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,reason:crashloopbackoff,$scope,$daemonset,$label,$node,$service} by {pod_name}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": [
+                                {
+                                    "label": "y = 0",
+                                    "value": "y = 0",
+                                    "display_type": "ok dashed"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 4,
+                            "width": 3,
+                            "height": 2
                         }
                     }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "title": "Network errors per pod",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                ]
             },
             "layout": {
-                "x": 151,
-                "y": 121,
-                "width": 43,
-                "height": 16
+                "x": 6,
+                "y": 9,
+                "width": 6,
+                "height": 7
+            }
+        },
+        {
+            "id": 4582249236647136,
+            "definition": {
+                "title": "DaemonSets",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 27,
+                        "definition": {
+                            "title": "Ready",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "live_span": "5m"
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "green_on_white"
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "value": 0,
+                                            "palette": "red_on_white"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.daemonset.ready{$scope,$daemonset,$cluster,$label,$namespace,$service,$node}",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 40,
+                        "definition": {
+                            "title": "Pods ready",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.daemonset.ready{$scope,$daemonset,$service,$namespace,$label,$cluster,$node} by {kube_daemon_set}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "green",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 25,
+                        "definition": {
+                            "title": "Desired",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "live_span": "5m"
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_text",
+                                            "custom_fg_color": "#6a53a1"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.daemonset.desired{$scope,$daemonset,$cluster,$label,$namespace,$service,$node}",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 26,
+                        "definition": {
+                            "title": "Pods desired",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.daemonset.desired{$scope,$daemonset,$service,$namespace,$label,$cluster,$node} by {kube_daemon_set}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 2,
+                            "width": 4,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 5,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 7067839332684070,
+            "definition": {
+                "title": "Deployments",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6,
+                        "definition": {
+                            "title": "Pods desired",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "live_span": "5m"
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_text",
+                                            "custom_fg_color": "#6a53a1"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas_desired{$scope,$deployment,$cluster,$label,$namespace,$service,$node}",
+                                            "aggregator": "avg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7,
+                        "definition": {
+                            "title": "Pods desired",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas_desired{$scope,$deployment,$cluster,$label,$namespace,$service,$node} by {kube_deployment}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4,
+                        "definition": {
+                            "title": "Pods available",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "live_span": "5m"
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "green_on_white"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas_available{$scope,$deployment,$cluster,$label,$namespace,$service,$node}",
+                                            "aggregator": "avg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5,
+                        "definition": {
+                            "title": "Pods available",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas_available{$scope,$deployment,$service,$label,$cluster,$namespace,$node} by {kube_deployment}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "green",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 2,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8,
+                        "definition": {
+                            "title": "Pods unavailable",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "live_span": "5m"
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "yellow_on_white"
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "value": 0,
+                                            "palette": "green_on_white"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas_unavailable{$scope,$deployment,$cluster,$label,$namespace,$service,$node}",
+                                            "aggregator": "avg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 9,
+                        "definition": {
+                            "title": "Pods unavailable",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.deployment.replicas_unavailable{$scope,$deployment,$service,$label,$cluster,$namespace,$node} by {kube_deployment}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "orange",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 4,
+                            "width": 4,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 7
+            }
+        },
+        {
+            "id": 3247965330200140,
+            "definition": {
+                "title": "ReplicaSets",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 38,
+                        "definition": {
+                            "title": "Ready",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "live_span": "5m"
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_text",
+                                            "custom_fg_color": "#6a53a1"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.replicaset.replicas_ready{$scope,$deployment,$replicaset,$cluster,$label,$namespace,$service,$node}",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 30,
+                        "definition": {
+                            "title": "Ready",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.replicaset.replicas_ready{$scope,$service,$namespace,$deployment,$replicaset,$label,$cluster,$node} by {kube_replica_set}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 39,
+                        "definition": {
+                            "title": "Not ready",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "live_span": "5m"
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "yellow_on_white",
+                                            "custom_fg_color": "#6a53a1"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.replicaset.replicas_desired{$scope,$deployment,$replicaset,$service,$namespace,$label,$cluster,$node}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes_state.replicaset.replicas_ready{$scope,$deployment,$replicaset,$service,$namespace,$label,$cluster,$node}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 - query2"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 31,
+                        "definition": {
+                            "title": "Not ready",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.replicaset.replicas_desired{$scope,$service,$namespace,$deployment,$replicaset,$label,$cluster,$node} by {kube_replica_set}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes_state.replicaset.replicas_ready{$scope,$service,$namespace,$deployment,$replicaset,$label,$cluster,$node} by {kube_replica_set}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 - query2"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "orange",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 2,
+                            "width": 4,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 6,
+                "height": 5
+            }
+        },
+        {
+            "id": 6757508018193946,
+            "definition": {
+                "title": "Containers",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 29,
+                        "definition": {
+                            "title": "Container states",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "running",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.container.running{$scope,$deployment,$statefulset,$replicaset,$daemonset,$service,$namespace,$label,$cluster,$node}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                },
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "waiting",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.container.waiting{$scope,$deployment,$statefulset,$replicaset,$daemonset,$service,$namespace,$label,$cluster,$node}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                },
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "terminated",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.container.terminated{$scope,$deployment,$statefulset,$replicaset,$daemonset,$service,$namespace,$label,$cluster,$node}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "grey",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                },
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "ready",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.container.ready{$scope,$deployment,$statefulset,$replicaset,$daemonset,$service,$namespace,$label,$cluster,$node}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "grey",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 6,
+                "y": 7,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 4828406508356148,
+            "definition": {
+                "title": "Resource Utilization",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 23,
+                        "definition": {
+                            "title": "CPU utilization per node",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "hostmap",
+                            "requests": {
+                                "fill": {
+                                    "q": "sum:kubernetes.cpu.usage.total{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}"
+                                }
+                            },
+                            "no_metric_hosts": false,
+                            "no_group_hosts": true,
+                            "scope": [
+                                "$scope",
+                                "$node",
+                                "$label",
+                                "$kube_deployment",
+                                "$kube_namespace"
+                            ],
+                            "custom_links": [],
+                            "style": {
+                                "palette": "YlOrRd",
+                                "palette_flip": false
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 16,
+                        "definition": {
+                            "title": "Sum Kubernetes CPU requests per node",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.cpu.requests{$scope,$deployment,$statefulset,$replicaset,$daemonset,$cluster,$namespace,$label,$service,$node} by {host}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "warm"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1,
+                        "definition": {
+                            "title": "Most CPU-intensive pods",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "style": {
+                                        "palette": "warm"
+                                    },
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.cpu.usage.total{$scope,$deployment,$statefulset,$replicaset,$daemonset,$cluster,$namespace,!pod_name:no_pod,$label,$service,$node} by {pod_name}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 14,
+                        "definition": {
+                            "title": "Memory usage per node",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "hostmap",
+                            "requests": {
+                                "fill": {
+                                    "q": "sum:kubernetes.memory.usage{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}"
+                                }
+                            },
+                            "no_metric_hosts": false,
+                            "no_group_hosts": true,
+                            "scope": [
+                                "$scope",
+                                "$node",
+                                "$label",
+                                "$kube_deployment",
+                                "$kube_namespace"
+                            ],
+                            "custom_links": [],
+                            "style": {
+                                "palette": "hostmap_blues",
+                                "palette_flip": false
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 17,
+                        "definition": {
+                            "title": "Sum Kubernetes memory requests per node",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.memory.requests{$scope,$deployment,$statefulset,$replicaset,$daemonset,$cluster,$namespace,$label,$service,$node} by {host}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "cool"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2799323524865250,
+                        "definition": {
+                            "title": "Most memory-intensive pods",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "style": {
+                                        "palette": "cool"
+                                    },
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.memory.usage{$scope,$deployment,$statefulset,$replicaset,$daemonset,$cluster,$namespace,!pod_name:no_pod,$label,$service,$node} by {pod_name}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 2,
+                            "width": 4,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 26,
+                "width": 12,
+                "height": 5
+            }
+        },
+        {
+            "id": 4688962710169134,
+            "definition": {
+                "title": "Disk I/O & Network",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 19,
+                        "definition": {
+                            "title": "Network in per node",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.network.rx_bytes{$scope,$deployment,$statefulset,$replicaset,$daemonset,$cluster,$namespace,$label,$service,$node} by {host}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "purple"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 20,
+                        "definition": {
+                            "title": "Network out per node",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.network.tx_bytes{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "green"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 15,
+                        "definition": {
+                            "title": "Network errors per node",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.network.rx_errors{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "warm"
+                                    },
+                                    "display_type": "bars"
+                                },
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.network.tx_errors{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "warm"
+                                    },
+                                    "display_type": "bars"
+                                },
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.network_errors{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 54,
+                        "definition": {
+                            "title": "Network errors per pod",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.network.rx_errors{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {pod_name}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                },
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.network.tx_errors{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {pod_name}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "yaxis": {
+                                "label": "",
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 33,
+                        "definition": {
+                            "title": "Disk writes per node",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.io.write_bytes{$scope,$service,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$label,$cluster,$node} by {host}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "grey",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 32,
+                        "definition": {
+                            "title": "Disk reads per node",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.io.read_bytes{$scope,$service,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$label,$cluster,$node} by {host}"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "grey",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 2,
+                            "width": 4,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 31,
+                "width": 12,
+                "height": 5
             }
         }
     ],
     "template_variables": [
         {
             "name": "scope",
-            "default": "*",
-            "prefix": null
+            "available_values": [],
+            "default": "*"
         },
         {
             "name": "cluster",
-            "default": "*",
-            "prefix": "kube_cluster_name"
+            "prefix": "kube_cluster_name",
+            "available_values": [],
+            "default": "*"
         },
         {
             "name": "namespace",
-            "default": "*",
-            "prefix": "kube_namespace"
+            "prefix": "kube_namespace",
+            "available_values": [],
+            "default": "*"
         },
         {
             "name": "deployment",
-            "default": "*",
-            "prefix": "kube_deployment"
+            "prefix": "kube_deployment",
+            "available_values": [],
+            "default": "*"
         },
         {
             "name": "daemonset",
-            "default": "*",
-            "prefix": "kube_daemon_set"
+            "prefix": "kube_daemon_set",
+            "available_values": [],
+            "default": "*"
         },
         {
             "name": "statefulset",
-            "default": "*",
-            "prefix": "kube_stateful_set"
+            "prefix": "kube_stateful_set",
+            "available_values": [],
+            "default": "*"
         },
         {
             "name": "replicaset",
-            "default": "*",
-            "prefix": "kube_replica_set"
+            "prefix": "kube_replica_set",
+            "available_values": [],
+            "default": "*"
         },
         {
             "name": "service",
-            "default": "*",
-            "prefix": "kube_service"
+            "prefix": "kube_service",
+            "available_values": [],
+            "default": "*"
         },
         {
             "name": "node",
-            "default": "*",
-            "prefix": "node"
+            "prefix": "node",
+            "available_values": [],
+            "default": "*"
         },
         {
             "name": "label",
-            "default": "*",
-            "prefix": "label"
+            "prefix": "label",
+            "available_values": [],
+            "default": "*"
         }
     ],
-    "layout_type": "free",
-    "is_read_only": true,
+    "layout_type": "ordered",
     "notify_list": [],
-    "id": 86
+    "reflow_type": "fixed"
 }

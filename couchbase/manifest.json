@@ -12,12 +12,12 @@
     "title": "CouchBase",
     "media": [],
     "classifier_tags": [
+      "Category::Caching",
+      "Category::Data Stores",
+      "Category::Log Collection",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Store",
-      "Category::Autodiscovery",
-      "Category::Log Collection"
+      "Supported OS::macOS"
     ]
   },
   "author": {
@@ -44,9 +44,7 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": [
-        "beam.smp couchbase"
-      ]
+      "process_signatures": ["beam.smp couchbase"]
     },
     "dashboards": {
       "couchbase": "assets/dashboards/couchbase_dashboard.json"

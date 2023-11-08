@@ -61,6 +61,7 @@ class ClickhouseCheck(AgentCheck):
         self._query_manager.execute()
         self.collect_version()
 
+    @AgentCheck.metadata_entrypoint
     def collect_version(self):
         version = list(self.execute_query_raw('SELECT version()'))[0][0]
 

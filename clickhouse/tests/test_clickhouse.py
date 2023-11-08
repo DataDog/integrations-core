@@ -1,9 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import mock
 import pytest
-from clickhouse_driver.errors import Error, NetworkError
 
 from datadog_checks.clickhouse import ClickhouseCheck
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -39,42 +37,6 @@ def test_check(aggregator, instance, dd_run_check):
     aggregator.assert_service_check("clickhouse.can_connect", count=1)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
-
-
-def test_can_connect(aggregator, instance, dd_run_check):
-    """
-    Regression test: a copy of the `can_connect` service check must be submitted for each check run.
-    (It used to be submitted only once on check init, which led to customer seeing "no data" in the UI.)
-    """
-    check = ClickhouseCheck('clickhouse', {}, [instance])
-
-    # Test for consecutive healthy clickhouse.can_connect statuses
-    num_runs = 3
-    for _ in range(num_runs):
-        dd_run_check(check)
-    aggregator.assert_service_check("clickhouse.can_connect", count=num_runs, status=check.OK)
-    aggregator.reset()
-
-    # Test 1 healthy connection --> 2 Unhealthy service checks --> 1 healthy connection. Recovered
-    dd_run_check(check)
-    with mock.patch('clickhouse_driver.Client', side_effect=NetworkError('Connection refused')):
-        with mock.patch('datadog_checks.clickhouse.ClickhouseCheck.ping_clickhouse', return_value=False):
-            with pytest.raises(Exception):
-                dd_run_check(check)
-            with pytest.raises(Exception):
-                dd_run_check(check)
-    dd_run_check(check)
-    aggregator.assert_service_check("clickhouse.can_connect", count=2, status=check.CRITICAL)
-    aggregator.assert_service_check("clickhouse.can_connect", count=2, status=check.OK)
-    aggregator.reset()
-
-    # Test Exception in ping_clickhouse(), but reestablishes connection.
-    dd_run_check(check)
-    with mock.patch('datadog_checks.clickhouse.ClickhouseCheck.ping_clickhouse', side_effect=Error()):
-        # connect() should be able to handle an exception in ping_clickhouse() and attempt reconnection
-        dd_run_check(check)
-    dd_run_check(check)
-    aggregator.assert_service_check("clickhouse.can_connect", count=3, status=check.OK)
 
 
 def test_custom_queries(aggregator, instance, dd_run_check):

@@ -12,12 +12,11 @@
     "title": "WebLogic",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
       "Category::Log Collection",
-      "Category::Web",
-      "Category::Oracle"
+      "Category::Oracle",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {

@@ -31,12 +31,6 @@ To install the check in dev mode:
 pip install -e '.[deps]'
 ```
 
-To install also development dependencies needed for executing tests:
-
-```shell
-pip install -r requirements-dev.txt
-```
-
 To download a new or updated integration, you may specify a precise
 [version][7]:
 
@@ -50,11 +44,30 @@ Or you may leave the version unspecified to download the latest version:
 python -m datadog_checks.downloader -vvvv datadog-$INTEGRATION
 ```
 
-You can use `ddev` to run the tests:
+
+### Testing
+
+You can use `ddev` to run the tests.
+
+About how to install `ddev`, see https://docs.datadoghq.com/developers/integrations/python/ and https://datadoghq.dev/integrations-core/.
+
+For running tests locally, you need to download some test data first. You should only have to do it the first time, and later after some updates to the data:
+
+```shell
+hatch run test-data:create
+```
+
+This will run the script under `tests/scripts/download_test_data.py`, which will get a partial copy from
+the actual repository.
+
+Then to run the tests:
 
 ```shell
 ddev test datadog_checks_downloader
 ```
+
+
+### (Legacy) Testing by Invoking Pytest Directly
 
 You can select between online and offline tests when running testsuite using
 pytest:
@@ -77,13 +90,6 @@ To run checks against content served from own local directory where TUF, in-toto
 pytest -vvvv --local-dir=/path/to/dir --distribution-name datadog-active-directory --distribution-version 1.10.0
 ```
 
-Data used for offline tests can be regenerated (for a new repo version) by running:
-```shell
-hatch run test-data:create
-```
-
-This will run the script under `tests/scripts/download_test_data.py`, which will get a partial copy from
-the actual repository.
 
 ## Troubleshooting
 

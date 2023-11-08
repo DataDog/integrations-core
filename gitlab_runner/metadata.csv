@@ -13,6 +13,7 @@ gitlab_runner.ci_ssh_docker_machines_provider_machine_states,gauge,,request,seco
 gitlab_runner.gitlab_runner_autoscaling_machine_creation_duration_seconds,gauge,,request,second,A histogram of Docker machine creation time. Applies to GitLab Runner 1.11.0+,0,gitlab_runner,auto docker machine creation time,
 gitlab_runner.gitlab_runner_autoscaling_machine_states,gauge,,request,second,The current number of machines per state in this provider. Applies to GitLab Runner 1.11.0+,0,gitlab_runner,auto total docker machines per state,
 gitlab_runner.gitlab_runner_jobs,gauge,,,,The current number of running builds. Applies to GitLab Runner 1.11.0+,0,gitlab_runner,current running builds,
+gitlab_runner.gitlab_runner_jobs_total,count,,,,The total number of jobs executed.,1,gitlab_runner,total jobs,
 gitlab_runner.gitlab_runner_errors_total,count,,request,second,The number of caught errors. Applies to GitLab Runner 1.11.0+,0,gitlab_runner,errors,
 gitlab_runner.gitlab_runner_version_info,gauge,,request,,A metric with a constant '1' value labeled by different build stats fields. Applies to GitLab Runner 1.11.0+,0,gitlab_runner,version info,
 gitlab_runner.go_gc_duration_seconds,gauge,,request,second,A summary of the GC invocation durations,0,gitlab_runner,gc duration,

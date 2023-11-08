@@ -61,7 +61,7 @@ files:
         type: boolean
         example: false
     - name: slm_stats
-      description: | 
+      description: |
         Set "slm_stats" to true to collect statistics about Snapshot Lifcycle Management.
         The user must have the `read_slm` cluster privilege to get these metrics.
       value:
@@ -122,13 +122,14 @@ files:
 
         2. data_path - The JSON path up to, but not including, the metric. For example, if querying for size of parent
                        circuit breaker, the full path is 'breakers.parent.estimated_size_in_bytes', which means the
-                       `data_path` is 'breakers.parent'.
+                       `data_path` is 'breakers.parent'. `data_path` cannot contain any wildcards, so accessing data
+                       indexed by ID (such as node or index) is not possible.
 
         3. columns - The list representing the data to be collected from the JSON query. There are two required pieces
                      of data:
-                       a. value_path - This is the JSON path from the `data_path` to the metric. For example, if
-                                       querying for size of parent circuit breaker, the `value_path` is
-                                       `estimated_size_in_bytes`.
+                       a. value_path - This is the JSON path from the `data_path` to the metric. This path may include
+                                       string keys as well as list indices. For example, if querying for size of parent
+                                       circuit breaker, the `value_path` is `estimated_size_in_bytes`.
                        b. name - The full metric name sent to Datadog. If `type` is `tag`, this column is considered a
                                  tag and applied to every metric collected by this particular query.
 
@@ -182,6 +183,14 @@ files:
               type: array
               items:
                 type: string
+    - name: submit_events
+      description: |
+        By default we submit events to Datadog if the cluster starts unhealthy or anytime its health changes.
+        You can set this option to `false` to disable submitting the events in case you already implemented
+        your own custom alerts based on metrics.
+      value:
+        type: boolean
+        example: true
     - template: instances/default
     - template: instances/http
   - template: logs

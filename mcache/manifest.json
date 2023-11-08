@@ -12,12 +12,11 @@
     "title": "Memcache",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Category::Web",
       "Category::Caching",
-      "Category::Autodiscovery",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Category::Tracing",
+      "Supported OS::Linux",
+      "Supported OS::macOS"
     ]
   },
   "author": {

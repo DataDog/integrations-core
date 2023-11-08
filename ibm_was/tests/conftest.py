@@ -28,7 +28,7 @@ def dd_environment():
     with docker_run(
         compose_file,
         conditions=[
-            CheckDockerLogs(compose_file, 'Server server1 open for e-business', attempts=80, wait=2),
+            CheckDockerLogs(compose_file, 'The SSL configuration alias is NodeDefaultSSLSettings', attempts=80, wait=3),
             StartPerfServlet(),
             CheckEndpoints(common.INSTANCE['servlet_url']),
         ],

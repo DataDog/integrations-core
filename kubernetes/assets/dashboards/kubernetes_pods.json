@@ -203,7 +203,6 @@
                 "title": "CPU-intensive pods",
                 "title_size": "16",
                 "title_align": "left",
-                "time": { "live_span": "4h" },
                 "type": "toplist",
                 "requests": [
                   {
@@ -274,7 +273,6 @@
                 "title": "Memory-intensive pods",
                 "title_size": "16",
                 "title_align": "left",
-                "time": { "live_span": "4h" },
                 "type": "toplist",
                 "requests": [
                   {
@@ -584,7 +582,7 @@
                     "response_format": "timeseries",
                     "queries": [
                       {
-                        "query": "sum:kubernetes.containers.state.terminated{$cluster,$namespace,$deployment,reason:oomkilled,$statefulset,$daemonset,$job} by {pod_name}",
+                        "query": "sum:kubernetes.containers.state.terminated{$cluster,$namespace,$deployment,reason:oomkilled,$scope,$statefulset,$daemonset,$job} by {pod_name}",
                         "data_source": "metrics",
                         "name": "query1"
                       }
@@ -898,7 +896,5 @@
     "layout_type": "ordered",
     "is_read_only": false,
     "notify_list": [],
-    "reflow_type": "fixed",
-    "id": "jgq-uej-f4x"
+    "reflow_type": "fixed"
   }
-  

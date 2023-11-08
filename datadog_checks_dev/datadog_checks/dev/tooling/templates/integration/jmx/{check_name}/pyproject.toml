@@ -1,7 +1,8 @@
 [build-system]
 requires = [
     "hatchling>=0.13.0",
-    "setuptools<61",
+    "setuptools>=66; python_version > '3.0'",
+    "setuptools; python_version < '3.0'",
 ]
 build-backend = "hatchling.build"
 
@@ -9,8 +10,8 @@ build-backend = "hatchling.build"
 name = "datadog-{project_name}"
 description = "The {integration_name} check"
 readme = "README.md"
-license = {{text = "BSD-3-Clause"}}
-requires-python = ">=3.8"
+license = "BSD-3-Clause"
+requires-python = ">=3.9"
 keywords = [
     "datadog",
     "datadog agent",
@@ -26,11 +27,11 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
     "Private :: Do Not Upload",
-    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Topic :: System :: Monitoring",
 ]
 dependencies = [
-    "datadog-checks-base>=23.6.0",
+    "datadog-checks-base>=32.6.0",
 ]
 dynamic = [
     "version",

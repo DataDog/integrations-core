@@ -6,6 +6,7 @@ from datadog_checks.base.checks.windows.perf_counters.counter import PerfObject
 from datadog_checks.base.constants import ServiceCheck
 
 from .metrics import METRICS_CONFIG
+from .service_check import app_pool_service_check, site_service_check
 
 
 class IISCheckV2(PerfCountersBaseCheckWithLegacySupport):
@@ -45,8 +46,15 @@ class IISCheckV2(PerfCountersBaseCheckWithLegacySupport):
             if include_fast:
                 new_config['include_fast'] = include_fast
 
-            # No duplicate Sites or Pools can be created
-            new_config['duplicate_instances_exist'] = False
+            # As we have discovered in 7.43 win32pdh function (win32pdh.GetFormattedCounterArray)
+            # has a memory leak. Until it is fixed we are suppressing this single use of the
+            # optimization controlled by "duplicate_instances_exist" flag because
+            # win32pdh.GetFormattedCounterArray is 5-10 times faster than its python re-implementation
+            # (GetFormattedCounterArray). For more details see get_counter_values() comments
+            #
+            # UNCOMMENT BELOW WHEN win32pdh.GetFormattedCounterArray IS FIXED
+            # # No duplicate Sites or Pools can be created
+            # new_config['duplicate_instances_exist'] = False
 
             metrics_config[object_name] = new_config
 
@@ -61,7 +69,7 @@ class IISCheckV2(PerfCountersBaseCheckWithLegacySupport):
                 object_config,
                 use_localized_counters,
                 tags,
-                'Current Application Pool Uptime',
+                'Current Application Pool State',
                 'app_pool',
                 self.instance.get('app_pools', []),
             )
@@ -90,16 +98,19 @@ class CompatibilityPerfObject(PerfObject):
         object_config,
         use_localized_counters,
         tags,
-        uptime_counter,
+        service_check_counter,
         instance_type,
         instances_included,
     ):
         super().__init__(check, connection, object_name, object_config, use_localized_counters, tags)
 
-        self.uptime_counter = uptime_counter
+        self.service_check_counter = service_check_counter
         self.instance_type = instance_type
         self.instance_service_check_name = f'{self.instance_type}_up'
-        self.instances_included = set(instances_included)
+        if isinstance(instances_included, dict):
+            self.instances_included = set(instances_included.get('include', []))
+        else:
+            self.instances_included = set(instances_included)
 
         # Resets during refreshes
         self.instances_unseen = set()
@@ -124,17 +135,22 @@ class CompatibilityPerfObject(PerfObject):
         return super()._instance_excluded(instance)
 
     def get_custom_transformers(self):
-        return {self.uptime_counter: self.__get_uptime_transformer}
+        return {self.service_check_counter: self.__get_service_check_transformer}
 
-    def __get_uptime_transformer(self, check, metric_name, modifiers):
+    def __get_service_check_transformer(self, check, metric_name, modifiers):
         gauge_method = check.gauge
         service_check_method = check.service_check
 
         def submit_uptime(value, tags=None):
+            # Submit the counter's value as a metric
             gauge_method(metric_name, value, tags=tags)
-            service_check_method(
-                self.instance_service_check_name, ServiceCheck.CRITICAL if value == 0 else ServiceCheck.OK, tags=tags
-            )
+
+            # Submit a service check
+            if self.instance_type == 'site':
+                status = site_service_check(value)
+            elif self.instance_type == 'app_pool':
+                status = app_pool_service_check(value)
+            service_check_method(self.instance_service_check_name, status, tags=tags)
 
         del check
         del modifiers

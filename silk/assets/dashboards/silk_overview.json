@@ -1,52 +1,50 @@
 {
   "title": "Silk - Overview",
-  "description": "",
+  "description": "This dashboard provides a high-level overview of your Silk Platform instances, so you can track throughput, latency, replication, io ops, and other metrics from all your servers and spot potential issues.\n\n\nFurther reading on monitoring Silk:\n- [Datadog's Silk integration docs](https://docs.datadoghq.com/integrations/silk/)\n- [Official Silk API documentation](https://github.com/silk-us/silk-sdp-api-docs)\n- [Silk Platform Overview](https://silk.us/platform-overview/)\n",
   "widgets": [
     {
       "id": 1469971046547818,
       "definition": {
-        "title": "New group",
-        "type": "group",
-        "banner_img": "/static/images/logos/silk_small.svg ",
+        "title": "",
+        "banner_img": "/static/images/logos/silk_large.svg",
         "show_title": false,
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
             "id": 4198239031394762,
             "definition": {
               "type": "note",
-              "content": "This dashboard provides a high-level overview of your Silk Platform instances, so you can track throughput, latency, replication, io ops, and other metrics from all your servers and spot potential issues.\n"
+              "content": "This dashboard provides a high-level overview of your Silk Platform instances, so you can track throughput, latency, replication, io ops, and other metrics from all your servers and spot potential issues.\n\n\nFurther reading on monitoring Silk:\n- [Datadog's Silk integration docs](https://docs.datadoghq.com/integrations/silk/)\n- [Official Silk API documentation](https://github.com/silk-us/silk-sdp-api-docs)\n- [Silk Platform Overview](https://silk.us/platform-overview/)\n",
+              "font_size": "16",
+              "has_padding": true
             },
             "layout": {
               "x": 0,
               "y": 0,
-              "width": 3,
+              "width": 4,
               "height": 4
             }
           },
           {
             "id": 8303942736007266,
             "definition": {
-              "title": "Check status",
+              "title": "Silk Hosts Status",
               "title_size": "16",
               "title_align": "left",
               "type": "check_status",
               "check": "silk.can_connect",
               "grouping": "cluster",
-              "group_by": [
-                "$silk_host",
-                "$system_name",
-                "$system_id"
-              ],
+              "group_by": [],
               "tags": [
-                "*"
+                "$silk_host"
               ]
             },
             "layout": {
-              "x": 3,
-              "y": 0,
-              "width": 3,
-              "height": 4
+              "x": 0,
+              "y": 4,
+              "width": 4,
+              "height": 3
             }
           }
         ]
@@ -54,17 +52,17 @@
       "layout": {
         "x": 0,
         "y": 0,
-        "width": 6,
-        "height": 7
+        "width": 4,
+        "height": 10
       }
     },
     {
       "id": 7496161841053540,
       "definition": {
-        "title": "Activity Summary",
-        "type": "group",
+        "title": "Silk Host Activity Summary",
         "background_color": "vivid_orange",
         "show_title": true,
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -100,13 +98,19 @@
               ],
               "autoscale": true,
               "custom_unit": "%",
-              "precision": 2
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              }
             },
             "layout": {
               "x": 0,
               "y": 0,
-              "width": 3,
-              "height": 2
+              "width": 4,
+              "height": 3
             }
           },
           {
@@ -142,13 +146,19 @@
               ],
               "autoscale": true,
               "custom_unit": "%",
-              "precision": 2
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              }
             },
             "layout": {
-              "x": 3,
+              "x": 4,
               "y": 0,
-              "width": 3,
-              "height": 2
+              "width": 4,
+              "height": 3
             }
           },
           {
@@ -184,13 +194,19 @@
               ],
               "autoscale": true,
               "custom_unit": "%",
-              "precision": 2
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              }
             },
             "layout": {
               "x": 0,
-              "y": 2,
-              "width": 3,
-              "height": 2
+              "y": 3,
+              "width": 4,
+              "height": 3
             }
           },
           {
@@ -226,72 +242,83 @@
               ],
               "autoscale": true,
               "custom_unit": "%",
-              "precision": 2
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              }
             },
             "layout": {
-              "x": 3,
-              "y": 2,
-              "width": 3,
-              "height": 2
+              "x": 4,
+              "y": 3,
+              "width": 4,
+              "height": 3
             }
           },
           {
             "id": 1909558225857630,
             "definition": {
-              "title": "Server state",
+              "title": "Silk Host Server State",
               "title_size": "16",
               "title_align": "left",
               "type": "check_status",
               "check": "silk.server.state",
               "grouping": "cluster",
               "group_by": [
-                "$system_name",
-                "$silk_host",
-                "$system_id"
+                "host",
+                "server_name",
+                "silk_host"
               ],
               "tags": [
-                "*"
+                "$server_name",
+                "$silk_host",
+                "$system_name",
+                "$system_id"
               ]
             },
             "layout": {
               "x": 0,
-              "y": 4,
-              "width": 3,
-              "height": 2
+              "y": 6,
+              "width": 4,
+              "height": 3
             }
           },
           {
             "id": 1464387879479190,
             "definition": {
-              "title": "System state",
+              "title": "Silk Host System State",
               "title_size": "16",
               "title_align": "left",
               "type": "check_status",
               "check": "silk.system.state",
               "grouping": "cluster",
               "group_by": [
-                "$silk_host",
-                "$system_name",
-                "$system_id"
+                "host",
+                "silk_host"
               ],
               "tags": [
-                "*"
+                "$system_name",
+                "$system_id",
+                "$silk_host",
+                "$server_name"
               ]
             },
             "layout": {
-              "x": 3,
-              "y": 4,
-              "width": 3,
-              "height": 2
+              "x": 4,
+              "y": 6,
+              "width": 4,
+              "height": 3
             }
           }
         ]
       },
       "layout": {
-        "x": 6,
+        "x": 4,
         "y": 0,
-        "width": 6,
-        "height": 7
+        "width": 8,
+        "height": 10
       }
     },
     {
@@ -329,7 +356,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.replication.system.logical_in{$silk_host,$system_name,$system_id} by {silk_host}",
+                      "query": "avg:silk.replication.system.logical_in{$silk_host,$system_name,$system_id} by {silk_host,system_name,system_id}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -350,7 +377,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.replication.system.logical_out{$silk_host,$system_name,$system_id} by {silk_host}",
+                      "query": "avg:silk.replication.system.logical_out{$silk_host,$system_name,$system_id} by {silk_host,system_id,system_name}",
                       "data_source": "metrics",
                       "name": "query0"
                     }
@@ -481,7 +508,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.replication.system.physical_in{$silk_host,$system_name,$system_id} by {silk_host}",
+                      "query": "avg:silk.replication.system.physical_in{$silk_host,$system_name,$system_id} by {silk_host,system_name,system_id}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -502,7 +529,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.replication.system.physical_out{$silk_host,$system_name,$system_id} by {silk_host}",
+                      "query": "avg:silk.replication.system.physical_out{$silk_host,$system_name,$system_id} by {silk_host,system_name,system_id}",
                       "data_source": "metrics",
                       "name": "query0"
                     }
@@ -611,7 +638,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 7,
+        "y": 10,
         "width": 12,
         "height": 5
       }
@@ -1311,9 +1338,19 @@
         "title": "Silk events",
         "title_size": "16",
         "title_align": "left",
-        "type": "event_stream",
-        "query": "source:silk",
-        "event_size": "s"
+        "time": {},
+        "requests": [
+          {
+            "query": {
+              "query_string": "source:silk",
+              "data_source": "event_stream",
+              "event_size": "s"
+            },
+            "columns": [],
+            "response_format": "event_list"
+          }
+        ],
+        "type": "list_stream"
       },
       "layout": {
         "x": 0,
@@ -1339,6 +1376,12 @@
     {
       "name": "system_id",
       "prefix": "system_id",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "server_name",
+      "prefix": "server_name",
       "available_values": [],
       "default": "*"
     }

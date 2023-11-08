@@ -5,21 +5,21 @@ import os
 
 import click
 import pluggy
-from datadog_checks.dev.tooling.commands.clean import clean
 from datadog_checks.dev.tooling.commands.create import create
-from datadog_checks.dev.tooling.commands.dep import dep
 from datadog_checks.dev.tooling.commands.run import run
-from datadog_checks.dev.tooling.commands.test import test
 
-from ddev.__about__ import __version__
+from ddev._version import __version__
 from ddev.cli.application import Application
 from ddev.cli.ci import ci
+from ddev.cli.clean import clean
 from ddev.cli.config import config
+from ddev.cli.dep import dep
 from ddev.cli.docs import docs
 from ddev.cli.env import env
 from ddev.cli.meta import meta
 from ddev.cli.release import release
 from ddev.cli.status import status
+from ddev.cli.test import test
 from ddev.cli.validate import validate
 from ddev.config.constants import AppEnvVars, ConfigEnvVars
 from ddev.plugin import specs
@@ -36,7 +36,7 @@ from ddev.utils.fs import Path
 @click.option(
     '--color/--no-color',
     default=None,
-    help='Whether or not to display colored output (default is auto-detection) [env vars: `DDEV_COLOR`/`NO_COLOR`]',
+    help='Whether or not to display colored output (default is auto-detection) [env vars: `FORCE_COLOR`/`NO_COLOR`]',
 )
 @click.option(
     '--interactive/--no-interactive',
@@ -118,13 +118,14 @@ def ddev(ctx: click.Context, core, extras, marketplace, agent, here, color, inte
     except OSError as e:  # no cov
         app.abort(f'Error loading configuration: {e}')
 
-    app.set_repo(core, extras, marketplace, agent, here)
-
     app.config.terminal.styles.parse_fields()
     errors = app.initialize_styles(app.config.terminal.styles.raw_data)
     if errors and color is not False and not app.quiet:  # no cov
         for error in errors:
             app.display_warning(error)
+
+    # Do this last
+    app.set_repo(core, extras, marketplace, agent, here)
 
     # TODO: remove this when the old CLI is gone
     app.initialize_old_cli()
@@ -144,6 +145,10 @@ ddev.add_command(status)
 ddev.add_command(test)
 ddev.add_command(validate)
 
+__management_command = os.environ.get('PYAPP_COMMAND_NAME', '')
+if __management_command:
+    ddev.add_command(click.Command(name=__management_command, help='Manage this application'))
+
 
 def main():  # no cov
     manager = pluggy.PluginManager('ddev')
@@ -152,7 +157,7 @@ def main():  # no cov
     manager.hook.register_commands()
 
     try:
-        return ddev(windows_expand_args=False)
+        return ddev(prog_name='ddev', windows_expand_args=False)
     except Exception:
         from rich.console import Console
 

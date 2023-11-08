@@ -16,9 +16,8 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::Monitoring",
-      "Category::Notification",
-      "Category::Network",
-      "Category::Autodiscovery"
+      "Category::Notifications",
+      "Category::Network"
     ]
   }},
   "assets": {{

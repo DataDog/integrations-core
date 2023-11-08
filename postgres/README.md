@@ -4,14 +4,13 @@
 
 ## Overview
 
-Get metrics from PostgreSQL in real time to:
+The Postgres integration provides health and performance metrics for your Postgres database in near real-time. Visualize these metrics with the provided dashboard and create monitors to alert your team on PostgreSQL states.
 
-- Visualize and monitor PostgreSQL states.
-- Receive notifications about PostgreSQL failovers and events.
+Enable [Database Monitoring][28] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, query explain plans, and blocking query insights.
 
 ## Setup
 
-<div class="alert alert-info">This page describes the Postgres Agent integration. If you are looking for the Database Monitoring product for Postgres, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
+<div class="alert alert-info">This page describes the standard Postgres Agent integration. If you are looking for the Database Monitoring product for Postgres, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
 
 ### Installation
 
@@ -19,9 +18,13 @@ The PostgreSQL check is packaged with the Agent. To start gathering your Postgre
 
 ### Configuration
 
+**Note**: To install Database Monitoring for PostgreSQL, select your hosting solution in the [Database Monitoring documentation][29] for instructions.
+
+Proceed with the following steps in this guide only if you are installing the standard integration alone.
+
 #### Prepare Postgres
 
-To get started with the PostgreSQL integration, create a read-only `datadog` user with proper access to your PostgreSQL server. Start `psql` on your PostgreSQL database.
+To get started with the standard PostgreSQL integration, create a read-only `datadog` user with proper access to your PostgreSQL server. Start `psql` on your PostgreSQL database.
 
 For PostgreSQL version 10 and above, run:
 
@@ -427,7 +430,7 @@ Additional helpful documentation, links, and articles:
 - [How to collect and monitor PostgreSQL data with Datadog][26]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/postgres/images/postgresql_dashboard.png
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/postgres/datadog_checks/postgres/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/tracing/send_traces/
@@ -453,3 +456,5 @@ Additional helpful documentation, links, and articles:
 [25]: https://www.datadoghq.com/blog/postgresql-monitoring-tools
 [26]: https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog
 [27]: https://docs.datadoghq.com/agent/docker/apm/
+[28]: https://docs.datadoghq.com/database_monitoring/
+[29]: https://docs.datadoghq.com/database_monitoring/#postgres

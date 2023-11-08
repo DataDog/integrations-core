@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
-from typing import Any, AnyStr, Sequence, Set, Tuple
+from typing import Any, AnyStr, Sequence, Set, Tuple  # noqa: F401
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.teradata.config_models.instance import Table
@@ -30,6 +30,9 @@ def create_tables_filter(tables):
 
     tables_to_collect = set()
     tables_to_exclude = set()
+
+    if tables is None:
+        return tables_to_collect, tables_to_exclude
 
     if isinstance(tables, tuple):
         tables_to_collect = set(tables)

@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-# flake8: noqa
+# ruff: noqa
 import json
 import os
 import shutil
@@ -10,7 +10,7 @@ import shutil
 import securesystemslib.settings
 securesystemslib.settings.SUBPROCESS_TIMEOUT = 60
 
-from securesystemslib.gpg.constants import GPG_COMMAND
+from securesystemslib.gpg.constants import gpg_command
 
 from in_toto import runlib
 from securesystemslib.interface import import_rsa_privatekey_from_file
@@ -110,7 +110,7 @@ def update_link_metadata(checks, core_workflow=True):
             products.append(dep_file)
 
     if core_workflow:
-        key_id = get_key_id(GPG_COMMAND)
+        key_id = get_key_id(gpg_command())
 
         # Find this latest signed link metadata file on disk.
         # NOTE: in-toto currently uses the first 8 characters of the signing keyId.

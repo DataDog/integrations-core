@@ -8,14 +8,17 @@ import os
 import re
 import warnings
 from base64 import urlsafe_b64encode
-from typing import Dict, List, Optional, Tuple
+from collections import namedtuple  # Not using dataclasses for Py2 compatibility
+from io import open
+from typing import Dict, List, Optional, Tuple  # noqa: F401
 
 import pytest
-from six import PY2
+from six import PY2, ensure_text
 
 from .._env import (
     E2E_FIXTURE_NAME,
     E2E_PARENT_PYTHON,
+    E2E_RESULT_FILE,
     SKIP_ENVIRONMENT,
     TESTING_PLUGIN,
     e2e_active,
@@ -26,6 +29,8 @@ from .._env import (
     replay_check_run,
     save_state,
     serialize_data,
+    set_up_env,
+    tear_down_env,
 )
 
 __aggregator = None
@@ -100,18 +105,11 @@ def dd_environment_runner(request):
     if isinstance(config, tuple):
         config, possible_metadata = config
 
-        # Support only defining the env_type for ease-of-use
+        # Support only defining the agent_type for ease-of-use
         if isinstance(possible_metadata, str):
-            metadata['env_type'] = possible_metadata
+            metadata['agent_type'] = possible_metadata
         else:
             metadata.update(possible_metadata)
-
-    # Default to Docker as that is the most common
-    metadata.setdefault('env_type', 'docker')
-
-    # Save any environment variables
-    metadata.setdefault('env_vars', {})
-    metadata['env_vars'].update(get_env_vars(raw=True))
 
     # Inject any log configuration
     logs_config = get_state('logs_config', [])
@@ -119,23 +117,50 @@ def dd_environment_runner(request):
         config = format_config(config)
         config['logs'] = logs_config
 
+    agent_type = metadata.get('agent_type')
+
     # Mount any volumes for Docker
-    if metadata['env_type'] == 'docker':
+    if agent_type == 'docker':
         docker_volumes = get_state('docker_volumes', [])
         if docker_volumes:
             metadata.setdefault('docker_volumes', []).extend(docker_volumes)
 
+    # Save any environment variables
+    metadata['e2e_env_vars'] = get_env_vars(raw=True)
+
     data = {'config': config, 'metadata': metadata}
 
-    message = serialize_data(data)
-
-    message = 'DDEV_E2E_START_MESSAGE {} DDEV_E2E_END_MESSAGE'.format(message)
+    message_template = 'DDEV_E2E_START_MESSAGE {} DDEV_E2E_END_MESSAGE'
 
     if testing_plugin:
-        return message
+        return message_template.format(serialize_data(data))
     else:  # no cov
         # Exit testing and pass data back up to command
-        pytest.exit(message)
+        if E2E_RESULT_FILE in os.environ:
+            with open(os.environ[E2E_RESULT_FILE], 'w', encoding='utf-8') as f:
+                f.write(ensure_text(json.dumps(data)))
+
+            # Rather than exiting we skip every test to avoid the following output:
+            # !!!!!!!!!! _pytest.outcomes.Exit: !!!!!!!!!!
+            pytest.skip()
+        else:
+            pytest.exit(message_template.format(serialize_data(data)))
+
+
+# Manipulate the output if we are spinning up or down an environment.
+#
+# Both of these conditions will be true during normal testing while only
+# one of them will be true when performing the logic.
+if not all([set_up_env(), tear_down_env()]):
+
+    def pytest_report_teststatus(report, config):
+        """
+        https://docs.pytest.org/en/stable/reference/reference.html#pytest.hookspec.pytest_report_teststatus
+        """
+        # Skipping every test displays an `s` for each even when using
+        # the minimum verbosity so we force zero output
+        if report.skipped:
+            return 'skipped', '', ''
 
 
 @pytest.fixture
@@ -160,10 +185,9 @@ def dd_agent_check(request, aggregator, datadog_agent):
             root = new_root
 
         python_path = os.environ[E2E_PARENT_PYTHON]
-        env = os.environ.get('TOX_ENV_NAME') or os.environ['HATCH_ENV_ACTIVE']
+        env = os.environ['HATCH_ENV_ACTIVE']
 
-        # TODO: switch to `ddev` when the old CLI is gone
-        check_command = [python_path, '-m', 'datadog_checks.dev', 'env', 'check', check, env, '--json']
+        check_command = [python_path, '-m', 'ddev', 'env', 'agent', check, env, 'check', '--json']
 
         if config:
             config = format_config(config)
@@ -172,7 +196,14 @@ def dd_agent_check(request, aggregator, datadog_agent):
             with open(config_file, 'wb') as f:
                 output = json.dumps(config).encode('utf-8')
                 f.write(output)
-            check_command.extend(['--config', config_file])
+            check_command.extend(['--config-file', config_file])
+
+        # TODO: remove these legacy flags when all usage of this fixture is migrated
+        if 'rate' in kwargs:
+            kwargs['check_rate'] = kwargs.pop('rate')
+
+        if 'times' in kwargs:
+            kwargs['check_times'] = kwargs.pop('times')
 
         for key, value in kwargs.items():
             if value is not False:
@@ -186,12 +217,13 @@ def dd_agent_check(request, aggregator, datadog_agent):
         matches = re.findall(r'((?:\{ \[|\[).*?\n(?:\} \]|\]))', result.stdout, re.DOTALL)
 
         if not matches:
-            raise ValueError(
-                '{}{}\nCould not find valid check output'.format(
-                    result.stdout,
-                    result.stderr,
-                )
-            )
+            message_parts = []
+            debug_result = run_command(['docker', 'logs', 'dd_{}_{}'.format(check, env)], capture=True)
+            if not debug_result.code:
+                message_parts.append(debug_result.stdout + debug_result.stderr)
+
+            message_parts.append(result.stdout + result.stderr)
+            raise ValueError('{}\nCould not find valid check output'.format('\n'.join(message_parts)))
 
         for raw_json in matches:
             try:
@@ -340,11 +372,19 @@ def mock_performance_objects(mocker, dd_default_hostname):
     return mock_perf_objects
 
 
+TestType = namedtuple('TestType', 'name description filepath_match')
+TEST_TYPES = (
+    TestType('unit', 'marker for unit tests', 'test_unit'),
+    TestType('integration', 'marker for integration tests', 'test_integration'),
+    TestType('e2e', 'marker for end-to-end tests', 'test_e2e'),
+)
+
+
 def pytest_configure(config):
     # pytest will emit warnings if these aren't registered ahead of time
-    config.addinivalue_line('markers', 'unit: marker for unit tests')
-    config.addinivalue_line('markers', 'integration: marker for integration tests')
-    config.addinivalue_line('markers', 'e2e: marker for end-to-end Datadog Agent tests')
+    for ttype in TEST_TYPES:
+        config.addinivalue_line('markers', '{}: {}'.format(ttype.name, ttype.description))
+
     config.addinivalue_line("markers", "latest_metrics: marker for verifying support of new metrics")
 
 
@@ -352,8 +392,9 @@ def pytest_addoption(parser):
     parser.addoption("--run-latest-metrics", action="store_true", default=False, help="run check_metrics tests")
 
     if PY2:
-        # Add a dummy memray options to make it possible to run memray with `ddev test --memray <integration>`
-        # only on py3 environments
+        # Add dummy memray options to make it possible to run memray with `ddev test --memray <integration>`
+        # in both py2 and 3 environments. In py2 the option is simply ignored, see pytest_collection_modifyitems.
+        # In py3 the option enables the memray plugin.
         parser.addoption("--memray", action="store_true", default=False, help="Dummy parameter for memray")
         parser.addoption(
             "--hide-memray-summary",
@@ -374,9 +415,19 @@ def pytest_collection_modifyitems(config, items):
     if PY2:
         for option in ("--memray",):
             if config.getoption(option):
-                warnings.warn("`{}` option ignored as it's not supported for py2 environments.".format(option))
+                warnings.warn(  # noqa: B028
+                    "`{}` option ignored as it's not supported for py2 environments.".format(option)
+                )  # noqa: B028, E501
 
     skip_latest_metrics = pytest.mark.skip(reason="need --run-latest-metrics option to run")
     for item in items:
         if "latest_metrics" in item.keywords:
             item.add_marker(skip_latest_metrics)
+
+        # In Python 2 we're using a much older version of pytest where the Item interface is different.
+        item_path = item.fspath if PY2 else item.path
+        if item_path is None:
+            continue
+        for ttype in TEST_TYPES:
+            if ttype.filepath_match in str(item_path):
+                item.add_marker(getattr(pytest.mark, ttype.name))

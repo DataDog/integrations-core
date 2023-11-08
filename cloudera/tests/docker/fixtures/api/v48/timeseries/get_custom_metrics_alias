@@ -1,0 +1,1035 @@
+{
+  "items": [
+    {
+      "timeSeries": [
+        {
+          "metadata": {
+            "metricName": "jvm_gc_rate",
+            "entityName": "cloudera_manager_server",
+            "startTime": "2023-01-18T16:23:02.215Z",
+            "endTime": "2023-01-18T16:28:02.215Z",
+            "attributes": {
+              "category": "CMSERVER",
+              "active": "true",
+              "entityName": "cloudera_manager_server"
+            },
+            "unitNumerators": [
+              "garbage collections"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT jvm_gc_rate AS \"foo\" WHERE entityName = \"cloudera_manager_server\" AND category = CMSERVER",
+            "alias": "foo",
+            "metricCollectionFrequencyMs": 60000,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2023-01-18T16:23:07.687Z",
+              "value": 0.09998000399920016,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:24:07.700Z",
+              "value": 0.08331528168896739,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:25:07.712Z",
+              "value": 0.09998000399920016,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:26:07.726Z",
+              "value": 0.09997667210984103,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:27:07.739Z",
+              "value": 0.09997833802676087,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "jvm_gc_rate",
+            "entityName": "DataNode (andrew-spark-cluster-worker0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2023-01-18T16:23:02.215Z",
+            "endTime": "2023-01-18T16:28:02.215Z",
+            "attributes": {
+              "serviceType": "HDFS",
+              "clusterDisplayName": "andrew-spark-cluster",
+              "hostId": "56005d085c452a34ec98183a6d69e3ef",
+              "active": "true",
+              "serviceDisplayName": "hdfs",
+              "serviceName": "hdfs",
+              "roleType": "DATANODE",
+              "version": "CDH 7.2.15",
+              "hostname": "andrew-spark-cluster-worker0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hdfs-DATANODE-407c856fd34d6e077e49fa6a4f01d458",
+              "clusterName": "andrew-spark-cluster",
+              "roleName": "hdfs-DATANODE-407c856fd34d6e077e49fa6a4f01d458",
+              "roleConfigGroup": "DataNode Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "garbage collections"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT jvm_gc_rate AS \"foo\" WHERE entityName = \"hdfs-DATANODE-407c856fd34d6e077e49fa6a4f01d458\" AND category = ROLE",
+            "alias": "foo",
+            "metricCollectionFrequencyMs": 60000,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2023-01-18T16:23:59.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:24:59.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:25:59.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:27:00.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:27:59.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "jvm_gc_rate",
+            "entityName": "SecondaryNameNode (andrew-spark-cluster-master0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2023-01-18T16:23:02.215Z",
+            "endTime": "2023-01-18T16:28:02.215Z",
+            "attributes": {
+              "serviceType": "HDFS",
+              "clusterDisplayName": "andrew-spark-cluster",
+              "hostId": "3a3fc98111c5d68d04e9b24149098904",
+              "active": "true",
+              "serviceDisplayName": "hdfs",
+              "serviceName": "hdfs",
+              "roleType": "SECONDARYNAMENODE",
+              "version": "CDH 7.2.15",
+              "hostname": "andrew-spark-cluster-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hdfs-SECONDARYNAMENODE-b8bd3ef8d544e185d4230afe2b56f85b",
+              "clusterName": "andrew-spark-cluster",
+              "roleName": "hdfs-SECONDARYNAMENODE-b8bd3ef8d544e185d4230afe2b56f85b",
+              "roleConfigGroup": "SecondaryNameNode Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "garbage collections"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT jvm_gc_rate AS \"foo\" WHERE entityName = \"hdfs-SECONDARYNAMENODE-b8bd3ef8d544e185d4230afe2b56f85b\" AND category = ROLE",
+            "alias": "foo",
+            "metricCollectionFrequencyMs": 60000,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2023-01-18T16:23:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:24:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:25:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:26:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:27:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "jvm_gc_rate",
+            "entityName": "Event Server (andrew-spark-cluster-master0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2023-01-18T16:23:02.215Z",
+            "endTime": "2023-01-18T16:28:02.215Z",
+            "attributes": {
+              "serviceType": "MGMT",
+              "hostname": "andrew-spark-cluster-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "EVENTSERVER",
+              "roleName": "EVENTSERVER",
+              "hostId": "3a3fc98111c5d68d04e9b24149098904",
+              "roleConfigGroup": "Event Server Default Group",
+              "active": "true",
+              "serviceDisplayName": "MGMT",
+              "serviceName": "MGMT",
+              "roleType": "EVENTSERVER",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "garbage collections"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT jvm_gc_rate AS \"foo\" WHERE entityName = \"EVENTSERVER\" AND category = ROLE",
+            "alias": "foo",
+            "metricCollectionFrequencyMs": 60000,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2023-01-18T16:23:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:24:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:25:57.000Z",
+              "value": 0.016666666666666666,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:26:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:27:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "jvm_gc_rate",
+            "entityName": "NodeManager (andrew-spark-cluster-worker0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2023-01-18T16:23:02.215Z",
+            "endTime": "2023-01-18T16:28:02.215Z",
+            "attributes": {
+              "serviceType": "YARN",
+              "clusterDisplayName": "andrew-spark-cluster",
+              "hostId": "56005d085c452a34ec98183a6d69e3ef",
+              "active": "true",
+              "serviceDisplayName": "yarn",
+              "serviceName": "yarn",
+              "roleType": "NODEMANAGER",
+              "version": "CDH 7.2.15",
+              "hostname": "andrew-spark-cluster-worker0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "yarn-NODEMANAGER-407c856fd34d6e077e49fa6a4f01d458",
+              "clusterName": "andrew-spark-cluster",
+              "roleName": "yarn-NODEMANAGER-407c856fd34d6e077e49fa6a4f01d458",
+              "roleConfigGroup": "yarn-NODEMANAGER-WORKER",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "garbage collections"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT jvm_gc_rate AS \"foo\" WHERE entityName = \"yarn-NODEMANAGER-407c856fd34d6e077e49fa6a4f01d458\" AND category = ROLE",
+            "alias": "foo",
+            "metricCollectionFrequencyMs": 60000,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2023-01-18T16:24:00.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:25:00.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:26:00.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:27:00.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:28:00.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "jvm_gc_rate",
+            "entityName": "Server (andrew-spark-cluster-master0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2023-01-18T16:23:02.215Z",
+            "endTime": "2023-01-18T16:28:02.215Z",
+            "attributes": {
+              "serviceType": "ZOOKEEPER",
+              "clusterDisplayName": "andrew-spark-cluster",
+              "hostId": "3a3fc98111c5d68d04e9b24149098904",
+              "active": "true",
+              "serviceDisplayName": "ZooKeeper",
+              "serviceName": "zookeeper-4b99",
+              "roleType": "SERVER",
+              "version": "CDH 7.2.15",
+              "hostname": "andrew-spark-cluster-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "zookeeper-4b99-SERVER-b8bd3ef8d544e185d4230afe2b56f85b",
+              "clusterName": "andrew-spark-cluster",
+              "roleName": "zookeeper-4b99-SERVER-b8bd3ef8d544e185d4230afe2b56f85b",
+              "roleConfigGroup": "Server Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "garbage collections"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT jvm_gc_rate AS \"foo\" WHERE entityName = \"zookeeper-4b99-SERVER-b8bd3ef8d544e185d4230afe2b56f85b\" AND category = ROLE",
+            "alias": "foo",
+            "metricCollectionFrequencyMs": 60000,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2023-01-18T16:23:56.810Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:24:56.812Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:26:01.813Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:27:06.813Z",
+              "value": 0,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "jvm_gc_rate",
+            "entityName": "JobHistory Server (andrew-spark-cluster-master0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2023-01-18T16:23:02.215Z",
+            "endTime": "2023-01-18T16:28:02.215Z",
+            "attributes": {
+              "serviceType": "YARN",
+              "clusterDisplayName": "andrew-spark-cluster",
+              "hostId": "3a3fc98111c5d68d04e9b24149098904",
+              "active": "true",
+              "serviceDisplayName": "yarn",
+              "serviceName": "yarn",
+              "roleType": "JOBHISTORY",
+              "version": "CDH 7.2.15",
+              "hostname": "andrew-spark-cluster-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "yarn-JOBHISTORY-b8bd3ef8d544e185d4230afe2b56f85b",
+              "clusterName": "andrew-spark-cluster",
+              "roleName": "yarn-JOBHISTORY-b8bd3ef8d544e185d4230afe2b56f85b",
+              "roleConfigGroup": "JobHistory Server Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "garbage collections"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT jvm_gc_rate AS \"foo\" WHERE entityName = \"yarn-JOBHISTORY-b8bd3ef8d544e185d4230afe2b56f85b\" AND category = ROLE",
+            "alias": "foo",
+            "metricCollectionFrequencyMs": 60000,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2023-01-18T16:23:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:24:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:25:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:26:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:27:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "jvm_gc_rate",
+            "entityName": "NameNode (andrew-spark-cluster-master0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2023-01-18T16:23:02.215Z",
+            "endTime": "2023-01-18T16:28:02.215Z",
+            "attributes": {
+              "serviceType": "HDFS",
+              "clusterDisplayName": "andrew-spark-cluster",
+              "hostId": "3a3fc98111c5d68d04e9b24149098904",
+              "active": "true",
+              "serviceDisplayName": "hdfs",
+              "serviceName": "hdfs",
+              "roleType": "NAMENODE",
+              "version": "CDH 7.2.15",
+              "hostname": "andrew-spark-cluster-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hdfs-NAMENODE-b8bd3ef8d544e185d4230afe2b56f85b",
+              "clusterName": "andrew-spark-cluster",
+              "roleName": "hdfs-NAMENODE-b8bd3ef8d544e185d4230afe2b56f85b",
+              "roleConfigGroup": "NameNode Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "garbage collections"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT jvm_gc_rate AS \"foo\" WHERE entityName = \"hdfs-NAMENODE-b8bd3ef8d544e185d4230afe2b56f85b\" AND category = ROLE",
+            "alias": "foo",
+            "metricCollectionFrequencyMs": 60000,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2023-01-18T16:23:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:24:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:25:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:26:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:27:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "jvm_gc_rate",
+            "entityName": "NodeManager (andrew-spark-cluster-worker2.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2023-01-18T16:23:02.215Z",
+            "endTime": "2023-01-18T16:28:02.215Z",
+            "attributes": {
+              "serviceType": "YARN",
+              "clusterDisplayName": "andrew-spark-cluster",
+              "hostId": "4b5b9745211ca82576a7de5c46343c70",
+              "active": "true",
+              "serviceDisplayName": "yarn",
+              "serviceName": "yarn",
+              "roleType": "NODEMANAGER",
+              "version": "CDH 7.2.15",
+              "hostname": "andrew-spark-cluster-worker2.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "yarn-NODEMANAGER-bdb2b49be899d470df4ec5b3ce292f9f",
+              "clusterName": "andrew-spark-cluster",
+              "roleName": "yarn-NODEMANAGER-bdb2b49be899d470df4ec5b3ce292f9f",
+              "roleConfigGroup": "yarn-NODEMANAGER-WORKER",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "garbage collections"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT jvm_gc_rate AS \"foo\" WHERE entityName = \"yarn-NODEMANAGER-bdb2b49be899d470df4ec5b3ce292f9f\" AND category = ROLE",
+            "alias": "foo",
+            "metricCollectionFrequencyMs": 60000,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2023-01-18T16:24:01.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:25:01.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:26:01.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:27:01.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:28:01.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "jvm_gc_rate",
+            "entityName": "NodeManager (andrew-spark-cluster-worker1.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2023-01-18T16:23:02.215Z",
+            "endTime": "2023-01-18T16:28:02.215Z",
+            "attributes": {
+              "serviceType": "YARN",
+              "clusterDisplayName": "andrew-spark-cluster",
+              "hostId": "4bbce889876e308f7783c260c0993ab3",
+              "active": "true",
+              "serviceDisplayName": "yarn",
+              "serviceName": "yarn",
+              "roleType": "NODEMANAGER",
+              "version": "CDH 7.2.15",
+              "hostname": "andrew-spark-cluster-worker1.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "yarn-NODEMANAGER-227209ef9c52153b6f4c48381c967c4c",
+              "clusterName": "andrew-spark-cluster",
+              "roleName": "yarn-NODEMANAGER-227209ef9c52153b6f4c48381c967c4c",
+              "roleConfigGroup": "yarn-NODEMANAGER-WORKER",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "garbage collections"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT jvm_gc_rate AS \"foo\" WHERE entityName = \"yarn-NODEMANAGER-227209ef9c52153b6f4c48381c967c4c\" AND category = ROLE",
+            "alias": "foo",
+            "metricCollectionFrequencyMs": 60000,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2023-01-18T16:24:01.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:25:01.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:26:01.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:27:01.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:28:01.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "jvm_gc_rate",
+            "entityName": "DataNode (andrew-spark-cluster-worker2.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2023-01-18T16:23:02.215Z",
+            "endTime": "2023-01-18T16:28:02.215Z",
+            "attributes": {
+              "serviceType": "HDFS",
+              "clusterDisplayName": "andrew-spark-cluster",
+              "hostId": "4b5b9745211ca82576a7de5c46343c70",
+              "active": "true",
+              "serviceDisplayName": "hdfs",
+              "serviceName": "hdfs",
+              "roleType": "DATANODE",
+              "version": "CDH 7.2.15",
+              "hostname": "andrew-spark-cluster-worker2.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hdfs-DATANODE-bdb2b49be899d470df4ec5b3ce292f9f",
+              "clusterName": "andrew-spark-cluster",
+              "roleName": "hdfs-DATANODE-bdb2b49be899d470df4ec5b3ce292f9f",
+              "roleConfigGroup": "DataNode Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "garbage collections"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT jvm_gc_rate AS \"foo\" WHERE entityName = \"hdfs-DATANODE-bdb2b49be899d470df4ec5b3ce292f9f\" AND category = ROLE",
+            "alias": "foo",
+            "metricCollectionFrequencyMs": 60000,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2023-01-18T16:24:01.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:25:01.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:26:01.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:27:01.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:28:01.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "jvm_gc_rate",
+            "entityName": "DataNode (andrew-spark-cluster-worker1.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2023-01-18T16:23:02.215Z",
+            "endTime": "2023-01-18T16:28:02.215Z",
+            "attributes": {
+              "serviceType": "HDFS",
+              "clusterDisplayName": "andrew-spark-cluster",
+              "hostId": "4bbce889876e308f7783c260c0993ab3",
+              "active": "true",
+              "serviceDisplayName": "hdfs",
+              "serviceName": "hdfs",
+              "roleType": "DATANODE",
+              "version": "CDH 7.2.15",
+              "hostname": "andrew-spark-cluster-worker1.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hdfs-DATANODE-227209ef9c52153b6f4c48381c967c4c",
+              "clusterName": "andrew-spark-cluster",
+              "roleName": "hdfs-DATANODE-227209ef9c52153b6f4c48381c967c4c",
+              "roleConfigGroup": "DataNode Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "garbage collections"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT jvm_gc_rate AS \"foo\" WHERE entityName = \"hdfs-DATANODE-227209ef9c52153b6f4c48381c967c4c\" AND category = ROLE",
+            "alias": "foo",
+            "metricCollectionFrequencyMs": 60000,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2023-01-18T16:24:01.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:25:01.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:26:01.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:27:01.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:28:01.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "jvm_gc_rate",
+            "entityName": "Telemetry Publisher (andrew-spark-cluster-master0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2023-01-18T16:23:02.215Z",
+            "endTime": "2023-01-18T16:28:02.215Z",
+            "attributes": {
+              "serviceType": "MGMT",
+              "hostname": "andrew-spark-cluster-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "TELEMETRYPUBLISHER",
+              "roleName": "TELEMETRYPUBLISHER",
+              "hostId": "3a3fc98111c5d68d04e9b24149098904",
+              "roleConfigGroup": "Telemetry Publisher Default Group",
+              "active": "true",
+              "serviceDisplayName": "MGMT",
+              "serviceName": "MGMT",
+              "roleType": "TELEMETRYPUBLISHER",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "garbage collections"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT jvm_gc_rate AS \"foo\" WHERE entityName = \"TELEMETRYPUBLISHER\" AND category = ROLE",
+            "alias": "foo",
+            "metricCollectionFrequencyMs": 60000,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2023-01-18T16:23:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:24:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:25:57.000Z",
+              "value": 0.016666666666666666,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:26:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:27:57.000Z",
+              "value": 0.016666666666666666,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "jvm_gc_rate",
+            "entityName": "ResourceManager (andrew-spark-cluster-master0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2023-01-18T16:23:02.215Z",
+            "endTime": "2023-01-18T16:28:02.215Z",
+            "attributes": {
+              "serviceType": "YARN",
+              "clusterDisplayName": "andrew-spark-cluster",
+              "hostId": "3a3fc98111c5d68d04e9b24149098904",
+              "active": "true",
+              "serviceDisplayName": "yarn",
+              "serviceName": "yarn",
+              "roleType": "RESOURCEMANAGER",
+              "version": "CDH 7.2.15",
+              "hostname": "andrew-spark-cluster-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "yarn-RESOURCEMANAGER-b8bd3ef8d544e185d4230afe2b56f85b",
+              "clusterName": "andrew-spark-cluster",
+              "roleName": "yarn-RESOURCEMANAGER-b8bd3ef8d544e185d4230afe2b56f85b",
+              "roleConfigGroup": "ResourceManager Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "garbage collections"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT jvm_gc_rate AS \"foo\" WHERE entityName = \"yarn-RESOURCEMANAGER-b8bd3ef8d544e185d4230afe2b56f85b\" AND category = ROLE",
+            "alias": "foo",
+            "metricCollectionFrequencyMs": 60000,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2023-01-18T16:23:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:24:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:25:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:26:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:27:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "jvm_gc_rate",
+            "entityName": "Host Monitor (andrew-spark-cluster-master0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2023-01-18T16:23:02.215Z",
+            "endTime": "2023-01-18T16:28:02.215Z",
+            "attributes": {
+              "serviceType": "MGMT",
+              "hostname": "andrew-spark-cluster-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "HOSTMONITOR",
+              "roleName": "HOSTMONITOR",
+              "hostId": "3a3fc98111c5d68d04e9b24149098904",
+              "roleConfigGroup": "Host Monitor Default Group",
+              "active": "true",
+              "serviceDisplayName": "MGMT",
+              "serviceName": "MGMT",
+              "roleType": "HOSTMONITOR",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "garbage collections"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT jvm_gc_rate AS \"foo\" WHERE entityName = \"HOSTMONITOR\" AND category = ROLE",
+            "alias": "foo",
+            "metricCollectionFrequencyMs": 60000,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2023-01-18T16:23:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:24:57.000Z",
+              "value": 0.03333333333333333,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:25:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:26:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:27:57.000Z",
+              "value": 0.016666666666666666,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "jvm_gc_rate",
+            "entityName": "NodeManager (andrew-spark-cluster-compute0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2023-01-18T16:23:02.215Z",
+            "endTime": "2023-01-18T16:28:02.215Z",
+            "attributes": {
+              "serviceType": "YARN",
+              "clusterDisplayName": "andrew-spark-cluster",
+              "hostId": "f2c4d49921e8d19fb41e203378af9525",
+              "active": "true",
+              "serviceDisplayName": "yarn",
+              "serviceName": "yarn",
+              "roleType": "NODEMANAGER",
+              "version": "CDH 7.2.15",
+              "hostname": "andrew-spark-cluster-compute0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "yarn-NODEMANAGER-5cba0bcd0bb4fc8281cb1141fdd3c8ba",
+              "clusterName": "andrew-spark-cluster",
+              "roleName": "yarn-NODEMANAGER-5cba0bcd0bb4fc8281cb1141fdd3c8ba",
+              "roleConfigGroup": "yarn-NODEMANAGER-COMPUTE",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "garbage collections"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT jvm_gc_rate AS \"foo\" WHERE entityName = \"yarn-NODEMANAGER-5cba0bcd0bb4fc8281cb1141fdd3c8ba\" AND category = ROLE",
+            "alias": "foo",
+            "metricCollectionFrequencyMs": 60000,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2023-01-18T16:24:00.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:25:00.000Z",
+              "value": 0.016666666666666666,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:26:00.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:27:00.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:28:00.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "jvm_gc_rate",
+            "entityName": "Service Monitor (andrew-spark-cluster-master0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2023-01-18T16:23:02.215Z",
+            "endTime": "2023-01-18T16:28:02.215Z",
+            "attributes": {
+              "serviceType": "MGMT",
+              "hostname": "andrew-spark-cluster-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "SERVICEMONITOR",
+              "roleName": "SERVICEMONITOR",
+              "hostId": "3a3fc98111c5d68d04e9b24149098904",
+              "roleConfigGroup": "Service Monitor Default Group",
+              "active": "true",
+              "serviceDisplayName": "MGMT",
+              "serviceName": "MGMT",
+              "roleType": "SERVICEMONITOR",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "garbage collections"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT jvm_gc_rate AS \"foo\" WHERE entityName = \"SERVICEMONITOR\" AND category = ROLE",
+            "alias": "foo",
+            "metricCollectionFrequencyMs": 60000,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2023-01-18T16:23:57.000Z",
+              "value": 0.016666666666666666,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:24:57.000Z",
+              "value": 0.03333333333333333,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:25:57.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:26:57.000Z",
+              "value": 0.016666666666666666,
+              "type": "SAMPLE"
+            },
+            {
+              "timestamp": "2023-01-18T16:27:57.000Z",
+              "value": 0.016666666666666666,
+              "type": "SAMPLE"
+            }
+          ]
+        }
+      ],
+      "warnings": [],
+      "timeSeriesQuery": "select jvm_gc_rate as foo"
+    }
+  ]
+}

@@ -198,7 +198,7 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 Need help? Contact [Datadog support][16].
 
 [1]: https://www.envoyproxy.io
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://istio.io
 [4]: https://istio.io/latest/docs/ops/deployment/requirements/#ports-used-by-istio
 [5]: https://www.envoyproxy.io/docs/envoy/latest/operations/admin

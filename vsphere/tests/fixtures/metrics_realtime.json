@@ -106,6 +106,14 @@
     {
         "entity": "VM4-2",
         "value": [
+            19955
+        ],
+        "counterId": 18,
+        "instance": ""
+    },
+    {
+        "entity": "VM4-2",
+        "value": [
             299
         ],
         "counterId": 23,
@@ -1234,6 +1242,14 @@
     {
         "entity": "VM4-20",
         "value": [
+            19955
+        ],
+        "counterId": 18,
+        "instance": ""
+    },
+    {
+        "entity": "VM4-20",
+        "value": [
             99
         ],
         "counterId": 23,
@@ -2309,6 +2325,14 @@
             1761
         ],
         "counterId": 14,
+        "instance": ""
+    },
+    {
+        "entity": "VM4-4",
+        "value": [
+            19955
+        ],
+        "counterId": 18,
         "instance": ""
     },
     {
@@ -3730,6 +3754,14 @@
     {
         "entity": "VM4-5",
         "value": [
+            19955
+        ],
+        "counterId": 18,
+        "instance": ""
+    },
+    {
+        "entity": "VM4-5",
+        "value": [
             99
         ],
         "counterId": 23,
@@ -4805,6 +4837,14 @@
             2539
         ],
         "counterId": 14,
+        "instance": ""
+    },
+    {
+        "entity": "VM4-3",
+        "value": [
+            19955
+        ],
+        "counterId": 18,
         "instance": ""
     },
     {
@@ -5890,6 +5930,14 @@
     {
         "entity": "VM4-12",
         "value": [
+            19955
+        ],
+        "counterId": 18,
+        "instance": ""
+    },
+    {
+        "entity": "VM4-12",
+        "value": [
             399
         ],
         "counterId": 23,
@@ -6501,6 +6549,14 @@
             451
         ],
         "counterId": 14,
+        "instance": ""
+    },
+    {
+        "entity": "$VM5",
+        "value": [
+            19955
+        ],
+        "counterId": 18,
         "instance": ""
     },
     {
@@ -7621,6 +7677,14 @@
             819
         ],
         "counterId": 14,
+        "instance": ""
+    },
+    {
+        "entity": "VM3-1",
+        "value": [
+            19955
+        ],
+        "counterId": 18,
         "instance": ""
     },
     {
@@ -8749,6 +8813,14 @@
             762
         ],
         "counterId": 14,
+        "instance": ""
+    },
+    {
+        "entity": "$VM3-2",
+        "value": [
+            19955
+        ],
+        "counterId": 18,
         "instance": ""
     },
     {
@@ -10226,6 +10298,14 @@
     {
         "entity": "10.0.0.103",
         "value": [
+            4957
+        ],
+        "counterId": 111,
+        "instance": ""
+    },
+    {
+        "entity": "10.0.0.103",
+        "value": [
             70
         ],
         "counterId": 124,
@@ -11626,6 +11706,14 @@
     {
         "entity": "10.0.0.104",
         "value": [
+            4957
+        ],
+        "counterId": 111,
+        "instance": ""
+    },
+    {
+        "entity": "10.0.0.104",
+        "value": [
             99
         ],
         "counterId": 124,
@@ -12866,6 +12954,14 @@
     {
         "entity": "VM4-11",
         "value": [
+            19955
+        ],
+        "counterId": 18,
+        "instance": ""
+    },
+    {
+        "entity": "VM4-11",
+        "value": [
             99
         ],
         "counterId": 23,
@@ -13946,6 +14042,14 @@
     {
         "entity": "VM4-6",
         "value": [
+            19955
+        ],
+        "counterId": 18,
+        "instance": ""
+    },
+    {
+        "entity": "VM4-6",
+        "value": [
             199
         ],
         "counterId": 23,
@@ -15021,6 +15125,14 @@
             2645
         ],
         "counterId": 14,
+        "instance": ""
+    },
+    {
+        "entity": "VM4-13",
+        "value": [
+            19955
+        ],
+        "counterId": 18,
         "instance": ""
     },
     {
@@ -16210,6 +16322,14 @@
     {
         "entity": "VM4-7",
         "value": [
+            19955
+        ],
+        "counterId": 18,
+        "instance": ""
+    },
+    {
+        "entity": "VM4-7",
+        "value": [
             199
         ],
         "counterId": 23,
@@ -17285,6 +17405,14 @@
             1774
         ],
         "counterId": 14,
+        "instance": ""
+    },
+    {
+        "entity": "VM4-17",
+        "value": [
+            19955
+        ],
+        "counterId": 18,
         "instance": ""
     },
     {
@@ -18370,6 +18498,14 @@
     {
         "entity": "VM4-10",
         "value": [
+            19955
+        ],
+        "counterId": 18,
+        "instance": ""
+    },
+    {
+        "entity": "VM4-10",
+        "value": [
             99
         ],
         "counterId": 23,
@@ -18821,6 +18957,14 @@
             2676
         ],
         "counterId": 14,
+        "instance": ""
+    },
+    {
+        "entity": "VM4-14",
+        "value": [
+            19955
+        ],
+        "counterId": 18,
         "instance": ""
     },
     {
@@ -19906,6 +20050,14 @@
     {
         "entity": "VM4-9",
         "value": [
+            19955
+        ],
+        "counterId": 18,
+        "instance": ""
+    },
+    {
+        "entity": "VM4-9",
+        "value": [
             99
         ],
         "counterId": 23,
@@ -20981,6 +21133,14 @@
             1799
         ],
         "counterId": 14,
+        "instance": ""
+    },
+    {
+        "entity": "VM4-15",
+        "value": [
+            19955
+        ],
+        "counterId": 18,
         "instance": ""
     },
     {
@@ -22330,6 +22490,14 @@
     {
         "entity": "VM4-1",
         "value": [
+            19955
+        ],
+        "counterId": 18,
+        "instance": ""
+    },
+    {
+        "entity": "VM4-1",
+        "value": [
             499
         ],
         "counterId": 23,
@@ -23474,6 +23642,14 @@
     {
         "entity": "VM4-19",
         "value": [
+            19955
+        ],
+        "counterId": 18,
+        "instance": ""
+    },
+    {
+        "entity": "VM4-19",
+        "value": [
             99
         ],
         "counterId": 23,
@@ -24549,6 +24725,14 @@
             1744
         ],
         "counterId": 14,
+        "instance": ""
+    },
+    {
+        "entity": "VM4-18",
+        "value": [
+            19955
+        ],
+        "counterId": 18,
         "instance": ""
     },
     {
@@ -25834,6 +26018,14 @@
     {
         "entity": "VM4-16",
         "value": [
+            19955
+        ],
+        "counterId": 18,
+        "instance": ""
+    },
+    {
+        "entity": "VM4-16",
+        "value": [
             99
         ],
         "counterId": 23,
@@ -26909,6 +27101,14 @@
             2529
         ],
         "counterId": 14,
+        "instance": ""
+    },
+    {
+        "entity": "VM4-8",
+        "value": [
+            19955
+        ],
+        "counterId": 18,
         "instance": ""
     },
     {

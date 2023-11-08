@@ -69,7 +69,11 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 
-        if PY2 or is_affirmative(instance.get('legacy_mode', True)):
+        # default to legacy mode for configuration backwards compatibility
+        init_config_legacy_mode = is_affirmative(init_config.get('legacy_mode', True))
+        # If legacy_mode is unset for an instance, default to the init_config option
+        instance_legacy_mode = is_affirmative(instance.get('legacy_mode', init_config_legacy_mode))
+        if PY2 or instance_legacy_mode:
             return Win32EventLogWMI(name, init_config, instances)
         else:
             return super(Win32EventLogCheck, cls).__new__(cls)
@@ -139,7 +143,7 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
             event_payload = {
                 'source_type_name': self.SOURCE_TYPE_NAME,
                 'priority': self._event_priority,
-                'tags': list(self.config.tags),
+                'tags': list(self.config.tags) if self.config.tags is not None else [],
             }
 
             # As seen in every collector, before using members of the enum you need to check for existence. See:

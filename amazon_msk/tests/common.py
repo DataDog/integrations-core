@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+from datadog_checks.amazon_msk.metrics import JMX_METRICS_MAP, JMX_METRICS_OVERRIDES
 from datadog_checks.dev import get_docker_hostname, get_here
 from datadog_checks.dev.utils import read_file
 
@@ -54,6 +55,25 @@ METRICS_FROM_LABELS = [
     'kafka.server.replica_manager.UnderReplicatedPartitions',
 ]
 
+METRICS_AS_GAUGE_AND_COUNT = [
+    "kafka.controller.ControllerChannelManager.Count",
+    "kafka.controller.ControllerEventManager.Count",
+    "kafka.controller.ControllerStats.Count",
+    "kafka.network.Acceptor.Count",
+    "kafka.network.RequestMetrics.Count",
+    "kafka.security.SimpleAclAuthorizer.Count",
+    "kafka.server.BrokerTopicMetrics.Count",
+    "kafka.server.DelayedFetchMetrics.Count",
+    "kafka.server.FetchSessionCache.Count",
+    "kafka.server.FetcherStats.Count",
+    "kafka.server.KafkaRequestHandlerPool.Count",
+    "kafka.server.ReplicaManager.Count",
+    "kafka.server.ReplicaManager.Value",
+    "kafka.server.SessionExpireListener.Count",
+    "kafka.server.ZooKeeperClientMetrics.Count",
+    "kafka.utils.Throttler.Count",
+]
+
 
 def get_metrics_fixture_path(exporter_type):
     return os.path.join(HERE, 'docker', 'exporter_{}'.format(exporter_type), 'metrics')
@@ -65,3 +85,24 @@ def read_api_fixture():
 
 def read_e2e_api_fixture():
     return read_file(os.path.join(HERE, 'mock_boto3', 'boto3', 'list_nodes.json'))
+
+
+def assert_jmx_metrics(aggregator, tags, is_enabled=True):
+    expected_metrics = set()
+
+    for raw_metric_name, metric_name in JMX_METRICS_MAP.items():
+        if raw_metric_name.endswith('_total') and raw_metric_name not in JMX_METRICS_OVERRIDES:
+            expected_metrics.add('{}.count'.format(metric_name[:-6]))
+        else:
+            expected_metrics.add(metric_name)
+
+    expected_metrics.update(METRICS_AS_GAUGE_AND_COUNT + [m + ".count" for m in METRICS_AS_GAUGE_AND_COUNT])
+    expected_metrics.update(METRICS_FROM_LABELS + [m + ".count" for m in METRICS_FROM_LABELS])
+
+    for metric in sorted(expected_metrics):
+        metric = 'aws.msk.{}'.format(metric)
+        if is_enabled:
+            for tag in tags:
+                aggregator.assert_metric_has_tag(metric, tag)
+        else:
+            aggregator.assert_metric(metric, count=0)

@@ -7,7 +7,7 @@ import decimal
 import time
 from contextlib import closing
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List  # noqa: F401
 
 import pymysql
 
@@ -96,7 +96,6 @@ def agent_check_getter(self):
 
 
 class MySQLActivity(DBMAsyncJob):
-
     DEFAULT_COLLECTION_INTERVAL = 10
     MAX_PAYLOAD_BYTES = 19e6
 
@@ -158,16 +157,18 @@ class MySQLActivity(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_activity(self):
         # type: () -> None
+        # do not emit any dd.internal metrics for DBM specific check code
+        tags = [t for t in self._tags if not t.startswith('dd.internal')]
         with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
             rows = self._get_activity(cursor)
             rows = self._normalize_rows(rows)
-            event = self._create_activity_event(rows)
+            event = self._create_activity_event(rows, tags)
             payload = json.dumps(event, default=self._json_event_encoding)
             self._check.database_monitoring_query_activity(payload)
             self._check.histogram(
                 "dd.mysql.activity.collect_activity.payload_size",
                 len(payload),
-                tags=self._tags + self._check._get_debug_tags(),
+                tags=tags + self._check._get_debug_tags(),
             )
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
@@ -211,6 +212,12 @@ class MySQLActivity(DBMAsyncJob):
             else:
                 self._log.debug("Failed to obfuscate query | err=[%s]", e)
             row["sql_text"] = "ERROR: failed to obfuscate"
+            self._check.count(
+                "dd.mysql.obfuscation.error",
+                1,
+                tags=self.tags + ["error:{}".format(type(e)), "error_msg:{}".format(e)] + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
         return row
 
     @staticmethod
@@ -235,7 +242,7 @@ class MySQLActivity(DBMAsyncJob):
         # type: (Dict[str]) -> int
         return len(str(row))
 
-    def _create_activity_event(self, active_sessions):
+    def _create_activity_event(self, active_sessions, tags):
         # type: (List[Dict[str]], List[Dict[str]]) -> Dict[str]
         return {
             "host": self._check.resolved_hostname,
@@ -243,8 +250,9 @@ class MySQLActivity(DBMAsyncJob):
             "ddsource": "mysql",
             "dbm_type": "activity",
             "collection_interval": self.collection_interval,
-            "ddtags": self._tags,
+            "ddtags": tags,
             "timestamp": time.time() * 1000,
+            "cloud_metadata": self._config.cloud_metadata,
             "mysql_activity": active_sessions,
         }
 

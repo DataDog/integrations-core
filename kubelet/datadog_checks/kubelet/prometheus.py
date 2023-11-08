@@ -5,20 +5,25 @@ from __future__ import division
 
 from copy import deepcopy
 
-from kubeutil import get_connection_info
 from six import iteritems
 
 from datadog_checks.base.checks.kubelet_base.base import urljoin
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.utils.tagging import tagger
 
-from .common import get_container_label, get_pod_by_uid, is_static_pending_pod, replace_container_rt_prefix
+from .common import (
+    get_container_label,
+    get_pod_by_uid,
+    get_prometheus_url,
+    is_static_pending_pod,
+    replace_container_rt_prefix,
+)
 
 METRIC_TYPES = ['counter', 'gauge', 'summary']
 
 # container-specific metrics should have all these labels
-PRE_1_16_CONTAINER_LABELS = set(['namespace', 'name', 'image', 'id', 'container_name', 'pod_name'])
-POST_1_16_CONTAINER_LABELS = set(['namespace', 'name', 'image', 'id', 'container', 'pod'])
+PRE_1_16_CONTAINER_LABELS = {'namespace', 'name', 'image', 'id', 'container_name', 'pod_name'}
+POST_1_16_CONTAINER_LABELS = {'namespace', 'name', 'image', 'id', 'container', 'pod'}
 
 # Value above which the figure can be discarded because it's an aberrant transient value
 MAX_MEMORY_RSS = 2**63
@@ -73,9 +78,7 @@ class CadvisorPrometheusScraperMixin(object):
         Create a copy of the instance and set default values.
         This is so the base class can create a scraper_config with the proper values.
         """
-        kubelet_conn_info = get_connection_info()
-        endpoint = kubelet_conn_info.get('url')
-
+        endpoint = get_prometheus_url("dummy_url/cadvisor")
         cadvisor_instance = deepcopy(instance)
         cadvisor_instance.update(
             {

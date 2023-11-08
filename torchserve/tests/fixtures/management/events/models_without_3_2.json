@@ -1,0 +1,20 @@
+{
+  "models": [
+    {
+      "modelName": "linear_regression_1_1",
+      "modelUrl": "linear_regression_1_1.mar"
+    },
+    {
+      "modelName": "linear_regression_1_2",
+      "modelUrl": "linear_regression_1_2_v3.mar"
+    },
+    {
+      "modelName": "linear_regression_2_2",
+      "modelUrl": "linear_regression_2_2.mar"
+    },
+    {
+      "modelName": "linear_regression_2_3",
+      "modelUrl": "linear_regression_2_3.mar"
+    }
+  ]
+}

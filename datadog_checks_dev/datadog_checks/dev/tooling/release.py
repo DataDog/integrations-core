@@ -20,6 +20,9 @@ def get_release_tag_string(check_name, version_string):
     """
     Compose a string to use for release tags
     """
+    if check_name == 'ddev':
+        version_string = f'v{version_string}'
+
     if check_name:
         return f'{check_name}-{version_string}'
     else:

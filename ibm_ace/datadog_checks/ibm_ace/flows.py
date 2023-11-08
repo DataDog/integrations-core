@@ -8,7 +8,7 @@ from datadog_checks.base.utils.constants import MICROSECOND
 class Statistics:
     NAME: str
     GAUGES = set()
-    MONOTONIC_COUNTS = set()
+    COUNTS = set()
     TEMPORAL_PERCENTS = {}
 
     def full_metric_name(self, metric):
@@ -18,8 +18,8 @@ class Statistics:
         for metric, value in data.items():
             if metric in self.GAUGES:
                 check.gauge(self.full_metric_name(metric), value, tags=tags)
-            elif metric in self.MONOTONIC_COUNTS:
-                check.monotonic_count(self.full_metric_name(metric), value, tags=tags)
+            elif metric in self.COUNTS:
+                check.count(self.full_metric_name(metric), value, tags=tags)
             elif metric in self.TEMPORAL_PERCENTS:
                 metric_data = self.TEMPORAL_PERCENTS[metric]
                 check.rate(
@@ -40,7 +40,7 @@ class MessageFlowStatistics(Statistics):
         'MinimumSizeOfInputMessages',
         'NumberOfThreadsInPool',
     ]
-    MONOTONIC_COUNTS = [
+    COUNTS = [
         'TimesMaximumNumberOfThreadsReached',
         'TotalInputMessages',
         'TotalNumberOfBackouts',

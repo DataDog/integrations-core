@@ -1,15 +1,16 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
+
 import pytest
 from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
 
 from datadog_checks.aspdotnet import AspdotnetCheck
-from datadog_checks.dev.testing import requires_py2
 
 from . import common
 
-pytestmark = [requires_py2, pytest.mark.usefixtures('pdh_mocks_fixture')]
+pytestmark = [pytest.mark.usefixtures('pdh_mocks_fixture')]
 
 
 @pytest.fixture(autouse=True)
@@ -18,7 +19,8 @@ def setup_check():
 
 
 def test_basic_check(aggregator):
-    instance = common.MINIMAL_INSTANCE
+    instance = copy.deepcopy(common.MINIMAL_INSTANCE)
+    instance["use_legacy_check_version"] = True
     c = AspdotnetCheck('aspdotnet', {}, [instance])
     c.check(instance)
 
@@ -33,7 +35,8 @@ def test_basic_check(aggregator):
 
 
 def test_with_tags(aggregator):
-    instance = common.INSTANCE_WITH_TAGS
+    instance = copy.deepcopy(common.INSTANCE_WITH_TAGS)
+    instance["use_legacy_check_version"] = True
     c = AspdotnetCheck('aspdotnet', {}, [instance])
     c.check(instance)
 

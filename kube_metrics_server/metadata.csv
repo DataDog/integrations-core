@@ -12,6 +12,5 @@ kube_metrics_server.manager_tick_duration.sum,gauge,,,second,"The total time spe
 kube_metrics_server.scraper_duration.count,gauge,,,,"Time spent scraping sources",0,kube_metrics_server,scraper_duration.count,
 kube_metrics_server.scraper_duration.sum,gauge,,,second,"Time spent scraping sources",0,kube_metrics_server,scraper_duration.sum,
 kube_metrics_server.scraper_last_time,gauge,,,second,"Last time metrics-server performed a scrape since unix epoch",0,kube_metrics_server,scraper_last_time,
-kube_metrics_server.process.cpu_seconds_total,count,,,second,"Total user and system CPU time spent",0,kube_metrics_server,process.cpu_seconds_total,
 kube_metrics_server.process.max_fds,gauge,,,,"Maximum number of open file descriptors",0,kube_metrics_server,process.max_fds,
 kube_metrics_server.process.open_fds,gauge,,,,"Number of open file descriptors",0,kube_metrics_server,process.open_fds,

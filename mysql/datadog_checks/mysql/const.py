@@ -7,6 +7,12 @@ RATE = "rate"
 COUNT = "count"
 MONOTONIC = "monotonic_count"
 PROC_NAME = 'mysqld'
+AWS_RDS_HOSTNAME_SUFFIX = ".rds.amazonaws.com"
+AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE = {
+    "flexible_server": "azure_mysql_flexible_server",
+    "single_server": "azure_mysql_server",
+    "virtual_machine": "azure_virtual_machine_instance",
+}
 
 # Vars found in "SHOW STATUS;"
 STATUS_VARS = {
@@ -231,12 +237,14 @@ OPTIONAL_INNODB_VARS = {
 GALERA_VARS = {
     'wsrep_cluster_size': ('mysql.galera.wsrep_cluster_size', GAUGE),
     'wsrep_local_recv_queue_avg': ('mysql.galera.wsrep_local_recv_queue_avg', GAUGE),
+    'wsrep_local_recv_queue': ('mysql.galera.wsrep_local_recv_queue', GAUGE),
     'wsrep_flow_control_paused': ('mysql.galera.wsrep_flow_control_paused', GAUGE),
     'wsrep_flow_control_paused_ns': ('mysql.galera.wsrep_flow_control_paused_ns', MONOTONIC),
     'wsrep_flow_control_recv': ('mysql.galera.wsrep_flow_control_recv', MONOTONIC),
     'wsrep_flow_control_sent': ('mysql.galera.wsrep_flow_control_sent', MONOTONIC),
     'wsrep_cert_deps_distance': ('mysql.galera.wsrep_cert_deps_distance', GAUGE),
     'wsrep_local_send_queue_avg': ('mysql.galera.wsrep_local_send_queue_avg', GAUGE),
+    'wsrep_local_send_queue': ('mysql.galera.wsrep_local_send_queue', GAUGE),
     'wsrep_replicated_bytes': ('mysql.galera.wsrep_replicated_bytes', GAUGE),
     'wsrep_received_bytes': ('mysql.galera.wsrep_received_bytes', GAUGE),
     'wsrep_received': ('mysql.galera.wsrep_received', GAUGE),

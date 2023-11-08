@@ -16,7 +16,7 @@
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Cloud",
-      "Category::Data Store",
+      "Category::Data Stores",
       "Category::Cost Management"
     ]
   },
@@ -50,7 +50,7 @@
       "Snowflake Organization Metrics": "assets/dashboards/organization_metrics.json"
     },
     "monitors": {
-      "Snowflake failed logins": "assets/recommended_monitors/snowflake_failed_logins.json"
+      "Snowflake failed logins": "assets/monitors/snowflake_failed_logins.json"
     }
   }
 }

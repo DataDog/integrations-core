@@ -1,16 +1,27 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import List, Optional, Type
+from typing import Any, Dict, List, Optional, Type  # noqa: F401
 
 from pyVmomi import vim
 from six import iteritems
 
 from datadog_checks.base import to_string
-from datadog_checks.vsphere.config import VSphereConfig
-from datadog_checks.vsphere.constants import MOR_TYPE_AS_STRING, REFERENCE_METRIC, SHORT_ROLLUP
-from datadog_checks.vsphere.resource_filters import ResourceFilter, match_any_regex
-from datadog_checks.vsphere.types import InfrastructureData, MetricFilters, MetricName
+from datadog_checks.vsphere.constants import (
+    BOTH,
+    HISTORICAL,
+    MOR_TYPE_AS_STRING,
+    OBJECT_PROPERTIES_BY_RESOURCE_TYPE,
+    OBJECT_PROPERTIES_TO_METRIC_NAME,
+    PROPERTY_METRICS_BY_RESOURCE_TYPE,
+    REALTIME,
+    REFERENCE_METRIC,
+    SHORT_ROLLUP,
+    SIMPLE_PROPERTIES_BY_RESOURCE_TYPE,
+)
+from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR
+from datadog_checks.vsphere.resource_filters import ResourceFilter, match_any_regex  # noqa: F401
+from datadog_checks.vsphere.types import InfrastructureData, MetricFilters, MetricName  # noqa: F401
 
 METRIC_TO_INSTANCE_TAG_MAPPING = {
     # Structure:
@@ -85,8 +96,86 @@ def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):
     return True
 
 
-def get_tags_recursively(mor, infrastructure_data, config, include_only=None):
-    # type: (vim.ManagedEntity, InfrastructureData, VSphereConfig, Optional[List[str]]) -> List[str]
+def is_metric_allowed_for_collection_type(mor_type, metric_name, collection_type):
+    allowed_metrics = ALLOWED_METRICS_FOR_MOR[mor_type]
+    if collection_type == BOTH:
+        metrics = allowed_metrics[HISTORICAL] + allowed_metrics[REALTIME]
+    elif collection_type == HISTORICAL:
+        metrics = allowed_metrics[HISTORICAL]
+    else:
+        metrics = allowed_metrics[REALTIME]
+    return metric_name in metrics
+
+
+def property_metrics_to_collect(mor_type, metric_filters):
+    # type: (str, MetricFilters) -> List[str]
+    filters = metric_filters.get(mor_type)
+    all_metrics = PROPERTY_METRICS_BY_RESOURCE_TYPE[mor_type]
+    if not filters:
+        full_name_metrics = ["{}.{}".format(mor_type, metric) for metric in all_metrics]
+        return full_name_metrics
+
+    metrics_to_collect = []
+    for metric in all_metrics:
+        full_name = "{}.{}".format(mor_type, metric)
+        if match_any_regex(full_name, filters):
+            metrics_to_collect.append(full_name)
+
+    return metrics_to_collect
+
+
+def properties_to_collect(mor_type, metric_filters):
+    # type: (Optional[str], MetricFilters) -> List[str]
+    if mor_type is None:
+        return []
+
+    resource_simple_properties = simple_properties_to_collect(mor_type, metric_filters)
+    resource_object_properties = object_properties_to_collect(mor_type, metric_filters)
+
+    return resource_simple_properties + resource_object_properties
+
+
+def simple_properties_to_collect(mor_string, resource_filters):
+    # type: (str, MetricFilters) -> List[str]
+    filters = resource_filters.get(mor_string)
+    resource_simple_properties = SIMPLE_PROPERTIES_BY_RESOURCE_TYPE.get(mor_string, [])
+
+    if not filters:
+        return resource_simple_properties
+
+    all_properties = []
+    for property_name in resource_simple_properties:
+        full_name = "{}.{}".format(mor_string, property_name)
+        if match_any_regex(full_name, filters):
+            all_properties.append(property_name)
+
+    return all_properties
+
+
+def object_properties_to_collect(mor_string, resource_filters):
+    # type: (str, MetricFilters) -> List[str]
+    filters = resource_filters.get(mor_string)
+    resource_object_properties = OBJECT_PROPERTIES_BY_RESOURCE_TYPE.get(mor_string, [])
+
+    if not filters:
+        return resource_object_properties
+
+    all_properties = []
+    for property_name in resource_object_properties:
+        property_metrics = OBJECT_PROPERTIES_TO_METRIC_NAME.get(property_name, [])
+        is_collected = False
+        for property_metric in property_metrics:
+            full_name = "{}.{}".format(mor_string, property_metric)
+            if match_any_regex(full_name, filters):
+                is_collected = True
+                break
+        if is_collected:
+            all_properties.append(property_name)
+    return all_properties
+
+
+def get_tags_recursively(mor, infrastructure_data, include_datastore_cluster_folder_tag, include_only=None):
+    # type: (vim.ManagedEntity, InfrastructureData, bool, Optional[List[str]]) -> List[str]
     """Go up the resources hierarchy from the given mor. Note that a host running a VM is not considered to be a
     parent of that VM.
 
@@ -108,7 +197,7 @@ def get_tags_recursively(mor, infrastructure_data, config, include_only=None):
         if isinstance(mor, vim.StoragePod):
             tags.append('vsphere_datastore_cluster:{}'.format(entity_name))
             # Legacy mode: keep it as "folder"
-            if config.include_datastore_cluster_folder_tag:
+            if include_datastore_cluster_folder_tag:
                 tags.append('vsphere_folder:{}'.format(entity_name))
         else:
             tags.append('vsphere_folder:{}'.format(entity_name))
@@ -122,9 +211,8 @@ def get_tags_recursively(mor, infrastructure_data, config, include_only=None):
         tags.append('vsphere_datastore:{}'.format(entity_name))
 
     parent = infrastructure_data.get(mor, {}).get('parent')
-    if parent is None:
-        return tags
-    tags.extend(get_tags_recursively(parent, infrastructure_data, config))
+    if parent is not None:
+        tags.extend(get_tags_recursively(parent, infrastructure_data, include_datastore_cluster_folder_tag))
     if not include_only:
         return tags
     filtered_tags = []
@@ -136,9 +224,9 @@ def get_tags_recursively(mor, infrastructure_data, config, include_only=None):
     return filtered_tags
 
 
-def should_collect_per_instance_values(config, metric_name, resource_type):
-    # type: (VSphereConfig, str, Type[vim.ManagedEntity]) -> bool
-    filters = config.collect_per_instance_filters.get(MOR_TYPE_AS_STRING[resource_type], [])
+def should_collect_per_instance_values(collect_per_instance_filters, metric_name, resource_type):
+    # type: (MetricFilters, str, Type[vim.ManagedEntity]) -> bool
+    filters = collect_per_instance_filters.get(MOR_TYPE_AS_STRING[resource_type], [])
     metric_matched = match_any_regex(metric_name, filters)
     return metric_matched
 
@@ -154,3 +242,10 @@ def get_mapped_instance_tag(metric_name):
         if metric_name.startswith(prefix):
             return tag_key
     return 'instance'
+
+
+def add_additional_tags(tags, additional_tags):
+    # type: (List[str], Dict[str, Optional[Any]]) -> List[str]
+    for tag_name, tag_value in additional_tags.items():
+        if tag_value is not None:
+            tags.append("{}:{}".format(tag_name, tag_value))

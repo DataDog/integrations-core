@@ -15,6 +15,8 @@ class CoreDNSCheck(OpenMetricsBaseCheck):
 
     METRIC_PREFIX = 'coredns.'
 
+    DEFAULT_METRIC_LIMIT = 0
+
     """
     Collect CoreDNS metrics from its Prometheus endpoint
     """

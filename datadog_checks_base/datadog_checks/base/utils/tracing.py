@@ -47,7 +47,8 @@ def tracing_method(f, tracer):
         @functools.wraps(f)
         def wrapper(self, *args, **kwargs):
             integration_name = _get_integration_name(f.__name__, self, *args, **kwargs)
-            with tracer.trace(f.__name__, service=INTEGRATION_TRACING_SERVICE_NAME, resource=integration_name):
+            with tracer.trace(f.__name__, service=INTEGRATION_TRACING_SERVICE_NAME, resource=integration_name) as span:
+                span.set_tag('_dd.origin', INTEGRATION_TRACING_SERVICE_NAME)
                 return f(self, *args, **kwargs)
 
     else:
@@ -55,7 +56,8 @@ def tracing_method(f, tracer):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
             integration_name = _get_integration_name(f.__name__, None, *args, **kwargs)
-            with tracer.trace(f.__name__, service=INTEGRATION_TRACING_SERVICE_NAME, resource=integration_name):
+            with tracer.trace(f.__name__, service=INTEGRATION_TRACING_SERVICE_NAME, resource=integration_name) as span:
+                span.set_tag('_dd.origin', INTEGRATION_TRACING_SERVICE_NAME)
                 return f(*args, **kwargs)
 
     return wrapper
@@ -68,7 +70,10 @@ def traced_warning(f, tracer):
     The error message is set to the warning message.
     """
     try:
-        from ddtrace.ext import errors
+        try:
+            from ddtrace.constants import ERROR_MSG, ERROR_TYPE
+        except ImportError:
+            from ddtrace.ext.errors import ERROR_MSG, ERROR_TYPE
 
         def wrapper(self, warning_message, *args, **kwargs):
             integration_name = _get_integration_name(f.__name__, self, *args, **kwargs)
@@ -81,8 +86,9 @@ def traced_warning(f, tracer):
                 _formatted_message = to_native_string(warning_message)
                 if args:
                     _formatted_message = _formatted_message % args
-                span.set_tag(errors.ERROR_MSG, _formatted_message)
-                span.set_tag(errors.ERROR_TYPE, "AgentCheck.warning")
+                span.set_tag('_dd.origin', INTEGRATION_TRACING_SERVICE_NAME)
+                span.set_tag(ERROR_MSG, _formatted_message)
+                span.set_tag(ERROR_TYPE, "AgentCheck.warning")
                 span.set_traceback()
                 span.error = 1
                 return f(self, warning_message, *args, **kwargs)

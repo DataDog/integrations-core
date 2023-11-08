@@ -1,0 +1,22 @@
+name: Save GitHub event
+
+on:
+  workflow_call:
+    inputs:
+      retention-days:
+        required: false
+        default: 1
+        type: number
+
+jobs:
+  save-event:
+    name: Save event
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: github-event
+        path: ${{ github.event_path }}
+        retention-days: ${{ inputs.retention-days }}

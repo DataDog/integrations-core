@@ -13,8 +13,7 @@
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
-      "Category::Data Store",
-      "Category::Autodiscovery",
+      "Category::Data Stores",
       "Category::Log Collection"
     ]
   },

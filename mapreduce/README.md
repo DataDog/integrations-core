@@ -109,7 +109,7 @@ Need help? Contact [Datadog support][11].
 - [How to monitor Hadoop with Datadog][15]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mapreduce/images/mapreduce_dashboard.png
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/mapreduce/datadog_checks/mapreduce/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#restart-the-agent

@@ -10,9 +10,9 @@ from mock import MagicMock
 from pyVmomi import vim
 from requests import Response
 from six import iteritems
-from tests.common import HERE, VSPHERE_VERSION
 
 from datadog_checks.vsphere.api import VersionInfo
+from tests.common import HERE, VSPHERE_VERSION
 
 
 class MockedCounter(object):

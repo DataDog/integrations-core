@@ -1,565 +1,651 @@
 {
-    "title": "RabbitMQ - Overview",
-    "description": "Use this dashboard to monitor RabbitMQ, including server status, work metrics for queues, and high-level memory and disk utilization metrics. Further reading on RabbitMQ monitoring:\n\n- [Datadog's RabbitMQ integration docs](https://docs.datadoghq.com/integrations/rabbitmq/)\n\n- [Key metrics for RabbitMQ monitoring](https://www.datadoghq.com/blog/rabbitmq-monitoring/) - [Collecting metrics with RabbitMQ monitoring tools](https://www.datadoghq.com/blog/rabbitmq-monitoring-tools/)\n\n- [Monitoring RabbitMQ performance with Datadog](https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
-    "widgets": [
-        {
-            "id": 0,
-            "definition": {
-                "type": "image",
-                "url": "/static/images/logos/rabbitmq_small.svg",
-                "sizing": "center"
-            },
-            "layout": {
-                "x": 0,
-                "y": 0,
-                "width": 21,
-                "height": 11
-            }
-        },
-        {
-            "id": 1,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:rabbitmq.node.mem_used{$rabbitmq_node} by {rabbitmq_node}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "cool",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Memory used",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
+    "title": "RabbitMQ Overview (Management Version)",
+    "description": "## RabbitMQ Integration\n\nThis dashboard provides an overview of your RabbitMQ (Management plugin) environment. It monitors node status, provides information on message statuses, and gives you insight into various other observability measures of your RMQ setup. \n\n*Note:* If you are using the Prometheus plugin version of RabbitMQ, please use the alternate dashboard.\n\nFor more information, please refer to:\n* [RabbitMQ Integration Doc](https://docs.datadoghq.com/integrations/rabbitmq/?tab=host)\n* [RabbitMQ Blog by Datadog](https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog/) ",
+    "widgets": [{
+        "id": 539814910975430,
+        "definition": {
+            "title": "",
+            "banner_img": "/static/images/logos/rabbitmq_small.svg",
+            "show_title": false,
+            "type": "group",
+            "layout_type": "ordered",
+            "widgets": [{
+                "id": 6507010436924774,
+                "definition": {
+                    "type": "note",
+                    "content": "**RabbitMQ**\n\nThis dashboard provides an overview of your RabbitMQ (Management Plugin) environment. It monitors node status, provides information on message statuses, and gives you insight into various other observability measures of your RMQ setup.\n\n*Note:* If you are using the Prometheus plugin version of RabbitMQ, please use the alternate dashboard.\n",
+                    "background_color": "white",
+                    "font_size": "14",
+                    "text_align": "left",
+                    "vertical_align": "top",
+                    "show_tick": false,
+                    "tick_pos": "50%",
+                    "tick_edge": "left",
+                    "has_padding": true
                 },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 121,
-                "y": 44,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 2,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:rabbitmq.node.fd_used{$rabbitmq_node} by {rabbitmq_node}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "File descriptors used",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 121,
-                "y": 28,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 3,
-            "definition": {
-                "type": "note",
-                "content": "Average resource utilization by node",
-                "background_color": "gray",
-                "font_size": "18",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 121,
-                "y": 0,
-                "width": 47,
-                "height": 5
-            }
-        },
-        {
-            "id": 4,
-            "definition": {
-                "type": "note",
-                "content": "  \nQueue throughput (avg messages per sec)",
-                "background_color": "gray",
-                "font_size": "18",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 23,
-                "y": 0,
-                "width": 47,
-                "height": 5
-            }
-        },
-        {
-            "id": 5,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:rabbitmq.queue.messages.rate{$rabbitmq_queue} by {rabbitmq_queue}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "thick"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Total",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 23,
-                "y": 12,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 6,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:rabbitmq.queue.messages.deliver.rate{$rabbitmq_queue} by {rabbitmq_queue}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "thin"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Delivered",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 23,
-                "y": 44,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 7,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:rabbitmq.queue.messages.publish.rate{$rabbitmq_queue} by {rabbitmq_queue}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "cool",
-                            "line_type": "solid",
-                            "line_width": "thin"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Published",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 23,
-                "y": 28,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 8,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:rabbitmq.queue.messages.ack.rate{$rabbitmq_queue} by {rabbitmq_queue}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "thin"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Acknowledged",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 23,
-                "y": 60,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 9,
-            "definition": {
-                "type": "toplist",
-                "requests": [
-                    {
-                        "q": "top(max:rabbitmq.queue.messages{$rabbitmq_node} by {rabbitmq_queue}, 20, 'last', 'desc')",
-                        "style": {
-                            "palette": "orange"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Queues by depth",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "10m"
+                "layout": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 3,
+                    "height": 3
                 }
-            },
-            "layout": {
-                "x": 72,
-                "y": 28,
-                "width": 47,
-                "height": 47
-            }
-        },
-        {
-            "id": 10,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:rabbitmq.queue.consumer_utilisation{$rabbitmq_queue} by {rabbitmq_queue}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "cool",
-                            "line_type": "solid",
-                            "line_width": "thick"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Consumer utilization",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
+            }, {
+                "id": 7472223195597488,
+                "definition": {
+                    "type": "note",
+                    "content": "**Useful Links**\n\n* [Integration Docs](https://docs.datadoghq.com/integrations/rabbitmq/?tab=host)\n* [RabbitMQ Blog by Datadog](https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog/)\n* [RabbitMQ Documentation](https://www.rabbitmq.com/documentation.html)",
+                    "background_color": "white",
+                    "font_size": "16",
+                    "text_align": "left",
+                    "vertical_align": "top",
+                    "show_tick": false,
+                    "tick_pos": "50%",
+                    "tick_edge": "left",
+                    "has_padding": true
                 },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 72,
-                "y": 12,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 11,
-            "definition": {
-                "type": "check_status",
-                "title": "RabbitMQ status by host",
-                "title_size": "16",
-                "title_align": "center",
-                "check": "rabbitmq.aliveness",
-                "grouping": "cluster",
-                "group_by": ["$host"],
-                "tags": ["*"],
-                "time": {
-                    "live_span": "1h"
+                "layout": {
+                    "x": 3,
+                    "y": 0,
+                    "width": 3,
+                    "height": 3
                 }
-            },
-            "layout": {
-                "x": 0,
-                "y": 13,
-                "width": 21,
-                "height": 14
-            }
+            }]
         },
-        {
-            "id": 12,
-            "definition": {
-                "type": "check_status",
-                "title": "Integration status",
-                "title_size": "16",
-                "title_align": "center",
-                "check": "rabbitmq.status",
-                "grouping": "cluster",
-                "group_by": [],
-                "tags": ["*"],
-                "time": {
-                    "live_span": "1h"
-                }
-            },
-            "layout": {
-                "x": 0,
-                "y": 28,
-                "width": 21,
-                "height": 14
-            }
-        },
-        {
-            "id": 13,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:rabbitmq.node.disk_free{$rabbitmq_node} by {rabbitmq_node}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "purple",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Disk space free",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 121,
-                "y": 12,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 14,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "avg:rabbitmq.node.disk_alarm{$rabbitmq_node} by {rabbitmq_node}",
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 0,
-                                "palette": "white_on_red"
-                            },
-                            {
-                                "comparator": "<",
-                                "value": 1,
-                                "palette": "white_on_green"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Disk Alarms",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "10m"
-                },
-                "autoscale": true,
-                "precision": 0
-            },
-            "layout": {
-                "x": 0,
-                "y": 43,
-                "width": 21,
-                "height": 14
-            }
-        },
-        {
-            "id": 15,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "avg:rabbitmq.node.mem_alarm{$rabbitmq_node} by {rabbitmq_node}",
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 0,
-                                "palette": "white_on_red"
-                            },
-                            {
-                                "comparator": "<",
-                                "value": 1,
-                                "palette": "white_on_green"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Memory Alarms",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "10m"
-                },
-                "autoscale": true,
-                "precision": 0
-            },
-            "layout": {
-                "x": 0,
-                "y": 58,
-                "width": 21,
-                "height": 15
-            }
-        },
-        {
-            "id": 16,
-            "definition": {
-                "type": "note",
-                "content": "Queue consumption",
-                "background_color": "gray",
-                "font_size": "18",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 72,
-                "y": 0,
-                "width": 47,
-                "height": 5
-            }
-        },
-        {
-            "id": 17,
-            "definition": {
-                "type": "note",
-                "content": "Negative values indicate that message count is falling over time.",
-                "background_color": "yellow",
-                "font_size": "14",
-                "text_align": "left",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left"
-            },
-            "layout": {
-                "x": 23,
-                "y": 6,
-                "width": 47,
-                "height": 5
-            }
-        },
-        {
-            "id": 18,
-            "definition": {
-                "type": "note",
-                "content": "Consumer utilization is a number between 0 and 1.",
-                "background_color": "yellow",
-                "font_size": "14",
-                "text_align": "left",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left"
-            },
-            "layout": {
-                "x": 72,
-                "y": 6,
-                "width": 47,
-                "height": 5
-            }
-        },
-        {
-            "id": 19,
-            "definition": {
-                "type": "note",
-                "content": "Assign the variable 'rabbitmq_node' to see the resource use of specific nodes.",
-                "background_color": "yellow",
-                "font_size": "14",
-                "text_align": "left",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left"
-            },
-            "layout": {
-                "x": 121,
-                "y": 6,
-                "width": 47,
-                "height": 5
-            }
+        "layout": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 6
         }
-    ],
-    "template_variables": [
-        {
-            "name": "rabbitmq_queue",
-            "default": "*",
-            "prefix": "rabbitmq_queue"
+    }, {
+        "id": 16881410520542,
+        "definition": {
+            "title": "Overview",
+            "background_color": "vivid_orange",
+            "show_title": true,
+            "type": "group",
+            "layout_type": "ordered",
+            "widgets": [{
+                "id": 7225439286749620,
+                "definition": {
+                    "type": "note",
+                    "content": "Alarm tables summarize which nodes have active disk or memory alarms.",
+                    "background_color": "orange",
+                    "font_size": "18",
+                    "text_align": "center",
+                    "vertical_align": "center",
+                    "show_tick": false,
+                    "tick_pos": "50%",
+                    "tick_edge": "left",
+                    "has_padding": true
+                },
+                "layout": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 6,
+                    "height": 1
+                }
+            }, {
+                "id": 694745486705286,
+                "definition": {
+                    "title": "Integration Status",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "time": {
+                        "live_span": "1d"
+                    },
+                    "type": "check_status",
+                    "check": "rabbitmq.status",
+                    "grouping": "cluster",
+                    "group": "app:rabbitmq-node3,cluster_name:stripe,cpu_arch:amd64,datacenter:us1.staging.dog,env:dev,env:staging,git.repository_url:https://github.com/bitnami/containers/tree/main/bitnami/rabbitmq,host:i-01de4e62a09bafe36,image_id:registry.ddbuild.io/images/mirror/bitnami/rabbitmq_sha256:30d7bc0faddf02d67e5bdcd8b00e0d6a444c0b7cc71dff3b6fa13db5062b4a27,image_name:registry.ddbuild.io/images/mirror/bitnami/rabbitmq,image_tag:3.10.8-debian-11-r4,instance_type:m5n.2xlarge,kube_cluster_name:stripe,kube_container_name:rabbitmq-node3,kube_deployment:rabbitmq-node3,kube_namespace:dsm-dev-rabbit,kube_node_role:compute,kube_node_role:nodeless,kube_node_role:nodeless-amd64-8c32g-v3,kube_ownerref_kind:replicaset,kube_ownerref_name:rabbitmq-node3-6999cd7b48,kube_qos:burstable,kube_replica_set:rabbitmq-node3-6999cd7b48,kube_service:rabbitmq-node3,ng_cluster_autoscaler:true,ng_local_storage:false,node.datadoghq.com/version:v6-1-16,pod_name:rabbitmq-node3-6999cd7b48-dkw2v,pod_phase:running,service:rabbitmq-node3,short_image:rabbitmq,site:datad0g.com,version:latest",
+                    "group_by": [],
+                    "tags": []
+                },
+                "layout": {
+                    "x": 0,
+                    "y": 1,
+                    "width": 2,
+                    "height": 2
+                }
+            }, {
+                "id": 2785913956837366,
+                "definition": {
+                    "title": "Disk Alarms",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "type": "query_table",
+                    "requests": [{
+                        "response_format": "scalar",
+                        "formulas": [{
+                            "alias": "Alarm",
+                            "conditional_formats": [{
+                                "comparator": ">",
+                                "palette": "white_on_green",
+                                "value": 0
+                            }, {
+                                "comparator": "<",
+                                "palette": "white_on_red",
+                                "value": 1
+                            }],
+                            "formula": "query1",
+                            "limit": {
+                                "count": 500,
+                                "order": "desc"
+                            }
+                        }],
+                        "queries": [{
+                            "data_source": "metrics",
+                            "name": "query1",
+                            "query": "avg:rabbitmq.node.disk_alarm{*} by {service}",
+                            "aggregator": "avg"
+                        }]
+                    }]
+                },
+                "layout": {
+                    "x": 2,
+                    "y": 1,
+                    "width": 4,
+                    "height": 2
+                }
+            }, {
+                "id": 384003158084066,
+                "definition": {
+                    "title": "RMQ Status",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "time": {
+                        "live_span": "1d"
+                    },
+                    "type": "check_status",
+                    "check": "rabbitmq.aliveness",
+                    "grouping": "cluster",
+                    "group": "app:rabbitmq-node1,cluster_name:stripe,cpu_arch:amd64,datacenter:us1.staging.dog,env:dev,env:staging,git.repository_url:https://github.com/bitnami/containers/tree/main/bitnami/rabbitmq,host:i-09baa95e1d76eef8b,image_id:registry.ddbuild.io/images/mirror/bitnami/rabbitmq_sha256:30d7bc0faddf02d67e5bdcd8b00e0d6a444c0b7cc71dff3b6fa13db5062b4a27,image_name:registry.ddbuild.io/images/mirror/bitnami/rabbitmq,image_tag:3.10.8-debian-11-r4,instance_type:m5n.4xlarge,kube_cluster_name:stripe,kube_container_name:rabbitmq-node1,kube_deployment:rabbitmq-node1,kube_namespace:dsm-dev-rabbit,kube_node_role:compute,kube_node_role:nodeless,kube_node_role:nodeless-amd64-16c64g-v2,kube_ownerref_kind:replicaset,kube_ownerref_name:rabbitmq-node1-568dc6fd6,kube_qos:burstable,kube_replica_set:rabbitmq-node1-568dc6fd6,kube_service:rabbitmq-node1,ng_cluster_autoscaler:true,ng_local_storage:false,node.datadoghq.com/version:v6-1-16,pod_name:rabbitmq-node1-568dc6fd6-58zds,pod_phase:running,service:rabbitmq-node1,short_image:rabbitmq,site:datad0g.com,version:latest,vhost:/",
+                    "group_by": ["host"],
+                    "tags": []
+                },
+                "layout": {
+                    "x": 0,
+                    "y": 3,
+                    "width": 2,
+                    "height": 2
+                }
+            }, {
+                "id": 6475934909762600,
+                "definition": {
+                    "title": "Memory Alarms",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "type": "query_table",
+                    "requests": [{
+                        "response_format": "scalar",
+                        "formulas": [{
+                            "alias": "Alarm",
+                            "conditional_formats": [{
+                                "comparator": ">",
+                                "palette": "white_on_green",
+                                "value": 0
+                            }, {
+                                "comparator": "<",
+                                "palette": "white_on_red",
+                                "value": 1
+                            }],
+                            "formula": "query1",
+                            "limit": {
+                                "count": 500,
+                                "order": "desc"
+                            }
+                        }],
+                        "queries": [{
+                            "data_source": "metrics",
+                            "name": "query1",
+                            "query": "avg:rabbitmq.node.mem_alarm{*} by {service}",
+                            "aggregator": "avg"
+                        }]
+                    }]
+                },
+                "layout": {
+                    "x": 2,
+                    "y": 3,
+                    "width": 4,
+                    "height": 2
+                }
+            }]
         },
-        {
-            "name": "rabbitmq_node",
-            "default": "*",
-            "prefix": "rabbitmq_node"
-        },
-        {
-            "name": "host",
-            "default": "*",
-            "prefix": "host"
-        },
-        {
-            "name": "scope",
-            "default": "*",
-            "prefix": null
+        "layout": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 6
         }
-    ],
-    "layout_type": "free",
-    "is_read_only": true,
+    }, {
+        "id": 2463793046394002,
+        "definition": {
+            "title": "Queue Throughput",
+            "background_color": "vivid_orange",
+            "show_title": true,
+            "type": "group",
+            "layout_type": "ordered",
+            "widgets": [{
+                "id": 4274214467814750,
+                "definition": {
+                    "type": "note",
+                    "content": "Queue throughput is shown in average messages per second. Negative values indicate that message count is failing over time.",
+                    "background_color": "orange",
+                    "font_size": "18",
+                    "text_align": "center",
+                    "vertical_align": "top",
+                    "show_tick": false,
+                    "tick_pos": "50%",
+                    "tick_edge": "left",
+                    "has_padding": true
+                },
+                "layout": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 12,
+                    "height": 1
+                }
+            }, {
+                "id": 8476859896430370,
+                "definition": {
+                    "title": "Total",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "show_legend": true,
+                    "legend_layout": "auto",
+                    "legend_columns": ["avg", "min", "max", "value", "sum"],
+                    "type": "timeseries",
+                    "requests": [{
+                        "formulas": [{
+                            "formula": "query1"
+                        }],
+                        "queries": [{
+                            "name": "query1",
+                            "data_source": "metrics",
+                            "query": "avg:rabbitmq.queue.messages.rate{$rabbitmq_queue} by {rabbitmq_queue}"
+                        }],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }]
+                },
+                "layout": {
+                    "x": 0,
+                    "y": 1,
+                    "width": 6,
+                    "height": 2
+                }
+            }, {
+                "id": 4424413758378164,
+                "definition": {
+                    "title": "Delivered",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "show_legend": true,
+                    "legend_layout": "auto",
+                    "legend_columns": ["avg", "min", "max", "value", "sum"],
+                    "type": "timeseries",
+                    "requests": [{
+                        "formulas": [{
+                            "formula": "query1"
+                        }],
+                        "queries": [{
+                            "name": "query1",
+                            "data_source": "metrics",
+                            "query": "avg:rabbitmq.queue.messages.deliver.rate{$rabbitmq_queue} by {rabbitmq_queue}"
+                        }],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }]
+                },
+                "layout": {
+                    "x": 6,
+                    "y": 1,
+                    "width": 6,
+                    "height": 2
+                }
+            }, {
+                "id": 6030302247474900,
+                "definition": {
+                    "title": "Published",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "show_legend": true,
+                    "legend_layout": "auto",
+                    "legend_columns": ["avg", "min", "max", "value", "sum"],
+                    "type": "timeseries",
+                    "requests": [{
+                        "formulas": [{
+                            "formula": "query1"
+                        }],
+                        "queries": [{
+                            "name": "query1",
+                            "data_source": "metrics",
+                            "query": "avg:rabbitmq.queue.messages.publish.rate{$rabbitmq_queue} by {rabbitmq_queue}"
+                        }],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }]
+                },
+                "layout": {
+                    "x": 0,
+                    "y": 3,
+                    "width": 6,
+                    "height": 2
+                }
+            }, {
+                "id": 5883048865383192,
+                "definition": {
+                    "title": "Acknowledged",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "show_legend": true,
+                    "legend_layout": "auto",
+                    "legend_columns": ["avg", "min", "max", "value", "sum"],
+                    "type": "timeseries",
+                    "requests": [{
+                        "formulas": [{
+                            "formula": "query1"
+                        }],
+                        "queries": [{
+                            "name": "query1",
+                            "data_source": "metrics",
+                            "query": "avg:rabbitmq.queue.messages.ack.rate{$rabbitmq_queue} by {rabbitmq_queue}"
+                        }],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }]
+                },
+                "layout": {
+                    "x": 6,
+                    "y": 3,
+                    "width": 6,
+                    "height": 2
+                }
+            }]
+        },
+        "layout": {
+            "x": 0,
+            "y": 6,
+            "width": 12,
+            "height": 6
+        }
+    }, {
+        "id": 6211186481704640,
+        "definition": {
+            "title": "Queue Consumption",
+            "background_color": "vivid_orange",
+            "show_title": true,
+            "type": "group",
+            "layout_type": "ordered",
+            "widgets": [{
+                "id": 7327292918773178,
+                "definition": {
+                    "type": "note",
+                    "content": "Consumer utilization is a number between 0 and 1.",
+                    "background_color": "orange",
+                    "font_size": "18",
+                    "text_align": "center",
+                    "vertical_align": "top",
+                    "show_tick": false,
+                    "tick_pos": "50%",
+                    "tick_edge": "left",
+                    "has_padding": true
+                },
+                "layout": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 12,
+                    "height": 1
+                }
+            }, {
+                "id": 5008288908208900,
+                "definition": {
+                    "title": "Queues by Depth",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "type": "toplist",
+                    "requests": [{
+                        "queries": [{
+                            "data_source": "metrics",
+                            "name": "query1",
+                            "query": "max:rabbitmq.queue.messages{$rabbitmq_node} by {rabbitmq_queue}",
+                            "aggregator": "avg"
+                        }],
+                        "formulas": [{
+                            "formula": "query1",
+                            "limit": {
+                                "count": 500,
+                                "order": "desc"
+                            }
+                        }],
+                        "response_format": "scalar"
+                    }]
+                },
+                "layout": {
+                    "x": 0,
+                    "y": 1,
+                    "width": 4,
+                    "height": 4
+                }
+            }, {
+                "id": 8866088362261712,
+                "definition": {
+                    "title": "Consumer Utilization",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "show_legend": true,
+                    "legend_layout": "auto",
+                    "legend_columns": ["avg", "min", "max", "value", "sum"],
+                    "type": "timeseries",
+                    "requests": [{
+                        "formulas": [{
+                            "formula": "query1"
+                        }],
+                        "queries": [{
+                            "name": "query1",
+                            "data_source": "metrics",
+                            "query": "avg:rabbitmq.queue.consumer_utilisation{$rabbitmq_queue} by {rabbitmq_queue}"
+                        }],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }]
+                },
+                "layout": {
+                    "x": 4,
+                    "y": 1,
+                    "width": 8,
+                    "height": 4
+                }
+            }]
+        },
+        "layout": {
+            "x": 0,
+            "y": 12,
+            "width": 12,
+            "height": 6,
+            "is_column_break": true
+        }
+    }, {
+        "id": 3412626217094282,
+        "definition": {
+            "title": "Resource Utilization",
+            "background_color": "vivid_orange",
+            "show_title": true,
+            "type": "group",
+            "layout_type": "ordered",
+            "widgets": [{
+                "id": 218491216894336,
+                "definition": {
+                    "type": "note",
+                    "content": "Average resource utilization by node is shown below. Assign the variable *rabbitmq_node* to see the resource use of specific nodes.",
+                    "background_color": "orange",
+                    "font_size": "18",
+                    "text_align": "center",
+                    "vertical_align": "top",
+                    "show_tick": false,
+                    "tick_pos": "50%",
+                    "tick_edge": "left",
+                    "has_padding": true
+                },
+                "layout": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 12,
+                    "height": 1
+                }
+            }, {
+                "id": 3257923575107055,
+                "definition": {
+                    "title": "Free Disk Space",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "show_legend": true,
+                    "legend_layout": "horizontal",
+                    "legend_columns": ["avg", "min", "max", "value", "sum"],
+                    "type": "timeseries",
+                    "requests": [{
+                        "formulas": [{
+                            "formula": "a"
+                        }],
+                        "queries": [{
+                            "data_source": "metrics",
+                            "name": "a",
+                            "query": "avg:rabbitmq.node.disk_free{$rabbitmq_node} by {rabbitmq_node}"
+                        }],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "semantic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "bars"
+                    }]
+                },
+                "layout": {
+                    "x": 0,
+                    "y": 1,
+                    "width": 6,
+                    "height": 2
+                }
+            }, {
+                "id": 2127235726603442,
+                "definition": {
+                    "title": "File Descriptors Used",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "show_legend": true,
+                    "legend_layout": "horizontal",
+                    "legend_columns": ["avg", "min", "max", "value", "sum"],
+                    "type": "timeseries",
+                    "requests": [{
+                        "formulas": [{
+                            "formula": "a"
+                        }],
+                        "queries": [{
+                            "data_source": "metrics",
+                            "name": "a",
+                            "query": "avg:rabbitmq.node.fd_used{$rabbitmq_node} by {rabbitmq_node}"
+                        }],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "semantic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "area"
+                    }]
+                },
+                "layout": {
+                    "x": 6,
+                    "y": 1,
+                    "width": 6,
+                    "height": 4
+                }
+            }, {
+                "id": 8173734642223534,
+                "definition": {
+                    "title": "Used Memory",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "show_legend": true,
+                    "legend_layout": "horizontal",
+                    "legend_columns": ["avg", "min", "max", "value", "sum"],
+                    "type": "timeseries",
+                    "requests": [{
+                        "formulas": [{
+                            "formula": "a"
+                        }],
+                        "queries": [{
+                            "data_source": "metrics",
+                            "name": "a",
+                            "query": "avg:rabbitmq.node.mem_used{$rabbitmq_node} by {rabbitmq_node}"
+                        }],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "semantic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "bars"
+                    }]
+                },
+                "layout": {
+                    "x": 0,
+                    "y": 3,
+                    "width": 6,
+                    "height": 2
+                }
+            }]
+        },
+        "layout": {
+            "x": 0,
+            "y": 18,
+            "width": 12,
+            "height": 6
+        }
+    }],
+    "template_variables": [{
+        "name": "rabbitmq_queue",
+        "prefix": "rabbitmq_queue",
+        "available_values": [],
+        "default": "*"
+    }, {
+        "name": "rabbitmq_node",
+        "prefix": "rabbitmq_node",
+        "available_values": [],
+        "default": "*"
+    }, {
+        "name": "host",
+        "prefix": "host",
+        "available_values": [],
+        "default": "*"
+    }],
+    "layout_type": "ordered",
     "notify_list": [],
-    "id": 237
+    "reflow_type": "fixed"
 }

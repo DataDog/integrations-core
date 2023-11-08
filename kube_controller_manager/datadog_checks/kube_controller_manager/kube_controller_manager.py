@@ -13,12 +13,17 @@ from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.http import RequestsWrapper
 
+NEW_1_24_COUNTERS = {
+    # This metric replaces the deprecated node_collector_evictions_number metric as of k8s v1.24+
+    'node_collector_evictions_total': 'nodes.evictions',
+}
+
 
 class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
     DEFAULT_IGNORE_DEPRECATED = False
 
-    DEFAUT_RATE_LIMITERS = [
+    DEFAULT_RATE_LIMITERS = [
         "bootstrap_signer",
         "cronjob_controller",
         "daemon_controller",
@@ -122,6 +127,12 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
                         {'node_collector_evictions_number': 'nodes.evictions'},
                         {'node_collector_unhealthy_nodes_in_zone': 'nodes.unhealthy'},
                         {'node_collector_zone_size': 'nodes.count'},
+                        {
+                            "job_controller_terminated_pods_"
+                            "tracking_finalizer_total": "job_controller.terminated"
+                            "_pods_tracking_finalizer"
+                        },
+                        NEW_1_24_COUNTERS,
                     ],
                 }
             },
@@ -144,7 +155,7 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
 
         # Populate the metric transformers dict
         transformers = {}
-        limiters = self.DEFAUT_RATE_LIMITERS + instance.get("extra_limiters", [])
+        limiters = self.DEFAULT_RATE_LIMITERS + instance.get("extra_limiters", [])
         for limiter in limiters:
             transformers[limiter + "_rate_limiter_use"] = self.rate_limiter_use
         queues = self.DEFAULT_QUEUES + instance.get("extra_queues", [])

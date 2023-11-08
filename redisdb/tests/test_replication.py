@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import pytest
 import redis
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.redisdb import Redis
 
 from .common import HOST, MASTER_PORT, REPLICA_PORT, UNHEALTHY_REPLICA_PORT
@@ -20,36 +21,47 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")
 
 
 def test_redis_replication_link_metric(aggregator, replica_instance, dd_run_check, check):
-    metric_name = 'redis.replication.master_link_down_since_seconds'
-
     redis_check = check(replica_instance)
     dd_run_check(redis_check)
-    aggregator.assert_metric(metric_name, value=0)
+    aggregator.assert_metric('redis.replication.master_link_down_since_seconds', value=0)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
-    # Test the same on the unhealthy host
-    aggregator.reset()
+
+def test_redis_replication_link_metric_with_unhealthy_host(aggregator, replica_instance, dd_run_check, check):
     replica_instance['port'] = UNHEALTHY_REPLICA_PORT
+    redis_check = check(replica_instance)
     redis_check.check(replica_instance)
-    metrics = aggregator.metrics(metric_name)
+    metrics = aggregator.metrics('redis.replication.master_link_down_since_seconds')
+
     assert len(metrics) == 1
     assert metrics[0].value != 0
 
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
-def test_redis_replication_service_check(aggregator, replica_instance, dd_run_check, check):
+
+@pytest.mark.parametrize(
+    'port, expected_status',
+    [
+        pytest.param(
+            REPLICA_PORT,
+            Redis.OK,
+            id='healthy',
+        ),
+        pytest.param(
+            UNHEALTHY_REPLICA_PORT,
+            Redis.CRITICAL,
+            id="unhealthy",
+        ),
+    ],
+)
+def test_redis_replication_service_check(aggregator, replica_instance, dd_run_check, check, port, expected_status):
+    replica_instance['port'] = port
     service_check_name = 'redis.replication.master_link_status'
+
     redis_check = check(replica_instance)
     dd_run_check(redis_check)
     assert len(aggregator.service_checks(service_check_name)) == 1
-
-    # Healthy host
-    assert aggregator.service_checks(service_check_name)[0].status == Redis.OK
-
-    # Unhealthy host
-    aggregator.reset()
-    replica_instance['port'] = UNHEALTHY_REPLICA_PORT
-    redis_check.check(replica_instance)
-    assert len(aggregator.service_checks(service_check_name)) == 1
-    assert aggregator.service_checks(service_check_name)[0].status == Redis.CRITICAL
+    assert aggregator.service_checks(service_check_name)[0].status == expected_status
 
 
 def test_redis_repl(aggregator, dd_run_check, check, master_instance):
@@ -66,3 +78,5 @@ def test_redis_repl(aggregator, dd_run_check, check, master_instance):
 
     for name in REPLICA_METRICS:
         aggregator.assert_metric(name)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)

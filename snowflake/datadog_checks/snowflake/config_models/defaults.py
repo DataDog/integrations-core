@@ -7,124 +7,54 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-from datadog_checks.base.utils.models.fields import get_default_field_value
 
-
-def shared_global_custom_queries(field, value):
-    return get_default_field_value(field, value)
-
-
-def shared_proxy_host(field, value):
-    return get_default_field_value(field, value)
-
-
-def shared_proxy_password(field, value):
-    return get_default_field_value(field, value)
-
-
-def shared_proxy_port(field, value):
-    return get_default_field_value(field, value)
-
-
-def shared_proxy_user(field, value):
-    return get_default_field_value(field, value)
-
-
-def shared_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_aggregate_last_24_hours(field, value):
+def instance_aggregate_last_24_hours():
     return False
 
 
-def instance_authenticator(field, value):
+def instance_authenticator():
     return 'snowflake'
 
 
-def instance_client_prefetch_threads(field, value):
+def instance_client_prefetch_threads():
     return 4
 
 
-def instance_client_session_keep_alive(field, value):
+def instance_client_session_keep_alive():
     return False
 
 
-def instance_custom_queries(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_database(field, value):
+def instance_database():
     return 'SNOWFLAKE'
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags():
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname():
     return False
 
 
-def instance_login_timeout(field, value):
+def instance_login_timeout():
     return 60
 
 
-def instance_metric_groups(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_metric_patterns(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval():
     return 3600
 
 
-def instance_ocsp_response_cache_filename(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_only_custom_queries(field, value):
+def instance_only_custom_queries():
     return False
 
 
-def instance_password(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_private_key_password(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_private_key_path(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_schema_(field, value):
+def instance_schema_():
     return 'ACCOUNT_USAGE'
 
 
-def instance_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tags(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_token(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_token_path(field, value):
+def instance_token_path():
     return '/path/to/token'
 
 
-def instance_use_global_custom_queries(field, value):
+def instance_use_global_custom_queries():
     return 'true'
-
-
-def instance_warehouse(field, value):
-    return get_default_field_value(field, value)

@@ -27,7 +27,7 @@ INSTANCE_INTEGRATION = {
 E2E_METADATA = {
     'start_commands': [
         'apt-get update',
-        'apt-get install rrdtool librrd-dev libpython2-dev build-essential -y',
+        'apt-get install rrdtool librrd-dev build-essential -y',
         'pip install rrdtool',
     ]
 }

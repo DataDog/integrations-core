@@ -9,9 +9,10 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, Sequence
+from typing import Optional
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -20,56 +21,56 @@ from . import defaults, validators
 
 
 class MetricPatterns(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
 
 
 class InstanceConfig(BaseModel):
-    class Config:
-        allow_mutation = False
-
+    model_config = ConfigDict(
+        validate_default=True,
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
     channel: str = Field(..., min_length=1)
-    disable_generic_tags: Optional[bool]
-    empty_default_hostname: Optional[bool]
-    message_flows: Optional[bool]
-    metric_patterns: Optional[MetricPatterns]
-    min_collection_interval: Optional[float]
+    disable_generic_tags: Optional[bool] = None
+    empty_default_hostname: Optional[bool] = None
+    message_flows: Optional[bool] = None
+    metric_patterns: Optional[MetricPatterns] = None
+    min_collection_interval: Optional[float] = None
     mq_password: Optional[str] = Field(None, min_length=1)
     mq_port: int
     mq_server: str = Field(..., min_length=1)
     mq_user: Optional[str] = Field(None, min_length=1)
-    mqcd_version: Optional[Literal[1, 2, 3, 4, 5, 6, 7, 8, 9]]
-    persist_connections: Optional[bool]
+    mqcd_version: Optional[Literal[1, 2, 3, 4, 5, 6, 7, 8, 9]] = None
+    persist_connections: Optional[bool] = None
     queue_manager: str = Field(..., min_length=1)
-    resource_statistics: Optional[bool]
-    service: Optional[str]
-    tags: Optional[Sequence[str]]
-    tls_auth: Optional[bool]
-    tls_certificate_label: Optional[str]
-    tls_cipher_spec: Optional[str]
+    resource_statistics: Optional[bool] = None
+    service: Optional[str] = None
+    tags: Optional[tuple[str, ...]] = None
+    tls_auth: Optional[bool] = None
+    tls_certificate_label: Optional[str] = None
+    tls_cipher_spec: Optional[str] = None
     tls_key_repository_location: Optional[str] = Field(None, min_length=1)
 
-    @root_validator(pre=True)
+    @model_validator(mode='before')
     def _initial_validation(cls, values):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
-    @validator('*', pre=True, always=True)
-    def _ensure_defaults(cls, v, field):
-        if v is not None or field.required:
-            return v
+    @field_validator('*', mode='before')
+    def _validate(cls, value, info):
+        field = cls.model_fields[info.field_name]
+        field_name = field.alias or info.field_name
+        if field_name in info.context['configured_fields']:
+            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-        return getattr(defaults, f'instance_{field.name}')(field, v)
+        return validation.utils.make_immutable(value)
 
-    @validator('*')
-    def _run_validations(cls, v, field):
-        if not v:
-            return v
-
-        return getattr(validators, f'instance_{field.name}', identity)(v, field=field)
-
-    @root_validator(pre=False)
-    def _final_validation(cls, values):
-        return validation.core.finalize_config(getattr(validators, 'finalize_instance', identity)(values))
+    @model_validator(mode='after')
+    def _final_validation(cls, model):
+        return validation.core.check_model(getattr(validators, 'check_instance', identity)(model))

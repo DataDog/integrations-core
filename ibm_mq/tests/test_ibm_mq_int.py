@@ -322,6 +322,7 @@ def test_check_regex_tag(aggregator, get_check, instance_queue_regex_tag, seed_d
         'connection_name:{}({})'.format(common.HOST, common.PORT),
         'channel:{}'.format(common.CHANNEL),
         'queue:{}'.format(common.QUEUE),
+        'queue_usage:normal',
         'foo:bar',
     ]
 

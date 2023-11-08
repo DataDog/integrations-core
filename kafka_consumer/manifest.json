@@ -12,12 +12,10 @@
     "title": "Kafka Consumer",
     "media": [],
     "classifier_tags": [
+      "Category::Message Queues",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Processing",
-      "Category::Messaging",
-      "Category::Autodiscovery"
+      "Supported OS::macOS"
     ]
   },
   "author": {
