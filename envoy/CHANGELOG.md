@@ -1,11 +1,5 @@
 # CHANGELOG - Envoy
 
-## 3.1.1 / 2023-11-08
-
-***Added***:
-
-* Add [Rbac statistics](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/rbac_filter) ([#16165](https://github.com/DataDog/integrations-core/pull/16165))
-
 <!-- towncrier release notes start -->
 
 ## 3.1.0 / 2023-09-29 / Agent 7.49.0
