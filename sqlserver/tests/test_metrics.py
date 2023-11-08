@@ -66,21 +66,17 @@ def test_check_server_metrics(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize("database_autodiscovery", [True, False])
 @pytest.mark.parametrize("dbm_enabled", [True, False])
 def test_check_instance_metrics(
     aggregator,
     dd_run_check,
     init_config,
     instance_docker_metrics,
-    database_autodiscovery,
     dbm_enabled,
 ):
-    instance_docker_metrics['database_autodiscovery'] = database_autodiscovery
+    instance_docker_metrics['database_autodiscovery'] = False
     instance_docker_metrics['dbm'] = dbm_enabled
     instance_docker_metrics['include_instance_metrics'] = True
-    if database_autodiscovery:
-        instance_docker_metrics['autodiscovery_include'] = AUTODISCOVERY_DBS
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     dd_run_check(sqlserver_check)
@@ -88,7 +84,7 @@ def test_check_instance_metrics(
     tags = instance_docker_metrics.get('tags', [])
 
     check_sqlserver_can_connect(
-        aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags, database_autodiscovery
+        aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags, False
     )
 
     for metric_name, _, _ in INSTANCE_METRICS:
@@ -98,21 +94,50 @@ def test_check_instance_metrics(
             continue
         aggregator.assert_metric(metric_name, tags=tags, hostname=sqlserver_check.resolved_hostname, count=1)
 
-    if not database_autodiscovery:
-        for metric_name, _, _ in INSTANCE_METRICS_DATABASE:
-            aggregator.assert_metric(metric_name, tags=tags, hostname=sqlserver_check.resolved_hostname, count=1)
-    else:
-        for db in AUTODISCOVERY_DBS:
-            for metric_name, _, _ in INSTANCE_METRICS_DATABASE:
-                aggregator.assert_metric(
-                    metric_name,
-                    tags=tags + ['database:{}'.format(db)],
-                    hostname=sqlserver_check.resolved_hostname,
-                    count=1,
-                )
+    for metric_name, _, _ in INSTANCE_METRICS_DATABASE:
+        aggregator.assert_metric(metric_name, tags=tags, hostname=sqlserver_check.resolved_hostname, count=1)
+
     if not dbm_enabled:
         for metric_name, _, _ in DBM_MIGRATED_METRICS:
             aggregator.assert_metric(metric_name, tags=tags, hostname=sqlserver_check.resolved_hostname, count=1)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_check_instance_metrics_autodiscovery(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['autodiscovery_include'] = AUTODISCOVERY_DBS
+    instance_docker_metrics['include_instance_metrics'] = True
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    dd_run_check(sqlserver_check)
+
+    tags = instance_docker_metrics.get('tags', [])
+
+    check_sqlserver_can_connect(
+        aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags, True
+    )
+
+    for metric_name, _, _ in INSTANCE_METRICS:
+        # TODO: we should find a better way to test these metrics
+        # remove SQL Server incremental sql fraction metrics for now
+        if metric_name in INCR_FRACTION_METRICS:
+            continue
+        aggregator.assert_metric(metric_name, tags=tags, hostname=sqlserver_check.resolved_hostname, count=1)
+
+    for db in AUTODISCOVERY_DBS:
+        for metric_name, _, _ in INSTANCE_METRICS_DATABASE:
+            aggregator.assert_metric(
+                metric_name,
+                tags=tags + ['database:{}'.format(db)],
+                hostname=sqlserver_check.resolved_hostname,
+                count=1,
+            )
 
 
 @pytest.mark.integration
