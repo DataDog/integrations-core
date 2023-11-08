@@ -280,11 +280,6 @@ files:
         of the current user will be used.
       value:
         type: string
-    - name: timeout
-      description: The number of seconds to wait for new event signals.
-      value:
-        type: integer
-        example: 5
     - name: payload_size
       description: |
         The number of events to request at a time.
@@ -309,6 +304,15 @@ files:
       value:
         type: boolean
         example: false
+    - name: timeout
+      description: |
+        The number of seconds to wait for new event signals.
+
+        Note: This is only used when `legacy_mode_v2` is set to `true`.
+        Starting in Agent version 7.50.0 this option is no longer applicable and can be removed.
+      value:
+        type: integer
+        example: 5
     - name: legacy_mode
       description: |
         Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
