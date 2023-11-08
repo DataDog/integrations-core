@@ -49,6 +49,7 @@ files:
       description: |
         Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
 
+        When set to `true`, WMI is used to collect events.
           /\ WARNING /\
           This mode, by nature of the underlying technology, is significantly more resource intensive.
 
@@ -57,6 +58,14 @@ files:
       value:
         type: boolean
         display_default: true
+        example: false
+    - name: legacy_mode_v2
+      description: |
+        Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
+
+        When set to `true`, the Python Event Log API is used to collect events.
+      value:
+        type: boolean
         example: false
     - template: init_config/default
   - template: instances
@@ -292,10 +301,19 @@ files:
         This is useful for preventing duplicate events being sent as a consequence of Agent restarts.
       value:
         type: integer
+    - name: legacy_mode_v2
+      description: |
+        Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
+
+        When set to `true`, the Python Event Log API is used to collect events.
+      value:
+        type: boolean
+        example: false
     - name: legacy_mode
       description: |
         Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
 
+        When set to `true`, WMI is used to collect events.
           /\ WARNING /\
           This mode, by nature of the underlying technology, is significantly more resource intensive.
 
