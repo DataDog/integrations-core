@@ -16,8 +16,7 @@ This check uses [OpenMetrics][5] to collect metrics from the OpenMetrics endpoin
 
 ### Configuration
 
-#### Containerized
-##### Metric collection
+#### Metric collection
 
 Make sure that the Prometheus-formatted metrics are exposed in your Karpenter cluster and which port. You can configure the port by following the instructions on the [Metrics][10] page in the Karpenter documentation. For the Agent to start collecting metrics, the Karpenter pods need to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [sample karpenter.d/conf.yaml][4].
 
