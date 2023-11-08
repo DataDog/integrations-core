@@ -13,6 +13,42 @@ Follow the instructions below to install and configure this check for an Agent r
 The Nvidia Triton check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
+#### OpenMetrics endpoint
+
+By default, the Nvidia Triton server exposes all metrics through the Prometheus endpoint. 
+To enable all metrics reportings: 
+
+```
+tritonserver --allow-metrics=true
+```
+
+To change the metric endpoint, use the `--metrics-address` option.
+
+Example:
+
+```
+tritonserver --metrics-address=http://0.0.0.0:8002
+```
+
+In this case, the OpenMetrics endpoint is exposed at this URL: `http://<NVIDIA_TRITON_ADDRESS>:8002/metrics`.
+
+The [latency summary][10] metrics are disabled by default. To enable summary metrics for latencies, use the command below:
+
+```
+tritonserver --metrics-config summary_latencies=true
+```
+
+The [response cache metrics][11] are not reported by default. You need to enable a cache implementation on the server side by specifying a <cache_implementation> and corresponding configuration.
+
+For instance:
+
+```
+tritonserver --cache-config local,size=1048576
+```
+
+Nvidia Triton also offers the possibility to expose [custom metrics][12] through their Openemtrics endpoint. Datadog can also collect these custom metrics using the `extra_metrics` option.
+<div class="alert alert-warning">These custom Nvidia Triton metrics are considered standard metrics in Datadog.</div>
+
 ### Configuration
 
 1. Edit the `nvidia_triton.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your nvidia_triton performance data. See the [sample nvidia_triton.d/conf.yaml][4] for all available configuration options.
@@ -53,3 +89,6 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/nvidia_triton/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/nvidia_triton/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/metrics.html#summaries
+[11]: https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/metrics.html#response-cache-metrics
+[12]: https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/metrics.html#custom-metrics
