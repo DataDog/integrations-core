@@ -49,15 +49,15 @@ on:
         type: boolean
       agent-image:
         required: false
-        default: ""
+        default: "datadog/agent-dev:nightly-7-49-x-py3"
         type: string
       agent-image-py2:
         required: false
-        default: ""
+        default: "datadog/agent-dev:nightly-7-49-x-py2"
         type: string
       agent-image-windows:
         required: false
-        default: ""
+        default: "datadog/agent:7.49.0-servercore"
         type: string
       agent-image-windows-py2:
         required: false
