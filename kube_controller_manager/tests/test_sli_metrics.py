@@ -209,7 +209,7 @@ def test_detect_sli_endpoint(mock_metrics, instance):
         mock_request.return_value.status_code = 200
         c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
         c.check(instance)
-        assert c._slis_available is True
+        assert instance["slis_available"] is True
 
 
 def test_detect_sli_endpoint_404(mock_metrics, instance):
@@ -217,7 +217,7 @@ def test_detect_sli_endpoint_404(mock_metrics, instance):
         mock_request.return_value.status_code = 404
         c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
         c.check(instance)
-        assert c._slis_available is False
+        assert instance["slis_available"] is False
 
 
 def test_detect_sli_endpoint_403(mock_metrics, mock_request, instance):
@@ -225,4 +225,4 @@ def test_detect_sli_endpoint_403(mock_metrics, mock_request, instance):
         mock_request.return_value.status_code = 403
         c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
         c.check(instance)
-        assert c._slis_available is False
+        assert instance["slis_available"] is False

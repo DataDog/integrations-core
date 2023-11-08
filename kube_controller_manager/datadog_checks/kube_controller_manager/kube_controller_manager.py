@@ -151,11 +151,12 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, SliMetricsScraperMixin
 
                 instance['health_url'] = url
 
-            slis_instance = self.create_sli_prometheus_instance(instances[0])
-            self.slis_scraper_config = self.get_scraper_config(slis_instance)
-            self.detect_sli_endpoint(
-                self.get_http_handler(self.slis_scraper_config), slis_instance.get('prometheus_url')
-            )
+                slis_instance = self.create_sli_prometheus_instance(instance)
+                instance['sli_scraper_config'] = self.get_scraper_config(slis_instance)
+                if instance.get('slis_available', None) is None:
+                    instance['slis_available'] = self.detect_sli_endpoint(
+                        self.get_http_handler(instance['sli_scraper_config']), slis_instance.get('prometheus_url')
+                    )
 
     def check(self, instance):
         # Get the configuration for this specific instance
@@ -190,9 +191,9 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, SliMetricsScraperMixin
 
         self._perform_service_check(instance)
 
-        if self._slis_available:
+        if instance.get('sli_scraper_config', None) and instance.get('slis_available', None):
             self.log.debug('Processing kube controller manager SLI metrics')
-            self.process(self.slis_scraper_config, metric_transformers=self.sli_transformers)
+            self.process(instance['sli_scraper_config'], metric_transformers=self.sli_transformers)
 
     def _ignore_deprecated_metric(self, metric, scraper_config):
         return metric.documentation.startswith("(Deprecated)")

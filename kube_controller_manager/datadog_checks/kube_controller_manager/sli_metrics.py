@@ -23,7 +23,6 @@ class SliMetricsScraperMixin(OpenMetricsBaseCheck):
 
     def __init__(self, *args, **kwargs):
         super(SliMetricsScraperMixin, self).__init__(*args, **kwargs)
-        self._slis_available = None
         self.sli_transformers = {
             'kubernetes_healthcheck': self.sli_metrics_transformer,
             'kubernetes_healthchecks_total': self.sli_metrics_transformer,
@@ -50,8 +49,6 @@ class SliMetricsScraperMixin(OpenMetricsBaseCheck):
         Whether the SLI metrics endpoint is available (k8s 1.26+).
         :return: true if the endpoint returns 200, false otherwise.
         """
-        if self._slis_available is not None:
-            return self._slis_available
         try:
             r = http_handler.get(url, stream=True)
         except Exception as e:
@@ -62,8 +59,7 @@ class SliMetricsScraperMixin(OpenMetricsBaseCheck):
                 "The /metrics/slis endpoint was introduced in Kubernetes v1.26. If you expect to see SLI metrics, \
                 please check that your permissions are configured properly."
             )
-        self._slis_available = r.status_code == 200
-        return self._slis_available
+        return r.status_code == 200
 
     def sli_metrics_transformer(self, metric, scraper_config):
         modified_metric = deepcopy(metric)
