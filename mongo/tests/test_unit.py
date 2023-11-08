@@ -614,7 +614,7 @@ def test_service_check_critical_when_connection_dies(error_cls, aggregator, chec
 
 def test_parse_mongo_version_with_suffix(check, instance, dd_run_check, datadog_agent):
     '''
-    Gracefully handle mongodb version in the form "major.minor.path-suffix".
+    Gracefully handle mongodb version in the form "major.minor.patch-suffix".
     One real-world example is Percona:
     https://www.percona.com/mongodb/software
     '''
