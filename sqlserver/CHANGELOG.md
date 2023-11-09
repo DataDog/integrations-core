@@ -16,6 +16,18 @@
 * Bump the `pyodbc` version to 5.0.1 ([#16041](https://github.com/DataDog/integrations-core/pull/16041))
 * Fix config option `dbm_enabled` type to ensure it is a boolean ([#16078](https://github.com/DataDog/integrations-core/pull/16078))
 
+## 15.0.3 / 2023-11-08
+
+***Fixed***
+
+* Fix `aarch64` compatibility of the `sqlserver` check by downgrading `lxml` to version 4.9.2 ([16080](https://github.com/DataDog/integrations-core/pull/16080))
+
+## 15.0.2 / 2023-10-10 / Agent 7.49.0
+
+***Fixed***:
+
+* Properly decode query_hash when statement_text is None ([#15974](https://github.com/DataDog/integrations-core/pull/15974))
+
 ## 15.0.1 / 2023-10-06
 
 ***Fixed***
