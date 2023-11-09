@@ -1,0 +1,62 @@
+{
+    "title": "Steven's Dashboard Wed, Nov 1, 5:21:44 pm",
+    "description": null,
+    "widgets": [
+        {
+            "id": 2274561750639842,
+            "definition": {
+                "title": "",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "split_group",
+                "source_widget_definition": {
+                    "title": "",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "type": "timeseries",
+                    "requests": [
+                        {
+                            "response_format": "timeseries",
+                            "queries": [
+                                {
+                                    "name": "query1",
+                                    "data_source": "metrics",
+                                    "query": "avg:system.cpu.user{*}"
+                                }
+                            ],
+                            "style": {
+                                "palette": "dog_classic",
+                                "line_type": "solid",
+                                "line_width": "normal"
+                            },
+                            "display_type": "line"
+                        }
+                    ]
+                },
+                "split_config": {
+                    "split_dimensions": [
+                        {
+                            "one_graph_per": "service"
+                        }
+                    ],
+                    "limit": 6,
+                    "sort": {
+                        "order": "desc"
+                    }
+                },
+                "size": "md",
+                "has_uniform_y_axes": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 3
+            }
+        }
+    ],
+    "template_variables": [],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}
