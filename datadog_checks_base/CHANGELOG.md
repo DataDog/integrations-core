@@ -33,6 +33,18 @@
 * Bump the `pymysql` version to 1.1.0 on Python 3 ([#16042](https://github.com/DataDog/integrations-core/pull/16042))
 * Bump the `pyodbc` version to 5.0.1 ([#16041](https://github.com/DataDog/integrations-core/pull/16041))
 
+## 34.0.3 / 2023-11-08
+
+***Fixed***:
+
+* Fix `aarch64` compatibility of the `sqlserver` and `ibm_was` checks by downgrading `lxml` to version 4.9.2 ([16080](https://github.com/DataDog/integrations-core/pull/16080))
+
+## 34.0.2 / 2023-10-27
+
+***Fixed***:
+
+* Bump the `cryptography` version to 41.0.5 ([#16083](https://github.com/DataDog/integrations-core/pull/16083))
+
 ## 34.0.1 / 2023-10-17
 
 ***Fixed***:
