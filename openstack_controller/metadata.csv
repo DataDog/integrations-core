@@ -248,4 +248,4 @@ openstack.octavia.amphora.stats.bytes_out,gauge,,,,"The total bytes sent",0,open
 openstack.octavia.amphora.stats.request_errors,gauge,,,,"The total requests that were unable to be fulfilled",0,openstack_controller,octavia amphora req err,
 openstack.octavia.amphora.stats.total_connections,gauge,,,,"The total connections handled",0,openstack_controller,octavia amphora total connections,
 openstack.glance.image.count,gauge,,,,"Number of public virtual machine images",0,openstack_controller,glance image ct,
-openstack.glance.response_time,gauge,,millisecond,,"Duration that an HTTP request takes to complete when making a request to keystone endpoint",0,openstack_controller,glance response time,
+openstack.glance.response_time,gauge,,millisecond,,"Duration that an HTTP request takes to complete when making a request to glance endpoint",0,openstack_controller,glance response time,
