@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 34.0.3 / 2023-11-08
+
+***Fixed***:
+
+* Fix `aarch64` compatibility of the `sqlserver` and `ibm_was` checks by downgrading `lxml` to version 4.9.2 ([16080](https://github.com/DataDog/integrations-core/pull/16080))
+
 ## 34.0.2 / 2023-10-27
 
 ***Fixed***:
