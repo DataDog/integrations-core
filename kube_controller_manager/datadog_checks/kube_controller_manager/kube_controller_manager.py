@@ -153,7 +153,7 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, SliMetricsScraperMixin
 
                 slis_instance = self.create_sli_prometheus_instance(instance)
                 instance['sli_scraper_config'] = self.get_scraper_config(slis_instance)
-                if instance.get('slis_available', None) is None:
+                if instance.get('slis_available') is None:
                     instance['slis_available'] = self.detect_sli_endpoint(
                         self.get_http_handler(instance['sli_scraper_config']), slis_instance.get('prometheus_url')
                     )
@@ -191,7 +191,7 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, SliMetricsScraperMixin
 
         self._perform_service_check(instance)
 
-        if instance.get('sli_scraper_config', None) and instance.get('slis_available', None):
+        if instance.get('sli_scraper_config') and instance.get('slis_available'):
             self.log.debug('Processing kube controller manager SLI metrics')
             self.process(instance['sli_scraper_config'], metric_transformers=self.sli_transformers)
 
