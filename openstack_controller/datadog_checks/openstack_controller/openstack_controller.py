@@ -12,6 +12,7 @@ from datadog_checks.openstack_controller.components.bare_metal import BareMetal
 from datadog_checks.openstack_controller.components.block_storage import BlockStorage
 from datadog_checks.openstack_controller.components.compute import Compute
 from datadog_checks.openstack_controller.components.identity import Identity
+from datadog_checks.openstack_controller.components.image import Image
 from datadog_checks.openstack_controller.components.load_balancer import LoadBalancer
 from datadog_checks.openstack_controller.components.network import Network
 from datadog_checks.openstack_controller.config import OpenstackConfig, normalize_discover_config_include
@@ -49,6 +50,7 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
             BlockStorage(self),
             BareMetal(self),
             LoadBalancer(self),
+            Image(self),
         ]
         self.projects_discovery = None
         if self.config.projects:

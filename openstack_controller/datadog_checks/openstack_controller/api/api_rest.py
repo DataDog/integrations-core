@@ -417,3 +417,8 @@ class ApiRest(Api):
         )
         response.raise_for_status()
         return response.json().get('amphora_stats', [])
+
+    def get_glance_images(self):
+        response = self.http.get('{}/v2/images'.format(self._catalog.get_endpoint_by_type(Component.Types.IMAGE.value)))
+        response.raise_for_status()
+        return response.json().get('images', [])
