@@ -373,6 +373,14 @@ envoy_http_downstream_cx_destroy_local_active_rq{envoy_http_conn_manager_prefix=
 # TYPE envoy_http_downstream_rq_ws_on_non_ws_route counter
 envoy_http_downstream_rq_ws_on_non_ws_route{envoy_http_conn_manager_prefix="ingress_http"} 0
 envoy_http_downstream_rq_xx{envoy_response_code_class="4",envoy_http_conn_manager_prefix="ingress_http"} 0
+# TYPE envoy_http_rbac_allowed counter
+envoy_http_rbac_allowed{envoy_http_conn_manager_prefix="ingress_http"} 0
+# TYPE envoy_http_rbac_denied counter
+envoy_http_rbac_denied{envoy_http_conn_manager_prefix="ingress_http"} 0
+# TYPE envoy_http_rbac_shadow_allowed counter
+envoy_http_rbac_shadow_allowed{envoy_http_conn_manager_prefix="ingress_http"} 0
+# TYPE envoy_http_rbac_shadow_denied counter
+envoy_http_rbac_shadow_denied{envoy_http_conn_manager_prefix="ingress_http"} 0
 # TYPE envoy_listener_worker_4_downstream_cx_total counter
 envoy_listener_worker_4_downstream_cx_total{envoy_listener_address="0.0.0.0_80"} 0
 # TYPE envoy_listener_http_downstream_rq_xx counter
