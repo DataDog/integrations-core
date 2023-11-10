@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.1.0 / 2023-11-10
+
+***Added***:
+
+* Add support for glance component. ([#16186](https://github.com/DataDog/integrations-core/pull/16186))
+
 ## 6.0.0 / 2023-11-07
 
 ***Changed***:
