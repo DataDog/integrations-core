@@ -39,12 +39,20 @@ init_config:
     ## @param legacy_mode - boolean - optional - default: true
     ## Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
     ##
+    ## When set to `true`, WMI is used to collect events.
     ##   /\ WARNING /\
     ##   This mode, by nature of the underlying technology, is significantly more resource intensive.
     ##
     ## Setting this option to `false` is only supported on Agent versions 7 and above.
     #
     legacy_mode: false
+
+    ## @param legacy_mode_v2 - boolean - optional - default: false
+    ## Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
+    ##
+    ## When set to `true`, the Python Event Log API is used to collect events.
+    #
+    # legacy_mode_v2: false
 
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
@@ -222,11 +230,6 @@ instances:
     #
     # domain: <DOMAIN>
 
-    ## @param timeout - integer - optional - default: 5
-    ## The number of seconds to wait for new event signals.
-    #
-    # timeout: 5
-
     ## @param payload_size - integer - optional - default: 10
     ## The number of events to request at a time.
     ##
@@ -242,9 +245,25 @@ instances:
     #
     # bookmark_frequency: <BOOKMARK_FREQUENCY>
 
+    ## @param legacy_mode_v2 - boolean - optional - default: false
+    ## Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
+    ##
+    ## When set to `true`, the Python Event Log API is used to collect events.
+    #
+    # legacy_mode_v2: false
+
+    ## @param timeout - integer - optional - default: 5
+    ## The number of seconds to wait for new event signals.
+    ##
+    ## Note: This is only used when `legacy_mode_v2` is set to `true`.
+    ## Starting in Agent version 7.50.0 this option is no longer applicable and can be removed.
+    #
+    # timeout: 5
+
     ## @param legacy_mode - boolean - optional - default: true
     ## Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
     ##
+    ## When set to `true`, WMI is used to collect events.
     ##   /\ WARNING /\
     ##   This mode, by nature of the underlying technology, is significantly more resource intensive.
     ##
