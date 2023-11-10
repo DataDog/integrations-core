@@ -266,3 +266,6 @@ class ApiSdk(Api):
         )
         response.raise_for_status()
         return response.json().get('amphora_stats', [])
+
+    def get_glance_images(self):
+        return [image.to_dict(original_names=True) for image in self.connection.image.images()]

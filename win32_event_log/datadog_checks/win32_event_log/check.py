@@ -11,6 +11,7 @@ import win32security
 from six import PY2
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.base.utils.time import get_timestamp
 
@@ -69,14 +70,36 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 
-        # default to legacy mode for configuration backwards compatibility
-        init_config_legacy_mode = is_affirmative(init_config.get('legacy_mode', True))
+        init_config_legacy_mode = init_config.get('legacy_mode', None)
+        init_config_legacy_mode_v2 = init_config.get('legacy_mode_v2', None)
         # If legacy_mode is unset for an instance, default to the init_config option
-        instance_legacy_mode = is_affirmative(instance.get('legacy_mode', init_config_legacy_mode))
-        if PY2 or instance_legacy_mode:
+        use_legacy_mode = instance.get('legacy_mode', init_config_legacy_mode)
+        use_legacy_mode_v2 = instance.get('legacy_mode_v2', init_config_legacy_mode_v2)
+
+        # If legacy_mode and legacy_mode_v2 are unset, default to legacy mode for configuration backwards compatibility
+        if use_legacy_mode is None and not is_affirmative(use_legacy_mode_v2):
+            use_legacy_mode = True
+
+        use_legacy_mode = is_affirmative(use_legacy_mode)
+        use_legacy_mode_v2 = is_affirmative(use_legacy_mode_v2)
+
+        if use_legacy_mode and use_legacy_mode_v2:
+            raise ConfigurationError(
+                "legacy_mode and legacy_mode_v2 are both true. Each instance must set a single mode to true."
+            )
+
+        if use_legacy_mode:
+            # Supports PY2 and PY3
             return Win32EventLogWMI(name, init_config, instances)
-        else:
+        elif use_legacy_mode_v2:
+            # Supports PY3
+            if PY2:
+                raise ConfigurationError("legacy_mode_v2 is not supported on Python2")
             return super(Win32EventLogCheck, cls).__new__(cls)
+        else:
+            raise SkipInstanceError(
+                "Set the legacy_mode and legacy_mode_v2 options to configure the implementation to use."
+            )
 
     def __init__(self, name, init_config, instances):
         super(Win32EventLogCheck, self).__init__(name, init_config, instances)
@@ -283,7 +306,6 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
 
     def poll_events(self):
         while True:
-
             # IMPORTANT: the subscription starts immediately so you must consume before waiting for the first signal
             while True:
                 # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtnext

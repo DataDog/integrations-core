@@ -117,6 +117,14 @@ class IdentityItem(BaseModel):
     users: Optional[bool] = None
 
 
+class ImageItem(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    images: Optional[bool] = None
+
+
 class IncludeItem3(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -286,6 +294,7 @@ class Components(BaseModel):
     block_storage: Optional[Union[bool, MappingProxyType[str, Any]]] = Field(None, alias='block-storage')
     compute: Optional[Union[bool, ComputeItem]] = None
     identity: Optional[Union[bool, IdentityItem]] = None
+    image: Optional[Union[bool, ImageItem]] = None
     load_balancer: Optional[Union[bool, LoadBalancerItem]] = Field(None, alias='load-balancer')
     network: Optional[Union[bool, NetworkItem]] = None
 

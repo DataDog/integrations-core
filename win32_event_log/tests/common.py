@@ -6,7 +6,7 @@ EVENT_ID = 9000
 EVENT_CATEGORY = 42
 
 INSTANCE = {
-    'legacy_mode': False,
+    'legacy_mode_v2': True,
     'timeout': 2,
     'path': 'Application',
     'filters': {'source': [EVENT_SOURCE]},

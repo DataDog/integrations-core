@@ -47,6 +47,7 @@ class Component:
         BLOCK_STORAGE = 'block-storage'
         BAREMETAL = 'baremetal'
         LOAD_BALANCER = 'load-balancer'
+        IMAGE = 'image'
 
     @unique
     class Types(list, Enum):
@@ -56,6 +57,7 @@ class Component:
         BLOCK_STORAGE = ['block-storage', 'volumev3']
         BAREMETAL = ['baremetal']
         LOAD_BALANCER = ['load-balancer']
+        IMAGE = ['image']
 
     def http_error(report_service_check=False):
         def decorator_http_error(func):

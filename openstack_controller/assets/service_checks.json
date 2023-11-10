@@ -98,6 +98,22 @@
         "description": "Returns `CRITICAL` if the Agent is unable to query the Octavia API and `UNKNOWN` if endpoint is not found in the catalog. Returns `OK` otherwise."
     },
     {
+        "agent_version": "7.50.0",
+        "check": "openstack.glance.api.up",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "integration": "OpenStack",
+        "name": "OpenStack Glance API Up",
+        "groups": [
+            "host",
+            "keystone_server",
+            "region_id"
+        ],
+        "description": "Returns `CRITICAL` if the Agent is unable to query the Glance API and `UNKNOWN` if endpoint is not found in the catalog. Returns `OK` otherwise."
+    },
+    {
         "agent_version": "5.6.0",
         "check": "openstack.nova.hypervisor.up",
         "statuses": [
