@@ -37,7 +37,6 @@ class Image(Component):
         if report_images:
             data = self.check.api.get_glance_images()
             for item in data:
-
                 image = get_metrics_and_tags(
                     item,
                     tags=GLANCE_IMAGE_TAGS,
