@@ -2,6 +2,14 @@
 
 <!-- towncrier release notes start -->
 
+## 6.0.2 / 2023-11-10
+
+***Fixed***:
+
+* Add `oracledb` to the ignored dependencies when we bump them before a release ([#16155](https://github.com/DataDog/integrations-core/pull/16155))
+* Allow bumping the version of `dnspython` ([#16156](https://github.com/DataDog/integrations-core/pull/16156))
+* Add a retry mechanism when pulling the agent docker image ([#16157](https://github.com/DataDog/integrations-core/pull/16157))
+
 ## 6.0.1 / 2023-11-02
 
 ***Fixed***:

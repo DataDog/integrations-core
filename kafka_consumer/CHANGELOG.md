@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 4.1.4 / 2023-11-10
+
+***Fixed***:
+
+* Attempt client connection before fetching consumer offsets ([#15951](https://github.com/DataDog/integrations-core/pull/15951))
+* Bump librdkafka and confluent-kafka to v2.3.0 ([#16088](https://github.com/DataDog/integrations-core/pull/16088))
+
 ## 4.1.3 / 2023-10-11 / Agent 7.48.1
 
 ***Fixed***:

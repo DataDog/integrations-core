@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 28.0.1 / 2023-11-10
+
+***Fixed***:
+
+* Exclude orjson when checking for dependency updates. ([#16166](https://github.com/DataDog/integrations-core/pull/16166))
+
 ## 28.0.0 / 2023-10-26
 
 ***Changed***:

@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 11.4.0 / 2023-11-10
+
+***Added***:
+
+* * Add obfuscation_mode config option to allow enabling obfuscation with go-sqllexer ([#16126](https://github.com/DataDog/integrations-core/pull/16126)) ([#16126](https://github.com/DataDog/integrations-core/pull/16126))
+* Updated dependencies. ([#16154](https://github.com/DataDog/integrations-core/pull/16154))
+
 ## 11.3.0 / 2023-10-26
 
 ***Added***:

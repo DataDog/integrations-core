@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 7.10.0 / 2023-11-10
+
+***Added***:
+
+* Added CreateContainerConfigError wait reason ([#16143](https://github.com/DataDog/integrations-core/pull/16143))
+
+***Fixed***:
+
+* Always define logger.
+  Quick fix for https://github.com/DataDog/integrations-core/issues/16179. ([#16187](https://github.com/DataDog/integrations-core/pull/16187))
+
 ## 7.9.2 / 2023-09-29 / Agent 7.49.0
 
 ***Fixed***:
