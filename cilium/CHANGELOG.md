@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.2.0 / 2023-11-10
+
+***Added***:
+
+* Add more FQDN and L7 metrics ([#16164](https://github.com/DataDog/integrations-core/pull/16164))
+
 ## 3.1.0 / 2023-10-26
 
 ***Added***:
