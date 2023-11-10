@@ -6,5 +6,5 @@ matches: # keep specific branch patterns from being deleted
 # Protected branches: https://github.com/DataDog/integrations-core/settings/branches
 - master
 - agent-v\d+
-- \d+\\.\d+\\.x
+- \d+\.\d+\.x
 - badges
