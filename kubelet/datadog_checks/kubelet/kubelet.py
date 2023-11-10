@@ -177,14 +177,6 @@ class KubeletCheck(
             raise Exception('Kubelet check only supports one configured instance.')
         inst = instances[0] if instances else None
 
-        cadvisor_instance = self._create_cadvisor_prometheus_instance(inst)
-
-        if len(inst.get('ignore_metrics', {})) > 0:
-            # Add entries from configuration to ignore_metrics in the cadvisor collector.
-            cadvisor_instance['ignore_metrics'].extend(
-                m for m in inst.get('ignore_metrics', {}) if m not in cadvisor_instance['ignore_metrics']
-            )
-
         # configuring the collection of some of the metrics (via the cadvisor or the summary endpoint)
         self.max_depth = inst.get('max_depth', DEFAULT_MAX_DEPTH)
         enabled_gauges = inst.get('enabled_gauges', DEFAULT_ENABLED_GAUGES)
@@ -194,10 +186,25 @@ class KubeletCheck(
         pod_level_metrics = inst.get('pod_level_metrics', DEFAULT_POD_LEVEL_METRICS)
         self.pod_level_metrics = ["{0}.{1}".format(self.NAMESPACE, x) for x in pod_level_metrics]
 
-        kubelet_instance = self._create_kubelet_prometheus_instance(inst)
-        probes_instance = self._create_probes_prometheus_instance(inst)
+        # configuring the different instances use to scrape the 3 kubelet endpoints
+        prom_url, get_prom_url_err = get_prometheus_url("dummy_url/cadvisor")
+
+        cadvisor_instance = self._create_cadvisor_prometheus_instance(inst, prom_url)
+        if len(inst.get('ignore_metrics', {})) > 0:
+            # Add entries from configuration to ignore_metrics in the cadvisor collector.
+            cadvisor_instance['ignore_metrics'].extend(
+                m for m in inst.get('ignore_metrics', {}) if m not in cadvisor_instance['ignore_metrics']
+            )
+
+        kubelet_instance = self._create_kubelet_prometheus_instance(inst, prom_url)
+        probes_instance = self._create_probes_prometheus_instance(inst, prom_url)
         generic_instances = [cadvisor_instance, kubelet_instance, probes_instance]
+
         super(KubeletCheck, self).__init__(name, init_config, generic_instances)
+
+        # we need to wait that `super()` was exectued to have the self.log instance created
+        if get_prom_url_err:
+            self.log.warning('get_prometheus_url() failed: %s', get_prom_url_err)
 
         self.cadvisor_legacy_port = inst.get('cadvisor_port', CADVISOR_DEFAULT_PORT)
         self.cadvisor_legacy_url = None
@@ -235,17 +242,16 @@ class KubeletCheck(
 
         self.first_run = True
 
-    def _create_kubelet_prometheus_instance(self, instance):
+    def _create_kubelet_prometheus_instance(self, instance, prom_url):
         """
         Create a copy of the instance and set default values.
         This is so the base class can create a scraper_config with the proper values.
         """
-        endpoint = get_prometheus_url("dummy_url/kubelet")
         kubelet_instance = deepcopy(instance)
         kubelet_instance.update(
             {
                 'namespace': self.NAMESPACE,
-                'prometheus_url': instance.get('kubelet_metrics_endpoint', urljoin(endpoint, KUBELET_METRICS_PATH)),
+                'prometheus_url': instance.get('kubelet_metrics_endpoint', urljoin(prom_url, KUBELET_METRICS_PATH)),
                 'metrics': [
                     DEFAULT_GAUGES,
                     DEPRECATED_GAUGES,
