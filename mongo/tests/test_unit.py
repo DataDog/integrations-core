@@ -610,3 +610,17 @@ def test_service_check_critical_when_connection_dies(error_cls, aggregator, chec
         with pytest.raises(Exception, match=f"{error_cls.__name__}: {msg}"):
             dd_run_check(check)
         aggregator.assert_service_check('mongodb.can_connect', MongoDb.CRITICAL)
+
+
+def test_parse_mongo_version_with_suffix(check, instance, dd_run_check, datadog_agent):
+    '''
+    Gracefully handle mongodb version in the form "major.minor.patch-suffix".
+    One real-world example is Percona:
+    https://www.percona.com/mongodb/software
+    '''
+    check = check(instance)
+    check.check_id = 'test:123'
+    with mock_pymongo('standalone') as mocked_client:
+        mocked_client.server_info = mock.MagicMock(return_value={'version': '3.6.23-13.0'})
+        dd_run_check(check)
+    datadog_agent.assert_metadata('test:123', {'version.scheme': 'semver', 'version.major': '3', 'version.minor': '6'})
