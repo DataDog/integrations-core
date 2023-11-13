@@ -6,12 +6,12 @@
 # modify the wheel build.
 
 name "snowflake-connector-python-py3"
-default_version "3.1.0"
+default_version "3.4.0"
 
 dependency "agent-requirements-constraints"
 
 source :url => "https://github.com/snowflakedb/snowflake-connector-python/archive/refs/tags/v#{version}.tar.gz",
-       :sha256 => "fb2477b653bd58edd0366b4d6395d109fd4e238b85ce5685d7944455e0d48dab",
+       :sha256 => "0af8e463d2e558eadb0d75d683e2154acf3e10a74510cc06f93c7596ec82323b",
        :extract => :seven_zip
 
 relative_path "snowflake-connector-python-#{version}"
@@ -35,11 +35,5 @@ build do
     }
   end
 
-  # We need a newer version of oscrypto than the one released to get a fix for a bug
-  # that gets triggered when having double digits on the OpenSSL version
-  # (https://github.com/wbond/oscrypto/issues/75).
-  # We can remove the oscrypto pinning once the fix becomes part of a new release
-  oscrypto_commit = "d5f3437ed24257895ae1edd9e503cfb352e635a8"
-
-  python_build_env.wheel ". \"oscrypto @ git+https://github.com/wbond/oscrypto.git@#{oscrypto_commit}\"", :env => build_env
+  python_build_env.wheel ".", env: build_env
 end

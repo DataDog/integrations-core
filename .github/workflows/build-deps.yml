@@ -18,6 +18,18 @@ jobs:
         env:
           TARGET_PLATFORM: ${{ matrix.os }}
           AGENT_BUILD_IMAGE_VERSION: "v20878799-a2f77ae"
-          INTEGRATIONS_CORE_PATH: ${{ github.workspace }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+
+  build-and-resolve-dependencies-windows:
+    name: "Build and resolve dependencies for Windows"
+    runs-on: "windows-2019"
+    steps:
+      - uses: actions/checkout@v4
+      - run: "bash .deps-builder/build-dependencies.sh"
+        env:
+          TARGET_PLATFORM: "windows_x64"
+          AGENT_BUILD_IMAGE_VERSION: "1809-v22993034-4b34cf9"
+          RUNNING_ON_WINDOWS: true
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_ACCESS_TOKEN }}

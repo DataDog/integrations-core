@@ -18,6 +18,8 @@ class PythonBuildEnvironment
   # Note that the Python build environment itself is assumed to be a global (per-project) entity,
   # and instances of the class are expected to use the same data for the most part,
   # they exist as instances mostly to hold a reference to the current builder.
+  include Omnibus::Util
+
   @@constraints_file = nil
 
   def initialize(builder)
@@ -25,13 +27,12 @@ class PythonBuildEnvironment
   end
 
   def create(python, build_dependencies_file)
-    # TODO: venv is probably not an option for py2
-    @builder.command "#{python} -m venv #{build_root}"
+    @builder.command "#{python} -m virtualenv #{build_root}"
     @builder.command "#{self.python} -m pip install -r #{build_dependencies_file}"
   end
 
   def python
-    File.join(build_root, "bin", "python")
+    windows_safe_path(build_root, os == 'windows' ? "Scripts" : "bin", "python")
   end
 
   # Set a constraint file (for all instances)
@@ -77,12 +78,12 @@ class PythonBuildEnvironment
   end
 
   def wheels_dir
-    File.join(@builder.install_dir, "wheels")
+    windows_safe_path(@builder.install_dir, "wheels")
   end
 
   private
 
   def build_root
-    File.join(@builder.build_dir, "build_env")
+    windows_safe_path(@builder.build_dir, "build_env")
   end
 end

@@ -14,6 +14,8 @@ build do
     python = "#{install_dir}/embedded/bin/python3"
   end
 
+  # We require virtualenv for creating the build environment
+  command "#{python} -m pip install virtualenv==20.24.6"
   # Install build dependencies in a virtual environment
   python_build_env.create python, "build_dependencies.txt"
 end

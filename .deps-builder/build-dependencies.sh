@@ -4,9 +4,18 @@ set -exu
 target_platform="${TARGET_PLATFORM}"
 image_version="${AGENT_BUILD_IMAGE_VERSION:-latest}"
 
-integrations_core_path="/integrations-core"
-docker_image="datadog/agent-buildimages-${target_platform}:v20878799-a2f77ae"
-build_script="/integrations-core/.deps-builder/build.sh"
+docker_image="datadog/agent-buildimages-${target_platform}:${image_version}"
+
+if [ -z "${RUNNING_ON_WINDOWS:-}" ];
+then
+    mount_target="/integrations-core"
+    mount_source="$(pwd)"
+    build_command="bash ${mount_target}/.deps-builder/build.sh"
+else
+    mount_target='c:\integrations-core'
+    mount_source="$(cmd //c cd)"
+    build_command='c:\integrations-core\.deps-builder\buildwin.bat'
+fi
 
 # Docker login
 if [ ! -z ${DOCKER_USERNAME:-} ];
@@ -15,7 +24,8 @@ fi
 
 # Run the omnibus build on the builder image
 docker run \
-       --mount type=bind,source="$(pwd)",target="${integrations_core_path}" \
+       --mount type=bind,source="${mount_source}",target="${mount_target}" \
        --name "agent-integrations-dependencies-builder" \
        "${docker_image}" \
-       bash "${build_script}"
+       ${build_command}
+

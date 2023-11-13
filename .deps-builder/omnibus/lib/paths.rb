@@ -1,7 +1,8 @@
 # (Computed) constants for use across definitions
 
 def integrations_core_root
-  root = ENV.fetch('INTEGRATIONS_CORE_PATH', '/integrations-core')
+  default_root = windows? ? 'C:\integrations-core' : '/integrations-core'
+  root = ENV.fetch('INTEGRATIONS_CORE_PATH', default_root)
 end
 
 def agent_requirements_in
