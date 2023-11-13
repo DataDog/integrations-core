@@ -1,0 +1,1 @@
+Centralize `get_prometheus_url` function call in the init function and defer log warning after super() call.
