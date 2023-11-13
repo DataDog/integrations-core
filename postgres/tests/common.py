@@ -13,6 +13,7 @@ from datadog_checks.postgres.util import (
     NEWER_14_METRICS,
     QUERY_PG_CONTROL_CHECKPOINT,
     QUERY_PG_REPLICATION_SLOTS,
+    QUERY_PG_REPLICATION_SLOTS_STATS,
     QUERY_PG_STAT_WAL_RECEIVER,
     QUERY_PG_UPTIME,
     REPLICATION_STATS_METRICS,
@@ -238,11 +239,12 @@ def check_physical_replication_slots(aggregator, expected_tags):
 def check_logical_replication_slots(aggregator, expected_tags):
     logical_replication_slot_tags = expected_tags + [
         'slot_name:logical_slot',
-        'slot_persistence:permanent',
         'slot_state:inactive',
         'slot_type:logical',
     ]
-    check_replication_slots(aggregator, expected_tags=logical_replication_slot_tags)
+    check_replication_slots(aggregator, expected_tags=logical_replication_slot_tags + ['slot_persistence:permanent'])
+    # Only logical replication slots will have rows in pg_stats_replication_slots
+    check_replication_slots_stats(aggregator, expected_tags=logical_replication_slot_tags)
 
 
 def check_replication_slots(aggregator, expected_tags, count=1):
@@ -258,6 +260,13 @@ def check_replication_slots(aggregator, expected_tags, count=1):
             'postgresql.replication_slot.xmin_age',
         ]:
             continue
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
+def check_replication_slots_stats(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 14.0:
+        return
+    for metric_name in _iterate_metric_name(QUERY_PG_REPLICATION_SLOTS_STATS):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
