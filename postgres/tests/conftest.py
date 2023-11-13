@@ -15,7 +15,18 @@ from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.config import PostgresConfig
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 
-from .common import DB_NAME, HOST, PASSWORD, PORT, PORT_REPLICA, PORT_REPLICA2, POSTGRES_IMAGE, POSTGRES_VERSION, USER
+from .common import (
+    DB_NAME,
+    HOST,
+    PASSWORD,
+    PORT,
+    PORT_REPLICA,
+    PORT_REPLICA2,
+    PORT_REPLICA_LOGICAL,
+    POSTGRES_IMAGE,
+    POSTGRES_VERSION,
+    USER,
+)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 INSTANCE = {
@@ -34,6 +45,7 @@ def connect_to_pg():
     if float(POSTGRES_VERSION) >= 10.0:
         psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA, password=PASSWORD)
         psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA2, password=PASSWORD)
+        psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA_LOGICAL, password=PASSWORD)
 
 
 @pytest.fixture(scope='session')
@@ -84,6 +96,13 @@ def pg_replica_instance():
 def pg_replica_instance2():
     instance = copy.deepcopy(INSTANCE)
     instance['port'] = PORT_REPLICA2
+    return instance
+
+
+@pytest.fixture
+def pg_replica_logical():
+    instance = copy.deepcopy(INSTANCE)
+    instance['port'] = PORT_REPLICA_LOGICAL
     return instance
 
 
