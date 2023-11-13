@@ -390,7 +390,7 @@ class PostgreSql(AgentCheck):
             if self._config.reported_hostname:
                 self._resolved_hostname = self._config.reported_hostname
             else:
-                self._resolved_hostname = self.resolve_db_host()            
+                self._resolved_hostname = self.resolve_db_host()
         return self._resolved_hostname
 
     def set_resolved_hostname_metadata(self):
