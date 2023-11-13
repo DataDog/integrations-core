@@ -68,6 +68,8 @@ from datadog_checks.sqlserver.queries import (
     QUERY_AO_FAILOVER_CLUSTER,
     QUERY_AO_FAILOVER_CLUSTER_MEMBER,
     QUERY_FAILOVER_CLUSTER_INSTANCE,
+    QUERY_LOG_SHIPPING_PRIMARY,
+    QUERY_LOG_SHIPPING_SECONDARY,
     QUERY_SERVER_STATIC_INFO,
     get_query_ao_availability_groups,
     get_query_file_stats,
@@ -753,6 +755,12 @@ class SQLServer(AgentCheck):
             else:
                 self.log_missing_metric("Failover Cluster Instance", major_version, engine_edition)
 
+        if is_affirmative(self.instance.get('include_primary_log_shipping_metrics', False)):
+            queries.extend([QUERY_LOG_SHIPPING_PRIMARY])
+
+        if is_affirmative(self.instance.get('include_secondary_log_shipping_metrics', False)):
+            queries.extend([QUERY_LOG_SHIPPING_SECONDARY])
+
         self._dynamic_queries = self._new_query_executor(queries)
         self._dynamic_queries.compile_queries()
         self.log.debug("initialized dynamic queries")
@@ -822,6 +830,7 @@ class SQLServer(AgentCheck):
 
                 if self.dynamic_queries:
                     self.dynamic_queries.execute()
+
                 # reuse connection for any custom queries
                 self._query_manager.execute()
             finally:

@@ -1,0 +1,15 @@
+name: Karpenter
+files:
+- name: karpenter.yaml
+  options:
+    - template: init_config
+      options:
+        - template: init_config/openmetrics
+    - template: instances
+      options:
+        - template: instances/openmetrics
+          overrides:
+            openmetrics_endpoint.value.example: http://localhost:8000/metrics
+            openmetrics_endpoint.description: |
+              Endpoint exposing the Karpenter's Prometheus metrics. For more information refer to:
+              https://karpenter.sh/docs/concepts/metrics/

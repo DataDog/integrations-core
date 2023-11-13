@@ -1,7 +1,9 @@
 # CHANGELOG - Nvidia Triton
 
-## 1.0.0 / 2023-10-11
+<!-- towncrier release notes start -->
+
+## 1.0.0 / 2023-11-10
 
 ***Added***:
 
-* Initial Release ([#15991](https://github.com/DataDog/integrations-core/pull/15991))
+* Add Nvidia Triton integration. ([#15918](https://github.com/DataDog/integrations-core/pull/15918))

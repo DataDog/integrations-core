@@ -1,0 +1,24 @@
+{
+  "flavor": {
+    "id": "d1",
+    "name": "ds512M",
+    "ram": 512,
+    "disk": 5,
+    "swap": "",
+    "OS-FLV-EXT-DATA:ephemeral": 0,
+    "OS-FLV-DISABLED:disabled": false,
+    "vcpus": 1,
+    "os-flavor-access:is_public": true,
+    "rxtx_factor": 1,
+    "links": [
+      {
+        "rel": "self",
+        "href": "http://34.91.114.145/compute/v2.1/flavors/d1"
+      },
+      {
+        "rel": "bookmark",
+        "href": "http://34.91.114.145/compute/flavors/d1"
+      }
+    ]
+  }
+}

@@ -1,1 +1,0 @@
-Stabilizes the `host` tag on the `sqlserver.can_connect` metric and adds the `connection_host` tag on the same metric.

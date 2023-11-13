@@ -1,0 +1,26 @@
+# HELP kubernetes_healthcheck [ALPHA] This metric records the result of a single healthcheck.
+# TYPE kubernetes_healthcheck gauge
+kubernetes_healthcheck{name="attachdetach",type="healthz"} 1
+kubernetes_healthcheck{name="bootstrapsigner",type="healthz"} 1
+kubernetes_healthcheck{name="clusterrole-aggregation",type="healthz"} 1
+kubernetes_healthcheck{name="cronjob",type="healthz"} 1
+kubernetes_healthcheck{name="csrapproving",type="healthz"} 1
+kubernetes_healthcheck{name="csrcleaner",type="healthz"} 1
+kubernetes_healthcheck{name="csrsigning",type="healthz"} 1
+kubernetes_healthcheck{name="daemonset",type="healthz"} 1
+kubernetes_healthcheck{name="deployment",type="healthz"} 1
+kubernetes_healthcheck{name="disruption",type="healthz"} 1
+kubernetes_healthcheck{name="etcd",type="readyz"} 1
+# HELP kubernetes_healthchecks_total [ALPHA] This metric records the results of all healthcheck.
+# TYPE kubernetes_healthchecks_total counter
+kubernetes_healthchecks_total{name="attachdetach",status="success",type="healthz"} 423
+kubernetes_healthchecks_total{name="bootstrapsigner",status="success",type="healthz"} 423
+kubernetes_healthchecks_total{name="clusterrole-aggregation",status="success",type="healthz"} 423
+kubernetes_healthchecks_total{name="cronjob",status="success",type="healthz"} 423
+kubernetes_healthchecks_total{name="csrapproving",status="success",type="healthz"} 423
+kubernetes_healthchecks_total{name="csrcleaner",status="success",type="healthz"} 423
+kubernetes_healthchecks_total{name="csrsigning",status="success",type="healthz"} 423
+kubernetes_healthchecks_total{name="daemonset",status="success",type="healthz"} 423
+kubernetes_healthchecks_total{name="deployment",status="success",type="healthz"} 423
+kubernetes_healthchecks_total{name="disruption",status="success",type="healthz"} 423
+kubernetes_healthchecks_total{name="etcd",status="success",type="readyz"} 15

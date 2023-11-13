@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.2.0 / 2023-11-10
+
+***Added***:
+
+* Add rbac metrics ([#16165](https://github.com/DataDog/integrations-core/pull/16165))
+
 ## 3.1.0 / 2023-09-29 / Agent 7.49.0
 
 ***Added***:

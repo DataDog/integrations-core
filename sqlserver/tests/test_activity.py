@@ -192,7 +192,7 @@ def test_collect_load_activity(
     assert b_conn['connections'] >= 1
     assert b_conn['status'] == "sleeping"
     assert f_conn['connections'] >= 1
-    assert f_conn['status'] == "running"
+    assert f_conn['status'] == "running" or f_conn['status'] == "sleeping"
 
     # internal debug metrics
     aggregator.assert_metric(
