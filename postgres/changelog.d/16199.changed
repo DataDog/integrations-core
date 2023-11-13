@@ -1,0 +1,1 @@
+INCIDENT-23437 Always resolve hostname instead of returning agent hostname regardless or dbm or generic tags enabled or not
