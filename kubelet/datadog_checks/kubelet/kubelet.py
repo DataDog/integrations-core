@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
-import logging
 import re
 import sys
 from collections import defaultdict
@@ -132,8 +131,6 @@ DEFAULT_ENABLED_GAUGES = [
 ]
 DEFAULT_POD_LEVEL_METRICS = ['network.*']
 
-log = logging.getLogger(__name__)
-
 
 class KubeletCheck(
     CadvisorPrometheusScraperMixin,
@@ -202,9 +199,9 @@ class KubeletCheck(
 
         super(KubeletCheck, self).__init__(name, init_config, generic_instances)
 
-        # we need to wait that `super()` was exectued to have the self.log instance created
+        # we need to wait that `super()` was executed to have the self.log instance created
         if get_prom_url_err:
-            self.log.warning('get_prometheus_url() failed: %s', get_prom_url_err)
+            self.log.warning('get_prometheus_url() failed to query the kublet, err: %s', get_prom_url_err)
 
         self.cadvisor_legacy_port = inst.get('cadvisor_port', CADVISOR_DEFAULT_PORT)
         self.cadvisor_legacy_url = None

@@ -2,20 +2,19 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import logging
 import re
 
 from kubeutil import get_connection_info
 
 from datadog_checks.base.utils.tagging import tagger
 
-log = logging.getLogger(__name__)
-
 try:
     from containers import is_excluded as c_is_excluded
 except ImportError:
     # Don't fail on < 6.2
-    log.info('Agent does not provide filtering logic, disabling container filtering')
+    import logging
+
+    logging.getLogger(__name__).info('Agent does not provide filtering logic, disabling container filtering')
 
     def c_is_excluded(name, image, namespace=""):
         return False
