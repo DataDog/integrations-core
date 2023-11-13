@@ -680,3 +680,64 @@ SELECT {aggregation_columns_select}
 FROM pg_stat_activity
 GROUP BY datid {aggregation_columns_group}
 """
+
+# Requires PG10+
+STAT_SUBSCRIPTION_METRICS = {
+    'name': 'stat_subscription_metrics',
+    'query': """
+SELECT  subname,
+        EXTRACT(EPOCH FROM (age(current_timestamp, last_msg_send_time))),
+        EXTRACT(EPOCH FROM (age(current_timestamp, last_msg_receipt_time))),
+        EXTRACT(EPOCH FROM (age(current_timestamp, latest_end_time)))
+FROM pg_stat_subscription
+""",
+    'columns': [
+        {'name': 'subscription_name', 'type': 'tag'},
+        {'name': 'postgresql.subscription.last_msg_send_age', 'type': 'gauge'},
+        {'name': 'postgresql.subscription.last_msg_receipt_age', 'type': 'gauge'},
+        {'name': 'postgresql.subscription.latest_end_age', 'type': 'gauge'},
+    ],
+}
+
+# Requires PG14+
+# While pg_subscription is available since PG10,
+# pg_subscription.oid is only publicly accessible starting PG14.
+SUBSCRIPTION_STATE_METRICS = {
+    'name': 'subscription_state_metrics',
+    'query': """
+select
+    pg_subscription.subname,
+    srrelid::regclass,
+    CASE srsubstate
+        WHEN 'i' THEN 'initialize'
+        WHEN 'd' THEN 'data_copy'
+        WHEN 'f' THEN 'finished_copy'
+        WHEN 's' THEN 'synchronized'
+        WHEN 'r' THEN 'ready'
+    END,
+    1
+from pg_subscription_rel
+join pg_subscription ON pg_subscription.oid = pg_subscription_rel.srsubid""".strip(),
+    'columns': [
+        {'name': 'subscription_name', 'type': 'tag'},
+        {'name': 'relation', 'type': 'tag'},
+        {'name': 'state', 'type': 'tag'},
+        {'name': 'postgresql.subscription.state', 'type': 'gauge'},
+    ],
+}
+
+# Requires PG15+
+STAT_SUBSCRIPTION_STATS_METRICS = {
+    'name': 'stat_subscription_stats_metrics',
+    'query': """
+SELECT subname,
+       apply_error_count,
+       sync_error_count
+FROM pg_stat_subscription_stats
+""",
+    'columns': [
+        {'name': 'subscription_name', 'type': 'tag'},
+        {'name': 'postgresql.subscription.apply_error', 'type': 'monotonic_count'},
+        {'name': 'postgresql.subscription.sync_error', 'type': 'monotonic_count'},
+    ],
+}
