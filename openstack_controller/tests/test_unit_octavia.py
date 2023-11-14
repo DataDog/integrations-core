@@ -1395,13 +1395,13 @@ def test_pools_exception(aggregator, dd_run_check, check, mock_http_get, connect
 
         assert (
             args_list.count(
-                (['http://127.0.0.1:9876/load-balancer/v2/lbaas/pools'], '6e39099cccde4f809b003d9e0dd09304')
+                (['http://127.0.0.1:9876/load-balancer/v2/lbaas/pools'], '1e6e233e637d4d55a50a62b63398ad15')
             )
             == 1
         )
         assert (
             args_list.count(
-                (['http://127.0.0.1:9876/load-balancer/v2/lbaas/pools'], '1e6e233e637d4d55a50a62b63398ad15')
+                (['http://127.0.0.1:9876/load-balancer/v2/lbaas/pools'], '6e39099cccde4f809b003d9e0dd09304')
             )
             == 1
         )
@@ -1505,7 +1505,7 @@ def test_pool_members_exception(aggregator, check, dd_run_check, mock_http_get, 
             args_list.count(
                 (
                     ['http://127.0.0.1:9876/load-balancer/v2/lbaas/pools/d0335b34-3115-4b3b-9a1a-7e2363ebfee3/members'],
-                    '6e39099cccde4f809b003d9e0dd09304',
+                    '1e6e233e637d4d55a50a62b63398ad15',
                 )
             )
             == 0
@@ -1514,7 +1514,7 @@ def test_pool_members_exception(aggregator, check, dd_run_check, mock_http_get, 
             args_list.count(
                 (
                     ['http://127.0.0.1:9876/load-balancer/v2/lbaas/pools/d0335b34-3115-4b3b-9a1a-7e2363ebfee3/members'],
-                    '1e6e233e637d4d55a50a62b63398ad15',
+                    '6e39099cccde4f809b003d9e0dd09304',
                 )
             )
             == 1
