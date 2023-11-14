@@ -25,7 +25,7 @@ init_config:
 
     ## @param skip_proxy - boolean - optional - default: false
     ## If set to `true`, this makes the check bypass any proxy
-    ## settings enabled and attempt to reach services directly.
+    ## settings enabled and any attempts to reach services directly.
     #
     # skip_proxy: false
 
@@ -108,7 +108,7 @@ instances:
     ## @param exclude_metrics - list of strings - optional
     ## A list of metrics to exclude, with each entry being either
     ## the exact metric name or a regular expression.
-    ## In order to exclude all metrics but the ones matching a specific filter,
+    ## To exclude all metrics but the ones matching a specific filter,
     ## you can use a negative lookahead regex like:
     ##   - ^(?!foo).*$
     #
@@ -134,7 +134,7 @@ instances:
     ## @param exclude_labels - list of strings - optional
     ## A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
     ## May be used in conjunction with `include_labels`.
-    ## Labels defined in `exclude_labels` will take precedence in case of overlap.
+    ## Labels defined in `exclude_labels` take precedence in cases of overlap.
     ##
     ## Note: Label filtering happens before `rename_labels`.
     #
@@ -142,7 +142,7 @@ instances:
 
     ## @param include_labels - list of strings - optional
     ## A list of labels to include. May be used in conjunction with `exclude_labels`.
-    ## Labels defined in `exclude_labels` will take precedence in case of overlap.
+    ## Labels defined in `exclude_labels` take precedence in cases of overlap.
     ##
     ## Note: Label filtering happens before `rename_labels`.
     #
@@ -301,7 +301,7 @@ instances:
     ## This overrides the `skip_proxy` setting in `init_config`.
     ##
     ## If set to `true`, this makes the check bypass any proxy
-    ## settings enabled and attempt to reach services directly.
+    ## settings enabled and any attempts to reach services directly.
     #
     # skip_proxy: false
 
@@ -612,7 +612,7 @@ instances:
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.
     ##
-    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    ## Metrics defined in `exclude` take precedence in cases of overlap.
     #
     # metric_patterns:
     #   include:
