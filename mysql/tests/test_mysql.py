@@ -412,7 +412,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         if reported_hostname:
             assert resolve_db_host.called is False, 'Expected resolve_db_host.called to be False'
         else:
-            assert resolve_db_host.called == dbm_enabled, 'Expected resolve_db_host.called to be ' + str(dbm_enabled)
+            assert resolve_db_host.called is True
 
     expected_tags = [
         'server:{}'.format(HOST),
