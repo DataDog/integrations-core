@@ -509,9 +509,19 @@ def test_networks_exception(aggregator, check, dd_run_check, mock_http_get, conn
     if api_type == ApiType.REST:
         args_list = []
         for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:9696/networking/v2.0/networks') == 2
+            args, kwargs = call
+            project_id = kwargs.get('params', {}).get('project_id', None)
+            args_list += [(list(args), project_id)]
+
+        assert (
+            args_list.count((['http://127.0.0.1:9696/networking/v2.0/networks'], '6e39099cccde4f809b003d9e0dd09304'))
+            == 1
+        )
+        assert (
+            args_list.count((['http://127.0.0.1:9696/networking/v2.0/networks'], '1e6e233e637d4d55a50a62b63398ad15'))
+            == 1
+        )
+
     if api_type == ApiType.SDK:
         assert connection_network.networks.call_count == 2
         assert (
