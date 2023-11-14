@@ -617,7 +617,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             'master',
             None,
             ENGINE_EDITION_SQL_DATABASE,
-            'stubbed.hostname',
+            'localhost/master',
             {},
             [],
         ),
@@ -626,7 +626,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             '',
             None,
             ENGINE_EDITION_SQL_DATABASE,
-            'stubbed.hostname',
+            'localhost/master',
             {
                 'aws': {
                     'instance_endpoint': 'foo.aws.com',
