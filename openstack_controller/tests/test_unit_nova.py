@@ -552,7 +552,7 @@ def test_limits_exception(aggregator, check, dd_run_check, mock_http_get, connec
         args_list = []
         for call in mock_http_get.call_args_list:
             args, kwargs = call
-            tenant_id = kwargs.get('params', {}).get('tenant_id', None)
+            tenant_id = kwargs.get('params', {}).get('tenant_id')
             args_list += [(list(args), tenant_id)]
 
         assert args_list.count((['http://127.0.0.1:8774/compute/v2.1/limits'], '6e39099cccde4f809b003d9e0dd09304')) == 1
@@ -1778,7 +1778,7 @@ def test_servers_disable_call(aggregator, check, dd_run_check, mock_http_get, co
         args_list = []
         for call in mock_http_get.call_args_list:
             args, kwargs = call
-            project_id = kwargs.get('params', {}).get('project_id', None)
+            project_id = kwargs.get('params', {}).get('project_id')
             args_list += [(list(args), project_id)]
 
         assert (

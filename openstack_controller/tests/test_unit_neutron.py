@@ -510,7 +510,7 @@ def test_networks_exception(aggregator, check, dd_run_check, mock_http_get, conn
         args_list = []
         for call in mock_http_get.call_args_list:
             args, kwargs = call
-            project_id = kwargs.get('params', {}).get('project_id', None)
+            project_id = kwargs.get('params', {}).get('project_id')
             args_list += [(list(args), project_id)]
 
         assert (

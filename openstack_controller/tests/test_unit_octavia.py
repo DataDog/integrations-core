@@ -601,7 +601,7 @@ def test_loadbalancers_exception(aggregator, check, dd_run_check, mock_http_get,
         args_list = []
         for call in mock_http_get.call_args_list:
             args, kwargs = call
-            project_id = kwargs.get('params', {}).get('project_id', None)
+            project_id = kwargs.get('params', {}).get('project_id')
             args_list += [(list(args), project_id)]
 
         assert (
@@ -804,7 +804,7 @@ def test_listeners_exception(aggregator, check, dd_run_check, mock_http_get, con
         args_list = []
         for call in mock_http_get.call_args_list:
             args, kwargs = call
-            project_id = kwargs.get('params', {}).get('project_id', None)
+            project_id = kwargs.get('params', {}).get('project_id')
             args_list += [(list(args), project_id)]
 
         assert (
@@ -1390,7 +1390,7 @@ def test_pools_exception(aggregator, dd_run_check, check, mock_http_get, connect
         args_list = []
         for call in mock_http_get.call_args_list:
             args, kwargs = call
-            project_id = kwargs.get('params', {}).get('project_id', None)
+            project_id = kwargs.get('params', {}).get('project_id')
             args_list += [(list(args), project_id)]
 
         assert (
@@ -1498,7 +1498,7 @@ def test_pool_members_exception(aggregator, check, dd_run_check, mock_http_get, 
         args_list = []
         for call in mock_http_get.call_args_list:
             args, kwargs = call
-            project_id = kwargs.get('params', {}).get('project_id', None)
+            project_id = kwargs.get('params', {}).get('project_id')
             args_list += [(list(args), project_id)]
 
         assert (
@@ -1672,7 +1672,7 @@ def test_healthmonitors_exception(aggregator, check, dd_run_check, mock_http_get
         args_list = []
         for call in mock_http_get.call_args_list:
             args, kwargs = call
-            project_id = kwargs.get('params', {}).get('project_id', None)
+            project_id = kwargs.get('params', {}).get('project_id')
             args_list += [(list(args), project_id)]
 
         assert (
@@ -1842,7 +1842,7 @@ def test_quotas_exception(aggregator, check, dd_run_check, mock_http_get, connec
         args_list = []
         for call in mock_http_get.call_args_list:
             args, kwargs = call
-            project_id = kwargs.get('params', {}).get('project_id', None)
+            project_id = kwargs.get('params', {}).get('project_id')
             args_list += [(list(args), project_id)]
 
         assert (
@@ -2133,7 +2133,7 @@ def test_amphorae_exception(aggregator, check, dd_run_check, mock_http_get, conn
         args_list = []
         for call in mock_http_get.call_args_list:
             args, kwargs = call
-            project_id = kwargs.get('params', {}).get('project_id', None)
+            project_id = kwargs.get('params', {}).get('project_id')
             args_list += [(list(args), project_id)]
 
         assert (
