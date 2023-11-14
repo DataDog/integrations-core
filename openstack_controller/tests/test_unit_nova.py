@@ -551,10 +551,13 @@ def test_limits_exception(aggregator, check, dd_run_check, mock_http_get, connec
     if api_type == ApiType.REST:
         args_list = []
         for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        num_calls = sum('http://127.0.0.1:8774/compute/v2.1/limits' in arg for arg in args_list)
-        assert num_calls == 2
+            args, kwargs = call
+            tenant_id = kwargs.get('params', {}).get('tenant_id', None)
+            args_list += [(list(args), tenant_id)]
+
+        assert args_list.count((['http://127.0.0.1:8774/compute/v2.1/limits'], '6e39099cccde4f809b003d9e0dd09304')) == 1
+        assert args_list.count((['http://127.0.0.1:8774/compute/v2.1/limits'], '1e6e233e637d4d55a50a62b63398ad15')) == 1
+
     if api_type == ApiType.SDK:
         assert connection_compute.get_limits.call_count == 2
 
@@ -1774,9 +1777,18 @@ def test_servers_disable_call(aggregator, check, dd_run_check, mock_http_get, co
     if api_type == ApiType.REST:
         args_list = []
         for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8774/compute/v2.1/servers/detail') == 1
+            args, kwargs = call
+            project_id = kwargs.get('params', {}).get('project_id', None)
+            args_list += [(list(args), project_id)]
+
+        assert (
+            args_list.count((['http://127.0.0.1:8774/compute/v2.1/servers/detail'], '1e6e233e637d4d55a50a62b63398ad15'))
+            == 0
+        )
+        assert (
+            args_list.count((['http://127.0.0.1:8774/compute/v2.1/servers/detail'], '6e39099cccde4f809b003d9e0dd09304'))
+            == 1
+        )
     if api_type == ApiType.SDK:
         assert connection_compute.servers.call_count == 1
         assert (

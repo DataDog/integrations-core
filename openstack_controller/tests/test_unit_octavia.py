@@ -600,9 +600,22 @@ def test_loadbalancers_exception(aggregator, check, dd_run_check, mock_http_get,
     if api_type == ApiType.REST:
         args_list = []
         for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:9876/load-balancer/v2/lbaas/loadbalancers') == 2
+            args, kwargs = call
+            project_id = kwargs.get('params', {}).get('project_id', None)
+            args_list += [(list(args), project_id)]
+
+        assert (
+            args_list.count(
+                (['http://127.0.0.1:9876/load-balancer/v2/lbaas/loadbalancers'], '1e6e233e637d4d55a50a62b63398ad15')
+            )
+            == 1
+        )
+        assert (
+            args_list.count(
+                (['http://127.0.0.1:9876/load-balancer/v2/lbaas/loadbalancers'], '6e39099cccde4f809b003d9e0dd09304')
+            )
+            == 1
+        )
     if api_type == ApiType.SDK:
         assert connection_load_balancer.load_balancers.call_count == 2
         assert (
@@ -790,9 +803,22 @@ def test_listeners_exception(aggregator, check, dd_run_check, mock_http_get, con
     if api_type == ApiType.REST:
         args_list = []
         for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:9876/load-balancer/v2/lbaas/listeners') == 2
+            args, kwargs = call
+            project_id = kwargs.get('params', {}).get('project_id', None)
+            args_list += [(list(args), project_id)]
+
+        assert (
+            args_list.count(
+                (['http://127.0.0.1:9876/load-balancer/v2/lbaas/listeners'], '6e39099cccde4f809b003d9e0dd09304')
+            )
+            == 1
+        )
+        assert (
+            args_list.count(
+                (['http://127.0.0.1:9876/load-balancer/v2/lbaas/listeners'], '1e6e233e637d4d55a50a62b63398ad15')
+            )
+            == 1
+        )
     if api_type == ApiType.SDK:
         assert connection_load_balancer.listeners.call_count == 2
         assert (
@@ -1363,9 +1389,22 @@ def test_pools_exception(aggregator, dd_run_check, check, mock_http_get, connect
     if api_type == ApiType.REST:
         args_list = []
         for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:9876/load-balancer/v2/lbaas/pools') == 2
+            args, kwargs = call
+            project_id = kwargs.get('params', {}).get('project_id', None)
+            args_list += [(list(args), project_id)]
+
+        assert (
+            args_list.count(
+                (['http://127.0.0.1:9876/load-balancer/v2/lbaas/pools'], '6e39099cccde4f809b003d9e0dd09304')
+            )
+            == 1
+        )
+        assert (
+            args_list.count(
+                (['http://127.0.0.1:9876/load-balancer/v2/lbaas/pools'], '1e6e233e637d4d55a50a62b63398ad15')
+            )
+            == 1
+        )
     if api_type == ApiType.SDK:
         assert connection_load_balancer.pools.call_count == 2
         assert (
@@ -1458,11 +1497,25 @@ def test_pool_members_exception(aggregator, check, dd_run_check, mock_http_get, 
     if api_type == ApiType.REST:
         args_list = []
         for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+            args, kwargs = call
+            project_id = kwargs.get('params', {}).get('project_id', None)
+            args_list += [(list(args), project_id)]
+
         assert (
             args_list.count(
-                'http://127.0.0.1:9876/load-balancer/v2/lbaas/pools/d0335b34-3115-4b3b-9a1a-7e2363ebfee3' '/members'
+                (
+                    ['http://127.0.0.1:9876/load-balancer/v2/lbaas/pools/d0335b34-3115-4b3b-9a1a-7e2363ebfee3/members'],
+                    '6e39099cccde4f809b003d9e0dd09304',
+                )
+            )
+            == 0
+        )
+        assert (
+            args_list.count(
+                (
+                    ['http://127.0.0.1:9876/load-balancer/v2/lbaas/pools/d0335b34-3115-4b3b-9a1a-7e2363ebfee3/members'],
+                    '1e6e233e637d4d55a50a62b63398ad15',
+                )
             )
             == 1
         )
@@ -1618,10 +1671,22 @@ def test_healthmonitors_exception(aggregator, check, dd_run_check, mock_http_get
     if api_type == ApiType.REST:
         args_list = []
         for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:9876/load-balancer/v2/lbaas/healthmonitors') == 2
+            args, kwargs = call
+            project_id = kwargs.get('params', {}).get('project_id', None)
+            args_list += [(list(args), project_id)]
 
+        assert (
+            args_list.count(
+                (['http://127.0.0.1:9876/load-balancer/v2/lbaas/healthmonitors'], '1e6e233e637d4d55a50a62b63398ad15')
+            )
+            == 1
+        )
+        assert (
+            args_list.count(
+                (['http://127.0.0.1:9876/load-balancer/v2/lbaas/healthmonitors'], '6e39099cccde4f809b003d9e0dd09304')
+            )
+            == 1
+        )
     if api_type == ApiType.SDK:
         assert (
             connection_load_balancer.health_monitors.call_args_list.count(
@@ -1776,9 +1841,22 @@ def test_quotas_exception(aggregator, check, dd_run_check, mock_http_get, connec
     if api_type == ApiType.REST:
         args_list = []
         for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:9876/load-balancer/v2/lbaas/quotas') == 2
+            args, kwargs = call
+            project_id = kwargs.get('params', {}).get('project_id', None)
+            args_list += [(list(args), project_id)]
+
+        assert (
+            args_list.count(
+                (['http://127.0.0.1:9876/load-balancer/v2/lbaas/quotas'], '1e6e233e637d4d55a50a62b63398ad15')
+            )
+            == 1
+        )
+        assert (
+            args_list.count(
+                (['http://127.0.0.1:9876/load-balancer/v2/lbaas/quotas'], '6e39099cccde4f809b003d9e0dd09304')
+            )
+            == 1
+        )
     if api_type == ApiType.SDK:
         assert connection_load_balancer.quotas.call_count == 2
         assert (
@@ -2054,9 +2132,22 @@ def test_amphorae_exception(aggregator, check, dd_run_check, mock_http_get, conn
     if api_type == ApiType.REST:
         args_list = []
         for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:9876/load-balancer/v2/octavia/amphorae') == 2
+            args, kwargs = call
+            project_id = kwargs.get('params', {}).get('project_id', None)
+            args_list += [(list(args), project_id)]
+
+        assert (
+            args_list.count(
+                (['http://127.0.0.1:9876/load-balancer/v2/octavia/amphorae'], '1e6e233e637d4d55a50a62b63398ad15')
+            )
+            == 1
+        )
+        assert (
+            args_list.count(
+                (['http://127.0.0.1:9876/load-balancer/v2/octavia/amphorae'], '6e39099cccde4f809b003d9e0dd09304')
+            )
+            == 1
+        )
 
     if api_type == ApiType.SDK:
         assert connection_load_balancer.quotas.call_count == 2
