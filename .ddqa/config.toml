@@ -7,6 +7,9 @@ qa_statuses = [
 ignored_labels = [
   "changelog/no-changelog",
   "qa/skip-qa",
+  "release",
+  "dev_package",
+  "ddev",
 ]
 
 [teams."Agent Integrations"]
