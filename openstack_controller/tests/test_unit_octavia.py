@@ -1508,7 +1508,7 @@ def test_pool_members_exception(aggregator, check, dd_run_check, mock_http_get, 
                     '1e6e233e637d4d55a50a62b63398ad15',
                 )
             )
-            == 0
+            == 1
         )
         assert (
             args_list.count(
@@ -1517,7 +1517,7 @@ def test_pool_members_exception(aggregator, check, dd_run_check, mock_http_get, 
                     '6e39099cccde4f809b003d9e0dd09304',
                 )
             )
-            == 1
+            == 0
         )
     if api_type == ApiType.SDK:
         assert (
