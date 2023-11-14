@@ -72,7 +72,7 @@ github_team = "network-device-monitoring"
 jira_project = "WINA"
 jira_issue_type = "QA Task"
 jira_statuses = [
-  "To Do",
+  "Triage",
   "In Progress",
   "Done",
 ]
