@@ -1719,7 +1719,6 @@ def test_servers_exception(aggregator, check, dd_run_check, mock_http_get, conne
             == 1
         )
 
-
     if api_type == ApiType.SDK:
         assert connection_compute.servers.call_count == 2
         assert (
