@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 4.5.0 / 2023-09-29
+## 4.6.0 / 2023-11-10
+
+***Added***:
+
+* Add support for kube_controller_manager SLI metrics ([#15914](https://github.com/DataDog/integrations-core/pull/15914))
+
+## 4.5.0 / 2023-09-29 / Agent 7.49.0
 
 ***Added***:
 

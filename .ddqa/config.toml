@@ -7,6 +7,9 @@ qa_statuses = [
 ignored_labels = [
   "changelog/no-changelog",
   "qa/skip-qa",
+  "release",
+  "dev_package",
+  "ddev",
 ]
 
 [teams."Agent Integrations"]
@@ -69,7 +72,7 @@ github_team = "network-device-monitoring"
 jira_project = "WINA"
 jira_issue_type = "QA Task"
 jira_statuses = [
-  "To Do",
+  "Triage",
   "In Progress",
   "Done",
 ]

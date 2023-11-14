@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 5.0.0 / 2023-09-29
+## 6.1.0 / 2023-11-10
+
+***Added***:
+
+* Add support for glance component. ([#16186](https://github.com/DataDog/integrations-core/pull/16186))
+
+## 6.0.0 / 2023-11-07
+
+***Changed***:
+
+* Refactor integration and add support for Ironic and Octavia components. ([#15918](https://github.com/DataDog/integrations-core/pull/15918))
+
+## 5.0.0 / 2023-09-29 / Agent 7.49.0
 
 ***Changed***:
 

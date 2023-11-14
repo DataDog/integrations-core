@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 15.2.0 / 2023-11-10
+
+***Added***:
+
+* Add support for log shipping monitoring on primary and secondary instances through the `include_primary_log_shipping_metrics` and `include_secondary_log_shipping_metrics` configuration options. ([#16101](https://github.com/DataDog/integrations-core/pull/16101))
+* * Add obfuscation_mode config option to allow enabling obfuscation with go-sqllexer ([#16125](https://github.com/DataDog/integrations-core/pull/16125)) ([#16125](https://github.com/DataDog/integrations-core/pull/16125))
+* [DBMON-3054] Move check config to SQLServerConfig class ([#16130](https://github.com/DataDog/integrations-core/pull/16130))
+* DBMON-3054] Add unit tests to assert every configurable metrics collection ([#16136](https://github.com/DataDog/integrations-core/pull/16136))
+* Updated dependencies. ([#16154](https://github.com/DataDog/integrations-core/pull/16154))
+
+***Fixed***:
+
+* Fix `aarch64` compatibility of the `sqlserver` check by downgrading `lxml` to version 4.9.2 ([16080](https://github.com/DataDog/integrations-core/pull/16080)) ([#16080](https://github.com/DataDog/integrations-core/pull/16080))
+* Stabilizes the `host` tag on the `sqlserver.can_connect` metric and adds the `connection_host` tag on the same metric. ([#16114](https://github.com/DataDog/integrations-core/pull/16114))
+* [SQL Server] - Fix query stats when a query is found in more than one procedure ([#16141](https://github.com/DataDog/integrations-core/pull/16141))
+
 ## 15.1.0 / 2023-10-26
 
 ***Added***:
@@ -15,6 +31,18 @@
 * Strip sql comments before parsing procedure name ([#16004](https://github.com/DataDog/integrations-core/pull/16004))
 * Bump the `pyodbc` version to 5.0.1 ([#16041](https://github.com/DataDog/integrations-core/pull/16041))
 * Fix config option `dbm_enabled` type to ensure it is a boolean ([#16078](https://github.com/DataDog/integrations-core/pull/16078))
+
+## 15.0.3 / 2023-11-08
+
+***Fixed***
+
+* Fix `aarch64` compatibility of the `sqlserver` check by downgrading `lxml` to version 4.9.2 ([16080](https://github.com/DataDog/integrations-core/pull/16080))
+
+## 15.0.2 / 2023-10-10 / Agent 7.49.0
+
+***Fixed***:
+
+* Properly decode query_hash when statement_text is None ([#15974](https://github.com/DataDog/integrations-core/pull/15974))
 
 ## 15.0.1 / 2023-10-06
 

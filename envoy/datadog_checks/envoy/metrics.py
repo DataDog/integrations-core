@@ -368,6 +368,10 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_tcp_on_demand_cluster_timeout': 'tcp.on_demand_cluster_timeout',
     'envoy_tcp_upstream_flush': 'tcp.upstream_flush',
     'envoy_tcp_upstream_flush_active': 'tcp.upstream_flush_active',
+    'envoy_http_rbac_allowed': 'http.rbac_allowed',
+    'envoy_http_rbac_denied': 'http.rbac_denied',
+    'envoy_http_rbac_shadow_allowed': 'http.rbac_shadow_allowed',
+    'envoy_http_rbac_shadow_denied': 'http.rbac_shadow_denied',
 }
 
 # fmt: off

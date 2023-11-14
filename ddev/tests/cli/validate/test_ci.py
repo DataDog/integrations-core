@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
 import yaml
 
 
@@ -143,6 +144,26 @@ def test_codecov_missing_flag(ddev, repository, helpers):
     assert result.exit_code == 1, result.output
     error = "Codecov config has 1 missing flag"
     assert error in helpers.remove_trailing_spaces(result.output)
+
+
+# TODO We do not have an off the shelf fixture to generate a marketplace repository
+@pytest.mark.parametrize(
+    'repository_name, repository_flag, expected_exit_code, expected_output',
+    [
+        pytest.param('core', '-c', 1, 'Unable to find the Codecov config file', id='integrations-core'),
+    ],
+)
+def test_codecov_file_missing(
+    ddev, repository, helpers, config_file, repository_name, repository_flag, expected_exit_code, expected_output
+):
+    config_file.model.repos[repository_name] = str(repository.path)
+    config_file.save()
+
+    (repository.path / '.codecov.yml').unlink()
+
+    result = ddev(repository_flag, "validate", "ci")
+    assert result.exit_code == expected_exit_code, result.output
+    assert expected_output in helpers.remove_trailing_spaces(result.output)
 
 
 def test_validate_ci_success(ddev, helpers):

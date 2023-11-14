@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 15.3.0 / 2023-11-10
+
+***Added***:
+
+* Updated dependencies. ([#16154](https://github.com/DataDog/integrations-core/pull/16154))
+
+***Fixed***:
+
+* Remove an unnecessary print statement ([#15594](https://github.com/DataDog/integrations-core/pull/15594))
+* * Fix edge-case causing potentially duplicate/wrong time series for activity metrics when `activity_metrics_excluded_aggregations` included `datname` ([#16106](https://github.com/DataDog/integrations-core/pull/16106)) ([#16106](https://github.com/DataDog/integrations-core/pull/16106))
+* Database instance metadata payloads should not contain duplicate `db` tags ([#16146](https://github.com/DataDog/integrations-core/pull/16146))
+
 ## 15.2.0 / 2023-10-26
 
 ***Added***:
@@ -17,7 +29,7 @@
 * Bump the minimum base check version to 34.1.0 ([#16062](https://github.com/DataDog/integrations-core/pull/16062))
 * Collect Postgres size metrics for auto-discovered databases ([#16076](https://github.com/DataDog/integrations-core/pull/16076))
 
-## 15.1.1 / 2023-10-17
+## 15.1.1 / 2023-10-17 / Agent 7.49.0
 
 ***Fixed***:
 

@@ -60,6 +60,9 @@ AGENT_METRICS = {
     'cilium_kvstore_events_queue_seconds': 'kvstore.events_queue.seconds',
     'cilium_kvstore_quorum_errors_total': 'kvstore.quorum_errors.total',
     'cilium_policy_implementation_delay': 'policy.implementation_delay',
+    'cilium_proxy_redirects': 'proxy.redirects',
+    'cilium_proxy_upstream_reply_seconds': 'proxy.upstream_reply.seconds',
+    'cilium_policy_l7_total': 'policy.l7.total',
     # Cilium <= 1.7
     'cilium_policy_l7_denied_total': 'policy.l7_denied.total',
     'cilium_policy_l7_forwarded_total': 'policy.l7_forwarded.total',
@@ -90,6 +93,11 @@ AGENT_METRICS = {
     'cilium_ipcache_errors_total': 'ipcache.errors.total',
     'cilium_k8s_event_lag_seconds': 'k8s_event.lag.seconds',
     'cilium_k8s_terminating_endpoints_events_total': 'k8s_terminating.endpoints_events.total',
+    'cilium_proxy_datapath_update_timeout_total': 'proxy.datapath.update_timeout.total',
+    # Cilium 1.12+
+    'cilium_fqdn_active_names': 'fqdn.active_names',
+    'cilium_fqdn_active_ips': 'fqdn.active_ips',
+    'cilium_fqdn_alive_zombie_connections': 'fqdn.alive_zombie_connections',
     # Cilium 1.14+
     'cilium_kvstore_sync_queue_size': 'kvstore.sync_queue_size',
     'cilium_kvstore_initial_sync_completed': 'kvstore.initial_sync_completed',

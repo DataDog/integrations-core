@@ -2,11 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 7.2.0 / 2023-11-07
+
 ***Added***:
 
-* Add support for configuring what resources to collect events from ([#15992](https://github.com/DataDog/integrations-core/pull/15992))
+* Add support for configuring what resources to collect events for. ([#15992](https://github.com/DataDog/integrations-core/pull/15992))
 
-## 7.1.0 / 2023-09-29
+## 7.1.0 / 2023-09-29 / Agent 7.49.0
 
 ***Added***:
 

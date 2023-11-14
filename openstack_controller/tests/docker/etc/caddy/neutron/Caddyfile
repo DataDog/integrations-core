@@ -4,22 +4,30 @@
 }
 :80 {
     root * /usr/share/caddy/
-    @get_root {
+    @get_networking {
         method GET
-        header X-Auth-Token "demo_test"
-        path /
+        path /networking
     }
-    route @get_root {
-        rewrite / /get.json
+    route @get_networking {
+        rewrite * /GET{http.request.uri.path}/response.json
         file_server
     }
-    @get_v2_0_networks {
+    @get_networking_v_2_0_agents {
         method GET
         header X-Auth-Token "demo_test"
-        path /v2.0/networks
+        path /networking/v2.0/agents
     }
-    route @get_v2_0_networks {
-        rewrite /v2.0/networks /v2.0/networks/get.json
+    route @get_networking_v_2_0_agents {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+    @get_networking_v_2_0_quotas {
+        method GET
+        header X-Auth-Token "demo_test"
+        path /networking/v2.0/quotas/*
+    }
+    route @get_networking_v_2_0_quotas {
+        rewrite * /GET{http.request.uri.path}/response.json
         file_server
     }
     file_server browse

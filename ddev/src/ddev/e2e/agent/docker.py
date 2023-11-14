@@ -4,9 +4,12 @@
 from __future__ import annotations
 
 import os
+import re
 import sys
 from functools import cache, cached_property
 from typing import TYPE_CHECKING, Callable
+
+import stamina
 
 from ddev.e2e.agent.interface import AgentInterface
 from ddev.utils.structures import EnvVars
@@ -15,6 +18,8 @@ if TYPE_CHECKING:
     import subprocess
 
     from ddev.utils.fs import Path
+
+AGENT_VERSION_REGEX = r'^datadog/agent:\d+(?:$|\.(\d+\.\d(?:$|-jmx$)|$))'
 
 
 class DockerAgent(AgentInterface):
@@ -91,12 +96,7 @@ class DockerAgent(AgentInterface):
 
         if agent_build.startswith("datadog/"):
             # Add a potentially missing `py` suffix for default non-RC builds
-            if (
-                'rc' not in agent_build
-                and 'py' not in agent_build
-                and agent_build != 'datadog/agent:6'
-                and agent_build != 'datadog/agent:7'
-            ):
+            if 'rc' not in agent_build and 'py' not in agent_build and not re.match(AGENT_VERSION_REGEX, agent_build):
                 agent_build = f'{agent_build}-py{self.python_version[0]}'
 
             if self.metadata.get('use_jmx') and not agent_build.endswith('-jmx'):
@@ -167,9 +167,7 @@ class DockerAgent(AgentInterface):
                     volumes[i] = f'/{vm_file}:{remaining}'
 
         if os.getenv('DDEV_E2E_DOCKER_NO_PULL') != '1':
-            process = self._run_command(['docker', 'pull', agent_build])
-            if process.returncode:
-                raise RuntimeError(f'Could not pull image {agent_build}')
+            self.__pull_image(agent_build)
 
         command = [
             'docker',
@@ -283,6 +281,12 @@ class DockerAgent(AgentInterface):
 
     def enter_shell(self) -> None:
         self._run_command(self._format_command(['cmd' if self._is_windows_container else 'bash']), check=True)
+
+    @stamina.retry(on=RuntimeError, attempts=3)
+    def __pull_image(self, agent_build):
+        process = self._run_command(['docker', 'pull', agent_build])
+        if process.returncode:
+            raise RuntimeError(f'Could not pull image {agent_build}')
 
 
 @cache

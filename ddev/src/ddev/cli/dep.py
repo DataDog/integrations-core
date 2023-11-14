@@ -17,7 +17,6 @@ from packaging.version import InvalidVersion, Version
 # Dependencies to ignore when update dependencies
 IGNORED_DEPS = {
     'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
-    'dnspython',
     'pymysql',  # https://github.com/DataDog/integrations-core/pull/12612
     'foundationdb',  # Breaking datadog_checks_base tests
     'openstacksdk',  # Breaking openstack_controller tests
@@ -36,6 +35,20 @@ IGNORED_DEPS = {
     'pydantic',
     # https://github.com/DataDog/integrations-core/pull/16080
     'lxml',
+    # We need to keep an `oracledb` version that uses the same version of odpi that is used in godror in the agent repo.
+    # Somehow we do not load the right version. Until we find out how and why, we need to keep both
+    # libs in sync with the same version of odpi.
+    'oracledb',
+    # We're not ready to switch to v3 of the postgres library, see:
+    # https://github.com/DataDog/integrations-core/pull/15859
+    'psycopg2-binary',
+    # orjson ... requires rustc 1.65+, but the latest we can have (thanks CentOS 6) is 1.62.
+    # We get the following error when compiling orjson on Centos 6:
+    # error: package `associative-cache v2.0.0` cannot be built because it requires rustc 1.65 or newer,
+    # while the currently active rustc version is 1.62.0-nightly
+    # Here's orjson switching to rustc 1.65:
+    # https://github.com/ijl/orjson/commit/ce9bae876657ed377d761bf1234b040e2cc13d3c
+    'orjson',
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others

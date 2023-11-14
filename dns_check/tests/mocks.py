@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 from dns.resolver import NXDOMAIN
+from six import PY3
 
 
 class MockDNSAnswer:
@@ -13,12 +14,11 @@ class MockDNSAnswer:
         def __init__(self, address):
             addresses = [x.strip().lower() for x in address.split(',')]
             if len(addresses) > 1:
-                items = []
-                for address in addresses:
-                    items.append(MockDNSAnswer.MockItem(address))
-                self.items = items
+                items = [MockDNSAnswer.MockItem(address) for address in addresses]
             else:
-                self.items = [MockDNSAnswer.MockItem(address)]
+                items = [MockDNSAnswer.MockItem(address)]
+
+            self.items = {item: None for item in items} if PY3 else items
 
     class MockItem:
         def __init__(self, address):

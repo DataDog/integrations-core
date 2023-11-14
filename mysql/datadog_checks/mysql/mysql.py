@@ -244,6 +244,10 @@ class MySql(AgentCheck):
                 )
                 results = dict(cursor.fetchall())
                 self.events_wait_current_enabled = self._get_variable_enabled(results, 'events_waits_current')
+                self.log.debug(
+                    '`events_wait_current_enabled` was false. Setting it to %s',
+                    self.events_wait_current_enabled or False,
+                )
         return self.events_wait_current_enabled
 
     def resolve_db_host(self):

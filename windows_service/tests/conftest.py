@@ -63,3 +63,8 @@ def instance_startup_type_filter():
 @pytest.fixture
 def instance_trigger_start():
     return deepcopy(common.INSTANCE_TRIGGER_START)
+
+
+@pytest.fixture
+def instance_name_regex_prefix():
+    return deepcopy(common.INSTANCE_PREFIX_MATCH)

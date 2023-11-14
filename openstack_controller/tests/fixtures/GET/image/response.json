@@ -1,0 +1,124 @@
+{
+    "versions": [
+        {
+            "id": "v2.16",
+            "status": "CURRENT",
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "http://10.164.0.71/image/v2/"
+                }
+            ]
+        },
+        {
+            "id": "v2.15",
+            "status": "SUPPORTED",
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "http://10.164.0.71/image/v2/"
+                }
+            ]
+        },
+        {
+            "id": "v2.14",
+            "status": "SUPPORTED",
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "http://10.164.0.71/image/v2/"
+                }
+            ]
+        },
+        {
+            "id": "v2.9",
+            "status": "SUPPORTED",
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "http://10.164.0.71/image/v2/"
+                }
+            ]
+        },
+        {
+            "id": "v2.7",
+            "status": "SUPPORTED",
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "http://10.164.0.71/image/v2/"
+                }
+            ]
+        },
+        {
+            "id": "v2.6",
+            "status": "SUPPORTED",
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "http://10.164.0.71/image/v2/"
+                }
+            ]
+        },
+        {
+            "id": "v2.5",
+            "status": "SUPPORTED",
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "http://10.164.0.71/image/v2/"
+                }
+            ]
+        },
+        {
+            "id": "v2.4",
+            "status": "SUPPORTED",
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "http://10.164.0.71/image/v2/"
+                }
+            ]
+        },
+        {
+            "id": "v2.3",
+            "status": "SUPPORTED",
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "http://10.164.0.71/image/v2/"
+                }
+            ]
+        },
+        {
+            "id": "v2.2",
+            "status": "SUPPORTED",
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "http://10.164.0.71/image/v2/"
+                }
+            ]
+        },
+        {
+            "id": "v2.1",
+            "status": "SUPPORTED",
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "http://10.164.0.71/image/v2/"
+                }
+            ]
+        },
+        {
+            "id": "v2.0",
+            "status": "SUPPORTED",
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "http://10.164.0.71/image/v2/"
+                }
+            ]
+        }
+    ]
+}

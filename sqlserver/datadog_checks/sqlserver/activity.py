@@ -12,6 +12,7 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 from datadog_checks.sqlserver.utils import PROC_CHAR_LIMIT, extract_sql_comments_and_procedure_name
 
@@ -139,27 +140,29 @@ def _hash_to_hex(hash) -> str:
 
 
 def agent_check_getter(self):
-    return self.check
+    return self._check
 
 
 class SqlserverActivity(DBMAsyncJob):
     """Collects query metrics and plans"""
 
-    def __init__(self, check):
-        self.check = check
+    def __init__(self, check, config: SQLServerConfig):
         # do not emit any dd.internal metrics for DBM specific check code
-        self.tags = [t for t in self.check.tags if not t.startswith('dd.internal')]
+        self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
         self.log = check.log
-        collection_interval = float(check.activity_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL))
+        self._config = config
+        collection_interval = float(
+            self._config.activity_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
+        )
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
         self.collection_interval = collection_interval
         super(SqlserverActivity, self).__init__(
             check,
-            run_sync=is_affirmative(check.activity_config.get('run_sync', False)),
-            enabled=is_affirmative(check.activity_config.get('enabled', True)),
+            run_sync=is_affirmative(self._config.activity_config.get('run_sync', False)),
+            enabled=is_affirmative(self._config.activity_config.get('enabled', True)),
             expected_db_exceptions=(),
-            min_collection_interval=check.min_collection_interval,
+            min_collection_interval=self._config.min_collection_interval,
             dbms="sqlserver",
             rate_limit=1 / float(collection_interval),
             job_name="query-activity",
@@ -231,12 +234,12 @@ class SqlserverActivity(DBMAsyncJob):
             if estimated_size > max_bytes_limit:
                 # query results are pre-sorted
                 # so once we hit the max bytes limit, return
-                self.check.histogram(
+                self._check.histogram(
                     "dd.sqlserver.activity.collect_activity.max_bytes.rows_dropped",
                     len(normalized_rows) - len(rows),
-                    **self.check.debug_stats_kwargs()
+                    **self._check.debug_stats_kwargs()
                 )
-                self.check.warning(
+                self._check.warning(
                     "Exceeded the limit of activity rows captured (%s of %s rows included). "
                     "Database load may be under-reported as a result.",
                     len(normalized_rows),
@@ -272,12 +275,12 @@ class SqlserverActivity(DBMAsyncJob):
         if 'statement_text' not in row:
             return self._sanitize_row(row)
         try:
-            statement = obfuscate_sql_with_metadata(row['statement_text'], self.check.obfuscator_options)
+            statement = obfuscate_sql_with_metadata(row['statement_text'], self._config.obfuscator_options)
             procedure_statement = None
             # sqlserver doesn't have a boolean data type so convert integer to boolean
             comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
             if row['is_proc'] and 'text' in row:
-                procedure_statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
+                procedure_statement = obfuscate_sql_with_metadata(row['text'], self._config.obfuscator_options)
             obfuscated_statement = statement['query']
             metadata = statement['metadata']
             row['dd_commands'] = metadata.get('commands', None)
@@ -291,16 +294,16 @@ class SqlserverActivity(DBMAsyncJob):
             if procedure_name:
                 row['procedure_name'] = procedure_name
         except Exception as e:
-            if self.check.log_unobfuscated_queries:
+            if self._config.log_unobfuscated_queries:
                 raw_query_text = row['text'] if row.get('is_proc', False) else row['statement_text']
                 self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", raw_query_text, e)
             else:
                 self.log.debug("Failed to obfuscate query | err=[%s]", e)
             obfuscated_statement = "ERROR: failed to obfuscate"
-            self.check.count(
+            self._check.count(
                 "dd.sqlserver.obfuscation.error",
                 1,
-                **self.check.debug_stats_kwargs(tags=["error:{}".format(type(e)), "error_msg:{}".format(e)])
+                **self._check.debug_stats_kwargs(tags=["error:{}".format(type(e)), "error_msg:{}".format(e)])
             )
         row = self._sanitize_row(row, obfuscated_statement)
         return row
@@ -330,16 +333,16 @@ class SqlserverActivity(DBMAsyncJob):
 
     def _create_activity_event(self, active_sessions, active_connections):
         event = {
-            "host": self.check.resolved_hostname,
+            "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
             "dbm_type": "activity",
             "collection_interval": self.collection_interval,
             "ddtags": self.tags,
             "timestamp": time.time() * 1000,
-            'sqlserver_version': self.check.static_info_cache.get(STATIC_INFO_VERSION, ""),
-            'sqlserver_engine_edition': self.check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
-            "cloud_metadata": self.check.cloud_metadata,
+            'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
+            'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
+            "cloud_metadata": self._config.cloud_metadata,
             "sqlserver_activity": active_sessions,
             "sqlserver_connections": active_connections,
         }
@@ -354,8 +357,8 @@ class SqlserverActivity(DBMAsyncJob):
 
         # re-use the check's conn module, but set extra_key=dbm-activity- to ensure we get our own
         # raw connection. adodbapi and pyodbc modules are thread safe, but connections are not.
-        with self.check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
-            with self.check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+        with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
+            with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 connections = self._get_active_connections(cursor)
                 request_cols = self._get_exec_requests_cols_cached(cursor, DM_EXEC_REQUESTS_COLS)
                 rows = self._get_activity(cursor, request_cols)
@@ -364,6 +367,6 @@ class SqlserverActivity(DBMAsyncJob):
                 payload = json.dumps(event, default=default_json_event_encoding)
                 self._check.database_monitoring_query_activity(payload)
 
-        self.check.histogram(
-            "dd.sqlserver.activity.collect_activity.payload_size", len(payload), **self.check.debug_stats_kwargs()
+        self._check.histogram(
+            "dd.sqlserver.activity.collect_activity.payload_size", len(payload), **self._check.debug_stats_kwargs()
         )
