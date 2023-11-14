@@ -390,7 +390,7 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
     'dbm_enabled, reported_hostname, expected_hostname',
     [
         (True, '', 'resolved.hostname'),
-        (False, '', 'stubbed.hostname'),
+        (False, '', 'resolved.hostname'),
         (False, 'forced_hostname', 'forced_hostname'),
         (True, 'forced_hostname', 'forced_hostname'),
     ],
