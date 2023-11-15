@@ -273,6 +273,7 @@ def test_statement_metrics(
             {
                 'aws': {
                     'instance_endpoint': 'foo.aws.com',
+                    'iam_auth': False,
                 },
                 'azure': {
                     'deployment_type': 'flexible_server',

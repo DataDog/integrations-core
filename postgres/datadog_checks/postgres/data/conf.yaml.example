@@ -459,6 +459,12 @@ instances:
         #
         # region: us-east-1
 
+        ## @param iam_auth - boolean - optional - default: false
+        ## Set to `true` to enable IAM authentication. 
+        ## `region` must be set to configure IAM authentication.
+        #
+        # iam_auth: false
+
     ## This block defines the configuration for Google Cloud SQL instances.
     ##
     ## Complete this section if you have installed the Datadog GCP Integration 

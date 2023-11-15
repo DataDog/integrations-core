@@ -25,6 +25,7 @@ class Aws(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    iam_auth: Optional[bool] = None
     instance_endpoint: Optional[str] = None
     region: Optional[str] = None
 

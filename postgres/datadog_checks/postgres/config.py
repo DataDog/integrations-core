@@ -116,6 +116,7 @@ class PostgresConfig:
         # Remap fully_qualified_domain_name to name
         azure = {k if k != 'fully_qualified_domain_name' else 'name': v for k, v in azure.items()}
         if aws:
+            aws["iam_auth"] = self._is_iam_auth_enabled(aws)
             self.cloud_metadata.update({'aws': aws})
         if gcp:
             self.cloud_metadata.update({'gcp': gcp})
@@ -211,3 +212,18 @@ class PostgresConfig:
                 return True
             except UnicodeEncodeError:
                 return False
+
+    @staticmethod
+    def _is_iam_auth_enabled(aws: dict) -> bool:
+        region = aws.get("region", None)
+        iam_auth = aws.get('iam_auth', None)
+        if iam_auth is None:
+            # for backward compatibility with old config
+            # if iam_auth is not set, we assume it's enabled if region is set
+            iam_auth = region is not None
+        else:
+            iam_auth = is_affirmative(iam_auth)
+            if iam_auth and region is None:
+                # if iam_auth is enabled, region must be set
+                raise ConfigurationError('Field `aws.region` is required when `aws.iam_auth` is enabled.')
+        return iam_auth

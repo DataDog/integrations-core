@@ -148,7 +148,7 @@ class PostgreSql(AgentCheck):
                     self.cloud_metadata.get("gcp")["project_id"], self.cloud_metadata.get("gcp")["instance_id"]
                 )
             )
-        if self.cloud_metadata.get("aws") is not None:
+        if self.cloud_metadata.get("aws") is not None and 'instance_endpoint' in self.cloud_metadata.get("aws"):
             self.tags.append(
                 "dd.internal.resource:aws_rds_instance:{}".format(
                     self.cloud_metadata.get("aws")["instance_endpoint"],
@@ -693,14 +693,19 @@ class PostgreSql(AgentCheck):
             conn = psycopg2.connect(connection_string)
         else:
             password = self._config.password
-            region = self._config.cloud_metadata.get('aws', {}).get('region', None)
-            if region is not None:
-                password = aws.generate_rds_iam_token(
-                    host=self._config.host,
-                    username=self._config.user,
-                    port=self._config.port,
-                    region=region,
-                )
+            if 'aws' in self.cloud_metadata:
+                # if we are running on AWS, check if IAM auth is enabled
+                iam_auth = self.cloud_metadata['aws']['iam_auth']
+                if iam_auth:
+                    # if IAM auth is enabled, region must be set. Validation is done in the config
+                    region = self.cloud_metadata['aws']['region']
+                    password = aws.generate_rds_iam_token(
+                        host=self._config.host,
+                        username=self._config.user,
+                        port=self._config.port,
+                        region=region,
+                    )
+            # if we are running on Azure, check if Managed Identity auth is enabled
             client_id = self._config.managed_identity.get('client_id', None)
             scope = self._config.managed_identity.get('identity_scope', None)
             if client_id is not None:
@@ -904,7 +909,7 @@ class PostgreSql(AgentCheck):
                 'integration_version': __version__,
                 "tags": [t for t in self._non_internal_tags if not t.startswith('db:')],
                 "timestamp": time() * 1000,
-                "cloud_metadata": self._config.cloud_metadata,
+                "cloud_metadata": self.cloud_metadata,
                 "metadata": {
                     "dbm": self._config.dbm_enabled,
                     "connection_host": self._config.host,

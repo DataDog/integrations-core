@@ -570,6 +570,13 @@ files:
           value:
             type: string
             example: us-east-1
+        - name: iam_auth
+          description: |
+            Set to `true` to enable IAM authentication. 
+            `region` must be set to configure IAM authentication.
+          value:
+            type: boolean
+            example: false
 
     - name: gcp
       description: |
