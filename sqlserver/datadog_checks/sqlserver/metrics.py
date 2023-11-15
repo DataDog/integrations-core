@@ -1042,6 +1042,7 @@ class SqlDbIndexUsageStats(BaseSqlServerMetric):
             ELSE ind.name
          END AS index_name,
          OBJECT_NAME(ind.object_id) as table_name,
+         ind.type_desc as index_type,
         {sql_columns}
     FROM sys.indexes ind
              INNER JOIN {table} ixus
@@ -1094,12 +1095,14 @@ class SqlDbIndexUsageStats(BaseSqlServerMetric):
         database_index = columns.index('db')
         index_name_index = columns.index('index_name')
         table_name_index = columns.index('table_name')
+        index_type_index = columns.index('index_type')
 
         for row in rows:
             database = row[database_index]
             index = row[index_name_index]
             table = row[table_name_index]
             column_val = row[value_column_index]
+            index_type = row[index_type_index]
 
             if database != self.instance:
                 continue
@@ -1108,6 +1111,7 @@ class SqlDbIndexUsageStats(BaseSqlServerMetric):
                 'db:{}'.format(str(database)),
                 'index_name:{}'.format(str(index)),
                 'table:{}'.format(str(table)),
+                'index_type:{}'.format(str(index_type)),
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.metric_name)
