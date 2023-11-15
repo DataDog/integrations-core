@@ -32,7 +32,7 @@
 * Bump the `pyodbc` version to 5.0.1 ([#16041](https://github.com/DataDog/integrations-core/pull/16041))
 * Fix config option `dbm_enabled` type to ensure it is a boolean ([#16078](https://github.com/DataDog/integrations-core/pull/16078))
 
-## 15.0.3 / 2023-11-08
+## 15.0.3 / 2023-11-08 / Agent 7.49.1
 
 ***Fixed***
 
