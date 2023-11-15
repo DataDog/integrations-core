@@ -822,9 +822,13 @@ def test_database_instance_cloud_metadata_aws(
     else:
         # When IAM auth is enabled, unit test should fail with password authentication error
         # this is because boto3.generate_rds_iam_token will always return a token (presigned url)
-        with pytest.raises(expected_error, match=error_msg):
-            check = integration_check(pg_instance)
-            check.check(pg_instance)
+        with mock.patch('datadog_checks.postgres.aws.generate_rds_iam_token') as mocked_generate_rds_iam_token:
+            mocked_generate_rds_iam_token.return_value = 'faketoken'
+            with pytest.raises(expected_error, match=error_msg):
+                check = integration_check(pg_instance)
+                check.check(pg_instance)
+            if expected_iam_auth_enabled:
+                assert mocked_generate_rds_iam_token.called
 
     if not expected_error == ConfigurationError:
         # we only assert the check ran if we don't expect a ConfigurationError
