@@ -684,7 +684,8 @@ class SqlDbFragmentation(BaseSqlServerMetric):
         "DDIPS.index_id as index_id, DDIPS.fragment_count as fragment_count, "
         "DDIPS.avg_fragment_size_in_pages as avg_fragment_size_in_pages, "
         "DDIPS.page_count as page_count, "
-        "DDIPS.avg_fragmentation_in_percent as avg_fragmentation_in_percent, I.name as index_name, I.type_desc as index_type"
+        "DDIPS.avg_fragmentation_in_percent as avg_fragmentation_in_percent, "
+        "I.name as index_name, I.type_desc as index_type "
         "FROM {table} (DB_ID('{{db}}'),null,null,null,null) as DDIPS "
         "INNER JOIN sys.indexes as I ON I.object_id = DDIPS.object_id "
         "AND DDIPS.index_id = I.index_id "
@@ -761,7 +762,7 @@ class SqlDbFragmentation(BaseSqlServerMetric):
                 u'object_name:{}'.format(ensure_unicode(object_name)),
                 u'index_id:{}'.format(ensure_unicode(index_id)),
                 u'index_name:{}'.format(ensure_unicode(index_name)),
-                u'index_type:{}'.format(ensure_unicode(index_name)),
+                u'index_type:{}'.format(ensure_unicode(index_type)),
             ]
 
             metric_tags.extend(self.tags)
