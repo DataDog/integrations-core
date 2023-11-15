@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.1.1 / 2023-11-15
+
+***Added***:
+
+* Added `pipe_schema` and `pipe_catalog` tags to snowpipe metrics. ([#16222](https://github.com/DataDog/integrations-core/pull/16222))
+
 ## 5.1.0 / 2023-11-10
 
 ***Added***:
