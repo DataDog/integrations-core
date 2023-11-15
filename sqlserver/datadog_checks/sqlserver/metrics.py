@@ -685,7 +685,7 @@ class SqlDbFragmentation(BaseSqlServerMetric):
         "DDIPS.avg_fragment_size_in_pages as avg_fragment_size_in_pages, "
         "DDIPS.page_count as page_count, "
         "DDIPS.avg_fragmentation_in_percent as avg_fragmentation_in_percent, "
-        "I.name as index_name, I.type_desc as index_type "
+        "I.name as index_name, I.type_desc as idx_type "
         "FROM {table} (DB_ID('{{db}}'),null,null,null,null) as DDIPS "
         "INNER JOIN sys.indexes as I ON I.object_id = DDIPS.object_id "
         "AND DDIPS.index_id = I.index_id "
@@ -739,7 +739,7 @@ class SqlDbFragmentation(BaseSqlServerMetric):
         object_name_index = columns.index("object_name")
         index_id_index = columns.index("index_id")
         index_name_index = columns.index("index_name")
-        index_type_index = columns.index("index_type")
+        index_type_index = columns.index("idx_type")
 
         for row in rows:
             if row[database_name] != self.instance:
@@ -1046,13 +1046,13 @@ class SqlDbIndexUsageStats(BaseSqlServerMetric):
             ELSE ind.name
          END AS index_name,
          OBJECT_NAME(ind.object_id) as table_name,
-         ind.type_desc as index_type,
+         ind.type_desc as idx_type,
         {sql_columns}
     FROM sys.indexes ind
              INNER JOIN {table} ixus
              ON ixus.index_id = ind.index_id AND ixus.object_id = ind.object_id
     WHERE OBJECTPROPERTY(ind.object_id, 'IsUserTable') = 1
-    GROUP BY ixus.database_id, OBJECT_NAME(ind.object_id), ind.name, {sql_columns}
+    GROUP BY ixus.database_id, OBJECT_NAME(ind.object_id), ind.name, ind.type_desc, {sql_columns}
     """.format(
         sql_columns=','.join(f'ixus.{col}' for col in columns),
         table=TABLE,
@@ -1099,7 +1099,7 @@ class SqlDbIndexUsageStats(BaseSqlServerMetric):
         database_index = columns.index('db')
         index_name_index = columns.index('index_name')
         table_name_index = columns.index('table_name')
-        index_type_index = columns.index('index_type')
+        index_type_index = columns.index('idx_type')
 
         for row in rows:
             database = row[database_index]
