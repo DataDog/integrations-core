@@ -212,6 +212,9 @@ class SilkCheck(AgentCheck):
             # Use `self.latest_event_query` as starting time and `collect_events_timestamp` as ending time
             event_query = EVENT_PATH.format(int(self.latest_event_query), int(collect_events_timestamp))
             raw_events, _ = self._get_data(event_query)
+            
+            self.debug.log("Received %s events.", len(raw_events))
+            self.debug.log("Events: %s", raw_events)
 
             for event in raw_events:
                 try:
