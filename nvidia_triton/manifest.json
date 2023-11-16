@@ -20,7 +20,7 @@
   "assets": {
     "integration": {
       "source_type_name": "Nvidia Triton",
-      "source_type_id": "10416",
+      "source_type_id": 10416,
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
