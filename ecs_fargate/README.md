@@ -745,6 +745,15 @@ partial -->
 
 3. Ensure your application is running in the same task definition as the Datadog Agent container.
 
+### Process collection
+
+You can monitor processes in ECS Fargate using the [Live Processes][56] page in the Datadog app. To enable process collection, in the Task Definition add the `PidMode` variable and set it to `task` as follows:
+
+```text
+"pidMode": "task"
+```
+Use the `AWS Fargate` Containers facet in the Live Processes page or enter `fargate:ecs` into the Filter bar to filter processes by ECS.
+
 ## Out-of-the-box tags
 
 The Agent can autodiscover and attach tags to all data emitted by the entire task or an individual container within this task. The list of tags automatically attached depends on the Agent's [cardinality configuration][33].
@@ -852,4 +861,4 @@ Need help? Contact [Datadog support][18].
 [53]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/cpp?tab=containers#instrument-your-application
 [54]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/dotnet-core?tab=containers#custom-instrumentation
 [55]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/dotnet-framework?tab=containers#custom-instrumentation
-
+[56]: https://app.datadoghq.com/process
