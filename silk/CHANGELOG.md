@@ -2,6 +2,8 @@
 
 ## 1.2.2 / 2023-04-14
 
+## 1.2.3-beta.1 / 2023-11-16
+
 * [Fixed] Fix duplicate events bug. See [#14020](https://github.com/DataDog/integrations-core/pull/14020).
 
 ## 1.2.1 / 2023-03-03
