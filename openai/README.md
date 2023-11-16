@@ -10,6 +10,8 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Python" xxx -->
 
+**Note**: This setup method will not collect `openai.api.usage.*` metrics, unless you also follow the API key setup instructions.
+
 ### Installation
 
 <!-- NOTE: This section is overwritten by the OpenAI configuration component exported in -->
@@ -98,6 +100,8 @@ DEBUG:ddtrace.contrib.openai._logging.py:sent 2 logs to 'http-intake.logs.datado
 <!-- xxz tab xxx -->
 <!-- xxx tab "Node.js" xxx -->
 
+**Note**: This setup method will not collect `openai.api.usage.*` metrics, unless you also follow the API key setup instructions.
+
 ### Installation
 
 1. Enable APM and StatsD in your Datadog Agent. For example, in Docker:
@@ -176,6 +180,8 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 <!-- xxz tabs xxx -->
 <!-- xxx tab "API Key" xxx -->
 
+**Note**: This setup method will only collect  `openai.api.usage.*` metrics. To collect all metrics provided by this integration, also follow the APM setup instructions.
+
 ### Installation
 
 1. Login to your [OpenAI Account][10].
@@ -194,6 +200,8 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 ## Data Collected
 
 ### Metrics
+
+**Note**: The `openai.api.usage.*` metrics are only collected with the API key setup method. All remaining metrics below are collected with the APM setup methods.
 
 See [metadata.csv][4] for a list of metrics provided by this integration.
 
