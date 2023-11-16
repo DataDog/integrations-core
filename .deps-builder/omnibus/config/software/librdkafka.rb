@@ -6,7 +6,6 @@ name "librdkafka"
 default_version "2.3.0"
 
 dependency 'curl'
-dependency 'libgcrypt'
 dependency "cyrus-sasl"
 
 source :url => "https://github.com/confluentinc/librdkafka/archive/refs/tags/v#{version}.tar.gz",

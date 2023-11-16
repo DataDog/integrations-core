@@ -33,3 +33,69 @@ jobs:
           RUNNING_ON_WINDOWS: true
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+
+  build-and-resolve-dependencies-macos:
+    name: "Build and resolve dependencies for macOS"
+    runs-on: "macos-11"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: "DataDog/datadog-agent-macos-build"
+          sparse-checkout: |
+            scripts/builder_setup.sh
+          path: "datadog-agent-macos-build"
+
+      - name: Use XCode 13.2
+        run: |
+          sudo xcode-select -s /Applications/Xcode_13.2.app
+
+      - name: Remove preinstalled environment
+        run: |
+          # The base box ships a few things that can have unwanted effects on the MacOS build.
+          # For instance, we compile Python in the pipeline. If Python finds some libraries while
+          # it's being compiled, then it will add a dynamic link to them and add some features.
+          # In this particular case, Python sees that there is libintl.8.dylib (provided by the gettext brew package)
+          # in the default include path, thus links to it. However, that's not something we need, so we don't actually
+          # ship that library in the MacOS package. Since we have a feature to make a build fail if we depend on
+          # something we don't ship, this made the build fail (see: https://github.com/DataDog/datadog-agent-macos-build/runs/1011733463?check_suite_focus=true).
+
+          # In order to avoid such cases in the future where we use things we didn't expect to, we'd rather
+          # start with a "clean" runner with the bare minimum, and only install the brew packages we require.
+          brew remove --force --ignore-dependencies $(brew list --formula)
+
+          # Also completely remove the ruby env, otherwise some files remain after the formula uninstall,
+          # possibly causing gem version mismatch issues (eg. bundler).
+          rm -rf /usr/local/lib/ruby
+
+      - name: Cache brew deps
+        uses: actions/cache@v3.3.2
+        with:
+          # Paths to cache:
+          # /usr/local/Homebrew - installation folder of Homebrew
+          # /usr/local/Cellar - installation folder of Homebrew formulae
+          # /usr/local/Frameworks, /usr/local/bin, /usr/local/opt - contain (links to) binaries installed by Homebrew formulae
+          # /usr/local/lib/python3.9 - Python3 packages installation
+          path: |
+            /usr/local/Homebrew
+            /usr/local/Cellar
+            /usr/local/Frameworks
+            /usr/local/bin
+            /usr/local/opt
+            /usr/local/lib/python3.9
+          key: macos-11-build-cache-${{ hashFiles('./datadog-agent-macos-build/scripts/builder_setup.sh') }}
+
+      - name: "Prepare builder"
+        run: |
+          touch ~/.build_setup
+          bash datadog-agent-macos-build/scripts/builder_setup.sh
+          # Create target folders
+          sudo mkdir -p /opt/datadog-agent /var/cache/omnibus && sudo chown "$USER" /opt/datadog-agent /var/cache/omnibus
+
+      - name: "Build dependencies"
+        run: "bash .deps-builder/build.sh"
+        env:
+          INTEGRATIONS_CORE_PATH: ${{ github.workspace }}
