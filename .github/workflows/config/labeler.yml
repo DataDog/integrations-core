@@ -478,3 +478,57 @@ integration/zk:
 release:
 - requirements-agent-release.txt
 - '*/__about__.py'
+team/container-integrations:
+- /cert_manager/**/*
+- /container/**/*
+- /containerd/**/*
+- /cri/**/*
+- /crio/**/*
+- /datadog_cluster_agent/**/*
+- /datadog_operator/**/*
+- /docker_daemon/**/*
+- /ecs_fargate/**/*
+- /eks_fargate/**/*
+- /helm/**/*
+- /kube_apiserver_metrics/**/*
+- /kube_controller_manager/**/*
+- /kube_dns/**/*
+- /kube_metrics_server/**/*
+- /kube_proxy/**/*
+- /kube_scheduler/**/*
+- /kubelet/**/*
+- /kubernetes/**/*
+- /kubernetes_state/**/*
+- /kubernetes_state_core/**/*
+- /nginx_ingress_controller/**/*
+- /oom_kill/**/*
+- /openmetrics/**/*
+- /podman/**/*
+- /tcp_queue_length/**/*
+team/network-device-monitoring:
+- /snmp/**/*
+team/platform-integrations:
+- /citrix_hypervisor/**/*
+- /cloudera/**/*
+- /cloud_foundry_api/**/*
+- /openstack/**/*
+- /openstack_controller/**/*
+- /vsphere/**/*
+team/database-monitoring:
+- /postgres/**/*
+- /mysql/**/*
+- /sqlserver/**/*
+team/windows-agent:
+- /active_directory/**/*
+- /aspdotnet/**/*
+- /dotnetclr/**/*
+- /exchange_server/**/*
+- /hyperv/**/*
+- /iis/**/*
+- /pdh_check/**/*
+- /win32_event_log/**/*
+- /windows_performance_counters/**/*
+- /windows_service/**/*
+- /wmi_check/**/*
+team/agent-platform:
+- /nvidia_jetson/**/*
