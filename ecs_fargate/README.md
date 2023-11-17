@@ -747,7 +747,7 @@ partial -->
 
 ### Process collection
 
-You can monitor processes in ECS Fargate using the [Live Processes][56] page in the Datadog app. To enable process collection, in the Task Definition add the `PidMode` variable and set it to `task` as follows:
+You can monitor processes in ECS Fargate in Datadog by using the [Live Processes page][56]. To enable process collection, add the `PidMode` variable in the Task Definition and set it to `task` as follows:
 
 ```text
 "pidMode": "task"
