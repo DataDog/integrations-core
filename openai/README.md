@@ -10,7 +10,7 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Python" xxx -->
 
-**Note**: This setup method will not collect `openai.api.usage.*` metrics, unless you also follow the API key setup instructions.
+**Note**: This setup method does not collect `openai.api.usage.*` metrics. To collect these metrics, also follow the API key setup instructions.
 
 ### Installation
 
@@ -100,7 +100,7 @@ DEBUG:ddtrace.contrib.openai._logging.py:sent 2 logs to 'http-intake.logs.datado
 <!-- xxz tab xxx -->
 <!-- xxx tab "Node.js" xxx -->
 
-**Note**: This setup method will not collect `openai.api.usage.*` metrics, unless you also follow the API key setup instructions.
+**Note**: This setup method does not collect `openai.api.usage.*` metrics. To collect these metrics, also follow the API key setup instructions.
 
 ### Installation
 
@@ -180,7 +180,7 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 <!-- xxz tabs xxx -->
 <!-- xxx tab "API Key" xxx -->
 
-**Note**: This setup method will only collect  `openai.api.usage.*` metrics. To collect all metrics provided by this integration, also follow the APM setup instructions.
+**Note**: This setup method only collects `openai.api.usage.*` metrics. To collect all metrics provided by this integration, also follow the APM setup instructions.
 
 ### Installation
 
@@ -201,7 +201,7 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 
 ### Metrics
 
-**Note**: The `openai.api.usage.*` metrics are only collected with the API key setup method. All remaining metrics below are collected with the APM setup methods.
+The `openai.api.usage.*` metrics are only collected with the API key setup method. All remaining metrics below are collected with the APM setup methods.
 
 See [metadata.csv][4] for a list of metrics provided by this integration.
 
