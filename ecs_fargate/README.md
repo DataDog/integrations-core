@@ -752,7 +752,7 @@ You can monitor processes in ECS Fargate in Datadog by using the [Live Processes
 ```text
 "pidMode": "task"
 ```
-Use the `AWS Fargate` Containers facet in the Live Processes page or enter `fargate:ecs` into the Filter bar to filter processes by ECS.
+To filter processes by ECS, use the `AWS Fargate` Containers facet or enter `fargate:ecs` in the search query on the Live Processes page.
 
 ## Out-of-the-box tags
 
