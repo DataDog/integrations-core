@@ -749,7 +749,7 @@ partial -->
 
 <div class="alert alert-warning">You can view your ECS Fargate processes in Datadog. To see their relationship to ECS Fargate containers, use the Datadog Agent v7.50.0 or later.</div>
 
-You can monitor processes in ECS Fargate in Datadog by using the [Live Processes page][56]. To enable process collection, add the `PidMode` variable in the Task Definition and set it to `task` as follows:
+You can monitor processes in ECS Fargate in Datadog by using the [Live Processes page][56]. To enable process collection, add the [`PidMode` parameter][57] in the Task Definition and set it to `task` as follows:
 
 ```text
 "pidMode": "task"
@@ -864,3 +864,4 @@ Need help? Contact [Datadog support][18].
 [54]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/dotnet-core?tab=containers#custom-instrumentation
 [55]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/dotnet-framework?tab=containers#custom-instrumentation
 [56]: https://app.datadoghq.com/process
+[57]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#other_task_definition_params
