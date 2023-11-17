@@ -6,6 +6,7 @@ source file: File.join(integrations_core_root, '.deps/build_dependencies.txt')
 
 dependency "datadog-agent-prepare"
 dependency "python3"
+dependency "virtualenv"
 
 build do
   if windows?
@@ -14,8 +15,6 @@ build do
     python = "#{install_dir}/embedded/bin/python3"
   end
 
-  # We require virtualenv for creating the build environment
-  command "#{python} -m pip install virtualenv==20.24.6"
   # Install build dependencies in a virtual environment
   python_build_env.create python, "build_dependencies.txt"
 end

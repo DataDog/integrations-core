@@ -89,14 +89,6 @@ if gcc_version.nil? || gcc_version.empty?
 end
 
 build do
-  # The dir for confs
-  if osx?
-    conf_dir = "#{install_dir}/etc/conf.d"
-  else
-    conf_dir = "#{install_dir}/etc/datadog-agent/conf.d"
-  end
-  mkdir conf_dir
-
   # aliases for pip
   if windows?
     python = "#{windows_safe_path(python_3_embedded)}\\python.exe"

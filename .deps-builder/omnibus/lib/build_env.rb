@@ -5,8 +5,13 @@ module Omnibus
   class Builder
     def python_build_env
       @python_build_env ||= PythonBuildEnvironment.new(self)
-      end
+    end
     expose :python_build_env
+
+    def python_build_env_py2
+      @python_build_env_py2 ||= Python2BuildEnvironment.new(self)
+    end
+    expose :python_build_env_py2
   end
 end
 
@@ -27,7 +32,7 @@ class PythonBuildEnvironment
   end
 
   def create(python, build_dependencies_file)
-    @builder.command "#{python} -m virtualenv #{build_root}"
+    @builder.command "#{system_python} -m virtualenv --python #{python} #{build_root}"
     @builder.command "#{self.python} -m pip install -r #{build_dependencies_file}"
   end
 
@@ -37,8 +42,8 @@ class PythonBuildEnvironment
 
   # Set a constraint file (for all instances)
   def constrain(val)
-    # Actually set the value at build time, not load time
-    @builder.block "Set constraint file to #{val}" do
+    # Actually set the value at build time, not load time, hence the use of a `block`
+    @builder.block "Set constraints file to #{val}" do
       python_build_env.constraints_file = val
     end
   end
@@ -56,6 +61,7 @@ class PythonBuildEnvironment
   # `options` are passed to the `shellout!` function used to run commands
   def wheel(arg, **options)
     root = build_root
+    build_env = self
     # We need to use a block here to ensure an order of execution that is consistent wrt how we set the `constraints_file`.
     # Builder#block uses `instance_eval`, therefore the scope inside the block is as if it were running
     # within the builder instance; that's why we need to access methods via `python_build_env`.
@@ -67,12 +73,12 @@ class PythonBuildEnvironment
       options[:env] = options.fetch(:env, {}).merge({"PATH" => paths.join(File::PATH_SEPARATOR)})
 
       # This forces the dependency resolution to ensure that the global constraints are respected
-      constraints_arg = python_build_env.constraints_file && "-c #{python_build_env.constraints_file}" || ""
+      constraints_arg = build_env.constraints_file && "-c #{build_env.constraints_file}" || ""
 
       # We pass the `wheels_dir` to `--find-links` to avoid rebuilding wheels that we already have
-      shellout! "#{python_build_env.python} -m pip wheel --no-build-isolation " \
-                "--find-links #{python_build_env.wheels_dir} " \
-                "#{constraints_arg} -w #{python_build_env.wheels_dir} #{arg}",
+      shellout! "#{build_env.python} -m pip wheel --no-build-isolation " \
+                "--find-links #{build_env.wheels_dir} " \
+                "#{constraints_arg} -w #{build_env.wheels_dir} #{arg}",
                 **options
     end
   end
@@ -81,9 +87,31 @@ class PythonBuildEnvironment
     windows_safe_path(@builder.install_dir, "wheels")
   end
 
-  private
+  protected
 
   def build_root
     windows_safe_path(@builder.build_dir, "build_env")
+  end
+
+  # The path to the base python used to install virtualenv
+  def system_python
+    if os == 'windows'
+      python = "#{windows_safe_path(@builder.python_3_embedded)}\\python.exe"
+    else
+      python = "#{@builder.install_dir}/embedded/bin/python3"
+    end
+  end
+end
+
+
+class Python2BuildEnvironment < PythonBuildEnvironment
+  def wheels_dir
+    windows_safe_path(@builder.install_dir, "wheels_py2")
+  end
+
+  protected
+
+  def build_root
+    windows_safe_path(@builder.build_dir, "build_env_py2")
   end
 end
