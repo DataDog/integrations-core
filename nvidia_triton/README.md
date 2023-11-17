@@ -15,8 +15,8 @@ No additional installation is needed on your server.
 
 #### OpenMetrics endpoint
 
-By default, the Nvidia Triton server exposes all metrics through the Prometheus endpoint. 
-To enable all metrics reportings: 
+By default, the Nvidia Triton server exposes all metrics through the Prometheus endpoint.
+To enable all metrics reportings:
 
 ```
 tritonserver --allow-metrics=true
@@ -75,6 +75,54 @@ The Nvidia Triton integration includes two service checks.
 
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
+### Logs
+
+The Nvidia Triton integration can collect logs from the Nvidia Triton server and forward them to Datadog.
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Uncomment and edit the logs configuration block in your `nvidia_triton.d/conf.yaml` file. Here's an example:
+
+   ```yaml
+   logs:
+     - type: docker
+       source: nvidia_triton
+       service: nvidia_triton
+   ```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][13].
+
+Then, set Log Integrations as pod annotations. This can also be configured with a file, a configmap, or a key-value store. For more information, see the configuration section of [Kubernetes Log Collection][14].
+
+
+**Annotations v1/v2**
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nvidia_triton
+  annotations:
+    ad.datadoghq.com/apache.logs: '[{"source":"nvidia_triton","service":"nvidia_triton"}]'
+spec:
+  containers:
+    - name: ray
+```
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][9].
@@ -92,3 +140,5 @@ Need help? Contact [Datadog support][9].
 [10]: https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/metrics.html#summaries
 [11]: https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/metrics.html#response-cache-metrics
 [12]: https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/metrics.html#custom-metrics
+[13]: https://docs.datadoghq.com/agent/kubernetes/log/#setup
+[14]: https://docs.datadoghq.com/agent/kubernetes/log/#configuration
