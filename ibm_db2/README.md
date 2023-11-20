@@ -49,6 +49,8 @@ the build process, install `libxslt-dev` (or `libxslt-devel` for RPM).
 
 #### Enable monitoring
 
+Create a Db2 user with the following permissions.
+
 To monitor the health of an instance, its associated databases, and database objects, enable the database system monitor switches for each of the objects you want to monitor: 
 * Statement
 * Lock
@@ -181,7 +183,6 @@ Then it's most likely caused by one of the following scenarios:
 - The CLI Driver isn't able to locate the database due to the absence of `db2cli.ini` and `db2dsdriver.cfg`
 
 The Agent requires the information in both of the above scenarios to determine where to properly connect to the database. To solve this issue, you can either include a host and port parameter for every instance of the `ibm_db2` check experiencing this issue. Alternatively, if you want to use the DSNs defined in either the `db2cli.ini` or `db2dsdriver.cfg` files, you can copy those files over to the `clidriver` directory that the Agent uses. Under normal circumstances, that directory is located at `/opt/datadog-agent/embedded/lib/python3.9/site-packages/clidriver/cfg` for Linux.
-- 
 
 ### Installing `ibm_db` client library offline
 
