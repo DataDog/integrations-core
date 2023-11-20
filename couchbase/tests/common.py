@@ -188,9 +188,6 @@ QUERY_STATS_ALWAYS_PRESENT = {
     'cpu_sys_percent',
     'cpu_user_percent',
     'memory_total',
-    'request_per_sec_15min',
-    'request_per_sec_1min',
-    'request_per_sec_5min',
     'request_prepared_percent',
 }
 

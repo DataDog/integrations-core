@@ -216,6 +216,7 @@ Additional helpful documentation, links, and articles:
 
 - [Monitor your OpenAI usage with Datadog][6]
 - [Monitor Azure OpenAI with Datadog][7]
+- [OpenAI Monitor Templates][12]
 
 [1]: https://openai.com/
 [2]: https://ddtrace.readthedocs.io/en/stable/installation_quickstart.html
@@ -228,3 +229,4 @@ Additional helpful documentation, links, and articles:
 [9]: https://github.com/DataDog/dd-trace-js
 [10]: https://platform.openai.com/
 [11]: https://app.datadoghq.com/integrations/openai
+[12]: https://app.datadoghq.com/monitors/recommended?q=integration%3AOpenAI&only_installed=false&p=1
