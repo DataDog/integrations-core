@@ -204,6 +204,7 @@ def test_index_metrics(aggregator, integration_check, pg_instance):
                 'db:datadog_test',
                 'lock_mode:AccessExclusiveLock',
                 'lock_type:relation',
+                'granted:True',
                 'table:persons',
                 'schema:public',
                 'dd.internal.resource:database_instance:stubbed.hostname',
