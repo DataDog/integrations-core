@@ -578,17 +578,16 @@ files:
             
             For more information on RDS IAM Authentication, see the AWS docs
             https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.Connecting.html
-          options:
+
+            To enable IAM Authentication, set `aws.managed_authentication.enabled` to `true`.
+            If `aws.managed_authentication.enabled` is set, then the `username` and `password` fields will be ignored.
+            `aws.region` is required to enable IAM Authentication.
+          value:
+            type: object
+            properties:
             - name: enabled
-              description: |
-                Set to `true` to enable AWS IAM Authentication.
-                
-                When enabled, the `username` and `password` fields will be ignored.
-                
-                `aws.region` must be set to the region of the instance.
-              value:
-                type: boolean
-                example: false
+              type: boolean
+              example: false
 
     - name: gcp
       description: |
@@ -658,30 +657,24 @@ files:
             
             For more information on Managed Identities, see the Azure docs
             https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
-          options:
-            - name: enabled
-              description: |
-                Set to `true` to enable Azure AD Authentication.
 
-                If this section is set, then the `username` and `password` fields will be ignored.
-              value:
-                type: boolean
-                example: false
+            To enable Azure AD Authentication, set `azure.managed_authentication.enabled` to `true`.
+            If `azure.managed_authentication.enabled` is set, then the `username` and `password` fields will be ignored.
+            `azure.managed_authentication.client_id` is required to enable Azure AD Authentication.
+
+            For more information on scopes, see the Azure docs
+            https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
+          value:
+            type: object
+            properties:
+            - name: enabled
+              type: boolean
+              example: false
             - name: client_id
-              description: |
-                Client ID of the Managed Identity.
-              value:
-                type: string
+              type: string
             - name: identity_scope
-              description: |
-                The permission scope from where to access the identity token. This value is optional if using the default
-                identity scope for Azure managed databases.
-                
-                For more information on scopes, see the Azure docs
-                https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
-              value:
-                type: string
-                example: https://ossrdbms-aad.database.windows.net/.default
+              type: string
+              example: https://ossrdbms-aad.database.windows.net/.default
 
     - name: managed_identity
       description: |
