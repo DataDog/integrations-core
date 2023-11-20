@@ -1,3 +1,9 @@
+## Datadog Agent version [7.49.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7491)
+
+* Datadog Checks Base [34.0.3](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* IBM WAS [3.1.1](https://github.com/DataDog/integrations-core/blob/master/ibm_was/CHANGELOG.md)
+* SQL Server [15.0.3](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+
 ## Datadog Agent version [7.49.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7490)
 
 * Amazon Kafka [4.2.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
