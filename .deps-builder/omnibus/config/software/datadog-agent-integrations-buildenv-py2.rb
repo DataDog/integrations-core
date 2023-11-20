@@ -6,6 +6,7 @@ source file: File.join(integrations_core_root, '.deps/build_dependencies.txt')
 
 dependency "datadog-agent-prepare"
 dependency "python2"
+dependency "virtualenv"
 
 build do
   if windows?

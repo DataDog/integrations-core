@@ -1,9 +1,10 @@
 require './lib/paths.rb'
 
-name 'datadog-agent-integrations-dependencies-py3'
+name 'datadog-agent-integrations-dependencies'
 
 source file: agent_requirements_path
 
+dependency "datadog-agent-integrations-buildenv-py2"
 dependency "datadog-agent-integrations-buildenv-py3"
 dependency "agent-requirements-constraints"
 
@@ -89,13 +90,6 @@ if gcc_version.nil? || gcc_version.empty?
 end
 
 build do
-  # aliases for pip
-  if windows?
-    python = "#{windows_safe_path(python_3_embedded)}\\python.exe"
-  else
-    python = "#{install_dir}/embedded/bin/python3"
-  end
-
   # If a python_mirror is set, it is set in a pip config file so that we do not leak the token in the CI output
   pip_config_file = ENV['PIP_CONFIG_FILE']
   pre_build_env = {
@@ -165,7 +159,7 @@ build do
   # We don't use the .in file provided by the base check directly because we
   # want to filter out things before installing.
   #
-  filtered_agent_requirements_in = 'agent_requirements-py3.in'
+  filtered_agent_requirements_in = "agent_requirements.in"
   if windows?
     static_reqs_in_file = "#{windows_safe_path(project_dir)}\\#{agent_requirements_in}"
     static_reqs_out_folder = "#{windows_safe_path(project_dir)}\\"
@@ -184,7 +178,7 @@ build do
   specific_build_env.each do |lib, env|
     requirements_custom[lib] = {
       "req_lines" => Array.new,
-      "req_file_path" => static_reqs_out_folder + lib + "-py3.in",
+      "req_file_path" => static_reqs_out_folder + lib,
     }
   end
 
@@ -228,19 +222,22 @@ build do
         vars: { requirements: lib_req["req_lines"] }
   end
 
-  # Build dependencies
-  # First we install the dependencies that need specific flags
-  specific_build_env.each do |lib, env|
-    python_build_env.wheel "-r #{requirements_custom[lib]['req_file_path']}", env: env
+  [["py2", python_build_env_py2], ["py3", python_build_env]].each do |suffix, py_build_env|
+    # Build dependencies
+    # First we install the dependencies that need specific flags
+    specific_build_env.each do |lib, env|
+      py_build_env.wheel "-r #{requirements_custom[lib]['req_file_path']}", env: env
+    end
+
+    # Then the ones requiring their own environment variables
+    py_build_env.wheel "-r #{static_reqs_out_file}", env: build_env
+
+    # Produce a lockfile
+    # TODO Move this to some constant so that we can reference the same name when "packaging"
+    lockfile_path = File.join(install_dir, "frozen-#{suffix}.txt")
+    command "#{py_build_env.python} -m piptools compile --generate-hashes " \
+            "--no-header --no-index --no-emit-find-links --generate-hashes " \
+            "-f #{py_build_env.wheels_dir} -o #{lockfile_path} #{agent_requirements_in}"
+
   end
-
-  # Then the ones requiring their own environment variables
-  python_build_env.wheel "-r #{static_reqs_out_file}", env: build_env
-
-  # Produce a lockfile
-  # TODO Move this to some constant so that we can reference the same name when "packaging"
-  lockfile_path = File.join(install_dir, "frozen.txt")
-  command "#{python_build_env.python} -m piptools compile --generate-hashes " \
-          "--no-header --no-index --no-emit-find-links --generate-hashes " \
-          "-f #{python_build_env.wheels_dir} -o #{lockfile_path} #{agent_requirements_in}"
 end

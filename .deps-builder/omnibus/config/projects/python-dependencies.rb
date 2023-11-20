@@ -9,8 +9,7 @@ name 'python-dependencies'
 homepage 'http://www.datadoghq.com'
 maintainer 'Datadog, Inc <package@datadoghq.com>'
 
-dependency 'datadog-agent-integrations-dependencies-py3'
-dependency 'datadog-agent-integrations-dependencies-py2'
+dependency 'datadog-agent-integrations-dependencies'
 
 INSTALL_DIR = '/opt/datadog-agent'
 
@@ -18,7 +17,7 @@ install_dir INSTALL_DIR
 build_version ENV['PACKAGE_VERSION']
 
 package :zipper do
-  target "frozen.txt"
+  target "frozen-py3.txt"
   target "wheels"
   target "frozen-py2.txt"
   target "wheels_py2"
