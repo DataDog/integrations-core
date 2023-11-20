@@ -585,7 +585,7 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
     'dbm_enabled, reported_hostname, expected_hostname',
     [
         (True, '', 'resolved.hostname'),
-        (False, '', 'stubbed.hostname'),
+        (False, '', 'resolved.hostname'),
         (False, 'forced_hostname', 'forced_hostname'),
         (True, 'forced_hostname', 'forced_hostname'),
     ],
@@ -609,7 +609,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         if reported_hostname:
             assert resolve_db_host.called is False, 'Expected resolve_db_host.called to be False'
         else:
-            assert resolve_db_host.called == dbm_enabled, 'Expected resolve_db_host.called to be ' + str(dbm_enabled)
+            assert resolve_db_host.called is True
 
     expected_tags_no_db = _get_expected_tags(check, pg_instance, server=HOST)
     expected_tags_with_db = expected_tags_no_db + ['db:datadog_test']
