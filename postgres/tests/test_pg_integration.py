@@ -741,7 +741,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, pg_instance, dbm_e
 
 
 @pytest.mark.parametrize(
-    "aws_metadata, expected_error, error_msg, expected_iam_auth_enabled",
+    "aws_metadata, expected_error, error_msg, expected_managed_auth_enabled",
     [
         (
             {
@@ -764,7 +764,9 @@ def test_database_instance_metadata(aggregator, dd_run_check, pg_instance, dbm_e
             {
                 "instance_endpoint": "mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com",
                 "region": "us-east-1",
-                "iam_auth": True,
+                "managed_authentication": {
+                    "enabled": True,
+                },
             },
             psycopg2.OperationalError,
             'password authentication failed',
@@ -781,7 +783,9 @@ def test_database_instance_metadata(aggregator, dd_run_check, pg_instance, dbm_e
         (
             {
                 "region": "us-east-1",
-                "iam_auth": False,
+                "managed_authentication": {
+                    "enabled": 'false',
+                },
             },
             None,
             None,
@@ -790,7 +794,9 @@ def test_database_instance_metadata(aggregator, dd_run_check, pg_instance, dbm_e
         (
             {
                 'region': 'us-east-1',
-                'iam_auth': True,
+                "managed_authentication": {
+                    "enabled": 'true',
+                },
             },
             psycopg2.OperationalError,
             'password authentication failed',
@@ -798,22 +804,24 @@ def test_database_instance_metadata(aggregator, dd_run_check, pg_instance, dbm_e
         ),
         (
             {
-                'iam_auth': True,
+                "managed_authentication": {
+                    "enabled": 'true',
+                }
             },
             ConfigurationError,
-            'Field `aws.region` is required when `aws.iam_auth` is enabled',
+            'AWS region must be set when using AWS managed authentication',
             None,  # IAM auth requires region so this should fail
         ),
     ],
 )
 def test_database_instance_cloud_metadata_aws(
-    aggregator, integration_check, pg_instance, aws_metadata, expected_error, error_msg, expected_iam_auth_enabled
+    aggregator, integration_check, pg_instance, aws_metadata, expected_error, error_msg, expected_managed_auth_enabled
 ):
     '''
-    This test is to verify different combinations of aws metadata and iam_auth settings.
-    In legacy config, iam_auth is inferred from the presence of region.
-    With the updated config, iam_auth is explicitly set.
-    This test verifies that the check runs with the expected iam_auth setting and tags.
+    This test is to verify different combinations of aws metadata and managed_authentication settings.
+    In legacy config, managed_authentication is inferred from the presence of region.
+    With the updated config, managed_authentication is explicitly set.
+    This test verifies that the check runs with the expected managed_authentication setting and tags.
     '''
     pg_instance["aws"] = aws_metadata
     if not expected_error:
@@ -827,12 +835,12 @@ def test_database_instance_cloud_metadata_aws(
             with pytest.raises(expected_error, match=error_msg):
                 check = integration_check(pg_instance)
                 check.check(pg_instance)
-            if expected_iam_auth_enabled:
+            if expected_managed_auth_enabled:
                 assert mocked_generate_rds_iam_token.called
 
     if not expected_error == ConfigurationError:
         # we only assert the check ran if we don't expect a ConfigurationError
-        assert check.cloud_metadata['aws']['iam_auth'] == expected_iam_auth_enabled
+        assert check.cloud_metadata['aws']['managed_authentication']['enabled'] == expected_managed_auth_enabled
 
         expected_tags = _get_expected_tags(check, pg_instance, db=DB_NAME)
         if "instance_endpoint" in aws_metadata:
@@ -840,6 +848,166 @@ def test_database_instance_cloud_metadata_aws(
 
         status = check.CRITICAL if expected_error else check.OK
         aggregator.assert_service_check(check.SERVICE_CHECK_NAME, status=status, tags=expected_tags)
+
+
+@pytest.mark.parametrize(
+    "azure_metadata, managed_identity, expected_error, error_msg, expected_managed_auth_enabled",
+    [
+        (
+            {
+                "deployment_type": "flexible_server",
+                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
+            },
+            None,
+            None,
+            None,
+            False,
+        ),
+        (
+            {
+                "deployment_type": "flexible_server",
+                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
+            },
+            {
+                "client_id": "my-client-id",
+            },
+            psycopg2.OperationalError,
+            'password authentication failed',
+            True,
+        ),
+        (
+            {
+                "deployment_type": "flexible_server",
+                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
+                "managed_authentication": {
+                    "enabled": False,
+                },
+            },
+            {
+                "client_id": "my-client-id",
+            },
+            None,
+            None,
+            False,
+        ),
+        (
+            {
+                "deployment_type": "flexible_server",
+                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
+                "managed_authentication": {
+                    "enabled": 'false',
+                },
+            },
+            {
+                "client_id": "my-client-id",
+            },
+            None,
+            None,
+            False,
+        ),
+        (
+            {
+                "deployment_type": "flexible_server",
+                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
+                "managed_authentication": {
+                    "enabled": True,
+                    "client_id": "my-client-id",
+                },
+            },
+            {
+                "client_id": "my-client-id",
+            },
+            psycopg2.OperationalError,
+            'password authentication failed',
+            True,
+        ),
+        (
+            {
+                "deployment_type": "flexible_server",
+                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
+                "managed_authentication": {
+                    "enabled": 'true',
+                    "client_id": "my-client-id",
+                    'identity_scope': 'https://database.windows.net/.default',
+                },
+            },
+            None,
+            psycopg2.OperationalError,
+            'password authentication failed',
+            True,
+        ),
+        (
+            {
+                "deployment_type": "flexible_server",
+                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
+                "managed_authentication": {
+                    "enabled": True,
+                },
+            },
+            None,
+            ConfigurationError,
+            'Azure client_id must be set when using Azure managed authentication',
+            None,
+        ),
+    ],
+)
+def test_database_instance_cloud_metadata_azure(
+    aggregator,
+    integration_check,
+    pg_instance,
+    azure_metadata,
+    managed_identity,
+    expected_error,
+    error_msg,
+    expected_managed_auth_enabled,
+):
+    '''
+    This test is to verify different combinations of aws metadata and managed_authentication settings.
+    In legacy config, managed_authentication is inferred from the presence of region.
+    With the updated config, managed_authentication is explicitly set.
+    This test verifies that the check runs with the expected managed_authentication setting and tags.
+    '''
+    pg_instance["azure"] = azure_metadata
+    if managed_identity:
+        pg_instance["managed_identity"] = managed_identity
+    if not expected_error:
+        check = integration_check(pg_instance)
+        check.check(pg_instance)
+    else:
+        # When IAM auth is enabled, unit test should fail with password authentication error
+        # this is because boto3.generate_rds_iam_token will always return a token (presigned url)
+        with mock.patch(
+            'datadog_checks.postgres.azure.generate_managed_identity_token'
+        ) as generate_managed_identity_token:
+            generate_managed_identity_token.return_value = 'faketoken'
+            with pytest.raises(expected_error, match=error_msg):
+                check = integration_check(pg_instance)
+                check.check(pg_instance)
+            if expected_managed_auth_enabled:
+                assert generate_managed_identity_token.called
+
+    if not expected_error == ConfigurationError:
+        # we only assert the check ran if we don't expect a ConfigurationError
+        assert check.cloud_metadata['azure']['managed_authentication']['enabled'] == expected_managed_auth_enabled
+
+        expected_tags = _get_expected_tags(check, pg_instance, db=DB_NAME)
+        if "fully_qualified_domain_name" in azure_metadata:
+            expected_tags.append(
+                "dd.internal.resource:azure_postgresql_flexible_server:{}".format(
+                    azure_metadata["fully_qualified_domain_name"]
+                )
+            )
+
+        status = check.CRITICAL if expected_error else check.OK
+        aggregator.assert_service_check(check.SERVICE_CHECK_NAME, status=status, tags=expected_tags)
+
+        if managed_identity:
+            assert check.warnings == [
+                (
+                    'DEPRECATION NOTICE: The managed_identity option is deprecated and will be removed '
+                    'in a future version. Please use the new azure.managed_authentication option instead.'
+                )
+            ]
 
 
 def assert_state_clean(check):

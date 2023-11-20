@@ -92,6 +92,11 @@ class PostgreSql(AgentCheck):
                 "DEPRECATION NOTICE: Please use the new custom_queries option "
                 "rather than the now deprecated custom_metrics"
             )
+        if 'managed_identity' in self.instance:
+            self.warning(
+                "DEPRECATION NOTICE: The managed_identity option is deprecated and will be removed in a future version."
+                " Please use the new azure.managed_authentication option instead."
+            )
         self._config = PostgresConfig(self.instance)
         self.cloud_metadata = self._config.cloud_metadata
         self.tags = self._config.tags
@@ -695,8 +700,8 @@ class PostgreSql(AgentCheck):
             password = self._config.password
             if 'aws' in self.cloud_metadata:
                 # if we are running on AWS, check if IAM auth is enabled
-                iam_auth = self.cloud_metadata['aws']['iam_auth']
-                if iam_auth:
+                aws_managed_authentication = self.cloud_metadata['aws']['managed_authentication']
+                if aws_managed_authentication['enabled']:
                     # if IAM auth is enabled, region must be set. Validation is done in the config
                     region = self.cloud_metadata['aws']['region']
                     password = aws.generate_rds_iam_token(
@@ -705,11 +710,12 @@ class PostgreSql(AgentCheck):
                         port=self._config.port,
                         region=region,
                     )
-            # if we are running on Azure, check if Managed Identity auth is enabled
-            client_id = self._config.managed_identity.get('client_id', None)
-            scope = self._config.managed_identity.get('identity_scope', None)
-            if client_id is not None:
-                password = azure.generate_managed_identity_token(client_id=client_id, identity_scope=scope)
+            elif 'azure' in self.cloud_metadata:
+                azure_managed_authentication = self.cloud_metadata['azure']['managed_authentication']
+                if azure_managed_authentication['enabled']:
+                    client_id = azure_managed_authentication['client_id']
+                    identity_scope = azure_managed_authentication.get('identity_scope', None)
+                    password = azure.generate_managed_identity_token(client_id=client_id, identity_scope=identity_scope)
 
             args = {
                 'host': self._config.host,

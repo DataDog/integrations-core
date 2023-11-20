@@ -459,11 +459,23 @@ instances:
         #
         # region: us-east-1
 
-        ## @param iam_auth - boolean - optional - default: false
-        ## Set to `true` to enable IAM authentication. 
-        ## `region` must be set to configure IAM authentication.
+        ## Configure section used for AWS IAM Authentication with RDS.
+        ##
+        ## This supports using IAM database authentication to connect to your database instance.
+        ##
+        ## For more information on RDS IAM Authentication, see the AWS docs
+        ## https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.Connecting.html
         #
-        # iam_auth: false
+        # managed_authentication:
+
+            ## @param enabled - boolean - optional - default: false
+            ## Set to `true` to enable AWS IAM Authentication.
+            ##
+            ## When enabled, the `username` and `password` fields will be ignored.
+            ##
+            ## `aws.region` must be set to the region of the instance.
+            #
+            # enabled: false
 
     ## This block defines the configuration for Google Cloud SQL instances.
     ##
@@ -520,6 +532,38 @@ instances:
         #
         # fully_qualified_domain_name: my-postgres-database.database.windows.net
 
+        ## Configuration section used for Azure AD Authentication.
+        ##
+        ## This supports using System or User assigned managed identities.
+        ##
+        ## For more information on Managed Identities, see the Azure docs
+        ## https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
+        #
+        # managed_authentication:
+
+            ## @param enabled - boolean - optional - default: false
+            ## Set to `true` to enable Azure AD Authentication.
+            ##
+            ## If this section is set, then the `username` and `password` fields will be ignored.
+            #
+            # enabled: false
+
+            ## @param client_id - string - optional
+            ## Client ID of the Managed Identity.
+            #
+            # client_id: <CLIENT_ID>
+
+            ## @param identity_scope - string - optional - default: https://ossrdbms-aad.database.windows.net/.default
+            ## The permission scope from where to access the identity token. This value is optional if using the default
+            ## identity scope for Azure managed databases.
+            ##
+            ## For more information on scopes, see the Azure docs
+            ## https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
+            #
+            # identity_scope: https://ossrdbms-aad.database.windows.net/.default
+
+    ## DEPRECATED: Please use `azure.managed_authentication` instead.
+    ##
     ## Configuration section used for Azure AD Authentication.
     ##
     ## This supports using System or User assigned managed identities.
