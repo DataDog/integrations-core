@@ -30,7 +30,7 @@ Use AWS Identity and Access Management (IAM) Access Analyzer across your Amazon 
 
 ### Metrics
 
-This integration does not not collect metrics
+This integration does not include any metrics.
 
 ### Service Checks
 
@@ -38,11 +38,11 @@ This integration does not include any service checks.
 
 ### Logs
 
-This integration can be configured to send Logs.
+This integration can be configured to send logs.
 
 ### Events
 
-This integration does not send events
+This integration does not include any events.
 
 ## Troubleshooting
 
