@@ -1,0 +1,1 @@
+Add support for paginated requests with `paginated_limit` option.
