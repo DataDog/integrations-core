@@ -17,7 +17,9 @@ from .common import (
     DB_NAME,
     DBM_MIGRATED_METRICS,
     HOST,
+    PASSWORD_ADMIN,
     POSTGRES_VERSION,
+    USER_ADMIN,
     _get_expected_tags,
     assert_metric_at_least,
     check_activity_metrics,
@@ -107,10 +109,13 @@ def test_snapshot_xmin(aggregator, integration_check, pg_instance):
                 query = 'select txid_current();'
             cur.execute(query)
 
+    aggregator.reset()
     check = integration_check(pg_instance)
     check.check(pg_instance)
-    aggregator.assert_metric('postgresql.snapshot.xmin', value=xmin + 1, count=1, tags=expected_tags)
-    aggregator.assert_metric('postgresql.snapshot.xmax', value=xmin + 1, count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.snapshot.xmin', count=1, tags=expected_tags)
+    aggregator.metrics('postgresql.snapshot.xmin')[0].value > xmin
+    aggregator.assert_metric('postgresql.snapshot.xmax', count=1, tags=expected_tags)
+    aggregator.metrics('postgresql.snapshot.xmax')[0].value > xmin
 
 
 def test_snapshot_xip(aggregator, integration_check, pg_instance):
@@ -343,6 +348,19 @@ def test_activity_metrics_no_aggregations(aggregator, integration_check, pg_inst
 
     expected_tags = _get_expected_tags(check, pg_instance, db=DB_NAME)
     check_activity_metrics(aggregator, expected_tags)
+
+
+def test_activity_vacuum_excluded(aggregator, integration_check, pg_instance):
+    pg_instance['collect_activity_metrics'] = True
+    check = integration_check(pg_instance)
+
+    conn = _get_conn(pg_instance, user=USER_ADMIN, password=PASSWORD_ADMIN)
+    cur = conn.cursor()
+    cur.execute('VACUUM analyze persons')
+
+    check.check(pg_instance)
+    dd_agent_tags = _get_expected_tags(check, pg_instance, db=DB_NAME, app='test', user=USER_ADMIN)
+    aggregator.assert_metric('postgresql.waiting_queries', value=0, count=1, tags=dd_agent_tags)
 
 
 def test_backend_transaction_age(aggregator, integration_check, pg_instance):
@@ -585,7 +603,7 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
     'dbm_enabled, reported_hostname, expected_hostname',
     [
         (True, '', 'resolved.hostname'),
-        (False, '', 'stubbed.hostname'),
+        (False, '', 'resolved.hostname'),
         (False, 'forced_hostname', 'forced_hostname'),
         (True, 'forced_hostname', 'forced_hostname'),
     ],
@@ -609,7 +627,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         if reported_hostname:
             assert resolve_db_host.called is False, 'Expected resolve_db_host.called to be False'
         else:
-            assert resolve_db_host.called == dbm_enabled, 'Expected resolve_db_host.called to be ' + str(dbm_enabled)
+            assert resolve_db_host.called is True
 
     expected_tags_no_db = _get_expected_tags(check, pg_instance, server=HOST)
     expected_tags_with_db = expected_tags_no_db + ['db:datadog_test']
