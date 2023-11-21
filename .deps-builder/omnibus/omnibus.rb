@@ -5,7 +5,6 @@
 
 require "./lib/zip_packager.rb"
 require "./lib/build_env.rb"
-require "./lib/project_extension.rb"
 
 if ENV["WINDOWS_BUILD_32_BIT"]
     windows_arch :x86
