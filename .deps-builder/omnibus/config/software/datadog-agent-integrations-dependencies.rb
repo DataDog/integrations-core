@@ -52,11 +52,6 @@ excluded_packages = Array.new
 # We build these manually
 excluded_packages.push(/^confluent-kafka==/)
 
-if osx?
-  # Temporarily exclude Aerospike until builder supports new dependency
-  excluded_packages.push(/^aerospike==/)
-end
-
 if arm?
   # This doesn't build on ARM
   excluded_packages.push(/^pymqi==/)
