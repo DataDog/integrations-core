@@ -608,13 +608,13 @@ def test_loadbalancers_exception(aggregator, check, dd_run_check, mock_http_get,
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/lbaas/loadbalancers'], '1e6e233e637d4d55a50a62b63398ad15')
             )
-            == 1
+            == 3
         )
         assert (
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/lbaas/loadbalancers'], '6e39099cccde4f809b003d9e0dd09304')
             )
-            == 1
+            == 3
         )
     if api_type == ApiType.SDK:
         assert connection_load_balancer.load_balancers.call_count == 2
@@ -811,13 +811,13 @@ def test_listeners_exception(aggregator, check, dd_run_check, mock_http_get, con
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/lbaas/listeners'], '6e39099cccde4f809b003d9e0dd09304')
             )
-            == 1
+            == 3
         )
         assert (
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/lbaas/listeners'], '1e6e233e637d4d55a50a62b63398ad15')
             )
-            == 1
+            == 3
         )
     if api_type == ApiType.SDK:
         assert connection_load_balancer.listeners.call_count == 2
@@ -1397,13 +1397,13 @@ def test_pools_exception(aggregator, dd_run_check, check, mock_http_get, connect
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/lbaas/pools'], '1e6e233e637d4d55a50a62b63398ad15')
             )
-            == 1
+            == 3
         )
         assert (
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/lbaas/pools'], '6e39099cccde4f809b003d9e0dd09304')
             )
-            == 1
+            == 3
         )
     if api_type == ApiType.SDK:
         assert connection_load_balancer.pools.call_count == 2
@@ -1508,7 +1508,7 @@ def test_pool_members_exception(aggregator, check, dd_run_check, mock_http_get, 
                     '1e6e233e637d4d55a50a62b63398ad15',
                 )
             )
-            == 1
+            == 3
         )
         assert (
             args_list.count(
@@ -1679,13 +1679,13 @@ def test_healthmonitors_exception(aggregator, check, dd_run_check, mock_http_get
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/lbaas/healthmonitors'], '1e6e233e637d4d55a50a62b63398ad15')
             )
-            == 1
+            == 3
         )
         assert (
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/lbaas/healthmonitors'], '6e39099cccde4f809b003d9e0dd09304')
             )
-            == 1
+            == 3
         )
     if api_type == ApiType.SDK:
         assert (
@@ -1849,13 +1849,13 @@ def test_quotas_exception(aggregator, check, dd_run_check, mock_http_get, connec
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/lbaas/quotas'], '1e6e233e637d4d55a50a62b63398ad15')
             )
-            == 1
+            == 3
         )
         assert (
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/lbaas/quotas'], '6e39099cccde4f809b003d9e0dd09304')
             )
-            == 1
+            == 3
         )
     if api_type == ApiType.SDK:
         assert connection_load_balancer.quotas.call_count == 2
@@ -2140,13 +2140,13 @@ def test_amphorae_exception(aggregator, check, dd_run_check, mock_http_get, conn
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/octavia/amphorae'], '1e6e233e637d4d55a50a62b63398ad15')
             )
-            == 1
+            == 3
         )
         assert (
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/octavia/amphorae'], '6e39099cccde4f809b003d9e0dd09304')
             )
-            == 1
+            == 3
         )
 
     if api_type == ApiType.SDK:

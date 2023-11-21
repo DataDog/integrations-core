@@ -237,6 +237,14 @@ REST_IRONIC_MICROVERSION_1_80 = {
     'use_legacy_check_version': False,
 }
 
+REST_PAGINATED_LIMIT = {
+    'keystone_server_url': 'http://127.0.0.1:8080/identity',
+    'username': 'admin',
+    'password': 'password',
+    'use_legacy_check_version': False,
+    'paginated_limit': 1,
+}
+
 SDK = {
     'openstack_cloud_name': 'test_cloud',
     'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,

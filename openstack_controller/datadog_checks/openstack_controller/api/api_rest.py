@@ -3,9 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+from requests.exceptions import HTTPError
+
 from datadog_checks.openstack_controller.api.api import Api
 from datadog_checks.openstack_controller.api.catalog import Catalog
 from datadog_checks.openstack_controller.components.component import Component
+from datadog_checks.openstack_controller.defaults import DEFAULT_MAX_RETRY
 
 
 class ApiRest(Api):
@@ -40,6 +43,59 @@ class ApiRest(Api):
         response = self.http.get(endpoint)
         response.raise_for_status()
         return response.elapsed.total_seconds() * 1000
+
+    def make_paginated_request(self, url, query_params, object_name):
+        result = []
+        query_params = query_params or {}
+        query_params['limit'] = self.config.paginated_limit
+        while True:
+            retry = 0
+            while retry < DEFAULT_MAX_RETRY:
+                self.log.debug(
+                    "Making paginated request- url: %s, params: %s, object_name: %s", url, query_params, object_name
+                )
+                try:
+                    resp = self.http.get(url, params=query_params)
+                    resp.raise_for_status()
+                    break
+                except HTTPError as e:
+                    # Only catch HTTPErrors to enable the retry mechanism.
+                    self.log.debug(
+                        "Error making paginated request to %s, lowering limit from %s to %s: %s",
+                        url,
+                        query_params.get('limit', 1000),
+                        query_params.get('limit', 1000) // 2,
+                        e,
+                    )
+                    query_params['limit'] = query_params.get('limit', 1000) // 2
+                    retry += 1
+            else:
+                raise Exception("Reached retry limit while making request to {}".format(url))
+
+            response_json = resp.json()
+            objects = response_json.get(object_name, [])
+            result.extend(objects)
+
+            links = response_json.get("{}_links".format(object_name), [])
+
+            # network pagination is handled differently https://docs.openstack.org/api-ref/network/v2/index.html#pagination
+            if 'network' in url:
+                has_next_link = False
+                for link in links:
+                    link_type = link.get('rel')
+                    if link_type == 'next':
+                        has_next_link = True
+                if not has_next_link:
+                    break
+
+            # If there is no link to the next object, it means we're done.
+            # For servers, see https://docs.openstack.org/api-ref/compute/?expanded=list-servers-detailed-detail#list-servers-detailed
+            elif links is None or links == []:
+                break
+
+            query_params['marker'] = objects[-1]['id']
+
+        return result
 
     def get_auth_projects(self):
         response = self.http.get('{}/v3/auth/projects'.format(self.config.keystone_server_url))
@@ -218,11 +274,11 @@ class ApiRest(Api):
 
     def get_compute_servers(self, project_id):
         params = {'project_id': project_id}
-        response = self.http.get(
-            '{}/servers/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value)), params=params
+        return self.make_paginated_request(
+            '{}/servers/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value)),
+            params,
+            'servers',
         )
-        response.raise_for_status()
-        return response.json().get('servers', [])
 
     def get_compute_server_diagnostics(self, server_id):
         response = self.http.get(
@@ -248,18 +304,16 @@ class ApiRest(Api):
         return response.json().get('services', [])
 
     def get_compute_flavors(self):
-        response = self.http.get(
-            '{}/flavors/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value))
+        return self.make_paginated_request(
+            '{}/flavors/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value)), {}, 'flavors'
         )
-        response.raise_for_status()
-        return response.json().get('flavors', [])
 
     def get_compute_hypervisors(self):
-        response = self.http.get(
-            '{}/os-hypervisors/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value))
+        return self.make_paginated_request(
+            '{}/os-hypervisors/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value)),
+            {},
+            'hypervisors',
         )
-        response.raise_for_status()
-        return response.json().get('hypervisors', [])
 
     def get_compute_hypervisor_uptime(self, hypervisor_id):
         response = self.http.get(
@@ -271,19 +325,17 @@ class ApiRest(Api):
         return response.json().get('hypervisor', {})
 
     def get_network_agents(self):
-        response = self.http.get(
-            '{}/v2.0/agents'.format(self._catalog.get_endpoint_by_type(Component.Types.NETWORK.value))
+        return self.make_paginated_request(
+            '{}/v2.0/agents'.format(self._catalog.get_endpoint_by_type(Component.Types.NETWORK.value)), {}, 'agents'
         )
-        response.raise_for_status()
-        return response.json().get('agents', [])
 
     def get_network_networks(self, project_id):
         params = {'project_id': project_id}
-        response = self.http.get(
-            '{}/v2.0/networks'.format(self._catalog.get_endpoint_by_type(Component.Types.NETWORK.value)), params=params
+        return self.make_paginated_request(
+            '{}/v2.0/networks'.format(self._catalog.get_endpoint_by_type(Component.Types.NETWORK.value)),
+            params,
+            'networks',
         )
-        response.raise_for_status()
-        return response.json().get('networks', [])
 
     def get_network_quota(self, project_id):
         response = self.http.get(
@@ -312,30 +364,27 @@ class ApiRest(Api):
         ironic_endpoint = self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)
 
         if use_legacy_nodes_resource(self.config.ironic_microversion):
-            response = self.http.get('{}/v1/nodes/detail'.format(ironic_endpoint))
+            response = self.make_paginated_request('{}/v1/nodes/detail'.format(ironic_endpoint), {}, 'nodes')
         else:
             params = {'detail': True}
+            response = self.make_paginated_request('{}/v1/nodes'.format(ironic_endpoint), params, 'nodes')
 
-            response = self.http.get('{}/v1/nodes'.format(ironic_endpoint), params=params)
-
-        response.raise_for_status()
-        return response.json().get('nodes', [])
+        return response
 
     def get_baremetal_conductors(self):
-        response = self.http.get(
-            '{}/v1/conductors'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value))
+        return self.make_paginated_request(
+            '{}/v1/conductors'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)),
+            {},
+            'conductors',
         )
-        response.raise_for_status()
-        return response.json().get('conductors', [])
 
     def get_load_balancer_loadbalancers(self, project_id):
         params = {'project_id': project_id}
-        response = self.http.get(
+        return self.make_paginated_request(
             '{}/v2/lbaas/loadbalancers'.format(self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value)),
-            params=params,
+            params,
+            'loadbalancers',
         )
-        response.raise_for_status()
-        return response.json().get('loadbalancers', [])
 
     def get_load_balancer_loadbalancer_stats(self, loadbalancer_id):
         response = self.http.get(
@@ -348,12 +397,11 @@ class ApiRest(Api):
 
     def get_load_balancer_listeners(self, project_id):
         params = {'project_id': project_id}
-        response = self.http.get(
+        return self.make_paginated_request(
             '{}/v2/lbaas/listeners'.format(self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value)),
-            params=params,
+            params,
+            'listeners',
         )
-        response.raise_for_status()
-        return response.json().get('listeners', [])
 
     def get_load_balancer_listener_stats(self, listener_id):
         response = self.http.get(
@@ -366,52 +414,47 @@ class ApiRest(Api):
 
     def get_load_balancer_pools(self, project_id):
         params = {'project_id': project_id}
-        response = self.http.get(
+        return self.make_paginated_request(
             '{}/v2/lbaas/pools'.format(self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value)),
-            params=params,
+            params,
+            'pools',
         )
-        response.raise_for_status()
-        return response.json().get('pools', [])
 
     def get_load_balancer_pool_members(self, pool_id, project_id):
         params = {'project_id': project_id}
-        response = self.http.get(
+        return self.make_paginated_request(
             '{}/v2/lbaas/pools/{}/members'.format(
                 self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value), pool_id
             ),
-            params=params,
+            params,
+            'members',
         )
-        response.raise_for_status()
-        return response.json().get('members', [])
 
     def get_load_balancer_healthmonitors(self, project_id):
         params = {'project_id': project_id}
-        response = self.http.get(
+        return self.make_paginated_request(
             '{}/v2/lbaas/healthmonitors'.format(
                 self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value)
             ),
-            params=params,
+            params,
+            'healthmonitors',
         )
-        response.raise_for_status()
-        return response.json().get('healthmonitors', [])
 
     def get_load_balancer_quotas(self, project_id):
         params = {'project_id': project_id}
-        response = self.http.get(
+        return self.make_paginated_request(
             '{}/v2/lbaas/quotas'.format(self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value)),
-            params=params,
+            params,
+            'quotas',
         )
-        response.raise_for_status()
-        return response.json().get('quotas', [])
 
     def get_load_balancer_amphorae(self, project_id):
         params = {'project_id': project_id}
-        response = self.http.get(
+        return self.make_paginated_request(
             '{}/v2/octavia/amphorae'.format(self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value)),
-            params=params,
+            params,
+            'amphorae',
         )
-        response.raise_for_status()
-        return response.json().get('amphorae', [])
 
     def get_load_balancer_amphora_stats(self, amphora_id):
         response = self.http.get(
@@ -423,6 +466,5 @@ class ApiRest(Api):
         return response.json().get('amphora_stats', [])
 
     def get_glance_images(self):
-        response = self.http.get('{}/v2/images'.format(self._catalog.get_endpoint_by_type(Component.Types.IMAGE.value)))
-        response.raise_for_status()
-        return response.json().get('images', [])
+        url = '{}/v2/images'.format(self._catalog.get_endpoint_by_type(Component.Types.IMAGE.value))
+        return self.make_paginated_request(url, {}, 'images')

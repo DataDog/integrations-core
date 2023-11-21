@@ -276,7 +276,7 @@ def test_agents_exception(aggregator, check, dd_run_check, mock_http_get, connec
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:9696/networking/v2.0/agents') == 2
+        assert args_list.count('http://127.0.0.1:9696/networking/v2.0/agents') == 6
     if api_type == ApiType.SDK:
         assert connection_network.agents.call_count == 2
 
@@ -515,11 +515,11 @@ def test_networks_exception(aggregator, check, dd_run_check, mock_http_get, conn
 
         assert (
             args_list.count((['http://127.0.0.1:9696/networking/v2.0/networks'], '1e6e233e637d4d55a50a62b63398ad15'))
-            == 1
+            == 3
         )
         assert (
             args_list.count((['http://127.0.0.1:9696/networking/v2.0/networks'], '6e39099cccde4f809b003d9e0dd09304'))
-            == 1
+            == 3
         )
 
     if api_type == ApiType.SDK:
