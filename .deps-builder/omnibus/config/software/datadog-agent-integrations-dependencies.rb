@@ -46,11 +46,6 @@ if redhat? && !arm?
   dependency 'pydantic-core-py3'
 end
 
-if linux?
-  # We need to use cython<3.0.0 to build oracledb
-  dependency 'oracledb-py3'
-end
-
 # package names of dependencies that won't be added to the Agent Python environment
 excluded_packages = Array.new
 
@@ -76,10 +71,6 @@ end
 # build
 if arm? || !_64_bit? || (windows? && windows_arch_i386?)
   excluded_packages.push(/^orjson==/)
-end
-
-if linux?
-  excluded_packages.push(/^oracledb==/)
 end
 
 gcc_version = ENV['GCC_VERSION']
