@@ -169,10 +169,6 @@ build do
     File.open(static_reqs_in_file, 'r+').readlines().each do |line|
       next if excluded_packages.any? { |package_regex| line.match(package_regex) }
 
-      # on non windows OS, we use the c version of the psycopg installation
-      if line.start_with?('psycopg[binary]') && !windows?
-        line.sub! 'psycopg[binary]', 'psycopg[c]'
-      end
       # Keeping the custom env requirements lines apart to install them with a specific env
       requirements_custom.each do |lib, lib_req|
         if Regexp.new('^' + lib + '==').freeze.match line
