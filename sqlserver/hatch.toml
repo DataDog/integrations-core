@@ -23,7 +23,7 @@ setup = ["single"]
 # query, we can do that by uncommenting this env setup. Note, you should make sure to set you
 # DD_API_KEY in order to send the related metrics to staging for evaluation.
 #[[envs.default.matrix]]
-#python = ["3.9"]
+#python = ["3.11"]
 #os = ["linux"]
 #driver = ["odbc"]
 #version = ["2019", "2022"]
