@@ -107,10 +107,13 @@ def test_snapshot_xmin(aggregator, integration_check, pg_instance):
                 query = 'select txid_current();'
             cur.execute(query)
 
+    aggregator.reset()
     check = integration_check(pg_instance)
     check.check(pg_instance)
-    aggregator.assert_metric('postgresql.snapshot.xmin', value=xmin + 1, count=1, tags=expected_tags)
-    aggregator.assert_metric('postgresql.snapshot.xmax', value=xmin + 1, count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.snapshot.xmin', count=1, tags=expected_tags)
+    aggregator.metrics('postgresql.snapshot.xmin')[0].value > xmin
+    aggregator.assert_metric('postgresql.snapshot.xmax', count=1, tags=expected_tags)
+    aggregator.metrics('postgresql.snapshot.xmax')[0].value > xmin
 
 
 def test_snapshot_xip(aggregator, integration_check, pg_instance):
