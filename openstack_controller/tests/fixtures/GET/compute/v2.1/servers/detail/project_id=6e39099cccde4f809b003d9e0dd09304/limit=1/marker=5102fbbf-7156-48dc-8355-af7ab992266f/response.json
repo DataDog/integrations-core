@@ -1,0 +1,76 @@
+{
+    "servers": [
+      {
+        "id": "954441a8-552a-476c-985e-6564e6fe93d6",
+        "name": "admin-2",
+        "status": "ACTIVE",
+        "tenant_id": "6e39099cccde4f809b003d9e0dd09304",
+        "user_id": "78205c506b534738bc851d3e189a00c3",
+        "metadata": {},
+        "hostId": "817ebf69d75b4cbd4ce16ed833468d628f7214b96bda065353b23549",
+        "image": "",
+        "flavor": {
+          "id": "c1",
+          "links": [
+            {
+              "rel": "bookmark",
+              "href": "http://34.91.114.145/compute/6e39099cccde4f809b003d9e0dd09304/flavors/c1"
+            }
+          ]
+        },
+        "created": "2023-04-08T09:36:12Z",
+        "updated": "2023-04-08T09:36:31Z",
+        "addresses": {
+          "shared": [
+            {
+              "version": 4,
+              "addr": "192.168.233.212",
+              "OS-EXT-IPS:type": "fixed",
+              "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:dd:51:b8"
+            }
+          ]
+        },
+        "accessIPv4": "",
+        "accessIPv6": "",
+        "links": [
+          {
+            "rel": "self",
+            "href": "http://34.91.114.145/compute/v2.1/6e39099cccde4f809b003d9e0dd09304/servers/954441a8-552a-476c-985e-6564e6fe93d6"
+          },
+          {
+            "rel": "bookmark",
+            "href": "http://34.91.114.145/compute/6e39099cccde4f809b003d9e0dd09304/servers/954441a8-552a-476c-985e-6564e6fe93d6"
+          }
+        ],
+        "OS-DCF:diskConfig": "AUTO",
+        "progress": 0,
+        "OS-EXT-AZ:availability_zone": "availability-zone",
+        "config_drive": "",
+        "key_name": null,
+        "OS-SRV-USG:launched_at": "2023-04-08T09:36:31.000000",
+        "OS-SRV-USG:terminated_at": null,
+        "OS-EXT-SRV-ATTR:host": "agent-integrations-openstack-default",
+        "OS-EXT-SRV-ATTR:instance_name": "instance-00000049",
+        "OS-EXT-SRV-ATTR:hypervisor_hostname": "agent-integrations-openstack-default",
+        "OS-EXT-STS:task_state": null,
+        "OS-EXT-STS:vm_state": "active",
+        "OS-EXT-STS:power_state": 1,
+        "os-extended-volumes:volumes_attached": [
+          {
+            "id": "ee975988-f570-4b6c-a94e-98b8d3a189e8"
+          }
+        ],
+        "security_groups": [
+          {
+            "name": "default"
+          }
+        ]
+      }
+    ],
+    "servers_links": [
+        {
+            "rel": "next",
+            "href": "http://127.0.0.1:8774/compute/v2.1/servers/detail?project_id=6e39099cccde4f809b003d9e0dd09304&limit=1&marker=954441a8-552a-476c-985e-6564e6fe93d6"
+        }
+    ]
+}
