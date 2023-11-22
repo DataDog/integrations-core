@@ -39,7 +39,7 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
         self.check_initializations.append(self.init)
 
     def init(self):
-        self.openstack_config = OpenstackConfig(self.log, self.config)
+        self.openstack_config = OpenstackConfig(self.log, self.config, self.instance)
         self.api = make_api(self.openstack_config, self.log, self.http)
         self.identity = Identity(self)
         self.external_tags = []

@@ -245,6 +245,14 @@ REST_PAGINATED_LIMIT = {
     'paginated_limit': 1,
 }
 
+REST_HIGH_PAGINATED_LIMIT = {
+    'keystone_server_url': 'http://127.0.0.1:8080/identity',
+    'username': 'admin',
+    'password': 'password',
+    'use_legacy_check_version': False,
+    'paginated_limit': 1000,
+}
+
 SDK = {
     'openstack_cloud_name': 'test_cloud',
     'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,

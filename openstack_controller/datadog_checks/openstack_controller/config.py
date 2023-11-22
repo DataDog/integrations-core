@@ -34,7 +34,7 @@ def normalize_discover_config_include(config, item_keys):
 
 
 class OpenstackConfig:
-    def __init__(self, logger, config):
+    def __init__(self, logger, config, instance):
         self.log = logger
         self.openstack_config_file_path = config.openstack_config_file_path
         self.openstack_cloud_name = config.openstack_cloud_name
@@ -47,7 +47,7 @@ class OpenstackConfig:
         self.ironic_microversion = config.ironic_microversion
         self.endpoint_interface = config.endpoint_interface
         self.endpoint_region_id = config.endpoint_region_id
-        self.paginated_limit = config.paginated_limit
+        self.paginated_limit = instance.get("paginated_limit", None)
         self.api_type = None
         self.validate()
 

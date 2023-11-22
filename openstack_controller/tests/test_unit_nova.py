@@ -924,7 +924,7 @@ def test_flavors_exception(aggregator, check, dd_run_check, mock_http_get, conne
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8774/compute/v2.1/flavors/detail') == 6
+        assert args_list.count('http://127.0.0.1:8774/compute/v2.1/flavors/detail') == 2
     if api_type == ApiType.SDK:
         assert connection_compute.flavors.call_count == 2
 
@@ -1203,7 +1203,7 @@ def test_hypervisors_exception(aggregator, check, dd_run_check, mock_http_get, c
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8774/compute/v2.1/os-hypervisors/detail') == 6
+        assert args_list.count('http://127.0.0.1:8774/compute/v2.1/os-hypervisors/detail') == 2
     if api_type == ApiType.SDK:
         assert connection_compute.hypervisors.call_count == 2
 
@@ -1712,11 +1712,11 @@ def test_servers_exception(aggregator, check, dd_run_check, mock_http_get, conne
             args_list += [(list(args), project_id)]
         assert (
             args_list.count((['http://127.0.0.1:8774/compute/v2.1/servers/detail'], '1e6e233e637d4d55a50a62b63398ad15'))
-            == 3
+            == 1
         )
         assert (
             args_list.count((['http://127.0.0.1:8774/compute/v2.1/servers/detail'], '6e39099cccde4f809b003d9e0dd09304'))
-            == 3
+            == 1
         )
 
     if api_type == ApiType.SDK:
@@ -1825,6 +1825,11 @@ def test_servers_disable_call(aggregator, check, dd_run_check, mock_http_get, co
             configs.REST_PAGINATED_LIMIT,
             metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT,
             id='api rest paginated',
+        ),
+        pytest.param(
+            configs.REST_HIGH_PAGINATED_LIMIT,
+            metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT,
+            id='api rest high paginated',
         ),
         pytest.param(
             configs.REST_NOVA_MICROVERSION_2_93,

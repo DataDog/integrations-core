@@ -3,12 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
-from requests.exceptions import HTTPError
-
 from datadog_checks.openstack_controller.api.api import Api
 from datadog_checks.openstack_controller.api.catalog import Catalog
 from datadog_checks.openstack_controller.components.component import Component
-from datadog_checks.openstack_controller.defaults import DEFAULT_MAX_RETRY
 
 
 class ApiRest(Api):
@@ -45,34 +42,27 @@ class ApiRest(Api):
         return response.elapsed.total_seconds() * 1000
 
     def make_paginated_request(self, url, query_params, object_name):
+        def make_request(url, params):
+            resp = self.http.get(url, params=params)
+            resp.raise_for_status()
+            response_json = resp.json()
+            return response_json
+
+        if self.config.paginated_limit is None:
+            response_json = make_request(url, query_params)
+            objects = response_json.get(object_name, [])
+            self.log.debug("objects %s url: %s", objects, url)
+            return objects
+
         result = []
         query_params = query_params or {}
         query_params['limit'] = self.config.paginated_limit
         while True:
-            retry = 0
-            while retry < DEFAULT_MAX_RETRY:
-                self.log.debug(
-                    "Making paginated request- url: %s, params: %s, object_name: %s", url, query_params, object_name
-                )
-                try:
-                    resp = self.http.get(url, params=query_params)
-                    resp.raise_for_status()
-                    break
-                except HTTPError as e:
-                    # Only catch HTTPErrors to enable the retry mechanism.
-                    self.log.debug(
-                        "Error making paginated request to %s, lowering limit from %s to %s: %s",
-                        url,
-                        query_params.get('limit', 1000),
-                        query_params.get('limit', 1000) // 2,
-                        e,
-                    )
-                    query_params['limit'] = query_params.get('limit', 1000) // 2
-                    retry += 1
-            else:
-                raise Exception("Reached retry limit while making request to {}".format(url))
+            self.log.debug(
+                "Making paginated request; url: %s, params: %s, object_name: %s", url, query_params, object_name
+            )
+            response_json = make_request(url, query_params)
 
-            response_json = resp.json()
             objects = response_json.get(object_name, [])
             result.extend(objects)
 

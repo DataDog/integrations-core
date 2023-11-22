@@ -31,6 +31,14 @@ pytestmark = [
             id='api rest microversion 2.93',
         ),
         pytest.param(
+            configs.REST_HIGH_PAGINATED_LIMIT,
+            id='api rest high paginated',
+        ),
+        pytest.param(
+            configs.REST_PAGINATED_LIMIT,
+            id='api rest high paginated',
+        ),
+        pytest.param(
             configs.SDK,
             id='api sdk no microversion',
         ),
@@ -63,6 +71,10 @@ def test_disable_octavia_metrics(aggregator, dd_run_check, instance, openstack_c
         pytest.param(
             configs.REST_NOVA_MICROVERSION_2_93,
             id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.REST_HIGH_PAGINATED_LIMIT,
+            id='api rest high paginated',
         ),
         pytest.param(
             configs.SDK,
@@ -99,6 +111,10 @@ def test_disable_octavia_loadbalancer_metrics(aggregator, dd_run_check, instance
         pytest.param(
             configs.REST_NOVA_MICROVERSION_2_93,
             id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.REST_HIGH_PAGINATED_LIMIT,
+            id='api rest high paginated',
         ),
         pytest.param(
             configs.SDK,
@@ -144,6 +160,10 @@ def test_disable_octavia_loadbalancer_stats_metrics(aggregator, dd_run_check, in
             id='api rest microversion 2.93',
         ),
         pytest.param(
+            configs.REST_HIGH_PAGINATED_LIMIT,
+            id='api rest high paginated',
+        ),
+        pytest.param(
             configs.SDK,
             id='api sdk no microversion',
         ),
@@ -178,6 +198,10 @@ def test_disable_octavia_listener_metrics(aggregator, dd_run_check, instance, op
         pytest.param(
             configs.REST_NOVA_MICROVERSION_2_93,
             id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.REST_HIGH_PAGINATED_LIMIT,
+            id='api rest high paginated',
         ),
         pytest.param(
             configs.SDK,
@@ -223,6 +247,10 @@ def test_disable_octavia_listener_stats_metrics(aggregator, dd_run_check, instan
             id='api rest microversion 2.93',
         ),
         pytest.param(
+            configs.REST_HIGH_PAGINATED_LIMIT,
+            id='api rest high paginated',
+        ),
+        pytest.param(
             configs.SDK,
             id='api sdk no microversion',
         ),
@@ -257,6 +285,10 @@ def test_disable_octavia_pool_metrics(aggregator, dd_run_check, instance, openst
         pytest.param(
             configs.REST_NOVA_MICROVERSION_2_93,
             id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.REST_HIGH_PAGINATED_LIMIT,
+            id='api rest high paginated',
         ),
         pytest.param(
             configs.SDK,
@@ -302,6 +334,10 @@ def test_disable_octavia_pool_member_metrics(aggregator, dd_run_check, instance,
             id='api rest microversion 2.93',
         ),
         pytest.param(
+            configs.REST_HIGH_PAGINATED_LIMIT,
+            id='api rest high paginated',
+        ),
+        pytest.param(
             configs.SDK,
             id='api sdk no microversion',
         ),
@@ -336,6 +372,10 @@ def test_disable_octavia_healthmonitor_metrics(aggregator, dd_run_check, instanc
         pytest.param(
             configs.REST_NOVA_MICROVERSION_2_93,
             id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.REST_HIGH_PAGINATED_LIMIT,
+            id='api rest high paginated',
         ),
         pytest.param(
             configs.SDK,
@@ -374,6 +414,10 @@ def test_disable_octavia_quota_metrics(aggregator, dd_run_check, instance, opens
             id='api rest microversion 2.93',
         ),
         pytest.param(
+            configs.REST_HIGH_PAGINATED_LIMIT,
+            id='api rest high paginated',
+        ),
+        pytest.param(
             configs.SDK,
             id='api sdk no microversion',
         ),
@@ -408,6 +452,10 @@ def test_disable_octavia_amphora_metrics(aggregator, dd_run_check, instance, ope
         pytest.param(
             configs.REST_NOVA_MICROVERSION_2_93,
             id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.REST_HIGH_PAGINATED_LIMIT,
+            id='api rest high paginated',
         ),
         pytest.param(
             configs.SDK,
@@ -448,6 +496,13 @@ def test_disable_octavia_amphora_stats_metrics(aggregator, dd_run_check, instanc
             {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['load-balancer'])}},
             None,
             configs.REST,
+            ApiType.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['load-balancer'])}},
+            None,
+            configs.REST_HIGH_PAGINATED_LIMIT,
             ApiType.REST,
             id='api rest',
         ),
@@ -501,6 +556,11 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
         ),
         pytest.param(
             {'http_error': {'/load-balancer': MockResponse(status_code=500)}},
+            configs.REST_HIGH_PAGINATED_LIMIT,
+            id='api rest',
+        ),
+        pytest.param(
+            {'http_error': {'/load-balancer': MockResponse(status_code=500)}},
             configs.SDK,
             id='api sdk',
         ),
@@ -532,6 +592,10 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
         pytest.param(
             configs.REST,
             id='api rest',
+        ),
+        pytest.param(
+            configs.REST_HIGH_PAGINATED_LIMIT,
+            id='api rest high paginated',
         ),
         pytest.param(
             configs.SDK,
@@ -574,6 +638,17 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
             id='api rest',
         ),
         pytest.param(
+            {
+                'http_error': {
+                    '/load-balancer/v2/lbaas/loadbalancers': MockResponse(status_code=500),
+                }
+            },
+            None,
+            configs.REST_PAGINATED_LIMIT,
+            ApiType.REST,
+            id='api rest paginated',
+        ),
+        pytest.param(
             None,
             {
                 'http_error': {
@@ -608,13 +683,13 @@ def test_loadbalancers_exception(aggregator, check, dd_run_check, mock_http_get,
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/lbaas/loadbalancers'], '1e6e233e637d4d55a50a62b63398ad15')
             )
-            == 3
+            == 1
         )
         assert (
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/lbaas/loadbalancers'], '6e39099cccde4f809b003d9e0dd09304')
             )
-            == 3
+            == 1
         )
     if api_type == ApiType.SDK:
         assert connection_load_balancer.load_balancers.call_count == 2
@@ -638,6 +713,10 @@ def test_loadbalancers_exception(aggregator, check, dd_run_check, mock_http_get,
         pytest.param(
             configs.REST,
             id='api rest',
+        ),
+        pytest.param(
+            configs.REST_HIGH_PAGINATED_LIMIT,
+            id='api rest high paginated',
         ),
         pytest.param(
             configs.SDK,
@@ -777,6 +856,17 @@ def test_loadbalancers_metrics(aggregator, check, dd_run_check):
             id='api rest',
         ),
         pytest.param(
+            {
+                'http_error': {
+                    '/load-balancer/v2/lbaas/listeners': MockResponse(status_code=500),
+                }
+            },
+            None,
+            configs.REST_PAGINATED_LIMIT,
+            ApiType.REST,
+            id='api rest paginated',
+        ),
+        pytest.param(
             None,
             {
                 'http_error': {
@@ -811,13 +901,13 @@ def test_listeners_exception(aggregator, check, dd_run_check, mock_http_get, con
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/lbaas/listeners'], '6e39099cccde4f809b003d9e0dd09304')
             )
-            == 3
+            == 1
         )
         assert (
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/lbaas/listeners'], '1e6e233e637d4d55a50a62b63398ad15')
             )
-            == 3
+            == 1
         )
     if api_type == ApiType.SDK:
         assert connection_load_balancer.listeners.call_count == 2
@@ -841,6 +931,10 @@ def test_listeners_exception(aggregator, check, dd_run_check, mock_http_get, con
         pytest.param(
             configs.REST,
             id='api rest',
+        ),
+        pytest.param(
+            configs.REST_HIGH_PAGINATED_LIMIT,
+            id='api rest high paginated',
         ),
         pytest.param(
             configs.SDK,
@@ -1363,6 +1457,17 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
             id='api rest',
         ),
         pytest.param(
+            {
+                'http_error': {
+                    '/load-balancer/v2/lbaas/pools': MockResponse(status_code=500),
+                }
+            },
+            None,
+            configs.REST_PAGINATED_LIMIT,
+            ApiType.REST,
+            id='api rest paginated',
+        ),
+        pytest.param(
             None,
             {
                 'http_error': {
@@ -1397,13 +1502,13 @@ def test_pools_exception(aggregator, dd_run_check, check, mock_http_get, connect
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/lbaas/pools'], '1e6e233e637d4d55a50a62b63398ad15')
             )
-            == 3
+            == 1
         )
         assert (
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/lbaas/pools'], '6e39099cccde4f809b003d9e0dd09304')
             )
-            == 3
+            == 1
         )
     if api_type == ApiType.SDK:
         assert connection_load_balancer.pools.call_count == 2
@@ -1427,6 +1532,10 @@ def test_pools_exception(aggregator, dd_run_check, check, mock_http_get, connect
         pytest.param(
             configs.REST,
             id='api rest',
+        ),
+        pytest.param(
+            configs.REST_HIGH_PAGINATED_LIMIT,
+            id='api rest high paginated',
         ),
         pytest.param(
             configs.SDK,
@@ -1472,6 +1581,19 @@ def test_pools_metrics(aggregator, check, dd_run_check):
             id='api rest',
         ),
         pytest.param(
+            {
+                'http_error': {
+                    '/load-balancer/v2/lbaas/pools/d0335b34-3115-4b3b-9a1a-7e2363ebfee3/members': MockResponse(
+                        status_code=500
+                    ),
+                }
+            },
+            None,
+            configs.REST_HIGH_PAGINATED_LIMIT,
+            ApiType.REST,
+            id='api rest paginated',
+        ),
+        pytest.param(
             None,
             {
                 'http_error': {
@@ -1508,7 +1630,7 @@ def test_pool_members_exception(aggregator, check, dd_run_check, mock_http_get, 
                     '1e6e233e637d4d55a50a62b63398ad15',
                 )
             )
-            == 3
+            == 1
         )
         assert (
             args_list.count(
@@ -1534,6 +1656,10 @@ def test_pool_members_exception(aggregator, check, dd_run_check, mock_http_get, 
         pytest.param(
             configs.REST,
             id='api rest',
+        ),
+        pytest.param(
+            configs.REST_HIGH_PAGINATED_LIMIT,
+            id='api rest high paginated',
         ),
         pytest.param(
             configs.SDK,
@@ -1645,6 +1771,17 @@ def test_pool_members_metrics(aggregator, check, dd_run_check):
             id='api rest',
         ),
         pytest.param(
+            {
+                'http_error': {
+                    '/load-balancer/v2/lbaas/healthmonitors': MockResponse(status_code=500),
+                }
+            },
+            None,
+            configs.REST_PAGINATED_LIMIT,
+            ApiType.REST,
+            id='api rest paginated',
+        ),
+        pytest.param(
             None,
             {
                 'http_error': {
@@ -1679,13 +1816,13 @@ def test_healthmonitors_exception(aggregator, check, dd_run_check, mock_http_get
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/lbaas/healthmonitors'], '1e6e233e637d4d55a50a62b63398ad15')
             )
-            == 3
+            == 1
         )
         assert (
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/lbaas/healthmonitors'], '6e39099cccde4f809b003d9e0dd09304')
             )
-            == 3
+            == 1
         )
     if api_type == ApiType.SDK:
         assert (
@@ -1708,6 +1845,10 @@ def test_healthmonitors_exception(aggregator, check, dd_run_check, mock_http_get
         pytest.param(
             configs.REST,
             id='api rest',
+        ),
+        pytest.param(
+            configs.REST_HIGH_PAGINATED_LIMIT,
+            id='api rest high paginated',
         ),
         pytest.param(
             configs.SDK,
@@ -1815,6 +1956,17 @@ def test_healthmonitors_metrics(aggregator, check, dd_run_check):
             id='api rest',
         ),
         pytest.param(
+            {
+                'http_error': {
+                    '/load-balancer/v2/lbaas/quotas': MockResponse(status_code=500),
+                }
+            },
+            None,
+            configs.REST_PAGINATED_LIMIT,
+            ApiType.REST,
+            id='api rest paginated',
+        ),
+        pytest.param(
             None,
             {
                 'http_error': {
@@ -1849,13 +2001,13 @@ def test_quotas_exception(aggregator, check, dd_run_check, mock_http_get, connec
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/lbaas/quotas'], '1e6e233e637d4d55a50a62b63398ad15')
             )
-            == 3
+            == 1
         )
         assert (
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/lbaas/quotas'], '6e39099cccde4f809b003d9e0dd09304')
             )
-            == 3
+            == 1
         )
     if api_type == ApiType.SDK:
         assert connection_load_balancer.quotas.call_count == 2
@@ -1879,6 +2031,10 @@ def test_quotas_exception(aggregator, check, dd_run_check, mock_http_get, connec
         pytest.param(
             configs.REST,
             id='api rest',
+        ),
+        pytest.param(
+            configs.REST_HIGH_PAGINATED_LIMIT,
+            id='api rest high paginated',
         ),
         pytest.param(
             configs.SDK,
@@ -2106,6 +2262,17 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
             id='api rest',
         ),
         pytest.param(
+            {
+                'http_error': {
+                    '/load-balancer/v2/octavia/amphorae': MockResponse(status_code=500),
+                }
+            },
+            None,
+            configs.REST_PAGINATED_LIMIT,
+            ApiType.REST,
+            id='api rest paginated',
+        ),
+        pytest.param(
             None,
             {
                 'http_error': {
@@ -2140,13 +2307,13 @@ def test_amphorae_exception(aggregator, check, dd_run_check, mock_http_get, conn
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/octavia/amphorae'], '1e6e233e637d4d55a50a62b63398ad15')
             )
-            == 3
+            == 1
         )
         assert (
             args_list.count(
                 (['http://127.0.0.1:9876/load-balancer/v2/octavia/amphorae'], '6e39099cccde4f809b003d9e0dd09304')
             )
-            == 3
+            == 1
         )
 
     if api_type == ApiType.SDK:
@@ -2170,6 +2337,10 @@ def test_amphorae_exception(aggregator, check, dd_run_check, mock_http_get, conn
     [
         pytest.param(
             configs.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            configs.REST_HIGH_PAGINATED_LIMIT,
             id='api rest',
         ),
         pytest.param(
