@@ -45,14 +45,21 @@ def _get_superconn(db_instance, application_name='test'):
 
 
 # Wait until the query yielding a single value cross the provided threshold
-def _wait_for_value(db_instance, lower_threshold, query):
+def _wait_for_value(db_instance, lower_threshold, query, attempts=10):
     value = 0
-    with _get_superconn(db_instance) as conn:
+    current_attempt = 0
+    # Stats table behave slightly differently than normal tables
+    # Repeating the same query within a transaction will yield the
+    # same value, despite the fact that the transaction is in READ COMMITED
+    # To avoid this, we avoid transaction block created by the with statement
+    conn = _get_superconn(db_instance)
+    while value <= lower_threshold and current_attempt < attempts:
         with conn.cursor() as cur:
-            while value <= lower_threshold:
-                cur.execute(query)
-                value = cur.fetchall()[0][0]
-                time.sleep(0.1)
+            cur.execute(query)
+            value = cur.fetchall()[0][0]
+            time.sleep(0.1)
+            current_attempt += 1
+    conn.close()
 
 
 def run_one_check(check, db_instance, cancel=True):
