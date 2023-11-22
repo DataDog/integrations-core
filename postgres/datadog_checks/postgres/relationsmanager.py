@@ -76,6 +76,10 @@ REL_METRICS = {
         'autovacuum_count': ('postgresql.autovacuumed', AgentCheck.monotonic_count),
         'analyze_count': ('postgresql.analyzed', AgentCheck.monotonic_count),
         'autoanalyze_count': ('postgresql.autoanalyzed', AgentCheck.monotonic_count),
+        'EXTRACT(EPOCH FROM -age(last_vacuum))': ('postgresql.last_vacuum_age', AgentCheck.gauge),
+        'EXTRACT(EPOCH FROM -age(last_autovacuum))': ('postgresql.last_autovacuum_age', AgentCheck.gauge),
+        'EXTRACT(EPOCH FROM -age(last_analyze))': ('postgresql.last_analyze_age', AgentCheck.gauge),
+        'EXTRACT(EPOCH FROM -age(last_autoanalyze))': ('postgresql.last_autoanalyze_age', AgentCheck.gauge),
     },
     'query': """
 SELECT relname,schemaname,{metrics_columns}

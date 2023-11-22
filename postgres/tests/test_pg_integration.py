@@ -129,14 +129,18 @@ def test_snapshot_xip(aggregator, integration_check, pg_instance):
     # Make sure to fetch the result to make sure we start the timer after the transaction started
     cur.fetchall()
 
-    conn2 = _get_conn(pg_instance)
-    conn2.set_session(autocommit=True)
-    with conn2.cursor() as cur2:
-        # Force increases of txid
-        cur2.execute('select txid_current();')
+    with _get_conn(pg_instance) as conn2:
+        with conn2.cursor() as cur2:
+            # Force increases of txid
+            cur2.execute('select txid_current();')
 
     check = integration_check(pg_instance)
     check.check(pg_instance)
+
+    # Cleanup
+    cur.close()
+    conn1.close()
+
     expected_tags = _get_expected_tags(check, pg_instance)
     aggregator.assert_metric('postgresql.snapshot.xip_count', value=1, count=1, tags=expected_tags)
 
@@ -149,10 +153,10 @@ def test_common_metrics_without_size(aggregator, integration_check, pg_instance)
 
 
 def test_uptime(aggregator, integration_check, pg_instance):
-    conn = _get_conn(pg_instance)
-    with conn.cursor() as cur:
-        cur.execute("SELECT FLOOR(EXTRACT(EPOCH FROM current_timestamp - pg_postmaster_start_time()))")
-        uptime = cur.fetchall()[0][0]
+    with _get_conn(pg_instance) as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT FLOOR(EXTRACT(EPOCH FROM current_timestamp - pg_postmaster_start_time()))")
+            uptime = cur.fetchall()[0][0]
     check = integration_check(pg_instance)
     check.check(pg_instance)
     expected_tags = _get_expected_tags(check, pg_instance)
@@ -166,10 +170,10 @@ def test_session_number(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
     expected_tags = _get_expected_tags(check, pg_instance, db='postgres')
-    conn = _get_conn(pg_instance)
-    with conn.cursor() as cur:
-        cur.execute("select sessions from pg_stat_database where datname='postgres'")
-        session_number = cur.fetchall()[0][0]
+    with _get_conn(pg_instance) as conn:
+        with conn.cursor() as cur:
+            cur.execute("select sessions from pg_stat_database where datname='postgres'")
+            session_number = cur.fetchall()[0][0]
     aggregator.assert_metric('postgresql.sessions.count', value=session_number, count=1, tags=expected_tags)
 
     # Generate a new session in postgres database
@@ -355,12 +359,15 @@ def test_activity_vacuum_excluded(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
 
     conn = _get_conn(pg_instance, user=USER_ADMIN, password=PASSWORD_ADMIN)
-    cur = conn.cursor()
-    cur.execute('VACUUM analyze persons')
+    with conn.cursor() as cur:
+        cur.execute('VACUUM analyze persons')
 
     check.check(pg_instance)
     dd_agent_tags = _get_expected_tags(check, pg_instance, db=DB_NAME, app='test', user=USER_ADMIN)
     aggregator.assert_metric('postgresql.waiting_queries', value=0, count=1, tags=dd_agent_tags)
+
+    # Cleaning
+    conn.close()
 
 
 def test_backend_transaction_age(aggregator, integration_check, pg_instance):
@@ -380,9 +387,6 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
 
     conn1 = _get_conn(pg_instance)
     cur = conn1.cursor()
-
-    conn2 = _get_conn(pg_instance)
-    cur2 = conn2.cursor()
 
     # Start a transaction in repeatable read to force pinning of backend_xmin
     cur.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;')
@@ -410,8 +414,10 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
 
     aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=test_tags)
 
-    # Open a new session and assign a new txid to it.
-    cur2.execute('select txid_current()')
+    with _get_conn(pg_instance) as conn2:
+        with conn2.cursor() as cur2:
+            # Open a new session and assign a new txid to it.
+            cur2.execute('select txid_current()')
 
     aggregator.reset()
     transaction_age_lower_bound = time.time() - start_transaction_time
@@ -435,9 +441,13 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
         lower_bound=transaction_age_lower_bound,
     )
 
+    # cleanup
+    cur.close()
+    conn1.close()
+
 
 @requires_over_10
-def test_wrong_version(aggregator, integration_check, pg_instance):
+def test_wrong_version(integration_check, pg_instance):
     check = integration_check(pg_instance)
     # Enforce the wrong version
     check._version_utils.get_raw_version = mock.MagicMock(return_value="9.6.0")
@@ -660,9 +670,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         (True, 'forced_hostname'),
     ],
 )
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_database_instance_metadata(aggregator, dd_run_check, pg_instance, dbm_enabled, reported_hostname):
+def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, reported_hostname):
     pg_instance['dbm'] = dbm_enabled
     # this will block on cancel and wait for the coll interval of 600 seconds,
     # unless the collection_interval is set to a short amount of time
