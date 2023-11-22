@@ -43,7 +43,7 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 ### Duplicate name tags
 
-Each certificate name is exposed within the `name` label in the Prometheus payload and is converted to this tag by the Datadog Agent. For that reason, if your hosts also make use of the `name` tag (for instance, automatically collected by the [AWS integration][9]), metrics coming from this integration will present both values. To avoid this situation, you can use the [`rename_labels`][10] configuration parameter to map the Prometheus label `name` to the Datadog tag `cert_name` to ensure you have a single value within the tag `cert_name` to identify your certificates :
+Each certificate name is exposed within the `name` label in the Prometheus payload and is converted to a tag by the Datadog Agent. If your hosts also use the `name` tag (for instance, automatically collected by the [AWS integration][9]), metrics coming from this integration will present both values. To avoid duplicate `name` tags, you can use the [`rename_labels`configuration parameter][10] to map the Prometheus label `name` to the Datadog tag `cert_name`. This ensures you have a single value within the tag `cert_name` to identify your certificates :
 ```yaml
 init_config:
 instances:
