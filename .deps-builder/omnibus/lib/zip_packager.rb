@@ -1,3 +1,9 @@
+# Requiring this module bypasses the standard Omnibus packagers so that all builds
+# use a custom packager that creates a tarball with contents taking from what ends up
+# in `install_dir`.
+# The default Omnibus behavior is not useful for our dependency building use case; this works
+# around that.
+
 module Omnibus
   module Packager
     # Monkey-patch the method that returns available packagers to return always the one we want

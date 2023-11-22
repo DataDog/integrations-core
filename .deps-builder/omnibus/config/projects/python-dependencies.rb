@@ -2,7 +2,9 @@
 # under the Apache License Version 2.0.
 # This product includes software developed at Datadog (https:#www.datadoghq.com/).
 # Copyright 2023-present Datadog, Inc.
-require "./lib/ostools.rb"
+
+require "./lib/zip_packager.rb"
+require "./lib/python_build_env.rb"
 
 name 'python-dependencies'
 

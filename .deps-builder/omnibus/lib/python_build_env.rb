@@ -1,3 +1,8 @@
+# This module adds DSL commands to Omnibus builders to interact with a common Python
+# build environment.
+# Exposing the Python build environment instances this way lets us easily access the
+# builder from them so that we can interact with it.
+
 require './lib/ostools.rb'
 
 
