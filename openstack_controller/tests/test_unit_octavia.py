@@ -1644,7 +1644,11 @@ def test_pool_members_exception(aggregator, check, dd_run_check, mock_http_get, 
     if api_type == ApiType.SDK:
         assert (
             connection_load_balancer.members.call_args_list.count(
-                mock.call('d0335b34-3115-4b3b-9a1a-7e2363ebfee3', project_id='1e6e233e637d4d55a50a62b63398ad15', limit=check.openstack_config.paginated_limit)
+                mock.call(
+                    'd0335b34-3115-4b3b-9a1a-7e2363ebfee3',
+                    project_id='1e6e233e637d4d55a50a62b63398ad15',
+                    limit=check.openstack_config.paginated_limit,
+                )
             )
             == 1
         )
@@ -2290,7 +2294,9 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
     indirect=['mock_http_get', 'connection_load_balancer'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_amphorae_exception(aggregator, check, dd_run_check, mock_http_get, connection_load_balancer, instance, api_type):
+def test_amphorae_exception(
+    aggregator, check, dd_run_check, mock_http_get, connection_load_balancer, instance, api_type
+):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.octavia.amphora.count',

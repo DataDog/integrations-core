@@ -158,11 +158,15 @@ class ApiSdk(Api):
         return [service.to_dict(original_names=True) for service in self.connection.compute.services()]
 
     def get_compute_flavors(self):
-        return [flavor.to_dict(original_names=True) for flavor in self.connection.compute.flavors(details=True, limit=self.config.paginated_limit)]
+        return [
+            flavor.to_dict(original_names=True)
+            for flavor in self.connection.compute.flavors(details=True, limit=self.config.paginated_limit)
+        ]
 
     def get_compute_hypervisors(self):
         return [
-            hypervisor.to_dict(original_names=True) for hypervisor in self.connection.compute.hypervisors(details=True, limit=self.config.paginated_limit)
+            hypervisor.to_dict(original_names=True)
+            for hypervisor in self.connection.compute.hypervisors(details=True, limit=self.config.paginated_limit)
         ]
 
     def get_compute_hypervisor_uptime(self, hypervisor_id):
@@ -192,21 +196,31 @@ class ApiSdk(Api):
         return self.connection.compute.get_flavor(flavor_id).to_dict(original_names=True)
 
     def get_network_agents(self):
-        return [agent.to_dict(original_names=True) for agent in self.connection.network.agents(limit=self.config.paginated_limit)]
+        return [
+            agent.to_dict(original_names=True)
+            for agent in self.connection.network.agents(limit=self.config.paginated_limit)
+        ]
 
     def get_network_networks(self, project_id):
         return [
-            network.to_dict(original_names=True) for network in self.connection.network.networks(project_id=project_id, limit=self.config.paginated_limit)
+            network.to_dict(original_names=True)
+            for network in self.connection.network.networks(project_id=project_id, limit=self.config.paginated_limit)
         ]
 
     def get_network_quota(self, project_id):
         return self.connection.network.get_quota(project_id, details=True).to_dict(original_names=True)
 
     def get_baremetal_nodes(self):
-        return [node.to_dict(original_names=True) for node in self.connection.baremetal.nodes(details=True, limit=self.config.paginated_limit)]
+        return [
+            node.to_dict(original_names=True)
+            for node in self.connection.baremetal.nodes(details=True, limit=self.config.paginated_limit)
+        ]
 
     def get_baremetal_conductors(self):
-        return [conductor.to_dict(original_names=True) for conductor in self.connection.baremetal.conductors(limit=self.config.paginated_limit)]
+        return [
+            conductor.to_dict(original_names=True)
+            for conductor in self.connection.baremetal.conductors(limit=self.config.paginated_limit)
+        ]
 
     def get_auth_projects(self):
         response = self.http.get('{}/v3/auth/projects'.format(self.cloud_config.get_auth_args().get('auth_url')))
@@ -216,7 +230,9 @@ class ApiSdk(Api):
     def get_load_balancer_loadbalancers(self, project_id):
         return [
             load_balancer.to_dict(original_names=True)
-            for load_balancer in self.connection.load_balancer.load_balancers(project_id=project_id, limit=self.config.paginated_limit)
+            for load_balancer in self.connection.load_balancer.load_balancers(
+                project_id=project_id, limit=self.config.paginated_limit
+            )
         ]
 
     def get_load_balancer_loadbalancer_stats(self, loadbalancer_id):
@@ -225,7 +241,9 @@ class ApiSdk(Api):
     def get_load_balancer_listeners(self, project_id):
         return [
             listener.to_dict(original_names=True)
-            for listener in self.connection.load_balancer.listeners(project_id=project_id, limit=self.config.paginated_limit)
+            for listener in self.connection.load_balancer.listeners(
+                project_id=project_id, limit=self.config.paginated_limit
+            )
         ]
 
     def get_load_balancer_listener_stats(self, listener_id):
@@ -233,30 +251,38 @@ class ApiSdk(Api):
 
     def get_load_balancer_pools(self, project_id):
         return [
-            pool.to_dict(original_names=True) for pool in self.connection.load_balancer.pools(project_id=project_id, limit=self.config.paginated_limit)
+            pool.to_dict(original_names=True)
+            for pool in self.connection.load_balancer.pools(project_id=project_id, limit=self.config.paginated_limit)
         ]
 
     def get_load_balancer_pool_members(self, pool_id, project_id):
         return [
             member.to_dict(original_names=True)
-            for member in self.connection.load_balancer.members(pool_id, project_id=project_id, limit=self.config.paginated_limit)
+            for member in self.connection.load_balancer.members(
+                pool_id, project_id=project_id, limit=self.config.paginated_limit
+            )
         ]
 
     def get_load_balancer_healthmonitors(self, project_id):
         return [
             healthmonitor.to_dict(original_names=True)
-            for healthmonitor in self.connection.load_balancer.health_monitors(project_id=project_id, limit=self.config.paginated_limit)
+            for healthmonitor in self.connection.load_balancer.health_monitors(
+                project_id=project_id, limit=self.config.paginated_limit
+            )
         ]
 
     def get_load_balancer_quotas(self, project_id):
         return [
-            quota.to_dict(original_names=True) for quota in self.connection.load_balancer.quotas(project_id=project_id, limit=self.config.paginated_limit)
+            quota.to_dict(original_names=True)
+            for quota in self.connection.load_balancer.quotas(project_id=project_id, limit=self.config.paginated_limit)
         ]
 
     def get_load_balancer_amphorae(self, project_id):
         return [
             amphora.to_dict(original_names=True)
-            for amphora in self.connection.load_balancer.amphorae(project_id=project_id, limit=self.config.paginated_limit)
+            for amphora in self.connection.load_balancer.amphorae(
+                project_id=project_id, limit=self.config.paginated_limit
+            )
         ]
 
     def get_load_balancer_amphora_stats(self, amphora_id):
@@ -269,4 +295,7 @@ class ApiSdk(Api):
         return response.json().get('amphora_stats', [])
 
     def get_glance_images(self):
-        return [image.to_dict(original_names=True) for image in self.connection.image.images(limit=self.config.paginated_limit)]
+        return [
+            image.to_dict(original_names=True)
+            for image in self.connection.image.images(limit=self.config.paginated_limit)
+        ]
