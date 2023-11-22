@@ -15,7 +15,6 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.utils import (
     default_json_event_encoding,
-    tracked_query,
 )
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.base.utils.serialization import json
@@ -185,7 +184,6 @@ class PostgreSql(AgentCheck):
             queries=queries,
             tags=self.tags_without_db,
             hostname=self.resolved_hostname,
-            track_operation_time=True,
         )
 
     def execute_query_raw(self, query, db):
@@ -429,17 +427,16 @@ class PostgreSql(AgentCheck):
         is_relations = scope.get('relation') and self._relations_manager.has_relations
         try:
             query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
-            with tracked_query(check=self, operation='custom_metrics' if is_custom_metrics else scope['name']):
-                # if this is a relation-specific query, we need to list all relations last
-                if is_relations:
-                    schema_field = get_schema_field(descriptors)
-                    formatted_query = self._relations_manager.filter_relation_query(query, schema_field)
-                    cursor.execute(formatted_query)
-                else:
-                    self.log.debug("Running query: %s", str(query))
-                    cursor.execute(query.replace(r'%', r'%%'))
+            # if this is a relation-specific query, we need to list all relations last
+            if is_relations:
+                schema_field = get_schema_field(descriptors)
+                formatted_query = self._relations_manager.filter_relation_query(query, schema_field)
+                cursor.execute(formatted_query)
+            else:
+                self.log.debug("Running query: %s", str(query))
+                cursor.execute(query.replace(r'%', r'%%'))
 
-                results = cursor.fetchall()
+            results = cursor.fetchall()
         except psycopg2.errors.FeatureNotSupported as e:
             # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
@@ -814,10 +811,7 @@ class PostgreSql(AgentCheck):
                 with conn.cursor() as cursor:
                     try:
                         self.log.debug("Running query: %s", query)
-                        with tracked_query(
-                            check=self, operation='custom_queries', tags=['metric_prefix:{}'.format(metric_prefix)]
-                        ):
-                            cursor.execute(query)
+                        cursor.execute(query)
                     except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
                         self.log.error("Error executing query for metric_prefix %s: %s", metric_prefix, str(e))
                         continue

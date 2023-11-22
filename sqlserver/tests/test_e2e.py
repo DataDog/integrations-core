@@ -9,7 +9,6 @@ from datadog_checks.sqlserver.const import DATABASE_INDEX_METRICS
 
 from .common import (
     CUSTOM_METRICS,
-    E2E_OPERATION_TIME_METRIC_NAME,
     EXPECTED_AO_METRICS_COMMON,
     EXPECTED_AO_METRICS_PRIMARY,
     EXPECTED_AO_METRICS_SECONDARY,
@@ -52,9 +51,7 @@ def test_ao_primary_replica(dd_agent_check, init_config, instance_ao_docker_prim
     for mname in EXPECTED_AO_METRICS_SECONDARY:
         aggregator.assert_metric(mname, count=0)
 
-    aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(), exclude=CUSTOM_METRICS + E2E_OPERATION_TIME_METRIC_NAME
-    )
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS)
 
 
 @not_windows_ci
@@ -94,9 +91,7 @@ def test_ao_secondary_replica(dd_agent_check, init_config, instance_ao_docker_se
     for mname in EXPECTED_AO_METRICS_PRIMARY + EXPECTED_QUERY_EXECUTOR_AO_METRICS_PRIMARY:
         aggregator.assert_metric(mname, count=0)
 
-    aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(), exclude=CUSTOM_METRICS + E2E_OPERATION_TIME_METRIC_NAME
-    )
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS)
 
 
 @not_windows_ado
@@ -138,6 +133,4 @@ def test_check_docker(dd_agent_check, init_config, instance_e2e):
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK)
     aggregator.assert_all_metrics_covered()
 
-    aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(), exclude=CUSTOM_METRICS + E2E_OPERATION_TIME_METRIC_NAME
-    )
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS)
