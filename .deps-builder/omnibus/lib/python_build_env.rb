@@ -3,18 +3,15 @@
 # Exposing the Python build environment instances this way lets us easily access the
 # builder from them so that we can interact with it.
 
-require './lib/ostools.rb'
-
-
 module Omnibus
   class Builder
     def python_build_env
-      @python_build_env ||= PythonBuildEnvironment.new(self)
+      @python_build_env ||= PythonBuildEnvironment.new(self, suffix: "py3")
     end
     expose :python_build_env
 
     def python_build_env_py2
-      @python_build_env_py2 ||= Python2BuildEnvironment.new(self)
+      @python_build_env_py2 ||= PythonBuildEnvironment.new(self, suffix: "py2")
     end
     expose :python_build_env_py2
   end
@@ -32,8 +29,9 @@ class PythonBuildEnvironment
 
   @@constraints_file = nil
 
-  def initialize(builder)
+  def initialize(builder, suffix: "")
     @builder = builder
+    @suffix = "_#{suffix}"
   end
 
   def create(python, build_dependencies_file)
@@ -42,7 +40,7 @@ class PythonBuildEnvironment
   end
 
   def python
-    windows_safe_path(build_root, os == 'windows' ? "Scripts" : "bin", "python")
+    windows_safe_path(build_root, @builder.ohai['platform_family'] == 'windows' ? "Scripts" : "bin", "python")
   end
 
   # Set a constraint file (for all instances)
@@ -89,34 +87,21 @@ class PythonBuildEnvironment
   end
 
   def wheels_dir
-    windows_safe_path(@builder.install_dir, "wheels")
+    windows_safe_path(@builder.install_dir, "wheels#{@suffix}")
   end
 
-  protected
+  private
 
   def build_root
-    windows_safe_path(@builder.build_dir, "build_env")
+    windows_safe_path(@builder.build_dir, "build_env#{@suffix}")
   end
 
   # The path to the base python used to install virtualenv
   def system_python
-    if os == 'windows'
+    if @builder.ohai['platform_family'] == 'windows'
       python = "#{windows_safe_path(@builder.python_3_embedded)}\\python.exe"
     else
       python = "#{@builder.install_dir}/embedded/bin/python3"
     end
-  end
-end
-
-
-class Python2BuildEnvironment < PythonBuildEnvironment
-  def wheels_dir
-    windows_safe_path(@builder.install_dir, "wheels_py2")
-  end
-
-  protected
-
-  def build_root
-    windows_safe_path(@builder.build_dir, "build_env_py2")
   end
 end

@@ -1,3 +1,4 @@
+require './lib/ostools.rb'
 require './lib/paths.rb'
 
 name 'datadog-agent-integrations-dependencies'
@@ -209,7 +210,6 @@ build do
     py_build_env.wheel "-r #{static_reqs_out_file}", env: build_env
 
     # Produce a lockfile
-    # TODO Move this to some constant so that we can reference the same name when "packaging"
     lockfile_path = File.join(install_dir, "frozen-#{suffix}.txt")
     command "#{py_build_env.python} -m piptools compile --generate-hashes " \
             "--no-header --no-index --no-emit-find-links --generate-hashes " \

@@ -20,7 +20,7 @@ build_version ENV['PACKAGE_VERSION']
 
 package :zipper do
   target "frozen-py3.txt"
-  target "wheels"
+  target "wheels_py3"
   target "frozen-py2.txt"
   target "wheels_py2"
 end
