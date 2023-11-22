@@ -410,7 +410,7 @@ def connection_compute(request, mock_responses):
             for aggregate in mock_responses('GET', '/compute/v2.1/os-aggregates')['aggregates']
         ]
 
-    def flavors(details):
+    def flavors(details, limit=None):
         if http_error and 'flavors' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['flavors'])
         return [
@@ -422,7 +422,7 @@ def connection_compute(request, mock_responses):
             for service in mock_responses('GET', '/compute/v2.1/flavors/detail')['flavors']
         ]
 
-    def hypervisors(details):
+    def hypervisors(details, limit=None):
         if http_error and 'hypervisors' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['hypervisors'])
         return [
@@ -454,7 +454,7 @@ def connection_compute(request, mock_responses):
             )
         )
 
-    def servers(project_id, details):
+    def servers(project_id, details, limit=None):
         if http_error and 'servers' in http_error and project_id in http_error['servers']:
             raise requests.exceptions.HTTPError(response=http_error['servers'][project_id])
         return [
@@ -501,7 +501,7 @@ def connection_network(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
 
-    def agents():
+    def agents(limit=None):
         if http_error and 'agents' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['agents'])
         return [
@@ -513,7 +513,7 @@ def connection_network(request, mock_responses):
             for agent in mock_responses('GET', '/networking/v2.0/agents')['agents']
         ]
 
-    def networks(project_id):
+    def networks(project_id, limit=None):
         if http_error and 'networks' in http_error and project_id in http_error['networks']:
             raise requests.exceptions.HTTPError(response=http_error['networks'])
         return [
@@ -546,7 +546,7 @@ def connection_baremetal(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
 
-    def nodes(details):
+    def nodes(details, limit=None):
         if http_error and 'nodes' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['nodes'])
         return [
@@ -558,7 +558,7 @@ def connection_baremetal(request, mock_responses):
             for node in mock_responses('GET', '/baremetal/v1/nodes/detail')['nodes']
         ]
 
-    def conductors():
+    def conductors(limit=None):
         if http_error and 'conductors' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['conductors'])
         return [
@@ -578,7 +578,7 @@ def connection_image(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
 
-    def images():
+    def images(limit=None):
         if http_error and 'images' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['images'])
         return [
@@ -598,7 +598,7 @@ def connection_load_balancer(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
 
-    def load_balancers(project_id):
+    def load_balancers(project_id, limit=None):
         if http_error and 'load_balancers' in http_error and project_id in http_error['load_balancers']:
             raise requests.exceptions.HTTPError(response=http_error['load_balancers'][project_id])
         return [
@@ -612,7 +612,7 @@ def connection_load_balancer(request, mock_responses):
             ]
         ]
 
-    def get_load_balancer_statistics(loadbalancer_id):
+    def get_load_balancer_statistics(loadbalancer_id, limit=None):
         if (
             http_error
             and 'load_balancer_statistics' in http_error
@@ -627,7 +627,7 @@ def connection_load_balancer(request, mock_responses):
             )
         )
 
-    def listeners(project_id):
+    def listeners(project_id, limit=None):
         if http_error and 'listeners' in http_error and project_id in http_error['listeners']:
             raise requests.exceptions.HTTPError(response=http_error['listeners'][project_id])
         return [
@@ -652,7 +652,7 @@ def connection_load_balancer(request, mock_responses):
             )
         )
 
-    def pools(project_id):
+    def pools(project_id, limit=None):
         if http_error and 'pools' in http_error and project_id in http_error['pools']:
             raise requests.exceptions.HTTPError(response=http_error['pools'][project_id])
         return [
@@ -664,7 +664,7 @@ def connection_load_balancer(request, mock_responses):
             for pool in mock_responses('GET', f'/load-balancer/v2/lbaas/pools?project_id={project_id}')['pools']
         ]
 
-    def members(pool_id, project_id):
+    def members(pool_id, project_id, limit=None):
         if http_error and 'pool_members' in http_error and pool_id in http_error['pool_members']:
             raise requests.exceptions.HTTPError(response=http_error['pool_members'][pool_id])
         return [
@@ -678,7 +678,7 @@ def connection_load_balancer(request, mock_responses):
             )['members']
         ]
 
-    def health_monitors(project_id):
+    def health_monitors(project_id, limit=None):
         if http_error and 'health_monitors' in http_error and project_id in http_error['health_monitors']:
             raise requests.exceptions.HTTPError(response=http_error['health_monitors'][project_id])
         return [
@@ -692,7 +692,7 @@ def connection_load_balancer(request, mock_responses):
             ]
         ]
 
-    def quotas(project_id):
+    def quotas(project_id, limit=None):
         if http_error and 'quotas' in http_error and project_id in http_error['quotas']:
             raise requests.exceptions.HTTPError(response=http_error['quotas'][project_id])
         return [
@@ -704,7 +704,7 @@ def connection_load_balancer(request, mock_responses):
             for pool in mock_responses('GET', f'/load-balancer/v2/lbaas/quotas?project_id={project_id}')['quotas']
         ]
 
-    def amphorae(project_id):
+    def amphorae(project_id, limit=None):
         if http_error and 'amphorae' in http_error and project_id in http_error['amphorae']:
             raise requests.exceptions.HTTPError(response=http_error['amphorae'][project_id])
         return [

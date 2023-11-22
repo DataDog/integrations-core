@@ -1723,13 +1723,13 @@ def test_servers_exception(aggregator, check, dd_run_check, mock_http_get, conne
         assert connection_compute.servers.call_count == 2
         assert (
             connection_compute.servers.call_args_list.count(
-                mock.call(details=True, project_id='1e6e233e637d4d55a50a62b63398ad15')
+                mock.call(details=True, project_id='1e6e233e637d4d55a50a62b63398ad15', limit=check.openstack_config.paginated_limit)
             )
             == 1
         )
         assert (
             connection_compute.servers.call_args_list.count(
-                mock.call(details=True, project_id='6e39099cccde4f809b003d9e0dd09304')
+                mock.call(details=True, project_id='6e39099cccde4f809b003d9e0dd09304', limit=check.openstack_config.paginated_limit)
             )
             == 1
         )
@@ -1801,13 +1801,13 @@ def test_servers_disable_call(aggregator, check, dd_run_check, mock_http_get, co
         assert connection_compute.servers.call_count == 1
         assert (
             connection_compute.servers.call_args_list.count(
-                mock.call(details=True, project_id='1e6e233e637d4d55a50a62b63398ad15')
+                mock.call(details=True, project_id='1e6e233e637d4d55a50a62b63398ad15', limit=check.openstack_config.paginated_limit)
             )
             == 0
         )
         assert (
             connection_compute.servers.call_args_list.count(
-                mock.call(details=True, project_id='6e39099cccde4f809b003d9e0dd09304')
+                mock.call(details=True, project_id='6e39099cccde4f809b003d9e0dd09304', limit=check.openstack_config.paginated_limit)
             )
             == 1
         )
