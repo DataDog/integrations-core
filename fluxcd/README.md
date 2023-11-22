@@ -12,7 +12,6 @@ Follow the instructions below to install and configure this check for an Agent r
 
 Starting from Agent release 7.51.0, the Fluxcd check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
-**WARNING**: This check uses [OpenMetrics](https://docs.datadoghq.com/integrations/openmetrics/) to collect metrics from the OpenMetrics endpoint Fluxcd can expose, which requires Python 3.
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
