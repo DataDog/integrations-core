@@ -90,12 +90,6 @@ class PythonBuildEnvironment
     windows_safe_path(@builder.install_dir, "wheels#{@suffix}")
   end
 
-  private
-
-  def build_root
-    windows_safe_path(@builder.build_dir, "build_env#{@suffix}")
-  end
-
   # The path to the base python used to install virtualenv
   def system_python
     if @builder.ohai['platform_family'] == 'windows'
@@ -103,5 +97,11 @@ class PythonBuildEnvironment
     else
       python = "#{@builder.install_dir}/embedded/bin/python3"
     end
+  end
+
+  private
+
+  def build_root
+    windows_safe_path(@builder.build_dir, "build_env#{@suffix}")
   end
 end
