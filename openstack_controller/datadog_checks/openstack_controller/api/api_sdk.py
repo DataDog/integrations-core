@@ -118,6 +118,12 @@ class ApiSdk(Api):
         response.raise_for_status()
         return response.elapsed.total_seconds() * 1000
 
+    def call_paginated_api(self, method_name, *args, **kwargs):
+        if kwargs.get('limit') is None:
+            kwargs.pop('limit')
+
+        return method_name(*args, **kwargs)
+
     def get_identity_regions(self):
         return [region.to_dict(original_names=True) for region in self.connection.identity.regions()]
 
@@ -160,13 +166,17 @@ class ApiSdk(Api):
     def get_compute_flavors(self):
         return [
             flavor.to_dict(original_names=True)
-            for flavor in self.connection.compute.flavors(details=True, limit=self.config.paginated_limit)
+            for flavor in self.call_paginated_api(
+                self.connection.compute.flavors, details=True, limit=self.config.paginated_limit
+            )
         ]
 
     def get_compute_hypervisors(self):
         return [
             hypervisor.to_dict(original_names=True)
-            for hypervisor in self.connection.compute.hypervisors(details=True, limit=self.config.paginated_limit)
+            for hypervisor in self.call_paginated_api(
+                self.connection.compute.hypervisors, details=True, limit=self.config.paginated_limit
+            )
         ]
 
     def get_compute_hypervisor_uptime(self, hypervisor_id):
@@ -182,7 +192,8 @@ class ApiSdk(Api):
     def get_compute_servers(self, project_id):
         return [
             server.to_dict(original_names=True)
-            for server in self.connection.compute.servers(
+            for server in self.call_paginated_api(
+                self.connection.compute.servers,
                 details=True,
                 project_id=project_id,
                 limit=self.config.paginated_limit,
@@ -198,13 +209,15 @@ class ApiSdk(Api):
     def get_network_agents(self):
         return [
             agent.to_dict(original_names=True)
-            for agent in self.connection.network.agents(limit=self.config.paginated_limit)
+            for agent in self.call_paginated_api(self.connection.network.agents, limit=self.config.paginated_limit)
         ]
 
     def get_network_networks(self, project_id):
         return [
             network.to_dict(original_names=True)
-            for network in self.connection.network.networks(project_id=project_id, limit=self.config.paginated_limit)
+            for network in self.call_paginated_api(
+                self.connection.network.networks, project_id=project_id, limit=self.config.paginated_limit
+            )
         ]
 
     def get_network_quota(self, project_id):
@@ -213,13 +226,17 @@ class ApiSdk(Api):
     def get_baremetal_nodes(self):
         return [
             node.to_dict(original_names=True)
-            for node in self.connection.baremetal.nodes(details=True, limit=self.config.paginated_limit)
+            for node in self.call_paginated_api(
+                self.connection.baremetal.nodes, details=True, limit=self.config.paginated_limit
+            )
         ]
 
     def get_baremetal_conductors(self):
         return [
             conductor.to_dict(original_names=True)
-            for conductor in self.connection.baremetal.conductors(limit=self.config.paginated_limit)
+            for conductor in self.call_paginated_api(
+                self.connection.baremetal.conductors, limit=self.config.paginated_limit
+            )
         ]
 
     def get_auth_projects(self):
@@ -230,8 +247,8 @@ class ApiSdk(Api):
     def get_load_balancer_loadbalancers(self, project_id):
         return [
             load_balancer.to_dict(original_names=True)
-            for load_balancer in self.connection.load_balancer.load_balancers(
-                project_id=project_id, limit=self.config.paginated_limit
+            for load_balancer in self.call_paginated_api(
+                self.connection.load_balancer.load_balancers, project_id=project_id, limit=self.config.paginated_limit
             )
         ]
 
@@ -241,8 +258,8 @@ class ApiSdk(Api):
     def get_load_balancer_listeners(self, project_id):
         return [
             listener.to_dict(original_names=True)
-            for listener in self.connection.load_balancer.listeners(
-                project_id=project_id, limit=self.config.paginated_limit
+            for listener in self.call_paginated_api(
+                self.connection.load_balancer.listeners, project_id=project_id, limit=self.config.paginated_limit
             )
         ]
 
@@ -252,36 +269,40 @@ class ApiSdk(Api):
     def get_load_balancer_pools(self, project_id):
         return [
             pool.to_dict(original_names=True)
-            for pool in self.connection.load_balancer.pools(project_id=project_id, limit=self.config.paginated_limit)
+            for pool in self.call_paginated_api(
+                self.connection.load_balancer.pools, project_id=project_id, limit=self.config.paginated_limit
+            )
         ]
 
     def get_load_balancer_pool_members(self, pool_id, project_id):
         return [
             member.to_dict(original_names=True)
-            for member in self.connection.load_balancer.members(
-                pool_id, project_id=project_id, limit=self.config.paginated_limit
+            for member in self.call_paginated_api(
+                self.connection.load_balancer.members, pool_id, project_id=project_id, limit=self.config.paginated_limit
             )
         ]
 
     def get_load_balancer_healthmonitors(self, project_id):
         return [
             healthmonitor.to_dict(original_names=True)
-            for healthmonitor in self.connection.load_balancer.health_monitors(
-                project_id=project_id, limit=self.config.paginated_limit
+            for healthmonitor in self.call_paginated_api(
+                self.connection.load_balancer.health_monitors, project_id=project_id, limit=self.config.paginated_limit
             )
         ]
 
     def get_load_balancer_quotas(self, project_id):
         return [
             quota.to_dict(original_names=True)
-            for quota in self.connection.load_balancer.quotas(project_id=project_id, limit=self.config.paginated_limit)
+            for quota in self.call_paginated_api(
+                self.connection.load_balancer.quotas, project_id=project_id, limit=self.config.paginated_limit
+            )
         ]
 
     def get_load_balancer_amphorae(self, project_id):
         return [
             amphora.to_dict(original_names=True)
-            for amphora in self.connection.load_balancer.amphorae(
-                project_id=project_id, limit=self.config.paginated_limit
+            for amphora in self.call_paginated_api(
+                self.connection.load_balancer.amphorae, project_id=project_id, limit=self.config.paginated_limit
             )
         ]
 
@@ -297,5 +318,5 @@ class ApiSdk(Api):
     def get_glance_images(self):
         return [
             image.to_dict(original_names=True)
-            for image in self.connection.image.images(limit=self.config.paginated_limit)
+            for image in self.call_paginated_api(self.connection.image.images, limit=self.config.paginated_limit)
         ]

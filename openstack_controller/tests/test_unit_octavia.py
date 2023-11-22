@@ -693,15 +693,20 @@ def test_loadbalancers_exception(aggregator, check, dd_run_check, mock_http_get,
         )
     if api_type == ApiType.SDK:
         assert connection_load_balancer.load_balancers.call_count == 2
+        limit_kwargs = (
+            {'limit': check.openstack_config.paginated_limit}
+            if check.openstack_config.paginated_limit is not None
+            else {}
+        )
         assert (
             connection_load_balancer.load_balancers.call_args_list.count(
-                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', limit=check.openstack_config.paginated_limit)
+                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', **limit_kwargs)
             )
             == 1
         )
         assert (
             connection_load_balancer.load_balancers.call_args_list.count(
-                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', limit=check.openstack_config.paginated_limit)
+                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', **limit_kwargs)
             )
             == 1
         )
@@ -911,15 +916,20 @@ def test_listeners_exception(aggregator, check, dd_run_check, mock_http_get, con
         )
     if api_type == ApiType.SDK:
         assert connection_load_balancer.listeners.call_count == 2
+        limit_kwargs = (
+            {'limit': check.openstack_config.paginated_limit}
+            if check.openstack_config.paginated_limit is not None
+            else {}
+        )
         assert (
             connection_load_balancer.listeners.call_args_list.count(
-                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', limit=check.openstack_config.paginated_limit)
+                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', **limit_kwargs)
             )
             == 1
         )
         assert (
             connection_load_balancer.listeners.call_args_list.count(
-                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', limit=check.openstack_config.paginated_limit)
+                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', **limit_kwargs)
             )
             == 1
         )
@@ -1512,15 +1522,20 @@ def test_pools_exception(aggregator, dd_run_check, check, mock_http_get, connect
         )
     if api_type == ApiType.SDK:
         assert connection_load_balancer.pools.call_count == 2
+        limit_kwargs = (
+            {'limit': check.openstack_config.paginated_limit}
+            if check.openstack_config.paginated_limit is not None
+            else {}
+        )
         assert (
             connection_load_balancer.pools.call_args_list.count(
-                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', limit=check.openstack_config.paginated_limit)
+                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', **limit_kwargs)
             )
             == 1
         )
         assert (
             connection_load_balancer.pools.call_args_list.count(
-                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', limit=check.openstack_config.paginated_limit)
+                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', **limit_kwargs)
             )
             == 1
         )
@@ -1642,12 +1657,17 @@ def test_pool_members_exception(aggregator, check, dd_run_check, mock_http_get, 
             == 0
         )
     if api_type == ApiType.SDK:
+        limit_kwargs = (
+            {'limit': check.openstack_config.paginated_limit}
+            if check.openstack_config.paginated_limit is not None
+            else {}
+        )
         assert (
             connection_load_balancer.members.call_args_list.count(
                 mock.call(
                     'd0335b34-3115-4b3b-9a1a-7e2363ebfee3',
                     project_id='1e6e233e637d4d55a50a62b63398ad15',
-                    limit=check.openstack_config.paginated_limit,
+                    **limit_kwargs
                 )
             )
             == 1
@@ -1829,15 +1849,20 @@ def test_healthmonitors_exception(aggregator, check, dd_run_check, mock_http_get
             == 1
         )
     if api_type == ApiType.SDK:
+        limit_kwargs = (
+            {'limit': check.openstack_config.paginated_limit}
+            if check.openstack_config.paginated_limit is not None
+            else {}
+        )
         assert (
             connection_load_balancer.health_monitors.call_args_list.count(
-                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', limit=check.openstack_config.paginated_limit)
+                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', **limit_kwargs)
             )
             == 1
         )
         assert (
             connection_load_balancer.health_monitors.call_args_list.count(
-                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', limit=check.openstack_config.paginated_limit)
+                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', **limit_kwargs)
             )
             == 1
         )
@@ -2015,15 +2040,20 @@ def test_quotas_exception(aggregator, check, dd_run_check, mock_http_get, connec
         )
     if api_type == ApiType.SDK:
         assert connection_load_balancer.quotas.call_count == 2
+        limit_kwargs = (
+            {'limit': check.openstack_config.paginated_limit}
+            if check.openstack_config.paginated_limit is not None
+            else {}
+        )
         assert (
             connection_load_balancer.quotas.call_args_list.count(
-                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', limit=check.openstack_config.paginated_limit)
+                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', **limit_kwargs)
             )
             == 1
         )
         assert (
             connection_load_balancer.quotas.call_args_list.count(
-                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', limit=check.openstack_config.paginated_limit)
+                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', **limit_kwargs)
             )
             == 1
         )
@@ -2324,15 +2354,20 @@ def test_amphorae_exception(
 
     if api_type == ApiType.SDK:
         assert connection_load_balancer.quotas.call_count == 2
+        limit_kwargs = (
+            {'limit': check.openstack_config.paginated_limit}
+            if check.openstack_config.paginated_limit is not None
+            else {}
+        )
         assert (
             connection_load_balancer.amphorae.call_args_list.count(
-                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', limit=check.openstack_config.paginated_limit)
+                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', **limit_kwargs)
             )
             == 1
         )
         assert (
             connection_load_balancer.amphorae.call_args_list.count(
-                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', limit=check.openstack_config.paginated_limit)
+                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', **limit_kwargs)
             )
             == 1
         )

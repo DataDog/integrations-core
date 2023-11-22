@@ -1726,7 +1726,6 @@ def test_servers_exception(aggregator, check, dd_run_check, mock_http_get, conne
                 mock.call(
                     details=True,
                     project_id='1e6e233e637d4d55a50a62b63398ad15',
-                    limit=check.openstack_config.paginated_limit,
                 )
             )
             == 1
@@ -1736,7 +1735,6 @@ def test_servers_exception(aggregator, check, dd_run_check, mock_http_get, conne
                 mock.call(
                     details=True,
                     project_id='6e39099cccde4f809b003d9e0dd09304',
-                    limit=check.openstack_config.paginated_limit,
                 )
             )
             == 1
@@ -1812,7 +1810,6 @@ def test_servers_disable_call(aggregator, check, dd_run_check, mock_http_get, co
                 mock.call(
                     details=True,
                     project_id='1e6e233e637d4d55a50a62b63398ad15',
-                    limit=check.openstack_config.paginated_limit,
                 )
             )
             == 0
@@ -1822,7 +1819,6 @@ def test_servers_disable_call(aggregator, check, dd_run_check, mock_http_get, co
                 mock.call(
                     details=True,
                     project_id='6e39099cccde4f809b003d9e0dd09304',
-                    limit=check.openstack_config.paginated_limit,
                 )
             )
             == 1
