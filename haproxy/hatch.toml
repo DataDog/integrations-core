@@ -1,11 +1,11 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.9"]
+python = ["2.7", "3.11"]
 version = ["2.0", "2.2", "2.4", "2.5", "2.6", "2.7"]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.9"]
+python = ["2.7", "3.11"]
 version = ["2.0"]
 impl = ["legacy"]
 

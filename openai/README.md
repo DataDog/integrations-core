@@ -10,6 +10,8 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Python" xxx -->
 
+**Note**: This setup method does not collect `openai.api.usage.*` metrics. To collect these metrics, also follow the API key setup instructions.
+
 ### Installation
 
 <!-- NOTE: This section is overwritten by the OpenAI configuration component exported in -->
@@ -98,6 +100,8 @@ DEBUG:ddtrace.contrib.openai._logging.py:sent 2 logs to 'http-intake.logs.datado
 <!-- xxz tab xxx -->
 <!-- xxx tab "Node.js" xxx -->
 
+**Note**: This setup method does not collect `openai.api.usage.*` metrics. To collect these metrics, also follow the API key setup instructions.
+
 ### Installation
 
 1. Enable APM and StatsD in your Datadog Agent. For example, in Docker:
@@ -176,6 +180,8 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 <!-- xxz tabs xxx -->
 <!-- xxx tab "API Key" xxx -->
 
+**Note**: This setup method only collects `openai.api.usage.*` metrics. To collect all metrics provided by this integration, also follow the APM setup instructions.
+
 ### Installation
 
 1. Login to your [OpenAI Account][10].
@@ -194,6 +200,8 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 ## Data Collected
 
 ### Metrics
+
+The `openai.api.usage.*` metrics are only collected with the API key setup method. All remaining metrics below are collected with the APM setup methods.
 
 See [metadata.csv][4] for a list of metrics provided by this integration.
 
@@ -216,6 +224,7 @@ Additional helpful documentation, links, and articles:
 
 - [Monitor your OpenAI usage with Datadog][6]
 - [Monitor Azure OpenAI with Datadog][7]
+- [OpenAI Monitor Templates][12]
 
 [1]: https://openai.com/
 [2]: https://ddtrace.readthedocs.io/en/stable/installation_quickstart.html
@@ -228,3 +237,4 @@ Additional helpful documentation, links, and articles:
 [9]: https://github.com/DataDog/dd-trace-js
 [10]: https://platform.openai.com/
 [11]: https://app.datadoghq.com/integrations/openai
+[12]: https://app.datadoghq.com/monitors/recommended?q=integration%3AOpenAI&only_installed=false&p=1

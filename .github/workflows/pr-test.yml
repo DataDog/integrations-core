@@ -11,6 +11,10 @@ on:
         required: false
         default: ""
         type: string
+      python-version:
+        required: false
+        default: ""
+        type: string
 
 jobs:
   compute-matrix:
@@ -42,6 +46,7 @@ jobs:
 
       # For other repositories
       setup-env-vars: "${{ inputs.setup-env-vars }}"
+      python-version: "${{ inputs.python-version }}"
     secrets: inherit
 
   save-event:

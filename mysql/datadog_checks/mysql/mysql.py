@@ -158,10 +158,8 @@ class MySql(AgentCheck):
         if self._resolved_hostname is None:
             if self._config.reported_hostname:
                 self._resolved_hostname = self._config.reported_hostname
-            elif self._config.dbm_enabled or self.disable_generic_tags:
-                self._resolved_hostname = self.resolve_db_host()
             else:
-                self._resolved_hostname = self.agent_hostname
+                self._resolved_hostname = self.resolve_db_host()
         return self._resolved_hostname
 
     @property

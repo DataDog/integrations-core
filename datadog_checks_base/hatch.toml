@@ -11,7 +11,7 @@ mypy-args = [
 ]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.9"]
+python = ["2.7", "3.11"]
 
 [envs.default]
 features = ["db", "deps", "http", "json", "kube"]
