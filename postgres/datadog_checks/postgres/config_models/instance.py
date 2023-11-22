@@ -12,12 +12,20 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import Any, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
 
 from . import defaults, validators
+
+
+class ManagedAuthentication(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = Field(None, example=False)
 
 
 class Aws(BaseModel):
@@ -26,7 +34,18 @@ class Aws(BaseModel):
         frozen=True,
     )
     instance_endpoint: Optional[str] = None
+    managed_authentication: Optional[ManagedAuthentication] = None
     region: Optional[str] = None
+
+
+class ManagedAuthentication1(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    client_id: Optional[str] = None
+    enabled: Optional[bool] = Field(None, example=False)
+    identity_scope: Optional[str] = Field(None, example='https://ossrdbms-aad.database.windows.net/.default')
 
 
 class Azure(BaseModel):
@@ -36,6 +55,7 @@ class Azure(BaseModel):
     )
     deployment_type: Optional[str] = None
     fully_qualified_domain_name: Optional[str] = None
+    managed_authentication: Optional[ManagedAuthentication1] = None
 
 
 class CollectSchemas(BaseModel):
