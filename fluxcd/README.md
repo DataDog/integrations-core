@@ -1,8 +1,8 @@
 # Agent Check: fluxcd
 
 ## Overview
-[Flux](https://fluxcd.io/) is a set of continuous and progressive delivery solutions for Kubernetes that are open and extensible.
-This check monitors fluxcd through the Datadog Agent.
+
+This check monitors [Flux][1] through the Datadog Agent. Flux is a set of continuous and progressive delivery solutions for Kubernetes that are open and extensible.
 
 ## Setup
 
@@ -10,25 +10,96 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-To install the fluxcd check on your host:
+Starting from Agent release 7.51.0, the Fluxcd check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
+**WARNING**: This check uses [OpenMetrics](https://docs.datadoghq.com/integrations/openmetrics/) to collect metrics from the OpenMetrics endpoint Fluxcd can expose, which requires Python 3.
 
-1. Install the [developer toolkit][10]
- on any machine.
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
 
-2. Run `ddev release build fluxcd` to build the package.
+#### Host
 
-3. [Download the Datadog Agent][2].
+##### Metric collection
 
-4. Upload the build artifact to any host with an Agent and
- run `datadog-agent integration install -w
- path/to/fluxcd/dist/<ARTIFACT_NAME>.whl`.
+1. Edit the `fluxcd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Fluxcd performance data. See the [sample configuration file][4] for all available configuration options.
 
-### Configuration
+    This example demonstrates the configuration:
 
-1. Edit the `fluxcd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your fluxcd performance data. See the [sample fluxcd.d/conf.yaml][4] for all available configuration options.
+    ```yaml
+    init_config:
+      ...
+    instances:
+      - openmetrics_endpoint: http://<FLUXCD_ADDRESS>:8080
+    ```
 
-2. [Restart the Agent][5].
+2. [Restart the Agent][5] after modifying the configuration.
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Docker" xxx -->
+
+#### Docker
+
+##### Metric collection
+
+This example demonstrates the configuration as a Docker label inside `docker-compose.yml`. See the [sample configuration file][4] for all available configuration options.
+
+```yaml
+labels:
+  com.datadoghq.ad.checks: '{"fluxcd":{"instances":[{"openmetrics_endpoint":"http://%%host%%:8080"}]}}'
+```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
+#### Kubernetes
+
+##### Metric collection
+
+This example demonstrates the configuration as Kubernetes annotations on your Fluxcd pods. See the [sample configuration file][4] for all available configuration options.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: '<POD_NAME>'
+  annotations:
+    ad.datadoghq.com/fluxcd.checks: |-
+      {
+        "fluxcd": {
+          "instances": [
+            {
+              "openmetrics_endpoint": "http://%%host%%:8080",
+            }
+          ]
+        }
+      }
+    # (...)
+spec:
+  containers:
+    - name: 'fluxcd'
+# (...)
+```
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
+Fluxcd metrics are available on the OpenMetrics endpoint. Additionally, Fluxcd allows you to [export custom application-level metrics][10]. You can configure the Fluxcd integration to collect these metrics using the `extra_metrics` option. All Fluxcd metrics, including your custom metrics, use the `fluxcd.` prefix.
+
+**Note:** Custom Fluxcd metrics are considered standard metrics in Datadog.
+
+This example demonstrates a configuration leveraging the `extra_metrics` option:
+
+```yaml
+init_config:
+  ...
+instances:
+  - openmetrics_endpoint: http://<FLUXCD_ADDRESS>:8080
+    # Also collect your own Fluxcd metrics
+    extra_metrics:
+      - my_custom_fluxcd_metric
+```
+
+More info on how to configure this option can be found in the [sample `fluxcd.d/conf.yaml` configuration file][11].
 
 ### Validation
 
