@@ -77,23 +77,22 @@ end
 build do
   # If a python_mirror is set, it is set in a pip config file so that we do not leak the token in the CI output
   pip_config_file = ENV['PIP_CONFIG_FILE']
-  pre_build_env = {
-    "PIP_CONFIG_FILE" => "#{pip_config_file}"
-  }
 
-  nix_build_env = {
-    "PIP_CONFIG_FILE" => "#{pip_config_file}",
-    "CFLAGS" => "-I#{install_dir}/embedded/include -I/opt/mqm/inc",
-    "CXXFLAGS" => "-I#{install_dir}/embedded/include -I/opt/mqm/inc",
-    "LDFLAGS" => "-L#{install_dir}/embedded/lib -L/opt/mqm/lib64 -L/opt/mqm/lib",
-    "LD_RUN_PATH" => "#{install_dir}/embedded/lib -L/opt/mqm/lib64 -L/opt/mqm/lib",
-    "PATH" => "#{install_dir}/embedded/bin:#{ENV['PATH']}",
-  }
-
-  win_build_env = {
-    "PIP_CONFIG_FILE" => "#{pip_config_file}",
-    "CFLAGS" => ""
-  }
+  if windows?
+    build_env = {
+      "PIP_CONFIG_FILE" => "#{pip_config_file}",
+      "CFLAGS" => ""
+    }
+  else
+    build_env = {
+      "PIP_CONFIG_FILE" => "#{pip_config_file}",
+      "CFLAGS" => "-I#{install_dir}/embedded/include -I/opt/mqm/inc",
+      "CXXFLAGS" => "-I#{install_dir}/embedded/include -I/opt/mqm/inc",
+      "LDFLAGS" => "-L#{install_dir}/embedded/lib -L/opt/mqm/lib64 -L/opt/mqm/lib",
+      "LD_RUN_PATH" => "#{install_dir}/embedded/lib -L/opt/mqm/lib64 -L/opt/mqm/lib",
+      "PATH" => "#{install_dir}/embedded/bin:#{ENV['PATH']}",
+    }
+  end
 
   # On Linux & Windows, specify the C99 standard explicitly to avoid issues while building some
   # wheels (eg. ddtrace).
@@ -104,29 +103,29 @@ build do
   # the command-line parameters, even when compiling C++ code, where -std=c99 is invalid.
   # See: https://github.com/python/cpython/blob/v3.8.8/Lib/distutils/sysconfig.py#L227
   if linux? || windows?
-    nix_build_env["CFLAGS"] += " -std=c99"
-    win_build_env["CFLAGS"] += " -std=c99"
+    build_env["CFLAGS"] += " -std=c99"
   end
 
   # We only have gcc 10.4.0 on linux for now
   if linux?
-    nix_build_env["CC"] = "/opt/gcc-#{gcc_version}/bin/gcc"
-    nix_build_env["CXX"] = "/opt/gcc-#{gcc_version}/bin/g++"
+    build_env["CC"] = "/opt/gcc-#{gcc_version}/bin/gcc"
+    build_env["CXX"] = "/opt/gcc-#{gcc_version}/bin/g++"
   end
 
-  # Some libraries (looking at you, aerospike-client-python) need EXT_CFLAGS instead of CFLAGS.
-  nix_specific_build_env = {
-    "aerospike" => nix_build_env.merge({"EXT_CFLAGS" => nix_build_env["CFLAGS"] + " -std=gnu99"}),
-    # Always build pyodbc from source to link to the embedded version of libodbc
-    "pyodbc" => nix_build_env.merge({"PIP_NO_BINARY" => "pyodbc"}),
-  }
-
-  win_specific_build_env = {}
+  specific_build_env = {}
+  if !windows?
+    # Some libraries (looking at you, aerospike-client-python) need EXT_CFLAGS instead of CFLAGS.
+    specific_build_env = {
+      "aerospike" => build_env.merge({"EXT_CFLAGS" => build_env["CFLAGS"] + " -std=gnu99"}),
+      # Always build pyodbc from source to link to the embedded version of libodbc
+      "pyodbc" => build_env.merge({"PIP_NO_BINARY" => "pyodbc"}),
+    }
+  end
 
   # We need to explicitly specify RUSTFLAGS for libssl and libcrypto
   # See https://github.com/pyca/cryptography/issues/8614#issuecomment-1489366475
   if redhat? && !arm?
-    nix_specific_build_env["cryptography"] = nix_build_env.merge(
+    specific_build_env["cryptography"] = build_env.merge(
       {
         "RUSTFLAGS" => "-C link-arg=-Wl,-rpath,#{install_dir}/embedded/lib",
         "OPENSSL_DIR" => "#{install_dir}/embedded/",
@@ -141,18 +140,9 @@ build do
   # want to filter out things before installing.
   #
   filtered_agent_requirements_in = "agent_requirements.in"
-  if windows?
-    static_reqs_in_file = "#{windows_safe_path(project_dir)}\\#{agent_requirements_in}"
-    static_reqs_out_folder = "#{windows_safe_path(project_dir)}\\"
-    static_reqs_out_file = static_reqs_out_folder + filtered_agent_requirements_in
-  else
-    static_reqs_in_file = "#{project_dir}/#{agent_requirements_in}"
-    static_reqs_out_folder = "#{project_dir}/"
-    static_reqs_out_file = static_reqs_out_folder + filtered_agent_requirements_in
-  end
-
-  specific_build_env = windows? ? win_specific_build_env : nix_specific_build_env
-  build_env = windows? ? win_build_env : nix_build_env
+  static_reqs_in_file = windows_safe_path(project_dir, agent_requirements_in)
+  static_reqs_out_folder = windows_safe_path(project_dir)
+  static_reqs_out_file = windows_safe_path(static_reqs_out_folder, filtered_agent_requirements_in)
 
   # Creating a hash containing the requirements and requirements file path associated to every lib
   requirements_custom = Hash.new()
