@@ -1,14 +1,14 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["3.9"]
+python = ["3.11"]
 
 [[envs.default.matrix]]
-python = ["3.9"]
+python = ["3.11"]
 setup = ["sandbox"]
 
 [envs.default.overrides]
-name."^py3.9$".e2e-env = { value = true }
+name."^py3.11$".e2e-env = { value = true }
 matrix.setup.e2e-env = { value = true, if = ["sandbox"], env = ["TERADATA_SERVER"] }
 matrix.setup.env-vars = [
   { key = "USE_TD_SANDBOX", value = "true", if = ["sandbox"] },
