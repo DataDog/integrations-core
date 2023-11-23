@@ -16,7 +16,7 @@ dependency 'datadog-agent-integrations-dependencies'
 INSTALL_DIR = '/opt/datadog-agent'
 
 install_dir INSTALL_DIR
-build_version ENV['PACKAGE_VERSION']
+build_version ENV['BUILDER_ID']
 
 package :zipper do
   target "frozen-py3.txt"

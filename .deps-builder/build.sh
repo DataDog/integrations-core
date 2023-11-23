@@ -6,5 +6,4 @@ root=${INTEGRATIONS_CORE_PATH:-/integrations-core}
 
 cd ${root}/.deps-builder/omnibus
 bundle install
-PACKAGE_VERSION=$(git rev-parse --short HEAD) \
-               bundle exec omnibus build ${omnibus_project} --log-level=debug
+bundle exec omnibus build ${omnibus_project} --log-level=debug

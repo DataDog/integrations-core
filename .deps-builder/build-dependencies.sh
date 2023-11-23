@@ -6,6 +6,9 @@ image_version="${AGENT_BUILD_IMAGE_VERSION:-latest}"
 
 docker_image="datadog/agent-buildimages-${target_platform}:${image_version}"
 
+# To be used in the output
+builder_id="${target_platform}:${image_version}"
+
 if [ -z "${RUNNING_ON_WINDOWS:-}" ];
 then
     mount_target="/integrations-core"
@@ -26,6 +29,7 @@ fi
 docker run \
        --mount type=bind,source="${mount_source}",target="${mount_target}" \
        --name "agent-integrations-dependencies-builder" \
+       -e BUILDER_ID="${builder_id}" \
        "${docker_image}" \
        ${build_command}
 
