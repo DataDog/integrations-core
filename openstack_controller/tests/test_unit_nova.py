@@ -5,9 +5,11 @@
 
 import logging
 import os
+from importlib.metadata import metadata
 
 import mock
 import pytest
+from packaging.version import Version
 
 import tests.configs as configs
 import tests.metrics as metrics
@@ -36,6 +38,10 @@ pytestmark = [
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.skipif(
+    Version(metadata("datadog_checks_base")["VERSION"]) < Version("34.1.2"),
+    reason='assert_external_tags was added in version 34.1.2',
+)
 def test_external_tags(datadog_agent, dd_run_check, check):
     dd_run_check(check)
     datadog_agent.assert_external_tags(
