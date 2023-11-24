@@ -12,6 +12,18 @@ import sys
 from collections import defaultdict
 from typing import Iterator
 
+# !!!!
+# Keep this in sync with datadog_checks_dev/datadog_checks/dev/tooling/constants.py
+# !!!!
+VALID_CHANGE_TYPES = [
+    'added',
+    'changed',
+    'deprecated',
+    'fixed',
+    'removed',
+    'security',
+]
+
 
 def changelog_entry_suffix(pr_number: int, pr_url: str) -> str:
     return f' ([#{pr_number}]({pr_url}))'
@@ -103,7 +115,7 @@ def get_noncore_repo_changelog_errors(git_diff: str, suffix: str, private: bool 
     '''
     Extras and Marketplace repos manage their changelogs as a single file.
 
-    We make sure that what contributors write to it follows are formatting conventions.
+    We make sure that what contributors write to it follows our formatting conventions.
     '''
     targets: dict[str, dict[str, dict[int, str]]] = {}
     for filename, lines in get_added_lines(git_diff).items():
@@ -185,6 +197,10 @@ def extract_filenames(git_diff: str) -> Iterator[str]:
         yield filename
 
 
+def gh_annotation(fpath, linenum, msg):
+    return f'::error file={fpath},line={linenum}::{"%0A".join(msg.splitlines())}'
+
+
 def get_core_repo_changelog_errors(git_diff: str, pr_number: int) -> list[str]:
     '''
     The integrations-core repo uses towncrier to stitch a release changelog from entry files.
@@ -200,34 +216,53 @@ def get_core_repo_changelog_errors(git_diff: str, pr_number: int) -> list[str]:
     fragments_dir = 'changelog.d'
     errors: list[str] = []
     for target, files in sorted(targets.items()):
-        if not requires_changelog(target, iter(files)):
-            continue
+        changelog_needed = requires_changelog(target, iter(files))
         changelog_entries = [f for f in files if f.startswith(fragments_dir)]
-        if not changelog_entries:
+        if not changelog_entries and not changelog_needed:
+            continue
+        if not changelog_entries and changelog_needed:
             msg = (
-                f'Package "{target}" has changes that require a changelog.\n'
+                f'Package "{target}" has changes that require a changelog. '
                 + 'Please run `ddev release changelog new` to add it.'
             )
             errors.append(msg)
-            errors.append(f'::error file={target}/changelog.d/{pr_number}.fixed,line=0::{"%0A".join(msg.splitlines())}')
+            errors.append(gh_annotation(f'{target}/changelog.d/{pr_number}.fixed', 0, msg))
             continue
         for entry_path in changelog_entries:
+            full_entry_path = f'{target}/{entry_path}'
+            if not changelog_needed:
+                msg = (
+                    "You added a changelog, but it's not needed for this change. To fix this please run:\n"
+                    + f'rm {full_entry_path}'
+                )
+                errors.append(msg)
+                errors.append(gh_annotation(full_entry_path, 0, msg))
             entry_parents, entry_fname = os.path.split(entry_path)
             entry_pr_num, _, entry_fname_rest = entry_fname.partition(".")
             if int(entry_pr_num) != pr_number:
                 correct_entry_path = os.path.join(entry_parents, f'{pr_number}.{entry_fname_rest}')
-                errors.append(
-                    f'Please rename changelog entry file "{target}/{entry_path}" to "{correct_entry_path}". '
-                    + 'This way your changelog entry matches the PR number.'
+                msg = (
+                    'Your changelog entry has the wrong PR number. To fix this please run:\n'
+                    + f'mv {full_entry_path} {target}/{correct_entry_path}'
                 )
+                errors.append(msg)
+                errors.append(gh_annotation(full_entry_path, 0, msg))
+            change_type, _, _ = entry_fname_rest.partition(".")
+            if change_type not in VALID_CHANGE_TYPES:
+                msg = (
+                    f'Your changelog entry "{full_entry_path}" has an invalid change type, please rename the file. '
+                    f'Valid types are:\n{" ".join(VALID_CHANGE_TYPES)}'
+                )
+                errors.append(msg)
+                errors.append(gh_annotation(full_entry_path, 0, msg))
 
     return errors
 
 
-def convert_to_messages(errors, on_ci):
+def ensure_right_format(errors, on_ci):
     for relative_path, line_number, message in errors:
         yield (
-            f'::error file={relative_path},line={line_number}::{message}'
+            gh_annotation(relative_path, line_number, message)
             if on_ci
             else f'{relative_path}, line {line_number}: {message}'
         )
@@ -264,10 +299,8 @@ def changelog_impl(*, ref: str, diff_file: str, pr_file: str, private: bool, rep
     )
     if not errors:
         return
-    for message in errors if repo == "core" else convert_to_messages(errors, on_ci):
-        # formatted = '%0A'.join(message.splitlines()) if on_ci else message
-        formatted = message
-        print(formatted)
+    for error in errors if repo == "core" else ensure_right_format(errors, on_ci):
+        print(error)
     sys.exit(1)
 
 
