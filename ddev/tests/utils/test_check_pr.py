@@ -31,47 +31,6 @@ def testing_context(monkeypatch, tmp_path):
     )
 
 
-extra_changelog_example = '''\
-diff --git a/snowflake/datadog_checks/snowflake/queries.py b/snowflake/datadog_checks/snowflake/queries.py
-index 9e83ef8f4b0c..d7d3c5fb62ff 100644
---- a/snowflake/datadog_checks/snowflake/queries.py
-+++ b/snowflake/datadog_checks/snowflake/queries.py
-@@ -191,12 +191,15 @@
- PipeHistory = {
-     'name': 'pipe.metrics',
-     'query': (
--        'select pipe_name, avg(credits_used), sum(credits_used), avg(bytes_inserted), sum(bytes_inserted), '
--        'avg(files_inserted), sum(files_inserted) from pipe_usage_history '
--        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1;'
-+        'avg(files_inserted), sum(files_inserted) from pipe_usage_history as history '
-+        'join snowflake.account_usage.pipes p on p.pipe_id = history.pipe_id '
-+        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1,2,3;'
-     ),
-     'columns': [
-         {'name': 'pipe', 'type': 'tag'},
-+        {'name': 'pipe_schema', 'type': 'tag'},
-+        {'name': 'pipe_catalog', 'type': 'tag'},
-         {'name': 'pipe.credits_used.avg', 'type': 'gauge'},
-         {'name': 'pipe.credits_used.sum', 'type': 'gauge'},
-         {'name': 'pipe.bytes_inserted.avg', 'type': 'gauge'},
-diff --git a/ddev/changelog.d/16222.added b/ddev/changelog.d/16222.added
-new file mode 100644
-index 000000000000..dfad2dae7569
---- /dev/null
-+++ b/ddev/changelog.d/16222.added
-@@ -0,0 +1 @@
-+Added `pipe_schema` and `pipe_catalog` tags to snowpipe metrics.
-\\ No newline at end of file
-diff --git a/snowflake/changelog.d/16222.added b/snowflake/changelog.d/16222.added
-new file mode 100644
-index 000000000000..dfad2dae7569
---- /dev/null
-+++ b/snowflake/changelog.d/16222.added
-@@ -0,0 +1 @@
-+Added `pipe_schema` and `pipe_catalog` tags to snowpipe metrics.
-\\ No newline at end of file
-'''
-
 EXAMPLE_NEEDS_CHANGELOG = '''\
 diff --git a/snowflake/datadog_checks/snowflake/queries.py b/snowflake/datadog_checks/snowflake/queries.py
 index 9e83ef8f4b0c..d7d3c5fb62ff 100644
@@ -210,8 +169,8 @@ def test_validation_passes(diff_content, testing_context, capsys):
             (
                 "You added a changelog, but it's not needed for this change. To fix this please run:\n"
                 'rm snowflake/changelog.d/123.added\n'
-                "::error file=snowflake/changelog.d/123.added,line=0::You added a changelog, but it's not needed for "
-                "this change. To fix this please run:%0Arm snowflake/changelog.d/123.added\n"
+                "::error file=snowflake/changelog.d/123.added,line=0::You added a changelog, but it's not needed "
+                "for this change. To fix this please run:%0Arm snowflake/changelog.d/123.added\n"
             ),
             id='changelog not needed',
         ),
