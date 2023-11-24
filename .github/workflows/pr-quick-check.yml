@@ -49,7 +49,7 @@ jobs:
       # if: inputs.repo != 'core'
       run: |-
         mkdir -p $(dirname ${{ env.CHECK_SCRIPT }})
-        curl -sLo ${{ env.CHECK_SCRIPT }} https://raw.githubusercontent.com/DataDog/integrations-core/master/${{ env.CHECK_SCRIPT }}
+        curl -sLo ${{ env.CHECK_SCRIPT }} https://raw.githubusercontent.com/DataDog/integrations-core/ik/AI-3603/improve-changelog-validation/${{ env.CHECK_SCRIPT }}
 
     - name: Check changelog
       run: >-
