@@ -23,7 +23,6 @@ jobs:
     steps:
     # Uncomment for testing purposes
     - uses: actions/checkout@v3
-      if: inputs.repo == 'core'
       with:
         ref: "${{ github.event.pull_request.head.sha }}"
 
@@ -44,12 +43,12 @@ jobs:
         -Lo /tmp/diff
         "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}"
 
-    - name: Fetch script
-      # Uncomment for testing purposes
-      if: inputs.repo != 'core'
-      run: |-
-        mkdir -p $(dirname ${{ env.CHECK_SCRIPT }})
-        curl -sLo ${{ env.CHECK_SCRIPT }} https://raw.githubusercontent.com/DataDog/integrations-core/master/${{ env.CHECK_SCRIPT }}
+    # - name: Fetch script
+    #   # Uncomment for testing purposes
+    #   if: inputs.repo != 'core'
+    #   run: |-
+    #     mkdir -p $(dirname ${{ env.CHECK_SCRIPT }})
+    #     curl -sLo ${{ env.CHECK_SCRIPT }} https://raw.githubusercontent.com/DataDog/integrations-core/master/${{ env.CHECK_SCRIPT }}
 
     - name: Check changelog
       run: >-
