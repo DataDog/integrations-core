@@ -204,11 +204,12 @@ def get_core_repo_changelog_errors(git_diff: str, pr_number: int) -> list[str]:
             continue
         changelog_entries = [f for f in files if f.startswith(fragments_dir)]
         if not changelog_entries:
-            errors.append(
-                f'Package "{target}" is missing a changelog entry for the following changes:\n'
-                + '\n'.join(f'- {f}' for f in files)
-                + 'Please run `ddev release changelog new` to add missing changelog entries.'
+            msg = (
+                f'Package "{target}" has changes that require a changelog.\n'
+                + 'Please run `ddev release changelog new` to add it.'
             )
+            errors.append(msg)
+            errors.append(f'::error file={target}/changelog.d/{pr_number}.fixed,line=0::{"%0A".join(msg.splitlines())}')
             continue
         for entry_path in changelog_entries:
             entry_parents, entry_fname = os.path.split(entry_path)
@@ -264,7 +265,8 @@ def changelog_impl(*, ref: str, diff_file: str, pr_file: str, private: bool, rep
     if not errors:
         return
     for message in errors if repo == "core" else convert_to_messages(errors, on_ci):
-        formatted = '%0A'.join(message.splitlines()) if on_ci else message
+        # formatted = '%0A'.join(message.splitlines()) if on_ci else message
+        formatted = message
         print(formatted)
     sys.exit(1)
 
@@ -279,7 +281,7 @@ def changelog_command(subparsers) -> None:
     parser.set_defaults(func=changelog_impl)
 
 
-def main():
+def main(args=None):
     import argparse
 
     parser = argparse.ArgumentParser(prog=__name__, allow_abbrev=False)
@@ -287,7 +289,7 @@ def main():
 
     changelog_command(subparsers)
 
-    kwargs = vars(parser.parse_args())
+    kwargs = vars(parser.parse_args(args=args))
     try:
         # We associate a command function with every subcommand parser.
         # This allows us to emulate Click's command group behavior.
