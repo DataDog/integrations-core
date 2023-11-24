@@ -240,7 +240,7 @@ def get_core_repo_changelog_errors(git_diff: str, pr_number: int) -> list[str]:
             entry_parents, entry_fname = os.path.split(entry_path)
             entry_pr_num, _, entry_fname_rest = entry_fname.partition(".")
             if int(entry_pr_num) != pr_number:
-                correct_entry_path = os.path.join(entry_parents, f'{pr_number}.{entry_fname_rest}')
+                correct_entry_path = f'{entry_parents}/{pr_number}.{entry_fname_rest}'
                 msg = (
                     'Your changelog entry has the wrong PR number. To fix this please run:\n'
                     + f'mv {full_entry_path} {target}/{correct_entry_path}'
