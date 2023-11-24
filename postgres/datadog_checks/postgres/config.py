@@ -14,6 +14,7 @@ DEFAULT_IGNORE_DATABASES = [
     'template%',
     'rdsadmin',
     'azure_maintenance',
+    'cloudsqladmin',
     'postgres',
 ]
 
@@ -115,10 +116,12 @@ class PostgresConfig:
         # Remap fully_qualified_domain_name to name
         azure = {k if k != 'fully_qualified_domain_name' else 'name': v for k, v in azure.items()}
         if aws:
+            aws['managed_authentication'] = self._aws_managed_authentication(aws)
             self.cloud_metadata.update({'aws': aws})
         if gcp:
             self.cloud_metadata.update({'gcp': gcp})
         if azure:
+            azure['managed_authentication'] = self._azure_managed_authentication(azure, self.managed_identity)
             self.cloud_metadata.update({'azure': azure})
         obfuscator_options_config = instance.get('obfuscator_options', {}) or {}
         self.obfuscator_options = {
@@ -136,6 +139,9 @@ class PostgresConfig:
             'table_names': is_affirmative(obfuscator_options_config.get('collect_tables', True)),
             'collect_commands': is_affirmative(obfuscator_options_config.get('collect_commands', True)),
             'collect_comments': is_affirmative(obfuscator_options_config.get('collect_comments', True)),
+            # Config to enable/disable obfuscation of sql statements with go-sqllexer pkg
+            # Valid values for this can be found at https://github.com/DataDog/datadog-agent/blob/main/pkg/obfuscate/obfuscate.go#L108
+            'obfuscation_mode': obfuscator_options_config.get('obfuscation_mode', ''),
         }
         self.log_unobfuscated_queries = is_affirmative(instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans = is_affirmative(instance.get('log_unobfuscated_plans', False))
@@ -207,3 +213,38 @@ class PostgresConfig:
                 return True
             except UnicodeEncodeError:
                 return False
+
+    @staticmethod
+    def _aws_managed_authentication(aws):
+        if 'managed_authentication' not in aws:
+            # for backward compatibility
+            # if managed_authentication is not set, we assume it is enabled if region is set
+            managed_authentication = {}
+            managed_authentication['enabled'] = 'region' in aws
+        else:
+            managed_authentication = aws['managed_authentication']
+            enabled = is_affirmative(managed_authentication.get('enabled', False))
+            if enabled and 'region' not in aws:
+                raise ConfigurationError('AWS region must be set when using AWS managed authentication')
+            managed_authentication['enabled'] = enabled
+        return managed_authentication
+
+    @staticmethod
+    def _azure_managed_authentication(azure, managed_identity):
+        if 'managed_authentication' not in azure:
+            # for backward compatibility
+            # if managed_authentication is not set, we assume it is enabled if client_id is set in managed_identity
+            managed_authentication = {}
+            if managed_identity:
+                managed_authentication['enabled'] = 'client_id' in managed_identity
+                managed_authentication.update(managed_identity)
+            else:
+                managed_authentication['enabled'] = False
+        else:
+            # if managed_authentication is set, we ignore the legacy managed_identity config
+            managed_authentication = azure['managed_authentication']
+            enabled = is_affirmative(managed_authentication.get('enabled', False))
+            if enabled and 'client_id' not in managed_authentication:
+                raise ConfigurationError('Azure client_id must be set when using Azure managed authentication')
+            managed_authentication['enabled'] = enabled
+        return managed_authentication

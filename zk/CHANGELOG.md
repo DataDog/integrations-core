@@ -1,8 +1,14 @@
 # CHANGELOG - zk
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 4.3.1 / 2023-08-18
+## 4.4.0 / 2023-10-26
+
+***Added***:
+
+* Allow multiple expected modes to be specified ([#15909](https://github.com/DataDog/integrations-core/pull/15909))
+
+## 4.3.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:
 
@@ -218,4 +224,3 @@
 ***Added***:
 
 * adds zk integration.
-

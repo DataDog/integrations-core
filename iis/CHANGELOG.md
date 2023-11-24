@@ -1,8 +1,8 @@
 # CHANGELOG - iis
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 3.0.0 / 2023-08-10
+## 3.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 
@@ -288,4 +288,3 @@
 ***Added***:
 
 * adds iis integration.
-

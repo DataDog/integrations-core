@@ -65,10 +65,12 @@ files:
           - 'template%'
           - rdsadmin
           - azure_maintenance
+          - cloudsqladmin
         default:
           - 'template%'
           - rdsadmin
           - azure_maintenance
+          - cloudsqladmin
     - name: ssl
       description: |
         This option determines whether or not and with what priority a secure SSL TCP/IP connection
@@ -233,6 +235,7 @@ files:
         By default, datname, usename and application_name will be used.
         If applications with different application_name are creating a lot of short-lived queries,
         removing application_name from the aggregation can help generate more stable metrics.
+        Note that datname is a required aggregation on activity metrics and can't be excluded.
       value:
         type: array
         items:
@@ -352,6 +355,9 @@ files:
             example:
               - "model"
               - "msdb"
+              - "cloudsqladmin"
+            display_default:
+              - "cloudsqladmin"
         - name: refresh
           description: Frequency in seconds of scans for new databases. Defaults to 10 minutes.
           value:
@@ -564,6 +570,27 @@ files:
           value:
             type: string
             example: us-east-1
+        - name: managed_authentication
+          description: |
+            Configure section used for AWS IAM Authentication with RDS.
+
+            This supports using IAM database authentication to connect to your database instance.
+
+            For more information on configuration, see
+            https://docs.datadoghq.com/database_monitoring/guide/managed_authentication
+            
+            For more information on RDS IAM Authentication, see the AWS docs
+            https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.Connecting.html
+
+            To enable IAM Authentication, set `aws.managed_authentication.enabled` to `true`.
+            If `aws.managed_authentication.enabled` is set, then the `password` fields will be ignored.
+            `aws.region` is required to enable IAM Authentication.
+          value:
+            type: object
+            properties:
+            - name: enabled
+              type: boolean
+              example: false
 
     - name: gcp
       description: |
@@ -625,9 +652,40 @@ files:
           value:
             type: string
             example: my-postgres-database.database.windows.net
+        - name: managed_authentication
+          description: |
+            Configuration section used for Azure AD Authentication.
+        
+            This supports using System or User assigned managed identities.
+
+            For more information on configuration, see
+            https://docs.datadoghq.com/database_monitoring/guide/managed_authentication
+            
+            For more information on Managed Identities, see the Azure docs
+            https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
+
+            To enable Azure AD Authentication, set `azure.managed_authentication.enabled` to `true`.
+            If `azure.managed_authentication.enabled` is set, then the `password` fields will be ignored.
+            `azure.managed_authentication.client_id` is required to enable Azure AD Authentication.
+
+            For more information on scopes, see the Azure docs
+            https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
+          value:
+            type: object
+            properties:
+            - name: enabled
+              type: boolean
+              example: false
+            - name: client_id
+              type: string
+            - name: identity_scope
+              type: string
+              example: https://ossrdbms-aad.database.windows.net/.default
 
     - name: managed_identity
       description: |
+        DEPRECATED: Please use `azure.managed_authentication` instead.
+
         Configuration section used for Azure AD Authentication.
         
         This supports using System or User assigned managed identities.

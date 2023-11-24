@@ -1,8 +1,14 @@
 # CHANGELOG - Cloud Foundry API
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 3.0.0 / 2023-08-10
+## 3.1.0 / 2023-11-10
+
+***Added***:
+
+* Updated dependencies. ([#16154](https://github.com/DataDog/integrations-core/pull/16154))
+
+## 3.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 

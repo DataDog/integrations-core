@@ -30,7 +30,7 @@ from datadog_checks.sqlserver.const import (
 )
 from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
 
-from .common import CHECK_NAME
+from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME
 
 try:
     import pyodbc
@@ -432,7 +432,7 @@ def test_statement_metrics_and_plans(
 
     # internal debug metrics
     aggregator.assert_metric(
-        "dd.sqlserver.operation.time",
+        OPERATION_TIME_METRIC_NAME,
         tags=['agent_hostname:stubbed.hostname', 'operation:collect_statement_metrics_and_plans']
         + _expected_dbm_instance_tags(dbm_instance),
     )
@@ -728,7 +728,7 @@ def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
         matching = [r for r in rows if r['text'] == test_query]
-        assert matching, "the test query should be visible in the query stats"
+        assert matching, "the test query should be visible in the query stats, found all rows: {}".format(rows)
         row = matching[0]
 
         cursor.execute(

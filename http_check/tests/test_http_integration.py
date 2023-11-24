@@ -605,3 +605,15 @@ def test_case_insensitive_header_content_type(dd_run_check, headers):
         assert check.http.options["headers"] == default_headers
     else:
         assert check.http.options["headers"] == headers
+
+
+def test_http_response_status_code_accepts_int_value(aggregator, dd_run_check):
+    instance = {
+        'name': 'foobar',
+        'url': 'http://something.com',
+        'http_response_status_code': 404,
+    }
+    check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
+
+    dd_run_check(check)
+    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=AgentCheck.CRITICAL)

@@ -5,7 +5,7 @@ python = ["2.7"]
 version = ["19.9"]
 
 [[envs.default.matrix]]
-python = ["3.9"]
+python = ["3.11"]
 version = ["19.9", "20.1"]
 
 [envs.default.overrides]

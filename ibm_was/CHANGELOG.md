@@ -1,8 +1,14 @@
 # CHANGELOG - IBM WAS
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 3.1.0 / 2023-08-18
+## 3.1.1 / 2023-11-08 / Agent 7.49.1
+
+***Fixed***:
+
+* Fix `aarch64` compatibility of the `ibm_was` check by downgrading `lxml` to version 4.9.2 ([16080](https://github.com/DataDog/integrations-core/pull/16080))
+
+## 3.1.0 / 2023-08-18 / Agent 7.48.0
 
 ***Added***:
 

@@ -8,7 +8,7 @@ from datadog_checks.base import ConfigurationError
 from datadog_checks.postgres.relationsmanager import QUERY_PG_CLASS, RelationsManager
 
 from .common import DB_NAME, HOST, PORT, _get_expected_tags, _iterate_metric_name
-from .utils import requires_over_11
+from .utils import _get_superconn, _wait_for_value, requires_over_11
 
 RELATION_METRICS = [
     'postgresql.seq_scans',
@@ -187,6 +187,32 @@ def test_index_metrics(aggregator, integration_check, pg_instance):
         check, pg_instance, db='dogs', table='breed', index='breed_names', schema='public'
     )
     for name in IDX_METRICS:
+        aggregator.assert_metric(name, count=1, tags=expected_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_vacuum_age(aggregator, integration_check, pg_instance):
+    pg_instance['relations'] = ['persons']
+    pg_instance['dbname'] = 'datadog_test'
+
+    conn = _get_superconn(pg_instance)
+    with conn.cursor() as cur:
+        cur.execute('select pg_stat_reset()')
+        cur.execute('VACUUM ANALYZE persons')
+    conn.close()
+
+    _wait_for_value(
+        pg_instance,
+        lower_threshold=0,
+        query="select count(*) from pg_stat_user_tables where relname='persons' and vacuum_count > 0;",
+    )
+
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    expected_tags = _get_expected_tags(check, pg_instance, db='datadog_test', table='persons', schema='public')
+    for name in ['postgresql.last_vacuum_age', 'postgresql.last_analyze_age']:
         aggregator.assert_metric(name, count=1, tags=expected_tags)
 
 

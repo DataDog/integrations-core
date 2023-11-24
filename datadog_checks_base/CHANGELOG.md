@@ -1,6 +1,66 @@
 # CHANGELOG - datadog_checks_base
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 34.3.0 / 2023-11-10
+
+***Added***:
+
+* Updated dependencies. ([#16154](https://github.com/DataDog/integrations-core/pull/16154))
+
+***Fixed***:
+
+* Fix `aarch64` compatibility of the `sqlserver and ibm_was` check by downgrading `lxml` to version 4.9.2 ([16080](https://github.com/DataDog/integrations-core/pull/16080)) ([#16080](https://github.com/DataDog/integrations-core/pull/16080))
+* Bump the dnspython version to 2.4.2 on Python 3 ([#16150](https://github.com/DataDog/integrations-core/pull/16150))
+
+## 34.2.0 / 2023-11-06
+
+***Added***:
+
+* Add exceptions to skip instance configurations ([#16012](https://github.com/DataDog/integrations-core/pull/16012))
+
+## 34.1.2 / 2023-11-02
+
+***Fixed***:
+
+* Bump librdkafka and confluent-kafka to v2.3.0 ([#16088](https://github.com/DataDog/integrations-core/pull/16088))
+* Add the ability to assert the `external_tags` when running tests ([#16089](https://github.com/DataDog/integrations-core/pull/16089))
+* Do not verify the tags order by default when testing the external tags ([#16105](https://github.com/DataDog/integrations-core/pull/16105))
+
+## 34.1.1 / 2023-10-26
+
+***Fixed***:
+
+* Bump the `cryptography` version to 41.0.5 ([#16083](https://github.com/DataDog/integrations-core/pull/16083))
+
+## 34.1.0 / 2023-10-20
+
+***Added***:
+
+* Add util to track db query operation time ([#16040](https://github.com/DataDog/integrations-core/pull/16040))
+
+***Fixed***:
+
+* Bump the `pymysql` version to 1.1.0 on Python 3 ([#16042](https://github.com/DataDog/integrations-core/pull/16042))
+* Bump the `pyodbc` version to 5.0.1 ([#16041](https://github.com/DataDog/integrations-core/pull/16041))
+
+## 34.0.3 / 2023-11-08
+
+***Fixed***:
+
+* Fix `aarch64` compatibility of the `sqlserver` and `ibm_was` checks by downgrading `lxml` to version 4.9.2 ([16080](https://github.com/DataDog/integrations-core/pull/16080))
+
+## 34.0.2 / 2023-10-27
+
+***Fixed***:
+
+* Bump the `cryptography` version to 41.0.5 ([#16083](https://github.com/DataDog/integrations-core/pull/16083))
+
+## 34.0.1 / 2023-10-17
+
+***Fixed***:
+
+* Fix check cancellation timeout due to `DBMAsyncJob` cancellation being blocked ([#16028](https://github.com/DataDog/integrations-core/pull/16028))
 
 ## 34.0.0 / 2023-09-29
 

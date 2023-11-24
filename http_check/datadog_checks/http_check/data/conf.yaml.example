@@ -94,7 +94,7 @@ instances:
     #
     # reverse_content_match: false
 
-    ## @param http_response_status_code - string - optional - default: (1|2|3)\d\d
+    ## @param http_response_status_code - string or integer - optional - default: (1|2|3)\d\d
     ## The http_response_status_code parameter will instruct the check
     ## to look for a particular HTTP response status code or a Regex identifying
     ## a set of possible status codes.

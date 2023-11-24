@@ -26,7 +26,7 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
     "Programming Language :: Python :: 2.7",
-    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.11",
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
 ]
@@ -39,7 +39,8 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "dnspython==1.16.0",
+    "dnspython==1.16.0; python_version < '3.0'",
+    "dnspython==2.4.2; python_version > '3.0'",
 ]
 
 [project.urls]

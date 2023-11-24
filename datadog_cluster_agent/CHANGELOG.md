@@ -1,8 +1,14 @@
 # CHANGELOG - Datadog-Cluster-Agent
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 2.7.1 / 2023-08-18
+## 2.8.0 / 2023-11-10
+
+***Added***:
+
+* Add `datadog.rate_limit_queries.remaining_min` to default metrics of `datadog_cluster_agent` integration ([#16122](https://github.com/DataDog/integrations-core/pull/16122))
+
+## 2.7.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:
 

@@ -75,7 +75,7 @@ To configure this check for an Agent running on a host:
 
     See the [example check configuration][6] for a comprehensive description of all options, including how to use custom queries to create your own metrics.
 
-    **Note**: The (default) provider `SQLOLEDB` is being deprecated. To use the newer `MSOLEDBSQL` provider, set the `adoprovider` variable to `MSOLEDBSQL` in your `sqlserver.d/conf.yaml` file after having downloaded the new provider from [Microsoft][7]. It is also possible to use the Windows Authentication and not specify the username/password with:
+    **Note**: The (default) provider `SQLOLEDB` is being deprecated. To use the newer `MSOLEDBSQL` provider, set the `adoprovider` variable to `MSOLEDBSQL19` in your `sqlserver.d/conf.yaml` file after having downloaded the new provider from [Microsoft][7]. If you're using `MSOLEDBSQL` version 18 or lower, set the `adoprovider` variable to `MSOLEDBSQL` instead. It is also possible to use the Windows Authentication and not specify the username/password with:
 
       ```yaml
       connection_string: "Trusted_Connection=yes"
@@ -169,6 +169,23 @@ See [service_checks.json][16] for a list of service checks provided by this inte
 ## Troubleshooting
 
 Need help? Contact [Datadog support][17].
+
+If you are running the Agent on an ARM aarch64 processor, there is a known issue starting in version 14.0.0 of this check, which is bundled with Agent version 7.48.0. A Python dependency fails to load, and you'll see the following message when running [the Agent's status subcommand][14]:
+
+```
+Loading Errors
+  ==============
+    sqlserver
+    ---------
+      Core Check Loader:
+        Check sqlserver not found in Catalog
+      JMX Check Loader:
+        check is not a jmx check, or unable to determine if it's so
+      Python Check Loader:
+        unable to import module 'sqlserver': No module named 'sqlserver'
+```
+
+A fix for this is currently being developed, and in the meantime Agent versions 7.47 and below will continue to function properly.
 
 ## Further Reading
 

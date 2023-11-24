@@ -4,7 +4,7 @@
 DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
 
 [[envs.default.matrix]]
-python = ["3.9"]
+python = ["3.11"]
 version = ["1.20"]
 auth = ["no-auth", "auth"]
 

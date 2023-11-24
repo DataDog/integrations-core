@@ -10,6 +10,7 @@ from six import PY3, StringIO, iteritems, string_types
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils.time import get_precise_time
 
 if PY3:
     # Flup package does not exist anymore so what's needed is vendored
@@ -51,12 +52,14 @@ class PHPFPMCheck(AgentCheck):
     """
 
     SERVICE_CHECK_NAME = 'php_fpm.can_ping'
+    STATUS_DURATION_NAME = 'php_fpm.status.duration'
 
     GAUGES = {
         'listen queue': 'php_fpm.listen_queue.size',
         'idle processes': 'php_fpm.processes.idle',
         'active processes': 'php_fpm.processes.active',
         'total processes': 'php_fpm.processes.total',
+        'max active processes': 'php_fpm.processes.max_active',
     }
 
     MONOTONIC_COUNTS = {
@@ -103,13 +106,17 @@ class PHPFPMCheck(AgentCheck):
         data = {}
         try:
             if use_fastcgi:
+                check_start_time = get_precise_time()
                 data = json.loads(self.request_fastcgi(status_url, query='json'))
+                check_duration = get_precise_time() - check_start_time
             else:
                 # TODO: adding the 'full' parameter gets you per-process detailed
                 # information, which could be nice to parse and output as metrics
                 max_attempts = 3
                 for i in range(max_attempts):
+                    check_start_time = get_precise_time()
                     resp = self.http.get(status_url, params={'json': True})
+                    check_duration = get_precise_time() - check_start_time
 
                     # Exponential backoff, wait at most (max_attempts - 1) times in case we get a 503.
                     # Delay in seconds is (2^i + random amount of seconds between 0 and 1)
@@ -132,6 +139,8 @@ class PHPFPMCheck(AgentCheck):
         metric_tags = tags + ["pool:{0}".format(pool_name)]
         if http_host is not None:
             metric_tags += ["http_host:{0}".format(http_host)]
+
+        self.gauge(self.STATUS_DURATION_NAME, check_duration, tags=metric_tags)
 
         for key, mname in iteritems(self.GAUGES):
             if key not in data:

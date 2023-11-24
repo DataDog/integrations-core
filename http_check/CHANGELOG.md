@@ -1,6 +1,18 @@
 # CHANGELOG - http_check
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 9.2.2 / 2023-11-10
+
+***Fixed***:
+
+* Allow using an integer for the expected status code in the config ([#16163](https://github.com/DataDog/integrations-core/pull/16163))
+
+## 9.2.1 / 2023-10-26 / Agent 7.49.0
+
+***Fixed***:
+
+* Bump the `cryptography` version to 41.0.5 ([#16083](https://github.com/DataDog/integrations-core/pull/16083))
 
 ## 9.2.0 / 2023-09-29
 
@@ -14,7 +26,7 @@
 
 * Add `use_cert_from_response` option ([#15785](https://github.com/DataDog/integrations-core/pull/15785))
 
-## 9.0.1 / 2023-08-18
+## 9.0.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:
 

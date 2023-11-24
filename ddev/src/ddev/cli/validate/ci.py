@@ -136,6 +136,10 @@ def ci(app: Application, sync: bool):
     if repo_choice not in valid_repos:
         app.abort(f'Unknown repository `{repo_choice}`')
 
+    # marketplace does not have a .codecov.yml file
+    if app.repo.name == 'marketplace':
+        return
+
     testable_checks = {integration.name for integration in app.repo.integrations.iter_testable('all')}
 
     cached_display_names: defaultdict[str, str] = defaultdict(str)

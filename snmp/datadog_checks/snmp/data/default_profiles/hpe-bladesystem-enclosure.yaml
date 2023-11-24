@@ -14,15 +14,15 @@ metrics:
       - name: cpqRackCommonEnclosureTempCurrent
         OID: 1.3.6.1.4.1.232.22.2.3.1.2.1.6
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.2.1.4
           name: cpqRackCommonEnclosureTempSensorEnclosureName
         tag: cpq_rack_common_enclosure_temp_sensor_enclosure_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.2.1.5
           name: cpqRackCommonEnclosureTempLocation
         tag: cpq_rack_common_enclosure_temp_location
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.2.1.8
           name: cpqRackCommonEnclosureTempCondition
         tag: cpq_rack_common_enclosure_temp_condition
@@ -31,7 +31,7 @@ metrics:
           2: ok
           3: degraded
           4: failed
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.2.1.9
           name: cpqRackCommonEnclosureTempType
         tag: cpq_rack_common_enclosure_temp_type
@@ -48,19 +48,19 @@ metrics:
       - name: cpqRackCommonEnclosureFan
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.3.1.5
           name: cpqRackCommonEnclosureFanLocation
         tag: cpq_rack_common_enclosure_fan_location
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.3.1.6
           name: cpqRackCommonEnclosureFanPartNumber
         tag: cpq_rack_common_enclosure_fan_part_number
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.3.1.7
           name: cpqRackCommonEnclosureFanSparePartNumber
         tag: cpq_rack_common_enclosure_fan_spare_part_number
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.3.1.8
           name: cpqRackCommonEnclosureFanPresent
         tag: cpq_rack_common_enclosure_fan_present
@@ -68,7 +68,7 @@ metrics:
           1: other
           2: absent
           3: present
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.3.1.9
           name: cpqRackCommonEnclosureFanRedundant
         tag: cpq_rack_common_enclosure_fan_redundant
@@ -76,15 +76,15 @@ metrics:
           1: other
           2: not_redundant
           3: redundant
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.3.1.10
           name: cpqRackCommonEnclosureFanRedundantGroupId
         tag: cpq_rack_common_enclosure_fan_redundant_group_id
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.3.1.12
           name: cpqRackCommonEnclosureFanEnclosureSerialNum
         tag: cpq_rack_common_enclosure_fan_enclosure_serial_num
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.3.1.11
           name: cpqRackCommonEnclosureFanCondition
         tag: cpq_rack_common_enclosure_fan_condition
@@ -101,15 +101,15 @@ metrics:
       - name: cpqRackCommonEnclosureFuse
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.4.1.4
           name: cpqRackCommonEnclosureFuseEnclosureName
         tag: cpq_rack_common_enclosure_fuse_enclosure_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.4.1.5
           name: cpqRackCommonEnclosureFuseLocation
         tag: cpq_rack_common_enclosure_fuse_location
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.4.1.6
           name: cpqRackCommonEnclosureFusePresent
         tag: cpq_rack_common_enclosure_fuse_present
@@ -117,7 +117,7 @@ metrics:
           1: other
           2: absent
           3: present
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.4.1.7
           name: cpqRackCommonEnclosureFuseCondition
         tag: cpq_rack_common_enclosure_fuse_condition
@@ -133,34 +133,34 @@ metrics:
       - name: cpqRackCommonEnclosureManager
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.6.1.4
           name: cpqRackCommonEnclosureManagerEnclosureName
         tag: cpq_rack_common_enclosure_manager_enclosure_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.6.1.5
           name: cpqRackCommonEnclosureManagerLocation
         tag: cpq_rack_common_enclosure_manager_location
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.6.1.6
           name: cpqRackCommonEnclosureManagerPartNumber
         tag: cpq_rack_common_enclosure_manager_part_number
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.6.1.7
           name: cpqRackCommonEnclosureManagerSparePartNumber
         tag: cpq_rack_common_enclosure_manager_spare_part_number
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.6.1.8
           name: cpqRackCommonEnclosureManagerSerialNum
         tag: cpq_rack_common_enclosure_manager_serial_num
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.6.1.9
           name: cpqRackCommonEnclosureManagerRole
         tag: cpq_rack_common_enclosure_manager_role
         mapping:
           1: standby
           2: active
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.6.1.10
           name: cpqRackCommonEnclosureManagerPresent
         tag: cpq_rack_common_enclosure_manager_present
@@ -168,7 +168,7 @@ metrics:
           1: other
           2: absent
           3: present
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.6.1.11
           name: cpqRackCommonEnclosureManagerRedundant
         tag: cpq_rack_common_enclosure_manager_redundant
@@ -176,7 +176,7 @@ metrics:
           1: other
           2: not_redundant
           3: redundant
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.1.6.1.12
           name: cpqRackCommonEnclosureManagerCondition
         tag: cpq_rack_common_enclosure_manager_condition
@@ -193,15 +193,15 @@ metrics:
       - name: cpqRackPowerEnclosure
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.3.1.1.3
           name: cpqRackPowerEnclosureName
         tag: cpq_rack_power_enclosure_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.3.1.1.4
           name: cpqRackPowerEnclosureMgmtBoardSerialNum
         tag: cpq_rack_power_enclosure_mgmt_board_serial_num
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.3.1.1.5
           name: cpqRackPowerEnclosureRedundant
         tag: cpq_rack_power_enclosure_redundant
@@ -209,7 +209,7 @@ metrics:
           1: other
           2: not_redundant
           3: redundant
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.3.1.1.6
           name: cpqRackPowerEnclosureLoadBalanced
         tag: cpq_rack_power_enclosure_load_balanced
@@ -217,7 +217,7 @@ metrics:
           1: other
           2: not_load_balanced
           3: load_balanced
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.3.1.1.7
           name: cpqRackPowerEnclosureInputPwrType
         tag: cpq_rack_power_enclosure_input_pwr_type
@@ -226,7 +226,7 @@ metrics:
           2: single_phase
           3: three_phase
           4: direct_current
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.3.1.1.10
           name: cpqRackPowerEnclosureBladeAutopoweron
         tag: cpq_rack_power_enclosure_blade_autopoweron
@@ -234,7 +234,7 @@ metrics:
           1: other
           2: disabled
           3: enabled
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.3.3.1.1.9
           name: cpqRackPowerEnclosureCondition
         tag: cpq_rack_power_enclosure_condition
@@ -255,23 +255,23 @@ metrics:
 #        OID: 1.3.6.1.4.1.232.22.2.4.1.1.1.24
 # string metric is not supported yet (keep this metric and this comment in profile until it's fixed)
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.4.1.1.1.4
           name: cpqRackServerBladeName
         tag: cpq_rack_server_blade_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.4.1.1.1.6
           name: cpqRackServerBladePartNumber
         tag: cpq_rack_server_blade_part_number
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.4.1.1.1.7
           name: cpqRackServerBladeSparePartNumber
         tag: cpq_rack_server_blade_spare_part_number
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.4.1.1.1.8
           name: cpqRackServerBladePosition
         tag: cpq_rack_server_blade_position
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.4.1.1.1.12
           name: cpqRackServerBladePresent
         tag: cpq_rack_server_blade_present
@@ -279,26 +279,26 @@ metrics:
           1: other
           2: absent
           3: present
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.4.1.1.1.13
           name: cpqRackServerBladeHasFuses
         tag: cpq_rack_server_blade_has_fuses
         mapping:
           1: false
           2: true
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.4.1.1.1.16
           name: cpqRackServerBladeSerialNum
         tag: cpq_rack_server_blade_serial_num
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.4.1.1.1.17
           name: cpqRackServerBladeProductId
         tag: cpq_rack_server_blade_product_id
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.4.1.1.1.18
           name: cpqRackServerBladeUid
         tag: cpq_rack_server_blade_uid
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.4.1.1.1.35
           name: cpqRackServerBladePOSTStatus
         tag: cpq_rack_server_blade_post_status
@@ -307,7 +307,7 @@ metrics:
           2: started
           3: completed
           4: failed
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.4.1.1.1.21
           name: cpqRackServerBladeStatus
         tag: cpq_rack_server_blade_status
@@ -316,7 +316,7 @@ metrics:
           2: ok
           3: degraded
           4: failed
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.4.1.1.1.25
           name: cpqRackServerBladePowered
         tag: cpq_rack_server_blade_powered
@@ -326,7 +326,7 @@ metrics:
           3: off
           4: power_staged_off
           5: reboot
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.4.1.1.1.26
           name: cpqRackServerBladeUIDState
         tag: cpq_rack_server_blade_uid_state
@@ -343,15 +343,15 @@ metrics:
       - name: cpqRackServerTempSensorCurrent
         OID: 1.3.6.1.4.1.232.22.2.4.3.1.1.8
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.4.3.1.1.4
           name: cpqRackServerTempSensorName
         tag: cpq_rack_server_temp_sensor_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.4.3.1.1.7
           name: cpqRackServerTempSensorLocation
         tag: cpq_rack_server_temp_sensor_location
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.4.3.1.1.10
           name: cpqRackServerTempSensorCondition
         tag: cpq_rack_server_temp_sensor_condition
@@ -360,7 +360,7 @@ metrics:
           2: ok
           3: degraded
           4: failed
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.4.3.1.1.11
           name: cpqRackServerTempSensorType
         tag: cpq_rack_server_temp_sensor_type
@@ -381,31 +381,31 @@ metrics:
       - name: cpqRackPowerSupplyExhaustTemp
         OID: 1.3.6.1.4.1.232.22.2.5.1.1.1.13
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.5.1.1.1.4
           name: cpqRackPowerSupplyEnclosureName
         tag: cpq_rack_power_supply_enclosure_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.5.1.1.1.5
           name: cpqRackPowerSupplySerialNum
         tag: cpq_rack_power_supply_serial_num
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.5.1.1.1.6
           name: cpqRackPowerSupplyPartNumber
         tag: cpq_rack_power_supply_part_number
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.5.1.1.1.7
           name: cpqRackPowerSupplySparePartNumber
         tag: cpq_rack_power_supply_spare_part_number
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.5.1.1.1.8
           name: cpqRackPowerSupplyFWRev
         tag: cpq_rack_power_supply_fw_rev
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.5.1.1.1.9
           name: cpqRackPowerSupplyMaxPwrOutput
         tag: cpq_rack_power_supply_max_pwr_output
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.5.1.1.1.16
           name: cpqRackPowerSupplyPresent
         tag: cpq_rack_power_supply_present
@@ -413,11 +413,11 @@ metrics:
           1: other
           2: absent
           3: present
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.5.1.1.1.18
           name: cpqRackPowerSupplyEnclosureSerialNum
         tag: cpq_rack_power_supply_enclosure_serial_num
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.5.1.1.1.14
           name: cpqRackPowerSupplyStatus
         tag: cpq_rack_power_supply_status
@@ -438,7 +438,7 @@ metrics:
           14: giveup_on_startup
           15: nvram_invalid
           16: calibration_table_invalid
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.5.1.1.1.15
           name: cpqRackPowerSupplyInputLineStatus
         tag: cpq_rack_power_supply_input_line_status
@@ -449,7 +449,7 @@ metrics:
           4: line_hit
           5: brown_out
           6: line_power_loss
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.232.22.2.5.1.1.1.17
           name: cpqRackPowerSupplyCondition
         tag: cpq_rack_power_supply_condition

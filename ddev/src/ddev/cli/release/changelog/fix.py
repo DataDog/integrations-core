@@ -11,14 +11,20 @@ if TYPE_CHECKING:
     from ddev.cli.application import Application
 
 
-@click.command(short_help='Fix changelog entries')
+@click.command
 @click.pass_obj
 def fix(app: Application):
     """
+    Fix changelog entries.
+
+    This command is only needed if you are manually writing to the changelog.
+    For instance for marketplace and extras integrations.
+    Don't use this in integrations-core because the changelogs there are generated automatically.
+
     The first line of every new changelog entry must include the PR number in which the change
     occurred. This command will apply this suffix to manually added entries if it is missing.
     """
-    from ddev.utils.scripts.check_pr import changelog_entry_suffix, get_changelog_errors
+    from ddev.utils.scripts.check_pr import changelog_entry_suffix, get_noncore_repo_changelog_errors
 
     latest_commit = app.repo.git.latest_commit
     pr = app.github.get_pull_request(latest_commit.sha)
@@ -37,7 +43,7 @@ def fix(app: Application):
 
     expected_suffix = changelog_entry_suffix(pr_number, pr_url)
     fixed = 0
-    for path, line_number, _ in get_changelog_errors(git_diff, expected_suffix):
+    for path, line_number, _ in get_noncore_repo_changelog_errors(git_diff, expected_suffix):
         if line_number == 1:
             continue
 

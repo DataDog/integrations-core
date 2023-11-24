@@ -1,14 +1,31 @@
 # CHANGELOG - kubelet
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 7.9.2 / 2023-09-29
+## 7.10.1 / 2023-11-14
+
+***Fixed***:
+
+* Centralize `get_prometheus_url` function call in the init function and defer log warning after super() call. ([#16192](https://github.com/DataDog/integrations-core/pull/16192))
+
+## 7.10.0 / 2023-11-10
+
+***Added***:
+
+* Added CreateContainerConfigError wait reason ([#16143](https://github.com/DataDog/integrations-core/pull/16143))
+
+***Fixed***:
+
+* Always define logger.
+  Quick fix for https://github.com/DataDog/integrations-core/issues/16179. ([#16187](https://github.com/DataDog/integrations-core/pull/16187))
+
+## 7.9.2 / 2023-09-29 / Agent 7.49.0
 
 ***Fixed***:
 
 * Fix kubelet check failing to initialize when the kubelet is temporarily unavailable ([#15706](https://github.com/DataDog/integrations-core/pull/15706))
 
-## 7.9.1 / 2023-08-18
+## 7.9.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:
 

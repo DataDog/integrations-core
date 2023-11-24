@@ -1,14 +1,20 @@
 # CHANGELOG - Vertica
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 4.2.0 / 2023-09-29
+## 4.3.0 / 2023-11-10
+
+***Added***:
+
+* Updated dependencies. ([#16154](https://github.com/DataDog/integrations-core/pull/16154))
+
+## 4.2.0 / 2023-09-29 / Agent 7.49.0
 
 ***Added***:
 
 * Update Vertica dependency to 1.3.5 ([#15922](https://github.com/DataDog/integrations-core/pull/15922))
 
-## 4.1.0 / 2023-08-18
+## 4.1.0 / 2023-08-18 / Agent 7.48.0
 
 ***Added***:
 

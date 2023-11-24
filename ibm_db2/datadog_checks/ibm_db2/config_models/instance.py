@@ -47,6 +47,7 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    connection_timeout: Optional[int] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     db: str
     disable_generic_tags: Optional[bool] = None

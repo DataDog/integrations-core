@@ -1,8 +1,14 @@
 # CHANGELOG - dns_check
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 3.0.0 / 2023-08-10
+## 3.0.1 / 2023-11-10
+
+***Fixed***:
+
+* Bump the dnspython version to 2.4.2 on Python 3 ([#16150](https://github.com/DataDog/integrations-core/pull/16150))
+
+## 3.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 

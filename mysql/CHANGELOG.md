@@ -1,6 +1,25 @@
 # CHANGELOG - mysql
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 11.4.0 / 2023-11-10
+
+***Added***:
+
+* * Add obfuscation_mode config option to allow enabling obfuscation with go-sqllexer ([#16126](https://github.com/DataDog/integrations-core/pull/16126)) ([#16126](https://github.com/DataDog/integrations-core/pull/16126))
+* Updated dependencies. ([#16154](https://github.com/DataDog/integrations-core/pull/16154))
+
+## 11.3.0 / 2023-10-26
+
+***Added***:
+
+* Add support for reporting SQL obfuscation errors ([#15990](https://github.com/DataDog/integrations-core/pull/15990))
+* Emit MySQL metrics queries operation time ([#16065](https://github.com/DataDog/integrations-core/pull/16065))
+
+***Fixed***:
+
+* Bump the `pymysql` version to 1.1.0 on Python 3 ([#16042](https://github.com/DataDog/integrations-core/pull/16042))
+* Bump the `cryptography` version to 41.0.5 ([#16083](https://github.com/DataDog/integrations-core/pull/16083))
 
 ## 11.2.0 / 2023-09-29
 
@@ -9,7 +28,7 @@
 * Update Cryptography to 41.0.4 ([#15922](https://github.com/DataDog/integrations-core/pull/15922))
 * Add `wsrep_local_{recv,send}_queue` instant metric ([#15841](https://github.com/DataDog/integrations-core/pull/15841)) Thanks [frivoire](https://github.com/frivoire).
 
-## 11.1.0 / 2023-08-18
+## 11.1.0 / 2023-08-18 / Agent 7.48.0
 
 ***Added***:
 

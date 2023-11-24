@@ -19,7 +19,14 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_VERSION,
 )
 
-from .common import CHECK_NAME, CUSTOM_METRICS, EXPECTED_DEFAULT_METRICS, assert_metrics
+from .common import (
+    CHECK_NAME,
+    CUSTOM_METRICS,
+    EXPECTED_DEFAULT_METRICS,
+    OPERATION_TIME_METRIC_NAME,
+    assert_metrics,
+    get_operation_time_metrics,
+)
 from .conftest import DEFAULT_TIMEOUT
 from .utils import not_windows_ci, windows_ci
 
@@ -42,9 +49,24 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
     aggregator.assert_service_check(
         'sqlserver.can_connect',
         status=sqlserver_check.CRITICAL,
-        tags=['sqlserver_host:{}'.format(sqlserver_check.resolved_hostname), 'db:master'] + instance_tags,
+        tags=[
+            'sqlserver_host:{}'.format(sqlserver_check.resolved_hostname),
+            'db:master',
+            'connection_host:{}'.format(instance_docker.get('host')),
+        ]
+        + instance_tags,
         message=str(excinfo.value),
     )
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('dbm_enabled', [True, False, 'true', 'false', None])
+def test_check_dbm_enabled_config(aggregator, dd_run_check, init_config, instance_docker, dbm_enabled):
+    if dbm_enabled is not None:
+        instance_docker['dbm'] = dbm_enabled
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
+    assert isinstance(sqlserver_check._config.dbm_enabled, bool)
 
 
 @pytest.mark.integration
@@ -69,10 +91,12 @@ def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, da
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
     expected_tags = instance_docker.get('tags', []) + [
-        'sqlserver_host:{}'.format(instance_docker.get('host')),
+        'connection_host:{}'.format(instance_docker.get('host')),
+        'sqlserver_host:{}'.format(sqlserver_check.resolved_hostname),
         'db:master',
     ]
     assert_metrics(
+        instance_docker,
         aggregator,
         check_tags=instance_docker.get('tags', []),
         service_tags=expected_tags,
@@ -203,7 +227,12 @@ def test_autodiscovery_db_service_checks(
     # verify that the old status check returns OK
     aggregator.assert_service_check(
         'sqlserver.can_connect',
-        tags=['db:master', 'sqlserver_host:localhost,1433'] + instance_tags,
+        tags=[
+            'db:master',
+            'sqlserver_host:{}'.format(check.resolved_hostname),
+            'connection_host:{}'.format(instance_autodiscovery.get('host')),
+        ]
+        + instance_tags,
         status=SQLServer.OK,
     )
 
@@ -211,7 +240,12 @@ def test_autodiscovery_db_service_checks(
     aggregator.assert_service_check(
         'sqlserver.database.can_connect',
         count=extra_count,
-        tags=['db:msdb', 'sqlserver_host:localhost,1433'] + instance_tags,
+        tags=[
+            'db:msdb',
+            'sqlserver_host:{}'.format(check.resolved_hostname),
+            'connection_host:{}'.format(instance_autodiscovery.get('host')),
+        ]
+        + instance_tags,
         status=SQLServer.OK,
     )
     # unavailable_db is an 'offline' database which prevents connections, so we expect this service check to be
@@ -220,7 +254,11 @@ def test_autodiscovery_db_service_checks(
     # to match against, so this assertion does not require the exact string
     sc = aggregator.service_checks('sqlserver.database.can_connect')
     db_critical_exists = False
-    critical_tags = instance_tags + ['db:unavailable_db', 'sqlserver_host:{}'.format(check.resolved_hostname)]
+    critical_tags = instance_tags + [
+        'db:unavailable_db',
+        'sqlserver_host:{}'.format(check.resolved_hostname),
+        'connection_host:{}'.format(instance_autodiscovery.get('host')),
+    ]
     for c in sc:
         if c.status == SQLServer.CRITICAL:
             db_critical_exists = True
@@ -242,13 +280,23 @@ def test_autodiscovery_exclude_db_service_checks(aggregator, dd_run_check, insta
     # assert no connection is created for an excluded database
     aggregator.assert_service_check(
         'sqlserver.database.can_connect',
-        tags=['db:msdb', 'sqlserver_host:localhost,1433'] + instance_tags,
+        tags=[
+            'db:msdb',
+            'sqlserver_host:{}'.format(check.resolved_hostname),
+            'connection_host:{}'.format(instance_autodiscovery.get('host')),
+        ]
+        + instance_tags,
         status=SQLServer.OK,
         count=0,
     )
     aggregator.assert_service_check(
         'sqlserver.database.can_connect',
-        tags=['db:master', 'sqlserver_host:localhost,1433'] + instance_tags,
+        tags=[
+            'db:master',
+            'sqlserver_host:{}'.format(check.resolved_hostname),
+            'connection_host:{}'.format(instance_autodiscovery.get('host')),
+        ]
+        + instance_tags,
         status=SQLServer.OK,
     )
 
@@ -384,6 +432,15 @@ def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_
         aggregator.assert_metric(mname)
 
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK)
+
+    for operation_name in get_operation_time_metrics(instance_docker_defaults):
+        aggregator.assert_metric(
+            OPERATION_TIME_METRIC_NAME,
+            tags=['operation:{}'.format(operation_name)] + check.debug_stats_kwargs()['tags'],
+            hostname=check.resolved_hostname,
+            count=1,
+        )
+
     aggregator.assert_all_metrics_covered()
 
 
@@ -430,7 +487,7 @@ def test_custom_metrics_fraction_counters(aggregator, dd_run_check, instance_doc
     dd_run_check(sqlserver_check)
     seen_plan_type = set()
     for m in aggregator.metrics("sqlserver.custom.plan_cache_test"):
-        tags_by_key = {k: v for k, v in [t.split(':') for t in m.tags if not t.startswith('dd.internal')]}
+        tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
         seen_plan_type.add(tags_by_key['plan_type'])
         assert tags_by_key['optional_tag'].lower() == 'tagx'
     assert 'SQL Plans' in seen_plan_type
@@ -446,7 +503,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
     dd_run_check(sqlserver_check)
     seen_databases = set()
     for m in aggregator.metrics("sqlserver.tempdb.file_space_usage.free_space"):
-        tags_by_key = {k: v for k, v in [t.split(':') for t in m.tags if not t.startswith('dd.internal')]}
+        tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
         seen_databases.add(tags_by_key['database'])
         assert tags_by_key['database_id']
 
@@ -560,7 +617,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             'master',
             None,
             ENGINE_EDITION_SQL_DATABASE,
-            'stubbed.hostname',
+            'localhost/master',
             {},
             [],
         ),
@@ -569,7 +626,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             '',
             None,
             ENGINE_EDITION_SQL_DATABASE,
-            'stubbed.hostname',
+            'localhost/master',
             {
                 'aws': {
                     'instance_endpoint': 'foo.aws.com',

@@ -34,11 +34,11 @@ metrics:
       - name: riverbed.interceptor.proc
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: riverbed.interceptor.procName
           OID: 1.3.6.1.4.1.17163.1.3.2.5.1.2
         tag: riverbed_interceptor_proc_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.17163.1.3.2.5.1.3
           name: riverbed.interceptor.procStatus
         tag: riverbed_interceptor_proc_status
@@ -50,7 +50,7 @@ metrics:
       - name: riverbed.interceptor.neighborConnectionCount
         OID: 1.3.6.1.4.1.17163.1.3.2.6.1.4
     metric_tags:
-      - column:
+      - symbol:
           name: riverbed.interceptor.neighborName
           OID: 1.3.6.1.4.1.17163.1.3.2.6.1.3
         tag: riverbed_interceptor_neighbor_name

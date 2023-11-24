@@ -1,5 +1,6 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 linkerd.prometheus.health,gauge,,,,Whether the check is able to connect to the metrics endpoint.,0,linkerd,,
+linkerd.openmetrics.health,gauge,,,,[OpenMetrics V2] Whether the check is able to connect to the metrics endpoint.,0,linkerd,,
 linkerd.jvm.start_time,gauge,,millisecond,,A gauge of the start time of the Java virtual machine in milliseconds since the epoch (Linkerd v1 only).,0,linkerd,,
 linkerd.jvm.thread.count,gauge,,thread,,A gauge of the number of live threads including both daemon and non-daemon threads (Linkerd v1 only).,0,linkerd,,
 linkerd.jvm.nonheap.committed,gauge,,byte,,"For the non-heap memory, a gauge of the amount of memory, in bytes, committed for the JVM to use (Linkerd v1 only).",-1,linkerd,,

@@ -1,8 +1,8 @@
 # CHANGELOG - eks_fargate
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 4.0.0 / 2023-08-10
+## 4.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 
@@ -115,4 +115,3 @@
 ***Added***:
 
 * Introducing the eks_fargate check ([#5417](https://github.com/DataDog/integrations-core/pull/5417))
-

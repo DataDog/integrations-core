@@ -1,8 +1,20 @@
 # CHANGELOG - windows_service
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 4.6.1 / 2023-08-18
+## 4.7.1 / 2023-11-10
+
+***Fixed***:
+
+* Fix regression introduced in Agent 7.41.0 when handling service name patterns that are a prefix of another pattern ([#16120](https://github.com/DataDog/integrations-core/pull/16120))
+
+## 4.7.0 / 2023-10-26
+
+***Added***:
+
+* Add Windows service `trigger_start` filter to config ([#16038](https://github.com/DataDog/integrations-core/pull/16038))
+
+## 4.6.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:
 

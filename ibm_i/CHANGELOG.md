@@ -1,8 +1,14 @@
 # CHANGELOG - IBM i
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 2.0.0 / 2023-08-10
+## 2.0.1 / 2023-10-26
+
+***Fixed***:
+
+* Bump the `pyodbc` version to 5.0.1 ([#16041](https://github.com/DataDog/integrations-core/pull/16041))
+
+## 2.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 

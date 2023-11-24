@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import contextlib
 import copy
+import functools
 import os
 from time import time
 
@@ -14,6 +15,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.utils import (
     default_json_event_encoding,
+    tracked_query,
 )
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.base.utils.serialization import json
@@ -90,6 +92,11 @@ class PostgreSql(AgentCheck):
                 "DEPRECATION NOTICE: Please use the new custom_queries option "
                 "rather than the now deprecated custom_metrics"
             )
+        if 'managed_identity' in self.instance:
+            self.warning(
+                "DEPRECATION NOTICE: The managed_identity option is deprecated and will be removed in a future version."
+                " Please use the new azure.managed_authentication option instead."
+            )
         self._config = PostgresConfig(self.instance)
         self.cloud_metadata = self._config.cloud_metadata
         self.tags = self._config.tags
@@ -113,7 +120,7 @@ class PostgreSql(AgentCheck):
         self.check_initializations.append(self.initialize_is_aurora)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         self.autodiscovery = self._build_autodiscovery()
-        self._dynamic_queries = None
+        self._dynamic_queries = []
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
             maxsize=1,
@@ -146,7 +153,7 @@ class PostgreSql(AgentCheck):
                     self.cloud_metadata.get("gcp")["project_id"], self.cloud_metadata.get("gcp")["instance_id"]
                 )
             )
-        if self.cloud_metadata.get("aws") is not None:
+        if self.cloud_metadata.get("aws") is not None and 'instance_endpoint' in self.cloud_metadata.get("aws"):
             self.tags.append(
                 "dd.internal.resource:aws_rds_instance:{}".format(
                     self.cloud_metadata.get("aws")["instance_endpoint"],
@@ -171,17 +178,18 @@ class PostgreSql(AgentCheck):
             )
         )
 
-    def _new_query_executor(self, queries):
+    def _new_query_executor(self, queries, db):
         return QueryExecutor(
-            self.execute_query_raw,
+            functools.partial(self.execute_query_raw, db=db),
             self,
             queries=queries,
             tags=self.tags_without_db,
             hostname=self.resolved_hostname,
+            track_operation_time=True,
         )
 
-    def execute_query_raw(self, query):
-        with self.db() as conn:
+    def execute_query_raw(self, query, db):
+        with db() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(query)
                 rows = cursor.fetchall()
@@ -229,6 +237,7 @@ class PostgreSql(AgentCheck):
 
         self.log.debug("Generating dynamic queries")
         queries = []
+        per_database_queries = []  # queries that need to be run per database, used for autodiscovery
         if self.version >= V9_2:
             q_pg_stat_database = copy.deepcopy(QUERY_PG_STAT_DATABASE)
             if len(self._config.ignore_databases) > 0:
@@ -279,26 +288,35 @@ class PostgreSql(AgentCheck):
                 query = copy.copy(query)
                 formatted_query = self._relations_manager.filter_relation_query(query['query'], 'nspname')
                 query['query'] = formatted_query
-                queries.append(query)
+                per_database_queries.append(query)
 
-        self._dynamic_queries = self._new_query_executor(queries)
-        self._dynamic_queries.compile_queries()
+        if self.autodiscovery:
+            self._collect_dynamic_queries_autodiscovery(per_database_queries)
+        else:
+            queries.extend(per_database_queries)
+        self._dynamic_queries.append(self._new_query_executor(queries, db=self.db))
+        for dynamic_query in self._dynamic_queries:
+            dynamic_query.compile_queries()
         self.log.debug("initialized %s dynamic querie(s)", len(queries))
 
         return self._dynamic_queries
 
     def cancel(self):
         """
-        Cancels and waits for all threads to stop.
+        Cancels and sends cancel signal to all threads.
         """
-        self.statement_samples.cancel()
-        self.statement_metrics.cancel()
-        self.metadata_samples.cancel()
+        if self._config.dbm_enabled:
+            self.statement_samples.cancel()
+            self.statement_metrics.cancel()
+            self.metadata_samples.cancel()
+        self._close_db_pool()
+        if self._db:
+            self._db.close()
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
         self.metrics_cache.clean_state()
-        self._dynamic_queries = None
+        self._dynamic_queries = []
 
     def _get_debug_tags(self):
         return ['agent_hostname:{}'.format(self.agent_hostname)]
@@ -376,10 +394,8 @@ class PostgreSql(AgentCheck):
         if self._resolved_hostname is None:
             if self._config.reported_hostname:
                 self._resolved_hostname = self._config.reported_hostname
-            elif self._config.dbm_enabled or self.disable_generic_tags:
-                self._resolved_hostname = self.resolve_db_host()
             else:
-                self._resolved_hostname = self.agent_hostname
+                self._resolved_hostname = self.resolve_db_host()
         return self._resolved_hostname
 
     def set_resolved_hostname_metadata(self):
@@ -413,16 +429,17 @@ class PostgreSql(AgentCheck):
         is_relations = scope.get('relation') and self._relations_manager.has_relations
         try:
             query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
-            # if this is a relation-specific query, we need to list all relations last
-            if is_relations:
-                schema_field = get_schema_field(descriptors)
-                formatted_query = self._relations_manager.filter_relation_query(query, schema_field)
-                cursor.execute(formatted_query)
-            else:
-                self.log.debug("Running query: %s", str(query))
-                cursor.execute(query.replace(r'%', r'%%'))
+            with tracked_query(check=self, operation='custom_metrics' if is_custom_metrics else scope['name']):
+                # if this is a relation-specific query, we need to list all relations last
+                if is_relations:
+                    schema_field = get_schema_field(descriptors)
+                    formatted_query = self._relations_manager.filter_relation_query(query, schema_field)
+                    cursor.execute(formatted_query)
+                else:
+                    self.log.debug("Running query: %s", str(query))
+                    cursor.execute(query.replace(r'%', r'%%'))
 
-            results = cursor.fetchall()
+                results = cursor.fetchall()
         except psycopg2.errors.FeatureNotSupported as e:
             # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
@@ -496,7 +513,7 @@ class PostgreSql(AgentCheck):
             column_values = row[len(descriptors) :]
 
             # build a map of descriptors and their values
-            desc_map = {name: value for (_, name), value in zip(descriptors, descriptor_values)}
+            desc_map = {name: value for (_, name), value in zip(descriptors, descriptor_values, strict=False)}
 
             # Build tags.
 
@@ -518,7 +535,7 @@ class PostgreSql(AgentCheck):
             tags += [("%s:%s" % (k, v)) for (k, v) in iteritems(desc_map)]
 
             # Submit metrics to the Agent.
-            for column, value in zip(cols, column_values):
+            for column, value in zip(cols, column_values, strict=False):
                 name, submit_metric = scope['metrics'][column]
                 submit_metric(self, name, value, tags=set(tags), hostname=self.resolved_hostname)
 
@@ -578,6 +595,17 @@ class PostgreSql(AgentCheck):
                     min_collection_interval=self._config.min_collection_interval,
                 ),
             )
+
+    def _collect_dynamic_queries_autodiscovery(self, queries):
+        if not self.autodiscovery:
+            return
+
+        databases = self.autodiscovery.get_items()
+        for dbname in databases:
+            db = functools.partial(
+                self.db_pool.get_connection, dbname=dbname, ttl_ms=self._config.idle_connection_timeout
+            )
+            self._dynamic_queries.append(self._new_query_executor(queries, db=db))
 
     def _collect_stats(self, instance_tags):
         """Query pg_stat_* for various metrics
@@ -643,12 +671,17 @@ class PostgreSql(AgentCheck):
                 with conn.cursor() as cursor:
                     self._query_scope(cursor, activity_metrics, instance_tags, False)
 
-            for scope in list(metric_scope) + self._config.custom_metrics:
+            for scope in list(metric_scope):
                 with conn.cursor() as cursor:
-                    self._query_scope(cursor, scope, instance_tags, scope in self._config.custom_metrics)
+                    self._query_scope(cursor, scope, instance_tags, False)
+
+            for scope in self._config.custom_metrics:
+                with conn.cursor() as cursor:
+                    self._query_scope(cursor, scope, instance_tags, True)
 
         if self.dynamic_queries:
-            self.dynamic_queries.execute()
+            for dynamic_query in self.dynamic_queries:
+                dynamic_query.execute()
 
     def _new_connection(self, dbname):
         if self._config.host == 'localhost' and self._config.password == '':
@@ -663,18 +696,24 @@ class PostgreSql(AgentCheck):
             conn = psycopg2.connect(connection_string)
         else:
             password = self._config.password
-            region = self._config.cloud_metadata.get('aws', {}).get('region', None)
-            if region is not None:
-                password = aws.generate_rds_iam_token(
-                    host=self._config.host,
-                    username=self._config.user,
-                    port=self._config.port,
-                    region=region,
-                )
-            client_id = self._config.managed_identity.get('client_id', None)
-            scope = self._config.managed_identity.get('identity_scope', None)
-            if client_id is not None:
-                password = azure.generate_managed_identity_token(client_id=client_id, identity_scope=scope)
+            if 'aws' in self.cloud_metadata:
+                # if we are running on AWS, check if IAM auth is enabled
+                aws_managed_authentication = self.cloud_metadata['aws']['managed_authentication']
+                if aws_managed_authentication['enabled']:
+                    # if IAM auth is enabled, region must be set. Validation is done in the config
+                    region = self.cloud_metadata['aws']['region']
+                    password = aws.generate_rds_iam_token(
+                        host=self._config.host,
+                        username=self._config.user,
+                        port=self._config.port,
+                        region=region,
+                    )
+            elif 'azure' in self.cloud_metadata:
+                azure_managed_authentication = self.cloud_metadata['azure']['managed_authentication']
+                if azure_managed_authentication['enabled']:
+                    client_id = azure_managed_authentication['client_id']
+                    identity_scope = azure_managed_authentication.get('identity_scope', None)
+                    password = azure.generate_managed_identity_token(client_id=client_id, identity_scope=identity_scope)
 
             args = {
                 'host': self._config.host,
@@ -775,7 +814,10 @@ class PostgreSql(AgentCheck):
                 with conn.cursor() as cursor:
                     try:
                         self.log.debug("Running query: %s", query)
-                        cursor.execute(query)
+                        with tracked_query(
+                            check=self, operation='custom_queries', tags=['metric_prefix:{}'.format(metric_prefix)]
+                        ):
+                            cursor.execute(query)
                     except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
                         self.log.error("Error executing query for metric_prefix %s: %s", metric_prefix, str(e))
                         continue
@@ -798,7 +840,7 @@ class PostgreSql(AgentCheck):
                         query_tags = list(custom_query.get('tags', []))
                         query_tags.extend(tags)
 
-                        for column, value in zip(columns, row):
+                        for column, value in zip(columns, row, strict=False):
                             # Columns can be ignored via configuration.
                             if not column:
                                 continue
@@ -869,9 +911,9 @@ class PostgreSql(AgentCheck):
                 "collection_interval": self._config.database_instance_collection_interval,
                 'dbms_version': payload_pg_version(self.version),
                 'integration_version': __version__,
-                "tags": self._non_internal_tags,
+                "tags": [t for t in self._non_internal_tags if not t.startswith('db:')],
                 "timestamp": time() * 1000,
-                "cloud_metadata": self._config.cloud_metadata,
+                "cloud_metadata": self.cloud_metadata,
                 "metadata": {
                     "dbm": self._config.dbm_enabled,
                     "connection_host": self._config.host,
@@ -879,6 +921,13 @@ class PostgreSql(AgentCheck):
             }
             self._database_instance_emitted[self.resolved_hostname] = event
             self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+
+    def debug_stats_kwargs(self, tags=None):
+        tags = self.tags + self._get_debug_tags() + (tags or [])
+        return {
+            'tags': tags,
+            "hostname": self.resolved_hostname,
+        }
 
     def check(self, _):
         tags = copy.copy(self.tags)

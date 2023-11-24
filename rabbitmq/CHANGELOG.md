@@ -1,8 +1,8 @@
 # CHANGELOG - rabbitmq
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 5.0.0 / 2023-08-10
+## 5.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
 

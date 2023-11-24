@@ -1,6 +1,6 @@
 # CHANGELOG - datadog_checks
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 1.0.0 / 2018-05-11
 

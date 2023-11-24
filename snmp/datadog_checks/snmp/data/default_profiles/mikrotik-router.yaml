@@ -27,22 +27,22 @@ metrics:
       - OID: 1.3.6.1.4.1.14988.1.1.19.1.1.9
         name: mtxrOpticalTxPower
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.14988.1.1.19.1.1.1
           name: mtxrOpticalIndex
         tag: mtxr_optical_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.14988.1.1.19.1.1.2
           name: mtxrOpticalName
         tag: mtxr_optical_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.14988.1.1.19.1.1.4
           name: mtxrOpticalTxFault
         tag: mtxr_optical_tx_fault
         mapping:
           0: 'false'
           1: 'true'
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.14988.1.1.19.1.1.3
           name: mtxrOpticalRxLoss
         tag: mtxr_optical_rx_loss
@@ -73,15 +73,15 @@ metrics:
       - OID: 1.3.6.1.4.1.14988.1.1.15.1.1.5
         name: mtxrPOECurrent
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.14988.1.1.15.1.1.1
           name: mtxrPOEInterfaceIndex
         tag: mtxr_poe_interface_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.14988.1.1.15.1.1.2
           name: mtxrPOEName
         tag: mtxr_poe_name
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.14988.1.1.15.1.1.3
           name: mtxrPOEStatus
         tag: mtxr_poe_status

@@ -1,8 +1,14 @@
 # CHANGELOG - mongo
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 6.0.1 / 2023-08-18
+## 6.0.2 / 2023-11-10
+
+***Fixed***:
+
+* Handle mongodb versions with suffixes. ([#16181](https://github.com/DataDog/integrations-core/pull/16181))
+
+## 6.0.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:
 

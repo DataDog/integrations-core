@@ -12,6 +12,8 @@ class AppEnvVars:
 
 
 class ConfigEnvVars:
+    DATA = 'DDEV_DATA_DIR'
+    CACHE = 'DDEV_CACHE_DIR'
     CONFIG = 'DDEV_CONFIG'
 
 

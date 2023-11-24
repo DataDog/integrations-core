@@ -30,6 +30,7 @@ class SharedConfig(BaseModel):
     event_priority: Optional[Literal['normal', 'low']] = None
     interpret_messages: Optional[bool] = None
     legacy_mode: Optional[bool] = None
+    legacy_mode_v2: Optional[bool] = None
     service: Optional[str] = None
     tag_event_id: Optional[bool] = None
     tag_sid: Optional[bool] = None

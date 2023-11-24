@@ -15,12 +15,12 @@ mypy-deps = [
 DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
 
 [[envs.default.matrix]]
-python = ["2.7", "3.9"]
+python = ["2.7", "3.11"]
 version = ["8.4", "10.0"]
 tls = ["false"]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.9"]
+python = ["2.7", "3.11"]
 version = ["8.4"]
 tls = ["true"]
 

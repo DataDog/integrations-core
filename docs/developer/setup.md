@@ -11,7 +11,7 @@ you intend to work on.
 
 ## Python
 
-To work on any integration you must install Python 3.9.
+To work on any integration you must install Python 3.11.
 
 After installation, restart your terminal and ensure that your newly installed Python comes first in your `PATH`.
 
@@ -25,7 +25,7 @@ After installation, restart your terminal and ensure that your newly installed P
     then install Python:
 
     ```
-    brew install python@3.9
+    brew install python@3.11
     ```
 
     After it completes, check the output to see if it asked you to run any extra commands and if so, execute them.
@@ -39,7 +39,7 @@ After installation, restart your terminal and ensure that your newly installed P
 === "Windows"
     Windows users have it the easiest.
 
-    Download the [Python 3.9 64-bit executable installer](https://www.python.org/downloads/release/python-3917/) and run it.
+    Download the [Python 3.11 64-bit executable installer](https://www.python.org/downloads/release/python-3115/) and run it.
     When prompted, be sure to select the option to add to your `PATH`. Also, it is recommended that you choose the per-user installation method.
 
     Verify successful `PATH` modification:
@@ -51,7 +51,7 @@ After installation, restart your terminal and ensure that your newly installed P
 === "Linux"
     Ah, you enjoy difficult things. Are you using Gentoo?
 
-    We recommend using either [Miniconda][miniconda-docs] or [pyenv][pyenv-github] to install Python 3.9. Whatever you do, never modify the system Python.
+    We recommend using either [Miniconda][miniconda-docs] or [pyenv][pyenv-github] to install Python 3.11. Whatever you do, never modify the system Python.
 
     Verify successful `PATH` modification:
 
@@ -200,11 +200,11 @@ After downloading the archive corresponding to your platform and architecture, e
 
     === "ARM"
         ```
-        pipx install ddev --python /opt/homebrew/bin/python3.9
+        pipx install ddev --python /opt/homebrew/bin/python3.11
         ```
     === "Intel"
         ```
-        pipx install ddev --python /usr/local/bin/python3.9
+        pipx install ddev --python /usr/local/bin/python3.11
         ```
 
     !!! warning
@@ -242,11 +242,11 @@ This is if you cloned [integrations-core][] and want to always use the version b
 
     === "ARM"
         ```
-        pipx install -e /path/to/integrations-core/ddev --python /opt/homebrew/opt/python@3.9/bin/python3.9
+        pipx install -e /path/to/integrations-core/ddev --python /opt/homebrew/opt/python@3.11/bin/python3.11
         ```
     === "Intel"
         ```
-        pipx install -e /path/to/integrations-core/ddev --python /usr/local/opt/python@3.9/bin/python3.9
+        pipx install -e /path/to/integrations-core/ddev --python /usr/local/opt/python@3.11/bin/python3.11
         ```
 
     !!! warning

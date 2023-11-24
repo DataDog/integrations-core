@@ -73,6 +73,17 @@ def instance_docker_defaults(instance_session_default):
 
 
 @pytest.fixture
+def instance_docker_metrics(instance_session_default):
+    '''
+    This fixture is used to test the metrics that are emitted from the integration main check.
+    We disable all DBM checks and only care about the main check metrics.
+    '''
+    instance = deepcopy(instance_session_default)
+    instance['dbm'] = False
+    return instance
+
+
+@pytest.fixture
 def instance_minimal_defaults():
     return {
         'host': DOCKER_SERVER,
@@ -131,14 +142,26 @@ def datadog_conn_docker(instance_docker):
 
 
 @pytest.fixture
-def bob_conn(instance_docker):
-    # Make DB connection
-
+def bob_conn_str(instance_docker):
     conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
         instance_docker['driver'], instance_docker['host'], "bob", "Password12!"
     )
-    conn = SelfHealingConnection(conn_str)
+    return conn_str
+
+
+@pytest.fixture
+def bob_conn(bob_conn_str):
+    # Make DB connection
+    conn = SelfHealingConnection(bob_conn_str)
     conn.reconnect()
+    yield conn
+    conn.close()
+
+
+@pytest.fixture
+def bob_conn_raw(bob_conn_str):
+    # Make DB connection
+    conn = _common_pyodbc_connect(bob_conn_str)
     yield conn
     conn.close()
 
@@ -178,6 +201,7 @@ class SelfHealingConnection:
                     cursor.execute(query, params)
                     if return_result:
                         return cursor.fetchall()
+                    return
             except Exception:
                 tracebacks.append(",".join(traceback.format_exception(*sys.exc_info())))
                 logging.exception("failed to execute query attempt=%s", attempt)

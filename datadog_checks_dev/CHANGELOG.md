@@ -1,6 +1,42 @@
 # CHANGELOG - Datadog Checks Dev
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 28.0.1 / 2023-11-10
+
+***Fixed***:
+
+* Exclude orjson when checking for dependency updates. ([#16166](https://github.com/DataDog/integrations-core/pull/16166))
+
+## 28.0.0 / 2023-10-26
+
+***Changed***:
+
+* Generate changelogs from fragment files using towncrier.
+  There are no changes to the ddev commands, only to their outputs.
+  We are making this change to avoid merge conflicts in high-traffic packages where people used to have to modify one CHANGELOG.md file. ([#15983](https://github.com/DataDog/integrations-core/pull/15983))
+
+## 27.0.1 / 2023-10-26
+
+***Fixed***:
+
+* Align package version in integration template with changelog. ([#16029](https://github.com/DataDog/integrations-core/pull/16029))
+* Allow bumping the version of `pyodbc` ([#16030](https://github.com/DataDog/integrations-core/pull/16030))
+* Display changes on `ddev show changes` when changes are found ([#16045](https://github.com/DataDog/integrations-core/pull/16045))
+* Allow bumping the version of `pymysql` ([#16043](https://github.com/DataDog/integrations-core/pull/16043))
+* Remove the `setup.py` file from the new integration template ([#16072](https://github.com/DataDog/integrations-core/pull/16072))
+
+## 27.0.0 / 2023-10-12
+
+***Changed***:
+
+* Migrate E2E features ([#15931](https://github.com/DataDog/integrations-core/pull/15931))
+
+## 26.0.1 / 2023-10-11
+
+***Fixed***:
+
+* Fix the manifest template file ([#15984](https://github.com/DataDog/integrations-core/pull/15984))
 
 ## 26.0.0 / 2023-10-02
 
@@ -30,7 +66,7 @@
 * Added overview examples to the readme file ([#15817](https://github.com/DataDog/integrations-core/pull/15817))
 * Added required classifier tag examples to template ([#15828](https://github.com/DataDog/integrations-core/pull/15828))
 * Prepare E2E tooling for better message passing ([#15843](https://github.com/DataDog/integrations-core/pull/15843))
-  
+
 ## 25.0.0 / 2023-09-13
 
 ***Changed***:

@@ -23,11 +23,11 @@ metrics:
       - name: avaya.genPort
         constant_value_one: true
     metric_tags:
-      - column:
+      - symbol:
           name: avaya.genPortId
           OID: 1.3.6.1.4.1.81.9.1.1.2
         tag: avaya_gen_port_id
-      - column:
+      - symbol:
           name: avaya.genPortFunctionality
           OID: 1.3.6.1.4.1.81.9.1.1.3
         tag: avaya_gen_port_functionality
@@ -84,7 +84,7 @@ metrics:
           56: s_fp_not_supported
           57: eth10_base_tw_in_pwr
           58: eth100_base_t_xw_in_pwr
-      - column:
+      - symbol:
           name: avaya.genPortType
           OID: 1.3.6.1.4.1.81.9.1.1.4
         tag: avaya_gen_port_type
@@ -414,15 +414,15 @@ metrics:
           4019: avaya_communication_manager_branch_edition_g430-10or100_t_port_and_in_pwr
           4020: avaya_g430-10or100_tport
           4021: avaya_g430-10or100_t_port_and_in_pwr
-      - column:
+      - symbol:
           name: avaya.genPortDescr
           OID: 1.3.6.1.4.1.81.9.1.1.5
         tag: avaya_gen_port_descr
-      - column:
+      - symbol:
           name: avaya.genPortName
           OID: 1.3.6.1.4.1.81.9.1.1.21
         tag: avaya_gen_port_name
-      - column:
+      - symbol:
           name: avaya.genPortClassification
           OID: 1.3.6.1.4.1.81.9.1.1.22
         tag: avaya_gen_port_classification
@@ -430,7 +430,7 @@ metrics:
           1: regular
           2: valuable
           255: not_supported
-      - column:
+      - symbol:
           name: avaya.scEthPortMode
           OID: 1.3.6.1.4.1.81.28.2.1.1.1.28
         tag: avaya_sc_eth_port_mode
@@ -444,7 +444,7 @@ metrics:
           7: full_duplex_sym_pause
           8: full_duplex_asym_rx_pause
           255: not_supported
-      - column:
+      - symbol:
           name: avaya.scEthPortSpeed
           OID: 1.3.6.1.4.1.81.28.2.1.1.1.29
         tag: avaya_sc_eth_port_speed
@@ -455,14 +455,14 @@ metrics:
           4: a155_mbps
           5: a622_mbps
           255: not_supported
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.81.9.1.1.10
           name: avaya.genPortAdminStatus
         tag: avaya_gen_port_admin_status
         mapping:
           1: enabled
           2: disabled
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.81.28.2.1.1.1.27
           name: avaya.scEthPortFunctionalStatus
         tag: avaya_sc_eth_port_functional_status

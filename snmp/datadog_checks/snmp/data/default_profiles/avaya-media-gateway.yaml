@@ -28,7 +28,7 @@ metrics:
     metric_tags:
       - index: 1
         tag: avaya_ent_physical_index
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6889.2.1.99.5.1.1.1
           name: avaya.avEntPhyChFruOperStat
         tag: avaya_av_ent_phy_ch_fru_oper_stat
@@ -37,7 +37,7 @@ metrics:
           2: fault
           3: not_present
           255: unknown
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6889.2.1.99.5.1.1.2
           name: avaya.avEntPhyChFruFault
         tag: avaya_av_ent_phy_ch_fru_fault
@@ -122,11 +122,11 @@ metrics:
       - name: avaya.cmgVoipAverageOccupancy
         OID: 1.3.6.1.4.1.6889.2.9.1.4.5.1.8
     metric_tags:
-      - column:
+      - symbol:
           name: avaya.cmgVoipCurrentIpAddress
           OID: 1.3.6.1.4.1.6889.2.9.1.4.5.1.4
         tag: avaya_cmg_voip_current_ip_address
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6889.2.9.1.4.5.1.9
           name: avaya.cmgVoipHyperactivity
         tag: avaya_cmg_voip_hyperactivity
@@ -134,7 +134,7 @@ metrics:
           1: normal
           2: hyperactive
           255: unknown
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6889.2.9.1.4.5.1.10
           name: avaya.cmgVoipAdminState
         tag: avaya_cmg_voip_admin_state
@@ -143,7 +143,7 @@ metrics:
           2: release
           3: camp-on
           255: unknown
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6889.2.9.1.4.5.1.12
           name: avaya.cmgVoipDspStatus
         tag: avaya_cmg_voip_dsp_status
@@ -161,7 +161,7 @@ metrics:
       - name: avaya.cmgDSPCoreChannelsInUse
         OID: 1.3.6.1.4.1.6889.2.9.1.4.6.1.3
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6889.2.9.1.4.6.1.4
           name: avaya.cmgDSPCoreAdminState
         tag: avaya_cmg_dsp_core_admin_state
@@ -170,7 +170,7 @@ metrics:
           2: release
           3: camp-on
           255: unknown
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6889.2.9.1.4.6.1.5
           name: avaya.cmgDSPCoreStatus
         tag: avaya_cmg_dsp_core_status
@@ -178,7 +178,7 @@ metrics:
           1: idle
           2: in_use
           3: fault
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.6889.2.9.1.4.6.1.7
           name: avaya.cmgDSPCoreDemandTestResult
         tag: avaya_cmg_dsp_core_demand_test_result

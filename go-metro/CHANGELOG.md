@@ -1,6 +1,6 @@
 # CHANGELOG - go-metro
 
-## Unreleased
+<!-- towncrier release notes start -->
 
 ## 1.3.1 / 2021-03-07
 

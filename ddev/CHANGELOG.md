@@ -1,6 +1,60 @@
 # CHANGELOG - ddev
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 6.0.2 / 2023-11-10
+
+***Fixed***:
+
+* Add `oracledb` to the ignored dependencies when we bump them before a release ([#16155](https://github.com/DataDog/integrations-core/pull/16155))
+* Allow bumping the version of `dnspython` ([#16156](https://github.com/DataDog/integrations-core/pull/16156))
+* Add a retry mechanism when pulling the agent docker image ([#16157](https://github.com/DataDog/integrations-core/pull/16157))
+
+## 6.0.1 / 2023-11-02
+
+***Fixed***:
+
+* Fix `ddev env start` to allow the use of stable releases ([#16077](https://github.com/DataDog/integrations-core/pull/16077))
+* Stop automatically upgrading `lxml` when bumping the dependencies ([#16112](https://github.com/DataDog/integrations-core/pull/16112))
+* Properly show extra output for failed Docker Agent E2E ([#16123](https://github.com/DataDog/integrations-core/pull/16123))
+* Do not validate the codecov file in marketplace when running the `validate ci` command ([#16144](https://github.com/DataDog/integrations-core/pull/16144))
+
+## 6.0.0 / 2023-10-26
+
+***Changed***:
+
+* Generate changelogs from fragment files using towncrier.
+  There are no changes to the ddev commands, only to their outputs.
+  We are making this change to avoid merge conflicts in high-traffic packages where people used to have to modify one CHANGELOG.md file. ([#15983](https://github.com/DataDog/integrations-core/pull/15983))
+* Bump datadog_checks_dev dependency to 28.0+. ([#16098](https://github.com/DataDog/integrations-core/pull/16098))
+
+## 5.3.0 / 2023-10-26
+
+***Added***:
+
+* Improve the upgrade-python script ([#16000](https://github.com/DataDog/integrations-core/pull/16000))
+
+***Fixed***:
+
+* Fix `ddev env test` so that tests run for all environments properly when no environment is specified ([#16054](https://github.com/DataDog/integrations-core/pull/16054))
+* Fix e2e test env detection to use `platforms`, not `platform` ([#16063](https://github.com/DataDog/integrations-core/pull/16063))
+* Include ddev's source code when measuring its coverage ([#16057](https://github.com/DataDog/integrations-core/pull/16057))
+* Fix Github API search query ([#15943](https://github.com/DataDog/integrations-core/pull/15943))
+* Do not modify the Agent build name if provided by the user when running the e2e environments ([#16052](https://github.com/DataDog/integrations-core/pull/16052))
+* Bump the Python version in the dependency provider when bumping the Python version ([#16070](https://github.com/DataDog/integrations-core/pull/16070))
+
+## 5.2.1 / 2023-10-12
+
+***Fixed***:
+
+* Fix environment metadata accessor ([#16009](https://github.com/DataDog/integrations-core/pull/16009))
+
+## 5.2.0 / 2023-10-12
+
+***Added***:
+
+* Migrate E2E features ([#15931](https://github.com/DataDog/integrations-core/pull/15931))
+* Bump the minimum supported version of datadog-checks-dev ([#16006](https://github.com/DataDog/integrations-core/pull/16006))
 
 ## 5.1.1 / 2023-09-29
 

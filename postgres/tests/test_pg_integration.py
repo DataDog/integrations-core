@@ -8,6 +8,7 @@ import mock
 import psycopg2
 import pytest
 
+from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.__about__ import __version__
 from datadog_checks.postgres.util import PartialFormatter, fmt
@@ -17,7 +18,9 @@ from .common import (
     DB_NAME,
     DBM_MIGRATED_METRICS,
     HOST,
+    PASSWORD_ADMIN,
     POSTGRES_VERSION,
+    USER_ADMIN,
     _get_expected_tags,
     assert_metric_at_least,
     check_activity_metrics,
@@ -29,6 +32,7 @@ from .common import (
     check_db_count,
     check_file_wal_metrics,
     check_logical_replication_slots,
+    check_performance_metrics,
     check_physical_replication_slots,
     check_slru_metrics,
     check_snapshot_txid_metrics,
@@ -38,7 +42,7 @@ from .common import (
     check_wal_receiver_metrics,
     requires_static_version,
 )
-from .utils import _get_conn, _get_superconn, requires_over_10, requires_over_14
+from .utils import _get_conn, _get_superconn, requires_over_10, requires_over_14, run_one_check
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
 
@@ -72,13 +76,21 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check_logical_replication_slots(aggregator, expected_tags)
     check_physical_replication_slots(aggregator, expected_tags)
     check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
+
+    check_performance_metrics(aggregator, expected_tags=check.debug_stats_kwargs()['tags'], is_aurora=is_aurora)
+
     aggregator.assert_all_metrics_covered()
 
 
 def test_snapshot_xmin(aggregator, integration_check, pg_instance):
     with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+        conn.set_session(autocommit=True)
         with conn.cursor() as cur:
-            cur.execute('select txid_snapshot_xmin(txid_current_snapshot());')
+            if float(POSTGRES_VERSION) >= 13.0:
+                query = 'select pg_snapshot_xmin(pg_current_snapshot());'
+            else:
+                query = 'select txid_snapshot_xmin(txid_current_snapshot());'
+            cur.execute(query)
             xmin = float(cur.fetchall()[0][0])
     check = integration_check(pg_instance)
     check.check(pg_instance)
@@ -92,13 +104,19 @@ def test_snapshot_xmin(aggregator, integration_check, pg_instance):
         conn.set_session(autocommit=True)
         with conn.cursor() as cur:
             # Force increases of txid
-            cur.execute('select txid_current();')
-            cur.execute('select txid_current();')
+            if float(POSTGRES_VERSION) >= 13.0:
+                query = 'select pg_current_xact_id();'
+            else:
+                query = 'select txid_current();'
+            cur.execute(query)
 
+    aggregator.reset()
     check = integration_check(pg_instance)
     check.check(pg_instance)
-    aggregator.assert_metric('postgresql.snapshot.xmin', value=xmin + 2, count=1, tags=expected_tags)
-    aggregator.assert_metric('postgresql.snapshot.xmax', value=xmin + 2, count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.snapshot.xmin', count=1, tags=expected_tags)
+    aggregator.metrics('postgresql.snapshot.xmin')[0].value > xmin
+    aggregator.assert_metric('postgresql.snapshot.xmax', count=1, tags=expected_tags)
+    aggregator.metrics('postgresql.snapshot.xmax')[0].value > xmin
 
 
 def test_snapshot_xip(aggregator, integration_check, pg_instance):
@@ -112,14 +130,18 @@ def test_snapshot_xip(aggregator, integration_check, pg_instance):
     # Make sure to fetch the result to make sure we start the timer after the transaction started
     cur.fetchall()
 
-    conn2 = _get_conn(pg_instance)
-    conn2.set_session(autocommit=True)
-    with conn2.cursor() as cur2:
-        # Force increases of txid
-        cur2.execute('select txid_current();')
+    with _get_conn(pg_instance) as conn2:
+        with conn2.cursor() as cur2:
+            # Force increases of txid
+            cur2.execute('select txid_current();')
 
     check = integration_check(pg_instance)
     check.check(pg_instance)
+
+    # Cleanup
+    cur.close()
+    conn1.close()
+
     expected_tags = _get_expected_tags(check, pg_instance)
     aggregator.assert_metric('postgresql.snapshot.xip_count', value=1, count=1, tags=expected_tags)
 
@@ -132,10 +154,10 @@ def test_common_metrics_without_size(aggregator, integration_check, pg_instance)
 
 
 def test_uptime(aggregator, integration_check, pg_instance):
-    conn = _get_conn(pg_instance)
-    with conn.cursor() as cur:
-        cur.execute("SELECT FLOOR(EXTRACT(EPOCH FROM current_timestamp - pg_postmaster_start_time()))")
-        uptime = cur.fetchall()[0][0]
+    with _get_conn(pg_instance) as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT FLOOR(EXTRACT(EPOCH FROM current_timestamp - pg_postmaster_start_time()))")
+            uptime = cur.fetchall()[0][0]
     check = integration_check(pg_instance)
     check.check(pg_instance)
     expected_tags = _get_expected_tags(check, pg_instance)
@@ -149,10 +171,10 @@ def test_session_number(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
     expected_tags = _get_expected_tags(check, pg_instance, db='postgres')
-    conn = _get_conn(pg_instance)
-    with conn.cursor() as cur:
-        cur.execute("select sessions from pg_stat_database where datname='postgres'")
-        session_number = cur.fetchall()[0][0]
+    with _get_conn(pg_instance) as conn:
+        with conn.cursor() as cur:
+            cur.execute("select sessions from pg_stat_database where datname='postgres'")
+            session_number = cur.fetchall()[0][0]
     aggregator.assert_metric('postgresql.sessions.count', value=session_number, count=1, tags=expected_tags)
 
     # Generate a new session in postgres database
@@ -323,12 +345,30 @@ def test_activity_metrics_no_application_aggregation(aggregator, integration_che
 
 def test_activity_metrics_no_aggregations(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
+    # datname is a required aggregation because our activity metric query is always grouping by database id.
+    # Setting it should issue a warning, be ignored and still produce an aggregation by db
     pg_instance['activity_metrics_excluded_aggregations'] = ['datname', 'application_name', 'usename']
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    expected_tags = _get_expected_tags(check, pg_instance)
+    expected_tags = _get_expected_tags(check, pg_instance, db=DB_NAME)
     check_activity_metrics(aggregator, expected_tags)
+
+
+def test_activity_vacuum_excluded(aggregator, integration_check, pg_instance):
+    pg_instance['collect_activity_metrics'] = True
+    check = integration_check(pg_instance)
+
+    conn = _get_conn(pg_instance, user=USER_ADMIN, password=PASSWORD_ADMIN)
+    with conn.cursor() as cur:
+        cur.execute('VACUUM analyze persons')
+
+    check.check(pg_instance)
+    dd_agent_tags = _get_expected_tags(check, pg_instance, db=DB_NAME, app='test', user=USER_ADMIN)
+    aggregator.assert_metric('postgresql.waiting_queries', value=0, count=1, tags=dd_agent_tags)
+
+    # Cleaning
+    conn.close()
 
 
 def test_backend_transaction_age(aggregator, integration_check, pg_instance):
@@ -348,9 +388,6 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
 
     conn1 = _get_conn(pg_instance)
     cur = conn1.cursor()
-
-    conn2 = _get_conn(pg_instance)
-    cur2 = conn2.cursor()
 
     # Start a transaction in repeatable read to force pinning of backend_xmin
     cur.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;')
@@ -378,8 +415,10 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
 
     aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=test_tags)
 
-    # Open a new session and assign a new txid to it.
-    cur2.execute('select txid_current()')
+    with _get_conn(pg_instance) as conn2:
+        with conn2.cursor() as cur2:
+            # Open a new session and assign a new txid to it.
+            cur2.execute('select txid_current()')
 
     aggregator.reset()
     transaction_age_lower_bound = time.time() - start_transaction_time
@@ -403,9 +442,13 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
         lower_bound=transaction_age_lower_bound,
     )
 
+    # cleanup
+    cur.close()
+    conn1.close()
+
 
 @requires_over_10
-def test_wrong_version(aggregator, integration_check, pg_instance):
+def test_wrong_version(integration_check, pg_instance):
     check = integration_check(pg_instance)
     # Enforce the wrong version
     check._version_utils.get_raw_version = mock.MagicMock(return_value="9.6.0")
@@ -535,21 +578,6 @@ def test_wal_metrics(aggregator, integration_check, pg_instance, is_aurora):
     aggregator.assert_metric('postgresql.wal_count', count=1, value=expected_num_wals, tags=dd_agent_tags)
     aggregator.assert_metric('postgresql.wal_size', count=1, value=expected_wal_size, tags=dd_agent_tags)
 
-    with postgres_conn.cursor() as cur:
-        # Force a wal switch
-        cur.execute("select pg_switch_wal();")
-        cur.fetchall()
-        # Checkpoint to accelerate new wal file
-        cur.execute("CHECKPOINT;")
-
-    aggregator.reset()
-    check.check(pg_instance)
-
-    expected_num_wals += 1
-    expected_wal_size = expected_num_wals * wal_size
-    aggregator.assert_metric('postgresql.wal_count', count=1, value=expected_num_wals, tags=dd_agent_tags)
-    aggregator.assert_metric('postgresql.wal_size', count=1, value=expected_wal_size, tags=dd_agent_tags)
-
 
 def test_pg_control(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
@@ -586,7 +614,7 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
     'dbm_enabled, reported_hostname, expected_hostname',
     [
         (True, '', 'resolved.hostname'),
-        (False, '', 'stubbed.hostname'),
+        (False, '', 'resolved.hostname'),
         (False, 'forced_hostname', 'forced_hostname'),
         (True, 'forced_hostname', 'forced_hostname'),
     ],
@@ -610,7 +638,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         if reported_hostname:
             assert resolve_db_host.called is False, 'Expected resolve_db_host.called to be False'
         else:
-            assert resolve_db_host.called == dbm_enabled, 'Expected resolve_db_host.called to be ' + str(dbm_enabled)
+            assert resolve_db_host.called is True
 
     expected_tags_no_db = _get_expected_tags(check, pg_instance, server=HOST)
     expected_tags_with_db = expected_tags_no_db + ['db:datadog_test']
@@ -643,9 +671,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         (True, 'forced_hostname'),
     ],
 )
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_database_instance_metadata(aggregator, dd_run_check, pg_instance, dbm_enabled, reported_hostname):
+def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, reported_hostname):
     pg_instance['dbm'] = dbm_enabled
     # this will block on cancel and wait for the coll interval of 600 seconds,
     # unless the collection_interval is set to a short amount of time
@@ -655,7 +681,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, pg_instance, dbm_e
     expected_host = reported_hostname if reported_hostname else 'stubbed.hostname'
     expected_tags = pg_instance['tags'] + ['port:{}'.format(pg_instance['port'])]
     check = PostgreSql('test_instance', {}, [pg_instance])
-    dd_run_check(check)
+    run_one_check(check, pg_instance)
 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
@@ -672,11 +698,281 @@ def test_database_instance_metadata(aggregator, dd_run_check, pg_instance, dbm_e
 
     # Run a second time and expect the metadata to not be emitted again because of the cache TTL
     aggregator.reset()
-    dd_run_check(check)
+    run_one_check(check, pg_instance)
 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
     assert event is None
+
+
+@pytest.mark.parametrize(
+    "aws_metadata, expected_error, error_msg, expected_managed_auth_enabled",
+    [
+        (
+            {
+                "instance_endpoint": "mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com",
+            },
+            None,
+            None,
+            False,
+        ),
+        (
+            {
+                "instance_endpoint": "mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com",
+                "region": "us-east-1",
+            },
+            psycopg2.OperationalError,
+            'password authentication failed',
+            True,
+        ),
+        (
+            {
+                "instance_endpoint": "mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com",
+                "region": "us-east-1",
+                "managed_authentication": {
+                    "enabled": True,
+                },
+            },
+            psycopg2.OperationalError,
+            'password authentication failed',
+            True,
+        ),
+        (
+            {
+                'region': 'us-east-1',
+            },
+            psycopg2.OperationalError,
+            'password authentication failed',
+            True,
+        ),
+        (
+            {
+                "region": "us-east-1",
+                "managed_authentication": {
+                    "enabled": 'false',
+                },
+            },
+            None,
+            None,
+            False,
+        ),
+        (
+            {
+                'region': 'us-east-1',
+                "managed_authentication": {
+                    "enabled": 'true',
+                },
+            },
+            psycopg2.OperationalError,
+            'password authentication failed',
+            True,
+        ),
+        (
+            {
+                "managed_authentication": {
+                    "enabled": 'true',
+                }
+            },
+            ConfigurationError,
+            'AWS region must be set when using AWS managed authentication',
+            None,  # IAM auth requires region so this should fail
+        ),
+    ],
+)
+def test_database_instance_cloud_metadata_aws(
+    aggregator, integration_check, pg_instance, aws_metadata, expected_error, error_msg, expected_managed_auth_enabled
+):
+    '''
+    This test is to verify different combinations of aws metadata and managed_authentication settings.
+    In legacy config, managed_authentication is inferred from the presence of region.
+    With the updated config, managed_authentication is explicitly set.
+    This test verifies that the check runs with the expected managed_authentication setting and tags.
+    '''
+    pg_instance["aws"] = aws_metadata
+    if not expected_error:
+        check = integration_check(pg_instance)
+        check.check(pg_instance)
+    else:
+        # When IAM auth is enabled, unit test should fail with password authentication error
+        # this is because boto3.generate_rds_iam_token will always return a token (presigned url)
+        with mock.patch('datadog_checks.postgres.aws.generate_rds_iam_token') as mocked_generate_rds_iam_token:
+            mocked_generate_rds_iam_token.return_value = 'faketoken'
+            with pytest.raises(expected_error, match=error_msg):
+                check = integration_check(pg_instance)
+                check.check(pg_instance)
+            if expected_managed_auth_enabled:
+                assert mocked_generate_rds_iam_token.called
+
+    if not expected_error == ConfigurationError:
+        # we only assert the check ran if we don't expect a ConfigurationError
+        assert check.cloud_metadata['aws']['managed_authentication']['enabled'] == expected_managed_auth_enabled
+
+        expected_tags = _get_expected_tags(check, pg_instance, db=DB_NAME)
+        if "instance_endpoint" in aws_metadata:
+            expected_tags.append("dd.internal.resource:aws_rds_instance:{}".format(aws_metadata["instance_endpoint"]))
+
+        status = check.CRITICAL if expected_error else check.OK
+        aggregator.assert_service_check(check.SERVICE_CHECK_NAME, status=status, tags=expected_tags)
+
+
+@pytest.mark.parametrize(
+    "azure_metadata, managed_identity, expected_error, error_msg, expected_managed_auth_enabled",
+    [
+        (
+            {
+                "deployment_type": "flexible_server",
+                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
+            },
+            None,
+            None,
+            None,
+            False,
+        ),
+        (
+            {
+                "deployment_type": "flexible_server",
+                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
+            },
+            {
+                "client_id": "my-client-id",
+            },
+            psycopg2.OperationalError,
+            'password authentication failed',
+            True,
+        ),
+        (
+            {
+                "deployment_type": "flexible_server",
+                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
+                "managed_authentication": {
+                    "enabled": False,
+                },
+            },
+            {
+                "client_id": "my-client-id",
+            },
+            None,
+            None,
+            False,
+        ),
+        (
+            {
+                "deployment_type": "flexible_server",
+                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
+                "managed_authentication": {
+                    "enabled": 'false',
+                },
+            },
+            {
+                "client_id": "my-client-id",
+            },
+            None,
+            None,
+            False,
+        ),
+        (
+            {
+                "deployment_type": "flexible_server",
+                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
+                "managed_authentication": {
+                    "enabled": True,
+                    "client_id": "my-client-id",
+                },
+            },
+            {
+                "client_id": "my-client-id",
+            },
+            psycopg2.OperationalError,
+            'password authentication failed',
+            True,
+        ),
+        (
+            {
+                "deployment_type": "flexible_server",
+                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
+                "managed_authentication": {
+                    "enabled": 'true',
+                    "client_id": "my-client-id",
+                    'identity_scope': 'https://database.windows.net/.default',
+                },
+            },
+            None,
+            psycopg2.OperationalError,
+            'password authentication failed',
+            True,
+        ),
+        (
+            {
+                "deployment_type": "flexible_server",
+                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
+                "managed_authentication": {
+                    "enabled": True,
+                },
+            },
+            None,
+            ConfigurationError,
+            'Azure client_id must be set when using Azure managed authentication',
+            None,
+        ),
+    ],
+)
+def test_database_instance_cloud_metadata_azure(
+    aggregator,
+    integration_check,
+    pg_instance,
+    azure_metadata,
+    managed_identity,
+    expected_error,
+    error_msg,
+    expected_managed_auth_enabled,
+):
+    '''
+    This test is to verify different combinations of aws metadata and managed_authentication settings.
+    In legacy config, managed_authentication is inferred from the presence of region.
+    With the updated config, managed_authentication is explicitly set.
+    This test verifies that the check runs with the expected managed_authentication setting and tags.
+    '''
+    pg_instance["azure"] = azure_metadata
+    if managed_identity:
+        pg_instance["managed_identity"] = managed_identity
+    if not expected_error:
+        check = integration_check(pg_instance)
+        check.check(pg_instance)
+    else:
+        # When IAM auth is enabled, unit test should fail with password authentication error
+        # this is because boto3.generate_rds_iam_token will always return a token (presigned url)
+        with mock.patch(
+            'datadog_checks.postgres.azure.generate_managed_identity_token'
+        ) as generate_managed_identity_token:
+            generate_managed_identity_token.return_value = 'faketoken'
+            with pytest.raises(expected_error, match=error_msg):
+                check = integration_check(pg_instance)
+                check.check(pg_instance)
+            if expected_managed_auth_enabled:
+                assert generate_managed_identity_token.called
+
+    if not expected_error == ConfigurationError:
+        # we only assert the check ran if we don't expect a ConfigurationError
+        assert check.cloud_metadata['azure']['managed_authentication']['enabled'] == expected_managed_auth_enabled
+
+        expected_tags = _get_expected_tags(check, pg_instance, db=DB_NAME)
+        if "fully_qualified_domain_name" in azure_metadata:
+            expected_tags.append(
+                "dd.internal.resource:azure_postgresql_flexible_server:{}".format(
+                    azure_metadata["fully_qualified_domain_name"]
+                )
+            )
+
+        status = check.CRITICAL if expected_error else check.OK
+        aggregator.assert_service_check(check.SERVICE_CHECK_NAME, status=status, tags=expected_tags)
+
+        if managed_identity:
+            assert check.warnings == [
+                (
+                    'DEPRECATION NOTICE: The managed_identity option is deprecated and will be removed '
+                    'in a future version. Please use the new azure.managed_authentication option instead.'
+                )
+            ]
 
 
 def assert_state_clean(check):

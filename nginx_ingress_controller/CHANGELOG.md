@@ -1,8 +1,8 @@
 # CHANGELOG - nginx-ingress-controller
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-## 2.4.1 / 2023-08-18
+## 2.4.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:
 

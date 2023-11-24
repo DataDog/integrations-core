@@ -1,4 +1,4 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["3.9"]
+python = ["3.11"]

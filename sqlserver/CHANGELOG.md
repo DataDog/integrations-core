@@ -1,6 +1,54 @@
 # CHANGELOG - sqlserver
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## 15.2.0 / 2023-11-10
+
+***Added***:
+
+* Add support for log shipping monitoring on primary and secondary instances through the `include_primary_log_shipping_metrics` and `include_secondary_log_shipping_metrics` configuration options. ([#16101](https://github.com/DataDog/integrations-core/pull/16101))
+* * Add obfuscation_mode config option to allow enabling obfuscation with go-sqllexer ([#16125](https://github.com/DataDog/integrations-core/pull/16125)) ([#16125](https://github.com/DataDog/integrations-core/pull/16125))
+* [DBMON-3054] Move check config to SQLServerConfig class ([#16130](https://github.com/DataDog/integrations-core/pull/16130))
+* DBMON-3054] Add unit tests to assert every configurable metrics collection ([#16136](https://github.com/DataDog/integrations-core/pull/16136))
+* Updated dependencies. ([#16154](https://github.com/DataDog/integrations-core/pull/16154))
+
+***Fixed***:
+
+* Fix `aarch64` compatibility of the `sqlserver` check by downgrading `lxml` to version 4.9.2 ([16080](https://github.com/DataDog/integrations-core/pull/16080)) ([#16080](https://github.com/DataDog/integrations-core/pull/16080))
+* Stabilizes the `host` tag on the `sqlserver.can_connect` metric and adds the `connection_host` tag on the same metric. ([#16114](https://github.com/DataDog/integrations-core/pull/16114))
+* [SQL Server] - Fix query stats when a query is found in more than one procedure ([#16141](https://github.com/DataDog/integrations-core/pull/16141))
+
+## 15.1.0 / 2023-10-26
+
+***Added***:
+
+* Add support for reporting SQL obfuscation errors ([#15990](https://github.com/DataDog/integrations-core/pull/15990))
+* Emit SQLServer metrics queries operation time ([#16066](https://github.com/DataDog/integrations-core/pull/16066))
+
+***Fixed***:
+
+* Properly decode query_hash when statement_text is None ([#15974](https://github.com/DataDog/integrations-core/pull/15974))
+* Strip sql comments before parsing procedure name ([#16004](https://github.com/DataDog/integrations-core/pull/16004))
+* Bump the `pyodbc` version to 5.0.1 ([#16041](https://github.com/DataDog/integrations-core/pull/16041))
+* Fix config option `dbm_enabled` type to ensure it is a boolean ([#16078](https://github.com/DataDog/integrations-core/pull/16078))
+
+## 15.0.3 / 2023-11-08 / Agent 7.49.1
+
+***Fixed***
+
+* Fix `aarch64` compatibility of the `sqlserver` check by downgrading `lxml` to version 4.9.2 ([16080](https://github.com/DataDog/integrations-core/pull/16080))
+
+## 15.0.2 / 2023-10-10 / Agent 7.49.0
+
+***Fixed***:
+
+* Properly decode query_hash when statement_text is None ([#15974](https://github.com/DataDog/integrations-core/pull/15974))
+
+## 15.0.1 / 2023-10-06
+
+***Fixed***
+
+* Set stored procedure collection to `run_sync=False`, fixing the delay in collection of other SQLServer telemetry. ([#15967](https://github.com/DataDog/integrations-core/pull/15967))
 
 ## 15.0.0 / 2023-09-29
 
@@ -19,9 +67,6 @@
 * Add `index_name` tag to `.database.avg_fragmentation_in_percent`, `.database.fragment_count`, `.database.avg_fragment_size_in_pages` metrics. Also add a new metric `sqlserver.database.index_page_count`, tagged by `database_name`, `object_name`, `index_id` and `index_name`. ([#15721](https://github.com/DataDog/integrations-core/pull/15721))
 * When DBM is enabled, starts collecting stored procedure metrics from sys.dm_exec_procedure_stats at 60s interval (configurable). Also adds the corresponding `procedure_metrics` section to the config file. The new DBM-only metrics are `sqlserver.procedures.count`, `sqlserver.procedures.time`, `sqlserver.procedures.worker_time`, `sqlserver.procedures.physical_reads`, `sqlserver.procedures.logical_reads`, `sqlserver.procedures.logical_writes` and `sqlserver.procedures.spills`. ([#15805](https://github.com/DataDog/integrations-core/pull/15805))
 * Add additional SQL Server performance counter metrics ([#15818](https://github.com/DataDog/integrations-core/pull/15818))
-
-***Added***:
-
 * Add Index Usage Metrics for SQL Server ([#15905](https://github.com/DataDog/integrations-core/pull/15905))
 
 ***Fixed***:
@@ -31,7 +76,7 @@
 * Fix sqlserver file stats metrics for Azure SQL DB ([#15695](https://github.com/DataDog/integrations-core/pull/15695))
 * Fix calculation for performance counters that require a corresponding [base counter type](https://learn.microsoft.com/en-us/windows/win32/wmisdk/base-counter-types) which were previously emitting a constant 100% value (such as `sqlserver.buffer.cache_hit_ratio`). ([#15846](https://github.com/DataDog/integrations-core/pull/15846))
 
-## 14.0.0 / 2023-08-18
+## 14.0.0 / 2023-08-18 / Agent 7.48.0
 
 ***Changed***:
 

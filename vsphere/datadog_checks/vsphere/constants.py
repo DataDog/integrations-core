@@ -69,6 +69,8 @@ REFERENCE_METRIC = "cpu.usage.avg"
 DEFAULT_VSPHERE_TAG_PREFIX = ""
 DEFAULT_VSPHERE_ATTR_PREFIX = ""
 
+DEFAULT_EVENT_RESOURCES = ['vm', 'host']
+
 PROPERTY_COUNT_METRICS = [
     "guest.net",
     "guest.ipStack.ipRoute",
