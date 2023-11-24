@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [Flux][1] through the Datadog Agent. Flux is a set of continuous and progressive delivery solutions for Kubernetes that are open and extensible.
+This check monitors [Flux][1] through the Datadog Agent. Flux is a set of continuous and progressive delivery solutions for Kubernetes that is open and extensible.
 
 ## Setup
 
@@ -22,7 +22,7 @@ Starting from Agent release 7.51.0, the Fluxcd check is included in the [Datadog
 
 1. Edit the `fluxcd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Fluxcd performance data. See the [sample configuration file][4] for all available configuration options.
 
-    This example demonstrates the configuration:
+    This is an example configuration:
 
     ```yaml
     init_config:
@@ -40,7 +40,7 @@ Starting from Agent release 7.51.0, the Fluxcd check is included in the [Datadog
 
 ##### Metric collection
 
-This example demonstrates the configuration as a Docker label inside `docker-compose.yml`. See the [sample configuration file][4] for all available configuration options.
+This is an example configuration of a Docker label inside `docker-compose.yml`. See the [sample configuration file][4] for all available configuration options.
 
 ```yaml
 labels:
@@ -54,7 +54,7 @@ labels:
 
 ##### Metric collection
 
-This example demonstrates the configuration as Kubernetes annotations on your Fluxcd pods. See the [sample configuration file][4] for all available configuration options.
+This is an example configuration with Kubernetes annotations on your Fluxcd pods. See the [sample configuration file][4] for all available configuration options.
 
 ```yaml
 apiVersion: v1
@@ -86,7 +86,7 @@ Fluxcd metrics are available on the OpenMetrics endpoint. Additionally, Fluxcd a
 
 **Note:** Custom Fluxcd metrics are considered standard metrics in Datadog.
 
-This example demonstrates a configuration leveraging the `extra_metrics` option:
+This is an example configuration leveraging the `extra_metrics` option:
 
 ```yaml
 init_config:
@@ -98,7 +98,7 @@ instances:
       - my_custom_fluxcd_metric
 ```
 
-More info on how to configure this option can be found in the [sample `fluxcd.d/conf.yaml` configuration file][11].
+See the [sample configuration file][4] for all available configuration options
 
 ### Validation
 
