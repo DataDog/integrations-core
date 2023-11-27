@@ -1,0 +1,1 @@
+Exclude manual vacuum from reported xid and xmin age
