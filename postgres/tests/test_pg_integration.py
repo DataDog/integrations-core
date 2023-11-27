@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import socket
+import threading
 import time
 
 import mock
@@ -42,7 +43,7 @@ from .common import (
     check_wal_receiver_metrics,
     requires_static_version,
 )
-from .utils import _get_conn, _get_superconn, requires_over_10, requires_over_14, run_one_check
+from .utils import _get_conn, _get_superconn, _wait_for_value, requires_over_10, requires_over_14, run_one_check
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
 
@@ -82,6 +83,15 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     aggregator.assert_all_metrics_covered()
 
 
+def _increase_txid(cur):
+    # Force increases of txid
+    if float(POSTGRES_VERSION) >= 13.0:
+        query = 'select pg_current_xact_id();'
+    else:
+        query = 'select txid_current();'
+    cur.execute(query)
+
+
 def test_snapshot_xmin(aggregator, integration_check, pg_instance):
     with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         conn.set_session(autocommit=True)
@@ -103,12 +113,7 @@ def test_snapshot_xmin(aggregator, integration_check, pg_instance):
         # Force autocommit
         conn.set_session(autocommit=True)
         with conn.cursor() as cur:
-            # Force increases of txid
-            if float(POSTGRES_VERSION) >= 13.0:
-                query = 'select pg_current_xact_id();'
-            else:
-                query = 'select txid_current();'
-            cur.execute(query)
+            _increase_txid(cur)
 
     aggregator.reset()
     check = integration_check(pg_instance)
@@ -126,14 +131,14 @@ def test_snapshot_xip(aggregator, integration_check, pg_instance):
     # Start a transaction
     cur.execute('BEGIN;')
     # Force assignement of a txid and keep the transaction opened
-    cur.execute('select txid_current();')
+    _increase_txid(cur)
     # Make sure to fetch the result to make sure we start the timer after the transaction started
     cur.fetchall()
 
     with _get_conn(pg_instance) as conn2:
         with conn2.cursor() as cur2:
             # Force increases of txid
-            cur2.execute('select txid_current();')
+            _increase_txid(cur2)
 
     check = integration_check(pg_instance)
     check.check(pg_instance)
@@ -212,7 +217,7 @@ def test_session_idle_and_killed(aggregator, integration_check, pg_instance):
     conn = _get_conn(pg_instance)
     with conn.cursor() as cur:
         cur.execute('BEGIN;')
-        cur.execute('select txid_current();')
+        _increase_txid(cur)
         cur.fetchall()
         # Keep transaction idle for 500ms
         time.sleep(0.5)
@@ -355,20 +360,55 @@ def test_activity_metrics_no_aggregations(aggregator, integration_check, pg_inst
     check_activity_metrics(aggregator, expected_tags)
 
 
+@requires_over_10
 def test_activity_vacuum_excluded(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
     check = integration_check(pg_instance)
 
-    conn = _get_conn(pg_instance, user=USER_ADMIN, password=PASSWORD_ADMIN)
-    with conn.cursor() as cur:
-        cur.execute('VACUUM analyze persons')
+    def run_vacuum(conn_vacuum):
+        with conn_vacuum.cursor() as cur:
+            cur.execute('set vacuum_cost_delay=100')
+            cur.execute('set vacuum_cost_limit=1')
+            try:
+                cur.execute('VACUUM analyze persons')
+            except psycopg2.errors.QueryCanceled:
+                pass
+
+    conn_vacuum = _get_conn(pg_instance, user=USER_ADMIN, password=PASSWORD_ADMIN, application_name='test')
+    thread = threading.Thread(target=run_vacuum, args=(conn_vacuum,))
+    thread.start()
+
+    conn_increase_txid = _get_conn(pg_instance, user=USER_ADMIN, password=PASSWORD_ADMIN, application_name='test')
+    cur = conn_increase_txid.cursor()
+    # Increase txid counter
+    _increase_txid(cur)
+    _increase_txid(cur)
+    # Increase start a transaction with xmin age = 1
+    cur.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;')
+    _increase_txid(cur)
+
+    _wait_for_value(
+        pg_instance,
+        lower_threshold=0,
+        query="SELECT count(*) from pg_stat_activity WHERE backend_type = 'client backend' AND query ~* '^vacuum';",
+    )
 
     check.check(pg_instance)
-    dd_agent_tags = _get_expected_tags(check, pg_instance, db=DB_NAME, app='test', user=USER_ADMIN)
-    aggregator.assert_metric('postgresql.waiting_queries', value=0, count=1, tags=dd_agent_tags)
+    expected_tags = _get_expected_tags(check, pg_instance, db=DB_NAME, app='test', user=USER_ADMIN)
+    aggregator.assert_metric('postgresql.waiting_queries', value=1, count=1, tags=expected_tags)
+    # Vacuum process with 3 xmin age should not be reported
+    aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=1, count=1, tags=expected_tags)
 
+    # Kill vacuum backend for faster tests
+    cur.execute(
+        """SELECT pg_cancel_backend(pid) FROM pg_stat_activity
+WHERE backend_type = 'client backend' AND query ~* '^vacuum'"""
+    )
     # Cleaning
-    conn.close()
+    cur.close()
+    conn_vacuum.close()
+    conn_increase_txid.close()
+    thread.join()
 
 
 def test_backend_transaction_age(aggregator, integration_check, pg_instance):
@@ -392,7 +432,7 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     # Start a transaction in repeatable read to force pinning of backend_xmin
     cur.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;')
     # Force assignement of a txid and keep the transaction opened
-    cur.execute('select txid_current();')
+    _increase_txid(cur)
     # Make sure to fetch the result to make sure we start the timer after the transaction started
     cur.fetchall()
     start_transaction_time = time.time()
@@ -418,7 +458,7 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     with _get_conn(pg_instance) as conn2:
         with conn2.cursor() as cur2:
             # Open a new session and assign a new txid to it.
-            cur2.execute('select txid_current()')
+            _increase_txid(cur2)
 
     aggregator.reset()
     transaction_age_lower_bound = time.time() - start_transaction_time
