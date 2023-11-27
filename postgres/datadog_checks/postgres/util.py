@@ -477,6 +477,20 @@ SELECT s.schemaname,
     'name': 'function_metrics',
 }
 
+# The metrics we retrieve from pg_stat_activity when the postgres version >= 10
+# The query will have a where condition removing manual vacuum and backends
+# other than client backends
+ACTIVITY_METRICS_10 = [
+    "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
+    "SUM(CASE WHEN state = 'idle in transaction' THEN 1 ELSE 0 END)",
+    "COUNT(CASE WHEN state = 'active' AND (usename NOT IN ('postgres', '{dd__user}')) THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN wait_event is NOT NULL THEN 1 ELSE null END)",
+    "COUNT(CASE WHEN wait_event is NOT NULL AND state = 'active' THEN 1 ELSE null END)",
+    "max(EXTRACT(EPOCH FROM (clock_timestamp() - xact_start)))",
+    "max(age(backend_xid))",
+    "max(age(backend_xmin))",
+]
+
 # The metrics we retrieve from pg_stat_activity when the postgres version >= 9.6
 ACTIVITY_METRICS_9_6 = [
     "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
@@ -551,7 +565,7 @@ ACTIVITY_QUERY_10 = """
 SELECT {aggregation_columns_select}
     {{metrics_columns}}
 FROM pg_stat_activity
-WHERE backend_type = 'client backend'
+WHERE backend_type = 'client backend' AND query !~* '^vacuum '
 GROUP BY datid {aggregation_columns_group}
 """
 
