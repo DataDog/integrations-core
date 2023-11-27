@@ -199,8 +199,8 @@ PipeHistory = {
     ),
     'columns': [
         {'name': 'pipe', 'type': 'tag'},
-        {'name': 'pipe_schema', 'type': 'tag'},
-        {'name': 'pipe_catalog', 'type': 'tag'},
+        {'name': 'schema', 'type': 'tag'},
+        {'name': 'database', 'type': 'tag'},
         {'name': 'pipe.credits_used.avg', 'type': 'gauge'},
         {'name': 'pipe.credits_used.sum', 'type': 'gauge'},
         {'name': 'pipe.bytes_inserted.avg', 'type': 'gauge'},
