@@ -77,7 +77,7 @@ cli = [
     "pathspec>=0.10.0",
     "platformdirs>=2.0.0a3",
     "pydantic>=2.0.2, <2.4.0",
-    "pysmi>=0.3.4",
+    "pysmi @ git+https://github.com/etingof/pysmi@58f2bf29cccff633af703f319dc237e17e16e3d3#egg=pysmi",
     "securesystemslib[crypto]==0.28.0",
     "semver>=2.13.0",
     "tabulate>=0.8.9",
@@ -120,6 +120,9 @@ include = [
 dev-mode-dirs = [
     ".",
 ]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.pytest.ini_options]
 testpaths = "tests"
