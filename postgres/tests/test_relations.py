@@ -230,6 +230,7 @@ def test_vacuum_age(aggregator, integration_check, pg_instance):
                 'db:datadog_test',
                 'lock_mode:AccessExclusiveLock',
                 'lock_type:relation',
+                'granted:True',
                 'table:persons',
                 'schema:public',
                 'dd.internal.resource:database_instance:stubbed.hostname',

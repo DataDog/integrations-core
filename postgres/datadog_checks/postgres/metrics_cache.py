@@ -9,6 +9,7 @@ from .util import (
     ACTIVITY_METRICS_8_3,
     ACTIVITY_METRICS_9_2,
     ACTIVITY_METRICS_9_6,
+    ACTIVITY_METRICS_10,
     ACTIVITY_METRICS_LT_8_3,
     ACTIVITY_QUERY_10,
     ACTIVITY_QUERY_LT_10,
@@ -226,6 +227,8 @@ class PostgresMetricsCache:
                     aggregation_columns_group=',' + ', '.join(aggregation_columns),
                 )
 
+            if version >= V10:
+                metrics_query = ACTIVITY_METRICS_10
             if version >= V9_6:
                 metrics_query = ACTIVITY_METRICS_9_6
             elif version >= V9_2:
