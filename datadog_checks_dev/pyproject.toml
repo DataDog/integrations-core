@@ -78,7 +78,7 @@ cli = [
     "platformdirs>=2.0.0a3",
     "pydantic>=2.0.2, <2.4.0",
     # pysmi is unmaintained at the moment, with unreleased bugfixes so we pin it to the last commit
-    "pysmi @ git+https://github.com/etingof/pysmi@58f2bf29cccff633af703f319dc237e17e16e3d3#egg=pysmi",
+    "pysmi@git+https://github.com/etingof/pysmi@58f2bf29cccff633af703f319dc237e17e16e3d3#egg=pysmi",
     "securesystemslib[crypto]==0.28.0",
     "semver>=2.13.0",
     "tabulate>=0.8.9",
@@ -93,7 +93,7 @@ cli = [
     # TODO: Remove once every check has a pyproject.toml
     "setuptools>=66; python_version > '3.0'",
     "setuptools; python_version < '3.0'",
-    "wheel>=0.32.3",
+    "wheel>=0.31.0",
 ]
 
 [project.entry-points.pytest11]
