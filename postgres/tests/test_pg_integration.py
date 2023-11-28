@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import socket
-import threading
 import time
 
 import mock
@@ -43,7 +42,16 @@ from .common import (
     check_wal_receiver_metrics,
     requires_static_version,
 )
-from .utils import _get_conn, _get_superconn, _wait_for_value, requires_over_10, requires_over_14, run_one_check
+from .utils import (
+    _get_conn,
+    _get_superconn,
+    _wait_for_value,
+    kill_vacuum,
+    requires_over_10,
+    requires_over_14,
+    run_one_check,
+    run_vacuum_thread,
+)
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
 
@@ -367,48 +375,36 @@ def test_activity_vacuum_excluded(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
     check = integration_check(pg_instance)
 
-    def run_vacuum(conn_vacuum):
-        with conn_vacuum.cursor() as cur:
-            cur.execute('set vacuum_cost_delay=100')
-            cur.execute('set vacuum_cost_limit=1')
-            try:
-                cur.execute('VACUUM analyze persons')
-            except psycopg2.errors.QueryCanceled:
-                pass
+    # Run vacuum in a thread
+    thread = run_vacuum_thread(pg_instance, 'VACUUM (DISABLE_PAGE_SKIPPING, ANALYZE) persons', application_name='test')
 
-    conn_vacuum = _get_conn(pg_instance, user=USER_ADMIN, password=PASSWORD_ADMIN, application_name='test')
-    thread = threading.Thread(target=run_vacuum, args=(conn_vacuum,))
-    thread.start()
-
-    conn_increase_txid = _get_conn(pg_instance, user=USER_ADMIN, password=PASSWORD_ADMIN, application_name='test')
-    cur = conn_increase_txid.cursor()
-    # Increase txid counter
-    _increase_txid(cur)
-    _increase_txid(cur)
-    # Increase start a transaction with xmin age = 1
-    cur.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;')
-    _increase_txid(cur)
-
+    # Wait for vacuum to be running
     _wait_for_value(
         pg_instance,
         lower_threshold=0,
         query="SELECT count(*) from pg_stat_activity WHERE backend_type = 'client backend' AND query ~* '^vacuum';",
     )
 
+    conn_increase_txid = _get_conn(pg_instance, user=USER_ADMIN, password=PASSWORD_ADMIN, application_name='test')
+    cur = conn_increase_txid.cursor()
+    # Increase txid counter
+    _increase_txid(cur)
+    _increase_txid(cur)
+    # Start a transaction with xmin age = 1
+    cur.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;')
+    _increase_txid(cur)
+
+    # Gather metrics
     check.check(pg_instance)
+
     expected_tags = _get_expected_tags(check, pg_instance, db=DB_NAME, app='test', user=USER_ADMIN)
     aggregator.assert_metric('postgresql.waiting_queries', value=1, count=1, tags=expected_tags)
     # Vacuum process with 3 xmin age should not be reported
     aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=1, count=1, tags=expected_tags)
 
-    # Kill vacuum backend for faster tests
-    cur.execute(
-        """SELECT pg_cancel_backend(pid) FROM pg_stat_activity
-WHERE backend_type = 'client backend' AND query ~* '^vacuum'"""
-    )
     # Cleaning
+    kill_vacuum(pg_instance)
     cur.close()
-    conn_vacuum.close()
     conn_increase_txid.close()
     thread.join()
 
