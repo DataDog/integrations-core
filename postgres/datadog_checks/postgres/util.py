@@ -434,6 +434,32 @@ SELECT v.datname, c.relname, v.phase,
     ],
 }
 
+# Requires PG13+
+ANALYZE_PROGRESS_METRICS = {
+    'name': 'analyze_progress_metrics',
+    'query': """
+SELECT r.datname, c.relname, child.relname, r.phase,
+       r.sample_blks_total, r.sample_blks_scanned,
+       r.ext_stats_total, r.ext_stats_computed,
+       r.child_tables_total, r.child_tables_done
+  FROM pg_stat_progress_analyze as r
+  JOIN pg_class c on c.oid = r.relid
+  LEFT JOIN pg_class child on child.oid = r.current_child_table_relid
+""",
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'child_relation', 'type': 'tag_not_null'},
+        {'name': 'phase', 'type': 'tag'},
+        {'name': 'postgresql.analyze.sample_blks_total', 'type': 'gauge'},
+        {'name': 'postgresql.analyze.sample_blks_scanned', 'type': 'gauge'},
+        {'name': 'postgresql.analyze.ext_stats_total', 'type': 'gauge'},
+        {'name': 'postgresql.analyze.ext_stats_computed', 'type': 'gauge'},
+        {'name': 'postgresql.analyze.child_tables_total', 'type': 'gauge'},
+        {'name': 'postgresql.analyze.child_tables_done', 'type': 'gauge'},
+    ],
+}
+
 # Requires PG12+
 CLUSTER_VACUUM_PROGRESS_METRICS = {
     'name': 'cluster_vacuum_progress_metrics',

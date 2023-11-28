@@ -37,6 +37,7 @@ from datadog_checks.postgres.statements import PostgresStatementMetrics
 from .__about__ import __version__
 from .config import PostgresConfig
 from .util import (
+    ANALYZE_PROGRESS_METRICS,
     AWS_RDS_HOSTNAME_SUFFIX,
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
     CLUSTER_VACUUM_PROGRESS_METRICS,
@@ -282,6 +283,7 @@ class PostgreSql(AgentCheck):
             queries.append(CLUSTER_VACUUM_PROGRESS_METRICS)
 
         if self.version >= V13:
+            queries.append(ANALYZE_PROGRESS_METRICS)
             queries.append(SNAPSHOT_TXID_METRICS)
         if self.version < V13:
             queries.append(SNAPSHOT_TXID_METRICS_LT_13)
