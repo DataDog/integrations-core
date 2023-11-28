@@ -8,22 +8,15 @@
 		// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
 		"dockerfile": "./Dockerfile"
 	},
+	// To run docker in docker
+	"privileged": true,
 	"features": {
 		"ghcr.io/devcontainers/features/python:1": {}
 	},
 
-	// Install the local ddev cli at start time.
-	"postCreateCommand": "pip install -e /workspaces/integrations-core/ddev"
+	// Install the local ddev cli at start time and set the location of the integrations-core folder, start docker service
+	"postCreateCommand": "pipx install -e /workspaces/integrations-core/ddev && ddev config find && sed -i 's|core = \"~/dd/integrations-core\"|core = \"/workspaces/integrations-core\"|' /root/.local/share/dd-checks-dev/config.toml && service docker start",
 
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
-
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
-
-	// Configure tool-specific properties.
-	// "customizations": {},
-
-	// Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "devcontainer"
+	// To access docker socket/service
+	"remoteUser": "root"
 }
