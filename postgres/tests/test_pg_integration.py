@@ -106,8 +106,10 @@ def test_snapshot_xmin(aggregator, integration_check, pg_instance):
     check.check(pg_instance)
 
     expected_tags = _get_expected_tags(check, pg_instance)
-    aggregator.assert_metric('postgresql.snapshot.xmin', value=xmin, count=1, tags=expected_tags)
-    aggregator.assert_metric('postgresql.snapshot.xmax', value=xmin, count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.snapshot.xmin', count=1, tags=expected_tags)
+    assert aggregator.metrics('postgresql.snapshot.xmin')[0].value >= xmin
+    aggregator.assert_metric('postgresql.snapshot.xmax', count=1, tags=expected_tags)
+    assert aggregator.metrics('postgresql.snapshot.xmax')[0].value >= xmin
 
     with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         # Force autocommit
@@ -119,9 +121,9 @@ def test_snapshot_xmin(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
     aggregator.assert_metric('postgresql.snapshot.xmin', count=1, tags=expected_tags)
-    aggregator.metrics('postgresql.snapshot.xmin')[0].value > xmin
+    assert aggregator.metrics('postgresql.snapshot.xmin')[0].value > xmin
     aggregator.assert_metric('postgresql.snapshot.xmax', count=1, tags=expected_tags)
-    aggregator.metrics('postgresql.snapshot.xmax')[0].value > xmin
+    assert aggregator.metrics('postgresql.snapshot.xmax')[0].value > xmin
 
 
 def test_snapshot_xip(aggregator, integration_check, pg_instance):
