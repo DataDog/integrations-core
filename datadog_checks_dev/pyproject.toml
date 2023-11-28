@@ -93,7 +93,7 @@ cli = [
     # TODO: Remove once every check has a pyproject.toml
     "setuptools>=66; python_version > '3.0'",
     "setuptools; python_version < '3.0'",
-    "wheel>=0.31.0",
+    "wheel>=0.32.3",
 ]
 
 [project.entry-points.pytest11]
