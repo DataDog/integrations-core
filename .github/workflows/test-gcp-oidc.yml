@@ -1,0 +1,33 @@
+name: Test Google Cloud Platform OIDC
+on:
+  pull_request:
+
+jobs:
+  job_id:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - id: auth
+      name: Get credentials
+      uses: google-github-actions/auth@v2
+      with:
+        project_id: datadog-agent-int-build
+        workload_identity_provider: projects/574011472402/locations/global/workloadIdentityPools/github/providers/integrations-core
+
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+
+    # - id: gcloud
+    #   name: gcloud
+    #   run: |-
+    #     gcloud auth login -y --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"
+    #     gcloud services list
+
+    - name: Access secret
+      run: gcloud secrets versions access latest --secret testing
