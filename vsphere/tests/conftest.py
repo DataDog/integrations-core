@@ -23,6 +23,7 @@ from .common import (
     PERF_METRIC_ID,
     PROPERTIES_EX,
     REALTIME_INSTANCE,
+    VM_INVALID_GATEWAY_PROPERTIES_EX,
     VM_INVALID_PROPERTIES_EX,
     VM_PROPERTIES_EX,
     VSPHERE_VERSION,
@@ -160,6 +161,11 @@ def vm_properties_ex():
 @pytest.fixture
 def vm_invalid_properties_ex():
     return VM_INVALID_PROPERTIES_EX
+
+
+@pytest.fixture
+def vm_invalid_gateway_properties_ex():
+    return VM_INVALID_GATEWAY_PROPERTIES_EX
 
 
 @pytest.fixture

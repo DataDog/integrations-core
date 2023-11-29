@@ -3037,6 +3037,76 @@ def test_property_metrics_expired_cache(
         )
 
 
+def test_property_metrics_invalid_ip_config(
+    aggregator, realtime_instance, dd_run_check, service_instance, vm_invalid_properties_ex
+):
+    realtime_instance['collect_property_metrics'] = True
+
+    service_instance.content.propertyCollector.RetrievePropertiesEx = vm_invalid_properties_ex
+
+    base_tags = ['vcenter_server:FAKE', 'vsphere_folder:unknown', 'vsphere_type:vm', 'vsphere_host:unknown']
+
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    aggregator.assert_metric('vsphere.vm.count', value=1, count=1, tags=base_tags)
+
+    aggregator.assert_metric(
+        'vsphere.vm.guest.net',
+        count=1,
+        value=1,
+        tags=base_tags + ['device_id:0', 'is_connected:True', 'nic_mac_address:00:61:58:72:53:13'],
+        hostname='vm1',
+    )
+
+    aggregator.assert_metric(
+        'vsphere.vm.guest.net.ipConfig.address',
+        count=0,
+        hostname='vm1',
+    )
+
+
+def test_property_metrics_invalid_ip_route_config(
+    aggregator, realtime_instance, dd_run_check, service_instance, vm_invalid_properties_ex
+):
+    realtime_instance['collect_property_metrics'] = True
+
+    service_instance.content.propertyCollector.RetrievePropertiesEx = vm_invalid_properties_ex
+
+    base_tags = ['vcenter_server:FAKE', 'vsphere_folder:unknown', 'vsphere_type:vm', 'vsphere_host:unknown']
+
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    aggregator.assert_metric('vsphere.vm.count', value=1, count=1, tags=base_tags)
+
+    aggregator.assert_metric(
+        'vsphere.vm.guest.ipStack.ipRoute',
+        count=0,
+        hostname='vm1',
+    )
+
+
+def test_property_metrics_invalid_ip_route_config_gateway(
+    aggregator, realtime_instance, dd_run_check, service_instance, vm_invalid_gateway_properties_ex
+):
+    realtime_instance['collect_property_metrics'] = True
+
+    service_instance.content.propertyCollector.RetrievePropertiesEx = vm_invalid_gateway_properties_ex
+
+    base_tags = ['vcenter_server:FAKE', 'vsphere_folder:unknown', 'vsphere_type:vm', 'vsphere_host:unknown']
+
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    aggregator.assert_metric('vsphere.vm.count', value=1, count=1, tags=base_tags)
+
+    aggregator.assert_metric(
+        'vsphere.vm.guest.ipStack.ipRoute',
+        count=1,
+        value=1,
+        tags=base_tags + ['network_dest_ip:fe83::', 'prefix_length:32'],
+        hostname='vm1',
+    )
+
+
 def test_property_metrics_invalid_property(
     aggregator, realtime_instance, dd_run_check, caplog, service_instance, vm_invalid_properties_ex
 ):
