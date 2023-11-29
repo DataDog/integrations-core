@@ -14,7 +14,7 @@ def test_upgrade_python(fake_repo, ddev):
     result = ddev('meta', 'scripts', 'upgrade-python', NEW_PYTHON_VERSION)
 
     assert result.exit_code == 0, result.output
-    assert result.output.endswith('Python upgrades\n\nPassed: 8\n')
+    assert result.output.endswith('Python upgrades\n\nPassed: 9\n')
 
     contents = constant_file.read_text()
     assert f'PYTHON_VERSION = {OLD_PYTHON_VERSION!r}' not in contents
@@ -30,7 +30,7 @@ def test_upgrade_python(fake_repo, ddev):
     assert f'python = ["2.7", "{OLD_PYTHON_VERSION}"]' not in contents
     assert f'python = ["2.7", "{NEW_PYTHON_VERSION}"]' in contents
 
-    for integration in ('dummy', 'datadog_checks_dependency_provider'):
+    for integration in ('dummy', 'datadog_checks_dependency_provider', 'logs_only'):
         pyproject_file = fake_repo.path / integration / 'pyproject.toml'
         contents = pyproject_file.read_text()
         assert f'Programming Language :: Python :: {OLD_PYTHON_VERSION}' not in contents
