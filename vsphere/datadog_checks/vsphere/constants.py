@@ -83,9 +83,7 @@ PROPERTY_COUNT_METRICS = [
     "summary.runtime.connectionState",
     "summary.runtime.powerState",
     "summary.runtime.inMaintenanceMode",
-    "configuration.drsConfig.enabled",
     "configuration.drsConfig.defaultVmBehavior",
-    "configuration.dasConfig.enabled",
 ]
 VM_OBJECT_PROPERTIES = ["guest.disk", "guest.net", "guest.ipStack"]
 

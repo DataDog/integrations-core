@@ -690,11 +690,12 @@ class VSphereCheck(AgentCheck):
             return
 
         is_count_metric = metric_name in PROPERTY_COUNT_METRICS
+        is_bool_metric = isinstance(metric_value, bool)
 
         if additional_tags is None:
             additional_tags = {}
 
-        if is_count_metric:
+        if is_count_metric or is_bool_metric:
             no_additional_tags = all(tag is None for tag in additional_tags.values())
             if no_additional_tags:
                 if metric_value is None:
@@ -713,10 +714,10 @@ class VSphereCheck(AgentCheck):
                 property_tag = {tag_name: metric_value}
                 additional_tags.update(property_tag)
 
-            # set metric value to 1 since it is not a float
-            metric_value = 1
+            if is_count_metric:
+                metric_value = 1
 
-        else:
+        elif not is_count_metric or is_bool_metric:
             try:
                 metric_value = float(metric_value)
             except Exception:
