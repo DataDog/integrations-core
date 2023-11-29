@@ -16,4 +16,9 @@ services:
     ports:
       - "1433:1433"
     volumes:
-      - ${DD_LOG_1}:/var/opt/mssql/log/errorlog
+    # If necessary, you can copy data out via `docker compose cp`, eg:
+    #   docker compose cp sqlserver:/var/opt/mssql/log/errorlog sqlserver.errorlog
+      - db-logs:/var/opt/mssql/log
+
+volumes:
+  db-logs:      
