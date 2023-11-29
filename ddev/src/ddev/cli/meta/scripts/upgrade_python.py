@@ -55,7 +55,7 @@ def integrations(app):
         names = ["datadog_checks_dependency_provider"]
         extra_integrations = [Integration(app.repo.path / name, app.repo.path, app.repo.config) for name in names]
 
-    return itertools.chain(app.repo.integrations.iter_testable(['all']), extra_integrations)
+    return itertools.chain(app.repo.integrations.iter_packages(['all']), extra_integrations)
 
 
 def update_ci_files(app: Application, new_version: str, old_version: str, tracker: ValidationTracker):
