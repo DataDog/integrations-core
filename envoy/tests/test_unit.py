@@ -49,6 +49,35 @@ def test_check(aggregator, dd_run_check, check, mock_http_response):
     aggregator.assert_no_duplicate_metrics()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
+@requires_py3
+def test_om_label_in_name_metrics(aggregator, dd_run_check, check, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('openmetrics_label_in_name.txt'))
+
+    c = check(DEFAULT_INSTANCE)
+
+    dd_run_check(c)
+
+    metrics = [
+        'http.local.rate_limit.enabled.count',
+        'http.local.rate_limit.enforced.count',
+        'http.local.rate_limit.ok.count',
+        'http.local.rate_limit.rate_limited.count',
+    ]
+
+    stat_prefix = 'envoy_http_local_rate_limiter'
+    
+    for metric in metrics:
+        aggregator.assert_metric("envoy.{}".format(metric))
+        aggregator.assert_metric_has_tag("envoy.{}".format(metric), 'stat_prefix:{}'.format(stat_prefix))
+
+    aggregator.assert_service_check(
+        "envoy.openmetrics.health", status=AgentCheck.OK, tags=['endpoint:http://localhost:8001/stats/prometheus']
+    )
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_no_duplicate_metrics()
+    # aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
 
 @requires_py3
 def test_collect_metadata(datadog_agent, fixture_path, mock_http_response, check, default_instance):
