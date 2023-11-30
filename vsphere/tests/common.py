@@ -758,7 +758,7 @@ VM_PROPERTIES_EX = mock.MagicMock(
                     ),
                     vmodl.DynamicProperty(
                         name='summary.runtime.inMaintenanceMode',
-                        val='False',
+                        val=False,
                     ),
                 ],
             ),
@@ -779,7 +779,7 @@ VM_PROPERTIES_EX = mock.MagicMock(
                     ),
                     vmodl.DynamicProperty(
                         name='summary.runtime.inMaintenanceMode',
-                        val='True',
+                        val=True,
                     ),
                 ],
             ),

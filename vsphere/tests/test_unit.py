@@ -2672,7 +2672,7 @@ def test_host_property_metrics(aggregator, realtime_instance, dd_run_check, capl
     aggregator.assert_metric(
         'vsphere.host.summary.runtime.inMaintenanceMode',
         count=1,
-        value=1,
+        value=0,
         tags=base_tags_host + ["inMaintenanceMode:False"],
         hostname='host1',
     )
