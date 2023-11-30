@@ -8,7 +8,7 @@ from six.moves.urllib.parse import urljoin, urlparse, urlunparse
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 
-from .metrics import PROMETHEUS_METRICS_MAP, DYNAMIC_METRIC_MAP
+from .metrics import DYNAMIC_METRIC_MAP, PROMETHEUS_METRICS_MAP
 from .utils import _get_server_info
 
 ENVOY_VERSION = {'istio_build': {'type': 'metadata', 'label': 'tag', 'name': 'version'}}
@@ -113,6 +113,7 @@ METRIC_WITH_LABEL_NAME = {
 
 METRIC_WITH_LABEL_NAME.update(DYNAMIC_METRIC_MAP)
 
+
 class EnvoyCheckV2(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'envoy'
 
@@ -145,19 +146,22 @@ class EnvoyCheckV2(OpenMetricsBaseCheckV2):
     def configure_transformer_label_in_name(self, metric_pattern, new_name, label_name, metric_type):
         method = getattr(self, metric_type)
         cached_patterns = defaultdict(lambda: re.compile(metric_pattern))
+
         def transform(metric, sample_data, runtime_data):
             for sample, tags, hostname in sample_data:
                 parsed_sample_name = sample.name
                 if metric.type == 'histogram':
+                    # Because histogram have multiple suffixes we need to treat them individually
+                    # Check for the suffix in each sample and then adjust the name accordingly
                     groups = re.match("(.*)_(bucket|sum|count)$", sample.name).groups()
                     parsed_sample_name = groups[0]
                     transformed_name = f'{new_name}.{groups[1]}'
                 else:
                     transformed_name = new_name
-                    
+
                 if sample.name.endswith("_total"):
                     parsed_sample_name = re.match("(.*)_total$", sample.name).groups()[0]
-            
+
                 label_value = cached_patterns[metric_pattern].match(parsed_sample_name).groups()[0]
 
                 tags.append('{}:{}'.format(label_name, label_value))

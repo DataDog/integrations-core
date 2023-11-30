@@ -9,7 +9,13 @@ from datadog_checks.dev.testing import requires_py2, requires_py3
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy.metrics import PROMETHEUS_METRICS_MAP
 
-from .common import DEFAULT_INSTANCE, DYNAMIC_OM_METRICS, MOCKED_PROMETHEUS_METRICS, OM_LOCAL_FILTER_METRICS, get_fixture_path
+from .common import (
+    DEFAULT_INSTANCE,
+    DYNAMIC_OM_METRICS,
+    MOCKED_PROMETHEUS_METRICS,
+    OM_LOCAL_FILTER_METRICS,
+    get_fixture_path,
+)
 
 pytestmark = [pytest.mark.unit]
 
@@ -49,17 +55,18 @@ def test_check(aggregator, dd_run_check, check, mock_http_response):
     aggregator.assert_no_duplicate_metrics()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
+
 @requires_py3
 @pytest.mark.parametrize(
     'metrics, tag, fixture_file',
     [
-        (DYNAMIC_OM_METRICS, ['envoy_destination','8443_fooBAZbarBUZ123456_'], 'openmetrics_dynamic.txt'),
-        (OM_LOCAL_FILTER_METRICS, ['stat_prefix','envoy_http_local_rate_limiter'], 'openmetrics_label_in_name.txt'),
+        (DYNAMIC_OM_METRICS, ['envoy_destination', '8443_fooBAZbarBUZ123456_'], 'openmetrics_dynamic.txt'),
+        (OM_LOCAL_FILTER_METRICS, ['stat_prefix', 'envoy_http_local_rate_limiter'], 'openmetrics_label_in_name.txt'),
     ],
     ids=[
         "Dynamic_Metrics",
         "Local_Filter_Metrics",
-    ]
+    ],
 )
 def test_om_label_in_name_metrics(aggregator, dd_run_check, check, mock_http_response, metrics, tag, fixture_file):
     mock_http_response(file_path=get_fixture_path(fixture_file))
@@ -67,7 +74,7 @@ def test_om_label_in_name_metrics(aggregator, dd_run_check, check, mock_http_res
     c = check(DEFAULT_INSTANCE)
 
     dd_run_check(c)
-    
+
     for metric in metrics:
         aggregator.assert_metric(f'envoy.{metric}')
         aggregator.assert_metric_has_tag(f'envoy.{metric}', f'{tag[0]}:{tag[1]}')
@@ -79,6 +86,7 @@ def test_om_label_in_name_metrics(aggregator, dd_run_check, check, mock_http_res
     aggregator.assert_all_metrics_covered()
     aggregator.assert_no_duplicate_metrics()
     # aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
 
 @requires_py3
 def test_collect_metadata(datadog_agent, fixture_path, mock_http_response, check, default_instance):
