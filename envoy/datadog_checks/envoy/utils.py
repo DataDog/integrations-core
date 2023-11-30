@@ -108,6 +108,6 @@ def create_metric_from_partial(metric_dict, label_name, raw_metric_namespace, me
             metrics[r"{}_(.+)_{}$".format(raw_metric_namespace, metric)] = {
                 'label_name': label_name,
                 'metric_type': metric_type,
-                'new_name': f"{metric_family_name}.{metric}{'.count' if metric_type == 'count' else ''}",
+                'new_name': "{}.{}{}".format(metric_family_name, metric, '.count' if metric_type == 'count' else ''),
             }
     return metrics
