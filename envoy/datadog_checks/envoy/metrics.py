@@ -1,7 +1,9 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from .utils import make_metric_tree
+from six import PY3
+
+from .utils import create_metric_from_partial, make_metric_tree
 
 METRIC_PREFIX = 'envoy.'
 
@@ -4070,31 +4072,5 @@ partial_metrics = {
     ],
 }
 
-
-def create_metric_from_partial(metric_dict, label_name, raw_metric_namespace, metric_family_name):
-    # This method takes in the following:
-    # metric_dict: dictionary containing {metric_type: [metric_names]}
-    # label_name: the label name that the matching group will be assigned to
-    # raw_metric_namespace: the common naming convention/namespace for the metric set as exposed on prometheus
-    # metric_family_name: the non dynamic name of the metric family as exposed on prometheus
-    # e.g: envoy_cluster_8443_fooBAZbarBUZ123456__bind_errors, envoy_cluster_8443_fooBAZbarBUZ123456__assignment_stale
-    # raw_metric_namespace = envoy_cluster, metric_family_name = _bind_errors and _assignment_stale respectively
-    ## TODO: add support for different regex patterns for the label regex
-    metrics = {}
-
-    for metric_type in metric_dict:
-        for metric in metric_dict[metric_type]:
-            if metric.endswith('_total'):
-                metric = metric[:-6]
-            if metric.startswith('_'):
-                metric = metric[1:]
-
-            metrics[rf"{raw_metric_namespace}_(.+)_{metric}$"] = {
-                'label_name': label_name,
-                'metric_type': metric_type,
-                'new_name': f"{metric_family_name}.{metric}{'.count' if metric_type == 'count' else ''}",
-            }
-    return metrics
-
-
-DYNAMIC_METRIC_MAP = create_metric_from_partial(partial_metrics, 'envoy_destination', 'envoy_cluster', 'cluster')
+if PY3:
+    DYNAMIC_METRIC_MAP = create_metric_from_partial(partial_metrics, 'envoy_destination', 'envoy_cluster', 'cluster')
