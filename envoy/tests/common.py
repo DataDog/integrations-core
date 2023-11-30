@@ -374,6 +374,223 @@ PROMETHEUS_METRICS = [
     "vhost.vcluster.upstream_rq.count",
 ]
 
+DYNAMIC_OM_METRICS = [
+    'cluster.assignment_stale',
+    'cluster.assignment_timeout_received',
+    'cluster.assignment_use_cached',
+    'cluster.bind_errors',
+    'cluster.circuit_breakers_default_cx_open',
+    'cluster.circuit_breakers_default_cx_pool_open',
+    'cluster.circuit_breakers_default_rq_open',
+    'cluster.circuit_breakers_default_rq_pending_open',
+    'cluster.circuit_breakers_default_rq_retry_open',
+    'cluster.circuit_breakers_high_cx_open',
+    'cluster.circuit_breakers_high_cx_pool_open',
+    'cluster.circuit_breakers_high_rq_open',
+    'cluster.circuit_breakers_high_rq_pending_open',
+    'cluster.circuit_breakers_high_rq_retry_open',
+    'cluster.client_ssl_socket_factory_downstream_context_secrets_not_ready',
+    'cluster.client_ssl_socket_factory_ssl_context_update_by_sds',
+    'cluster.client_ssl_socket_factory_upstream_context_secrets_not_ready',
+    'cluster.default_total_match_count',
+    'cluster.ext_authz_authenticator_denied',
+    'cluster.ext_authz_authenticator_error',
+    'cluster.ext_authz_authenticator_failure_mode_allowed',
+    'cluster.ext_authz_authenticator_ok',
+    'cluster.ext_authz_terminator_error',
+    'cluster.ext_authz_terminator_ok',
+    'cluster.external_upstream_rq',
+    'cluster.external_upstream_rq_completed',
+    'cluster.external_upstream_rq_time.bucket',
+    'cluster.external_upstream_rq_time.count',
+    'cluster.external_upstream_rq_time.sum',
+    'cluster.external_upstream_rq_xx',
+    'cluster.health_check_attempt',
+    'cluster.health_check_degraded',
+    'cluster.health_check_failure',
+    'cluster.health_check_healthy',
+    'cluster.health_check_network_failure',
+    'cluster.health_check_passive_failure',
+    'cluster.health_check_success',
+    'cluster.health_check_verify_cluster',
+    'cluster.http2_deferred_stream_close',
+    'cluster.http2_dropped_headers_with_underscores',
+    'cluster.http2_goaway_sent',
+    'cluster.http2_header_overflow',
+    'cluster.http2_headers_cb_no_stream',
+    'cluster.http2_inbound_empty_frames_flood',
+    'cluster.http2_inbound_priority_frames_flood',
+    'cluster.http2_inbound_window_update_frames_flood',
+    'cluster.http2_keepalive_timeout',
+    'cluster.http2_metadata_empty_frames',
+    'cluster.http2_outbound_control_flood',
+    'cluster.http2_outbound_control_frames_active',
+    'cluster.http2_outbound_flood',
+    'cluster.http2_outbound_frames_active',
+    'cluster.http2_pending_send_bytes',
+    'cluster.http2_requests_rejected_with_underscores_in_headers',
+    'cluster.http2_rx_messaging_error',
+    'cluster.http2_rx_reset',
+    'cluster.http2_stream_refused_errors',
+    'cluster.http2_streams_active',
+    'cluster.http2_trailers',
+    'cluster.http2_tx_flush_timeout',
+    'cluster.http2_tx_reset',
+    'cluster.init_fetch_timeout',
+    'cluster.internal_upstream_rq',
+    'cluster.internal_upstream_rq_completed',
+    'cluster.internal_upstream_rq_xx',
+    'cluster.lb_healthy_panic',
+    'cluster.lb_local_cluster_not_ok',
+    'cluster.lb_recalculate_zone_structures',
+    'cluster.lb_subsets_active',
+    'cluster.lb_subsets_created',
+    'cluster.lb_subsets_fallback',
+    'cluster.lb_subsets_fallback_panic',
+    'cluster.lb_subsets_removed',
+    'cluster.lb_subsets_selected',
+    'cluster.lb_subsets_single_host_per_subset_duplicate',
+    'cluster.lb_zone_cluster_too_small',
+    'cluster.lb_zone_no_capacity_left',
+    'cluster.lb_zone_number_differs',
+    'cluster.lb_zone_routing_all_directly',
+    'cluster.lb_zone_routing_cross_zone',
+    'cluster.lb_zone_routing_sampled',
+    'cluster.max_host_weight',
+    'cluster.membership_change',
+    'cluster.membership_degraded',
+    'cluster.membership_excluded',
+    'cluster.membership_healthy',
+    'cluster.original_dst_host_invalid',
+    'cluster.outlier_detection_ejections',
+    'cluster.outlier_detection_ejections_active',
+    'cluster.outlier_detection_ejections_consecutive_5xx',
+    'cluster.outlier_detection_ejections_detected_consecutive_5xx',
+    'cluster.outlier_detection_ejections_detected_consecutive_gateway_failure',
+    'cluster.outlier_detection_ejections_detected_consecutive_local_origin_failure',
+    'cluster.outlier_detection_ejections_detected_failure_percentage',
+    'cluster.outlier_detection_ejections_detected_local_origin_failure_percentage',
+    'cluster.outlier_detection_ejections_detected_local_origin_success_rate',
+    'cluster.outlier_detection_ejections_detected_success_rate',
+    'cluster.outlier_detection_ejections_enforced',
+    'cluster.outlier_detection_ejections_enforced_consecutive_5xx',
+    'cluster.outlier_detection_ejections_enforced_consecutive_gateway_failure',
+    'cluster.outlier_detection_ejections_enforced_consecutive_local_origin_failure',
+    'cluster.outlier_detection_ejections_enforced_failure_percentage',
+    'cluster.outlier_detection_ejections_enforced_local_origin_failure_percentage',
+    'cluster.outlier_detection_ejections_enforced_local_origin_success_rate',
+    'cluster.outlier_detection_ejections_enforced_success_rate',
+    'cluster.outlier_detection_ejections_overflow',
+    'cluster.outlier_detection_ejections_success_rate',
+    'cluster.ratelimit_error',
+    'cluster.ratelimit_failure_mode_allowed',
+    'cluster.ratelimit_ok',
+    'cluster.ratelimit_over_limit',
+    'cluster.retry_or_shadow_abandoned',
+    'cluster.ssl_ciphers_TLS_AES_128_GCM_SHA256',
+    'cluster.ssl_connection_error',
+    'cluster.ssl_curves',
+    'cluster.ssl_fail_verify_cert_hash',
+    'cluster.ssl_fail_verify_error',
+    'cluster.ssl_fail_verify_no_cert',
+    'cluster.ssl_fail_verify_san',
+    'cluster.ssl_handshake',
+    'cluster.ssl_no_certificate',
+    'cluster.ssl_ocsp_staple_failed',
+    'cluster.ssl_ocsp_staple_omitted',
+    'cluster.ssl_ocsp_staple_requests',
+    'cluster.ssl_ocsp_staple_responses',
+    'cluster.ssl_session_reused',
+    'cluster.ssl_sigalgs',
+    'cluster.ssl_versions',
+    'cluster.ssl_was_key_usage_invalid',
+    'cluster.update_attempt',
+    'cluster.update_duration.bucket',
+    'cluster.update_duration.count',
+    'cluster.update_duration.sum',
+    'cluster.update_empty',
+    'cluster.update_failure',
+    'cluster.update_no_rebuild',
+    'cluster.update_rejected',
+    'cluster.update_success',
+    'cluster.update_time',
+    'cluster.upstream_cx',
+    'cluster.upstream_cx_active',
+    'cluster.upstream_cx_close_notify',
+    'cluster.upstream_cx_connect_attempts_exceeded',
+    'cluster.upstream_cx_connect_fail',
+    'cluster.upstream_cx_connect_ms.bucket',
+    'cluster.upstream_cx_connect_ms.count',
+    'cluster.upstream_cx_connect_ms.sum',
+    'cluster.upstream_cx_connect_timeout',
+    'cluster.upstream_cx_connect_with_0_rtt',
+    'cluster.upstream_cx_destroy',
+    'cluster.upstream_cx_destroy_local',
+    'cluster.upstream_cx_destroy_local_with_active_rq',
+    'cluster.upstream_cx_destroy_remote',
+    'cluster.upstream_cx_destroy_remote_with_active_rq',
+    'cluster.upstream_cx_destroy_with_active_rq',
+    'cluster.upstream_cx_http1',
+    'cluster.upstream_cx_http2',
+    'cluster.upstream_cx_http3',
+    'cluster.upstream_cx_idle_timeout',
+    'cluster.upstream_cx_length_ms.bucket',
+    'cluster.upstream_cx_length_ms.count',
+    'cluster.upstream_cx_length_ms.sum',
+    'cluster.upstream_cx_max_duration_reached',
+    'cluster.upstream_cx_max_requests',
+    'cluster.upstream_cx_none_healthy',
+    'cluster.upstream_cx_overflow',
+    'cluster.upstream_cx_pool_overflow',
+    'cluster.upstream_cx_protocol_error',
+    'cluster.upstream_cx_rx_bytes',
+    'cluster.upstream_cx_rx_bytes_buffered',
+    'cluster.upstream_cx_tx_bytes',
+    'cluster.upstream_cx_tx_bytes_buffered',
+    'cluster.upstream_flow_control_backed_up',
+    'cluster.upstream_flow_control_drained',
+    'cluster.upstream_flow_control_paused_reading',
+    'cluster.upstream_flow_control_resumed_reading',
+    'cluster.upstream_http3_broken',
+    'cluster.upstream_internal_redirect_failed',
+    'cluster.upstream_internal_redirect_succeeded',
+    'cluster.upstream_rq',
+    'cluster.upstream_rq_0rtt',
+    'cluster.upstream_rq_active',
+    'cluster.upstream_rq_cancelled',
+    'cluster.upstream_rq_completed',
+    'cluster.upstream_rq_maintenance_mode',
+    'cluster.upstream_rq_max_duration_reached',
+    'cluster.upstream_rq_pending',
+    'cluster.upstream_rq_pending_active',
+    'cluster.upstream_rq_pending_failure_eject',
+    'cluster.upstream_rq_pending_overflow',
+    'cluster.upstream_rq_per_try_idle_timeout',
+    'cluster.upstream_rq_per_try_timeout',
+    'cluster.upstream_rq_retry',
+    'cluster.upstream_rq_retry_backoff_exponential',
+    'cluster.upstream_rq_retry_backoff_ratelimited',
+    'cluster.upstream_rq_retry_limit_exceeded',
+    'cluster.upstream_rq_retry_overflow',
+    'cluster.upstream_rq_retry_success',
+    'cluster.upstream_rq_rx_reset',
+    'cluster.upstream_rq_time.bucket',
+    'cluster.upstream_rq_time.count',
+    'cluster.upstream_rq_time.sum',
+    'cluster.upstream_rq_timeout',
+    'cluster.upstream_rq_tx_reset',
+    'cluster.upstream_rq_xx',
+    'cluster.version',
+    'cluster.warming_state',
+]
+
+OM_LOCAL_FILTER_METRICS =[
+    'http.local.rate_limit.enabled.count',
+    'http.local.rate_limit.enforced.count',
+    'http.local.rate_limit.ok.count',
+    'http.local.rate_limit.rate_limited.count',
+]
+
 FLAKY_METRICS = {
     "listener.downstream_cx_active",
     "listener.downstream_cx_destroy.count",
@@ -699,5 +916,217 @@ MOCKED_PROMETHEUS_METRICS = {
 }
 
 
+
+
 def get_fixture_path(filename):
     return os.path.join(HERE, 'fixtures', filename)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -8,7 +8,7 @@ from six.moves.urllib.parse import urljoin, urlparse, urlunparse
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 
-from .metrics import PROMETHEUS_METRICS_MAP
+from .metrics import PROMETHEUS_METRICS_MAP, DYNAMIC_METRIC_MAP
 from .utils import _get_server_info
 
 ENVOY_VERSION = {'istio_build': {'type': 'metadata', 'label': 'tag', 'name': 'version'}}
@@ -89,28 +89,29 @@ METRIC_WITH_LABEL_NAME = {
         'metric_type': 'monotonic_count',
         'new_name': 'listener.downstream_cx.count',
     },
-    r'(.+)_http_local_rate_limit_enabled': {
+    r'(.+)_http_local_rate_limit_enabled$': {
         'label_name': 'stat_prefix',
-        'metric_type': 'count',
+        'metric_type': 'monotonic_count',
         'new_name': 'http.local.rate_limit.enabled.count',
     },
-    r'(.+)_http_local_rate_limit_enforced': {
+    r'(.+)_http_local_rate_limit_enforced$': {
         'label_name': 'stat_prefix',
-        'metric_type': 'count',
+        'metric_type': 'monotonic_count',
         'new_name': 'http.local.rate_limit.enforced.count',
     },
-    r'(.+)_http_local_rate_limit_ok': {
+    r'(.+)_http_local_rate_limit_ok$': {
         'label_name': 'stat_prefix',
-        'metric_type': 'count',
+        'metric_type': 'monotonic_count',
         'new_name': 'http.local.rate_limit.ok.count',
     },
-    r'(.+)_http_local_rate_limit_rate_limited': {
+    r'(.+)_http_local_rate_limit_rate_limited$': {
         'label_name': 'stat_prefix',
-        'metric_type': 'count',
+        'metric_type': 'monotonic_count',
         'new_name': 'http.local.rate_limit.rate_limited.count',
     },
 }
 
+METRIC_WITH_LABEL_NAME.update(DYNAMIC_METRIC_MAP)
 
 class EnvoyCheckV2(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'envoy'
@@ -144,16 +145,24 @@ class EnvoyCheckV2(OpenMetricsBaseCheckV2):
     def configure_transformer_label_in_name(self, metric_pattern, new_name, label_name, metric_type):
         method = getattr(self, metric_type)
         cached_patterns = defaultdict(lambda: re.compile(metric_pattern))
-
         def transform(metric, sample_data, runtime_data):
             for sample, tags, hostname in sample_data:
                 parsed_sample_name = sample.name
+                if metric.type == 'histogram':
+                    groups = re.match("(.*)_(bucket|sum|count)$", sample.name).groups()
+                    parsed_sample_name = groups[0]
+                    transformed_name = f'{new_name}.{groups[1]}'
+                else:
+                    transformed_name = new_name
+                    
                 if sample.name.endswith("_total"):
                     parsed_sample_name = re.match("(.*)_total$", sample.name).groups()[0]
+            
                 label_value = cached_patterns[metric_pattern].match(parsed_sample_name).groups()[0]
 
                 tags.append('{}:{}'.format(label_name, label_value))
-                method(new_name, sample.value, tags=tags, hostname=hostname)
+
+                method(transformed_name, sample.value, tags=tags, hostname=hostname)
 
         return transform
 

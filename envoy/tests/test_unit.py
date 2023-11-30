@@ -9,7 +9,7 @@ from datadog_checks.dev.testing import requires_py2, requires_py3
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy.metrics import PROMETHEUS_METRICS_MAP
 
-from .common import DEFAULT_INSTANCE, MOCKED_PROMETHEUS_METRICS, get_fixture_path
+from .common import DEFAULT_INSTANCE, DYNAMIC_OM_METRICS, MOCKED_PROMETHEUS_METRICS, OM_LOCAL_FILTER_METRICS, get_fixture_path
 
 pytestmark = [pytest.mark.unit]
 
@@ -39,7 +39,7 @@ def test_check(aggregator, dd_run_check, check, mock_http_response):
     dd_run_check(c)
 
     for metric in MOCKED_PROMETHEUS_METRICS:
-        aggregator.assert_metric("envoy.{}".format(metric))
+        aggregator.assert_metric(f'envoy.{metric}')
 
     aggregator.assert_service_check(
         "envoy.openmetrics.health", status=AgentCheck.OK, tags=['endpoint:http://localhost:8001/stats/prometheus']
@@ -57,18 +57,33 @@ def test_om_label_in_name_metrics(aggregator, dd_run_check, check, mock_http_res
 
     dd_run_check(c)
 
-    metrics = [
-        'http.local.rate_limit.enabled.count',
-        'http.local.rate_limit.enforced.count',
-        'http.local.rate_limit.ok.count',
-        'http.local.rate_limit.rate_limited.count',
-    ]
-
     stat_prefix = 'envoy_http_local_rate_limiter'
     
-    for metric in metrics:
-        aggregator.assert_metric("envoy.{}".format(metric))
-        aggregator.assert_metric_has_tag("envoy.{}".format(metric), 'stat_prefix:{}'.format(stat_prefix))
+    for metric in OM_LOCAL_FILTER_METRICS:
+        aggregator.assert_metric(f'envoy.{metric}')
+        aggregator.assert_metric_has_tag(f'envoy.{metric}', f'stat_prefix:{stat_prefix}')
+
+    aggregator.assert_service_check(
+        "envoy.openmetrics.health", status=AgentCheck.OK, tags=['endpoint:http://localhost:8001/stats/prometheus']
+    )
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_no_duplicate_metrics()
+    # aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+@requires_py3
+def test_om_label_in_name_dynamic_metrics(aggregator, dd_run_check, check, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('openmetrics_dynamic.txt'))
+
+    c = check(DEFAULT_INSTANCE)
+
+    dd_run_check(c)
+
+    envoy_destination = '8443_fooBAZbarBUZ123456_'
+    
+    for metric in DYNAMIC_OM_METRICS:
+        aggregator.assert_metric(f'envoy.{metric}')
+        aggregator.assert_metric_has_tag(f'envoy.{metric}', f'envoy_destination:{envoy_destination}')
 
     aggregator.assert_service_check(
         "envoy.openmetrics.health", status=AgentCheck.OK, tags=['endpoint:http://localhost:8001/stats/prometheus']
