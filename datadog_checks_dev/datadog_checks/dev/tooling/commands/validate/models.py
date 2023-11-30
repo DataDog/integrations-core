@@ -39,7 +39,7 @@ from ..console import (
 
 LICENSE_HEADER = "(C) Datadog, Inc."
 
-NO_MODELS_CHECK = {
+INTEGRATIONS_WITHOUT_MODELS = {
     'snmp',  # Deprecated
     'tokumx',  # Python 2 only
 }
@@ -82,8 +82,8 @@ def models(ctx, check, sync, verbose):
     checks, an 'all' or empty `check` value will validate all README files.
     """
     root = get_root()
-    community_check = ctx.obj['repo_choice'] not in ('core', 'internal')
-    core_check = ctx.obj['repo_choice'] == 'core'
+    is_community_check = ctx.obj['repo_choice'] not in ('core', 'internal')
+    is_core_check = ctx.obj['repo_choice'] == 'core'
 
     checks = set(process_checks_option(check, source='valid_checks', extend_changed=True))
 
@@ -98,8 +98,8 @@ def models(ctx, check, sync, verbose):
 
     code_formatter = ModelConsumer.create_code_formatter()
 
-    if core_check:
-        checks = checks.difference(NO_MODELS_CHECK)
+    if is_core_check:
+        checks = checks.difference(INTEGRATIONS_WITHOUT_MODELS)
 
     for check in sorted(checks):
         display_queue = {}
@@ -136,7 +136,7 @@ def models(ctx, check, sync, verbose):
         else:
             models_location = get_models_location(check)
 
-            if not sync and not dir_exists(models_location) and not core_check:
+            if not sync and not dir_exists(models_location) and not is_core_check:
                 continue
 
         model_consumer = ModelConsumer(spec.data, code_formatter)
@@ -174,7 +174,7 @@ def models(ctx, check, sync, verbose):
                     # validators.py and deprecations.py are custom files, they should only be rendered the first time
                     continue
 
-            if not community_check:
+            if not is_community_check:
                 expected_model_file_lines.extend(license_header_lines)
 
             if model_file not in CUSTOM_FILES:
@@ -184,7 +184,7 @@ def models(ctx, check, sync, verbose):
 
             # If we're re-generating a file, we should ensure we do not change the license date
             # We also want to handle the case where there is no license header
-            if not community_check:
+            if not is_community_check:
                 if len(current_model_file_lines) > 0 and LICENSE_HEADER in current_model_file_lines[0]:
                     expected_model_file_lines[0] = current_model_file_lines[0]
 
