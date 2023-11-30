@@ -85,3 +85,20 @@ def _get_server_info(server_info_url, log, http):
         return None
 
     return raw_version
+
+
+def modify_metrics_dict(metrics):
+    # This function removes the wildcard from the metric list defined in metrics.py. Parser.py compares the compiled
+    # metric with the metrics lists and if the entry is not found, it will raise an UnknowMetric error. Since the "*."
+    # is used for wildcard matching, the comparison will always be false. E.g.:
+    # "*.http_local_rate_limit.enabled" =/= "http_local_rate_limit.enabled
+    # This is needed for metrics that start with a configurable namespace such as:
+    # `<stat_prefix>.http_local_rate_limit.enabled` and parsed as http_local_rate_limit.enabled with tag
+    # `stat_prefix=<stat_prefix>` in the parser.py
+    mod_metrics_dict = {}
+
+    for key, value in metrics.items():
+        new_key = key.replace('*.', '')
+        mod_metrics_dict[new_key] = value
+
+    return mod_metrics_dict
