@@ -39,6 +39,11 @@ from ..console import (
 
 LICENSE_HEADER = "(C) Datadog, Inc."
 
+NO_MODELS_CHECK = {
+    'snmp',  # Deprecated
+    'tokumx',  # Python 2 only
+}
+
 
 def standardize_new_lines(lines):
     # If a new line is at the start or end of a line, remove it and add it to the list
@@ -78,8 +83,10 @@ def models(ctx, check, sync, verbose):
     """
     root = get_root()
     community_check = ctx.obj['repo_choice'] not in ('core', 'internal')
+    core_check = ctx.obj['repo_choice'] == 'core'
 
-    checks = process_checks_option(check, source='valid_checks', extend_changed=True)
+    checks = set(process_checks_option(check, source='valid_checks', extend_changed=True))
+
     echo_info(f"Validating data models for {len(checks)} checks ...")
 
     specs_failed = {}
@@ -91,7 +98,10 @@ def models(ctx, check, sync, verbose):
 
     code_formatter = ModelConsumer.create_code_formatter()
 
-    for check in checks:
+    if core_check:
+        checks = checks.difference(NO_MODELS_CHECK)
+
+    for check in sorted(checks):
         display_queue = {}
         if check == 'datadog_checks_base':
             spec_path = path_join(root, 'datadog_checks_base', 'tests', 'models', 'data', 'spec.yaml')
@@ -126,8 +136,7 @@ def models(ctx, check, sync, verbose):
         else:
             models_location = get_models_location(check)
 
-            # TODO: Remove when all integrations have models
-            if not sync and not dir_exists(models_location):
+            if not sync and not dir_exists(models_location) and not core_check:
                 continue
 
         model_consumer = ModelConsumer(spec.data, code_formatter)
