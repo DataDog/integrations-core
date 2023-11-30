@@ -14,11 +14,4 @@ services:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=Password123
     ports:
-      - "1433:1433"
-    volumes:
-    # If necessary, you can copy data out via `docker compose cp`, eg:
-    #   docker compose cp sqlserver:/var/opt/mssql/log/errorlog sqlserver.errorlog
-      - db-logs:/var/opt/mssql/log
-
-volumes:
-  db-logs:      
+      - "1433:1433"     
