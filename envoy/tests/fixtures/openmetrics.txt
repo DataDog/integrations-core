@@ -639,6 +639,14 @@ envoy_cluster_manager_cds_control_plane_rate_limit_enforced{} 0
 envoy_cluster_manager_cds_update_attempt{} 13
 # TYPE envoy_cluster_manager_cds_update_failure counter
 envoy_cluster_manager_cds_update_failure{} 12
+# TYPE envoy_http_local_rate_limit_enabled counter
+envoy_http_local_rate_limit_enabled{envoy_local_http_ratelimit_prefix="http_local_rate_limiter"} 0
+# TYPE envoy_http_local_rate_limit_enforced counter
+envoy_http_local_rate_limit_enforced{envoy_local_http_ratelimit_prefix="http_local_rate_limiter"} 0
+# TYPE envoy_http_local_rate_limit_ok counter
+envoy_http_local_rate_limit_ok{envoy_local_http_ratelimit_prefix="http_local_rate_limiter"} 0
+# TYPE envoy_http_local_rate_limit_rate_limited counter
+envoy_http_local_rate_limit_rate_limited{envoy_local_http_ratelimit_prefix="http_local_rate_limiter"} 0
 # TYPE envoy_listener_admin_downstream_cx_destroy counter
 envoy_listener_admin_downstream_cx_destroy{} 7
 # TYPE envoy_listener_admin_http_downstream_rq_xx counter
