@@ -64,8 +64,8 @@ def test_check(aggregator, dd_run_check, check, mock_http_response):
         (OM_LOCAL_FILTER_METRICS, ['stat_prefix', 'envoy_http_local_rate_limiter'], 'openmetrics_label_in_name.txt'),
     ],
     ids=[
-        "Dynamic_Metrics",
-        "Local_Filter_Metrics",
+        "dynamic_metrics",
+        "local_filter_metrics",
     ],
 )
 def test_om_label_in_name_metrics(aggregator, dd_run_check, check, mock_http_response, metrics, tag, fixture_file):
