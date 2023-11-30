@@ -45,7 +45,7 @@ def test_check(aggregator, dd_run_check, check, mock_http_response):
     dd_run_check(c)
 
     for metric in MOCKED_PROMETHEUS_METRICS:
-        aggregator.assert_metric(f'envoy.{metric}')
+        aggregator.assert_metric('envoy.{}'.format(metric))
 
     aggregator.assert_service_check(
         "envoy.openmetrics.health", status=AgentCheck.OK, tags=['endpoint:http://localhost:8001/stats/prometheus']

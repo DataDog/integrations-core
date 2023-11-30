@@ -155,7 +155,7 @@ class EnvoyCheckV2(OpenMetricsBaseCheckV2):
                     # Check for the suffix in each sample and then adjust the name accordingly
                     groups = re.match("(.*)_(bucket|sum|count)$", sample.name).groups()
                     parsed_sample_name = groups[0]
-                    transformed_name = f'{new_name}.{groups[1]}'
+                    transformed_name = '{}.{}'.format(new_name, groups[1])
                 else:
                     transformed_name = new_name
 
