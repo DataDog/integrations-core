@@ -699,7 +699,7 @@ class VSphereCheck(AgentCheck):
             if no_additional_tags:
                 if metric_value is None:
                     self.log.debug(
-                        "Could not sumbit property metric- no metric data: name=`%s`, value=`%s`, hostname=`%s`, "
+                        "Could not submit property metric- no metric data: name=`%s`, value=`%s`, hostname=`%s`, "
                         "base tags=`%s` additional tags=`%s`",
                         metric_full_name,
                         metric_value,
@@ -721,7 +721,7 @@ class VSphereCheck(AgentCheck):
                 metric_value = float(metric_value)
             except Exception:
                 self.log.debug(
-                    "Could not sumbit property metric- unexpected metric value: name=`%s`, value=`%s`, hostname=`%s`, "
+                    "Could not submit property metric- unexpected metric value: name=`%s`, value=`%s`, hostname=`%s`, "
                     "base tags=`%s` additional tags=`%s`",
                     metric_full_name,
                     metric_value,
