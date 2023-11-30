@@ -700,7 +700,7 @@ class VSphereCheck(AgentCheck):
             if no_additional_tags:
                 if metric_value is None:
                     self.log.debug(
-                        "Could not sumbit property metric- no metric data: name=`%s`, value=`%s`, hostname=`%s`, "
+                        "Could not submit property metric- no metric data: name=`%s`, value=`%s`, hostname=`%s`, "
                         "base tags=`%s` additional tags=`%s`, is_bool_metric=`%s`",
                         metric_full_name,
                         metric_value,
@@ -723,7 +723,7 @@ class VSphereCheck(AgentCheck):
                 metric_value = float(metric_value)
             except Exception:
                 self.log.debug(
-                    "Could not sumbit property metric- unexpected metric value: name=`%s`, value=`%s`, hostname=`%s`, "
+                    "Could not submit property metric- unexpected metric value: name=`%s`, value=`%s`, hostname=`%s`, "
                     "base tags=`%s` additional tags=`%s`, is_bool_metric=`%s`",
                     metric_full_name,
                     metric_value,
@@ -800,17 +800,18 @@ class VSphereCheck(AgentCheck):
             self.submit_property_metric(
                 'guest.net', 1, base_tags, hostname, resource_metric_suffix, additional_tags=nic_tags
             )
-            ip_addresses = nic.ipConfig.ipAddress
-            for ip_address in ip_addresses:
-                nic_tags['nic_ip_address'] = ip_address.ipAddress
-                self.submit_property_metric(
-                    'guest.net.ipConfig.address',
-                    1,
-                    base_tags,
-                    hostname,
-                    resource_metric_suffix,
-                    additional_tags=nic_tags,
-                )
+            if nic.ipConfig is not None:
+                ip_addresses = nic.ipConfig.ipAddress
+                for ip_address in ip_addresses:
+                    nic_tags['nic_ip_address'] = ip_address.ipAddress
+                    self.submit_property_metric(
+                        'guest.net.ipConfig.address',
+                        1,
+                        base_tags,
+                        hostname,
+                        resource_metric_suffix,
+                        additional_tags=nic_tags,
+                    )
 
     def submit_ip_stack_property_metrics(
         self,
@@ -826,29 +827,34 @@ class VSphereCheck(AgentCheck):
                 host_name = ip_stack.dnsConfig.hostName
                 domain_name = ip_stack.dnsConfig.domainName
                 ip_tags.update({'route_hostname': host_name, 'route_domain_name': domain_name})
-            ip_routes = ip_stack.ipRouteConfig.ipRoute
-            for ip_route in ip_routes:
-                prefix_length = ip_route.prefixLength
-                gateway_address = ip_route.gateway.ipAddress
-                network = ip_route.network
-                # network
-                device = ip_route.gateway.device
-                route_tags = {
-                    'device': device,
-                    'network_dest_ip': network,
-                    'prefix_length': prefix_length,
-                    'gateway_address': gateway_address,
-                }
-                ip_tags.update(route_tags)
 
-                self.submit_property_metric(
-                    'guest.ipStack.ipRoute',
-                    1,
-                    base_tags,
-                    hostname,
-                    resource_metric_suffix,
-                    additional_tags=ip_tags,
-                )
+            if ip_stack.ipRouteConfig is not None:
+                ip_routes = ip_stack.ipRouteConfig.ipRoute
+                for ip_route in ip_routes:
+                    prefix_length = ip_route.prefixLength
+                    network = ip_route.network
+
+                    route_tags = {
+                        'network_dest_ip': network,
+                        'prefix_length': prefix_length,
+                    }
+
+                    if ip_route.gateway:
+                        gateway_address = ip_route.gateway.ipAddress
+                        device = ip_route.gateway.device
+                        gateway_tags = {'device': device, 'gateway_address': gateway_address}
+                        route_tags.update(gateway_tags)
+
+                    ip_tags.update(route_tags)
+
+                    self.submit_property_metric(
+                        'guest.ipStack.ipRoute',
+                        1,
+                        base_tags,
+                        hostname,
+                        resource_metric_suffix,
+                        additional_tags=ip_tags,
+                    )
 
     def submit_simple_property_metrics(
         self,

@@ -68,6 +68,24 @@ python = ["2.7", "{OLD_PYTHON_VERSION}"]
         )
 
     write_file(
+        repo_path / 'logs_only',
+        'pyproject.toml',
+        f"""[project]
+    name = "dummy"
+    classifiers = [
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Developers",
+        "Intended Audience :: System Administrators",
+        "License :: OSI Approved :: BSD License",
+        "Natural Language :: English",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: {OLD_PYTHON_VERSION}",
+    ]
+    """,
+    )
+
+    write_file(
         repo_path / '.github' / 'workflows',
         'build-ddev.yml',
         f"""name: build ddev
