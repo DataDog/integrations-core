@@ -372,10 +372,10 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_http_rbac_denied': 'http.rbac_denied',
     'envoy_http_rbac_shadow_allowed': 'http.rbac_shadow_allowed',
     'envoy_http_rbac_shadow_denied': 'http.rbac_shadow_denied',
-    'envoy_http_local_rate_limit_enabled': 'http.local_rate_limit_enabled',
-    'envoy_http_local_rate_limit_enforced': 'http.local_rate_limit_enforced',
-    'envoy_http_local_rate_limit_rate_limited': 'http.local_rate_limit_rate_limited',
-    'envoy_http_local_rate_limit_ok': 'http.local_rate_limit_ok',
+    'envoy_http_local_rate_limit_enabled': 'http.local.rate.limit_enabled',
+    'envoy_http_local_rate_limit_enforced': 'http.local.rate.limit_enforced',
+    'envoy_http_local_rate_limit_rate_limited': 'http.local.rate_limit.rate_limited',
+    'envoy_http_local_rate_limit_ok': 'http.local.rate_limit.ok',
 }
 
 # fmt: off

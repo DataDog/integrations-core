@@ -89,6 +89,26 @@ METRIC_WITH_LABEL_NAME = {
         'metric_type': 'monotonic_count',
         'new_name': 'listener.downstream_cx.count',
     },
+    r'envoy_(.+)_http_local_rate_limit_enabled$': {
+        'label_name': 'stat_prefix',
+        'metric_type': 'monotonic_count',
+        'new_name': 'http.local_rate_limit_enabled.count',
+    },
+    r'envoy_(.+)_http_local_rate_limit_enforced$': {
+        'label_name': 'stat_prefix',
+        'metric_type': 'monotonic_count',
+        'new_name': 'http.local_rate_limit_enforced.count',
+    },
+    r'envoy_(.+)_http_local_rate_limit_ok$': {
+        'label_name': 'stat_prefix',
+        'metric_type': 'monotonic_count',
+        'new_name': 'http.local_rate_limit_ok.count',
+    },
+    r'envoy_(.+)_http_local_rate_limit_rate_limited$': {
+        'label_name': 'stat_prefix',
+        'metric_type': 'monotonic_count',
+        'new_name': 'http.local_rate_limit_rate_limited.count',
+    },
 }
 
 
