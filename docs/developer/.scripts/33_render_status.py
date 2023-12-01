@@ -38,10 +38,8 @@ def patch(lines):
         render_dashboard_progress,
         render_logs_progress,
         render_recommended_monitors_progress,
-        render_config_spec_progress,
         render_e2e_progress,
         render_latest_version_progress,
-        render_config_validation_progress,
         render_metadata_progress,
         render_process_signatures_progress,
         render_check_signatures_progress,
@@ -55,30 +53,6 @@ def patch(lines):
 
     new_lines.extend(lines[marker_index + 1:])
     return new_lines
-
-
-def render_config_spec_progress():
-    valid_checks = [x for x in sorted(get_valid_checks()) if not is_tile_only(x)]
-    total_checks = len(valid_checks)
-    checks_with_spec = 0
-
-    lines = ['## Config specs', '', None, '', '??? check "Completed"']
-
-    for check in valid_checks:
-        spec_path = get_default_config_spec(check)
-        if os.path.isfile(spec_path):
-            checks_with_spec += 1
-            status = 'X'
-        else:
-            status = ' '
-
-        lines.append(f'    - [{status}] {check}')
-
-    percent = checks_with_spec / total_checks * 100
-    formatted_percent = f'{percent:.2f}'
-    lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
-    lines[4] = f'??? check "Completed {checks_with_spec}/{total_checks}"'
-    return lines
 
 
 def render_dashboard_progress():
@@ -317,27 +291,4 @@ def render_recommended_monitors_progress():
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
     lines[4] = f'??? check "Completed {checks_with_rm}/{total_checks}"'
-    return lines
-
-
-def render_config_validation_progress():
-    valid_checks = sorted(c for c in get_valid_checks() if os.path.isfile(get_default_config_spec(c)))
-    total_checks = len(valid_checks)
-    checks_with_config_validation = 0
-
-    lines = ['## Config validation', '', None, '', '??? check "Completed"']
-
-    for check in valid_checks:
-        if has_config_models(check):
-            status = 'X'
-            checks_with_config_validation += 1
-        else:
-            status = ' '
-
-        lines.append(f'    - [{status}] {check}')
-
-    percent = checks_with_config_validation / total_checks * 100
-    formatted_percent = f'{percent:.2f}'
-    lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
-    lines[4] = f'??? check "Completed {checks_with_config_validation}/{total_checks}"'
     return lines

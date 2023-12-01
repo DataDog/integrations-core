@@ -39,6 +39,11 @@ from ..console import (
 
 LICENSE_HEADER = "(C) Datadog, Inc."
 
+INTEGRATIONS_WITHOUT_MODELS = {
+    'snmp',  # Deprecated
+    'tokumx',  # Python 2 only
+}
+
 
 def standardize_new_lines(lines):
     # If a new line is at the start or end of a line, remove it and add it to the list
@@ -77,9 +82,11 @@ def models(ctx, check, sync, verbose):
     checks, an 'all' or empty `check` value will validate all README files.
     """
     root = get_root()
-    community_check = ctx.obj['repo_choice'] not in ('core', 'internal')
+    is_community_check = ctx.obj['repo_choice'] not in ('core', 'internal')
+    is_core_check = ctx.obj['repo_choice'] == 'core'
 
-    checks = process_checks_option(check, source='valid_checks', extend_changed=True)
+    checks = set(process_checks_option(check, source='valid_checks', extend_changed=True))
+
     echo_info(f"Validating data models for {len(checks)} checks ...")
 
     specs_failed = {}
@@ -91,7 +98,10 @@ def models(ctx, check, sync, verbose):
 
     code_formatter = ModelConsumer.create_code_formatter()
 
-    for check in checks:
+    if is_core_check:
+        checks = checks.difference(INTEGRATIONS_WITHOUT_MODELS)
+
+    for check in sorted(checks):
         display_queue = {}
         if check == 'datadog_checks_base':
             spec_path = path_join(root, 'datadog_checks_base', 'tests', 'models', 'data', 'spec.yaml')
@@ -126,8 +136,7 @@ def models(ctx, check, sync, verbose):
         else:
             models_location = get_models_location(check)
 
-            # TODO: Remove when all integrations have models
-            if not sync and not dir_exists(models_location):
+            if not sync and not dir_exists(models_location) and not is_core_check:
                 continue
 
         model_consumer = ModelConsumer(spec.data, code_formatter)
@@ -165,7 +174,7 @@ def models(ctx, check, sync, verbose):
                     # validators.py and deprecations.py are custom files, they should only be rendered the first time
                     continue
 
-            if not community_check:
+            if not is_community_check:
                 expected_model_file_lines.extend(license_header_lines)
 
             if model_file not in CUSTOM_FILES:
@@ -175,7 +184,7 @@ def models(ctx, check, sync, verbose):
 
             # If we're re-generating a file, we should ensure we do not change the license date
             # We also want to handle the case where there is no license header
-            if not community_check:
+            if not is_community_check:
                 if len(current_model_file_lines) > 0 and LICENSE_HEADER in current_model_file_lines[0]:
                     expected_model_file_lines[0] = current_model_file_lines[0]
 
