@@ -56,9 +56,9 @@ The IBM Db2 integration pulls data using the following table functions:
 * `MON_GET_DATABASE`
 * `MON_GET_INSTANCE`
 
-For more information about these table functions see the [IBM documentation][17].
+For more information about these table functions, see the [official IBM documentation][17].
 
-To monitor a Db2 instance, create a Db2 user with either the `EXECUTE` permission on the above five table functions or grant the Db2 user one of the following roles:
+To monitor a Db2 instance, create a Db2 user with either the `EXECUTE` permission on the above five table functions, or grant the Db2 user one of the following roles:
 * `DATAACCESS` authority
 * `DBADM` authority
 * `SQLADM` authority
