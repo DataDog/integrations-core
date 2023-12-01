@@ -9,7 +9,13 @@ from datadog_checks.dev.testing import requires_py2, requires_py3
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy.metrics import PROMETHEUS_METRICS_MAP
 
-from .common import DEFAULT_INSTANCE, MOCKED_PROMETHEUS_METRICS, get_fixture_path
+from .common import (
+    DEFAULT_INSTANCE,
+    LOCAL_RATE_LIMIT_METRICS,
+    MOCKED_PROMETHEUS_METRICS,
+    RATE_LIMIT_STAT_PREFIX_TAG,
+    get_fixture_path,
+)
 
 pytestmark = [pytest.mark.unit]
 
@@ -84,6 +90,38 @@ def test_collect_metadata_with_invalid_base_url(
     c._collect_metadata()
     datadog_agent.assert_metadata_count(0)
     c.log.debug.assert_called_with('Skipping server info collection due to malformed url: %s', b'')
+
+
+@requires_py3
+@pytest.mark.parametrize(
+    'fixture_file',
+    [
+        'openmetrics.txt',
+        'openmetrics_1_28.txt',
+    ],
+    ids=[
+        "Envoy < 1.28",
+        "Envoy >= 1.28",
+    ],
+)
+def test_local_rate_limit_metrics(aggregator, dd_run_check, check, mock_http_response, fixture_file):
+    mock_http_response(file_path=get_fixture_path(fixture_file))
+
+    c = check(DEFAULT_INSTANCE)
+
+    dd_run_check(c)
+
+    for metric in LOCAL_RATE_LIMIT_METRICS:
+        aggregator.assert_metric('envoy.{}'.format(metric))
+        aggregator.assert_metric_has_tag('envoy.{}'.format(metric), RATE_LIMIT_STAT_PREFIX_TAG)
+
+    aggregator.assert_service_check(
+        "envoy.openmetrics.health", status=AgentCheck.OK, tags=['endpoint:http://localhost:8001/stats/prometheus']
+    )
+
+    # aggregator.assert_all_metrics_covered()
+    aggregator.assert_no_duplicate_metrics()
+    # aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @requires_py3

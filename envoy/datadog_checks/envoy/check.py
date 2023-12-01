@@ -16,6 +16,7 @@ ENVOY_VERSION = {'istio_build': {'type': 'metadata', 'label': 'tag', 'name': 've
 LABEL_MAP = {
     'cluster_name': 'envoy_cluster',
     'envoy_cluster_name': 'envoy_cluster',
+    'envoy_local_http_ratelimit_prefix': 'stat_prefix',  # local rate limit
     'envoy_http_conn_manager_prefix': 'stat_prefix',  # tracing
     'envoy_listener_address': 'address',  # listener
     'envoy_virtual_cluster': 'virtual_envoy_cluster',  # vhost

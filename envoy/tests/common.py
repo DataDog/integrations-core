@@ -218,10 +218,6 @@ PROMETHEUS_METRICS = [
     "http.rbac_denied.count",
     "http.rbac_shadow_allowed.count",
     "http.rbac_shadow_denied.count",
-    "http.local_rate_limit_enabled.count",
-    "http.local_rate_limit_enforced.count",
-    "http.local_rate_limit_rate_limited.count",
-    "http.local_rate_limit_ok.count",
     "http.rq_direct_response.count",
     "http.rq_redirect.count",
     "http.rq_reset_after_downstream_response_started.count",
@@ -377,6 +373,15 @@ PROMETHEUS_METRICS = [
     "http.rq.count",
     "vhost.vcluster.upstream_rq.count",
 ]
+
+LOCAL_RATE_LIMIT_METRICS = [
+    "http.local_rate_limit_enabled.count",
+    "http.local_rate_limit_enforced.count",
+    "http.local_rate_limit_rate_limited.count",
+    "http.local_rate_limit_ok.count",
+]
+
+RATE_LIMIT_STAT_PREFIX_TAG = 'stat_prefix:http_local_rate_limiter'
 
 FLAKY_METRICS = {
     "listener.downstream_cx_active",
