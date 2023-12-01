@@ -49,7 +49,19 @@ the build process, install `libxslt-dev` (or `libxslt-devel` for RPM).
 
 #### Enable monitoring
 
-Create a Db2 user with the following permissions.
+The IBM Db2 integration pulls data using the following table functions: 
+* `MON_GET_TABLESPACE`
+* `MON_GET_TRANSACTION_LOG`
+* `MON_GET_BUFFERPOOL`
+* `MON_GET_DATABASE`
+* `MON_GET_INSTANCE`
+
+For more information about these table functions see the [IBM documentation][17].
+
+To monitor a Db2 instance, create a Db2 user with either the `EXECUTE` permission on the above five table functions or grant the Db2 user one of the following roles:
+* `DATAACCESS` authority
+* `DBADM` authority
+* `SQLADM` authority
 
 To monitor the health of an instance, its associated databases, and database objects, enable the database system monitor switches for each of the objects you want to monitor: 
 * Statement
@@ -262,3 +274,4 @@ Additional helpful documentation, links, and articles:
 [14]: https://pypi.org/project/ibm-db/#files
 [15]: https://docs.datadoghq.com/developers/guide/custom-python-package/?tab=linux
 [16]: https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/
+[17]: https://www.ibm.com/docs/en/db2oc?topic=views-monitor-procedures-functions
