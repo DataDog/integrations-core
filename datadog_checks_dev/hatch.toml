@@ -15,13 +15,13 @@ e2e-env = false
 DDEV_TESTING_PLUGIN = "true"
 
 [[envs.default.matrix]]
-python = ["2.7", "3.9"]
+python = ["2.7", "3.11"]
 
 [envs.default.overrides]
 matrix.python.features = [
-  { value = "cli", if = ["3.9"] },
+  { value = "cli", if = ["3.11"] },
 ]
 # TODO: remove this when the old CLI is gone
 matrix.python.pre-install-commands = [
-  { value = "python -m pip install --no-deps --disable-pip-version-check {verbosity:flag:-1} -e ../ddev", if = ["3.9"] },
+  { value = "python -m pip install --no-deps --disable-pip-version-check {verbosity:flag:-1} -e ../ddev", if = ["3.11"] },
 ]

@@ -411,6 +411,81 @@ select txid_snapshot_xmin(txid_current_snapshot), txid_snapshot_xmax(txid_curren
     ],
 }
 
+# Requires PG10+
+VACUUM_PROGRESS_METRICS = {
+    'name': 'vacuum_progress_metrics',
+    'query': """
+SELECT v.datname, c.relname, v.phase,
+       v.heap_blks_total, v.heap_blks_scanned, v.heap_blks_vacuumed,
+       v.index_vacuum_count, v.max_dead_tuples, v.num_dead_tuples
+  FROM pg_stat_progress_vacuum as v
+  JOIN pg_class c on c.oid = v.relid
+""",
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'phase', 'type': 'tag'},
+        {'name': 'postgresql.vacuum.heap_blks_total', 'type': 'gauge'},
+        {'name': 'postgresql.vacuum.heap_blks_scanned', 'type': 'gauge'},
+        {'name': 'postgresql.vacuum.heap_blks_vacuumed', 'type': 'gauge'},
+        {'name': 'postgresql.vacuum.index_vacuum_count', 'type': 'gauge'},
+        {'name': 'postgresql.vacuum.max_dead_tuples', 'type': 'gauge'},
+        {'name': 'postgresql.vacuum.num_dead_tuples', 'type': 'gauge'},
+    ],
+}
+
+# Requires PG13+
+ANALYZE_PROGRESS_METRICS = {
+    'name': 'analyze_progress_metrics',
+    'query': """
+SELECT r.datname, c.relname, child.relname, r.phase,
+       r.sample_blks_total, r.sample_blks_scanned,
+       r.ext_stats_total, r.ext_stats_computed,
+       r.child_tables_total, r.child_tables_done
+  FROM pg_stat_progress_analyze as r
+  JOIN pg_class c on c.oid = r.relid
+  LEFT JOIN pg_class child on child.oid = r.current_child_table_relid
+""",
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'child_relation', 'type': 'tag_not_null'},
+        {'name': 'phase', 'type': 'tag'},
+        {'name': 'postgresql.analyze.sample_blks_total', 'type': 'gauge'},
+        {'name': 'postgresql.analyze.sample_blks_scanned', 'type': 'gauge'},
+        {'name': 'postgresql.analyze.ext_stats_total', 'type': 'gauge'},
+        {'name': 'postgresql.analyze.ext_stats_computed', 'type': 'gauge'},
+        {'name': 'postgresql.analyze.child_tables_total', 'type': 'gauge'},
+        {'name': 'postgresql.analyze.child_tables_done', 'type': 'gauge'},
+    ],
+}
+
+# Requires PG12+
+CLUSTER_VACUUM_PROGRESS_METRICS = {
+    'name': 'cluster_vacuum_progress_metrics',
+    'query': """
+SELECT
+       v.datname, c.relname, v.command, v.phase,
+       i.relname,
+       heap_tuples_scanned, heap_tuples_written, heap_blks_total, heap_blks_scanned, index_rebuild_count
+  FROM pg_stat_progress_cluster as v
+  LEFT JOIN pg_class c on c.oid = v.relid
+  LEFT JOIN pg_class i on i.oid = v.cluster_index_relid
+""",
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'command', 'type': 'tag'},
+        {'name': 'phase', 'type': 'tag'},
+        {'name': 'index', 'type': 'tag_not_null'},
+        {'name': 'postgresql.cluster_vacuum.heap_tuples_scanned', 'type': 'gauge'},
+        {'name': 'postgresql.cluster_vacuum.heap_tuples_written', 'type': 'gauge'},
+        {'name': 'postgresql.cluster_vacuum.heap_blks_total', 'type': 'gauge'},
+        {'name': 'postgresql.cluster_vacuum.heap_blks_scanned', 'type': 'gauge'},
+        {'name': 'postgresql.cluster_vacuum.index_rebuild_count', 'type': 'gauge'},
+    ],
+}
+
 WAL_FILE_METRICS = {
     'name': 'wal_metrics',
     'query': """
@@ -477,14 +552,30 @@ SELECT s.schemaname,
     'name': 'function_metrics',
 }
 
+# The metrics we retrieve from pg_stat_activity when the postgres version >= 10
+# The query will have a where condition removing manual vacuum and backends
+# other than client backends
+ACTIVITY_METRICS_10 = [
+    "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
+    "SUM(CASE WHEN state = 'idle in transaction' THEN 1 ELSE 0 END)",
+    "COUNT(CASE WHEN state = 'active' AND (usename NOT IN ('postgres', '{dd__user}')) THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN wait_event is NOT NULL THEN 1 ELSE null END)",
+    "COUNT(CASE WHEN wait_event is NOT NULL AND state = 'active' THEN 1 ELSE null END)",
+    "max(EXTRACT(EPOCH FROM (clock_timestamp() - xact_start)))",
+    "max(age(backend_xid))",
+    "max(age(backend_xmin))",
+]
+
 # The metrics we retrieve from pg_stat_activity when the postgres version >= 9.6
 ACTIVITY_METRICS_9_6 = [
     "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
     "SUM(CASE WHEN state = 'idle in transaction' THEN 1 ELSE 0 END)",
-    "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
+    "COUNT(CASE WHEN state = 'active' AND (query !~* '^vacuum ' AND query !~ '^autovacuum:' "
+    "AND usename NOT IN ('postgres', '{dd__user}')) THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN wait_event is NOT NULL AND query !~* '^vacuum ' AND query !~ '^autovacuum:' "
     "THEN 1 ELSE null END )",
-    "COUNT(CASE WHEN wait_event is NOT NULL AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
-    "COUNT(CASE WHEN wait_event is NOT NULL AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN wait_event is NOT NULL AND query !~* '^vacuum ' AND query !~ '^autovacuum:' AND state = 'active' "
+    "THEN 1 ELSE null END )",
     "max(EXTRACT(EPOCH FROM (clock_timestamp() - xact_start)))",
     "max(age(backend_xid))",
     "max(age(backend_xmin))",
@@ -494,10 +585,11 @@ ACTIVITY_METRICS_9_6 = [
 ACTIVITY_METRICS_9_2 = [
     "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
     "SUM(CASE WHEN state = 'idle in transaction' THEN 1 ELSE 0 END)",
-    "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
-    "THEN 1 ELSE null END )",
-    "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
-    "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN state = 'active' AND (query !~* '^vacuum ' AND query !~ '^autovacuum:' "
+    "AND usename NOT IN ('postgres', '{dd__user}')) THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN waiting = 't' AND query !~* '^vacuum ' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN waiting = 't' AND query !~* '^vacuum ' AND query !~ '^autovacuum:' "
+    "AND state = 'active' THEN 1 ELSE null END )",
     "max(EXTRACT(EPOCH FROM (clock_timestamp() - xact_start)))",
     "null",  # backend_xid is not available
     "null",  # backend_xmin is not available
@@ -507,10 +599,11 @@ ACTIVITY_METRICS_9_2 = [
 ACTIVITY_METRICS_8_3 = [
     "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
     "SUM(CASE WHEN current_query LIKE '<IDLE> in transaction' THEN 1 ELSE 0 END)",
-    "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
-    "THEN 1 ELSE null END )",
-    "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
-    "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN state = 'active' AND (query !~* '^vacuum ' AND query !~ '^autovacuum:' "
+    "AND usename NOT IN ('postgres', '{dd__user}')) THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN waiting = 't' AND query !~* '^vacuum ' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN waiting = 't' AND query !~* '^vacuum ' AND query !~ '^autovacuum:' "
+    "AND state = 'active' THEN 1 ELSE null END )",
     "max(EXTRACT(EPOCH FROM (clock_timestamp() - xact_start)))",
     "null",  # backend_xid is not available
     "null",  # backend_xmin is not available
@@ -520,10 +613,11 @@ ACTIVITY_METRICS_8_3 = [
 ACTIVITY_METRICS_LT_8_3 = [
     "SUM(CASE WHEN query_start IS NOT NULL THEN 1 ELSE 0 END)",
     "SUM(CASE WHEN current_query LIKE '<IDLE> in transaction' THEN 1 ELSE 0 END)",
-    "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
-    "THEN 1 ELSE null END )",
-    "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
-    "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN state = 'active' AND (query !~* '^vacuum ' AND query !~ '^autovacuum:' "
+    "AND usename NOT IN ('postgres', '{dd__user}')) THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN waiting = 't' AND query !~* '^vacuum ' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN waiting = 't' AND query !~* '^vacuum ' AND query !~ '^autovacuum:' "
+    "AND state = 'active' THEN 1 ELSE null END )",
     "max(EXTRACT(EPOCH FROM (clock_timestamp() - query_start)))",
     "null",  # backend_xid is not available
     "null",  # backend_xmin is not available
@@ -546,7 +640,7 @@ ACTIVITY_QUERY_10 = """
 SELECT {aggregation_columns_select}
     {{metrics_columns}}
 FROM pg_stat_activity
-WHERE backend_type = 'client backend'
+WHERE backend_type = 'client backend' AND query !~* '^vacuum '
 GROUP BY datid {aggregation_columns_group}
 """
 

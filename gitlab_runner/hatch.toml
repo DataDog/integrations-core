@@ -5,7 +5,7 @@ DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
 GITLAB_IMAGE = "gitlab/gitlab-ce"
 
 [[envs.default.matrix]]
-python = ["2.7", "3.9"]
+python = ["2.7", "3.11"]
 version = ["10.8.0"]
 
 [envs.default.overrides]

@@ -8,17 +8,17 @@ dependencies = [
 
 # Rabbitmq versions <3.8 must be tested on both PY2 and PY3. All these versions use RabbitMQ's management plugin as the source for data.
 [[envs.default.matrix]]
-python = ["2.7", "3.9"]
+python = ["2.7", "3.11"]
 version = ["3.5", "3.6", "3.7"]
 
 # Rabbitmq versions 3.8+ introduce the Prometheus plugin. This is the preferred way to collect metrics. We drop PY2 support.
 [[envs.default.matrix]]
-python = ["3.9"]
+python = ["3.11"]
 version = ["3.8", "3.9", "3.10", "3.11"]
 
 # We still support metrics from management plugin as a legacy option and continue to support PY2 for them as well.
 [[envs.default.matrix]]
-python = ["2.7", "3.9"]
+python = ["2.7", "3.11"]
 version = ["3.8", "3.9", "3.10", "3.11"]
 plugin = ["mgmt"]
 

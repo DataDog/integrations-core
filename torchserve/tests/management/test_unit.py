@@ -317,7 +317,7 @@ def test_check_with_events(
     mocker.patch('requests.get', wraps=mock_http_responses(new_response))
     dd_run_check(check_instance)
 
-    for expected_event, actual_event in zip(expected_events, aggregator.events):
+    for expected_event, actual_event in zip(expected_events, aggregator.events, strict=True):
         assert "timestamp" in actual_event and actual_event["timestamp"]
         assert "host" in actual_event and actual_event["host"]
         assert actual_event["alert_type"] == "info"
@@ -330,8 +330,6 @@ def test_check_with_events(
             actual_event["tags"]
             == [f"management_api_url:{mocked_management_instance['management_api_url']}"] + expected_event["tags"]
         )
-
-    assert len(aggregator.events) == len(expected_events)
 
 
 def test_check_disable_events(dd_run_check, datadog_agent, aggregator, check, mocked_management_instance, mocker):

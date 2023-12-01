@@ -39,6 +39,9 @@ IGNORED_DEPS = {
     # Somehow we do not load the right version. Until we find out how and why, we need to keep both
     # libs in sync with the same version of odpi.
     'oracledb',
+    # We're not ready to switch to v3 of the postgres library, see:
+    # https://github.com/DataDog/integrations-core/pull/15859
+    'psycopg2-binary',
     # orjson ... requires rustc 1.65+, but the latest we can have (thanks CentOS 6) is 1.62.
     # We get the following error when compiling orjson on Centos 6:
     # error: package `associative-cache v2.0.0` cannot be built because it requires rustc 1.65 or newer,

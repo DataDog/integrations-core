@@ -37,8 +37,10 @@ from datadog_checks.postgres.statements import PostgresStatementMetrics
 from .__about__ import __version__
 from .config import PostgresConfig
 from .util import (
+    ANALYZE_PROGRESS_METRICS,
     AWS_RDS_HOSTNAME_SUFFIX,
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
+    CLUSTER_VACUUM_PROGRESS_METRICS,
     CONNECTION_METRICS,
     FUNCTION_METRICS,
     QUERY_PG_CONTROL_CHECKPOINT,
@@ -52,6 +54,7 @@ from .util import (
     SNAPSHOT_TXID_METRICS,
     SNAPSHOT_TXID_METRICS_LT_13,
     STAT_WAL_METRICS,
+    VACUUM_PROGRESS_METRICS,
     WAL_FILE_METRICS,
     DatabaseConfigurationError,  # noqa: F401
     fmt,
@@ -59,7 +62,7 @@ from .util import (
     payload_pg_version,
     warning_with_tags,
 )
-from .version_utils import V9, V9_2, V10, V13, V14, VersionUtils
+from .version_utils import V9, V9_2, V10, V12, V13, V14, VersionUtils
 
 try:
     import datadog_agent
@@ -91,6 +94,11 @@ class PostgreSql(AgentCheck):
             self.warning(
                 "DEPRECATION NOTICE: Please use the new custom_queries option "
                 "rather than the now deprecated custom_metrics"
+            )
+        if 'managed_identity' in self.instance:
+            self.warning(
+                "DEPRECATION NOTICE: The managed_identity option is deprecated and will be removed in a future version."
+                " Please use the new azure.managed_authentication option instead."
             )
         self._config = PostgresConfig(self.instance)
         self.cloud_metadata = self._config.cloud_metadata
@@ -148,7 +156,7 @@ class PostgreSql(AgentCheck):
                     self.cloud_metadata.get("gcp")["project_id"], self.cloud_metadata.get("gcp")["instance_id"]
                 )
             )
-        if self.cloud_metadata.get("aws") is not None:
+        if self.cloud_metadata.get("aws") is not None and 'instance_endpoint' in self.cloud_metadata.get("aws"):
             self.tags.append(
                 "dd.internal.resource:aws_rds_instance:{}".format(
                     self.cloud_metadata.get("aws")["instance_endpoint"],
@@ -253,7 +261,12 @@ class PostgreSql(AgentCheck):
                 q_pg_stat_database_conflicts["query"] += " AND datname in('{}')".format(self._config.dbname)
 
             queries.extend(
-                [q_pg_stat_database, q_pg_stat_database_conflicts, QUERY_PG_UPTIME, QUERY_PG_CONTROL_CHECKPOINT]
+                [
+                    q_pg_stat_database,
+                    q_pg_stat_database_conflicts,
+                    QUERY_PG_UPTIME,
+                    QUERY_PG_CONTROL_CHECKPOINT,
+                ]
             )
 
         if self.version >= V10:
@@ -264,8 +277,13 @@ class PostgreSql(AgentCheck):
                 queries.append(QUERY_PG_STAT_WAL_RECEIVER)
                 queries.append(WAL_FILE_METRICS)
             queries.append(QUERY_PG_REPLICATION_SLOTS)
+            queries.append(VACUUM_PROGRESS_METRICS)
+
+        if self.version >= V12:
+            queries.append(CLUSTER_VACUUM_PROGRESS_METRICS)
 
         if self.version >= V13:
+            queries.append(ANALYZE_PROGRESS_METRICS)
             queries.append(SNAPSHOT_TXID_METRICS)
         if self.version < V13:
             queries.append(SNAPSHOT_TXID_METRICS_LT_13)
@@ -389,10 +407,8 @@ class PostgreSql(AgentCheck):
         if self._resolved_hostname is None:
             if self._config.reported_hostname:
                 self._resolved_hostname = self._config.reported_hostname
-            elif self._config.dbm_enabled or self.disable_generic_tags:
-                self._resolved_hostname = self.resolve_db_host()
             else:
-                self._resolved_hostname = self.agent_hostname
+                self._resolved_hostname = self.resolve_db_host()
         return self._resolved_hostname
 
     def set_resolved_hostname_metadata(self):
@@ -510,7 +526,7 @@ class PostgreSql(AgentCheck):
             column_values = row[len(descriptors) :]
 
             # build a map of descriptors and their values
-            desc_map = {name: value for (_, name), value in zip(descriptors, descriptor_values)}
+            desc_map = {name: value for (_, name), value in zip(descriptors, descriptor_values, strict=False)}
 
             # Build tags.
 
@@ -532,7 +548,7 @@ class PostgreSql(AgentCheck):
             tags += [("%s:%s" % (k, v)) for (k, v) in iteritems(desc_map)]
 
             # Submit metrics to the Agent.
-            for column, value in zip(cols, column_values):
+            for column, value in zip(cols, column_values, strict=False):
                 name, submit_metric = scope['metrics'][column]
                 submit_metric(self, name, value, tags=set(tags), hostname=self.resolved_hostname)
 
@@ -693,18 +709,24 @@ class PostgreSql(AgentCheck):
             conn = psycopg2.connect(connection_string)
         else:
             password = self._config.password
-            region = self._config.cloud_metadata.get('aws', {}).get('region', None)
-            if region is not None:
-                password = aws.generate_rds_iam_token(
-                    host=self._config.host,
-                    username=self._config.user,
-                    port=self._config.port,
-                    region=region,
-                )
-            client_id = self._config.managed_identity.get('client_id', None)
-            scope = self._config.managed_identity.get('identity_scope', None)
-            if client_id is not None:
-                password = azure.generate_managed_identity_token(client_id=client_id, identity_scope=scope)
+            if 'aws' in self.cloud_metadata:
+                # if we are running on AWS, check if IAM auth is enabled
+                aws_managed_authentication = self.cloud_metadata['aws']['managed_authentication']
+                if aws_managed_authentication['enabled']:
+                    # if IAM auth is enabled, region must be set. Validation is done in the config
+                    region = self.cloud_metadata['aws']['region']
+                    password = aws.generate_rds_iam_token(
+                        host=self._config.host,
+                        username=self._config.user,
+                        port=self._config.port,
+                        region=region,
+                    )
+            elif 'azure' in self.cloud_metadata:
+                azure_managed_authentication = self.cloud_metadata['azure']['managed_authentication']
+                if azure_managed_authentication['enabled']:
+                    client_id = azure_managed_authentication['client_id']
+                    identity_scope = azure_managed_authentication.get('identity_scope', None)
+                    password = azure.generate_managed_identity_token(client_id=client_id, identity_scope=identity_scope)
 
             args = {
                 'host': self._config.host,
@@ -831,7 +853,7 @@ class PostgreSql(AgentCheck):
                         query_tags = list(custom_query.get('tags', []))
                         query_tags.extend(tags)
 
-                        for column, value in zip(columns, row):
+                        for column, value in zip(columns, row, strict=False):
                             # Columns can be ignored via configuration.
                             if not column:
                                 continue
@@ -904,7 +926,7 @@ class PostgreSql(AgentCheck):
                 'integration_version': __version__,
                 "tags": [t for t in self._non_internal_tags if not t.startswith('db:')],
                 "timestamp": time() * 1000,
-                "cloud_metadata": self._config.cloud_metadata,
+                "cloud_metadata": self.cloud_metadata,
                 "metadata": {
                     "dbm": self._config.dbm_enabled,
                     "connection_host": self._config.host,

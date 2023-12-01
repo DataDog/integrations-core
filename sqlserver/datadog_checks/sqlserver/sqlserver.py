@@ -224,7 +224,7 @@ class SQLServer(AgentCheck):
         if self._resolved_hostname is None:
             if self._config.reported_hostname:
                 self._resolved_hostname = self._config.reported_hostname
-            elif self._config.dbm_enabled:
+            else:
                 host, _ = split_sqlserver_host_port(self.instance.get('host'))
                 self._resolved_hostname = resolve_db_host(host)
                 engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
@@ -248,8 +248,6 @@ class SQLServer(AgentCheck):
                     # meaning that the agent is only able to see query activity for the specific database it's
                     # connected to. For this reason, each Azure SQL database is modeled as an independent host.
                     self._resolved_hostname = "{}/{}".format(host, configured_database)
-            else:
-                self._resolved_hostname = self.agent_hostname
         # set resource tags to properly tag with updated hostname
         self.set_resource_tags()
 

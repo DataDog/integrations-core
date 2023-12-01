@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 7.10.1 / 2023-11-14
+
+***Fixed***:
+
+* Centralize `get_prometheus_url` function call in the init function and defer log warning after super() call. ([#16192](https://github.com/DataDog/integrations-core/pull/16192))
+
 ## 7.10.0 / 2023-11-10
 
 ***Added***:

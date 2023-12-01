@@ -1,7 +1,7 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.9"]
+python = ["2.7", "3.11"]
 # We do not test IBM WAS v8. IBM themselves no longer build a docker image for this
 # version and we don't see the need to build and host an image ourselves. For reference:
 # https://github.com/WASdev/ci.docker.websphere-traditional/issues/198

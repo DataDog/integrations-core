@@ -1,0 +1,1 @@
+PostgreSQL: Exclude manually launched vacuum from pg_stat_activity metrics
