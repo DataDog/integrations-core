@@ -126,16 +126,19 @@ assets/               @DataDog/documentation @DataDog/agent-integrations
 /vsphere/manifest.json                  @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /vsphere/*.md                           @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 
-# System checks
-/disk/                                    @DataDog/agent-integrations @DataDog/windows-agent
-/disk/*.md                                @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
-/disk/manifest.json                       @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
-/network/                                 @DataDog/agent-integrations @DataDog/windows-agent
-/network/*.md                             @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
-/network/manifest.json                    @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
-/process/                                 @DataDog/agent-integrations @DataDog/windows-agent
-/process/*.md                             @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
-/process/manifest.json                    @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+# System checks (Agent core checks)
+/disk/                                    @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/windows-agent
+/disk/*.md                                @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/disk/manifest.json                       @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/network/                                 @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/windows-agent
+/network/*.md                             @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/network/manifest.json                    @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/ntp/                                     @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/windows-agent
+/ntp/*.md                                 @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/ntp/manifest.json                        @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/process/                                 @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/windows-agent
+/process/*.md                             @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/process/manifest.json                    @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
 
 # OpenTelemetry
 /otel/                                    @DataDog/opentelemetry @DataDog/agent-integrations
