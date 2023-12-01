@@ -228,7 +228,17 @@ def test(
                     for env_name in chosen_environments:
                         app.platform.check_command([sys.executable, '-m', 'hatch', 'env', 'remove', env_name])
 
-            app.platform.check_command(command)
+            import subprocess
+
+            process = app.platform.run_command(command, stderr=subprocess.PIPE)
+
+            if process.returncode:
+                app.display_error(process.stderr.decode('utf-8'))
+                if chosen_environments == ["default"] and "No environments were selected" in str(process.stderr):
+                    continue
+                else:
+                    app.platform.exit_with_code(process.returncode)
+
             if standard_tests and coverage:
                 app.display_header('Coverage report')
                 app.platform.check_command([sys.executable, '-m', 'coverage', 'report', '--rcfile=../.coveragerc'])

@@ -1,0 +1,1 @@
+Return an exit code 0 when running the tests without specifying envs but none are found with the `test` command

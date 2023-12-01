@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
+import subprocess
 import sys
 
 import pytest
@@ -97,6 +98,7 @@ class TestStandard:
             mocker.call(
                 [sys.executable, '-m', 'hatch', 'env', 'run', '--ignore-compat', '--', 'test', '--tb', 'short'],
                 shell=False,
+                stderr=subprocess.PIPE,
             )
         ]
 
@@ -130,6 +132,7 @@ class TestStandard:
                     'short',
                 ],
                 shell=False,
+                stderr=subprocess.PIPE,
             )
         ]
 
@@ -155,10 +158,12 @@ class TestStandard:
             mocker.call(
                 [sys.executable, '-m', 'hatch', 'env', 'run', '--ignore-compat', '--', 'test', '--tb', 'short'],
                 shell=False,
+                stderr=subprocess.PIPE,
             ),
             mocker.call(
                 [sys.executable, '-m', 'hatch', 'env', 'run', '--ignore-compat', '--', 'test', '--tb', 'short'],
                 shell=False,
+                stderr=subprocess.PIPE,
             ),
         ]
 
@@ -191,6 +196,7 @@ class TestStandard:
                     'bar',
                 ],
                 shell=False,
+                stderr=subprocess.PIPE,
             )
         ]
 
@@ -231,7 +237,7 @@ class TestStandard:
                 """
             )
 
-        assert run.call_args_list == [mocker.call(expected_command, shell=False)]
+        assert run.call_args_list == [mocker.call(expected_command, shell=False, stderr=subprocess.PIPE)]
 
         verbose_env_var, verbose_value = hatch_verbose
         if verbose_value is None:
@@ -269,6 +275,7 @@ class TestStandard:
             mocker.call(
                 [sys.executable, '-m', 'hatch', 'env', 'run', '--ignore-compat', '--', 'test', '--tb', 'short'],
                 shell=False,
+                stderr=subprocess.PIPE,
             )
         ]
         assert env_vars['DD_API_KEY'] == 'foo'
@@ -303,6 +310,82 @@ class TestStandard:
                     'short',
                 ],
                 shell=False,
+                stderr=subprocess.PIPE,
+            )
+        ]
+
+    def test_env_not_found(self, ddev, helpers, mocker):
+        run = mocker.patch(
+            'subprocess.run', return_value=mocker.MagicMock(returncode=1, stderr=b'No environments were selected')
+        )
+
+        with EnvVars({'PYTHON_FILTER': '3.9'}):
+            result = ddev('test', 'win32_event_log:unknown_env')
+
+        assert result.exit_code == 1, result.output
+        assert result.output == helpers.dedent(
+            """
+            ────────────────────────────── Windows Event Log ───────────────────────────────
+            No environments were selected
+            """
+        )
+
+        assert run.call_args_list == [
+            mocker.call(
+                [
+                    sys.executable,
+                    '-m',
+                    'hatch',
+                    'env',
+                    'run',
+                    '--env',
+                    'unknown_env',
+                    '--filter',
+                    '{"python": "3.9"}',
+                    '--',
+                    'test',
+                    '--tb',
+                    'short',
+                ],
+                shell=False,
+                stderr=subprocess.PIPE,
+            )
+        ]
+
+    def test_no_env_specified_and_no_env_found(self, ddev, helpers, mocker):
+        run = mocker.patch(
+            'subprocess.run', return_value=mocker.MagicMock(returncode=1, stderr=b'No environments were selected')
+        )
+
+        with EnvVars({'PYTHON_FILTER': '3.9'}):
+            result = ddev('test', 'win32_event_log')
+
+        assert result.exit_code == 0, result.output
+        assert result.output == helpers.dedent(
+            """
+            ────────────────────────────── Windows Event Log ───────────────────────────────
+            No environments were selected
+            """
+        )
+
+        assert run.call_args_list == [
+            mocker.call(
+                [
+                    sys.executable,
+                    '-m',
+                    'hatch',
+                    'env',
+                    'run',
+                    '--ignore-compat',
+                    '--filter',
+                    '{"python": "3.9"}',
+                    '--',
+                    'test',
+                    '--tb',
+                    'short',
+                ],
+                shell=False,
+                stderr=subprocess.PIPE,
             )
         ]
 
@@ -333,6 +416,7 @@ class TestSpecificFunctionality:
             mocker.call(
                 [sys.executable, '-m', 'hatch', 'env', 'run', '--env', 'lint', '--', 'all'],
                 shell=False,
+                stderr=subprocess.PIPE,
             )
         ]
         assert env_vars['DD_API_KEY'] == 'bar'
@@ -362,6 +446,7 @@ class TestSpecificFunctionality:
             mocker.call(
                 [sys.executable, '-m', 'hatch', 'env', 'run', '--env', 'lint', '--', 'fmt'],
                 shell=False,
+                stderr=subprocess.PIPE,
             )
         ]
         assert env_vars['DD_API_KEY'] == 'bar'
@@ -391,6 +476,7 @@ class TestSpecificFunctionality:
             mocker.call(
                 [sys.executable, '-m', 'hatch', 'env', 'run', '--filter', '{"benchmark-env": true}', '--', 'benchmark'],
                 shell=False,
+                stderr=subprocess.PIPE,
             )
         ]
         assert env_vars['DD_API_KEY'] == 'foo'
@@ -430,6 +516,7 @@ class TestSpecificFunctionality:
                     '--run-latest-metrics',
                 ],
                 shell=False,
+                stderr=subprocess.PIPE,
             )
         ]
         assert env_vars['DD_API_KEY'] == 'foo'
@@ -456,6 +543,7 @@ class TestCoverage:
             mocker.call(
                 [sys.executable, '-m', 'hatch', 'env', 'run', '--ignore-compat', '--', 'test-cov', '--tb', 'short'],
                 shell=False,
+                stderr=subprocess.PIPE,
             ),
             mocker.call([sys.executable, '-m', 'coverage', 'report', '--rcfile=../.coveragerc'], shell=False),
         ]
@@ -498,6 +586,7 @@ class TestCoverage:
             mocker.call(
                 [sys.executable, '-m', 'hatch', 'env', 'run', '--ignore-compat', '--', 'test-cov', '--tb', 'short'],
                 shell=False,
+                stderr=subprocess.PIPE,
             ),
             mocker.call([sys.executable, '-m', 'coverage', 'report', '--rcfile=../.coveragerc'], shell=False),
             mocker.call([sys.executable, '-m', 'coverage', 'xml', '-i', '--rcfile=../.coveragerc'], shell=False),
@@ -552,6 +641,7 @@ class TestJUnit:
                     'postgres',
                 ],
                 shell=False,
+                stderr=subprocess.PIPE,
             )
         ]
 
@@ -588,6 +678,7 @@ class TestJUnit:
                     'postgres',
                 ],
                 shell=False,
+                stderr=subprocess.PIPE,
             )
         ]
 
@@ -626,6 +717,7 @@ class TestDDTrace:
                     '--ddtrace',
                 ],
                 shell=False,
+                stderr=subprocess.PIPE,
             )
         ]
         assert env_vars['DDEV_TRACE_ENABLED'] == 'true'
@@ -667,6 +759,7 @@ class TestDDTrace:
                     '--ddtrace',
                 ],
                 shell=False,
+                stderr=subprocess.PIPE,
             )
         ]
         assert env_vars['DDEV_TRACE_ENABLED'] == 'true'
@@ -708,6 +801,7 @@ class TestDDTrace:
                     '--ddtrace',
                 ],
                 shell=False,
+                stderr=subprocess.PIPE,
             )
         ]
         assert env_vars['DDEV_TRACE_ENABLED'] == 'true'
@@ -748,6 +842,7 @@ class TestDDTrace:
                     'short',
                 ],
                 shell=False,
+                stderr=subprocess.PIPE,
             )
         ]
         assert 'DD_SERVICE' not in env_vars
@@ -784,6 +879,7 @@ class TestMemray:
                     '--memray',
                 ],
                 shell=False,
+                stderr=subprocess.PIPE,
             )
         ]
 
@@ -824,6 +920,7 @@ class TestRecreate:
             mocker.call(
                 [sys.executable, '-m', 'hatch', 'env', 'run', '--filter', '{"benchmark-env": true}', '--', 'benchmark'],
                 shell=False,
+                stderr=subprocess.PIPE,
             ),
         ]
 
@@ -860,6 +957,7 @@ class TestRecreate:
                     '--run-latest-metrics',
                 ],
                 shell=False,
+                stderr=subprocess.PIPE,
             ),
         ]
 
@@ -895,6 +993,7 @@ class TestRecreate:
                     'short',
                 ],
                 shell=False,
+                stderr=subprocess.PIPE,
             ),
         ]
 
@@ -915,6 +1014,7 @@ class TestRecreate:
             mocker.call(
                 [sys.executable, '-m', 'hatch', 'env', 'run', '--ignore-compat', '--', 'test', '--tb', 'short'],
                 shell=False,
+                stderr=subprocess.PIPE,
             ),
         ]
 
@@ -951,6 +1051,7 @@ class TestPluginInteraction:
             mocker.call(
                 [sys.executable, '-m', 'hatch', 'env', 'run', '--ignore-compat', '--', 'test', '--tb', 'short'],
                 shell=False,
+                stderr=subprocess.PIPE,
             ),
             mocker.call(
                 [sys.executable, '-m', 'hatch', 'env', 'remove', 'default'],
