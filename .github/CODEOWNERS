@@ -148,24 +148,24 @@ assets/               @DataDog/documentation @DataDog/agent-integrations
 /nvidia_jetson/manifest.json              @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
 
 # Database monitoring
-**/base/utils/db/utils.py                           @DataDog/agent-integrations @DataDog/database-monitoring
-datadog_checks_base/tests/**/test_util.py           @DataDog/agent-integrations @DataDog/database-monitoring
-**/base/utils/db/sql.py                             @DataDog/database-monitoring @DataDog/agent-integrations
-datadog_checks_base/tests/**/test_db_sql.py         @DataDog/database-monitoring @DataDog/agent-integrations
-**/base/utils/db/statement_metrics.py               @DataDog/database-monitoring @DataDog/agent-integrations
-datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring @DataDog/agent-integrations
-/postgres/                                          @DataDog/database-monitoring @DataDog/agent-integrations
+**/base/utils/db/utils.py                           @DataDog/agent-integrations @DataDog/database-monitoring-agent
+datadog_checks_base/tests/**/test_util.py           @DataDog/agent-integrations @DataDog/database-monitoring-agent
+**/base/utils/db/sql.py                             @DataDog/database-monitoring-agent @DataDog/agent-integrations
+datadog_checks_base/tests/**/test_db_sql.py         @DataDog/database-monitoring-agent @DataDog/agent-integrations
+**/base/utils/db/statement_metrics.py               @DataDog/database-monitoring-agent @DataDog/agent-integrations
+datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring-agent @DataDog/agent-integrations
+/postgres/                                          @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /postgres/*.md                                      @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /postgres/manifest.json                             @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
-/mysql/                                             @DataDog/database-monitoring @DataDog/agent-integrations
+/mysql/                                             @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /mysql/*.md                                         @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /mysql/manifest.json                                @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
-/sqlserver/                                         @DataDog/database-monitoring @DataDog/agent-integrations
+/sqlserver/                                         @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /sqlserver/*.md                                     @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /sqlserver/manifest.json                            @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
-/oracle/                                            @DataDog/agent-integrations @DataDog/database-monitoring
-/oracle/*.md                                        @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
-/oracle/manifest.json                               @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
+/oracle/                                            @DataDog/database-monitoring-agent @DataDog/agent-integrations
+/oracle/*.md                                        @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
+/oracle/manifest.json                               @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 
 # APM Integrations
 /langchain/         @DataDog/ml-observability @DataDog/agent-integrations @DataDog/documentation
