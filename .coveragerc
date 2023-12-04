@@ -10,7 +10,8 @@ disable_warnings =
 # All paths are relative to each tox.ini
 omit =
     */test_bench.py
-    */test_e2e.py
+    */test_e2e*.py
+    */test_e2e*/*
 
     # Configuration models
     # TODO: remove when python 2 is dropped
