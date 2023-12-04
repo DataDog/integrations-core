@@ -400,7 +400,9 @@ def test_activity_vacuum_excluded(aggregator, integration_check, pg_instance):
     expected_tags = _get_expected_tags(check, pg_instance, db=DB_NAME, app='test', user=USER_ADMIN)
     aggregator.assert_metric('postgresql.waiting_queries', value=1, count=1, tags=expected_tags)
     # Vacuum process with 3 xmin age should not be reported
-    aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=1, count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.activity.backend_xmin_age', count=1, tags=expected_tags)
+    # We can not predict the value of backend_xid_age, most of the time it will be 1 here, but the value is a bit flaky
+    assert aggregator.metrics('postgresql.activity.backend_xmin_age')[0].value <= 2
 
     # Cleaning
     kill_vacuum(pg_instance)
