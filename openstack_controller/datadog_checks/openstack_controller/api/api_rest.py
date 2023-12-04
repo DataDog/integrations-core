@@ -292,6 +292,46 @@ class ApiRest(Api):
         response.raise_for_status()
         return response.json().get('quota', [])
 
+    def make_paginated_request(self, url, resource_name, marker_name, params=None):
+        first_try = True
+        marker = None
+        item_list = []
+        params = {} if params is None else params
+        while True:
+            params['limit'] = self.config.paginated_limit
+            self.log.debug(
+                "making paginated request [limit=%s, marker=%s, first_try=%s",
+                self.config.paginated_limit,
+                marker,
+                first_try,
+            )
+
+            if not first_try:
+                params['marker'] = marker
+
+            first_try = False
+            marker = None
+            response = self.http.get(url, params=params)
+            response.raise_for_status()
+
+            response_json = response.json()
+            nodes = response_json.get(resource_name, [])
+            if len(nodes) > 0:
+                last_item = nodes[-1]
+                next = last_item.get('next')
+                item_list.extend(nodes)
+                if next is None:
+                    break
+
+                marker = last_item.get(marker_name)
+            else:
+                break
+
+            if marker is None:
+                break
+
+        return item_list
+
     def get_baremetal_nodes(self):
         def use_legacy_nodes_resource(microversion):
             self.log.debug("Configured ironic microversion: %s", microversion)
@@ -308,18 +348,24 @@ class ApiRest(Api):
             self.log.debug("Collecting baremetal nodes with use_legacy_nodes_resource =%s", legacy_microversion)
             return legacy_microversion
 
-        self.log.debug("getting baremetal nodes [microversion=%s]", self.config.ironic_microversion)
         ironic_endpoint = self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)
 
+        params = {}
         if use_legacy_nodes_resource(self.config.ironic_microversion):
-            response = self.http.get('{}/v1/nodes/detail'.format(ironic_endpoint))
+            url = '{}/v1/nodes/detail'.format(ironic_endpoint)
         else:
             params = {'detail': True}
+            url = '{}/v1/nodes'.format(ironic_endpoint)
 
-            response = self.http.get('{}/v1/nodes'.format(ironic_endpoint), params=params)
+        if self.config.paginated_limit is not None:
+            return self.make_paginated_request(url, 'nodes', 'uuid', params)
 
-        response.raise_for_status()
-        return response.json().get('nodes', [])
+        else:
+            response = self.http.get(url, params=params)
+            response.raise_for_status()
+
+            response_json = response.json()
+            return response_json.get("nodes", [])
 
     def get_baremetal_conductors(self):
         response = self.http.get(

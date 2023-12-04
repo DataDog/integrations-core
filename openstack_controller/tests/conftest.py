@@ -167,7 +167,7 @@ def mock_responses(microversion_headers):
         filename = file
         request_path = url
         request_path = request_path.replace('?', '/')
-        if params is not None:
+        if params is not None and params != {}:
             param_string = '/'.join('{}={}'.format(key, str(val)) for key, val in params.items())
             request_path = '{}/{}'.format(url, param_string)
         if any(re.search(pattern, request_path) for pattern in NOVA_ENDPOINTS):
@@ -546,7 +546,7 @@ def connection_baremetal(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
 
-    def nodes(details):
+    def nodes(details, limit=None):
         if http_error and 'nodes' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['nodes'])
         return [
