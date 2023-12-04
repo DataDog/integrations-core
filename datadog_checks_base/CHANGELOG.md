@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 34.3.1 / 2023-12-04
+
+***Fixed***:
+
+* Bump the cryptography version to 41.0.6 ([#16322](https://github.com/DataDog/integrations-core/pull/16322))
+
 ## 34.3.0 / 2023-11-10
 
 ***Added***:
