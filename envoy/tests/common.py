@@ -383,7 +383,7 @@ LOCAL_RATE_LIMIT_METRICS = [
 
 RATE_LIMIT_STAT_PREFIX_TAG = 'stat_prefix:http_local_rate_limiter'
 
-FLAKY_METRICS = {
+FLAKY_METRICS = [
     "listener.downstream_cx_active",
     "listener.downstream_cx_destroy.count",
     "cluster.internal.upstream_rq.count",
@@ -393,9 +393,9 @@ FLAKY_METRICS = {
     "cluster.upstream_rq_xx.count",
     "access_logs.grpc_access_log.logs_written.count",
     "access_logs.grpc_access_log.logs_dropped.count",
-}
+]
 
-MOCKED_PROMETHEUS_METRICS = {
+MOCKED_PROMETHEUS_METRICS = [
     "cluster.assignment_stale.count",
     "cluster.assignment_timeout_received.count",
     "cluster.bind_errors.count",
@@ -709,7 +709,7 @@ MOCKED_PROMETHEUS_METRICS = {
     "tcp.on_demand_cluster_timeout.count",
     "tcp.upstream_flush.count",
     "tcp.upstream_flush_active",
-}
+]
 
 
 def get_fixture_path(filename):

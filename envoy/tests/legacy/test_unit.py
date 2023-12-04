@@ -10,7 +10,15 @@ import requests
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
-from .common import ENVOY_VERSION, EXT_METRICS, FLAVOR, HOST, INSTANCES
+from .common import (
+    ENVOY_VERSION,
+    EXT_METRICS,
+    FLAVOR,
+    HOST,
+    INSTANCES,
+    LOCAL_RATE_LIMIT_METRICS,
+    RATE_LIMIT_STAT_PREFIX_TAG,
+)
 
 CHECK_NAME = 'envoy'
 
@@ -21,7 +29,7 @@ def test_success_fixture(aggregator, fixture_path, mock_http_response, check, dd
     instance = INSTANCES['main']
     c = check(instance)
 
-    response = mock_http_response(file_path=fixture_path('multiple_services')).return_value
+    response = mock_http_response(file_path=fixture_path('./legacy/multiple_services')).return_value
     dd_run_check(c)
 
     metrics_collected = 0
@@ -59,7 +67,7 @@ def test_success_fixture_included_metrics(aggregator, fixture_path, mock_http_re
     instance = INSTANCES['included_metrics']
     c = check(instance)
 
-    mock_http_response(file_path=fixture_path('multiple_services'))
+    mock_http_response(file_path=fixture_path('./legacy/multiple_services'))
     dd_run_check(c)
 
     for metric in aggregator.metric_names:
@@ -70,7 +78,7 @@ def test_success_fixture_excluded_metrics(aggregator, fixture_path, mock_http_re
     instance = INSTANCES['excluded_metrics']
     c = check(instance)
 
-    mock_http_response(file_path=fixture_path('multiple_services'))
+    mock_http_response(file_path=fixture_path('./legacy/multiple_services'))
     dd_run_check(c)
 
     for metric in aggregator.metric_names:
@@ -83,7 +91,7 @@ def test_success_fixture_inclued_and_excluded_metrics(
     instance = INSTANCES['included_excluded_metrics']
     c = check(instance)
 
-    mock_http_response(file_path=fixture_path('multiple_services'))
+    mock_http_response(file_path=fixture_path('./legacy/multiple_services'))
     dd_run_check(c)
 
     for metric in aggregator.metric_names:
@@ -94,7 +102,7 @@ def test_service_check(aggregator, fixture_path, mock_http_response, check, dd_r
     instance = INSTANCES['main']
     c = check(instance)
 
-    mock_http_response(file_path=fixture_path('multiple_services'))
+    mock_http_response(file_path=fixture_path('./legacy/multiple_services'))
     dd_run_check(c)
 
     assert aggregator.service_checks(Envoy.SERVICE_CHECK_NAME)[0].status == Envoy.OK
@@ -104,7 +112,7 @@ def test_unknown(fixture_path, mock_http_response, dd_run_check, check):
     instance = INSTANCES['main']
     c = check(instance)
 
-    mock_http_response(file_path=fixture_path('unknown_metrics'))
+    mock_http_response(file_path=fixture_path('./legacy/unknown_metrics'))
     dd_run_check(c)
 
     assert sum(c.unknown_metrics.values()) == 5
@@ -201,7 +209,7 @@ def test_metadata(datadog_agent, fixture_path, mock_http_response, check, fixtur
     check.check_id = 'test:123'
     check.log = mock.MagicMock()
 
-    mock_http_response(file_path=fixture_path(fixture_file))
+    mock_http_response(file_path=fixture_path('./legacy/{}'.format(fixture_file)))
 
     check._collect_metadata()
 
@@ -224,7 +232,7 @@ def test_metadata_invalid(datadog_agent, fixture_path, mock_http_response, check
     check.check_id = 'test:123'
     check.log = mock.MagicMock()
 
-    mock_http_response(file_path=fixture_path('server_info_invalid'))
+    mock_http_response(file_path=fixture_path('./legacy/server_info_invalid'))
     check._collect_metadata()
 
     datadog_agent.assert_metadata('test:123', {})
@@ -248,7 +256,7 @@ def test_stats_prefix_ext_auth(aggregator, fixture_path, mock_http_response, che
     tags = ['cluster_name:foo', 'envoy_cluster:foo']
     tags_prefix = tags + ['stat_prefix:bar']
     c = check(instance)
-    mock_http_response(file_path=fixture_path('stat_prefix')).return_value
+    mock_http_response(file_path=fixture_path('./legacy/stat_prefix')).return_value
     dd_run_check(c)
 
     # To ensure that this change didn't break the old behavior, both the value and the tags are asserted.
@@ -261,3 +269,15 @@ def test_stats_prefix_ext_auth(aggregator, fixture_path, mock_http_response, che
             tags=tags_prefix,
         )
         aggregator.assert_metric(metric, value=index, tags=tags)
+
+
+def test_local_rate_limit_metrics(aggregator, fixture_path, mock_http_response, check, dd_run_check):
+    instance = INSTANCES['main']
+    c = check(instance)
+
+    mock_http_response(file_path=fixture_path('./legacy/local_rate_limit.txt'))
+    dd_run_check(c)
+
+    for metric in LOCAL_RATE_LIMIT_METRICS:
+        aggregator.assert_metric(metric)
+        aggregator.assert_metric_has_tag(metric, RATE_LIMIT_STAT_PREFIX_TAG)

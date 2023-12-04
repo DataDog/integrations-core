@@ -3861,30 +3861,34 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
-    'http.local_rate_limit_enabled': {
+    '*.http_local_rate_limit.enabled': {
         'tags': (
             ('stat_prefix', ),
+            (),
             (),
         ),
         'method': 'monotonic_count',
     },
-    'http.local_rate_limit_enforced': {
+    '*.http_local_rate_limit.enforced': {
         'tags': (
             ('stat_prefix', ),
+            (),
             (),
         ),
         'method': 'monotonic_count',
     },
-    'http.local_rate_limit_rate_limited': {
+    '*.http_local_rate_limit.rate_limited': {
         'tags': (
             ('stat_prefix', ),
+            (),
             (),
         ),
         'method': 'monotonic_count',
     },
-    'http.local_rate_limit_ok': {
+    '*.http_local_rate_limit.ok': {
         'tags': (
             ('stat_prefix', ),
+            (),
             (),
         ),
         'method': 'monotonic_count',
