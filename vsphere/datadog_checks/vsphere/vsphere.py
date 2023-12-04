@@ -690,12 +690,12 @@ class VSphereCheck(AgentCheck):
             return
 
         is_count_metric = metric_name in PROPERTY_COUNT_METRICS
-        is_bool_metric = isinstance(metric_value, bool)
 
         if additional_tags is None:
             additional_tags = {}
 
         if is_count_metric:
+            is_bool_metric = isinstance(metric_value, bool)
             no_additional_tags = all(tag is None for tag in additional_tags.values())
             if no_additional_tags:
                 if metric_value is None:
@@ -724,13 +724,12 @@ class VSphereCheck(AgentCheck):
             except Exception:
                 self.log.debug(
                     "Could not submit property metric- unexpected metric value: name=`%s`, value=`%s`, hostname=`%s`, "
-                    "base tags=`%s` additional tags=`%s`, is_bool_metric=`%s`",
+                    "base tags=`%s` additional tags=`%s`",
                     metric_full_name,
                     metric_value,
                     hostname,
                     base_tags,
                     additional_tags,
-                    is_bool_metric,
                 )
                 return
 
