@@ -61,10 +61,18 @@ def lock_table(pg_instance, table, lock_mode):
     return lock_conn
 
 
-def kill_vacuum(pg_instance):
+def kill_session(pg_instance, query_pattern):
     with _get_superconn(pg_instance) as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT pg_cancel_backend(pid) FROM pg_stat_activity WHERE query ~* '^vacuum'")
+            cur.execute(
+                f"""SELECT pg_cancel_backend(pid)
+FROM pg_stat_activity
+WHERE query ~* '{query_pattern}' AND pid!=pg_backend_pid()"""
+            )
+
+
+def kill_vacuum(pg_instance):
+    kill_session(pg_instance, '^vacuum')
 
 
 # Wait until the query yielding a single value cross the provided threshold
@@ -85,23 +93,28 @@ def _wait_for_value(db_instance, lower_threshold, query, attempts=10):
     conn.close()
 
 
-def run_vacuum_thread(pg_instance, vacuum_query, application_name='test'):
-    def run_analyze():
-        conn_vacuum = _get_superconn(pg_instance, application_name)
-        with conn_vacuum.cursor() as cur:
-            cur.execute("set statement_timeout='2s'")
-            cur.execute('set vacuum_cost_delay=100')
-            cur.execute('set vacuum_cost_limit=1')
+def run_query_thread(pg_instance, query, application_name='test', init_statements=None):
+    def run_query():
+        conn = _get_superconn(pg_instance, application_name)
+        with conn.cursor() as cur:
+            if init_statements:
+                for stmt in init_statements:
+                    cur.execute(stmt)
             try:
-                cur.execute(vacuum_query)
+                cur.execute(query)
             except psycopg2.errors.QueryCanceled:
                 pass
-        conn_vacuum.close()
+        conn.close()
 
-    # Start vacuum
-    thread = threading.Thread(target=run_analyze)
+    # Start thread
+    thread = threading.Thread(target=run_query)
     thread.start()
     return thread
+
+
+def run_vacuum_thread(pg_instance, vacuum_query, application_name='test'):
+    init_stmts = ["set statement_timeout='2s'", 'set vacuum_cost_delay=100', 'set vacuum_cost_limit=1']
+    return run_query_thread(pg_instance, vacuum_query, application_name, init_stmts)
 
 
 def run_one_check(check, db_instance, cancel=True):
