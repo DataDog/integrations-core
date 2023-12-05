@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Tuple  # noqa: F401
 from six.moves import range, zip
 
 from .errors import UnknownMetric, UnknownTags
-from .metrics import METRIC_PREFIX, METRIC_TREE, METRICS
+from .metrics import METRIC_PREFIX, METRIC_TREE, MOD_METRICS
 
 HISTOGRAM = re.compile(r'([P0-9.]+)\(([^,]+)')
 PERCENTILE_SUFFIX = {
@@ -65,6 +65,10 @@ def _parse_metric(metric, metric_mapping, skip_part=None):
         else:
             tag_value_builder.append(metric_part)
             tags_to_build += 1
+            # Allows for the wildcard usage for the scenario in which the raw metric starts with a configurable name.
+            # E.g.: stat_prefix.http_local_rate_limit.ok
+            if "*" in metric_mapping:
+                metric_mapping = metric_mapping["*"]
     return metric_parts, tag_value_builder, tag_names, tag_values, unknown_tags, tags_to_build, metric_mapping
 
 
@@ -78,11 +82,12 @@ def parse_metric(metric, retry=False, metric_mapping=METRIC_TREE, disable_legacy
         'listener.0.0.0.0_80.downstream_cx_total' ->
         ('listener.downstream_cx_total', ['address:0.0.0.0_80'], 'count')
     """
+    # breakpoint()
     metric_parts, tag_value_builder, tag_names, tag_values, unknown_tags, tags_to_build, last_mapping = _parse_metric(
         metric, metric_mapping
     )
     parsed_metric = '.'.join(metric_parts)
-    if parsed_metric not in METRICS:
+    if parsed_metric not in MOD_METRICS:
         if retry:
             skip_parts = []
             # Retry parsing for metrics by skipping the last matched metric part
@@ -102,7 +107,7 @@ def parse_metric(metric, retry=False, metric_mapping=METRIC_TREE, disable_legacy
                     last_mapping,
                 ) = _parse_metric(metric, metric_mapping, skip_part)
                 parsed_metric = '.'.join(metric_parts)
-                if parsed_metric in METRICS:
+                if parsed_metric in MOD_METRICS:
                     break
             else:
                 raise UnknownMetric
@@ -133,7 +138,7 @@ def parse_metric(metric, retry=False, metric_mapping=METRIC_TREE, disable_legacy
 
     tags = ['{}:{}'.format(tag_name, tag_value) for tag_name, tag_value in zip(tag_names, tag_values)]
 
-    return METRIC_PREFIX + parsed_metric, tags, METRICS[parsed_metric]['method']
+    return METRIC_PREFIX + parsed_metric, tags, MOD_METRICS[parsed_metric]['method']
 
 
 def construct_tag_values(tag_builder, num_tags):

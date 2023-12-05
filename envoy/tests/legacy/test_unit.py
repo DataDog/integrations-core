@@ -7,6 +7,7 @@ import mock
 import pytest
 import requests
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
@@ -281,3 +282,5 @@ def test_local_rate_limit_metrics(aggregator, fixture_path, mock_http_response, 
     for metric in LOCAL_RATE_LIMIT_METRICS:
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag(metric, RATE_LIMIT_STAT_PREFIX_TAG)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

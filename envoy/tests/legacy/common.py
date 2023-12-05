@@ -46,10 +46,10 @@ EXT_METRICS = [
 ]
 
 LOCAL_RATE_LIMIT_METRICS = [
-    "http.local_rate_limit_enabled",
-    "http.local_rate_limit_enforced",
-    "http.local_rate_limit_rate_limited",
-    "http.local_rate_limit_ok",
+    "envoy.http_local_rate_limit.enabled",
+    "envoy.http_local_rate_limit.enforced",
+    "envoy.http_local_rate_limit.rate_limited",
+    "envoy.http_local_rate_limit.ok",
 ]
 
 RATE_LIMIT_STAT_PREFIX_TAG = 'stat_prefix:http_local_rate_limiter'
