@@ -19,22 +19,12 @@ jobs:
           - SLACK_CHANNEL_ID_AGENT_INTEGRATIONS_REVIEWS
           - SLACK_CHANNEL_ID_INFRA_INTEGRATIONS
     steps:
-    - uses: octokit/graphql-action@v2.x
-      with:
-        query: |
-          query organization("DataDog") {
-              teams(first: 100, userLogins: [$reviewer_id]) {
-                edges {
-                  node {
-                    name
-                  }
-                }
-              }
-            }
-        variables: |
-          reviewer_id: ${{ github.event.review.user.login }}
+    - run: |
+        REVIEWER_ID=$(echo "${{ github.event.review.user.login }}")
+        DATADOG_TEAMS=$(gh api graphql --paginate -f query='{organization(login: "DataDog") {teams(first: 100, userLogins: ["$REVIEWER_ID"]) { edges {node {name}}}}}' | jq -r '.data.organization.teams.edges[].node.name')
+        echo "::set-output name=TEAM::$DATADOG_TEAMS"
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
     - uses: DataDog/slapr@master
       env:
         GITHUB_CONTEXT: "${{ toJson(github) }}"
