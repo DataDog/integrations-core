@@ -22,7 +22,7 @@ jobs:
     - uses: octokit/graphql-action@v2.x
       with:
         query: |
-          query organization(login: "DataDog") {
+          query organization("DataDog") {
               teams(first: 100, userLogins: [$reviewer_id]) {
                 edges {
                   node {
