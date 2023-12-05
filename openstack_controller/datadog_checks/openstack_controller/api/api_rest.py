@@ -293,23 +293,20 @@ class ApiRest(Api):
         return response.json().get('quota', [])
 
     def make_paginated_request(self, url, resource_name, marker_name, params=None):
-        first_try = True
         marker = None
         item_list = []
         params = {} if params is None else params
         while True:
             params['limit'] = self.config.paginated_limit
             self.log.debug(
-                "making paginated request [limit=%s, marker=%s, first_try=%s",
+                "making paginated request [limit=%s, marker=%s]",
                 self.config.paginated_limit,
                 marker,
-                first_try,
             )
 
-            if not first_try:
+            if marker is not None:
                 params['marker'] = marker
 
-            first_try = False
             marker = None
             response = self.http.get(url, params=params)
             response.raise_for_status()
