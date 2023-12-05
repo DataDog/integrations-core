@@ -209,7 +209,6 @@ LIMIT {table_count_limit}
 ) AS subquery GROUP BY schemaname
     """
     ),
-    'name': 'count_metrics',
 }
 
 q1 = (
@@ -253,7 +252,6 @@ REPLICATION_METRICS = {
     'query': """
 SELECT {metrics_columns}
  WHERE (SELECT pg_is_in_recovery())""",
-    'name': 'replication_metrics',
 }
 
 # Requires postgres 10+
@@ -287,7 +285,6 @@ REPLICATION_STATS_METRICS = {
 SELECT application_name, state, sync_state, client_addr, {metrics_columns}
 FROM pg_stat_replication
 """,
-    'name': 'replication_stats_metrics',
 }
 
 
@@ -352,7 +349,6 @@ WITH max_con AS (SELECT setting::float FROM pg_settings WHERE name = 'max_connec
 SELECT {metrics_columns}
   FROM pg_stat_database, max_con
 """,
-    'name': 'connections_metrics',
 }
 
 SLRU_METRICS = {
@@ -371,7 +367,6 @@ SLRU_METRICS = {
 SELECT name, {metrics_columns}
   FROM pg_stat_slru
 """,
-    'name': 'slru_metrics',
 }
 
 SNAPSHOT_TXID_METRICS = {
@@ -474,7 +469,6 @@ SELECT s.schemaname,
     ON o.funcname = s.funcname;
 """,
     'relation': False,
-    'name': 'function_metrics',
 }
 
 # The metrics we retrieve from pg_stat_activity when the postgres version >= 9.6

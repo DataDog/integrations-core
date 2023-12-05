@@ -41,10 +41,6 @@
 
 ## 34.1.0 / 2023-10-20
 
-***Added***:
-
-* Add util to track db query operation time ([#16040](https://github.com/DataDog/integrations-core/pull/16040))
-
 ***Fixed***:
 
 * Bump the `pymysql` version to 1.1.0 on Python 3 ([#16042](https://github.com/DataDog/integrations-core/pull/16042))
