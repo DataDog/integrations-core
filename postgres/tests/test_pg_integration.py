@@ -332,6 +332,7 @@ def test_activity_metrics_no_aggregations(aggregator, integration_check, pg_inst
     check_activity_metrics(aggregator, expected_tags)
 
 
+@pytest.mark.skip(reason='building image for incident-24014')
 def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
     check = integration_check(pg_instance)

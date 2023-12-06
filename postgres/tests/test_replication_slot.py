@@ -11,6 +11,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 
 
 @requires_over_10
+@pytest.mark.skip(reason='building image for incident-24014')
 def test_physical_replication_slots(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     redo_lsn_age = 0
