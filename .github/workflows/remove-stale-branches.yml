@@ -1,0 +1,19 @@
+on:
+  schedule:
+    # Every day at midnight
+    - cron: "0 0 * * *"
+
+jobs:
+  remove-stale-branches:
+    name: Remove Stale Branches
+    runs-on: ubuntu-latest
+    steps:
+      - uses: fpicalausa/remove-stale-branches@v1
+        with:
+          dry-run: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          exempt-protected-branches: true
+          operations-per-run: 100
+          days-before-branch-stale: 150
+          days-before-branch-delete: 7
+          stale-branch-message: "Hello @{author} :wave: Your branch [{branchName}]({branchUrl}) hasn't been updated in the last 150 days and is marked as stale. It will be removed in a week.\r\nIf you want to keep this branch around, delete this comment or add new commits to this branch."
