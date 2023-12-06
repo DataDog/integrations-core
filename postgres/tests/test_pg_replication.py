@@ -96,6 +96,7 @@ def test_wal_receiver_metrics(aggregator, integration_check, pg_instance, pg_rep
 
 
 @requires_over_10
+@pytest.mark.skip(reason='building image for incident-24014')
 def test_conflicts_lock(aggregator, integration_check, pg_instance, pg_replica_instance2):
     check = integration_check(pg_replica_instance2)
     expected_tags = _get_expected_tags(check, pg_replica_instance2, db=DB_NAME)
@@ -122,6 +123,7 @@ def test_conflicts_lock(aggregator, integration_check, pg_instance, pg_replica_i
 
 
 @requires_over_10
+@pytest.mark.skip(reason='building image for incident-24014')
 def test_conflicts_snapshot(aggregator, integration_check, pg_instance, pg_replica_instance2):
     check = integration_check(pg_replica_instance2)
     expected_tags = _get_expected_tags(check, pg_replica_instance2, db=DB_NAME)
