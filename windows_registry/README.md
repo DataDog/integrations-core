@@ -11,32 +11,30 @@ Watch for changes in Windows Registry keys and forward them to Datadog. Enable t
 
 ### Installation
 
-The Windows Crash Detection integration is included in the [Datadog Agent][1] package. No additional installation is needed.
+The Windows Registry integration is included in the [Datadog Agent][1] package. No additional installation is needed.
 
 ### Configuration
 
-This integration collects Windows Registry information using one or both of the following methods:
+This integration collects Windows Registry information using both of following methods:
 
 - As [Datadog Metrics][2]
 - As [Datadog Logs][3]
 
 
-Both methods are configured in `win32_event_log.d/conf.yaml` in the `conf.d/` folder at the root of the [Agent's configuration directory][4]. See the [sample win32_event_log.d/conf.yaml][3] for all available configuration options.
+1. Edit the `windows_registry.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting Windows registry information. See the [sample windows_.d/conf.yaml.example][5] for all available configuration options.
 
+2. Collecting logs is disabled by default in the Datadog Agent. Enable log collection in your `datadog.yaml` file: 
 
-1. Edit the `wincrashdetect.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to set `enabled: true`. See the [sample wincrashdetect.d/conf.yaml.example][3] for all available configuration options.
-
-2. Enable the Windows Crash Detection module in `C:\ProgramData\Datadog\system-probe.yaml` by setting the enabled flag to 'true':
-
-   ```yaml
-    windows_crash_detection:
-        enabled: true
+    ```yaml
+    logs_enabled: true
     ```
-3. [Restart the Agent][4].
+
+3. [Restart the Agent][6].
+
 
 ### Validation
 
-Check the information page in the Datadog Agent Manager or run the [Agent's `status` subcommand][6] and look for `winregistry` under the Checks section.
+Check the information page in the Datadog Agent Manager or run the [Agent's `status` subcommand][7] and look for `windows_registry` under the Checks section.
 
 ## Data Collected
 
@@ -46,7 +44,7 @@ All metrics collected by the Windows Registry integration are forwarded to Datad
 
 ### Logs
 
-All logs collected by the Windows Registry integration are forwarded to Datadog, and subject to [Logs billing][7].
+All logs collected by the Windows Registry integration are forwarded to Datadog, and subject to [Logs billing][8].
 
 ### Service Checks
 
@@ -54,15 +52,15 @@ The Windows Registry integration does not include any service checks.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8] with an [Agent Flare][9].
+Need help? Contact [Datadog support][9] with an [Agent Flare][10].
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: https://app.datadoghq.com/account/settings/agent/latest?platform=windows
 [2]: https://docs.datadoghq.com/metrics/#overview
 [3]: https://docs.datadoghq.com/logs/
-[4]:
-[5]:
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/basic_agent_usage/windows/?tab=gui#agent-status-and-information
-[7]: https://docs.datadoghq.com/account_management/billing/log_management/
-[8]: https://docs.datadoghq.com/help/
-[9]: https://docs.datadoghq.com/agent/troubleshooting/send_a_flare/?tab=agentv6v7
+[4]: https://docs.datadoghq.com/agent/configuration/agent-configuration-files/?tab=agentv6v7#agent-configuration-directory
+[5]: https://github.com/DataDog/datadog-agent/blob/ee8232f97515ae7aed31c02c47ef57eead300c1c/cmd/agent/dist/conf.d/windows_registry.d/conf.yaml.example
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[7]: https://docs.datadoghq.com/agent/basic_agent_usage/windows/?tab=gui#agent-status-and-information
+[8]: https://docs.datadoghq.com/account_management/billing/log_management/
+[9]: https://docs.datadoghq.com/help/
+[10]: https://docs.datadoghq.com/agent/troubleshooting/send_a_flare/?tab=agentv6v7
