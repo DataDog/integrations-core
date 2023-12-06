@@ -7,7 +7,7 @@ import pytest
 from datadog_checks.couchbase import Couchbase
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import MOCKED_COUCHBASE_METRICS, MOCKED_COUCHBASE_QUERY_METRICS
+from .common import MOCKED_COUCHBASE_METRICS, QUERY_STATS
 from .conftest import mock_http_responses
 
 
@@ -146,7 +146,7 @@ def test_unit_query_metrics(dd_run_check, check, instance_query, mocker, aggrega
 
     dd_run_check(check(instance_query))
 
-    for metric in MOCKED_COUCHBASE_METRICS + MOCKED_COUCHBASE_QUERY_METRICS:
+    for metric in MOCKED_COUCHBASE_METRICS + QUERY_STATS:
         aggregator.assert_metric("couchbase." + metric)
 
     aggregator.assert_service_check('couchbase.can_connect', Couchbase.OK)

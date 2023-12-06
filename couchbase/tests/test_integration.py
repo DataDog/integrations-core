@@ -10,7 +10,6 @@ from datadog_checks.couchbase.couchbase_consts import (
     INDEX_STATS_SERVICE_CHECK_NAME,
     NODE_CLUSTER_SERVICE_CHECK_NAME,
     NODE_HEALTH_SERVICE_CHECK_NAME,
-    QUERY_STATS,
     SERVICE_CHECK_NAME,
     SG_SERVICE_CHECK_NAME,
 )
@@ -26,6 +25,7 @@ from .common import (
     INDEX_STATS_INDEXER_METRICS,
     INDEX_STATS_TAGS,
     PORT,
+    QUERY_STATS,
     SYNC_GATEWAY_METRICS,
     _assert_bucket_metrics,
     _assert_stats,
@@ -61,7 +61,7 @@ def test_query_monitoring_metrics(aggregator, dd_run_check, instance_query, couc
     dd_run_check(couchbase)
 
     for metric_name in QUERY_STATS:
-        aggregator.assert_metric('couchbase.query.{}'.format(metric_name), tags=CHECK_TAGS, at_least=0)
+        aggregator.assert_metric('couchbase.{}'.format(metric_name), tags=CHECK_TAGS, at_least=0)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
