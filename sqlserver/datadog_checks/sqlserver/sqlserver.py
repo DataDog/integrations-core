@@ -13,7 +13,7 @@ from cachetools import TTLCache
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
-from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host, tracked_query
+from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.config import SQLServerConfig
@@ -789,11 +789,9 @@ class SQLServer(AgentCheck):
                             db_names = [d.name for d in self.databases] or [
                                 self.instance.get('database', self.connection.DEFAULT_DATABASE)
                             ]
-                            metric_cls = getattr(metrics, cls)
-                            with tracked_query(self, operation=metric_cls.OPERATION_NAME):
-                                rows, cols = metric_cls.fetch_all_values(
-                                    cursor, list(metric_names), self.log, databases=db_names
-                                )
+                            rows, cols = getattr(metrics, cls).fetch_all_values(
+                                cursor, list(metric_names), self.log, databases=db_names
+                            )
                         except Exception as e:
                             self.log.error("Error running `fetch_all` for metrics %s - skipping.  Error: %s", cls, e)
                             rows, cols = None, None

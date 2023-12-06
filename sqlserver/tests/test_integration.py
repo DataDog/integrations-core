@@ -19,14 +19,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_VERSION,
 )
 
-from .common import (
-    CHECK_NAME,
-    CUSTOM_METRICS,
-    EXPECTED_DEFAULT_METRICS,
-    OPERATION_TIME_METRIC_NAME,
-    assert_metrics,
-    get_operation_time_metrics,
-)
+from .common import CHECK_NAME, CUSTOM_METRICS, EXPECTED_DEFAULT_METRICS, assert_metrics
 from .conftest import DEFAULT_TIMEOUT
 from .utils import not_windows_ci, windows_ci
 
@@ -96,7 +89,6 @@ def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, da
         'db:master',
     ]
     assert_metrics(
-        instance_docker,
         aggregator,
         check_tags=instance_docker.get('tags', []),
         service_tags=expected_tags,
@@ -432,15 +424,6 @@ def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_
         aggregator.assert_metric(mname)
 
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK)
-
-    for operation_name in get_operation_time_metrics(instance_docker_defaults):
-        aggregator.assert_metric(
-            OPERATION_TIME_METRIC_NAME,
-            tags=['operation:{}'.format(operation_name)] + check.debug_stats_kwargs()['tags'],
-            hostname=check.resolved_hostname,
-            count=1,
-        )
-
     aggregator.assert_all_metrics_covered()
 
 

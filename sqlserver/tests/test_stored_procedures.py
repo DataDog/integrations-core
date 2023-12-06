@@ -20,7 +20,7 @@ from datadog_checks.sqlserver.const import (
 )
 from datadog_checks.sqlserver.stored_procedures import SQL_SERVER_PROCEDURE_METRICS_COLUMNS
 
-from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME
+from .common import CHECK_NAME
 
 try:
     import pyodbc
@@ -279,7 +279,7 @@ def test_procedure_metrics(
 
     # internal debug metrics
     aggregator.assert_metric(
-        OPERATION_TIME_METRIC_NAME,
+        "dd.sqlserver.operation.time",
         tags=['agent_hostname:stubbed.hostname', 'operation:collect_procedure_metrics']
         + _expected_dbm_instance_tags(dbm_instance),
     )

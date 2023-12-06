@@ -441,12 +441,17 @@ def test_check_local(aggregator, dd_run_check, init_config, instance_docker):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
     check_tags = instance_docker.get('tags', [])
+<<<<<<< HEAD
     expected_tags = check_tags + [
         'sqlserver_host:{}'.format(sqlserver_check.resolved_hostname),
         'connection_host:{}'.format(DOCKER_SERVER),
         'db:master',
     ]
     assert_metrics(instance_docker, aggregator, check_tags, expected_tags, hostname=sqlserver_check.resolved_hostname)
+=======
+    expected_tags = check_tags + ['sqlserver_host:{}'.format(DOCKER_SERVER), 'db:master']
+    assert_metrics(aggregator, check_tags, expected_tags, hostname=sqlserver_check.resolved_hostname)
+>>>>>>> parent of 5dc82133cb ([DBMON-3030] Report metrics query operation time (#16066))
 
 
 SQL_SERVER_2012_VERSION_EXAMPLE = """\
