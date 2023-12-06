@@ -82,7 +82,7 @@ def parse_metric(metric, retry=False, metric_mapping=METRIC_TREE, disable_legacy
         'listener.0.0.0.0_80.downstream_cx_total' ->
         ('listener.downstream_cx_total', ['address:0.0.0.0_80'], 'count')
     """
-    # breakpoint()
+
     metric_parts, tag_value_builder, tag_names, tag_values, unknown_tags, tags_to_build, last_mapping = _parse_metric(
         metric, metric_mapping
     )
