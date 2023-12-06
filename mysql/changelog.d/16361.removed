@@ -1,0 +1,1 @@
+Remove tracking of mysql metrics queries operation time (Reverts [#16065](https://github.com/DataDog/integrations-core/pull/16065))
