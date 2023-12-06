@@ -784,7 +784,7 @@ VM_PROPERTIES_EX = mock.MagicMock(
                     ),
                     vmodl.DynamicProperty(
                         name='summary.runtime.inMaintenanceMode',
-                        val='False',
+                        val=False,
                     ),
                 ],
             ),
@@ -805,7 +805,7 @@ VM_PROPERTIES_EX = mock.MagicMock(
                     ),
                     vmodl.DynamicProperty(
                         name='summary.runtime.inMaintenanceMode',
-                        val='True',
+                        val=True,
                     ),
                 ],
             ),
@@ -831,6 +831,31 @@ VM_PROPERTIES_EX = mock.MagicMock(
                     vmodl.DynamicProperty(
                         name='configuration.drsConfig.vmotionRate',
                         val=2,
+                    ),
+                ],
+            ),
+            vim.ObjectContent(
+                obj=vim.ClusterComputeResource(moId="c2"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='c2',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='configuration.dasConfig.enabled',
+                        val=False,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='configuration.drsConfig.enabled',
+                        val=False,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='configuration.drsConfig.defaultVmBehavior',
+                        val='fullyAutomated',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='configuration.drsConfig.vmotionRate',
+                        val=1,
                     ),
                 ],
             ),

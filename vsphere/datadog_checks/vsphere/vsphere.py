@@ -695,17 +695,19 @@ class VSphereCheck(AgentCheck):
             additional_tags = {}
 
         if is_count_metric:
+            is_bool_metric = isinstance(metric_value, bool)
             no_additional_tags = all(tag is None for tag in additional_tags.values())
             if no_additional_tags:
                 if metric_value is None:
                     self.log.debug(
                         "Could not submit property metric- no metric data: name=`%s`, value=`%s`, hostname=`%s`, "
-                        "base tags=`%s` additional tags=`%s`",
+                        "base tags=`%s` additional tags=`%s`, is_bool_metric=`%s`",
                         metric_full_name,
                         metric_value,
                         hostname,
                         base_tags,
                         additional_tags,
+                        is_bool_metric,
                     )
                     return
 
@@ -713,8 +715,8 @@ class VSphereCheck(AgentCheck):
                 property_tag = {tag_name: metric_value}
                 additional_tags.update(property_tag)
 
-            # set metric value to 1 since it is not a float
-            metric_value = 1
+            if not is_bool_metric:
+                metric_value = 1
 
         else:
             try:

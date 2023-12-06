@@ -2672,7 +2672,7 @@ def test_host_property_metrics(aggregator, realtime_instance, dd_run_check, capl
     aggregator.assert_metric(
         'vsphere.host.summary.runtime.inMaintenanceMode',
         count=1,
-        value=1,
+        value=0,
         tags=base_tags_host + ["inMaintenanceMode:False"],
         hostname='host1',
     )
@@ -2729,22 +2729,52 @@ def test_cluster_property_metrics(aggregator, historical_instance, dd_run_check,
     historical_instance['collect_property_metrics'] = True
 
     service_instance.content.propertyCollector.RetrievePropertiesEx = vm_properties_ex
-    base_tags = ['vcenter_server:FAKE', 'vsphere_cluster:c1', 'vsphere_type:cluster']
+    base_tags = ['vcenter_server:FAKE', 'vsphere_type:cluster']
+    base_tags_cluster_1 = base_tags + ['vsphere_cluster:c1']
+    base_tags_cluster_2 = base_tags + ['vsphere_cluster:c2']
+
     check = VSphereCheck('vsphere', {}, [historical_instance])
     dd_run_check(check)
+
+    # cluster 1
     aggregator.assert_metric(
-        'vsphere.cluster.configuration.drsConfig.enabled', count=1, value=1, tags=base_tags + ['enabled:True']
+        'vsphere.cluster.configuration.drsConfig.enabled', count=1, value=1, tags=base_tags_cluster_1 + ['enabled:True']
     )
     aggregator.assert_metric(
-        'vsphere.cluster.configuration.dasConfig.enabled', count=1, value=1, tags=base_tags + ['enabled:True']
+        'vsphere.cluster.configuration.dasConfig.enabled', count=1, value=1, tags=base_tags_cluster_1 + ['enabled:True']
     )
     aggregator.assert_metric(
         'vsphere.cluster.configuration.drsConfig.defaultVmBehavior',
         count=1,
         value=1,
-        tags=base_tags + ['defaultVmBehavior:fullyAutomated'],
+        tags=base_tags_cluster_1 + ['defaultVmBehavior:fullyAutomated'],
     )
-    aggregator.assert_metric('vsphere.cluster.configuration.drsConfig.vmotionRate', count=1, value=2, tags=base_tags)
+    aggregator.assert_metric(
+        'vsphere.cluster.configuration.drsConfig.vmotionRate', count=1, value=2, tags=base_tags_cluster_1
+    )
+
+    # cluster 2
+    aggregator.assert_metric(
+        'vsphere.cluster.configuration.drsConfig.enabled',
+        count=1,
+        value=0,
+        tags=base_tags_cluster_2 + ['enabled:False'],
+    )
+    aggregator.assert_metric(
+        'vsphere.cluster.configuration.dasConfig.enabled',
+        count=1,
+        value=0,
+        tags=base_tags_cluster_2 + ['enabled:False'],
+    )
+    aggregator.assert_metric(
+        'vsphere.cluster.configuration.drsConfig.defaultVmBehavior',
+        count=1,
+        value=1,
+        tags=base_tags_cluster_2 + ['defaultVmBehavior:fullyAutomated'],
+    )
+    aggregator.assert_metric(
+        'vsphere.cluster.configuration.drsConfig.vmotionRate', count=1, value=1, tags=base_tags_cluster_2
+    )
 
 
 def test_datastore_property_metrics(aggregator, historical_instance, dd_run_check, service_instance, vm_properties_ex):

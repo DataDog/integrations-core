@@ -340,6 +340,35 @@ QUERY_PG_REPLICATION_SLOTS = {
     ],
 }
 
+# Require PG14+
+QUERY_PG_REPLICATION_SLOTS_STATS = {
+    'name': 'pg_replication_slots_stats',
+    'columns': [
+        {'name': 'slot_name', 'type': 'tag'},
+        {'name': 'slot_type', 'type': 'tag'},
+        {'name': 'slot_state', 'type': 'tag'},
+        {'name': 'postgresql.replication_slot.spill_txns', 'type': 'monotonic_count'},
+        {'name': 'postgresql.replication_slot.spill_count', 'type': 'monotonic_count'},
+        {'name': 'postgresql.replication_slot.spill_bytes', 'type': 'monotonic_count'},
+        {'name': 'postgresql.replication_slot.stream_txns', 'type': 'monotonic_count'},
+        {'name': 'postgresql.replication_slot.stream_count', 'type': 'monotonic_count'},
+        {'name': 'postgresql.replication_slot.stream_bytes', 'type': 'monotonic_count'},
+        {'name': 'postgresql.replication_slot.total_txns', 'type': 'monotonic_count'},
+        {'name': 'postgresql.replication_slot.total_bytes', 'type': 'monotonic_count'},
+    ],
+    'query': """
+SELECT
+    stat.slot_name,
+    slot_type,
+    CASE WHEN active THEN 'active' ELSE 'inactive' END,
+    spill_txns, spill_count, spill_bytes,
+    stream_txns, stream_count, stream_bytes,
+    total_txns, total_bytes
+FROM pg_stat_replication_slots AS stat
+JOIN pg_replication_slots ON pg_replication_slots.slot_name = stat.slot_name
+""".strip(),
+}
+
 CONNECTION_METRICS = {
     'descriptors': [],
     'metrics': {
