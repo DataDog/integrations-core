@@ -281,6 +281,7 @@ def test_local_rate_limit_metrics(aggregator, fixture_path, mock_http_response, 
 
     for metric in LOCAL_RATE_LIMIT_METRICS:
         aggregator.assert_metric(metric)
-        aggregator.assert_metric_has_tag(metric, RATE_LIMIT_STAT_PREFIX_TAG)
+        for tag in RATE_LIMIT_STAT_PREFIX_TAG:
+            aggregator.assert_metric_has_tag(metric, tag, count=1)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

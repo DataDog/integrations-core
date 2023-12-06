@@ -105,6 +105,8 @@ def test_collect_metadata_with_invalid_base_url(
     ],
 )
 def test_local_rate_limit_metrics(aggregator, dd_run_check, check, mock_http_response, fixture_file):
+    # Envoy 1.28+ fixed this metric by moving the variable stat_prefix into a label which follows the normal
+    # OpenMetrics convention. However older versions still have the stat_prefix inside the metric name.
     mock_http_response(file_path=get_fixture_path('./openmetrics/{}'.format(fixture_file)))
 
     c = check(DEFAULT_INSTANCE)
@@ -119,7 +121,6 @@ def test_local_rate_limit_metrics(aggregator, dd_run_check, check, mock_http_res
         "envoy.openmetrics.health", status=AgentCheck.OK, tags=['endpoint:http://localhost:8001/stats/prometheus']
     )
 
-    # aggregator.assert_all_metrics_covered()
     aggregator.assert_no_duplicate_metrics()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 

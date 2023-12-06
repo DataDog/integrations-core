@@ -3861,7 +3861,7 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
-    # "*." to match at the beginning of raw metric if it's not a
+    # "*." to match at the beginning of raw metric if it doesn't have a standard name
     '*.http_local_rate_limit.enabled': {
         'tags': (
             ('stat_prefix',),
