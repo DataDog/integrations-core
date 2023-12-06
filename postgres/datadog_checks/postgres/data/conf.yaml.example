@@ -62,7 +62,6 @@ instances:
     #   - template%
     #   - rdsadmin
     #   - azure_maintenance
-    #   - cloudsqladmin
 
     ## @param ssl - string - optional - default: allow
     ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
@@ -181,7 +180,6 @@ instances:
     ## By default, datname, usename and application_name will be used.
     ## If applications with different application_name are creating a lot of short-lived queries,
     ## removing application_name from the aggregation can help generate more stable metrics.
-    ## Note that datname is a required aggregation on activity metrics and can't be excluded.
     #
     # activity_metrics_excluded_aggregations:
     #   - application_name
@@ -269,7 +267,7 @@ instances:
         #   - master$
         #   - AdventureWorks.*
 
-        ## @param exclude - list of strings - optional - default: ['cloudsqladmin']
+        ## @param exclude - list of strings - optional
         ## Regular expression for database names to exclude as part of `database_autodiscovery`.
         ## Character casing is ignored. The regular expressions start matching from the beginning,
         ## so to match anywhere, prepend `.*`. For exact matches append `$`.
@@ -279,7 +277,6 @@ instances:
         # exclude:
         #   - model
         #   - msdb
-        #   - cloudsqladmin
 
         ## @param refresh - integer - optional - default: 600
         ## Frequency in seconds of scans for new databases. Defaults to 10 minutes.

@@ -26,22 +26,11 @@ def wait_on_result(cursor=None, sql=None, binds=None, expected_value=None):
     return True
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.skipif(
     POSTGRES_VERSION is None or float(POSTGRES_VERSION) < 9.2,
     reason='Deadlock test requires version 9.2 or higher (make sure POSTGRES_VERSION is set)',
 )
 def test_deadlock(aggregator, dd_run_check, integration_check, pg_instance):
-    '''
-    This test creates a deadlock by having two connections update the same two rows in opposite order.
-    conn1 - open new transaction (implicitly), update row 1, do not commit (transaction left open)
-    conn2 - open new transaction (explicitly), update row 2, update row 1, (attempt to) commit
-    conn1 - update row 2, (attempt to) commit
-    conn2 is blocked waiting for conn1 to update row 1
-    conn1 is blocked waiting for conn2 to update row 2
-    deadlock occurs
-    '''
     check = integration_check(pg_instance)
     check._connect()
     conn = check._new_connection(pg_instance['dbname'])
@@ -127,9 +116,6 @@ commit;
     except psycopg2.errors.DeadlockDetected:
         pass
 
-    conn1.close()
-    conn2.close()
-
     dd_run_check(check)
 
     wait_on_result(cursor=cursor, sql=deadlock_count_sql, binds=(DB_NAME,), expected_value=deadlocks_before + 1)
@@ -144,5 +130,3 @@ commit;
             'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
         ],
     )
-
-    conn.close()

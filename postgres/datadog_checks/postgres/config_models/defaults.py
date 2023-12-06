@@ -77,7 +77,7 @@ def instance_idle_connection_timeout():
 
 
 def instance_ignore_databases():
-    return ['template%', 'rdsadmin', 'azure_maintenance', 'cloudsqladmin']
+    return ['template%', 'rdsadmin', 'azure_maintenance']
 
 
 def instance_log_unobfuscated_plans():

@@ -65,12 +65,10 @@ files:
           - 'template%'
           - rdsadmin
           - azure_maintenance
-          - cloudsqladmin
         default:
           - 'template%'
           - rdsadmin
           - azure_maintenance
-          - cloudsqladmin
     - name: ssl
       description: |
         This option determines whether or not and with what priority a secure SSL TCP/IP connection
@@ -235,7 +233,6 @@ files:
         By default, datname, usename and application_name will be used.
         If applications with different application_name are creating a lot of short-lived queries,
         removing application_name from the aggregation can help generate more stable metrics.
-        Note that datname is a required aggregation on activity metrics and can't be excluded.
       value:
         type: array
         items:
@@ -355,9 +352,6 @@ files:
             example:
               - "model"
               - "msdb"
-              - "cloudsqladmin"
-            display_default:
-              - "cloudsqladmin"
         - name: refresh
           description: Frequency in seconds of scans for new databases. Defaults to 10 minutes.
           value:

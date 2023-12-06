@@ -29,7 +29,6 @@ from .common import (
     check_db_count,
     check_file_wal_metrics,
     check_logical_replication_slots,
-    check_performance_metrics,
     check_physical_replication_slots,
     check_slru_metrics,
     check_snapshot_txid_metrics,
@@ -73,21 +72,13 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check_logical_replication_slots(aggregator, expected_tags)
     check_physical_replication_slots(aggregator, expected_tags)
     check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
-
-    check_performance_metrics(aggregator, expected_tags=check.debug_stats_kwargs()['tags'], is_aurora=is_aurora)
-
     aggregator.assert_all_metrics_covered()
 
 
 def test_snapshot_xmin(aggregator, integration_check, pg_instance):
     with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
-        conn.set_session(autocommit=True)
         with conn.cursor() as cur:
-            if float(POSTGRES_VERSION) >= 13.0:
-                query = 'select pg_snapshot_xmin(pg_current_snapshot());'
-            else:
-                query = 'select txid_snapshot_xmin(txid_current_snapshot());'
-            cur.execute(query)
+            cur.execute('select txid_snapshot_xmin(txid_current_snapshot());')
             xmin = float(cur.fetchall()[0][0])
     check = integration_check(pg_instance)
     check.check(pg_instance)
@@ -101,16 +92,13 @@ def test_snapshot_xmin(aggregator, integration_check, pg_instance):
         conn.set_session(autocommit=True)
         with conn.cursor() as cur:
             # Force increases of txid
-            if float(POSTGRES_VERSION) >= 13.0:
-                query = 'select pg_current_xact_id();'
-            else:
-                query = 'select txid_current();'
-            cur.execute(query)
+            cur.execute('select txid_current();')
+            cur.execute('select txid_current();')
 
     check = integration_check(pg_instance)
     check.check(pg_instance)
-    aggregator.assert_metric('postgresql.snapshot.xmin', value=xmin + 1, count=1, tags=expected_tags)
-    aggregator.assert_metric('postgresql.snapshot.xmax', value=xmin + 1, count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.snapshot.xmin', value=xmin + 2, count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.snapshot.xmax', value=xmin + 2, count=1, tags=expected_tags)
 
 
 def test_snapshot_xip(aggregator, integration_check, pg_instance):
@@ -335,13 +323,11 @@ def test_activity_metrics_no_application_aggregation(aggregator, integration_che
 
 def test_activity_metrics_no_aggregations(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
-    # datname is a required aggregation because our activity metric query is always grouping by database id.
-    # Setting it should issue a warning, be ignored and still produce an aggregation by db
     pg_instance['activity_metrics_excluded_aggregations'] = ['datname', 'application_name', 'usename']
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    expected_tags = _get_expected_tags(check, pg_instance, db=DB_NAME)
+    expected_tags = _get_expected_tags(check, pg_instance)
     check_activity_metrics(aggregator, expected_tags)
 
 
@@ -546,6 +532,21 @@ def test_wal_metrics(aggregator, integration_check, pg_instance, is_aurora):
 
     expected_wal_size = expected_num_wals * wal_size
     dd_agent_tags = _get_expected_tags(check, pg_instance)
+    aggregator.assert_metric('postgresql.wal_count', count=1, value=expected_num_wals, tags=dd_agent_tags)
+    aggregator.assert_metric('postgresql.wal_size', count=1, value=expected_wal_size, tags=dd_agent_tags)
+
+    with postgres_conn.cursor() as cur:
+        # Force a wal switch
+        cur.execute("select pg_switch_wal();")
+        cur.fetchall()
+        # Checkpoint to accelerate new wal file
+        cur.execute("CHECKPOINT;")
+
+    aggregator.reset()
+    check.check(pg_instance)
+
+    expected_num_wals += 1
+    expected_wal_size = expected_num_wals * wal_size
     aggregator.assert_metric('postgresql.wal_count', count=1, value=expected_num_wals, tags=dd_agent_tags)
     aggregator.assert_metric('postgresql.wal_size', count=1, value=expected_wal_size, tags=dd_agent_tags)
 
