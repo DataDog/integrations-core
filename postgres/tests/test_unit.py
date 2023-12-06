@@ -14,8 +14,7 @@ from six import iteritems
 
 from datadog_checks.postgres import PostgreSql, util
 
-from .common import PORT, check_performance_metrics
-from .utils import requires_over_10
+from .common import PORT
 
 pytestmark = pytest.mark.unit
 
@@ -241,36 +240,24 @@ def test_resolved_hostname_metadata(check, test_case):
         m.assert_any_call('test:123', 'resolved_hostname', test_case)
 
 
-@requires_over_10
 @pytest.mark.usefixtures('mock_cursor_for_replica_stats')
 def test_replication_stats(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
-    base_tags = [
-        'foo:bar',
-        'port:5432',
-        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
-    ]
+    base_tags = ['foo:bar', 'port:5432', 'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname)]
     app1_tags = base_tags + [
         'wal_sync_state:async',
         'wal_state:streaming',
         'wal_app_name:app1',
         'wal_client_addr:1.1.1.1',
     ]
-    app2_tags = base_tags + [
-        'wal_sync_state:sync',
-        'wal_state:backup',
-        'wal_app_name:app2',
-        'wal_client_addr:1.1.1.1',
-    ]
+    app2_tags = base_tags + ['wal_sync_state:sync', 'wal_state:backup', 'wal_app_name:app2', 'wal_client_addr:1.1.1.1']
 
     aggregator.assert_metric('postgresql.db.count', 0, base_tags)
     for suffix in ('wal_write_lag', 'wal_flush_lag', 'wal_replay_lag', 'backend_xmin_age'):
         metric_name = 'postgresql.replication.{}'.format(suffix)
         aggregator.assert_metric(metric_name, 12, app1_tags)
         aggregator.assert_metric(metric_name, 13, app2_tags)
-
-    check_performance_metrics(aggregator, check.debug_stats_kwargs()['tags'])
 
     aggregator.assert_all_metrics_covered()
 

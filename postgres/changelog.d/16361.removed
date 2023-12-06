@@ -1,0 +1,1 @@
+Remove tracking of postgres metrics queries operation time (Reverts [#16040](https://github.com/DataDog/integrations-core/pull/16040))

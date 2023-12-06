@@ -96,7 +96,6 @@ class PostgresMetricsCache:
             "FROM pg_stat_database psd "
             "JOIN pg_database pd ON psd.datname = pd.datname",
             'relation': False,
-            'name': 'instance_metrics',
         }
 
         res["query"] += " WHERE " + " AND ".join(
@@ -130,7 +129,6 @@ class PostgresMetricsCache:
             'metrics': self.bgw_metrics,
             'query': "select {metrics_columns} FROM pg_stat_bgwriter",
             'relation': False,
-            'name': 'bgw_metrics',
         }
 
     def get_count_metrics(self):
@@ -161,7 +159,6 @@ class PostgresMetricsCache:
             'metrics': self.archiver_metrics,
             'query': "select {metrics_columns} FROM pg_stat_archiver",
             'relation': False,
-            'name': 'archiver_metrics',
         }
 
     def get_replication_metrics(self, version, is_aurora):
@@ -253,5 +250,4 @@ class PostgresMetricsCache:
             'metrics': metrics,
             'query': query,
             'relation': False,
-            'name': 'activity_metrics',
         }

@@ -55,7 +55,6 @@ SELECT mode,
    AND pc.relname NOT LIKE 'pg^_%%' ESCAPE '^'
  GROUP BY pd.datname, pc.relname, pn.nspname, locktype, mode, granted""",
     'relation': True,
-    'name': 'lock_metrics',
 }
 
 # The pg_stat_all_tables contain one row for each table in the current database,
@@ -88,7 +87,6 @@ SELECT relname,schemaname,{metrics_columns}
   FROM pg_stat_user_tables
  WHERE {relations}""",
     'relation': True,
-    'name': 'rel_metrics',
 }
 
 
@@ -111,7 +109,6 @@ SELECT relname,
   FROM pg_stat_user_indexes
  WHERE {relations}""",
     'relation': True,
-    'name': 'idx_metrics',
 }
 
 
@@ -199,9 +196,7 @@ SELECT relname,
   FROM pg_statio_user_tables
  WHERE {relations}""",
     'relation': True,
-    'name': 'statio_metrics',
 }
-
 # adapted from https://wiki.postgresql.org/wiki/Show_database_bloat and https://github.com/bucardo/check_postgres/
 TABLE_BLOAT_QUERY = """
 SELECT
@@ -252,7 +247,6 @@ TABLE_BLOAT = {
     },
     'query': TABLE_BLOAT_QUERY,
     'relation': True,
-    'name': 'table_bloat_metrics',
 }
 
 
@@ -308,7 +302,6 @@ INDEX_BLOAT = {
     },
     'query': INDEX_BLOAT_QUERY,
     'relation': True,
-    'name': 'index_bloat_metrics',
 }
 
 RELATION_METRICS = [LOCK_METRICS, REL_METRICS, IDX_METRICS, STATIO_METRICS]
