@@ -7,7 +7,13 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy import Envoy
 
-from .common import DEFAULT_INSTANCE, FLAKY_METRICS, LOCAL_RATE_LIMIT_METRICS, PROMETHEUS_METRICS, requires_new_environment
+from .common import (
+    DEFAULT_INSTANCE,
+    FLAKY_METRICS,
+    LOCAL_RATE_LIMIT_METRICS,
+    PROMETHEUS_METRICS,
+    requires_new_environment,
+)
 
 pytestmark = [requires_new_environment]
 
