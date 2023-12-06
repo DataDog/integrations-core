@@ -183,13 +183,6 @@ INDEX_STATS_COUNT_METRICS = [
     'couchbase.index.scan_bytes_read',
 ]
 
-QUERY_STATS_ALWAYS_PRESENT = {
-    'cpu_sys_percent',
-    'cpu_user_percent',
-    'memory_total',
-    'request_prepared_percent',
-}
-
 OPTIONAL_BY_BUCKET_METRICS = [
     'couchbase.by_bucket.avg_bg_wait_time',
     'couchbase.by_bucket.avg_disk_commit_time',
@@ -567,6 +560,30 @@ MOCKED_COUCHBASE_METRICS = [
     "ram.total",
     "ram.used",
     "ram.used_by_data",
+]
+
+MOCKED_COUCHBASE_QUERY_METRICS = [
+    "query.cores",
+    "query.cpu_sys_percent",
+    "query.cpu_user_percent",
+    "query.gc_num",
+    "query.gc_pause_percent",
+    "query.gc_pause_time",
+    "query.memory_system",
+    "query.memory_total",
+    "query.memory_usage",
+    "query.request_active_count",
+    "query.request_completed_count",
+    "query.request_per_sec_15min",
+    "query.request_per_sec_1min",
+    "query.request_per_sec_5min",
+    "query.request_prepared_percent",
+    "query.request_time_80percentile",
+    "query.request_time_95percentile",
+    "query.request_time_99percentile",
+    "query.request_time_mean",
+    "query.request_time_median",
+    "query.total_threads",
 ]
 
 

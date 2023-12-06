@@ -231,6 +231,7 @@ def mock_http_responses(url, **_params):
         'http://localhost:8091/pools/default/buckets?v=62866031&uuid=f66f28b255e70b6f2618c15228238797': 'pools/default/buckets.json',  # noqa
         'http://localhost:8091/pools/default/buckets/cb_bucket/stats': 'pools/default/buckets/cb_buckets/stats.json',
         'http://localhost:8091/pools/default/tasks': 'pools/default/tasks.json',
+        'http://localhost:8093/admin/vitals': 'admin/vitals.json',
     }
 
     metrics_file = mapping.get(url)
