@@ -1,0 +1,1 @@
+Remove tracking of sqlserver metrics queries operation time (Reverts [#16066](https://github.com/DataDog/integrations-core/pull/16066))
