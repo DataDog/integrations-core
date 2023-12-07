@@ -1,0 +1,22 @@
+{
+	"id": 11907436,
+	"name": "High Memory Usage on Ray.io Node",
+	"type": "query alert",
+	"query": "avg(last_5m):100 * avg:ray.node.mem.available{*} / avg:ray.node.mem.total{*} < 5",
+	"message": "{{#is_alert}} \nThere is less than {{value}}% memory available.\n\n{{/is_alert}}\n\n{{#is_warning}}\nThere is less than {{value}}% memory available.\n\n{{/is_warning}}",
+	"tags": [],
+	"options": {
+		"thresholds": {
+			"critical": 5,
+			"warning": 10
+		},
+		"notify_audit": false,
+		"include_tags": false,
+		"notify_no_data": false,
+		"new_host_delay": 300,
+		"silenced": {},
+		"avalanche_window": 10
+	},
+	"priority": null,
+	"restricted_roles": null
+}

@@ -44,6 +44,11 @@
     },
     "logs": {
       "source": "ray"
+    },
+    "monitors": {
+      "cpu_utilization": "assets/monitors/cpu_utilization.json",
+      "failed_tasks": "assets/monitors/failed_tasks.json",
+      "high_memory": "assets/monitors/high_memory.json"
     }
   },
   "author": {
