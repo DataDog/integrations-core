@@ -40,6 +40,7 @@ STATISTICS_COMPONENTS_MAP = {
     "QUEUE": queries.QueueMetrics,
     "SNAPSHOTSTATUS": queries.SnapshotStatusMetrics,
     "TABLE": queries.TableMetrics,
+    "LIVECLIENTS": queries.LiveClientsMetrics,
 }
 
 
