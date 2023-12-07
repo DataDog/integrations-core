@@ -29,6 +29,10 @@ requires_over_14 = pytest.mark.skipif(
     POSTGRES_VERSION is None or float(POSTGRES_VERSION) < 14,
     reason='This test is for over 14 only (make sure POSTGRES_VERSION is set)',
 )
+requires_over_15 = pytest.mark.skipif(
+    POSTGRES_VERSION is None or float(POSTGRES_VERSION) < 15,
+    reason='This test is for over 15 only (make sure POSTGRES_VERSION is set)',
+)
 
 
 def _get_conn(db_instance, dbname=None, user=None, password=None, application_name='test'):
