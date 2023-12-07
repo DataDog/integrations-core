@@ -194,7 +194,7 @@ PipeHistory = {
         'select history.pipe_name, p.pipe_schema, p.pipe_catalog, '
         'avg(credits_used), sum(credits_used), avg(bytes_inserted), sum(bytes_inserted), '
         'avg(files_inserted), sum(files_inserted) from pipe_usage_history as history '
-        'join snowflake.account_usage.pipes p on p.pipe_id = history.pipe_id '
+        'join pipes p on p.pipe_id = history.pipe_id '
         'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1,2,3;'
     ),
     'columns': [
