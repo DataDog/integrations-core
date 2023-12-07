@@ -16,6 +16,7 @@ ENVOY_VERSION = {'istio_build': {'type': 'metadata', 'label': 'tag', 'name': 've
 LABEL_MAP = {
     'cluster_name': 'envoy_cluster',
     'envoy_cluster_name': 'envoy_cluster',
+    'envoy_local_http_ratelimit_prefix': 'stat_prefix',  # local rate limit
     'envoy_http_conn_manager_prefix': 'stat_prefix',  # tracing
     'envoy_listener_address': 'address',  # listener
     'envoy_virtual_cluster': 'virtual_envoy_cluster',  # vhost
@@ -88,6 +89,26 @@ METRIC_WITH_LABEL_NAME = {
         'label_name': 'handler',
         'metric_type': 'monotonic_count',
         'new_name': 'listener.downstream_cx.count',
+    },
+    r'envoy_(.+)_http_local_rate_limit_enabled$': {
+        'label_name': 'stat_prefix',
+        'metric_type': 'monotonic_count',
+        'new_name': 'http.local_rate_limit_enabled.count',
+    },
+    r'envoy_(.+)_http_local_rate_limit_enforced$': {
+        'label_name': 'stat_prefix',
+        'metric_type': 'monotonic_count',
+        'new_name': 'http.local_rate_limit_enforced.count',
+    },
+    r'envoy_(.+)_http_local_rate_limit_ok$': {
+        'label_name': 'stat_prefix',
+        'metric_type': 'monotonic_count',
+        'new_name': 'http.local_rate_limit_ok.count',
+    },
+    r'envoy_(.+)_http_local_rate_limit_rate_limited$': {
+        'label_name': 'stat_prefix',
+        'metric_type': 'monotonic_count',
+        'new_name': 'http.local_rate_limit_rate_limited.count',
     },
 }
 

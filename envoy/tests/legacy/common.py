@@ -44,3 +44,12 @@ EXT_METRICS = [
     "envoy.cluster.ext_authz.failure_mode_allowed",
     "envoy.cluster.ext_authz.ok",
 ]
+
+LOCAL_RATE_LIMIT_METRICS = [
+    "envoy.http_local_rate_limit.enabled",
+    "envoy.http_local_rate_limit.enforced",
+    "envoy.http_local_rate_limit.rate_limited",
+    "envoy.http_local_rate_limit.ok",
+]
+
+RATE_LIMIT_STAT_PREFIX_TAG = ['stat_prefix:http_local_rate_limiter', 'stat_prefix:foo']
