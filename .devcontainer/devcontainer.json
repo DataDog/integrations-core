@@ -14,8 +14,10 @@
 		"ghcr.io/devcontainers/features/python:1": {}
 	},
 
-	// Install the local ddev cli at start time and set the location of the integrations-core folder, start docker service
-	"postCreateCommand": "pipx install -e /workspaces/integrations-core/ddev && ddev config find && sed -i 's|core = \"~/dd/integrations-core\"|core = \"/workspaces/integrations-core\"|' /root/.local/share/dd-checks-dev/config.toml && service docker start",
+	// Install the local ddev cli at creation time and set the location of the integrations-core folder
+	"postCreateCommand": "pip install -e /workspaces/integrations-core/datadog_checks_dev[cli] && pip install -e /workspaces/integrations-core/ddev && ddev config set repos.core /workspaces/integrations-core && ddev config set repo core",
+	// Start docker-in-docker service when the container is started
+	"postStartCommand": "service docker start",
 
 	// To access docker socket/service
 	"remoteUser": "root"
