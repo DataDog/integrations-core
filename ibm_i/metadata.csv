@@ -13,6 +13,7 @@ ibm_i.job.status,gauge,,,,Whether a job is currently active or not.,0,ibm_i,job 
 ibm_i.job.jobq_duration,gauge,,second,,The amount of time a job has been in the JOBQ status,-1,ibm_i,job jobq duration,
 ibm_i.job.active_duration,gauge,,second,,The amount of time a job has been active,1,ibm_i,job active duration,
 ibm_i.job.cpu_usage,gauge,,,,The CPU usage by a job,0,ibm_i,job cpu,
+ibm_i.job.cpu_usage.pct,gauge,,percent,,The CPU usage by a job as a percentage,0,ibm_i,job cpu,
 ibm_i.job.temp_storage,gauge,,mebibyte,,The amount of temporary storage that is currently allocated to a job,0,ibm_i,job storage,
 ibm_i.pool.size,gauge,,mebibyte,,The amount of main storage in a pool,0,ibm_i,pool size,
 ibm_i.pool.reserved_size,gauge,,mebibyte,,The amount of storage in a pool reserved for system use,0,ibm_i,pool reserved,
