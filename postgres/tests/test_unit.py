@@ -14,7 +14,7 @@ from six import iteritems
 
 from datadog_checks.postgres import PostgreSql, util
 
-from .common import PORT, check_performance_metrics
+from .common import PORT
 from .utils import requires_over_10
 
 pytestmark = pytest.mark.unit
@@ -269,8 +269,6 @@ def test_replication_stats(aggregator, integration_check, pg_instance):
         metric_name = 'postgresql.replication.{}'.format(suffix)
         aggregator.assert_metric(metric_name, 12, app1_tags)
         aggregator.assert_metric(metric_name, 13, app2_tags)
-
-    check_performance_metrics(aggregator, check.debug_stats_kwargs()['tags'])
 
     aggregator.assert_all_metrics_covered()
 

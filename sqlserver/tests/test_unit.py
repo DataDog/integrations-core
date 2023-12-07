@@ -446,7 +446,7 @@ def test_check_local(aggregator, dd_run_check, init_config, instance_docker):
         'connection_host:{}'.format(DOCKER_SERVER),
         'db:master',
     ]
-    assert_metrics(instance_docker, aggregator, check_tags, expected_tags, hostname=sqlserver_check.resolved_hostname)
+    assert_metrics(aggregator, check_tags, expected_tags, hostname=sqlserver_check.resolved_hostname)
 
 
 SQL_SERVER_2012_VERSION_EXAMPLE = """\
