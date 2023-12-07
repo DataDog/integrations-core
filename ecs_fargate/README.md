@@ -482,7 +482,7 @@ After this has been added edit the application container in your Task Definition
 <!-- xxx tab "AWS CLI" xxx -->
 ##### AWS CLI
 
-Edit the existing task definition JSON file that you have to contain the `log_router` container and the updated `logConfiguration` for your application container, as described in the previous section. Once this is done you can create a new revision of your task definition with:
+Edit your existing JSON task definition file to include the `log_router` container and the updated `logConfiguration` for your application container, as described in the previous section. After this is done, create a new revision of your task definition with the following command:
 
 ```bash
 aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-agent-ecs-fargate.json
