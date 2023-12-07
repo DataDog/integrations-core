@@ -35,6 +35,7 @@ MemoryMetrics = {
         {'name': 'memory.pooled', 'type': 'gauge'},
         {'name': 'memory.physical', 'type': 'gauge'},
         {'name': 'memory.java.max_heap', 'type': 'gauge'},
+        {'name': 'memory.undo_pool_size', 'type': 'gauge'},
     ],
 }
 
@@ -357,5 +358,22 @@ ProcedureProfileMetrics = {
         {'name': 'procedureprofile.max_time', 'type': 'gauge'},
         {'name': 'procedureprofile.aborts', 'type': 'monotonic_gauge'},
         {'name': 'procedureprofile.failures', 'type': 'monotonic_gauge'},
+    ],
+}
+# https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php#sysprocstatliveclients
+# One row per procedure, summarized across the cluster.
+LiveClientsMetrics = {
+    'name': 'liveclients',
+    'query': '@Statistics:[LIVECLIENTS]',
+    'columns': [
+        None,  # TIMESTAMP
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
+        {'name': 'liveclients.connection_id', 'type': 'gauge'},
+        {'name': 'liveclients.client_hostname', 'type': 'gauge'},
+        {'name': 'liveclients.admin', 'type': 'gauge'},
+        {'name': 'liveclients.outstanding_request_bytes', 'type': 'monotonic_gauge'},
+        {'name': 'liveclients.outstanding_response_messages', 'type': 'gauge'},
+        {'name': 'liveclients.outstanding_transactions', 'type': 'monotonic_gauge'},
     ],
 }
