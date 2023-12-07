@@ -289,7 +289,7 @@ jmx_metrics:
         bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?)'
         attribute:
           fetch-rate:
-            metric_type: gauge
+            metric_type: rate
             alias: kafka.consumer.fetch_rate
     - include:
         domain: 'kafka.consumer'
