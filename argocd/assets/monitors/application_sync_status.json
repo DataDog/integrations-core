@@ -6,7 +6,7 @@
   "tags": [
     "integration:argocd"
   ],
-  "description": "A sync status in ArgoCD provide insights into the state of applications. This monitor tracks the state of those applications and alerts when there is at least one unsynchronized ArgoCD application.",
+  "description": "A sync status in ArgoCD provides insight into the state of applications. This monitor tracks the state of those applications and alerts when there is at least one unsynchronized ArgoCD application.",
   "definition": {
     "message": "{{#is_alert}}\nApplication {{name.name}} has been reporting with a sync_status:{{sync_status.name}} for the last 30 minutes.\n{{/is_alert}}",
     "name": "[ArgoCD] Application Sync Status",
