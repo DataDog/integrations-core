@@ -22,10 +22,10 @@ jobs:
                             # https://github.com/actions/labeler/issues/112#issuecomment-1000491676
       - name: Add team labels
         run: |
-          for team in $(jq -r '.event.pull_request.requested_teams[].name' <<< "$GITHUB_CONTEXT"); do 
-            # Replace spaces with dashes "Platform Integrations" -> "Platform-Integrations"
-            team_normalized=$(echo "$team" | sed 's/ /-/g')
-            gh pr edit $NUMBER --add-label "team/$team_normalized"
+          # Replace spaces with dashes "Platform Integrations" -> "Platform-Integrations"
+          jq -r '.event.pull_request.requested_teams[].name' <<< "$GITHUB_CONTEXT" | while read -r team; do
+              team_normalized=$(echo "$team" | sed 's/ /-/g')
+              echo "Team: $team_normalized"
           done
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
