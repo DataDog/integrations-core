@@ -1636,12 +1636,12 @@
                                   {
                                       "data_source": "metrics",
                                       "name": "query1",
-                                      "query": "sum:jvm.gc.major_collection_count{$datacenter} by {type}.weighted()"
+                                      "query": "sum:jvm.gc.major_collection_time{$datacenter} by {type}.weighted()"
                                   },
                                   {
                                       "data_source": "metrics",
                                       "name": "query2",
-                                      "query": "sum:jvm.gc.minor_collection_count{$datacenter} by {type}.weighted()"
+                                      "query": "sum:jvm.gc.minor_collection_time{$datacenter} by {type}.weighted()"
                                   }
                               ],
                               "response_format": "timeseries",
