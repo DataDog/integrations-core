@@ -6,7 +6,7 @@
   "tags": [
     "integration:azure-iot-edge"
   ],
-  "description": "An IoT device can approach or exceed the limits of its available physical or virtual memory resources. This monitor tracks the memory utilization to avoid potential memory problems that can impact on the device's performance and functionality.",
+  "description": "An IoT device can approach or exceed the limits of its available physical or virtual memory resources. This monitor tracks the memory utilization to avoid potential memory problems that can impact the device's performance and functionality.",
   "definition": {
     "message": "Please check device {{host}}, as Edge Agent reports usage of more than {{threshold}}% of available RAM for the last hour.",
     "name": "[Azure IoT Edge] IoT Edge device {{host}} is running out of memory",
