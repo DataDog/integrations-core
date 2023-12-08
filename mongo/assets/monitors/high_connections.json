@@ -6,7 +6,7 @@
   "tags": [
     "integration:mongodb"
   ],
-  "description": "A connection pool helps reduce application latency and the number of times new connections are created. This monitor tracks the number of incoming connections to alert when the connection pool near the saturation point.",
+  "description": "A connection pool helps reduce application latency and the number of times new connections are created. This monitor tracks the number of incoming connections to alert when the connection pool is near the saturation point.",
   "definition": {
     "message": "The number of incoming connections is reaching the maximum. {{value}} % of the available connections have been used on {{replset_name.name}}",
     "name": "[MongoDB] High incoming connections",
