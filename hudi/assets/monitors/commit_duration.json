@@ -6,7 +6,7 @@
   "tags": [
     "integration:hudi"
   ],
-  "description": "When you commit a set of data changes it takes some time for the operation to complete. This monitor tracks anomalies in the average duration of Apache Hudi commit actions for different tables and hosts to detect unexpected behavior.",
+  "description": "When you commit a set of data changes, it takes some time for the operation to complete. This monitor tracks anomalies in the average duration of Apache Hudi commit actions for different tables and hosts to detect unexpected behavior.",
   "definition": {
     "message": "There is an anomaly in the Hudi commit duration on host: {{host.host}} for the table {{table_name.name}} \n\n\n`hudi.action.duration` measures the amount of time it took to successfully perform a commit on a batch of records in milliseconds.",
     "name": "[Hudi] Anomalous commit duration for table {{table_name.name}}",
