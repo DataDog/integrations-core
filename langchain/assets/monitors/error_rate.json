@@ -6,7 +6,7 @@
   "tags": [
     "integration:langchain"
   ],
-  "description": "LangChain requests are captured by Datadog's APM generate trace metrics. This monitor tracks the error rate of LangChain requests, alerting if errors exceed 10% of total requests in the last 5 minutes.",
+  "description": "LangChain requests are captured by Datadog's APM generated trace metrics. This monitor tracks the error rate of LangChain requests, alerting if errors exceed 10% of total requests in the last 5 minutes.",
   "definition": {
     "message": "{{#is_alert}}\n\nALERT: The error rate of your LangChain requests is higher than normal. The error rate is currently over {{value}} errors per request.\n{{/is_alert}}",
     "name": "[LangChain] LangChain service has a high error rate",
