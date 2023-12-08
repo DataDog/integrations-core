@@ -3135,3 +3135,146 @@ def test_property_metrics_invalid_ip_route_config_gateway(
         tags=base_tags + ['network_dest_ip:fe83::', 'prefix_length:32'],
         hostname='vm1',
     )
+
+
+@pytest.mark.parametrize(
+    ('max_query_metrics', 'metrics_per_query', 'max_historical_metrics', 'expected_batch_num'),
+    [
+        pytest.param(
+            None,
+            None,
+            None,
+            4,
+            id='defaults',
+        ),
+        pytest.param(
+            1000,
+            1000,
+            1000,
+            4,
+            id='High custom settings',
+        ),
+        pytest.param(
+            None,
+            None,
+            1,
+            7,
+            id='lowest max historical metrics',
+        ),
+        pytest.param(
+            1,
+            None,
+            None,
+            7,
+            id='lowest max query metrics',
+        ),
+        pytest.param(
+            -1,
+            1000,
+            1,
+            7,
+            id='negative max query metrics but low max historical',
+        ),
+        pytest.param(
+            -1,
+            1000,
+            1000,
+            4,
+            id='negative max query metrics',
+        ),
+        pytest.param(
+            -1,
+            -1,
+            1,
+            7,
+            id='negative max query metrics and metrics per query',
+        ),
+        pytest.param(
+            -1,
+            -1,
+            -1,
+            4,
+            id='all negative',
+        ),
+        pytest.param(
+            -1,
+            -1,
+            2,
+            5,
+            id='larger than 1 batch size',
+        ),
+        pytest.param(
+            -1,
+            1,
+            1000,
+            7,
+            id='smaller max query metrics',
+        ),
+        pytest.param(
+            1,
+            1,
+            1,
+            7,
+            id='multiple historical batches',
+        ),
+    ],
+)
+def test_make_batch_historical(
+    aggregator,
+    dd_run_check,
+    historical_instance,
+    service_instance,
+    max_query_metrics,
+    expected_batch_num,
+    metrics_per_query,
+    max_historical_metrics,
+):
+
+    # based on PERF_COUNTER_INFO: there are 7 metrics- counter IDs 100- 106
+    # 1 cluster metric, 1 datacenter metric, and 3 datastore metrics
+    #
+    # based on PROPERTIES_EX: there are 5 resources- 2 datacenters, 1 cluster, and 1 datastore
+    # counter 103 and 104 are realtime metrics
+
+    # counter 102 is a datacener and cluster metric
+    # 101 is a cluster metric
+    # 100 105 106 are datastore metrics
+
+    # in total, there are 7 metrics to query for, so that is the largest amount of batches
+    # the smallest number of batches is 4, one for each unique resource
+
+    if max_query_metrics is not None:
+        service_instance.content.setting.QueryOptions = mock.MagicMock(
+            return_value=[mock.MagicMock(value=max_query_metrics)]
+        )
+    if metrics_per_query is not None:
+        historical_instance['metrics_per_query'] = metrics_per_query
+    if max_historical_metrics is not None:
+        historical_instance['max_historical_metrics'] = max_historical_metrics
+
+    check = VSphereCheck('vsphere', {}, [historical_instance])
+    dd_run_check(check)
+    num_calls = service_instance.content.perfManager.QueryPerf.call_count
+    assert num_calls == expected_batch_num
+
+    # confirm some metrics are still collected
+    aggregator.assert_metric(
+        'vsphere.cpu.totalmhz.avg',
+        count=1,
+        value=5,
+        tags=['vcenter_server:FAKE', 'vsphere_cluster:c1', 'vsphere_type:cluster'],
+    )
+
+    aggregator.assert_metric(
+        'vsphere.datastore.busResets.sum',
+        count=1,
+        value=5,
+        tags=['vcenter_server:FAKE', 'vsphere_datastore:ds1', 'vsphere_type:datastore'],
+    )
+
+    aggregator.assert_metric(
+        'vsphere.vmop.numChangeDS.latest',
+        count=1,
+        value=7,
+        tags=['vcenter_server:FAKE', 'vsphere_datacenter:dc1', 'vsphere_type:datacenter'],
+    )
