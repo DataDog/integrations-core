@@ -43,7 +43,10 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "coredns"
+      ]
     },
     "dashboards": {
       "CoreDNS": "assets/dashboards/coredns.json"
