@@ -20,3 +20,13 @@ jobs:
           repo-token: "${{ secrets.repo-token }}"
           sync-labels: ""   # workaround for sync-labels bug:
                             # https://github.com/actions/labeler/issues/112#issuecomment-1000491676
+      - name: Add team labels
+        run: |
+          for team in $(jq -r '.event.pull_request.requested_teams[].name' <<< "$GITHUB_CONTEXT"); do 
+            gh pr edit $NUMBER --add-label "team/$team"
+          done
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.number }}
