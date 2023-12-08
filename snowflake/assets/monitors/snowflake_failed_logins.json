@@ -6,7 +6,7 @@
   "tags": [
     "integration:snowflake"
   ],
-  "description": "To access a Snowflake account a user needs to provice credentials and have access permissions. This monitor tracks the login attempts to identify security, compliance, and performance issues.",
+  "description": "To access a Snowflake account, a user needs to provide credentials and have access permissions. This monitor tracks the login attempts to identify security, compliance, and performance issues.",
   "definition": {
     "message": "There has been at least 10 failed login attempts in the past 24 hours.",
     "name": "[Snowflake] Increased Failed Login Attempts",
