@@ -69,7 +69,7 @@ class VSphereCheck(AgentCheck):
         # type: (Type[VSphereCheck], str, Dict[str, Any], List[Dict[str, Any]]) -> VSphereCheck
         """For backward compatibility reasons, there are two side-by-side implementations of the VSphereCheck.
         Instantiating this class will return an instance of the legacy integration for existing users and
-        an instance of the new implementation for new users."""
+        an instance of the new implementation for new users. """
         if is_affirmative(instances[0].get('use_legacy_check_version', True)):
             from datadog_checks.vsphere.legacy.vsphere_legacy import VSphereLegacyCheck
 
