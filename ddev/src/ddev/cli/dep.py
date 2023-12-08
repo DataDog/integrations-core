@@ -322,6 +322,7 @@ def read_check_dependencies(repo, integrations=None):
         integrations = [repo.integrations.get(integration) for integration in integrations]
     elif integrations is None:
         integrations = list(repo.integrations.iter_agent_checks('all'))
+        integrations.append(repo.integrations.get('datadog_checks_base'))
     else:
         integrations = [repo.integrations.get(integrations)]
 

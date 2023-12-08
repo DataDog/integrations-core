@@ -149,6 +149,7 @@ def get_active_job_status(timeout):
                 "SUBSTR(SUBSTR(A.JOB_NAME,POSSTR(A.JOB_NAME,'/')+1),POSSTR(SUBSTR(A.JOB_NAME,POSSTR(A.JOB_NAME,'/')+1),'/')+1) AS JOB_NAME, "  # noqa:E501
                 "A.SUBSYSTEM, 'ACTIVE', A.JOB_STATUS, 1, "
                 "CASE WHEN A.ELAPSED_TIME = 0 THEN 0 ELSE A.ELAPSED_CPU_TIME / (10 * A.ELAPSED_TIME) END AS CPU_RATE, "
+                "A.ELAPSED_CPU_PERCENTAGE AS CPU_PERCENT, "
                 "(DAYS(CURRENT TIMESTAMP) - DAYS(A.JOB_ACTIVE_TIME)) * 86400 + MIDNIGHT_SECONDS(CURRENT TIMESTAMP) - MIDNIGHT_SECONDS(A.JOB_ACTIVE_TIME) AS ACTIVE_DURATION "  # noqa:E501
                 # Two queries: one to fetch the stats, another to reset them
                 "FROM TABLE(QSYS2.ACTIVE_JOB_INFO('NO', '', '', '', 'ALL')) A INNER JOIN TABLE(QSYS2.ACTIVE_JOB_INFO('YES', '', '', '')) B "  # noqa:E501
@@ -166,6 +167,7 @@ def get_active_job_status(timeout):
             {'name': 'job_active_status', 'type': 'tag'},
             {'name': 'ibm_i.job.status', 'type': 'gauge'},
             {'name': 'ibm_i.job.cpu_usage', 'type': 'gauge'},
+            {'name': 'ibm_i.job.cpu_usage.pct', 'type': 'gauge'},
             {'name': 'ibm_i.job.active_duration', 'type': 'gauge'},
         ],
     }

@@ -73,7 +73,7 @@ partial -->
 <!-- xxx tab "AWS CLI" xxx -->
 ##### AWS CLI Task Definition
 
-1. Download [datadog-agent-ecs-fargate.json][42]. **Note**: If you are using Internet Explorer, this may download as gzip file, which contains the JSON file mentioned below.**
+1. Download [datadog-agent-ecs-fargate.json][42]. **Note**: If you are using Internet Explorer, this may download as a gzip file, which contains the JSON file mentioned below.
 <!-- partial
 {{< site-region region="us,us3,us5,eu,ap1,gov" >}}
 2. Update the JSON with a `TASK_NAME`, your [Datadog API Key][41], and the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}). **Note**: The environment variable `ECS_FARGATE` is already set to `"true"`.
@@ -482,7 +482,7 @@ After this has been added edit the application container in your Task Definition
 <!-- xxx tab "AWS CLI" xxx -->
 ##### AWS CLI
 
-Edit the existing task definition JSON file that you have to contain the `log_router` container and the updated `logConfiguration` for your application container, as described in the previous section. Once this is done you can create a new revision of your task definition with:
+Edit your existing JSON task definition file to include the `log_router` container and the updated `logConfiguration` for your application container, as described in the previous section. After this is done, create a new revision of your task definition with the following command:
 
 ```bash
 aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-agent-ecs-fargate.json

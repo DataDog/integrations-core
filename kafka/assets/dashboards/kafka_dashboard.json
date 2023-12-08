@@ -526,13 +526,8 @@
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:kafka.replication.leader_elections{$datacenter}.weighted()"
-                    },
-                    {
-                      "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:kafka.replication.leader_elections.rate{$datacenter}.weighted()"
+                      "query": "sum:kafka.replication.leader_elections.rate{$datacenter}"
                     }
                   ],
                   "response_format": "timeseries",

@@ -1,8 +1,14 @@
 # Agent Check: Databricks
 
+![Databricks default dashboard][21]
+
 ## Overview
 
 Monitor your [Databricks][1] clusters with the Datadog [Spark integration][2].
+
+This integration unifies logs, infrastructure metrics, and Spark performance metrics, providing real-time visibility into the health of your nodes and the performance of your jobs. It can help you debug errors, fine-tune performance, and identify issues such as inefficient data partitioning or clusters running out of memory.
+
+For feature details, see [Monitor Databricks with Datadog][22].
 
 ## Setup
 
@@ -469,3 +475,5 @@ Need help? Contact [Datadog support][10].
 [18]: https://docs.databricks.com/en/clusters/web-terminal.html
 [19]: https://docs.databricks.com/en/notebooks/index.html
 [20]: https://docs.datadoghq.com/agent/troubleshooting/
+[21]: https://raw.githubusercontent.com/DataDog/integrations-core/master/databricks/images/databricks_dashboard.png
+[22]: https://www.datadoghq.com/blog/databricks-monitoring-datadog/
