@@ -3211,6 +3211,27 @@ def test_property_metrics_invalid_ip_route_config_gateway(
             id='smaller max query metrics',
         ),
         pytest.param(
+            None,
+            None,
+            -1,
+            4,
+            id='negative max historical metrics',
+        ),
+        pytest.param(
+            1,
+            None,
+            -1,
+            7,
+            id='negative max historical metrics but low max query metrics ',
+        ),
+        pytest.param(
+            10,
+            None,
+            -1,
+            4,
+            id='negative max historical metrics and high max query metrics ',
+        ),
+        pytest.param(
             1,
             1,
             1,
@@ -3241,7 +3262,7 @@ def test_make_batch_historical(
     # 100 105 106 are datastore metrics
 
     # in total, there are 7 metrics to query for, so that is the largest amount of batches
-    # the smallest number of batches is 4, one for each unique resource
+    # the smallest number of batches is 4, 1 for all datastores + 1 for all datacenters + 1 for each cluster metric
 
     if max_query_metrics is not None:
         service_instance.content.setting.QueryOptions = mock.MagicMock(
@@ -3277,4 +3298,79 @@ def test_make_batch_historical(
         count=1,
         value=7,
         tags=['vcenter_server:FAKE', 'vsphere_datacenter:dc1', 'vsphere_type:datacenter'],
+    )
+
+
+@pytest.mark.parametrize(
+    ('max_query_metrics', 'metrics_per_query', 'max_historical_metrics', 'expected_batch_num'),
+    [
+        pytest.param(
+            None,
+            None,
+            None,
+            2,
+            id='defaults',
+        ),
+        pytest.param(
+            1,
+            None,
+            None,
+            2,
+            id='small max_query_metrics',
+        ),
+        pytest.param(
+            1,
+            1,
+            1,
+            6,
+            id='small max_query_metrics and historical metric',
+        ),
+        pytest.param(
+            None,
+            None,
+            1,
+            2,
+            id='ignore max_historical_metrics',
+        ),
+    ],
+)
+def test_make_batch_realtime(
+    aggregator,
+    dd_run_check,
+    realtime_instance,
+    service_instance,
+    max_query_metrics,
+    expected_batch_num,
+    metrics_per_query,
+    max_historical_metrics,
+):
+
+    if max_query_metrics is not None:
+        service_instance.content.setting.QueryOptions = mock.MagicMock(
+            return_value=[mock.MagicMock(value=max_query_metrics)]
+        )
+    if metrics_per_query is not None:
+        realtime_instance['metrics_per_query'] = metrics_per_query
+    if max_historical_metrics is not None:
+        realtime_instance['max_historical_metrics'] = max_historical_metrics
+
+    # there are 2 VMs, 1 host, and 2 metrics- so 2 * 2 + 2 * 1 = 6 max batches and 2 min batches
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    num_calls = service_instance.content.perfManager.QueryPerf.call_count
+    assert num_calls == expected_batch_num
+
+    aggregator.assert_metric(
+        'vsphere.cpu.costop.sum',
+        value=61,
+        count=1,
+        hostname='host1',
+        tags=['vcenter_server:FAKE'],
+    )
+    aggregator.assert_metric(
+        'vsphere.cpu.costop.sum',
+        value=52,
+        count=1,
+        hostname='vm1',
+        tags=['vcenter_server:FAKE'],
     )
