@@ -23,7 +23,9 @@ jobs:
       - name: Add team labels
         run: |
           for team in $(jq -r '.event.pull_request.requested_teams[].name' <<< "$GITHUB_CONTEXT"); do 
-            gh pr edit $NUMBER --add-label "team/$team"
+            # Replace spaces with dashes "Platform Integrations" -> "Platform-Integrations"
+            team_normalized=$(echo "$team" | sed 's/ /-/g')
+            gh pr edit $NUMBER --add-label "team/$team_normalized"
           done
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
