@@ -6,7 +6,7 @@
   "tags": [
     "integration:kafka"
   ],
-  "description": "Producer can send requests to publish messages to Kafka topics at a different rate. This monitor tracks the request rate to identify a sudden and significant increase in the request rate above the norm.",
+  "description": "A producer can send requests to publish messages to Kafka topics at a different rate. This monitor tracks the request rate to identify a sudden and significant increase in the request rate above the norm.",
   "definition": {
     "message": "The request rate on a producer is abnormally high: {{value}} request/s.",
     "name": "[Kafka] High request rate on producer {{host.name}}",

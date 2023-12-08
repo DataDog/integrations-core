@@ -6,7 +6,7 @@
   "tags": [
     "integration:kafka"
   ],
-  "description": "Partitions represent divisions of a topic's data stream. This monitor counts the partitions that are not currently available or operational. This typically occurs when Kafka brokers hosting those partitions are not reachable or experiencing issues.",
+  "description": "Partitions represent divisions of a topic's data stream. This monitor counts the partitions that are not currently available or operational. This typically occurs when Kafka brokers hosting those partitions are not reachable or are experiencing issues.",
   "definition": {
     "message": "Partition without an active leader detected",
     "name": "[Kafka] Offline partition on {{host.name}}",
