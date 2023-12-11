@@ -312,11 +312,11 @@ class ApiRest(Api):
             response.raise_for_status()
 
             response_json = response.json()
-            nodes = response_json.get(resource_name, [])
-            if len(nodes) > 0:
-                last_item = nodes[-1]
+            resources = response_json.get(resource_name, [])
+            if len(resources) > 0:
+                last_item = resources[-1]
                 next = last_item.get('next')
-                item_list.extend(nodes)
+                item_list.extend(resources)
                 if next is None:
                     break
 
