@@ -297,17 +297,16 @@ class ApiRest(Api):
         item_list = []
         params = {} if params is None else params
         while True:
-            params['limit'] = self.config.paginated_limit
             self.log.debug(
                 "making paginated request [limit=%s, marker=%s]",
                 self.config.paginated_limit,
                 marker,
             )
 
+            params['limit'] = self.config.paginated_limit
             if marker is not None:
                 params['marker'] = marker
 
-            marker = None
             response = self.http.get(url, params=params)
             response.raise_for_status()
 
@@ -322,6 +321,7 @@ class ApiRest(Api):
 
                 marker = last_item.get(marker_name)
             else:
+                marker = None
                 break
 
             if marker is None:
