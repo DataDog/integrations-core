@@ -47,6 +47,7 @@ from .util import (
     QUERY_PG_REPLICATION_SLOTS,
     QUERY_PG_REPLICATION_SLOTS_STATS,
     QUERY_PG_STAT_DATABASE,
+    QUERY_TXID_EXHAUSTION,
     QUERY_PG_STAT_DATABASE_CONFLICTS,
     QUERY_PG_STAT_WAL_RECEIVER,
     QUERY_PG_UPTIME,
@@ -270,6 +271,7 @@ class PostgreSql(AgentCheck):
                     q_pg_stat_database_conflicts,
                     QUERY_PG_UPTIME,
                     QUERY_PG_CONTROL_CHECKPOINT,
+                    QUERY_TXID_EXHAUSTION,
                 ]
             )
 
