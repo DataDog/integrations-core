@@ -129,17 +129,17 @@ QUERY_TXID_EXHAUSTION = {
     'name': 'txid_exhaustion_metrics',
     'query': """
     WITH per_database_stats AS (
-      SELECT
-        d.datname,
-        2147483648 AS max_old_xid,
-        EXTRACT(epoch FROM now() - d.datfrozenxid) AS oldest_current_xid
-      FROM pg_catalog.pg_database d
-      WHERE d.datallowconn
+        SELECT
+            datname,
+            2147483648 AS max_old_xid,
+            AGE(d.datfrozenxid) AS oldest_current_xid
+        FROM pg_catalog.pg_database d
+        WHERE d.datallowconn
     )
     SELECT
-      pds.datname,
-      ROUND(100 * (pds.oldest_current_xid / pds.max_old_xid))
-    FROM per_database_stats pds;
+        pds.datname,
+        MAX(ROUND(100*(oldest_current_xid/max_old_xid::float))) AS percent_to_txid_exhaustion
+    FROM per_database_stats pds GROUP BY pds.datname;
     """.strip(),
     'columns': [
         {'name': 'db', 'type': 'tag'},
