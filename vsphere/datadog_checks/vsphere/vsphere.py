@@ -27,6 +27,7 @@ from datadog_checks.vsphere.constants import (
     MAX_QUERY_METRICS_OPTION,
     PROPERTY_COUNT_METRICS,
     REALTIME_METRICS_INTERVAL_ID,
+    UNLIMITED_HIST_METRICS_PER_QUERY,
 )
 from datadog_checks.vsphere.event import VSphereEvent
 from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
@@ -569,7 +570,7 @@ class VSphereCheck(AgentCheck):
         if resource_type == vim.ClusterComputeResource:
             # Cluster metrics are unpredictable and a single call can max out the limit. Always collect them one by one.
             max_batch_size = 1  # type: float
-        elif is_historical_batch or self._config.max_historical_metrics < 0:
+        elif not is_historical_batch or self._config.max_historical_metrics < 0:
             # Queries are not limited by vCenter
             max_batch_size = self._config.metrics_per_query
         else:
@@ -947,9 +948,12 @@ class VSphereCheck(AgentCheck):
         if self._config.is_historical():
             try:
                 vcenter_max_hist_metrics = self.api.get_max_query_metrics()
-                if vcenter_max_hist_metrics < self._config.max_historical_metrics:
+                if (vcenter_max_hist_metrics < self._config.max_historical_metrics) or (
+                    self._config.max_historical_metrics < 0
+                    and vcenter_max_hist_metrics != UNLIMITED_HIST_METRICS_PER_QUERY
+                ):
                     self.log.warning(
-                        "The integration was configured with `max_query_metrics: %d` but your vCenter has a"
+                        "The integration was configured with `max_historical_metrics: %d` but your vCenter has a"
                         "limit of %d which is lower. Ignoring your configuration in favor of the vCenter value."
                         "To update the vCenter value, please update the `%s` field",
                         self._config.max_historical_metrics,

@@ -7,7 +7,7 @@ import pytest
 from mock import MagicMock, Mock, patch
 from pyVmomi import vim
 
-from datadog_checks.vsphere.legacy.vsphere_legacy import DEFAULT_MAX_HIST_METRICS
+from datadog_checks.vsphere.constants import DEFAULT_MAX_QUERY_METRICS
 
 from .common import (
     DEFAULT_INSTANCE,
@@ -127,7 +127,7 @@ def query_events():
 @pytest.fixture
 def query_options():
     def QueryOptions(name):
-        return [MagicMock(value=DEFAULT_MAX_HIST_METRICS)]
+        return [MagicMock(value=DEFAULT_MAX_QUERY_METRICS)]
 
     yield QueryOptions
 

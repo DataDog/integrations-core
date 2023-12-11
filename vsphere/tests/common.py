@@ -182,6 +182,20 @@ PERF_COUNTER_INFO = [
         rollupType=vim.PerformanceManager.CounterInfo.RollupType.average,
         unitInfo=vim.ElementDescription(key='kibibyte'),
     ),
+    vim.PerformanceManager.CounterInfo(
+        key=105,
+        groupInfo=vim.ElementDescription(key='datastore'),
+        nameInfo=vim.ElementDescription(key='busResets'),
+        rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
+        unitInfo=vim.ElementDescription(key='operation'),
+    ),
+    vim.PerformanceManager.CounterInfo(
+        key=106,
+        groupInfo=vim.ElementDescription(key='datastore'),
+        nameInfo=vim.ElementDescription(key='commandsAborted'),
+        rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
+        unitInfo=vim.ElementDescription(key='operation'),
+    ),
 ]
 
 
