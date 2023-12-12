@@ -151,9 +151,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
                 # Keep in sync with: /datadog_checks_base/pyproject.toml
                 'pydantic==2.0.2',
             ],
-            'python': [
-                PYTHON_VERSION,
-            ]
+            'python': PYTHON_VERSION,
         }
         config = {'lint': lint_env}
 
