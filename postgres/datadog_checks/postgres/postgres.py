@@ -5,6 +5,7 @@ import contextlib
 import copy
 import functools
 import os
+import threading
 from time import time
 
 import psycopg2
@@ -323,10 +324,7 @@ class PostgreSql(AgentCheck):
 
         return self._dynamic_queries
 
-    def cancel(self):
-        """
-        Cancels and sends cancel signal to all threads.
-        """
+    def _cancel(self):
         if self._config.dbm_enabled:
             self.statement_samples.cancel()
             self.statement_metrics.cancel()
@@ -334,6 +332,14 @@ class PostgreSql(AgentCheck):
         self._close_db_pool()
         if self._db:
             self._db.close()
+
+    def cancel(self):
+        """
+        cancel check within timeout
+        """
+        cancel_thread = threading.Thread(target=self._cancel)
+        cancel_thread.start()
+        cancel_thread.join(timeout=4)
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
