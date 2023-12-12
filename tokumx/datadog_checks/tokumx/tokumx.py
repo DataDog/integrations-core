@@ -23,6 +23,7 @@ class LocalRate:
     """To be used for metrics that should be sent as rates but that we want to send as histograms"""
 
     def __init__(self, agent_check, metric_name, tags):
+
         self.agent_check = agent_check
         self.metric_name = metric_name
         self.tags = tags
