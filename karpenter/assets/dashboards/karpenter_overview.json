@@ -385,7 +385,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Average pod Startup Time by Node",
+                            "title": "Average Pod Startup Time by Node",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"
