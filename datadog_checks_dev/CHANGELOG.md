@@ -6,16 +6,16 @@
 
 ***Removed***:
 
-* remove pyro4 and serpent dependencies ([#16269](https://github.com/DataDog/integrations-core/pull/16269))
+* Remove pyro4 and serpent dependencies ([#16269](https://github.com/DataDog/integrations-core/pull/16269))
 
 ***Added***:
 
 * Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
-* Make the `spec.yaml` mandatory in integrations-core if there are configuration files ([#16345](https://github.com/DataDog/integrations-core/pull/16345))
+* Make the `spec.yaml` file mandatory in integrations-core if there are configuration files ([#16345](https://github.com/DataDog/integrations-core/pull/16345))
 
 ***Fixed***:
 
-* Make the config_models mandatory in integrations-core ([#16311](https://github.com/DataDog/integrations-core/pull/16311))
+* Make the `config_models` files mandatory in integrations-core ([#16311](https://github.com/DataDog/integrations-core/pull/16311))
 
 ## 28.0.1 / 2023-11-10
 
