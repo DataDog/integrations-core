@@ -501,7 +501,7 @@
                                     }
                                 }
                             ],
-                            "title": "Pod Overview by Zone, Instance Type, Node, Namespace and Phase",
+                            "title": "Pod Overview by Zone, Instance Type, Node, Namespace, and Phase",
                             "type": "treemap"
                         },
                         "id": 779470295601126,
