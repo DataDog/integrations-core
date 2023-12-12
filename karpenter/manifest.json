@@ -41,8 +41,7 @@
       }
     },
     "dashboards": {
-      "karpenter_overview": "assets/dashboards/karpenter_overview.json",
-      "Karpenter Overview": "assets/dashboards/overview.json"
+      "karpenter_overview": "assets/dashboards/karpenter_overview.json"
     },
     "logs": {
       "source": "karpenter"
