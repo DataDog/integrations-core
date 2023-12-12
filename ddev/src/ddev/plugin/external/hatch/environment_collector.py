@@ -3,6 +3,8 @@ from functools import cached_property
 
 from hatch.env.collectors.plugin.interface import EnvironmentCollectorInterface
 
+from ddev.repo.constants import PYTHON_VERSION
+
 
 class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
     PLUGIN_NAME = 'datadog-checks'
@@ -149,6 +151,9 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
                 # Keep in sync with: /datadog_checks_base/pyproject.toml
                 'pydantic==2.0.2',
             ],
+            'python': [
+                PYTHON_VERSION,
+            ]
         }
         config = {'lint': lint_env}
 
