@@ -44,6 +44,7 @@ from .util import (
     CLUSTER_VACUUM_PROGRESS_METRICS,
     CONNECTION_METRICS,
     FUNCTION_METRICS,
+    INDEX_PROGRESS_METRICS,
     QUERY_PG_CONTROL_CHECKPOINT,
     QUERY_PG_REPLICATION_SLOTS,
     QUERY_PG_REPLICATION_SLOTS_STATS,
@@ -287,6 +288,7 @@ class PostgreSql(AgentCheck):
 
         if self.version >= V12:
             queries.append(CLUSTER_VACUUM_PROGRESS_METRICS)
+            queries.append(INDEX_PROGRESS_METRICS)
 
         if self.version >= V13:
             queries.append(ANALYZE_PROGRESS_METRICS)
