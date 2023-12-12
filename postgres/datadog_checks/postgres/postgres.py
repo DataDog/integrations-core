@@ -578,6 +578,8 @@ class PostgreSql(AgentCheck):
         metric_name: str,
         value: int,
     ):
+        if self.metrics_cache.table_activity_metrics is None:
+            return
         db = dbname if self.autodiscovery else self._config.dbname
         if db not in self.metrics_cache.table_activity_metrics.keys():
             self.metrics_cache.table_activity_metrics[db] = {}

@@ -190,7 +190,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._config = config
         self.db_pool = self._check.db_pool
         self._collect_pg_settings_enabled = is_affirmative(config.settings_metadata_config.get('enabled', False))
-        self._collect_schemas_enabled = is_affirmative(config.schemas_metadata_config.get('enabled', False))
+        self._collect_schemas_enabled = config.schemas_metadata_config.get('enabled', False)
         self._pg_settings_cached = None
         self._time_since_last_settings_query = 0
         self._time_since_last_schemas_query = 0
@@ -354,6 +354,8 @@ class PostgresMetadata(DBMAsyncJob):
                 VersionUtils.transform_version(str(self._check.version))['version.major'] == "9"
                 or not info["has_partitions"]
             ):
+                if not cache or dbname not in cache or info['name'] not in cache[dbname]:
+                    return 0
                 return (
                     cache[dbname][info['name']]['postgresql.index_scans']
                     + cache[dbname][info['name']]['postgresql.seq_scans']

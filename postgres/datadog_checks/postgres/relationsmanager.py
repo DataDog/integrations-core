@@ -53,7 +53,7 @@ SELECT mode,
  WHERE {relations}
    AND l.mode IS NOT NULL
    AND pc.relname NOT LIKE 'pg^_%%' ESCAPE '^'
- GROUP BY pd.datname, pc.relname, pn.nspname, locktype, mode, granted""",
+ GROUP BY pd.datname, pc.relname, pn.nspname, locktype, mode, granted {limits}""",
     'relation': True,
     'name': 'lock_metrics',
 }
@@ -86,7 +86,7 @@ REL_METRICS = {
     'query': """
 SELECT relname,schemaname,{metrics_columns}
   FROM pg_stat_user_tables
- WHERE {relations}""",
+ WHERE {relations} {limits}""",
     'relation': True,
     'name': 'rel_metrics',
 }
@@ -109,7 +109,7 @@ SELECT relname,
        indexrelname,
        {metrics_columns}
   FROM pg_stat_user_indexes
- WHERE {relations}""",
+ WHERE {relations} {limits}""",
     'relation': True,
     'name': 'idx_metrics',
 }
@@ -197,7 +197,7 @@ SELECT relname,
        schemaname,
        {metrics_columns}
   FROM pg_statio_user_tables
- WHERE {relations}""",
+ WHERE {relations} {limits}""",
     'relation': True,
     'name': 'statio_metrics',
 }
@@ -241,7 +241,7 @@ FROM (
     JOIN pg_namespace nn ON cc.relnamespace = nn.oid
     AND nn.nspname = rs.schemaname
     AND nn.nspname <> 'information_schema'
-) AS sml WHERE {relations};
+) AS sml WHERE {relations} {limits};
 """
 
 # The estimated table bloat
@@ -297,7 +297,7 @@ FROM (
     AND nn.nspname <> 'information_schema'
     LEFT JOIN pg_index i ON indrelid = cc.oid
     LEFT JOIN pg_class c2 ON c2.oid = i.indexrelid
-) AS sml WHERE {relations};
+) AS sml WHERE {relations} {limits};
 """
 
 # The estimated table bloat
