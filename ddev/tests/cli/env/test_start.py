@@ -443,3 +443,40 @@ def test_dogstatsd(ddev, helpers, data_dir, write_result_file, mocker):
             'DD_DOGSTATSD_METRICS_STATS_ENABLE': 'true',
         },
     )
+
+
+def test_debug_mode(ddev, helpers, data_dir, write_result_file, mocker):
+    metadata = {}
+    config = {}
+    mocker.patch('subprocess.run', side_effect=write_result_file({'metadata': metadata, 'config': config}))
+    start = mocker.patch('ddev.e2e.agent.docker.DockerAgent.start')
+
+    integration = 'postgres'
+    environment = 'py3.12'
+    env_data = EnvDataStorage(data_dir).get(integration, environment)
+
+    result = ddev('-vvv', 'env', 'start', integration, environment)
+
+    assert result.exit_code == 0, result.output
+    assert result.output == helpers.dedent(
+        f"""
+        ─────────────────────────────── Starting: py3.12 ───────────────────────────────
+
+        Stop environment -> ddev env stop {integration} {environment}
+        Execute tests -> ddev env test {integration} {environment}
+        Check status -> ddev env agent {integration} {environment} status
+        Trigger run -> ddev env agent {integration} {environment} check
+        Reload config -> ddev env reload {integration} {environment}
+        Manage config -> ddev env config
+        Config file -> {env_data.config_file}
+        """
+    )
+
+    assert env_data.read_config() == {'instances': [config]}
+    assert env_data.read_metadata() == metadata
+
+    start.assert_called_once_with(
+        agent_build='datadog/agent-dev:master',
+        local_packages={},
+        env_vars={'DD_DD_URL': 'https://app.datadoghq.com', 'DD_SITE': 'datadoghq.com', 'DD_LOG_LEVEL': 'debug'},
+    )

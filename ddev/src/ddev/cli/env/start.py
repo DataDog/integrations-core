@@ -136,7 +136,7 @@ def start(
             or ''
         )
 
-    agent_env_vars = _get_agent_env_vars(app.config.org.config, metadata, extra_env_vars, dogstatsd)
+    agent_env_vars = _get_agent_env_vars(app.config.org.config, metadata, extra_env_vars, dogstatsd, ctx.obj.verbose)
 
     try:
         agent.start(agent_build=agent_build, local_packages=local_packages, env_vars=agent_env_vars)
@@ -160,7 +160,7 @@ def start(
         app.display_pair('Config file', f'[link={env_data.config_file}]{env_data.config_file}[/]')
 
 
-def _get_agent_env_vars(org_config, metadata, extra_env_vars, dogstatsd):
+def _get_agent_env_vars(org_config, metadata, extra_env_vars, dogstatsd, verbose):
     from ddev.e2e.constants import DEFAULT_DOGSTATSD_PORT, E2EEnvVars, E2EMetadata
 
     # Use the environment variables defined by tests as defaults so tooling can override them
@@ -190,5 +190,8 @@ def _get_agent_env_vars(org_config, metadata, extra_env_vars, dogstatsd):
     # Enable logs Agent by default if the environment is mounting logs
     if any(ev.startswith(E2EEnvVars.LOGS_DIR_PREFIX) for ev in metadata.get(E2EMetadata.ENV_VARS, {})):
         env_vars.setdefault('DD_LOGS_ENABLED', 'true')
+
+    if verbose:
+        env_vars['DD_LOG_LEVEL'] = 'debug'
 
     return env_vars
