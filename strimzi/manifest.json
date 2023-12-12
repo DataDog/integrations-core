@@ -50,7 +50,7 @@
       "topic_operate_resource_state": "assets/monitors/topic_operator_resource.json"
     },
     "dashboards": {
-      "strimzi": "assets/dashboards/overview.json",
+      "strimzi": "assets/dashboards/overview.json"
     },
     "logs": {
       "source": "strimzi"
