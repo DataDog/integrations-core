@@ -44,7 +44,7 @@
       },
       "process_signatures": [
         "java org.apache.spark.deploy.SparkSubmit",
-        "java org.apache.spark.executor.CoarseGrainedExecutorBackend",
+        "java org.apache.spark.deploy.worker.Worker",
         "java org.apache.spark.deploy.master.Master"
       ]
     },
