@@ -79,6 +79,8 @@ MAX_CUSTOM_RESULTS = 100
 
 PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s)"
 
+CANCEL_TIMEOUT = 4
+
 
 class PostgreSql(AgentCheck):
     """Collects per-database, and optionally per-relation metrics, custom metrics"""
@@ -341,7 +343,9 @@ class PostgreSql(AgentCheck):
         """
         cancel_thread = threading.Thread(target=self._cancel)
         cancel_thread.start()
-        cancel_thread.join(timeout=4)
+        cancel_thread.join(timeout=CANCEL_TIMEOUT)
+        if cancel_thread.is_alive():
+            self.log.warning("Timeout while cancelling check, database connections may not be closed gracefully.")
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
