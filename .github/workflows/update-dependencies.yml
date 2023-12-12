@@ -2,8 +2,8 @@ name: Update the dependencies
 
 on:
   schedule:
-  # At 4AM on Monday (UTC)
-  - cron: "0 4 * * 1"
+  # At 2AM on Monday (UTC)
+  - cron: "0 2 * * 1"
 
 jobs:
   update_dependencies:
@@ -35,10 +35,8 @@ jobs:
       env:
         DD_GITHUB_USER: "${{ github.actor }}"
         DD_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-    - name: Generate changelogs
-      run: |-
-        ddev release changelog new fixed -m "Update dependencies"
     - name: Create Pull Request
+      id: cpr
       uses: peter-evans/create-pull-request@v5
       with:
         # TODO Change once we have another bot account for this pipeline
@@ -68,3 +66,18 @@ jobs:
         delete-branch: true
         base: master
         labels: bot
+        draft: false
+    # We generate the changelog if and only if the PR was created
+    - name: Update changelogs
+      if: ${{ steps.cpr.outputs.pull-request-number }}
+      env:
+        GH_TOKEN:
+          ${{ github.token }}
+      run: |-
+        gh pr checkout ${{ steps.cpr.outputs.pull-request-number }}
+        ddev release changelog new added -m "Update dependencies"
+        git config --global user.email "agent-integrations-dependency-bot@datadoghq.com"
+        git config --global user.name "Agent Integrations Dependency Bot"
+        git add .
+        git commit -am "Update changelogs"
+        git push origin HEAD
