@@ -212,7 +212,7 @@ jobs:
       run: ddev test --compat --recreate --junit ${{ inputs.target }}
 
     - name: Run E2E tests with latest base package
-      if: inputs.standard && inputs.repo == 'core'
+      if: inputs.standard && inputs.repo == 'core' && !inputs.minimum-base-package
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: ddev env test --base --new-env --junit ${{ inputs.target }}

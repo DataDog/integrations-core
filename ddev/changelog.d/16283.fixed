@@ -1,0 +1,5 @@
+Fix and extend changelog validation:
+
+- handle invalid change type file extensions
+- handle unnecessary changelog entries
+- fix error message formatting

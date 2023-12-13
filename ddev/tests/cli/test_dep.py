@@ -63,6 +63,7 @@ dep-c==5.1.0
 def test_sync(ddev, fake_repo):
     create_integration(fake_repo, 'foo', ['dep-a==1.0.0', 'dep-b==3.1.4'])
     create_integration(fake_repo, 'bar', ['dep-a==1.0.0'])
+    create_integration(fake_repo, 'datadog_checks_base', ['dep-a==1.0.0'])
 
     requirements = """
 dep-a==1.1.1
@@ -75,10 +76,11 @@ dep-b==3.1.4
     result = ddev('dep', 'sync')
 
     assert result.exit_code == 0
-    assert result.output == 'Files updated: 2\n'
+    assert result.output == 'Files updated: 3\n'
 
     assert_dependencies(fake_repo, 'foo', ['dep-a==1.1.1', 'dep-b==3.1.4'])
     assert_dependencies(fake_repo, 'bar', ['dep-a==1.1.1'])
+    assert_dependencies(fake_repo, 'datadog_checks_base', ['dep-a==1.1.1'])
 
 
 class TestUpdates:
@@ -135,6 +137,7 @@ dep-a can be updated to version 1.2.3 on py2 and py3
     def test_sync(self, ddev):
         self.add_integration('foo', ['dep-a==1.0.0', 'dep-b==3.1.4'])
         self.add_integration('bar', ['dep-a==1.0.0'])
+        self.add_integration('datadog_checks_base', ['dep-a==1.0.0', 'dep-b==3.1.4'])
         self.write_requirements()
 
         self.add_pypi_entry(
@@ -151,13 +154,14 @@ dep-a can be updated to version 1.2.3 on py2 and py3
         assert result.exit_code == 0
         assert (
             result.output
-            == '''Files updated: 2
+            == '''Files updated: 3
 Updated 1 dependencies
 '''
         )
 
         assert_dependencies(self.repo, 'foo', ['dep-a==1.2.3', 'dep-b==3.1.4'])
         assert_dependencies(self.repo, 'bar', ['dep-a==1.2.3'])
+        assert_dependencies(self.repo, 'datadog_checks_base', ['dep-a==1.2.3', 'dep-b==3.1.4'])
 
         requirements = self.requirements_path.read_text()
         expected = """
@@ -296,7 +300,7 @@ def assert_dependencies(root, name, dependencies):
 
 def create_integration(root, name, dependencies):
     integration_dir = root / name
-    integration_dir.mkdir()
+    integration_dir.mkdir(exist_ok=True)
     with open(integration_dir / 'pyproject.toml', 'wb') as f:
         tomli_w.dump({'project': {'optional-dependencies': {'deps': dependencies}}}, f)
 

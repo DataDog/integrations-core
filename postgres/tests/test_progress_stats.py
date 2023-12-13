@@ -8,16 +8,19 @@ import pytest
 from datadog_checks.postgres.util import (
     ANALYZE_PROGRESS_METRICS,
     CLUSTER_VACUUM_PROGRESS_METRICS,
+    INDEX_PROGRESS_METRICS,
     VACUUM_PROGRESS_METRICS,
 )
 
 from .common import DB_NAME, _get_expected_tags, _iterate_metric_name
 from .utils import (
     _wait_for_value,
+    kill_session,
     kill_vacuum,
     lock_table,
     requires_over_12,
     requires_over_13,
+    run_query_thread,
     run_vacuum_thread,
 )
 
@@ -97,6 +100,45 @@ def test_vacuum_progress(aggregator, integration_check, pg_instance):
     ]
     for metric_name in _iterate_metric_name(VACUUM_PROGRESS_METRICS):
         aggregator.assert_metric(metric_name, count=1, tags=expected_tags)
+
+
+@requires_over_12
+def test_index_progress(aggregator, integration_check, pg_instance):
+    check = integration_check(pg_instance)
+
+    # Keep test_part locked to prevent create index concurrently from finishing
+    conn = lock_table(pg_instance, 'test_part1', 'ROW EXCLUSIVE')
+
+    # Start vacuum in a thread
+    thread = run_query_thread(pg_instance, 'CREATE INDEX CONCURRENTLY test_progress_index ON test_part1 (id);')
+
+    # Wait for blocked created index to appear
+    _wait_for_value(
+        pg_instance,
+        lower_threshold=0,
+        query="select count(*) FROM pg_stat_progress_create_index where lockers_total=1;",
+    )
+    # Gather metrics
+    check.check(pg_instance)
+
+    # Kill the create index
+    kill_session(pg_instance, 'CREATE INDEX')
+
+    # Cleanup connection and thread
+    conn.close()
+    thread.join()
+
+    # Check metrics
+    expected_tags = _get_expected_tags(check, pg_instance) + [
+        'command:CREATE INDEX CONCURRENTLY',
+        'index:test_progress_index',
+        'phase:waiting for writers before build',
+        'table:test_part1',
+        f'db:{DB_NAME}',
+    ]
+    for metric_name in _iterate_metric_name(INDEX_PROGRESS_METRICS):
+        aggregator.assert_metric(metric_name, count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.create_index.lockers_total', count=1, value=1, tags=expected_tags)
 
 
 @requires_over_12
