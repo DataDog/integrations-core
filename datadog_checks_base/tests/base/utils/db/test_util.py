@@ -20,7 +20,6 @@ from datadog_checks.base.utils.db.utils import (
     default_json_event_encoding,
     obfuscate_sql_with_metadata,
     resolve_db_host,
-    tracked_query,
 )
 from datadog_checks.base.utils.serialization import json
 
@@ -277,16 +276,3 @@ def test_dbm_async_job_inactive_stop(aggregator):
 def test_default_json_event_encoding(input):
     # assert that the default json event encoding can handle all defined types without raising TypeError
     assert json.dumps(input, default=default_json_event_encoding)
-
-
-def test_tracked_query(aggregator):
-    with mock.patch('time.time', side_effect=[100, 101]):
-        with tracked_query(
-            check=AgentCheck(name="testcheck"),
-            operation="test_query",
-            tags=["test:tag"],
-        ):
-            pass
-        aggregator.assert_metric(
-            "dd.testcheck.operation.time", tags=["test:tag", "operation:test_query"], count=1, value=1000.0
-        )
