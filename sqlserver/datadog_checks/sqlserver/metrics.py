@@ -605,8 +605,6 @@ class SqlDatabaseStats(BaseSqlServerMetric):
     def fetch_metric(self, rows, columns, values_cache=None):
         database_name = columns.index("name")
         db_state_desc_index = columns.index("state_desc")
-        is_read_only = columns.index("is_read_only")
-        is_in_standby = columns.index("is_in_standby")
         db_recovery_model_desc_index = columns.index("recovery_model_desc")
         value_column_index = columns.index(self.column)
 
