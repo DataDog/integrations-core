@@ -79,7 +79,7 @@ MAX_CUSTOM_RESULTS = 100
 
 PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s)"
 
-CANCEL_TIMEOUT = 4
+CANCEL_TIMEOUT = 0.4
 
 
 class PostgreSql(AgentCheck):
