@@ -2,7 +2,6 @@
 base-package-features = ["deps", "db", "json"]
 check-types = false
 mypy-args = [
-  "--py2",
   "--check-untyped-defs",
   "--follow-imports",
   "silent",

@@ -340,6 +340,35 @@ QUERY_PG_REPLICATION_SLOTS = {
     ],
 }
 
+# Require PG14+
+QUERY_PG_REPLICATION_SLOTS_STATS = {
+    'name': 'pg_replication_slots_stats',
+    'columns': [
+        {'name': 'slot_name', 'type': 'tag'},
+        {'name': 'slot_type', 'type': 'tag'},
+        {'name': 'slot_state', 'type': 'tag'},
+        {'name': 'postgresql.replication_slot.spill_txns', 'type': 'monotonic_count'},
+        {'name': 'postgresql.replication_slot.spill_count', 'type': 'monotonic_count'},
+        {'name': 'postgresql.replication_slot.spill_bytes', 'type': 'monotonic_count'},
+        {'name': 'postgresql.replication_slot.stream_txns', 'type': 'monotonic_count'},
+        {'name': 'postgresql.replication_slot.stream_count', 'type': 'monotonic_count'},
+        {'name': 'postgresql.replication_slot.stream_bytes', 'type': 'monotonic_count'},
+        {'name': 'postgresql.replication_slot.total_txns', 'type': 'monotonic_count'},
+        {'name': 'postgresql.replication_slot.total_bytes', 'type': 'monotonic_count'},
+    ],
+    'query': """
+SELECT
+    stat.slot_name,
+    slot_type,
+    CASE WHEN active THEN 'active' ELSE 'inactive' END,
+    spill_txns, spill_count, spill_bytes,
+    stream_txns, stream_count, stream_bytes,
+    total_txns, total_bytes
+FROM pg_stat_replication_slots AS stat
+JOIN pg_replication_slots ON pg_replication_slots.slot_name = stat.slot_name
+""".strip(),
+}
+
 CONNECTION_METRICS = {
     'descriptors': [],
     'metrics': {
@@ -483,6 +512,37 @@ SELECT
         {'name': 'postgresql.cluster_vacuum.heap_blks_total', 'type': 'gauge'},
         {'name': 'postgresql.cluster_vacuum.heap_blks_scanned', 'type': 'gauge'},
         {'name': 'postgresql.cluster_vacuum.index_rebuild_count', 'type': 'gauge'},
+    ],
+}
+
+# Requires PG12+
+INDEX_PROGRESS_METRICS = {
+    'name': 'index_progress_metrics',
+    'query': """
+SELECT
+       p.datname, c.relname, i.relname, p.command, p.phase,
+       lockers_total, lockers_done,
+       blocks_total, blocks_done,
+       tuples_total, tuples_done,
+       partitions_total, partitions_done
+  FROM pg_stat_progress_create_index as p
+  LEFT JOIN pg_class c on c.oid = p.relid
+  LEFT JOIN pg_class i on i.oid = p.index_relid
+""",
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'index', 'type': 'tag_not_null'},
+        {'name': 'command', 'type': 'tag'},
+        {'name': 'phase', 'type': 'tag'},
+        {'name': 'postgresql.create_index.lockers_total', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.lockers_done', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.blocks_total', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.blocks_done', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.tuples_total', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.tuples_done', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.partitions_total', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.partitions_done', 'type': 'gauge'},
     ],
 }
 
@@ -651,3 +711,64 @@ SELECT {aggregation_columns_select}
 FROM pg_stat_activity
 GROUP BY datid {aggregation_columns_group}
 """
+
+# Requires PG10+
+STAT_SUBSCRIPTION_METRICS = {
+    'name': 'stat_subscription_metrics',
+    'query': """
+SELECT  subname,
+        EXTRACT(EPOCH FROM (age(current_timestamp, last_msg_send_time))),
+        EXTRACT(EPOCH FROM (age(current_timestamp, last_msg_receipt_time))),
+        EXTRACT(EPOCH FROM (age(current_timestamp, latest_end_time)))
+FROM pg_stat_subscription
+""",
+    'columns': [
+        {'name': 'subscription_name', 'type': 'tag'},
+        {'name': 'postgresql.subscription.last_msg_send_age', 'type': 'gauge'},
+        {'name': 'postgresql.subscription.last_msg_receipt_age', 'type': 'gauge'},
+        {'name': 'postgresql.subscription.latest_end_age', 'type': 'gauge'},
+    ],
+}
+
+# Requires PG14+
+# While pg_subscription is available since PG10,
+# pg_subscription.oid is only publicly accessible starting PG14.
+SUBSCRIPTION_STATE_METRICS = {
+    'name': 'subscription_state_metrics',
+    'query': """
+select
+    pg_subscription.subname,
+    srrelid::regclass,
+    CASE srsubstate
+        WHEN 'i' THEN 'initialize'
+        WHEN 'd' THEN 'data_copy'
+        WHEN 'f' THEN 'finished_copy'
+        WHEN 's' THEN 'synchronized'
+        WHEN 'r' THEN 'ready'
+    END,
+    1
+from pg_subscription_rel
+join pg_subscription ON pg_subscription.oid = pg_subscription_rel.srsubid""".strip(),
+    'columns': [
+        {'name': 'subscription_name', 'type': 'tag'},
+        {'name': 'relation', 'type': 'tag'},
+        {'name': 'state', 'type': 'tag'},
+        {'name': 'postgresql.subscription.state', 'type': 'gauge'},
+    ],
+}
+
+# Requires PG15+
+STAT_SUBSCRIPTION_STATS_METRICS = {
+    'name': 'stat_subscription_stats_metrics',
+    'query': """
+SELECT subname,
+       apply_error_count,
+       sync_error_count
+FROM pg_stat_subscription_stats
+""",
+    'columns': [
+        {'name': 'subscription_name', 'type': 'tag'},
+        {'name': 'postgresql.subscription.apply_error', 'type': 'monotonic_count'},
+        {'name': 'postgresql.subscription.sync_error', 'type': 'monotonic_count'},
+    ],
+}

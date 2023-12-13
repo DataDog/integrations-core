@@ -58,7 +58,7 @@ jira_statuses = [
   "Done",
 ]
 github_team = "database-monitoring"
-github_labels = ["team/database-monitoring"]
+github_labels = ["team/database-monitoring", "team/database-monitoring-agent"]
 
 [teams."Network Device Monitoring"]
 jira_project = "NDMII"
