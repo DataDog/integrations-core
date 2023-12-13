@@ -1,0 +1,1 @@
+Mount the logs volumes inside the agent with the `env start` command

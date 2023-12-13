@@ -56,3 +56,21 @@ services:
     environment:
       POSTGRES_PASSWORD: datad0g
     command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
+
+  postgres_logical_replica:
+    image: "postgres:${POSTGRES_IMAGE}"
+    ports:
+      - "5435:5435"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -p 5435 -U datadog -d datadog_test && if [[ ! -e /tmp/container_ready.txt ]]; then exit 1; fi"]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pg-net
+    volumes:
+      - ./resources_logical:/docker-entrypoint-initdb.d/
+      - ./etc/postgresql_logical_replica:/etc/postgresql/
+    environment:
+      POSTGRES_PASSWORD: datad0g
+    command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'

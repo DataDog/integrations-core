@@ -27,6 +27,7 @@ from datadog_checks.vsphere.constants import (
     MAX_QUERY_METRICS_OPTION,
     PROPERTY_COUNT_METRICS,
     REALTIME_METRICS_INTERVAL_ID,
+    UNLIMITED_HIST_METRICS_PER_QUERY,
 )
 from datadog_checks.vsphere.event import VSphereEvent
 from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
@@ -569,7 +570,7 @@ class VSphereCheck(AgentCheck):
         if resource_type == vim.ClusterComputeResource:
             # Cluster metrics are unpredictable and a single call can max out the limit. Always collect them one by one.
             max_batch_size = 1  # type: float
-        elif is_historical_batch or self._config.max_historical_metrics < 0:
+        elif not is_historical_batch or self._config.max_historical_metrics < 0:
             # Queries are not limited by vCenter
             max_batch_size = self._config.metrics_per_query
         else:
@@ -695,17 +696,19 @@ class VSphereCheck(AgentCheck):
             additional_tags = {}
 
         if is_count_metric:
+            is_bool_metric = isinstance(metric_value, bool)
             no_additional_tags = all(tag is None for tag in additional_tags.values())
             if no_additional_tags:
                 if metric_value is None:
                     self.log.debug(
-                        "Could not sumbit property metric- no metric data: name=`%s`, value=`%s`, hostname=`%s`, "
-                        "base tags=`%s` additional tags=`%s`",
+                        "Could not submit property metric- no metric data: name=`%s`, value=`%s`, hostname=`%s`, "
+                        "base tags=`%s` additional tags=`%s`, is_bool_metric=`%s`",
                         metric_full_name,
                         metric_value,
                         hostname,
                         base_tags,
                         additional_tags,
+                        is_bool_metric,
                     )
                     return
 
@@ -713,15 +716,15 @@ class VSphereCheck(AgentCheck):
                 property_tag = {tag_name: metric_value}
                 additional_tags.update(property_tag)
 
-            # set metric value to 1 since it is not a float
-            metric_value = 1
+            if not is_bool_metric:
+                metric_value = 1
 
         else:
             try:
                 metric_value = float(metric_value)
             except Exception:
                 self.log.debug(
-                    "Could not sumbit property metric- unexpected metric value: name=`%s`, value=`%s`, hostname=`%s`, "
+                    "Could not submit property metric- unexpected metric value: name=`%s`, value=`%s`, hostname=`%s`, "
                     "base tags=`%s` additional tags=`%s`",
                     metric_full_name,
                     metric_value,
@@ -797,17 +800,18 @@ class VSphereCheck(AgentCheck):
             self.submit_property_metric(
                 'guest.net', 1, base_tags, hostname, resource_metric_suffix, additional_tags=nic_tags
             )
-            ip_addresses = nic.ipConfig.ipAddress
-            for ip_address in ip_addresses:
-                nic_tags['nic_ip_address'] = ip_address.ipAddress
-                self.submit_property_metric(
-                    'guest.net.ipConfig.address',
-                    1,
-                    base_tags,
-                    hostname,
-                    resource_metric_suffix,
-                    additional_tags=nic_tags,
-                )
+            if nic.ipConfig is not None:
+                ip_addresses = nic.ipConfig.ipAddress
+                for ip_address in ip_addresses:
+                    nic_tags['nic_ip_address'] = ip_address.ipAddress
+                    self.submit_property_metric(
+                        'guest.net.ipConfig.address',
+                        1,
+                        base_tags,
+                        hostname,
+                        resource_metric_suffix,
+                        additional_tags=nic_tags,
+                    )
 
     def submit_ip_stack_property_metrics(
         self,
@@ -823,29 +827,34 @@ class VSphereCheck(AgentCheck):
                 host_name = ip_stack.dnsConfig.hostName
                 domain_name = ip_stack.dnsConfig.domainName
                 ip_tags.update({'route_hostname': host_name, 'route_domain_name': domain_name})
-            ip_routes = ip_stack.ipRouteConfig.ipRoute
-            for ip_route in ip_routes:
-                prefix_length = ip_route.prefixLength
-                gateway_address = ip_route.gateway.ipAddress
-                network = ip_route.network
-                # network
-                device = ip_route.gateway.device
-                route_tags = {
-                    'device': device,
-                    'network_dest_ip': network,
-                    'prefix_length': prefix_length,
-                    'gateway_address': gateway_address,
-                }
-                ip_tags.update(route_tags)
 
-                self.submit_property_metric(
-                    'guest.ipStack.ipRoute',
-                    1,
-                    base_tags,
-                    hostname,
-                    resource_metric_suffix,
-                    additional_tags=ip_tags,
-                )
+            if ip_stack.ipRouteConfig is not None:
+                ip_routes = ip_stack.ipRouteConfig.ipRoute
+                for ip_route in ip_routes:
+                    prefix_length = ip_route.prefixLength
+                    network = ip_route.network
+
+                    route_tags = {
+                        'network_dest_ip': network,
+                        'prefix_length': prefix_length,
+                    }
+
+                    if ip_route.gateway:
+                        gateway_address = ip_route.gateway.ipAddress
+                        device = ip_route.gateway.device
+                        gateway_tags = {'device': device, 'gateway_address': gateway_address}
+                        route_tags.update(gateway_tags)
+
+                    ip_tags.update(route_tags)
+
+                    self.submit_property_metric(
+                        'guest.ipStack.ipRoute',
+                        1,
+                        base_tags,
+                        hostname,
+                        resource_metric_suffix,
+                        additional_tags=ip_tags,
+                    )
 
     def submit_simple_property_metrics(
         self,
@@ -939,9 +948,12 @@ class VSphereCheck(AgentCheck):
         if self._config.is_historical():
             try:
                 vcenter_max_hist_metrics = self.api.get_max_query_metrics()
-                if vcenter_max_hist_metrics < self._config.max_historical_metrics:
+                if (vcenter_max_hist_metrics < self._config.max_historical_metrics) or (
+                    self._config.max_historical_metrics < 0
+                    and vcenter_max_hist_metrics != UNLIMITED_HIST_METRICS_PER_QUERY
+                ):
                     self.log.warning(
-                        "The integration was configured with `max_query_metrics: %d` but your vCenter has a"
+                        "The integration was configured with `max_historical_metrics: %d` but your vCenter has a"
                         "limit of %d which is lower. Ignoring your configuration in favor of the vCenter value."
                         "To update the vCenter value, please update the `%s` field",
                         self._config.max_historical_metrics,

@@ -182,6 +182,20 @@ PERF_COUNTER_INFO = [
         rollupType=vim.PerformanceManager.CounterInfo.RollupType.average,
         unitInfo=vim.ElementDescription(key='kibibyte'),
     ),
+    vim.PerformanceManager.CounterInfo(
+        key=105,
+        groupInfo=vim.ElementDescription(key='datastore'),
+        nameInfo=vim.ElementDescription(key='busResets'),
+        rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
+        unitInfo=vim.ElementDescription(key='operation'),
+    ),
+    vim.PerformanceManager.CounterInfo(
+        key=106,
+        groupInfo=vim.ElementDescription(key='datastore'),
+        nameInfo=vim.ElementDescription(key='commandsAborted'),
+        rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
+        unitInfo=vim.ElementDescription(key='operation'),
+    ),
 ]
 
 
@@ -484,6 +498,32 @@ ip_stack3.ipRouteConfig = ip_route_config3
 IP_STACKS_3 = vim.ArrayOfAnyType()
 IP_STACKS_3.append(ip_stack3)
 
+# VM invalid
+ip_config_invalid = vim.net.IpConfigInfo()
+net_invalid = vim.vm.GuestInfo.NicInfo()
+net_invalid.macAddress = '00:61:58:72:53:13'
+net_invalid.connected = True
+NETS_INVALID = vim.ArrayOfAnyType()
+NETS_INVALID.append(net_invalid)
+
+# VM invalid ip stack
+ip_stack_invalid = vim.vm.GuestInfo.StackInfo()
+ip_stack_invalid.dnsConfig = None
+IP_STACKS_INVALID = vim.ArrayOfAnyType()
+IP_STACKS_INVALID.append(ip_stack_invalid)
+
+# VM invalid ip route gateway
+ip_route_invalid2 = vim.net.IpRouteConfigInfo.IpRoute()
+ip_route_invalid2.prefixLength = 32
+ip_route_invalid2.network = 'fe83::'
+ip_route_config_invalid2 = vim.net.IpRouteConfigInfo()
+ip_route_config_invalid2.ipRoute = vim.ArrayOfAnyType()
+ip_route_config_invalid2.ipRoute.append(ip_route_invalid2)
+ip_stack_invalid2 = vim.vm.GuestInfo.StackInfo()
+ip_stack_invalid2.dnsConfig = None
+ip_stack_invalid2.ipRouteConfig = ip_route_config_invalid2
+IP_STACKS_INVALID2 = vim.ArrayOfAnyType()
+IP_STACKS_INVALID2.append(ip_stack_invalid2)
 
 VM_PROPERTIES_EX = mock.MagicMock(
     return_value=vim.PropertyCollector.RetrieveResult(
@@ -758,7 +798,7 @@ VM_PROPERTIES_EX = mock.MagicMock(
                     ),
                     vmodl.DynamicProperty(
                         name='summary.runtime.inMaintenanceMode',
-                        val='False',
+                        val=False,
                     ),
                 ],
             ),
@@ -779,7 +819,7 @@ VM_PROPERTIES_EX = mock.MagicMock(
                     ),
                     vmodl.DynamicProperty(
                         name='summary.runtime.inMaintenanceMode',
-                        val='True',
+                        val=True,
                     ),
                 ],
             ),
@@ -809,6 +849,31 @@ VM_PROPERTIES_EX = mock.MagicMock(
                 ],
             ),
             vim.ObjectContent(
+                obj=vim.ClusterComputeResource(moId="c2"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='c2',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='configuration.dasConfig.enabled',
+                        val=False,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='configuration.drsConfig.enabled',
+                        val=False,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='configuration.drsConfig.defaultVmBehavior',
+                        val='fullyAutomated',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='configuration.drsConfig.vmotionRate',
+                        val=1,
+                    ),
+                ],
+            ),
+            vim.ObjectContent(
                 obj=vim.Datastore(moId="ds1"),
                 propSet=[
                     vmodl.DynamicProperty(
@@ -826,6 +891,183 @@ VM_PROPERTIES_EX = mock.MagicMock(
                 ],
             ),
         ],
+    )
+)
+
+
+VM_INVALID_PROPERTIES_EX = mock.MagicMock(
+    return_value=vim.PropertyCollector.RetrieveResult(
+        objects=[
+            vim.ObjectContent(
+                obj=vim.VirtualMachine(moId="vm1"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='vm1',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='runtime.powerState',
+                        val=vim.VirtualMachinePowerState.poweredOn,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.config.numCpu',
+                        val=2,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.config.memorySizeMB',
+                        val=2048,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.config.numVirtualDisks',
+                        val=1,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.config.numEthernetCards',
+                        val=1,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.quickStats.uptimeSeconds',
+                        val=12184573,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.guestFullName',
+                        val=None,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.disk',
+                        val=DISKS,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.net',
+                        val=NETS_INVALID,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.ipStack',
+                        val=IP_STACKS_INVALID,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.toolsVersion',
+                        val='11296',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.hardware.numCoresPerSocket',
+                        val='2',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.cpuAllocation.limit',
+                        val='-1',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.cpuAllocation.overheadLimit',
+                        val=None,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.memoryAllocation.limit',
+                        val='-1',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.memoryAllocation.overheadLimit',
+                        val=None,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='parent',
+                        val=vim.Folder(moId="root"),
+                    ),
+                    vmodl.DynamicProperty(
+                        name='runtime.host',
+                        val=vim.HostSystem(moId="host1"),
+                    ),
+                ],
+            ),
+        ]
+    )
+)
+
+VM_INVALID_GATEWAY_PROPERTIES_EX = mock.MagicMock(
+    return_value=vim.PropertyCollector.RetrieveResult(
+        objects=[
+            vim.ObjectContent(
+                obj=vim.VirtualMachine(moId="vm1"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='vm1',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='runtime.powerState',
+                        val=vim.VirtualMachinePowerState.poweredOn,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.config.numCpu',
+                        val=2,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.config.memorySizeMB',
+                        val=2048,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.config.numVirtualDisks',
+                        val=1,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.config.numEthernetCards',
+                        val=1,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.quickStats.uptimeSeconds',
+                        val=12184573,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.guestFullName',
+                        val=None,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.disk',
+                        val=DISKS,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.net',
+                        val=NETS_INVALID,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.ipStack',
+                        val=IP_STACKS_INVALID2,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='guest.toolsVersion',
+                        val='11296',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.hardware.numCoresPerSocket',
+                        val='2',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.cpuAllocation.limit',
+                        val='-1',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.cpuAllocation.overheadLimit',
+                        val=None,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.memoryAllocation.limit',
+                        val='-1',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='config.memoryAllocation.overheadLimit',
+                        val=None,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='parent',
+                        val=vim.Folder(moId="root"),
+                    ),
+                    vmodl.DynamicProperty(
+                        name='runtime.host',
+                        val=vim.HostSystem(moId="host1"),
+                    ),
+                ],
+            ),
+        ]
     )
 )
 

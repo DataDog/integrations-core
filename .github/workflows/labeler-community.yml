@@ -5,6 +5,11 @@ on:
   pull_request_target:
     branches:
       - master
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - review_requested
 
 jobs:
   labeler:

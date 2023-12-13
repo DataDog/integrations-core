@@ -4,7 +4,7 @@ set -e
 # pg_monitor is only available on 10+
 # prior to version 10 there was no `pg_read_all_stats` role so by adding a database to which the agent can't connect
 # it causes many of the tests to fail since some stats queries fail (like reading the size of the database to which you can't connect)
-# therefore we will only add this database to which you can't connect in 10+ for testing purposes
+# therefore we will only add this database to which you can't connect in 10+ for testing purposes.
 if [[ !("$PG_MAJOR" == 9.* ) ]]; then
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-'EOSQL'
     GRANT pg_monitor TO datadog;

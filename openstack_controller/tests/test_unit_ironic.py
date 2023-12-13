@@ -11,6 +11,7 @@ import tests.configs as configs
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.openstack_controller.api.type import ApiType
+from datadog_checks.openstack_controller.openstack_controller import OpenStackControllerCheck
 from tests.common import remove_service_from_catalog
 from tests.metrics import (
     CONDUCTORS_METRICS_IRONIC_MICROVERSION_1_80,
@@ -326,6 +327,71 @@ def test_nodes_metrics(aggregator, check, dd_run_check, metrics):
             tags=metric['tags'],
             hostname=metric.get('hostname'),
         )
+
+
+@pytest.mark.parametrize(
+    ('connection_baremetal', 'instance', 'metrics', 'api_type'),
+    [
+        pytest.param(
+            None,
+            configs.REST,
+            NODES_METRICS_IRONIC_MICROVERSION_DEFAULT,
+            ApiType.REST,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            None,
+            configs.REST_IRONIC_MICROVERSION_1_80,
+            NODES_METRICS_IRONIC_MICROVERSION_1_80,
+            ApiType.REST,
+            id='api rest microversion 1.80',
+        ),
+        pytest.param(
+            None,
+            configs.SDK,
+            NODES_METRICS_IRONIC_MICROVERSION_DEFAULT,
+            ApiType.SDK,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            None,
+            configs.SDK_IRONIC_MICROVERSION_1_80,
+            NODES_METRICS_IRONIC_MICROVERSION_1_80,
+            ApiType.SDK,
+            id='api sdk microversion 1.80',
+        ),
+    ],
+    indirect=['connection_baremetal'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_ironic_nodes_pagination(
+    aggregator, dd_run_check, instance, metrics, api_type, mock_http_get, connection_baremetal
+):
+    instance['paginated_limit'] = 1
+    dd_run_check(OpenStackControllerCheck('test', {}, [instance]))
+    for metric in metrics:
+        aggregator.assert_metric(
+            metric['name'],
+            count=metric['count'],
+            value=metric['value'],
+            tags=metric['tags'],
+            hostname=metric.get('hostname'),
+        )
+
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, _ = call
+            args_list += list(args)
+
+        baremetal_url = (
+            'http://127.0.0.1:6385/baremetal/v1/nodes/detail'
+            if instance.get("ironic_microversion", None) != "1.80"
+            else 'http://127.0.0.1:6385/baremetal/v1/nodes'
+        )
+        assert args_list.count(baremetal_url) == 4
+    if api_type == ApiType.SDK:
+        assert connection_baremetal.nodes.call_count == 1
 
 
 @pytest.mark.parametrize(
