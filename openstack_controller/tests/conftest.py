@@ -167,7 +167,7 @@ def mock_responses(microversion_headers):
         filename = file
         request_path = url
         request_path = request_path.replace('?', '/')
-        if params is not None and params != {}:
+        if params:
             param_string = '/'.join('{}={}'.format(key, str(val)) for key, val in params.items())
             request_path = '{}/{}'.format(url, param_string)
         if any(re.search(pattern, request_path) for pattern in NOVA_ENDPOINTS):
