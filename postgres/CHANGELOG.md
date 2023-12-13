@@ -26,7 +26,6 @@
 ***Fixed***:
 
 * Add cloudsqladmin to default list of databases to exclude from autodiscovery and databases to ignore to prevent failures on Postgres 15 on Google CloudSQL ([#16027](https://github.com/DataDog/integrations-core/pull/16027))
-* Bump the minimum base check version to 34.1.0 ([#16062](https://github.com/DataDog/integrations-core/pull/16062))
 
 ## 15.1.1 / 2023-10-17 / Agent 7.49.0
 
