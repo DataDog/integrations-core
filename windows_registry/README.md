@@ -21,7 +21,7 @@ This integration collects Windows Registry information using both of following m
 - As [Datadog Logs][3]
 
 
-1. Edit the `windows_registry.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting Windows registry information. See the [sample windows_.d/conf.yaml.example][5] for all available configuration options.
+1. Edit the `windows_registry.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's [configuration directory][4] to start collecting Windows registry information. See the [sample windows_.d/conf.yaml][5] for all available configuration options.
 
 2. Collecting logs is disabled by default in the Datadog Agent. Enable log collection in your `datadog.yaml` file: 
 
@@ -34,13 +34,13 @@ This integration collects Windows Registry information using both of following m
 
 ### Validation
 
-Check the information page in the Datadog Agent Manager or run the [Agent's `status` subcommand][7] and look for `windows_registry` under the Checks section.
+Check the information page in the Datadog Agent Manager or run the Agent's `status` [subcommand][7] and look for `windows_registry` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-All metrics collected by the Windows Registry integration are forwarded to Datadog.
+All metrics collected by the Windows Registry integration are forwarded to Datadog as [custom metrics][11], which may impact your billing .
 
 ### Logs
 
@@ -58,9 +58,10 @@ Need help? Contact [Datadog support][9] with an [Agent Flare][10].
 [2]: https://docs.datadoghq.com/metrics/#overview
 [3]: https://docs.datadoghq.com/logs/
 [4]: https://docs.datadoghq.com/agent/configuration/agent-configuration-files/?tab=agentv6v7#agent-configuration-directory
-[5]: https://github.com/DataDog/datadog-agent/blob/ee8232f97515ae7aed31c02c47ef57eead300c1c/cmd/agent/dist/conf.d/windows_registry.d/conf.yaml.example
+[5]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/windows_registry.d/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [7]: https://docs.datadoghq.com/agent/basic_agent_usage/windows/?tab=gui#agent-status-and-information
 [8]: https://docs.datadoghq.com/account_management/billing/log_management/
 [9]: https://docs.datadoghq.com/help/
-[10]: https://docs.datadoghq.com/agent/troubleshooting/send_a_flare/?tab=agentv6v7
+[10]:https://docs.datadoghq.com/agent/troubleshooting/send_a_flare/?tab=agentv6v7
+[11]:https://docs.datadoghq.com/account_management/billing/custom_metrics/?tab=countrate
