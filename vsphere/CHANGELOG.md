@@ -2,6 +2,10 @@
 
 <!-- towncrier release notes start -->
 
+## 7.3.1-beta.1 / 2023-12-13
+
+No significant changes.
+
 ## 7.3.0 / 2023-12-11
 
 ***Added***:
