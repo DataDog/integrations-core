@@ -3,7 +3,7 @@
     "created_at": "2023-12-13",
     "last_updated_at": "2023-12-13",
     "title": "High Memory Usage",
-    "description": "<REPLACE_WITH_DESCRIPTION>",
+    "description": "Running Ray machine learning or data processing workloads can be computationally intensive. This monitor notifies you when the Ray.io node is running low on available memory.",
     "definition": {
         "id": 136348497,
         "name": "High Memory Usage on Ray.io Node",
