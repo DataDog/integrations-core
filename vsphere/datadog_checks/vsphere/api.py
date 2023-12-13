@@ -37,20 +37,35 @@ def smart_retry(f):
         # type: (VSphereAPI, *Any, **Any) -> Any
         try:
             return f(api_instance, *args, **kwargs)
-        except vmodl.fault.InvalidArgument:
+        except vmodl.fault.InvalidArgument as e:
             # This error is raised when the api call request is invalid. This error also appear when
             # requesting non existing metrics. Retrying won't help
             # https://code.vmware.com/apis/704/vsphere/vmodl.fault.InvalidArgument.html
+            api_instance.log.warning(
+                "An InvalidArgument exception occurred when executing %s: %s.",
+                f.__name__,
+                e,
+            )
             raise
-        except vim.fault.InvalidName:
+        except vim.fault.InvalidName as e:
             # For the scope of this integration, this is raised when fetching a config value from vCenter
             # that doesn't exist (especially maxQueryMetrics). Retrying won't help
             # https://code.vmware.com/apis/704/vsphere/vim.fault.InvalidName.html
+            api_instance.log.warning(
+                "An InvalidName exception occurred when executing %s: %s.",
+                f.__name__,
+                e,
+            )
             raise
-        except vim.fault.RestrictedByAdministrator:
+        except vim.fault.RestrictedByAdministrator as e:
             # The operation cannot complete because of some restriction set by the server administrator.
             # Retrying won't help
             # https://code.vmware.com/apis/704/vsphere/vim.fault.RestrictedByAdministrator.html
+            api_instance.log.warning(
+                "A RestrictedByAdministrator exception occurred when executing %s: %s.",
+                f.__name__,
+                e,
+            )
             raise
         except Exception as e:
             api_instance.log.debug(
@@ -150,7 +165,7 @@ class VSphereAPI(object):
             connect.Disconnect(self._conn)
 
         self._conn = conn
-        self.log.debug("Connected to %s", version_info.fullName)
+        self.log.warning("Connected to %s", version_info.fullName)
 
     @smart_retry
     def get_current_time(self):
@@ -170,6 +185,7 @@ class VSphereAPI(object):
 
         https://vdc-download.vmware.com/vmwb-repository/dcr-public/fe08899f-1eec-4d8d-b3bc-a6664c168c2c/7fdf97a1-4c0d-4be0-9d43-2ceebbc174d9/doc/vim.PerformanceManager.CounterInfo.html
         """
+        self.log.warning("Collecting perf counters")
         return self._conn.content.perfManager.QueryPerfCounterByLevel(collection_level)
 
     @smart_retry
@@ -314,7 +330,7 @@ class VSphereAPI(object):
         # type: (List[vim.PerformanceManager.QuerySpec]) -> List[vim.PerformanceManager.EntityMetricBase]
         perf_manager = self._conn.content.perfManager
         values = perf_manager.QueryPerf(query_specs)
-        self.log.debug("Received %s values from QueryPerf", len(values))
+        self.log.warning("Received %s values from QueryPerf", len(values))
         self.log.trace(
             "Query metrics:\n=== QUERY ===\n%s\n=== RESPONSE ===\n%s\n=== END QUERY ===",
             query_specs,
@@ -325,12 +341,14 @@ class VSphereAPI(object):
     @smart_retry
     def get_new_events(self, start_time):
         # type: (dt.datetime) -> List[vim.event.Event]
+        self.log.warning("Querying for new events")
         event_manager = self._conn.content.eventManager
         query_filter = vim.event.EventFilterSpec()
         time_filter = vim.event.EventFilterSpec.ByTime(beginTime=start_time)
         query_filter.time = time_filter
         query_filter.type = ALLOWED_EVENTS
         try:
+            self.log.warning("Collecting new events from event manager")
             events = event_manager.QueryEvents(query_filter)
         except SoapAdapter.ParserError as e:
             self.log.debug("Error parsing bulk events: %s", e)

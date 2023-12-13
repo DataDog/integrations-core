@@ -146,7 +146,7 @@ class VSphereCheck(AgentCheck):
             raw=True,
             hostname=self._hostname,
         )
-        self.log.debug("Collected %d counters metadata in %.3f seconds.", len(counters), t0.total())
+        self.log.warning("Collected %d counters metadata in %.3f seconds.", len(counters), t0.total())
 
         for mor_type in self._config.collected_resource_types:
             allowed_counters = []
@@ -173,6 +173,7 @@ class VSphereCheck(AgentCheck):
         """
         Fetch the all tags, build tags for each monitored resources and store all of that into the tags_cache.
         """
+        self.log.warning("Connecting to REST API for tags")
         if not self.api_rest:
             return {}
 
@@ -194,6 +195,7 @@ class VSphereCheck(AgentCheck):
             self.log.error("Failed to collect tags: %s", e)
             return {}
 
+        self.log.warning("Tags Collected")
         self.gauge(
             'datadog.vsphere.query_tags.time',
             t0.total(),
@@ -209,7 +211,7 @@ class VSphereCheck(AgentCheck):
         """Fetch the complete infrastructure, generate tags for each monitored resources and store all of that
         into the infrastructure_cache. It also computes the resource `hostname` property to be used when submitting
         metrics for this mor."""
-        self.log.debug("Refreshing the infrastructure cache...")
+        self.log.warning("Refreshing the infrastructure cache...")
         t0 = Timer()
         infrastructure_data = self.api.get_infrastructure()
         collect_property_metrics = self._config.collect_property_metrics
@@ -220,7 +222,7 @@ class VSphereCheck(AgentCheck):
             raw=True,
             hostname=self._hostname,
         )
-        self.log.debug("Infrastructure cache refreshed in %.3f seconds.", t0.total())
+        self.log.warning("Infrastructure cache refreshed in %.3f seconds.", t0.total())
 
         # When collecting property metrics, there are pyVmomi objects in the cache at this point
         if collect_property_metrics:
@@ -230,9 +232,11 @@ class VSphereCheck(AgentCheck):
 
         all_tags = {}
         if self._config.should_collect_tags:
+            self.log.warning("Collecting tags")
             all_tags = self.collect_tags(infrastructure_data)
         self.infrastructure_cache.set_all_tags(all_tags)
 
+        self.log.warning("Collecting infrastructure data")
         for mor, properties in iteritems(infrastructure_data):
             if not isinstance(mor, tuple(self._config.collected_resource_types)):
                 # Do nothing for the resource types we do not collect
@@ -342,6 +346,7 @@ class VSphereCheck(AgentCheck):
             if hostname:
                 mor_payload['hostname'] = hostname
 
+            self.log.warning("Setting new infrastructure cache")
             self.infrastructure_cache.set_mor_props(mor, mor_payload)
 
     def submit_metrics_callback(self, query_results):
@@ -356,6 +361,7 @@ class VSphereCheck(AgentCheck):
         # `have_instance_value` is used later to avoid collecting aggregated metrics
         # when instance metrics are collected.
         have_instance_value = defaultdict(set)  # type: Dict[Type[vim.ManagedEntity], Set[MetricName]]
+        self.log.warning("Iterating through %s query results", len(query_results))
         for results_per_mor in query_results:
             resource_type = type(results_per_mor.entity)
             metadata = self.metrics_metadata_cache.get_metadata(resource_type)
@@ -463,6 +469,7 @@ class VSphereCheck(AgentCheck):
         Warning: called in threads
         """
         t0 = Timer()
+        self.log.warning("Querying metrics using VsphereAPI")
         metrics_values = self.api.query_metrics(query_specs)
         self.histogram(
             'datadog.vsphere.query_metrics.time',
@@ -478,6 +485,7 @@ class VSphereCheck(AgentCheck):
         """
         Build query specs using MORs and metrics metadata.
         """
+        self.log.warning("Genrating query specs")
         server_current_time = self.api.get_current_time()
         self.log.debug("Server current datetime: %s", server_current_time)
         for resource_type in self._config.collected_resource_types:
@@ -521,16 +529,18 @@ class VSphereCheck(AgentCheck):
         """Run queries in multiple threads and wait for completion."""
         tasks = []  # type: List[Any]
         try:
+            self.log.warning("creating query specs and appending tasks")
             for query_specs in self.make_query_specs():
                 tasks.append(self.thread_pool.submit(self.query_metrics_wrapper, query_specs))
         except Exception as e:
             self.log.warning("Unable to schedule all metric collection tasks: %s", e)
         finally:
-            self.log.debug("Queued all %d tasks, waiting for completion.", len(tasks))
+            self.log.warning("Queued all %d tasks, waiting for completion.", len(tasks))
             for future in as_completed(tasks):
                 future_exc = future.exception()
                 if isinstance(future_exc, vmodl.fault.InvalidArgument):
                     # The query was invalid or the resource does not have values for this metric.
+                    self.log.warning("Query was invalid: %s", future_exc)
                     continue
                 elif future_exc is not None:
                     self.log.warning("A metric collection API call failed with the following error: %s", future_exc)
@@ -538,11 +548,12 @@ class VSphereCheck(AgentCheck):
 
                 results = future.result()
                 if not results:
-                    self.log.debug("A metric collection API call did not return data.")
+                    self.log.warning("A metric collection API call did not return data.")
                     continue
 
                 try:
                     # Callback is called in the main thread
+                    self.log.warning("Collecting completed. Submitting metrics now")
                     self.submit_metrics_callback(results)
                 except Exception as e:
                     self.log.exception(
@@ -566,7 +577,7 @@ class VSphereCheck(AgentCheck):
         """
         # Safeguard, let's avoid collecting multiple resources in the same call
         mors_filtered = [m for m in mors if isinstance(m, resource_type)]  # type: List[vim.ManagedEntity]
-
+        self.log.warning("Creating batches for metrics collection")
         if resource_type == vim.ClusterComputeResource:
             # Cluster metrics are unpredictable and a single call can max out the limit. Always collect them one by one.
             max_batch_size = 1  # type: float
@@ -619,7 +630,7 @@ class VSphereCheck(AgentCheck):
 
     def collect_events(self):
         # type: () -> None
-        self.log.debug("Starting events collection (query start time: %s).", self.latest_event_query)
+        self.log.warning("Starting events collection (query start time: %s).", self.latest_event_query)
         latest_event_time = None
         collect_start_time = get_current_datetime()
         try:
@@ -634,6 +645,7 @@ class VSphereCheck(AgentCheck):
             )
             self.log.debug("Got %s new events from the vCenter event manager", len(new_events))
             event_config = {'collect_vcenter_alarms': True}
+            self.log.warning("Collected Events to be normalized")
             for event in new_events:
                 self.log.debug(
                     "Processing event with id:%s, type:%s: msg:%s", event.key, type(event), event.fullFormattedMessage
@@ -916,18 +928,22 @@ class VSphereCheck(AgentCheck):
 
     def check(self, _):
         # type: (Any) -> None
+        self.log.warning("Starting vSphere check")
+        self.log.warning("Getting hostname")
         self._hostname = datadog_agent.get_hostname()
         # Assert the health of the vCenter API by getting the version, and submit the service_check accordingly
 
         now = get_timestamp()
         if self.last_connection_time + self._config.connection_reset_timeout <= now or self.api is None:
             self.last_connection_time = now
-            self.log.debug("Refreshing vCenter connection")
+            self.log.warning("Refreshing vCenter connection")
             self.initiate_api_connection()
 
         try:
+            self.log.warning("Getting version metadata")
             version_info = self.api.get_version()
             if self.is_metadata_collection_enabled():
+                self.log.warning("Collected version metadata")
                 self.set_metadata('version', version_info.version_str)
         except Exception:
             # Explicitly do not attach any host to the service checks.
@@ -935,6 +951,7 @@ class VSphereCheck(AgentCheck):
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.base_tags, hostname=None)
             raise
         else:
+            self.log.warning("Submitting service check")
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.base_tags, hostname=None)
 
         # Collect and submit events
@@ -946,6 +963,7 @@ class VSphereCheck(AgentCheck):
 
         # Update the value of `max_query_metrics` if needed
         if self._config.is_historical():
+            self.log.warning("Getting max metrics for historical queries")
             try:
                 vcenter_max_hist_metrics = self.api.get_max_query_metrics()
                 if (vcenter_max_hist_metrics < self._config.max_historical_metrics) or (
@@ -972,15 +990,20 @@ class VSphereCheck(AgentCheck):
 
         # Refresh the metrics metadata cache
         if self.metrics_metadata_cache.is_expired():
+            self.log.warning("Checking for metrics metadata cache expiration")
             with self.metrics_metadata_cache.update():
+                self.log.warning("Refreshing metrics metadata cache")
                 self.refresh_metrics_metadata_cache()
 
         # Refresh the infrastructure cache
+        self.log.warning("Checking for infrastructure metadata cache expiration")
         if self.infrastructure_cache.is_expired():
+            self.log.warning("Refreshing infrastructure metadata cache")
             with self.infrastructure_cache.update():
                 self.refresh_infrastructure_cache()
 
             # Submit host tags as soon as we have fresh data
+            self.log.warning("Submitting host tags")
             self.submit_external_host_tags()
 
             # Submit property metrics after the cache is refreshed
@@ -994,6 +1017,7 @@ class VSphereCheck(AgentCheck):
                 self.infrastructure_cache.clear_properties()
 
         # Submit the number of resources that are monitored
+        self.log.warning("Submitting vm count")
         for resource_type in self._config.collected_resource_types:
             for mor in self.infrastructure_cache.get_mors(resource_type):
                 mor_props = self.infrastructure_cache.get_mor_props(mor)
@@ -1007,6 +1031,6 @@ class VSphereCheck(AgentCheck):
                 )
 
         # Creating a thread pool and starting metric collection
-        self.log.debug("Starting metric collection in %d threads.", self._config.threads_count)
+        self.log.warning("Starting metric collection in %d threads.", self._config.threads_count)
         self.collect_metrics_async()
-        self.log.debug("Metric collection completed.")
+        self.log.warning("Metric collection completed.")
