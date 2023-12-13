@@ -346,7 +346,6 @@ class VSphereCheck(AgentCheck):
             if hostname:
                 mor_payload['hostname'] = hostname
 
-            self.log.warning("Setting new infrastructure cache")
             self.infrastructure_cache.set_mor_props(mor, mor_payload)
 
     def submit_metrics_callback(self, query_results):
@@ -577,7 +576,6 @@ class VSphereCheck(AgentCheck):
         """
         # Safeguard, let's avoid collecting multiple resources in the same call
         mors_filtered = [m for m in mors if isinstance(m, resource_type)]  # type: List[vim.ManagedEntity]
-        self.log.warning("Creating batches for metrics collection")
         if resource_type == vim.ClusterComputeResource:
             # Cluster metrics are unpredictable and a single call can max out the limit. Always collect them one by one.
             max_batch_size = 1  # type: float
