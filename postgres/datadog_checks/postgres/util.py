@@ -515,6 +515,37 @@ SELECT
     ],
 }
 
+# Requires PG12+
+INDEX_PROGRESS_METRICS = {
+    'name': 'index_progress_metrics',
+    'query': """
+SELECT
+       p.datname, c.relname, i.relname, p.command, p.phase,
+       lockers_total, lockers_done,
+       blocks_total, blocks_done,
+       tuples_total, tuples_done,
+       partitions_total, partitions_done
+  FROM pg_stat_progress_create_index as p
+  LEFT JOIN pg_class c on c.oid = p.relid
+  LEFT JOIN pg_class i on i.oid = p.index_relid
+""",
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'index', 'type': 'tag_not_null'},
+        {'name': 'command', 'type': 'tag'},
+        {'name': 'phase', 'type': 'tag'},
+        {'name': 'postgresql.create_index.lockers_total', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.lockers_done', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.blocks_total', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.blocks_done', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.tuples_total', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.tuples_done', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.partitions_total', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.partitions_done', 'type': 'gauge'},
+    ],
+}
+
 WAL_FILE_METRICS = {
     'name': 'wal_metrics',
     'query': """
