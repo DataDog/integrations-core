@@ -555,7 +555,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
             file_id = columns.index("file_id")
             file_type = columns.index("type")
             file_location = columns.index("physical_name")
-            filename = columns.index("name")
+            filename_idx = columns.index("name")
             db_files_state_desc_index = columns.index("state_desc")
             value_column_index = columns.index(self.column)
         except ValueError as e:
@@ -573,7 +573,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
             fileid = row[file_id]
             filetype = self.DB_TYPE_MAP[row[file_type]]
             location = row[file_location]
-            filename = row[filename]
+            filename = row[filename_idx]
             db_files_state_desc = row[db_files_state_desc_index]
 
             metric_tags = [
