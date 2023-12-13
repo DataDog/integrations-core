@@ -44,8 +44,8 @@
     },
     "monitors": {
       "high cpu utilization": "assets/monitors/cpu_utilization.json",
-      "low GPU utilization": "assets/monitors/gpus_utilization.json",
-      "high memory utilization": "assets/monitors/memory_utilization.json",
+      "low GPU utilization": "assets/monitors/gpu_utilization.json",
+      "high memory utilization": "assets/monitors/mem_utilization.json",
       "high failed tasks": "assets/monitors/failed_task.json"
     },
     "logs": {
