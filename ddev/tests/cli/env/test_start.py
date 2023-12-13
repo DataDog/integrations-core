@@ -5,7 +5,7 @@ import copy
 import os
 
 import pytest
-from datadog_checks.dev._env import serialize_data
+from datadog_checks.dev.env import serialize_data
 
 from ddev.e2e.config import EnvDataStorage
 from ddev.e2e.constants import DEFAULT_DOGSTATSD_PORT, E2EEnvVars, E2EMetadata
