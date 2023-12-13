@@ -400,6 +400,85 @@ Some of the metrics listed below require additional configuration, see the [samp
 
 See [metadata.csv][20] for a list of metrics provided by this integration.
 
+The check does not collect all metrics by default. Configure the following options to enable the respective metrics:
+
+`relations` enables the following metrics:
+
+| Metric name                                  | Metric type |
+| -------------------------------------------- | ----------- |
+| postgresql.seq_scans                         | GAUGE       |
+| postgresql.seq_rows_read                     | GAUGE       |
+| postgresql.index_scans                       | GAUGE       |
+| postgresql.index_rel_scans                   | GAUGE       |
+| postgresql.index_rows_fetched                | GAUGE       |
+| postgresql.rows_hot_updated                  | GAUGE       |
+| postgresql.live_rows                         | GAUGE       |
+| postgresql.dead_rows                         | GAUGE       |
+| postgresql.vacuumed                          | COUNT       |
+| postgresql.autovacuumed                      | COUNT       |
+| postgresql.analyzed                          | COUNT       |
+| postgresql.heap_blocks_hit                   | GAUGE       |
+| postgresql.heap_blocks_read                  | GAUGE       |
+| postgresql.toast_blocks_read                 | GAUGE       |
+| postgresql.toast_blocks_hit                  | GAUGE       |
+| postgresql.toast_index_blocks_read           | GAUGE       |
+| postgresql.toast_index_blocks_hit            | GAUGE       |
+| postgresql.locks                             | GAUGE       |
+| postgresql.index_blocks_hit                  | GAUGE       |
+| postgresql.index_blocks_read                 | GAUGE       |
+| postgresql.index_rel_rows_fetched            | GAUGE       |
+| postgresql.rows_inserted                     | GAUGE       |
+| postgresql.rows_updated                      | GAUGE       |
+| postgresql.rows_deleted                      | GAUGE       |
+| postgresql.autoanalyzed                      | COUNT       |
+| postgresql.index_rows_read                   | GAUGE       |
+| postgresql.table_size                        | GAUGE       |
+| postgresql.index_size                        | GAUGE       |
+| postgresql.total_size                        | GAUGE       |
+
+`collect_database_size_metrics` adds the following metrics:
+
+| Metric name                                 | Metric type |
+| ------------------------------------------- | ----------- |
+| postgresql.database_size                    | GAUGE       |
+
+`collect_bloat_metrics` adds the following metrics:
+
+| Metric name                                 | Metric type |
+| ------------------------------------------- | ----------- |
+| postgresql.index_bloat                      | GAUGE       |
+| postgresql.table_bloat                      | GAUGE       |
+
+`collect_wal_metrics` adds the following metrics:
+
+| Metric name                                 | Metric type |
+| ------------------------------------------- | ----------- |
+| postgresql.wal_age                          | GAUGE       |
+
+`collect_activity_metrics` adds the following metrics:
+
+| Metric name                                 | Metric type |
+| ------------------------------------------- | ----------- |
+| postgresql.transactions.open                | GAUGE       |
+| postgresql.transactions.idle_in_transaction | GAUGE       |
+| postgresql.active_queries                   | GAUGE       |
+| postgresql.active_waiting_queries           | GAUGE       |
+| postgresql.waiting_queries                  | GAUGE       |
+
+`collect_count_metrics` adds the following metrics:
+
+| Metric name                                 | Metric type |
+| ------------------------------------------- | ----------- |
+| postgresql.table.count                      | GAUGE       |
+
+`collect_function_metrics` adds the following metrics:
+
+| Metric name                                 | Metric type |
+| ------------------------------------------- | ----------- |
+| postgresql.function.calls                   | RATE        |
+| postgresql.function.total_time              | GAUGE       |
+| postgresql.function.self_time               | GAUGE       |
+
 For Agent version `7.32.0` and later, if you have Database Monitoring enabled, the `postgresql.connections` metric is tagged with `state`, `app`, `db` and `user`.
 
 ### Events
