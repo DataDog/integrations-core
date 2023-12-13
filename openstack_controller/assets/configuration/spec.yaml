@@ -132,6 +132,7 @@ files:
             paginated_limit sets the number of items some api calls should return.
           value:
             example: 1000
+            default: null
             type: integer
         - name: openstack_config_file_path
           description: |
