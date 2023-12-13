@@ -44,6 +44,9 @@
     },
     "logs": {
       "source": "ray"
+    },
+    "dashboards": {
+      "Ray Overview Dashboard": "assets/dashboards/overview_dashboard.json"
     }
   },
   "author": {
