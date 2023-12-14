@@ -30,7 +30,6 @@ jobs:
       run: |
         pip install -e ./datadog_checks_dev[cli]
         pip install -e ./ddev
-        pip install hatchling==1.14.0
 
     - name: Configure ddev
       run: |
@@ -41,12 +40,6 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends libkrb5-dev
-
-    - name: Validate documentation
-      run: |
-        cd ddev
-        hatch version
-        pip freeze
 
     - name: Validate documentation
       run: ddev -v docs build --check
