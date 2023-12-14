@@ -67,7 +67,7 @@ cli = [
     "codespell",
     "colorama",
     "datamodel-code-generator~=0.21.4",
-    "hatch>=1.5.0",
+    "hatch @ git+https://github.com/FlorentClarret/hatch.git@e32dce14fcd233365679dc6fd25f325d12c3ee51",
     "in-toto==2.0.0",
     "jsonschema",
     "markdown",
@@ -106,6 +106,9 @@ Source = "https://github.com/DataDog/integrations-core"
 
 [tool.hatch.version]
 path = "datadog_checks/dev/__about__.py"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.build.targets.sdist]
 include = [
