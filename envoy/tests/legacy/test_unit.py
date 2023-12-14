@@ -18,8 +18,8 @@ from .common import (
     HOST,
     INSTANCES,
     LOCAL_RATE_LIMIT_METRICS,
-    STAT_PREFIX_TAG,
     RBAC_METRICS,
+    STAT_PREFIX_TAG,
 )
 
 CHECK_NAME = 'envoy'

@@ -54,11 +54,9 @@ LOCAL_RATE_LIMIT_METRICS = [
 
 STAT_PREFIX_TAG = ['stat_prefix:http_local_rate_limiter', 'stat_prefix:foo_buz_112']
 
-RBAC_METRICS = [    
+RBAC_METRICS = [
     "envoy.http.rbac.allowed",
     "envoy.http.rbac.denied",
     "envoy.http.rbac.shadow_allowed",
     "envoy.http.rbac.shadow_denied",
 ]
-
-
