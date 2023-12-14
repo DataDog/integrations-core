@@ -67,12 +67,20 @@ class SQLServerConfig:
                     # Config to enable/disable obfuscation of sql statements with go-sqllexer pkg
                     # Valid values for this can be found at https://github.com/DataDog/datadog-agent/blob/main/pkg/obfuscate/obfuscate.go#L108
                     'obfuscation_mode': obfuscator_options_config.get('obfuscation_mode', ''),
-                    'remove_space_between_parentheses': is_affirmative(obfuscator_options_config.get('remove_space_between_parentheses', False)),
+                    'remove_space_between_parentheses': is_affirmative(
+                        obfuscator_options_config.get('remove_space_between_parentheses', False)
+                    ),
                     'keep_null': is_affirmative(obfuscator_options_config.get('keep_null', False)),
                     'keep_boolean': is_affirmative(obfuscator_options_config.get('keep_boolean', False)),
-                    'keep_positional_parameter': is_affirmative(obfuscator_options_config.get('keep_positional_parameter', False)),
-                    'keep_trailing_semicolon': is_affirmative(obfuscator_options_config.get('keep_trailing_semicolon', False)),
-                    'keep_identifier_quotation': is_affirmative(obfuscator_options_config.get('keep_identifier_quotation', False)),
+                    'keep_positional_parameter': is_affirmative(
+                        obfuscator_options_config.get('keep_positional_parameter', False)
+                    ),
+                    'keep_trailing_semicolon': is_affirmative(
+                        obfuscator_options_config.get('keep_trailing_semicolon', False)
+                    ),
+                    'keep_identifier_quotation': is_affirmative(
+                        obfuscator_options_config.get('keep_identifier_quotation', False)
+                    ),
                 }
             )
         )
