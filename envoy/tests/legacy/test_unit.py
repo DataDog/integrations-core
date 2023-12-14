@@ -18,7 +18,8 @@ from .common import (
     HOST,
     INSTANCES,
     LOCAL_RATE_LIMIT_METRICS,
-    RATE_LIMIT_STAT_PREFIX_TAG,
+    RBAC_METRICS,
+    STAT_PREFIX_TAG,
 )
 
 CHECK_NAME = 'envoy'
@@ -281,7 +282,21 @@ def test_local_rate_limit_metrics(aggregator, fixture_path, mock_http_response, 
 
     for metric in LOCAL_RATE_LIMIT_METRICS:
         aggregator.assert_metric(metric)
-        for tag in RATE_LIMIT_STAT_PREFIX_TAG:
+        for tag in STAT_PREFIX_TAG:
             aggregator.assert_metric_has_tag(metric, tag, count=1)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def test_rbac_metrics(aggregator, fixture_path, mock_http_response, check, dd_run_check):
+    instance = INSTANCES['main']
+    c = check(instance)
+
+    mock_http_response(file_path=fixture_path('./legacy/rbac_metric.txt'))
+    dd_run_check(c)
+
+    for metric in RBAC_METRICS:
+        aggregator.assert_metric(metric)
+        aggregator.assert_metric_has_tag(metric, STAT_PREFIX_TAG[1], count=1)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

@@ -973,3 +973,7 @@ envoy.http_local_rate_limit.enabled,count,,request,,[Legacy] Total number of req
 envoy.http_local_rate_limit.enforced,count,,request,,[Legacy] Total number of requests for which rate limiting was applied (e.g.: 429 returned),-1,envoy,,
 envoy.http_local_rate_limit.rate_limited,count,,request,,[Legacy] Total number of responses without an available token (but not necessarily enforced),-1,envoy,,
 envoy.http_local_rate_limit.ok,count,,request,,[Legacy] Total number of under the limit responses from the token bucket,-1,envoy,,
+envoy.http.rbac.allowed,count,,request,,[Legacy] Total requests that were allowed access,-1,envoy,,
+envoy.http.rbac.denied,count,,request,,[Legacy] Total requests that were denied access,-1,envoy,,
+envoy.http.rbac.shadow_allowed,count,,request,,[Legacy] Total requests that would be allowed access by the filter's shadow rules,-1,envoy,,
+envoy.http.rbac.shadow_denied,count,,request,,[Legacy] Total requests that would be denied access by the filter's shadow rules,-1,envoy,,
