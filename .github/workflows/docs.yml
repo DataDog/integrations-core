@@ -30,6 +30,7 @@ jobs:
       run: |
         pip install -e ./datadog_checks_dev[cli]
         pip install -e ./ddev
+        pip install hatchling==1.14.0
 
     - name: Configure ddev
       run: |
