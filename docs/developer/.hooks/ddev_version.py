@@ -15,7 +15,7 @@ os.environ.pop('HATCH_ENV_ACTIVE', None)
 def get_latest_version():
     """This returns the latest version of ddev."""
     ddev_root = Path.cwd() / 'ddev'
-    print("Path: " + ddev_root)
+    print("Path: " + str(ddev_root))
     output = subprocess.check_output(['hatch', 'version'], cwd=str(ddev_root)).decode('utf-8').strip()
     print("output: " + output)
 
