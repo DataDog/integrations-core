@@ -16,9 +16,11 @@ def get_latest_version():
     """This returns the latest version of ddev."""
     ddev_root = Path.cwd() / 'ddev'
     output = subprocess.check_output(['hatch', 'version'], cwd=str(ddev_root)).decode('utf-8').strip()
-    print(output)
+    print(subprocess.check_output(['hatch', '--version'], cwd=str(ddev_root)).decode('utf-8').strip())
 
     version = output.replace('dev', '')
+
+    print(version)
     parts = list(map(int, version.split('.')))
     major, minor, patch = parts[:SEMVER_PARTS]
     if len(parts) > SEMVER_PARTS:
