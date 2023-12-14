@@ -16,6 +16,7 @@ def get_latest_version():
     """This returns the latest version of ddev."""
     ddev_root = Path.cwd() / 'ddev'
     output = subprocess.check_output(['hatch', 'version'], cwd=str(ddev_root)).decode('utf-8').strip()
+    print(output)
 
     version = output.replace('dev', '')
     parts = list(map(int, version.split('.')))
