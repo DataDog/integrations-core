@@ -53,7 +53,6 @@ class LocalRate:
 
 class TokuMX(AgentCheck):
     SERVICE_CHECK_NAME = 'tokumx.can_connect'
-
     GAUGES = [
         "indexCounters.btree.missRatio",
         "globalLock.ratio",
