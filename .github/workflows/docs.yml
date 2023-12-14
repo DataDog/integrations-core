@@ -42,6 +42,11 @@ jobs:
         sudo apt-get install -y --no-install-recommends libkrb5-dev
 
     - name: Validate documentation
+      run: |
+        cd ddev
+        hatch version
+
+    - name: Validate documentation
       run: ddev -v docs build --check
 
     - name: Build documentation
