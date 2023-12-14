@@ -1,0 +1,4 @@
+http.foo_buz_112.rbac.allowed: 0
+http.foo_buz_112.rbac.denied: 0
+http.foo_buz_112.rbac.shadow_allowed: 0
+http.foo_buz_112.rbac.shadow_denied: 0

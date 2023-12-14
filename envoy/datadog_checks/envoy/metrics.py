@@ -3861,6 +3861,38 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'http.rbac.allowed': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.rbac.denied': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.rbac.shadow_allowed': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.rbac.shadow_denied': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
     # "*." to match at the beginning of raw metric if it doesn't have a standard name
     '*.http_local_rate_limit.enabled': {
         'tags': (
