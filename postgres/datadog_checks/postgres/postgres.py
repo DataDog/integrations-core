@@ -79,7 +79,7 @@ MAX_CUSTOM_RESULTS = 100
 
 PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s)"
 
-CANCEL_TIMEOUT = 0.4
+CANCEL_TIMEOUT = 0.5  # the default timeout for cancelling a check run
 
 
 class PostgreSql(AgentCheck):
@@ -341,9 +341,13 @@ class PostgreSql(AgentCheck):
         """
         cancel check within timeout
         """
+        cancel_timeout = datadog_agent.get_config('check_cancel_timeout', CANCEL_TIMEOUT)
         cancel_thread = threading.Thread(target=self._cancel)
         cancel_thread.start()
-        cancel_thread.join(timeout=CANCEL_TIMEOUT)
+        # This is a hacky way to make sure check is canceled within timeout
+        # 0.8 is a "magic" number that was chosen to make sure we give it some room when
+        # check cancel is called from the agent, mainly for accquiring the GIL
+        cancel_thread.join(timeout=cancel_timeout * 0.8)
         if cancel_thread.is_alive():
             self.log.warning("Timeout while cancelling check, database connections may not be closed gracefully.")
 
