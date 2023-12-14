@@ -20,7 +20,8 @@ def get_latest_version():
 
     version = output.replace('dev', '')
 
-    print(version)
+    print("version: " + version)
+    print("split: " + version.split('.'))
     parts = list(map(int, version.split('.')))
     major, minor, patch = parts[:SEMVER_PARTS]
     if len(parts) > SEMVER_PARTS:
