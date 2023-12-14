@@ -29,7 +29,7 @@ dependencies = [
     "click~=8.1.6",
     "coverage",
     "datadog-checks-dev[cli]~=29.0",
-    "git+https://github.com/FlorentClarret/hatch.git@e32dce14fcd233365679dc6fd25f325d12c3ee51",
+    "hatch @ git+https://github.com/FlorentClarret/hatch.git@e32dce14fcd233365679dc6fd25f325d12c3ee51",
     "httpx",
     "jsonpointer",
     "pluggy",
