@@ -14,7 +14,6 @@
 * Exclude orjson when checking for dependency updates ([#16190](https://github.com/DataDog/integrations-core/pull/16190))
 * Exclude psycopg2 when checking for dependency updates ([#16194](https://github.com/DataDog/integrations-core/pull/16194))
 * Fix and extend changelog validation:
-
   - handle invalid change type file extensions
   - handle unnecessary changelog entries
   - fix error message formatting ([#16283](https://github.com/DataDog/integrations-core/pull/16283))
