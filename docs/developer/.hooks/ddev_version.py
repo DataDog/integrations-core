@@ -15,15 +15,9 @@ os.environ.pop('HATCH_ENV_ACTIVE', None)
 def get_latest_version():
     """This returns the latest version of ddev."""
     ddev_root = Path.cwd() / 'ddev'
-    print("Path: " + str(ddev_root))
-    print("process: " + subprocess.check_output(['hatch', '--version'], cwd=str(ddev_root), stderr=subprocess.STDOUT).decode('utf-8').strip())
-    output = subprocess.check_output(['hatch', 'version'], cwd=str(ddev_root), stderr=subprocess.STDOUT).decode('utf-8').strip()
-    print("output: " + output)
-
+    output = subprocess.check_output(['hatch', 'version'], cwd=str(ddev_root)).decode('utf-8').strip()
     version = output.replace('dev', '')
 
-    print("version: " + version)
-    print(version.split('.'))
     parts = list(map(int, version.split('.')))
     major, minor, patch = parts[:SEMVER_PARTS]
     if len(parts) > SEMVER_PARTS:
