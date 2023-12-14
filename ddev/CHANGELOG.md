@@ -2,6 +2,27 @@
 
 <!-- towncrier release notes start -->
 
+## 6.1.0 / 2023-12-14
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+* Bump the `datadog_checks_dev` version to 29 ([#16404](https://github.com/DataDog/integrations-core/pull/16404))
+
+***Fixed***:
+
+* Exclude orjson when checking for dependency updates ([#16190](https://github.com/DataDog/integrations-core/pull/16190))
+* Exclude psycopg2 when checking for dependency updates ([#16194](https://github.com/DataDog/integrations-core/pull/16194))
+* Fix and extend changelog validation:
+
+  - handle invalid change type file extensions
+  - handle unnecessary changelog entries
+  - fix error message formatting ([#16283](https://github.com/DataDog/integrations-core/pull/16283))
+* Take into account logs only integrations when bumping the Python version ([#16303](https://github.com/DataDog/integrations-core/pull/16303))
+* Take into account the base check when bumping the dependencies ([#16365](https://github.com/DataDog/integrations-core/pull/16365))
+* Pin the `hatch` version to 1.7.0 ([#16405](https://github.com/DataDog/integrations-core/pull/16405))
+* Mount the logs volumes inside the agent with the `env start` command ([#16411](https://github.com/DataDog/integrations-core/pull/16411))
+
 ## 6.0.2 / 2023-11-10
 
 ***Fixed***:
