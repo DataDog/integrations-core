@@ -44,7 +44,8 @@ jobs:
     - name: Validate documentation
       run: |
         cd ddev
-        hatch --version
+        hatch version
+        pip freeze
 
     - name: Validate documentation
       run: ddev -v docs build --check
