@@ -25,7 +25,7 @@
     "oauth": {},
     "assets": {
       "integration": {
-        "source_type_name": "windows-registry",
+          "source_type_name": "Windows Registry",
         "configuration": {},
         "events": {
           "creates_events": false
