@@ -54,7 +54,7 @@ spec:
 
 _Available for Agent versions >6.0_
 
-Argo CD logs can be collected from the different Argo CD pods through Kubernetes. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][11].
+Karpenter logs can be collected from the different Karpenter pods through Kubernetes. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][11].
 
 See the [Autodiscovery Integration Templates][3] for guidance on applying the parameters below.
 
