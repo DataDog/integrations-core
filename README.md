@@ -1,4 +1,4 @@
-# Datadog Agent Integrations - Core
+# Datadog Agent Integrations - Core 
 
 | | |
 | --- | --- |
