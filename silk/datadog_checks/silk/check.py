@@ -214,7 +214,7 @@ class SilkCheck(AgentCheck):
             # Use `self.latest_event_query` as starting time and `collect_events_timestamp` as ending time
             event_query = EVENT_PATH.format(int(self.latest_event_query), int(collect_events_timestamp))
             raw_events, _ = self._get_data(event_query)
-            # breakpoint()
+
             for event in raw_events:
                 try:
                     tags = self._tags + system_tags
