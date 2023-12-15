@@ -109,10 +109,42 @@ To configure this check for an Agent running on a host:
        dbname: "<DB_NAME>"
    
        # @param disable_generic_tags - boolean - optional - default: false
-       # The integration will stop sending server tag as is reduntant with host tag
+       # The integration will stop sending server tag as is redundant with host tag
        disable_generic_tags: true
    ```
 
+   To collect relation metrics, the Agent must connect to every logical database. These databases can be discovered automatically, or each one can be listed explicitly in the configuration. 
+   
+   To discover logical databases automatically on a given instance, enable autodiscovery on that instance:
+   ```yaml
+    instances:
+      - host: localhost
+        port: 5432
+        database_autodiscovery:
+          enabled: true
+          # Optionally, set the include field to specify
+          # a set of databases you are interested in discovering
+          include:
+            - mydb.*
+            - example.*
+   ```
+
+  Alternatively, you can list each logical database as an instance in the configuration:
+  ```yaml
+  instances:
+    - host: example-service-primary.example-host.com
+      port: 5432
+      username: datadog
+      password: '<PASSWORD>'
+    - host: example-service–replica-1.example-host.com
+      port: 5432
+      username: datadog
+      password: '<PASSWORD>'
+    - host: example-service–replica-2.example-host.com
+      port: 5432
+      username: datadog
+      password: '<PASSWORD>'
+   ```
 2. [Restart the Agent][4].
 
 ##### Trace collection
