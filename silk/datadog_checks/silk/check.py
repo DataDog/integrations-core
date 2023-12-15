@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
+from math import ceil
 
 from six.moves.urllib.parse import urljoin, urlparse
 
@@ -26,6 +27,7 @@ class SilkCheck(AgentCheck):
         self.metrics_to_collect = dict(METRICS)
 
         server = self.instance.get("host_address")
+        self.extend_events_window = self.instance.get("extend_events_window", False)
 
         if server is None:
             raise ConfigurationError("host_address is a required parameter.")
@@ -212,7 +214,7 @@ class SilkCheck(AgentCheck):
             # Use `self.latest_event_query` as starting time and `collect_events_timestamp` as ending time
             event_query = EVENT_PATH.format(int(self.latest_event_query), int(collect_events_timestamp))
             raw_events, _ = self._get_data(event_query)
-
+            # breakpoint()
             for event in raw_events:
                 try:
                     tags = self._tags + system_tags
@@ -228,4 +230,15 @@ class SilkCheck(AgentCheck):
             self.log.error("Unable to fetch events: %s", str(e))
 
         # Update latest event query to last event time
-        self.latest_event_query = collect_events_timestamp
+        if self.extend_events_window:
+            if len(raw_events) > 0:
+                self.latest_event_query = ceil(raw_events[-1].get('timestamp'))
+                self.log.debug("Update next event query start timestamp to %s", self.latest_event_query)
+            else:
+                self.log.debug(
+                    "No events found in this query window. Keeping the same query window. Start: %s, end: %s",
+                    self.latest_event_query,
+                    collect_events_timestamp,
+                )
+        else:
+            self.latest_event_query = collect_events_timestamp
