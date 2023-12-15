@@ -356,6 +356,7 @@ files:
               - "model"
               - "msdb"
               - "cloudsqladmin"
+              - "rdsadmin"
             display_default:
               - "cloudsqladmin"
         - name: refresh
