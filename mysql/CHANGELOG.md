@@ -19,7 +19,6 @@
 
 ***Added***:
 
-* Add support for reporting SQL obfuscation errors ([#15990](https://github.com/DataDog/integrations-core/pull/15990))
 * Emit MySQL metrics queries operation time ([#16065](https://github.com/DataDog/integrations-core/pull/16065))
 
 ***Fixed***:

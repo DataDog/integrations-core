@@ -22,7 +22,6 @@
 
 ***Added***:
 
-* Add support for reporting SQL obfuscation errors ([#15990](https://github.com/DataDog/integrations-core/pull/15990))
 * Emit SQLServer metrics queries operation time ([#16066](https://github.com/DataDog/integrations-core/pull/16066))
 
 ***Fixed***:
