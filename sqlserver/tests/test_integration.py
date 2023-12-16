@@ -783,6 +783,7 @@ def test_index_usage_statistics(aggregator, dd_run_check, instance_docker, datab
         'db:datadog_test',
         'table:ϑings',
         'index_name:thingsindex',
+        'index_type:CLUSTERED'
     ]
     for m in DATABASE_INDEX_METRICS:
         aggregator.assert_metric(m[0], tags=expected_tags, count=1)

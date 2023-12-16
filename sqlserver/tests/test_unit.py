@@ -265,14 +265,24 @@ def test_SqlMasterDatabaseFileStats_fetch_metric(col_val_row_1, col_val_row_2, c
 )
 def test_SqlDbIndexUsageStats_fetch_metric(col_val_row_1, col_val_row_2, col_val_row_3):
     Row = namedtuple(
-        'Row', ['db', 'index_name', 'table_name', "user_seeks", "user_scans", "user_lookups", "user_updates"]
+        'Row',
+        ['db', 'index_name', 'table_name', "user_seeks", "user_scans", "user_lookups", "user_updates", "idx_type"],
     )
     mock_rows = [
-        Row('foo_db', "my-index", "table_a", 23, col_val_row_1, 12453, 1234),
-        Row('foo_db', "foo-index", "table_a", 23, col_val_row_2, 12, 1234),
-        Row('foo_db', "bar-index", "table_b", 23, col_val_row_3, 123, 1234),
+        Row('foo_db', "my-index", "table_a", 23, col_val_row_1, 12453, 1234, 'NONCLUSTERED'),
+        Row('foo_db', "foo-index", "table_a", 23, col_val_row_2, 12, 1234, 'NONCLUSTERED'),
+        Row('foo_db', "bar-index", "table_b", 23, col_val_row_3, 123, 1234, 'NONCLUSTERED'),
     ]
-    mock_cols = ['db', 'index_name', 'table_name', "user_seeks", "user_scans", "user_lookups", "user_updates"]
+    mock_cols = [
+        'db',
+        'index_name',
+        'table_name',
+        "user_seeks",
+        "user_scans",
+        "user_lookups",
+        "user_updates",
+        "idx_type",
+    ]
     report_function = mock.MagicMock()
     mock_metric_obj = SqlDbIndexUsageStats(
         cfg_instance=mock.MagicMock(dict),
