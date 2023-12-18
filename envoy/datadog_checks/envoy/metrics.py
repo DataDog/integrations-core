@@ -376,6 +376,7 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_http_local_rate_limit_enforced': 'http.local_rate_limit_enforced',
     'envoy_http_local_rate_limit_rate_limited': 'http.local_rate_limit_rate_limited',
     'envoy_http_local_rate_limit_ok': 'http.local_rate_limit_ok',
+    'envoy_control_plane_connected_state': 'control_plane.connected_state',
 }
 
 # fmt: off
