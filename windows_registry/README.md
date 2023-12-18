@@ -4,7 +4,7 @@
 
 Watch for changes in Windows Registry keys and forward them to Datadog. Enable this integration to:
 
-- Understand system and application health through Windows Registry key values
+- Understand system and application level health and status through Windows Registry values
 - Monitor for unexpected changes impacting security and compliance requirements
 
 ## Setup
@@ -15,13 +15,13 @@ The Windows Registry integration is included in the [Datadog Agent][1] package. 
 
 ### Configuration
 
-This integration collects Windows Registry information using both of following methods:
+This integration collects and reports Windows Registry information using both of following methods:
 
 - As [Datadog Metrics][2]
 - As [Datadog Logs][3]
 
 
-1. Edit the `windows_registry.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's [configuration directory][4] to start collecting Windows registry information. See the [sample windows_.d/conf.yaml][5] for all available configuration options.
+1. Edit the `windows_registry.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's [configuration directory][4] to start collecting Windows registry information. See the [sample windows_registry.d/conf.yaml][5] for all available configuration options.
 
 2. Collecting logs is disabled by default in the Datadog Agent. Enable log collection in your `datadog.yaml` file: 
 
