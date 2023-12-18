@@ -6,5 +6,3 @@ envoy_http_local_rate_limit_enforced{envoy_local_http_ratelimit_prefix="http_loc
 envoy_http_local_rate_limit_ok{envoy_local_http_ratelimit_prefix="http_local_rate_limiter"} 0
 # TYPE envoy_http_local_rate_limit_rate_limited counter
 envoy_http_local_rate_limit_rate_limited{envoy_local_http_ratelimit_prefix="http_local_rate_limiter"} 0
-# TYPE envoy_control_plane_connected_state gauge
-envoy_control_plane_connected_state{} 1
