@@ -46,6 +46,7 @@ from .util import (
     INDEX_PROGRESS_METRICS,
     QUERY_PG_CONTROL_CHECKPOINT,
     QUERY_PG_REPLICATION_SLOTS,
+    QUERY_PG_REPLICATION_INACTIVE_SLOTS,
     QUERY_PG_REPLICATION_SLOTS_STATS,
     QUERY_PG_STAT_DATABASE,
     QUERY_PG_STAT_DATABASE_CONFLICTS,
@@ -282,6 +283,7 @@ class PostgreSql(AgentCheck):
                 queries.append(QUERY_PG_STAT_WAL_RECEIVER)
                 queries.append(WAL_FILE_METRICS)
             queries.append(QUERY_PG_REPLICATION_SLOTS)
+            queries.append(QUERY_PG_REPLICATION_INACTIVE_SLOTS)
             queries.append(VACUUM_PROGRESS_METRICS)
             queries.append(STAT_SUBSCRIPTION_METRICS)
 

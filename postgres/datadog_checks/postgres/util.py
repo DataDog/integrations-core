@@ -340,6 +340,20 @@ QUERY_PG_REPLICATION_SLOTS = {
     ],
 }
 
+QUERY_PG_REPLICATION_INACTIVE_SLOTS = {
+    'name': 'pg_replication_inactive_slots',
+    'query': """
+    SELECT
+        COUNT(*)
+        FROM pg_replication_slots
+        WHERE NOT active;
+    """.strip(),
+    'columns': [
+        {'name': 'postgresql.replication_slot.inactive_slots', 'type': 'gauge'},
+    ],
+}
+
+
 # Require PG14+
 QUERY_PG_REPLICATION_SLOTS_STATS = {
     'name': 'pg_replication_slots_stats',
