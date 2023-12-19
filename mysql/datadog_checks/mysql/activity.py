@@ -78,7 +78,7 @@ WHERE
     ) OR waits_a.event_id is NULL)
     -- We ignore rows without SQL text because there will be rows for background operations that do not have
     -- SQL text associated with it.
-    AND COALESCE(statement.sql_text, thread_a.PROCESSLIST_info) != "";
+    AND COALESCE(statement.sql_text, thread_a.PROCESSLIST_info) != '';
 """
 
 
