@@ -104,14 +104,14 @@ select
     LOWER(
         LTRIM(RTRIM(
             CASE 
-                WHEN CHARINDEX('CREATE PROCEDURE ', UPPER(lqt.text)) > 0 
-                    THEN SUBSTRING(lqt.text, CHARINDEX('CREATE PROCEDURE ', UPPER(lqt.text)) + LEN('CREATE PROCEDURE '), 
+                WHEN CHARINDEX('CREATE PROCEDURE ', UPPER(LTRIM(qt.text))) > 0 
+                    THEN SUBSTRING(LTRIM(qt.text), CHARINDEX('CREATE PROCEDURE ', UPPER(LTRIM(qt.text))) + LEN('CREATE PROCEDURE ') + 1, 
                                    PATINDEX('%[ ,'+CHAR(10)+CHAR(13)+']%', 
-                                            SUBSTRING(lqt.text, CHARINDEX('CREATE PROCEDURE ', UPPER(lqt.text)) + LEN('CREATE PROCEDURE '), 1000)) - 1)
-                WHEN CHARINDEX('CREATE PROC ', UPPER(lqt.text)) > 0 AND CHARINDEX('CREATE PROCEDURE ', UPPER(lqt.text)) = 0 
-                    THEN SUBSTRING(lqt.text, CHARINDEX('CREATE PROC ', UPPER(lqt.text)) + LEN('CREATE PROC '), 
+                                            SUBSTRING(LTRIM(qt.text), CHARINDEX('CREATE PROCEDURE ', UPPER(LTRIM(qt.text))) + LEN('CREATE PROCEDURE ') + 1, 1000)) - 1)
+                WHEN CHARINDEX('CREATE PROC ', UPPER(LTRIM(qt.text))) > 0 AND CHARINDEX('CREATE PROCEDURE ', UPPER(LTRIM(qt.text))) = 0 
+                    THEN SUBSTRING(LTRIM(qt.text), CHARINDEX('CREATE PROC ', UPPER(LTRIM(qt.text))) + LEN('CREATE PROC ') + 1, 
                                    PATINDEX('%[ ,'+CHAR(10)+CHAR(13)+']%', 
-                                            SUBSTRING(lqt.text, CHARINDEX('CREATE PROC ', UPPER(lqt.text)) + LEN('CREATE PROC '), 1000)) - 1)
+                                            SUBSTRING(LTRIM(qt.text), CHARINDEX('CREATE PROC ', UPPER(LTRIM(qt.text))) + LEN('CREATE PROC ') + 1, 1000)) - 1)
                 ELSE NULL
             END
         ))
@@ -155,14 +155,14 @@ select
     LOWER(
         LTRIM(RTRIM(
             CASE 
-                WHEN CHARINDEX('CREATE PROCEDURE ', UPPER(lqt.text)) > 0 
-                    THEN SUBSTRING(lqt.text, CHARINDEX('CREATE PROCEDURE ', UPPER(lqt.text)) + LEN('CREATE PROCEDURE '), 
+                WHEN CHARINDEX('CREATE PROCEDURE ', UPPER(LTRIM(qt.text))) > 0 
+                    THEN SUBSTRING(LTRIM(qt.text), CHARINDEX('CREATE PROCEDURE ', UPPER(LTRIM(qt.text))) + LEN('CREATE PROCEDURE ') + 1, 
                                    PATINDEX('%[ ,'+CHAR(10)+CHAR(13)+']%', 
-                                            SUBSTRING(lqt.text, CHARINDEX('CREATE PROCEDURE ', UPPER(lqt.text)) + LEN('CREATE PROCEDURE '), 1000)) - 1)
-                WHEN CHARINDEX('CREATE PROC ', UPPER(lqt.text)) > 0 AND CHARINDEX('CREATE PROCEDURE ', UPPER(lqt.text)) = 0 
-                    THEN SUBSTRING(lqt.text, CHARINDEX('CREATE PROC ', UPPER(lqt.text)) + LEN('CREATE PROC '), 
+                                            SUBSTRING(LTRIM(qt.text), CHARINDEX('CREATE PROCEDURE ', UPPER(LTRIM(qt.text))) + LEN('CREATE PROCEDURE ') + 1, 1000)) - 1)
+                WHEN CHARINDEX('CREATE PROC ', UPPER(LTRIM(qt.text))) > 0 AND CHARINDEX('CREATE PROCEDURE ', UPPER(LTRIM(qt.text))) = 0 
+                    THEN SUBSTRING(LTRIM(qt.text), CHARINDEX('CREATE PROC ', UPPER(LTRIM(qt.text))) + LEN('CREATE PROC ') + 1, 
                                    PATINDEX('%[ ,'+CHAR(10)+CHAR(13)+']%', 
-                                            SUBSTRING(lqt.text, CHARINDEX('CREATE PROC ', UPPER(lqt.text)) + LEN('CREATE PROC '), 1000)) - 1)
+                                            SUBSTRING(LTRIM(qt.text), CHARINDEX('CREATE PROC ', UPPER(LTRIM(qt.text))) + LEN('CREATE PROC ') + 1, 1000)) - 1)
                 ELSE NULL
             END
         ))
