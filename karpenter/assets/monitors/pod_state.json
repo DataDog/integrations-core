@@ -2,7 +2,7 @@
     "version": 2,
     "created_at": "2023-12-19",
     "last_updated_at": "2023-12-19",
-    "title": "High percentage of pods reporting in a non Running or non Succeeded state",,
+    "title": "High percentage of pods reporting in a non Running or non Succeeded state",
     "description": "Karpenter reports the states of pods that it manages. An elevated count of pods not in a Running or Succeeded state may indicate problems with Karpenter's provisioning or scaling activities, impacting the stability and performance of the Kubernetes environment.",
     "definition": {
         "id": 136666207,
