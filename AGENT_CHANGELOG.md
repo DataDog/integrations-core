@@ -15,7 +15,6 @@
 * HTTP [9.2.3](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
 * IBM Db2 [2.1.0](https://github.com/DataDog/integrations-core/blob/master/ibm_db2/CHANGELOG.md)
 * IBM i [2.0.1](https://github.com/DataDog/integrations-core/blob/master/ibm_i/CHANGELOG.md)
-* IBM WAS [3.1.1](https://github.com/DataDog/integrations-core/blob/master/ibm_was/CHANGELOG.md)
 * Kafka Consumer [4.1.4](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md)
 * Karpenter [1.0.0](https://github.com/DataDog/integrations-core/blob/master/karpenter/CHANGELOG.md)
 * Kubernetes API server metrics [4.1.0](https://github.com/DataDog/integrations-core/blob/master/kube_apiserver_metrics/CHANGELOG.md)
@@ -41,6 +40,12 @@
 * Windows Service [4.7.1](https://github.com/DataDog/integrations-core/blob/master/windows_service/CHANGELOG.md)
 * Yarn [5.1.0](https://github.com/DataDog/integrations-core/blob/master/yarn/CHANGELOG.md)
 * ZooKeeper [4.4.0](https://github.com/DataDog/integrations-core/blob/master/zk/CHANGELOG.md)
+
+## Datadog Agent version [7.49.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7491)
+
+* Datadog Checks Base [34.0.3](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* IBM WAS [3.1.1](https://github.com/DataDog/integrations-core/blob/master/ibm_was/CHANGELOG.md)
+* SQL Server [15.0.3](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
 
 ## Datadog Agent version [7.49.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7490)
 
