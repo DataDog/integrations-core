@@ -151,6 +151,7 @@ def test_collect_load_activity(
     # the second query should be fred's, which is currently blocked on
     # bob who is holding a table lock
     blocked_row = event['sqlserver_activity'][1]
+    print(blocked_row)
     # assert the data that was collected is correct
     assert blocked_row['user_name'] == "fred", "incorrect user_name"
     assert blocked_row['session_status'] == "running", "incorrect session_status"
@@ -171,6 +172,7 @@ def test_collect_load_activity(
     # assert that the current timestamp is being collected as an ISO timestamp with TZ info
     assert parser.isoparse(blocked_row['now']).tzinfo, "current timestamp not formatted correctly"
     assert blocked_row["query_start"], "missing query_start"
+    assert blocked_row["is_user_process"], "missing is_user_process"
     assert parser.isoparse(blocked_row["query_start"]).tzinfo, "query_start timestamp not formatted correctly"
     for r in DM_EXEC_REQUESTS_COLS:
         assert r in blocked_row
@@ -304,6 +306,9 @@ def test_activity_nested_blocking_transactions(
     assert root_blocker["client_port"]
     assert root_blocker["client_address"]
     assert root_blocker["host_name"]
+    assert root_blocker["transaction_state"]
+    assert root_blocker["transaction_start"]
+    assert root_blocker["transaction_type"]
     # Expect to capture the query signature for the root blocker
     # query text is not captured from the req dmv
     # but available in the connection dmv with most_recent_sql_handle
@@ -331,6 +336,10 @@ def test_activity_nested_blocking_transactions(
     assert tx2["query_start"]
     assert tx2["query_hash"]
     assert tx2["query_plan_hash"]
+    assert tx2["transaction_state"]
+    assert tx2["transaction_start"]
+    assert tx2["transaction_type"]
+
     assert tx3["user_name"] == "fred"
     assert tx3["database_name"] == "datadog_test"
     assert tx3["last_request_start_time"]
@@ -342,6 +351,9 @@ def test_activity_nested_blocking_transactions(
     assert tx3["query_start"]
     assert tx3["query_hash"]
     assert tx3["query_plan_hash"]
+    assert tx3["transaction_state"]
+    assert tx3["transaction_start"]
+    assert tx3["transaction_type"]
 
     assert isinstance(tx2["query_hash"], str)
     assert isinstance(tx2["query_plan_hash"], str)

@@ -63,14 +63,26 @@ SELECT
     c.client_net_address as client_address,
     sess.host_name as host_name,
     sess.program_name as program_name,
+    sess.is_user_process as is_user_process,
+    CONVERT(
+        NVARCHAR, TODATETIMEOFFSET(at.transaction_begin_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
+    ) as transaction_start,
+    at.transaction_state as transaction_state,
+    at.transaction_type as transaction_type,
     {exec_request_columns}
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
         ON sess.session_id = c.session_id
     INNER JOIN sys.dm_exec_requests req
         ON c.connection_id = req.connection_id
+    LEFT JOIN sys.dm_tran_session_transactions st
+        ON sess.session_id = st.session_id
+    LEFT JOIN sys.dm_tran_active_transactions at
+        ON st.transaction_id = at.transaction_id
     CROSS APPLY sys.dm_exec_sql_text(req.sql_handle) qt
-WHERE sess.session_id != @@spid AND sess.status != 'sleeping'
+WHERE
+    sess.session_id != @@spid AND
+    sess.status != 'sleeping'
 """,
 ).strip()
 
@@ -97,10 +109,20 @@ SELECT
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
-    sess.program_name as program_name
+    sess.program_name as program_name,
+    sess.is_user_process as is_user_process,
+    CONVERT(
+        NVARCHAR, TODATETIMEOFFSET(at.transaction_begin_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
+    ) as transaction_start,
+    at.transaction_state as transaction_state,
+    at.transaction_type as transaction_type
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
         ON sess.session_id = c.session_id
+    LEFT JOIN sys.dm_tran_session_transactions st
+        ON sess.session_id = st.session_id
+    LEFT JOIN sys.dm_tran_active_transactions at
+        ON st.transaction_id = at.transaction_id
     CROSS APPLY sys.dm_exec_sql_text(c.most_recent_sql_handle) lqt
 WHERE sess.status = 'sleeping'
     AND sess.session_id IN ({blocking_session_ids})
@@ -237,7 +259,7 @@ class SqlserverActivity(DBMAsyncJob):
                 self._check.histogram(
                     "dd.sqlserver.activity.collect_activity.max_bytes.rows_dropped",
                     len(normalized_rows) - len(rows),
-                    **self._check.debug_stats_kwargs()
+                    **self._check.debug_stats_kwargs(),
                 )
                 self._check.warning(
                     "Exceeded the limit of activity rows captured (%s of %s rows included). "
@@ -262,7 +284,7 @@ class SqlserverActivity(DBMAsyncJob):
         available_columns = [c for c in all_expected_columns if c in all_columns]
         missing_columns = set(all_expected_columns) - set(available_columns)
         if missing_columns:
-            self._log.debug("missing the following expected columns from sys.dm_exec_requests: %s", missing_columns)
+            self._log.warning("missing the following expected columns from sys.dm_exec_requests: %s", missing_columns)
         self._log.debug("found available sys.dm_exec_requests columns: %s", available_columns)
         return available_columns
 
