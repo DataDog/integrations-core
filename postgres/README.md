@@ -136,7 +136,7 @@ To configure this check for an Agent running on a host:
       port: 5432
       username: datadog
       password: '<PASSWORD>'
-    - host: example-service–replica-1.example-host.com
+    - host: example-service-replica-1.example-host.com
       port: 5432
       username: datadog
       password: '<PASSWORD>'
