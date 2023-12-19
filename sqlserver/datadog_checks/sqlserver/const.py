@@ -247,3 +247,5 @@ TEMPDB_FILE_SPACE_USAGE_METRICS = [
     ),
     ('sqlserver.tempdb.file_space_usage.mixed_extent_space', 'sys.dm_db_file_space_usage', 'mixed_extent_space'),
 ]
+
+PROC_CHAR_LIMIT = 500

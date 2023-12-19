@@ -190,6 +190,7 @@ class InstanceConfig(BaseModel):
     server_version: Optional[str] = None
     service: Optional[str] = None
     stored_procedure: Optional[str] = None
+    stored_procedure_characters_limit: Optional[int] = None
     tags: Optional[tuple[str, ...]] = None
     use_global_custom_queries: Optional[str] = None
     username: Optional[str] = None
