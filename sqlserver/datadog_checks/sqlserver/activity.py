@@ -14,7 +14,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.utils import PROC_CHAR_LIMIT, extract_sql_comments_and_procedure_name
+from datadog_checks.sqlserver.utils import PROC_CHAR_LIMIT, extract_sql_comments
 
 try:
     import datadog_agent
@@ -59,6 +59,22 @@ SELECT
         ELSE req.statement_end_offset END
             - req.statement_start_offset) / 2) + 1) AS statement_text,
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
+    PATINDEX('%[ ,'+CHAR(10)+CHAR(13)+']%', SUBSTRING(qt.text, CHARINDEX('CREATE PROCEDURE ', UPPER(qt.text)) + LEN('CREATE PROCEDURE '), 1000)) as create_proc_index,
+    LOWER(
+        LTRIM(RTRIM(
+            CASE 
+                WHEN CHARINDEX('CREATE PROCEDURE ', UPPER(qt.text)) > 0 
+                    THEN SUBSTRING(qt.text, CHARINDEX('CREATE PROCEDURE ', UPPER(qt.text)) + LEN('CREATE PROCEDURE '), 
+                                   PATINDEX('%[ ,'+CHAR(10)+CHAR(13)+']%', 
+                                            SUBSTRING(qt.text, CHARINDEX('CREATE PROCEDURE ', UPPER(qt.text)) + LEN('CREATE PROCEDURE '), 1000)) - 1)
+                WHEN CHARINDEX('CREATE PROC ', UPPER(qt.text)) > 0 AND CHARINDEX('CREATE PROCEDURE ', UPPER(qt.text)) = 0 
+                    THEN SUBSTRING(qt.text, CHARINDEX('CREATE PROC ', UPPER(qt.text)) + LEN('CREATE PROC '), 
+                                   PATINDEX('%[ ,'+CHAR(10)+CHAR(13)+']%', 
+                                            SUBSTRING(qt.text, CHARINDEX('CREATE PROC ', UPPER(qt.text)) + LEN('CREATE PROC '), 1000)) - 1)
+                ELSE NULL
+            END
+        ))
+    ) AS procedure_name,
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
@@ -94,6 +110,22 @@ SELECT
     sess.status as session_status,
     lqt.text as statement_text,
     SUBSTRING(lqt.text, 1, {proc_char_limit}) as text,
+    PATINDEX('%[ ,'+CHAR(10)+CHAR(13)+']%', SUBSTRING(lqt.text, CHARINDEX('CREATE PROCEDURE ', UPPER(lqt.text)) + LEN('CREATE PROCEDURE '), 1000)) as create_proc_index,
+    LOWER(
+        LTRIM(RTRIM(
+            CASE 
+                WHEN CHARINDEX('CREATE PROCEDURE ', UPPER(lqt.text)) > 0 
+                    THEN SUBSTRING(lqt.text, CHARINDEX('CREATE PROCEDURE ', UPPER(lqt.text)) + LEN('CREATE PROCEDURE '), 
+                                   PATINDEX('%[ ,'+CHAR(10)+CHAR(13)+']%', 
+                                            SUBSTRING(lqt.text, CHARINDEX('CREATE PROCEDURE ', UPPER(lqt.text)) + LEN('CREATE PROCEDURE '), 1000)) - 1)
+                WHEN CHARINDEX('CREATE PROC ', UPPER(lqt.text)) > 0 AND CHARINDEX('CREATE PROCEDURE ', UPPER(lqt.text)) = 0 
+                    THEN SUBSTRING(lqt.text, CHARINDEX('CREATE PROC ', UPPER(lqt.text)) + LEN('CREATE PROC '), 
+                                   PATINDEX('%[ ,'+CHAR(10)+CHAR(13)+']%', 
+                                            SUBSTRING(lqt.text, CHARINDEX('CREATE PROC ', UPPER(lqt.text)) + LEN('CREATE PROC '), 1000)) - 1)
+                ELSE NULL
+            END
+        ))
+    ) AS procedure_name,
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
@@ -277,7 +309,9 @@ class SqlserverActivity(DBMAsyncJob):
         try:
             statement = obfuscate_sql_with_metadata(row['statement_text'], self._config.obfuscator_options)
             # sqlserver doesn't have a boolean data type so convert integer to boolean
-            comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
+            row['is_proc'] = True if row.get('procedure_name') else False
+            comments, _ = extract_sql_comments(row['text'])
+            print(row)
             if row['is_proc'] and 'text' in row:
                 try:
                     procedure_statement = obfuscate_sql_with_metadata(row['text'], self._config.obfuscator_options)
@@ -297,8 +331,6 @@ class SqlserverActivity(DBMAsyncJob):
             row['dd_tables'] = metadata.get('tables', None)
             row['dd_comments'] = comments
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
-            if procedure_name:
-                row['procedure_name'] = procedure_name
         except Exception as e:
             if self._config.log_unobfuscated_queries:
                 self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['statement_text'], e)

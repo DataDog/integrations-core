@@ -22,7 +22,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.utils import PROC_CHAR_LIMIT, extract_sql_comments_and_procedure_name
+from datadog_checks.sqlserver.utils import PROC_CHAR_LIMIT, extract_sql_comments
 
 try:
     import datadog_agent
@@ -101,6 +101,21 @@ select
         ELSE statement_end_offset END
             - statement_start_offset) / 2) + 1) AS statement_text,
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
+    LOWER(
+        LTRIM(RTRIM(
+            CASE 
+                WHEN CHARINDEX('CREATE PROCEDURE ', UPPER(lqt.text)) > 0 
+                    THEN SUBSTRING(lqt.text, CHARINDEX('CREATE PROCEDURE ', UPPER(lqt.text)) + LEN('CREATE PROCEDURE '), 
+                                   PATINDEX('%[ ,'+CHAR(10)+CHAR(13)+']%', 
+                                            SUBSTRING(lqt.text, CHARINDEX('CREATE PROCEDURE ', UPPER(lqt.text)) + LEN('CREATE PROCEDURE '), 1000)) - 1)
+                WHEN CHARINDEX('CREATE PROC ', UPPER(lqt.text)) > 0 AND CHARINDEX('CREATE PROCEDURE ', UPPER(lqt.text)) = 0 
+                    THEN SUBSTRING(lqt.text, CHARINDEX('CREATE PROC ', UPPER(lqt.text)) + LEN('CREATE PROC '), 
+                                   PATINDEX('%[ ,'+CHAR(10)+CHAR(13)+']%', 
+                                            SUBSTRING(lqt.text, CHARINDEX('CREATE PROC ', UPPER(lqt.text)) + LEN('CREATE PROC '), 1000)) - 1)
+                ELSE NULL
+            END
+        ))
+    ) AS procedure_name,
     encrypted as is_encrypted,
     s.* from qstats_aggr_split s
     cross apply sys.dm_exec_sql_text(s.plan_handle) qt
@@ -137,6 +152,21 @@ select
         ELSE statement_end_offset
     END - statement_start_offset) / 2) + 1) AS statement_text,
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
+    LOWER(
+        LTRIM(RTRIM(
+            CASE 
+                WHEN CHARINDEX('CREATE PROCEDURE ', UPPER(lqt.text)) > 0 
+                    THEN SUBSTRING(lqt.text, CHARINDEX('CREATE PROCEDURE ', UPPER(lqt.text)) + LEN('CREATE PROCEDURE '), 
+                                   PATINDEX('%[ ,'+CHAR(10)+CHAR(13)+']%', 
+                                            SUBSTRING(lqt.text, CHARINDEX('CREATE PROCEDURE ', UPPER(lqt.text)) + LEN('CREATE PROCEDURE '), 1000)) - 1)
+                WHEN CHARINDEX('CREATE PROC ', UPPER(lqt.text)) > 0 AND CHARINDEX('CREATE PROCEDURE ', UPPER(lqt.text)) = 0 
+                    THEN SUBSTRING(lqt.text, CHARINDEX('CREATE PROC ', UPPER(lqt.text)) + LEN('CREATE PROC '), 
+                                   PATINDEX('%[ ,'+CHAR(10)+CHAR(13)+']%', 
+                                            SUBSTRING(lqt.text, CHARINDEX('CREATE PROC ', UPPER(lqt.text)) + LEN('CREATE PROC '), 1000)) - 1)
+                ELSE NULL
+            END
+        ))
+    ) AS procedure_name,
     encrypted as is_encrypted,
     s.* from qstats_aggr_split s
     cross apply sys.dm_exec_sql_text(s.plan_handle) qt
@@ -312,7 +342,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 # Attempt to obfuscate SQL statement with metadata
                 procedure_statement = None
                 statement = obfuscate_sql_with_metadata(row['statement_text'], self._config.obfuscator_options)
-                comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
+                row['is_proc'] = True if row['procedure_name'] else False
+                comments, _ = extract_sql_comments(row['text'])
 
                 if row['is_proc']:
                     procedure_statement = obfuscate_sql_with_metadata(row['text'], self._config.obfuscator_options)
@@ -337,8 +368,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             if procedure_statement:
                 row['procedure_text'] = procedure_statement['query']
                 row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
-            if procedure_name:
-                row['procedure_name'] = procedure_name
 
             row['text'] = obfuscated_statement
             row['query_signature'] = compute_sql_signature(obfuscated_statement)

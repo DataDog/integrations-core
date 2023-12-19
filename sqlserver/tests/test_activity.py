@@ -590,6 +590,7 @@ def test_activity_stored_procedure_failed_to_obfuscate(dbm_instance, datadog_age
                 "statement_text": statement_text,
                 "text": procedure_text,
                 "query_start": new_time(),
+                "procedure_name": "dbo.sp_test",
             },
         ]
         # the first call to obfuscate query text will succeed
