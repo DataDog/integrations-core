@@ -647,9 +647,13 @@ class SQLServer(AgentCheck):
                 )
                 try:
                     cursor.execute(BASE_NAME_QUERY, candidates)
-                    base_name = cursor.fetchone().counter_name.strip()
-                    self.log.debug("Got base metric: %s for metric: %s", base_name, counter_name)
-                    self._sql_counter_types[counter_name] = (sql_counter_type, base_name)
+                    row = cursor.fetchone()
+                    if row:
+                        base_name = row.counter_name.strip()
+                        self.log.debug("Got base metric: %s for metric: %s", base_name, counter_name)
+                        self._sql_counter_types[counter_name] = (sql_counter_type, base_name)
+                    else:
+                        self.log.warning("Could not get counter_name of base for metric: %s", counter_name)
                 except Exception as e:
                     self.log.warning("Could not get counter_name of base for metric: %s", e)
 

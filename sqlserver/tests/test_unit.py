@@ -293,7 +293,14 @@ def test_SqlDbIndexUsageStats_fetch_metric(col_val_row_1, col_val_row_2, col_val
         assert errors < 1
 
 
-def test_SqlFractionMetric_base(caplog):
+@pytest.mark.parametrize(
+    'base_name',
+    [
+        pytest.param('Buffer cache hit ratio base', id='base_name valid'),
+        pytest.param(None, id='base_name None'),
+    ]
+)
+def test_SqlFractionMetric_base(caplog, base_name):
     Row = namedtuple('Row', ['counter_name', 'cntr_type', 'cntr_value', 'instance_name', 'object_name'])
     fetchall_results = [
         Row('Buffer cache hit ratio', 537003264, 33453, '', 'SQLServer:Buffer Manager'),
@@ -314,22 +321,25 @@ def test_SqlFractionMetric_base(caplog):
             'tags': ['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname'],
             'hostname': 'stubbed.hostname',
         },
-        base_name='Buffer cache hit ratio base',
+        base_name=base_name,
         report_function=report_function,
         column=None,
         logger=mock.MagicMock(),
     )
     results_rows, results_cols = SqlFractionMetric.fetch_all_values(
-        mock_cursor, ['Buffer cache hit ratio', 'Buffer cache hit ratio base'], mock.mock.MagicMock()
+        mock_cursor, ['Buffer cache hit ratio', base_name], mock.mock.MagicMock()
     )
     metric_obj.fetch_metric(results_rows, results_cols)
-    report_function.assert_called_with(
-        'sqlserver.buffer.cache_hit_ratio',
-        0.9976737943992127,
-        raw=True,
-        hostname='stubbed.hostname',
-        tags=['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname'],
-    )
+    if base_name:
+        report_function.assert_called_with(
+            'sqlserver.buffer.cache_hit_ratio',
+            0.9976737943992127,
+            raw=True,
+            hostname='stubbed.hostname',
+            tags=['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname'],
+        )
+    else:
+        report_function.assert_not_called()
 
 
 def test_SqlFractionMetric_group_by_instance(caplog):
