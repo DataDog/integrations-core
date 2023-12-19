@@ -139,17 +139,14 @@ exclude = ["openmetrics"]
 [overrides.validate.metrics]
 exclude = [
     'disk',
-    'go_expvar',
     'go-metro',
-    'http',
+    'http_check',
     'kubelet',
-    'kubernetes',
     'kubernetes_state',
     'network',
     'ntp',
     'process',
-    'riak_cs',
     'system_core',
     'system_swap',
-    'tcp',
+    'tcp_check',
 ]

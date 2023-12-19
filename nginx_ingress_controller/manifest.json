@@ -57,7 +57,7 @@
       "bot_errors": "assets/saved_views/bot_errors.json"
     },
     "logs": {
-      "source": "nginx_ingress_controller"
+      "source": "nginx-ingress-controller"
     }
   }
 }

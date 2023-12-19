@@ -328,11 +328,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     1,
                     **self._check.debug_stats_kwargs(tags=["error:obfuscate-query-{}".format(type(e))])
                 )
-                self._check.count(
-                    "dd.sqlserver.obfuscation.error",
-                    1,
-                    **self._check.debug_stats_kwargs(tags=["error:{}".format(type(e)), "error_msg:{}".format(e)])
-                )
                 continue
 
             # Extract obfuscated statement and update row fields
@@ -517,7 +512,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     else:
                         self.log.debug("Failed to obfuscate plan | %s", context)
                     collection_errors = [{'code': "obfuscate_xml_plan_error", 'message': str(e)}]
-                    self._config.count(
+                    self._check.count(
                         "dd.sqlserver.statements.error",
                         1,
                         **self._check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(e))])

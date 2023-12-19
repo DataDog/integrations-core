@@ -69,6 +69,23 @@ GRANT EXECUTE on bobProc to bob;
 GRANT EXECUTE on bobProc to fred;
 GO
 
+CREATE PROCEDURE procedureWithLargeCommment AS
+/* 
+author: Datadog 
+usage: some random comments
+test: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+description: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+this comment has no actual meanings, just to test large sp with truncation
+the quick brown fox jumps over the lazy dog, the quick brown fox jumps over the lazy dog, the quick brown fox jumps over the lazy dog
+*/
+BEGIN
+    SELECT * FROM ϑings;
+END;
+GO
+GRANT EXECUTE on procedureWithLargeCommment to bob;
+GRANT EXECUTE on procedureWithLargeCommment to fred;
+GO
+
 -- create test procedure for metrics loading feature
 USE master;
 GO
