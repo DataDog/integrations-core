@@ -47,7 +47,7 @@
       "source": "karpenter"
     },
     "monitors": {
-      "pod states": "assets/pod_state.json"
+      "pod states": "assets/monitors/pod_state.json"
     }
   },
   "author": {

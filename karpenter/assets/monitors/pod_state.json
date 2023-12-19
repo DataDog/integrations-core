@@ -8,12 +8,12 @@
         "id": 136665031,
         "name": "High number of pods reporting in a non Running or non Succeeded state",
         "type": "query alert",
-        "query": "min(last_30m):sum:karpenter.pods.state{NOT phase:running or NOT phase:running} by {namespace,provisioner,host} > 20",
+        "query": "min(last_30m):sum:karpenter.pods.state{NOT phase:running or NOT phase:running} by {namespace,provisioner,host} > 15",
         "message": "{{#is_alert}} \nKarpenter is reporting a high number of pods not in Running/Succeeded state on host: {{host.name}}.\n{{value}} number of pods by {{provisioner.name}} in {{namespace.name}} namespace are in a non running/succeeded state in the last 30 minutes.\n{{/is_alert}}\n\n{{#is_recovery}}\nKarpenter is reporting that number of pods in non Running/Succeeded state are back below the trigger threshold of {{threshold}} in the last 30 minutes\n{{/is_recovery}}",
         "tags": [],
         "options": {
             "thresholds": {
-                "critical": 10
+                "critical": 15
             },
             "notify_audit": false,
             "include_tags": true,
