@@ -230,10 +230,20 @@ class SilkCheck(AgentCheck):
             self.log.error("Unable to fetch events: %s", str(e))
 
         # Update latest event query to last event time
+        # The logic here is purposely verbose in logging for troubleshooting purposes
         if self.extend_events_window:
             if len(raw_events) > 0:
-                self.latest_event_query = ceil(raw_events[-1].get('timestamp'))
-                self.log.debug("Update next event query start timestamp to %s", self.latest_event_query)
+                last_event_ts = raw_events[-1].get('timestamp')
+                self.log.debug("Update next event query start timestamp to %s", last_event_ts)
+                if last_event_ts > self.latest_event_query:
+                    self.latest_event_query = ceil(last_event_ts)
+                else:
+                    self.log.debug(
+                        "Last event timestamp %s is less than current query window start %s. Keeping the same query window.",
+                        last_event_ts,
+                        self.latest_event_query,
+                    )
+                    self.latest_event_query = collect_events_timestamp
             else:
                 self.log.debug(
                     "No events found in this query window. Keeping the same query window. Start: %s, end: %s",
