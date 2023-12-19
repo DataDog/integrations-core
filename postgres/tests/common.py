@@ -275,7 +275,7 @@ def check_replication_slots(aggregator, expected_tags, count=1):
 def check_inactive_replication_slots(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 10.0:
         return
-    for metric_name in _iterate_metric_name(QUERY_PG_REPLICATION_SLOTS):
+    for metric_name in _iterate_metric_name(QUERY_PG_REPLICATION_INACTIVE_SLOTS):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
