@@ -334,7 +334,7 @@ instances:
 
     ## @param stored_procedure_characters_limit - integer - optional - default: 500
     ## Limit the number of characters of the text of a stored procedure that is collected.
-    ## The characters limit is applicable to both query metrics and query activity.
+    ## The characters limit is applicable to both query metrics and query samples.
     ## Increasing this value will increase the amount of data collected from the database,
     ## and increase the amount of data sent to Datadog.
     #
