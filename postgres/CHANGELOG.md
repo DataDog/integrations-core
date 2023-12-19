@@ -8,6 +8,10 @@
 
 * Updated dependencies. ([#16154](https://github.com/DataDog/integrations-core/pull/16154))
 
+***Added***:
+
+* Add inactive replication slot count metric ([#16463](https://github.com/DataDog/integrations-core/pull/16463))
+
 ***Fixed***:
 
 * Remove an unnecessary print statement ([#15594](https://github.com/DataDog/integrations-core/pull/15594))
