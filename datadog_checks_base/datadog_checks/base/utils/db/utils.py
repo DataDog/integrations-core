@@ -19,6 +19,7 @@ from cachetools import TTLCache
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
+from datadog_checks.base.utils.agent.utils import should_profile_memory
 from datadog_checks.base.utils.db.types import Transformer  # noqa: F401
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracing import INTEGRATION_TRACING_SERVICE_NAME, tracing_enabled
@@ -303,7 +304,22 @@ class DBMAsyncJob(object):
                         "dd.{}.async_job.inactive_stop".format(self._dbms), 1, tags=self._job_tags, raw=True
                     )
                     break
-                self._run_job_rate_limited()
+                if 'profile_memory' in self._check.init_config or (
+                    datadog_agent.tracemalloc_enabled() and should_profile_memory(datadog_agent, self._check.name)
+                ):
+                    from datadog_checks.base.utils.agent.memory import profile_memory
+
+                    metrics = profile_memory(
+                        self._run_job_rate_limited, self._check.init_config, namespaces=[self._check.name, self._job_name],
+                    )
+
+                    tags = self._check.get_debug_metric_tags()
+                    tags.append("job_name:{}".format(self._job_name))
+                    tags.extend(self._check.instance.get('__memory_profiling_tags', []))
+                    for m in metrics:
+                        self._check.gauge(m.name, m.value, tags=tags, raw=True)
+                else:
+                    self._run_job_rate_limited()
         except Exception as e:
             if self._cancel_event.isSet():
                 # canceling can cause exceptions if the connection is closed the middle of the check run

@@ -9,6 +9,7 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from ipaddress import IPv4Address
 
 import mock
+from datadog_checks.base.utils.agent.memory import MemoryProfileMetric
 import pytest
 
 from datadog_checks.base import AgentCheck
@@ -259,6 +260,14 @@ def test_dbm_async_job_inactive_stop(aggregator):
     job.run_job_loop([])
     job._job_loop_future.result()
     aggregator.assert_metric("dd.test-dbms.async_job.inactive_stop", tags=['job:test-job'])
+
+
+def test_dbm_async_job_profile_memory(aggregator):
+    check = AgentCheck(name="testcheck", init_config={"profile_memory": "/tmp"}, instance={})
+    job = TestJob(check)
+    job.run_job_loop([])
+    dummy_memory_profile_metric = MemoryProfileMetric('check_run_alloc', 0)
+    aggregator.assert_metric(dummy_memory_profile_metric.name)
 
 
 @pytest.mark.parametrize(
