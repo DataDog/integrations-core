@@ -15,7 +15,7 @@
 * Submit boolean properties as metric values ([#16315](https://github.com/DataDog/integrations-core/pull/16315))
 * Use correct size parameters when creating batches ([#16380](https://github.com/DataDog/integrations-core/pull/16380))
 
-## 7.2.0 / 2023-11-07
+## 7.2.0 / 2023-11-07 / Agent 7.50.0
 
 ***Added***:
 
