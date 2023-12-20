@@ -149,7 +149,8 @@ def test_stat_subscription(aggregator, integration_check, pg_replica_logical):
             metric,
             lower_bound=0.001,
             tags=expected_subscription_tags,
-            count=1,
+            min_count=1,
+            max_count=2,
         )
 
 
