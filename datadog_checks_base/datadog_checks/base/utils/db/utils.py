@@ -319,7 +319,6 @@ class DBMAsyncJob(object):
                     tags.extend(self._check.instance.get('__memory_profiling_tags', []))
                     for m in metrics:
                         self._check.gauge(m.name, m.value, tags=tags, raw=True)
-                    self._check.count("dd.{}.async_job.run".format(self._dbms), 1, tags=self._job_tags, raw=True)
                 else:
                     self._run_job_rate_limited()
         except Exception as e:

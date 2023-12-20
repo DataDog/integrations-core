@@ -261,18 +261,6 @@ def test_dbm_async_job_inactive_stop(aggregator):
     aggregator.assert_metric("dd.test-dbms.async_job.inactive_stop", tags=['job:test-job'])
 
 
-def test_dbm_async_job_profile_memory(aggregator):
-    check = AgentCheck(name="testcheck", init_config={"profile_memory": "/tmp"}, instances=[{}])
-    # the job will run for 1 second and then stop due to inactive,
-    # but this is enough to test the memory profiling
-    job = TestJob(check, rate_limit=10, min_collection_interval=1)
-    job.run_job_loop([])
-    job._job_loop_future.result()
-    # memory profile metrics are ignored when running in tests
-    # we will assert the async_job.run metric instead
-    aggregator.assert_metric("dd.test-dbms.async_job.run", tags=['job:test-job'])
-
-
 @pytest.mark.parametrize(
     "input",
     [
