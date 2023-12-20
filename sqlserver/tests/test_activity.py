@@ -608,17 +608,27 @@ def test_activity_stored_procedure_failed_to_obfuscate(dbm_instance, datadog_age
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_activity_stored_procedure_truncated(
+@pytest.mark.parametrize(
+    "stored_procedure_characters_limit",
+    [
+        500,
+        1000,
+        2000,
+    ],
+)
+def test_activity_stored_procedure_characters_limit(
     aggregator,
     instance_docker,
     dd_run_check,
     dbm_instance,
     datadog_agent,
+    stored_procedure_characters_limit,
 ):
+    dbm_instance['stored_procedure_characters_limit'] = stored_procedure_characters_limit
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     def _obfuscate_sql(sql_query, options=None):
-        if "PROCEDURE procedureWithLargeCommment" in sql_query:
+        if "PROCEDURE procedureWithLargeCommment" in sql_query and len(sql_query) >= stored_procedure_characters_limit:
             raise Exception("failed to obfuscate")
         return json.dumps({'query': sql_query, 'metadata': {}})
 
@@ -681,6 +691,10 @@ def test_activity_stored_procedure_truncated(
     assert matching_activity[0]['is_proc'] is True
     assert matching_activity[0]['procedure_name'].lower() == "procedurewithlargecommment"
     assert matching_activity[0]['text'] == "SELECT * FROM ϑings"
+    # this is a hacky way of asserting that the procedure signature is present
+    # when stored_procedure_characters_limit is set to a large value
+    if stored_procedure_characters_limit > 500:
+        assert "procedure_signature" in matching_activity[0]
 
 
 @pytest.mark.parametrize(

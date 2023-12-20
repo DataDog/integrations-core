@@ -14,7 +14,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.utils import PROC_CHAR_LIMIT, extract_sql_comments_and_procedure_name
+from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name
 
 try:
     import datadog_agent
@@ -193,7 +193,8 @@ class SqlserverActivity(DBMAsyncJob):
     def _get_idle_blocking_sessions(self, cursor, blocking_session_ids):
         # The IDLE_BLOCKING_SESSIONS_QUERY contains minimum information on idle blocker
         query = IDLE_BLOCKING_SESSIONS_QUERY.format(
-            blocking_session_ids=",".join(map(str, blocking_session_ids)), proc_char_limit=PROC_CHAR_LIMIT
+            blocking_session_ids=",".join(map(str, blocking_session_ids)),
+            proc_char_limit=self._config.stored_procedure_characters_limit,
         )
         self.log.debug("Running query [%s]", query)
         cursor.execute(query)
@@ -206,7 +207,7 @@ class SqlserverActivity(DBMAsyncJob):
         self.log.debug("collecting sql server activity")
         query = ACTIVITY_QUERY.format(
             exec_request_columns=', '.join(['req.{}'.format(r) for r in exec_request_columns]),
-            proc_char_limit=PROC_CHAR_LIMIT,
+            proc_char_limit=self._config.stored_procedure_characters_limit,
         )
         self.log.debug("Running query [%s]", query)
         cursor.execute(query)

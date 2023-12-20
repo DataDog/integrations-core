@@ -332,6 +332,14 @@ instances:
         #
         # collection_interval: 10
 
+    ## @param stored_procedure_characters_limit - integer - optional - default: 500
+    ## Limit the number of characters of the text of a stored procedure that is collected.
+    ## The characters limit is applicable to both query metrics and query samples.
+    ## Please be aware that increasing this value may affect performance,
+    ## as more data will be gathered from the database and sent to Datadog.
+    #
+    # stored_procedure_characters_limit: 500
+
     ## This block defines the configuration for AWS RDS and Aurora instances.
     ##
     ## Complete this section if you have installed the Datadog AWS Integration
