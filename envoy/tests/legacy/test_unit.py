@@ -256,7 +256,12 @@ def test_metadata_not_collected(datadog_agent, check):
 @pytest.mark.parametrize(
     ('fixture_file', 'metrics', 'standard_tags', 'additional_tags'),
     [
-        ('./legacy/stat_prefix', EXT_METRICS, ['cluster_name:foo', 'envoy_cluster:foo'], ['stat_prefix:bar']),
+        (
+            './legacy/stat_prefix',
+            EXT_METRICS,
+            ['cluster_name:foo', 'envoy_cluster:foo'],
+            ['stat_prefix:bar'],
+        ),
         (
             './legacy/rbac_metric.txt',
             RBAC_METRICS,
@@ -269,7 +274,7 @@ def test_metadata_not_collected(datadog_agent, check):
         "rbac_prefix_shadow",
     ],
 )
-def test_stats_prefix_ext_auth(
+def test_stats_prefix_optional_tags(
     aggregator,
     fixture_path,
     mock_http_response,
@@ -281,7 +286,7 @@ def test_stats_prefix_ext_auth(
     additional_tags,
 ):
     instance = INSTANCES['main']
-    tags = standard_tags
+    tags = standard_tags.append('endpoint:{}'.format(instance["stats_url"]))
     tags_prefix = tags + additional_tags
     c = check(instance)
     mock_http_response(file_path=fixture_path(fixture_file)).return_value
