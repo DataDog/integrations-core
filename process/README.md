@@ -44,7 +44,7 @@ Run the [Agent's status subcommand][5] and look for `process` under the Checks s
 The following metrics are not available on Linux or macOS:
 - Process I/O metrics are **not** available on Linux or macOS since the files that the Agent reads (`/proc//io`) are only readable by the process's owner. For more information, [read the Agent FAQ][6].
 
-The following metrics are not available on [Windows][12]:
+The following metrics are not available on Windows:
 - `system.cpu.iowait`
 - `system.processes.mem.page_faults.minor_faults`
 - `system.processes.mem.page_faults.children_minor_faults`
@@ -53,7 +53,7 @@ The following metrics are not available on [Windows][12]:
 
 **Note**: Use a [WMI check][11] to gather page fault metrics on Windows.
 
-**Note**: In v6.11+, the Agent runs as `ddagentuser` instead of `Local System`. Because of this, it does not have access to the full command line of processes running under other users and to the user of other users' processes. This causes the following options of the check to not work:
+**Note**: In v6.11+ on Windows, the Agent runs as `ddagentuser` instead of `Local System`. Because of [this][12], it does not have access to the full command line of processes running under other users and to the user of other users' processes. This causes the following options of the check to not work:
 - `exact_match` when set to `false`
 - `user`, which allows selecting processes that belong to a specific user
 
