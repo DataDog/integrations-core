@@ -28,11 +28,11 @@ def test_success(aggregator, check, dd_run_check):
         if collected_metrics and collected_metrics[0].name not in UNIQUE_METRICS:
             expected_tags = [t for t in METRICS[metric]['tags'] if t]
             for tag_set in expected_tags:
-            # Iterate over the expected tags and check that they're present in the collected_metric's tags.
-            # We iterate over each collected metric and we see if the metric has more than 1 tag. If it does, we
-            # iterate over each tag attached to the metric to see if the tags are in the tag_set of expected_tags.
-            # Since an endpoint tag is added to each metric, checking for the metric specific tags parsed from the
-            # metric, should only be done if the metric has more tags than just the endpoint tag.
+                # Iterate over the expected tags and check that they're present in the collected_metric's tags.
+                # We iterate over each collected metric and we see if the metric has more than 1 tag. If it does, we
+                # iterate over each tag attached to the metric to see if the tags are in the tag_set of expected_tags.
+                # Since an endpoint tag is added to each metric, checking for the metric specific tags parsed from the
+                # metric, should only be done if the metric has more tags than just the endpoint tag.
                 assert all(
                     all(any(tag in mt for mt in m.tags) for tag in tag_set)
                     for m in collected_metrics
