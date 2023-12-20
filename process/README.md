@@ -53,7 +53,7 @@ The following metrics are not available on [Windows][12]:
 
 **Note**: Use a [WMI check][11] to gather page fault metrics on Windows.
 
-**Note**: In v6.11 +, the Agent runs as `ddagentuser` instead of `Local System`. Because of this, it does not have access to the full command line of processes running under other users and to the user of other users’ processes. This causes the following options of the check to not work:
+**Note**: In v6.11+, the Agent runs as `ddagentuser` instead of `Local System`. Because of this, it does not have access to the full command line of processes running under other users and to the user of other users' processes. This causes the following options of the check to not work:
 - `exact_match` when set to `false`
 - `user`, which allows selecting processes that belong to a specific user
 
