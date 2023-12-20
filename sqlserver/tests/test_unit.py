@@ -298,7 +298,7 @@ def test_SqlDbIndexUsageStats_fetch_metric(col_val_row_1, col_val_row_2, col_val
     [
         pytest.param('Buffer cache hit ratio base', id='base_name valid'),
         pytest.param(None, id='base_name None'),
-    ]
+    ],
 )
 def test_SqlFractionMetric_base(caplog, base_name):
     Row = namedtuple('Row', ['counter_name', 'cntr_type', 'cntr_value', 'instance_name', 'object_name'])
