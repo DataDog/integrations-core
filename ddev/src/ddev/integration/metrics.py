@@ -1,11 +1,10 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from dataclasses import dataclass
+from pydantic import BaseModel
 
 
-@dataclass
-class Metric:
+class Metric(BaseModel):
     metric_name: str
     metric_type: str
     interval: int | None

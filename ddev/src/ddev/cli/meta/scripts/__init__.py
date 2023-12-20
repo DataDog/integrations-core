@@ -19,6 +19,6 @@ def scripts():
 
 scripts.add_command(email2ghuser)
 scripts.add_command(metrics2md)
-scripts.add_command(remove_labels)
 scripts.add_command(generate_metrics)
+scripts.add_command(remove_labels)
 scripts.add_command(upgrade_python)
