@@ -653,7 +653,11 @@ class SQLServer(AgentCheck):
                         self.log.debug("Got base metric: %s for metric: %s", base_name, counter_name)
                         self._sql_counter_types[counter_name] = (sql_counter_type, base_name)
                     else:
-                        self.log.warning("Could not get counter_name of base for metric: %s", counter_name)
+                        self.log.warning(
+                            "Could not get counter_name of base for metric %s with candidates %s",
+                            counter_name,
+                            candidates,
+                        )
                 except Exception as e:
                     self.log.warning("Could not get counter_name of base for metric: %s", e)
 
