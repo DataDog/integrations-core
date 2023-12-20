@@ -157,6 +157,9 @@ class SqlFractionMetric(BaseSqlServerMetric):
         return results, None
 
     def fetch_metric(self, results, columns, values_cache=None):
+        if not self.base_name:
+            self.log.error('Skipping counter. Missing base counter name')
+            return
         num_counters = results.get(self.sql_name.strip())
         base_counters = results.get(self.base_name.strip())
         if not num_counters or not base_counters:
