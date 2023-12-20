@@ -9,7 +9,6 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from ipaddress import IPv4Address
 
 import mock
-from datadog_checks.base.utils.agent.memory import MemoryProfileMetric
 import pytest
 
 from datadog_checks.base import AgentCheck

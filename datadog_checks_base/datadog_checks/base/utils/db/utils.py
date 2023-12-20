@@ -310,7 +310,9 @@ class DBMAsyncJob(object):
                     from datadog_checks.base.utils.agent.memory import profile_memory
 
                     metrics = profile_memory(
-                        self._run_job_rate_limited, self._check.init_config, namespaces=[self._check.name, self._job_name],
+                        self._run_job_rate_limited,
+                        self._check.init_config,
+                        namespaces=[self._check.name, self._job_name],
                     )
 
                     tags = self._check.get_debug_metric_tags() + self._job_tags
