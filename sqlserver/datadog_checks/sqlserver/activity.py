@@ -14,7 +14,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.utils import PROC_CHAR_LIMIT, extract_sql_comments_and_procedure_name
+from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name
 
 try:
     import datadog_agent
@@ -193,7 +193,8 @@ class SqlserverActivity(DBMAsyncJob):
     def _get_idle_blocking_sessions(self, cursor, blocking_session_ids):
         # The IDLE_BLOCKING_SESSIONS_QUERY contains minimum information on idle blocker
         query = IDLE_BLOCKING_SESSIONS_QUERY.format(
-            blocking_session_ids=",".join(map(str, blocking_session_ids)), proc_char_limit=PROC_CHAR_LIMIT
+            blocking_session_ids=",".join(map(str, blocking_session_ids)),
+            proc_char_limit=self._config.stored_procedure_characters_limit,
         )
         self.log.debug("Running query [%s]", query)
         cursor.execute(query)
@@ -206,7 +207,7 @@ class SqlserverActivity(DBMAsyncJob):
         self.log.debug("collecting sql server activity")
         query = ACTIVITY_QUERY.format(
             exec_request_columns=', '.join(['req.{}'.format(r) for r in exec_request_columns]),
-            proc_char_limit=PROC_CHAR_LIMIT,
+            proc_char_limit=self._config.stored_procedure_characters_limit,
         )
         self.log.debug("Running query [%s]", query)
         cursor.execute(query)
@@ -276,35 +277,35 @@ class SqlserverActivity(DBMAsyncJob):
             return self._sanitize_row(row)
         try:
             statement = obfuscate_sql_with_metadata(row['statement_text'], self._config.obfuscator_options)
-            procedure_statement = None
             # sqlserver doesn't have a boolean data type so convert integer to boolean
             comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
             if row['is_proc'] and 'text' in row:
-                procedure_statement = obfuscate_sql_with_metadata(row['text'], self._config.obfuscator_options)
+                try:
+                    procedure_statement = obfuscate_sql_with_metadata(row['text'], self._config.obfuscator_options)
+                    # procedure_signature is used to link this activity event with
+                    # its related plan events
+                    row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
+                except Exception as e:
+                    # if we fail to obfuscate the procedure text,
+                    # we should not mark query statement as failed to obfuscate
+                    if self._config.log_unobfuscated_queries:
+                        self.log.warning("Failed to obfuscate stored procedure=[%s] | err=[%s]", row['text'], e)
+                    else:
+                        self.log.debug("Failed to obfuscate stored procedure | err=[%s]", e)
             obfuscated_statement = statement['query']
             metadata = statement['metadata']
             row['dd_commands'] = metadata.get('commands', None)
             row['dd_tables'] = metadata.get('tables', None)
             row['dd_comments'] = comments
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
-            # procedure_signature is used to link this activity event with
-            # its related plan events
-            if procedure_statement:
-                row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
             if procedure_name:
                 row['procedure_name'] = procedure_name
         except Exception as e:
             if self._config.log_unobfuscated_queries:
-                raw_query_text = row['text'] if row.get('is_proc', False) else row['statement_text']
-                self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", raw_query_text, e)
+                self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['statement_text'], e)
             else:
                 self.log.debug("Failed to obfuscate query | err=[%s]", e)
             obfuscated_statement = "ERROR: failed to obfuscate"
-            self._check.count(
-                "dd.sqlserver.obfuscation.error",
-                1,
-                **self._check.debug_stats_kwargs(tags=["error:{}".format(type(e)), "error_msg:{}".format(e)])
-            )
         row = self._sanitize_row(row, obfuscated_statement)
         return row
 
