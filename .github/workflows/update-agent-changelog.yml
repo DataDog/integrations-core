@@ -53,7 +53,7 @@ jobs:
           ### Additional Notes
           <!-- Anything else we should know when reviewing? -->
           
-          This PR was automatically generated because the tag `${{ env.AGENT_VERSION }}` has been created.
+          This PR was automatically generated.
 
           ### Review checklist (to be filled by reviewers)
 
