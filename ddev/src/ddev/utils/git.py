@@ -60,6 +60,10 @@ class GitManager:
     def tags(self) -> list[str]:
         return sorted(set(self.capture('tag', '--list').splitlines()))
 
+    def fetch_tags(self) -> None:
+        # We force because, in very rare cases, we move tags
+        self.capture('fetch', '--all', '--tags', '--force')
+
     def get_tags(self) -> list[str]:
         with suppress(AttributeError):
             del self.tags

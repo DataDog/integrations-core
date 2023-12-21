@@ -7,7 +7,7 @@ import re
 
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
-from datadog_checks.sqlserver.const import DEFAULT_AUTODISCOVERY_INTERVAL
+from datadog_checks.sqlserver.const import DEFAULT_AUTODISCOVERY_INTERVAL, PROC_CHAR_LIMIT
 
 
 class SQLServerConfig:
@@ -67,12 +67,27 @@ class SQLServerConfig:
                     # Config to enable/disable obfuscation of sql statements with go-sqllexer pkg
                     # Valid values for this can be found at https://github.com/DataDog/datadog-agent/blob/main/pkg/obfuscate/obfuscate.go#L108
                     'obfuscation_mode': obfuscator_options_config.get('obfuscation_mode', ''),
+                    'remove_space_between_parentheses': is_affirmative(
+                        obfuscator_options_config.get('remove_space_between_parentheses', False)
+                    ),
+                    'keep_null': is_affirmative(obfuscator_options_config.get('keep_null', False)),
+                    'keep_boolean': is_affirmative(obfuscator_options_config.get('keep_boolean', False)),
+                    'keep_positional_parameter': is_affirmative(
+                        obfuscator_options_config.get('keep_positional_parameter', False)
+                    ),
+                    'keep_trailing_semicolon': is_affirmative(
+                        obfuscator_options_config.get('keep_trailing_semicolon', False)
+                    ),
+                    'keep_identifier_quotation': is_affirmative(
+                        obfuscator_options_config.get('keep_identifier_quotation', False)
+                    ),
                 }
             )
         )
         self.log_unobfuscated_queries: bool = is_affirmative(instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans: bool = is_affirmative(instance.get('log_unobfuscated_plans', False))
         self.database_instance_collection_interval: int = instance.get('database_instance_collection_interval', 1800)
+        self.stored_procedure_characters_limit: int = instance.get('stored_procedure_characters_limit', PROC_CHAR_LIMIT)
         self.connection_host: str = instance['host']
 
     def _compile_valid_patterns(self, patterns: list[str]) -> re.Pattern:

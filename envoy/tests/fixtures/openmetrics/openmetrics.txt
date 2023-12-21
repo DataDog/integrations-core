@@ -1307,3 +1307,5 @@ envoy_tcp_on_demand_cluster_missing{} 0
 envoy_tcp_on_demand_cluster_success{} 0
 # TYPE envoy_tcp_on_demand_cluster_timeout counter
 envoy_tcp_on_demand_cluster_timeout{} 0
+# TYPE envoy_control_plane_connected_state gauge
+envoy_control_plane_connected_state{} 1
