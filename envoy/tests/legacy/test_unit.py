@@ -286,8 +286,8 @@ def test_stats_prefix_optional_tags(
     additional_tags,
 ):
     instance = INSTANCES['main']
-    tags = standard_tags.append('endpoint:{}'.format(instance["stats_url"]))
-    tags_prefix = tags + additional_tags
+    standard_tags.append('endpoint:{}'.format(instance["stats_url"]))
+    tags_prefix = standard_tags + additional_tags
     c = check(instance)
     mock_http_response(file_path=fixture_path(fixture_file)).return_value
     dd_run_check(c)
@@ -301,7 +301,7 @@ def test_stats_prefix_optional_tags(
             value=index + len(metrics),
             tags=tags_prefix,
         )
-        aggregator.assert_metric(metric, value=index, tags=tags)
+        aggregator.assert_metric(metric, value=index, tags=standard_tags)
 
 
 def test_local_rate_limit_metrics(aggregator, fixture_path, mock_http_response, check, dd_run_check):
