@@ -70,8 +70,13 @@ def test_changelog_since_to(fake_changelog, ddev, mocker):
 def repo_with_fake_changelog(repo_with_history, config_file):
     config_file.model.repos['core'] = str(repo_with_history.path)
     config_file.save()
+    # ruff: noqa: E501
     expected_output = (
         """
+## Datadog Agent version [7.41.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7410)
+
+* datadog_checks_downloader [4.0.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md)
+
 ## Datadog Agent version [7.40.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7400)
 
 * onlywin [1.0.0](https://github.com/DataDog/integrations-core/blob/master/onlywin/CHANGELOG.md)
