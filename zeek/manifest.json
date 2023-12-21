@@ -51,10 +51,7 @@
       "Zeek - Miscellaneous": "assets/dashboards/zeek_miscellaneous.json",
       "Zeek - Syslog": "assets/dashboards/zeek_syslog.json",
       "Corelight Suricata": "assets/dashboards/corelight_suricata.json"
-    },
-    "monitors": {},
-    "logs": {},
-    "saved_views": {}
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
