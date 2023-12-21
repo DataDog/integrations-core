@@ -1,6 +1,6 @@
 ## Overview
 
-* Zeek is the world’s leading platform for network security monitoring.
+* Zeek is the world's leading platform for network security monitoring.
 * Zeek interprets what it sees and creates compact, high-fidelity transaction logs, file content, and fully customized output, suitable for manual review on disk or in a more analyst-friendly tool like a security and information event management (SIEM) system.
 
 This integration provides visulizations and log enrichments for Network Protocols, Files, Detections, Network Observations, Miscellaneous, some Diagnostics logs and Corelight Suricata eventtypes.
@@ -97,7 +97,7 @@ eg.
 
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this integration.
+The zeek integration does not include any metrics.
 
 ### Events
 

@@ -35,16 +35,23 @@
       "events": {
         "creates_events": false
       },
-      "metrics": {
-        "prefix": "zeek.",
-        "check": "",
-        "metadata_path": "metadata.csv"
-      },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
     },
-    "dashboards": {},
+    "dashboards": {
+      "Zeek - Connections": "assets/dashboards/zeek_connections.json",
+      "Zeek - DHCP": "assets/dashboards/zeek_dhcp.json",
+      "Zeek - DNS": "assets/dashboards/zeek_dns.json",
+      "Zeek - Network Protocols": "assets/dashboards/zeek_network_protocols.json",
+      "Zeek - Detection": "assets/dashboards/zeek_detection.json",
+      "Zeek - Diagnostics": "assets/dashboards/zeek_diagnostics.json",
+      "Zeek - Files": "assets/dashboards/zeek_files.json",
+      "Zeek - Network Observations": "assets/dashboards/zeek_network_observations.json",
+      "Zeek - Miscellaneous": "assets/dashboards/zeek_miscellaneous.json",
+      "Zeek - Syslog": "assets/dashboards/zeek_syslog.json",
+      "Corelight Suricata": "assets/dashboards/corelight_suricata.json"
+    },
     "monitors": {},
     "logs": {},
     "saved_views": {}
