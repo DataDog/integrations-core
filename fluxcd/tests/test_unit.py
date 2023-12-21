@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -21,7 +20,6 @@ EXPECTED_METRICS = {
 }
 
 
-@pytest.mark.unit
 def test_mock_assert_metrics(dd_run_check, aggregator, check, mock_metrics):
     dd_run_check(check)
     for metric_name in EXPECTED_METRICS:
