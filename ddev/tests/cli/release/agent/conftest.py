@@ -40,12 +40,16 @@ def repo_with_history(tmp_path_factory):
     write_agent_requirements(repo.path, ["datadog-onlywin==1.0.0; sys_platform == 'win32'"])
     commit('fourth')
     repo.git.run('tag', '7.40.0')
+    write_agent_requirements(repo.path, ["datadog-checks-downloader==4.0.0"])
+    commit('fifth')
+    repo.git.run('tag', '7.41.0')
 
     # Satisfy manifest requirements
     write_dummy_manifest(repo.path, 'foo')
     write_dummy_manifest(repo.path, 'bar')
     write_dummy_manifest(repo.path, 'onlywin')
-    write_dummy_manifest(repo.path, 'datadog_checks_base')
+    write_dummy_pyproject(repo.path, 'datadog_checks_downloader')
+    write_dummy_pyproject(repo.path, 'datadog_checks_base')
 
     yield repo
 
@@ -68,3 +72,23 @@ def write_dummy_manifest(repo_path, integration):
             },
             f,
         )
+
+
+def write_dummy_pyproject(repo_path, integration):
+    (repo_path / integration).mkdir(exist_ok=True)
+
+    file = repo_path / integration / 'pyproject.toml'
+    file.write_text(
+        f"""[project]
+name = "{integration}"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.12",
+]
+    """
+    )
