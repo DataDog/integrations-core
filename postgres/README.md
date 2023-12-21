@@ -127,6 +127,8 @@ To configure this check for an Agent running on a host:
           include:
             - mydb.*
             - example.*
+        relations:
+          - relation_regex: .*
    ```
 
   Alternatively, you can list each logical database as an instance in the configuration:
@@ -136,14 +138,24 @@ To configure this check for an Agent running on a host:
       port: 5432
       username: datadog
       password: '<PASSWORD>'
+      relations:
+        - relation_name: products
+        - relation_name: external_seller_products
     - host: example-service–replica-1.example-host.com
       port: 5432
       username: datadog
       password: '<PASSWORD>'
+      relations:
+        - relation_regex: inventory_.*
+          relkind:
+            - r
+            - i
     - host: example-service–replica-2.example-host.com
       port: 5432
       username: datadog
       password: '<PASSWORD>'
+      relations:
+        - relation_regex: .*
    ```
 2. [Restart the Agent][4].
 
