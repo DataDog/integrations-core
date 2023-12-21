@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "",
+    "description": "Visualize zeek logs",
     "title": "zeek",
     "media": [
       {
@@ -19,12 +19,11 @@
     ],
     "classifier_tags": [
       "Supported OS::Linux",
-      "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::",
-      "Offering::",
-      "Queried Data Type::",
-      "Submitted Data Type::"
+      "Category::Security",
+      "Category::Network",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
     ]
   },
   "assets": {
