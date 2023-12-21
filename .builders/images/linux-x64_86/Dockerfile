@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=quay.io/pypa/manylinux2014_x86_64
+ARG BASE_IMAGE=quay.io/pypa/manylinux2010_x86_64
 FROM ${BASE_IMAGE}
 
 ARG PYTHON_MAJOR
@@ -9,6 +9,10 @@ ENV KRB5_VERSION="1.20.1"
 ENV KRB5_SHA256="704aed49b19eb5a7178b34b2873620ec299db08752d6a8574f95d41879ab8851"
 ENV OPENSSL_VERSION="3.0.12"
 ENV OPENSSL_SHA256="f93c9e8edde5e9166119de31755fc87b4aa34863662f67ddfcba14d0b6b69b61"
+ENV RUST_VERSION=nightly-2022-05-15
+ENV RUSTC_SHA256="3dc5ef50861ee18657f9db2eeb7392f9c2a6c95c90ab41e45ab4ca71476b4338"
+ENV RUSTUP_VERSION=1.24.3
+ENV RUSTUP_SHA256="3dc5ef50861ee18657f9db2eeb7392f9c2a6c95c90ab41e45ab4ca71476b4338"
 
 ENV PATH="/opt/python/cp${PYTHON_MAJOR}-cp${PYTHON_MAJOR}/bin:${PATH}"
 
@@ -43,5 +47,27 @@ RUN curl "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" -o /
  && rm -rf /tmp/openssl-${OPENSSL_VERSION} \
  && rm -rf /tmp/openssl.tar.gz
 
+# Rust toolchain
+RUN curl -sSL -o rustup-init "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/x86_64-unknown-linux-gnu/rustup-init" \
+    && echo "${RUSTUP_SHA256}  rustup-init" | sha256sum --check \
+    && chmod +x ./rustup-init \
+    && ./rustup-init -y --profile minimal --default-toolchain "${RUST_VERSION}" \
+    && echo "${RUSTC_SHA256}  $HOME/.cargo/bin/rustc" | sha256sum --check \
+    && rm ./rustup-init
+ENV PATH="/root/.cargo/bin:${PATH}"
 
-CMD ["python", "-m", "pip", "install", "-r", "/home/requirements.in"]
+# Compile and install Python
+ENV PYTHON_VERSION=3.11.5
+ENV PYTHON_SHA256="a12a0a013a30b846c786c010f2c19dd36b7298d888f7c4bd1581d90ce18b5e58"
+RUN yum install -y libffi-devel
+RUN curl "https://python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz" -Lo /tmp/python.tar.gz \
+    && echo "${PYTHON_SHA256}  /tmp/python.tar.gz" | sha256sum --check \
+    && tar -C /tmp -xf /tmp/python.tar.gz \
+    && cd /tmp/Python-${PYTHON_VERSION} \
+    && ./configure --prefix=/opt/python/${PYTHON_VERSION} --with-ensurepip=yes --enable-shared --enable-ipv6 --with-dbmliborder= \
+    && make && make install
+
+ENV PATH="/opt/python/${PYTHON_VERSION}/bin:${PATH}"
+ENV LD_LIBRARY_PATH="/opt/python/3.11.5/lib/:${LD_LIBRARY_PATH}"
+
+CMD ["python3", "-m", "pip", "install", "-r", "/home/requirements.in"]
