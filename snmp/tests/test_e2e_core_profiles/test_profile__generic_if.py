@@ -23,7 +23,7 @@ def test_e2e_profile__generic_if(dd_agent_check):
 
     ip_address = get_device_ip_from_config(config)
     common_tags = [
-        'snmp_profile:_generic-if',
+        'snmp_profile:generic-if',
         'snmp_host:_generic-if.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
@@ -40,10 +40,14 @@ def test_e2e_profile__generic_if(dd_agent_check):
         ['interface_index:19'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ifInDiscards', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ifInErrors', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ifOutDiscards', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ifOutErrors', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ifInDiscards', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ifInErrors', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ifOutDiscards', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ifOutErrors', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ifInDiscards.rate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ifInErrors.rate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ifOutDiscards.rate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ifOutErrors.rate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         ['interface_index:15'],
@@ -87,8 +91,15 @@ def test_e2e_profile__generic_if(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ifHCInOctets', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ifHCOutOctets', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ifHCInOctets', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ifHCOutOctets', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ifHCInOctets.rate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ifHCOutOctets.rate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ifBandwidthInUsage.rate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ifBandwidthOutUsage.rate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        if_speed_tags = common_tags + tag_row + ['speed_source:device']
+        aggregator.assert_metric('snmp.ifInSpeed', metric_type=aggregator.GAUGE, tags=if_speed_tags)
+        aggregator.assert_metric('snmp.ifOutSpeed', metric_type=aggregator.GAUGE, tags=if_speed_tags)
 
     tag_rows = [
         [
@@ -124,10 +135,9 @@ def test_e2e_profile__generic_if(dd_agent_check):
         'id_tags': ['device_namespace:default', 'snmp_device:' + ip_address],
         'ip_address': '' + ip_address,
         'name': '_generic-if.device.name',
-        'profile': '_generic-if',
+        'profile': 'generic-if',
         'status': 1,
         'sys_object_id': '1.2.3.20231221',
-        'vendor': '_generic',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
