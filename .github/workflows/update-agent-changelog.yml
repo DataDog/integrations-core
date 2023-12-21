@@ -54,12 +54,6 @@ jobs:
           <!-- Anything else we should know when reviewing? -->
           
           This PR was automatically generated.
-
-          ### Review checklist (to be filled by reviewers)
-
-          - [ ] Feature or bugfix MUST have appropriate tests (unit, integration, e2e)
-          - [ ] [Changelog entries](https://datadoghq.dev/integrations-core/guidelines/pr/#changelog-entries) must be created for modifications to shipped code
-          - [ ] Add the `qa/skip-qa` label if the PR doesn't need to be tested during QA.
         title: Finalize Agent release ${{ env.AGENT_VERSION }}
         branch: bot/update-agent-changelog-${{ env.AGENT_VERSION }}
         branch-suffix: timestamp
