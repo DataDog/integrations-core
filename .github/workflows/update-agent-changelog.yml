@@ -69,4 +69,4 @@ jobs:
         labels: bot,qa/skip-qa
         draft: true
       env:
-        AGENT_VERSION: ${{ github.ref_name }}"
+        AGENT_VERSION: ${{ github.ref_name }}
