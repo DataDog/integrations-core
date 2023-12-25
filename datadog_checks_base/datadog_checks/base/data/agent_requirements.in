@@ -6,10 +6,10 @@ beautifulsoup4==4.12.2; python_version > '3.0'
 beautifulsoup4==4.9.3; python_version < '3.0'
 binary==1.0.0
 boto3==1.17.112; python_version < '3.0'
-boto3==1.28.78; python_version > '3.0'
+boto3==1.34.2; python_version > '3.0'
 boto==2.49.0
 botocore==1.20.112; python_version < '3.0'
-botocore==1.31.78; python_version > '3.0'
+botocore==1.34.2; python_version > '3.0'
 cachetools==3.1.1; python_version < '3.0'
 cachetools==5.3.2; python_version > '3.0'
 clickhouse-cityhash==1.0.2.3; python_version < '3.0'
@@ -20,7 +20,7 @@ cm-client==45.0.4
 confluent-kafka==2.3.0; python_version > '3.0'
 contextlib2==0.6.0.post1; python_version < '3.0'
 cryptography==3.3.2; python_version < '3.0'
-cryptography==41.0.6; python_version > '3.0'
+cryptography==41.0.7; python_version > '3.0'
 ddtrace==0.32.2; sys_platform == 'win32' and python_version < '3.0'
 ddtrace==0.53.2; sys_platform != 'win32' and python_version < '3.0'
 ddtrace==1.11.2; python_version > '3.0'
@@ -34,7 +34,7 @@ importlib-metadata==2.1.3; python_version < '3.8'
 in-toto==2.0.0; python_version > '3.0'
 ipaddress==1.0.23; python_version < '3.0'
 jaydebeapi==1.2.3
-jellyfish==1.0.1; python_version > '3.0'
+jellyfish==1.0.3; python_version > '3.0'
 jpype1==1.4.1; python_version > '3.0'
 kubernetes==18.20.0; python_version < '3.0'
 kubernetes==28.1.0; python_version > '3.0'
@@ -54,13 +54,13 @@ paramiko==2.12.0; python_version < '3.0'
 paramiko==3.3.1; python_version > '3.0'
 ply==3.11
 prometheus-client==0.12.0; python_version < '3.0'
-prometheus-client==0.18.0; python_version > '3.0'
+prometheus-client==0.19.0; python_version > '3.0'
 protobuf==3.17.3; python_version < '3.0'
 protobuf==3.20.2; python_version > '3.0'
 psutil==5.9.0
-psycopg-pool==3.1.8; python_version > '3.0'
+psycopg-pool==3.2.0; python_version > '3.0'
 psycopg2-binary==2.9.9; python_version > '3.0'
-psycopg[binary]==3.1.12; python_version > '3.0'
+psycopg[binary]==3.1.15; python_version > '3.0'
 pyasn1==0.4.6
 pycryptodomex==3.10.1
 pydantic==2.0.2; python_version > '3.0'
@@ -103,12 +103,13 @@ semver==3.0.2; python_version > '3.0'
 service-identity[idna]==21.1.0
 simplejson==3.19.2
 six==1.16.0
-snowflake-connector-python==3.5.0; python_version > '3.0'
+snowflake-connector-python==3.6.0; python_version > '3.0'
 supervisor==4.2.5
 tuf==2.0.0; python_version > '3.0'
 typing==3.10.0.0; python_version < '3.0'
 uptime==3.0.1
 vertica-python==1.2.0; python_version < '3.0'
-vertica-python==1.3.6; python_version > '3.0'
+vertica-python==1.3.7; python_version > '3.0'
 win-inet-pton==1.1.0; sys_platform == 'win32' and python_version < '3.0'
-wrapt==1.15.0
+wrapt==1.15.0; python_version < '3.0'
+wrapt==1.16.0; python_version > '3.0'

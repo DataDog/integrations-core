@@ -376,6 +376,7 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_http_local_rate_limit_enforced': 'http.local_rate_limit_enforced',
     'envoy_http_local_rate_limit_rate_limited': 'http.local_rate_limit_rate_limited',
     'envoy_http_local_rate_limit_ok': 'http.local_rate_limit_ok',
+    'envoy_control_plane_connected_state': 'control_plane.connected_state',
 }
 
 # fmt: off
@@ -3857,6 +3858,38 @@ METRICS = {
         'tags': (
             (),
             (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.rbac.allowed': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.rbac.denied': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.rbac.shadow_allowed': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.rbac.shadow_denied': {
+        'tags': (
+            ('stat_prefix',),
+            ('shadow_rule_prefix',),
             (),
         ),
         'method': 'monotonic_count',
