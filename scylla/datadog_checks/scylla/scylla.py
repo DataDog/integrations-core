@@ -1,9 +1,9 @@
-# (C) Datadog, Inc. 2023-present
+# (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from six import PY2
 from six.moves.urllib.parse import urlparse
 
-from six import PY2
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck
 
 from .metrics import ADDITIONAL_METRICS_MAP, INSTANCE_DEFAULT_METRICS

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2023-present
+# (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -654,6 +654,7 @@ ADDITIONAL_METRICS_MAP = {
     'scylla.tracing': SCYLLA_TRACING,
     'scylla.view': SCYLLA_VIEW,
 }
+
 
 def construct_metrics_config(metrics):
     # turns the metrics from a list of dicts to a flat dict

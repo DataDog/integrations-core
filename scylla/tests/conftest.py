@@ -15,17 +15,22 @@ INSTANCE_URL = "http://{}:{}/metrics".format(HOST, INSTANCE_PORT)
 
 
 @pytest.fixture(scope='session')
-def dd_environment():
+def dd_environment(instance):
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 
     with docker_run(compose_file, log_patterns=[r'init - Scylla version \S* initialization completed.']):
-        instances = {'instances': [{'openmetrics_endpoint': INSTANCE_URL}]}
+        instances = {'instances': [instance]}
         yield instances
 
 
 @pytest.fixture(scope="session")
-def db_instance():
-    return {'prometheus_url': INSTANCE_URL, 'tags': ['instance_test']}
+def instance_legacy():
+    return {'prometheus_url': INSTANCE_URL, 'tags': ['prometheus:true']}
+
+
+@pytest.fixture(scope="session")
+def instance():
+    return {'openmetrics_endpoint': INSTANCE_URL, 'tags': ['prometheus:false']}
 
 
 @pytest.fixture()

@@ -2,17 +2,19 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import pytest
 import platform
+
+import pytest
+
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.scylla import ScyllaCheck
 
 from .common import INSTANCE_DEFAULT_METRICS, INSTANCE_DEFAULT_METRICS_V2
 
 
-
 @pytest.mark.e2e
-def test_check_ok(dd_agent_check):
-    aggregator = dd_agent_check(rate=True)
+def test_check_ok(dd_agent_check, instance_legacy):
+    aggregator = dd_agent_check(instance_legacy, rate=True)
 
     for metric in INSTANCE_DEFAULT_METRICS:
         aggregator.assert_metric(metric)
@@ -23,8 +25,8 @@ def test_check_ok(dd_agent_check):
 
 @pytest.mark.skipif(platform.python_version() < "3", reason='OpenMetrics V2 is only available with Python 3')
 @pytest.mark.e2e
-def test_check_ok_omv2(dd_agent_check, dd_environment_omv2):
-    aggregator = dd_agent_check(omv2_instance, rate=True)
+def test_check_ok_omv2(dd_agent_check, instance):
+    aggregator = dd_agent_check(instance, rate=True)
     for metric in INSTANCE_DEFAULT_METRICS_V2:
         aggregator.assert_metric(metric)
 
