@@ -1,8 +1,11 @@
-# (C) Datadog, Inc. 2020-present
+# (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 # metrics namespaced under 'scylla'
+
+import pdb
+
 SCYLLA_ALIEN = {
     'scylla_alien_receive_batch_queue_length': 'alien.receive_batch_queue_length',
     'scylla_alien_total_received_messages': 'alien.total_received_messages',
@@ -651,3 +654,25 @@ ADDITIONAL_METRICS_MAP = {
     'scylla.tracing': SCYLLA_TRACING,
     'scylla.view': SCYLLA_VIEW,
 }
+
+def construct_metrics_config(metrics):
+    # turns the metrics from a list of dicts to a flat dict
+    metric_map = {}
+    for metric_group in metrics:
+        # pdb.set_trace()
+        metric_map.update(metric_group)  # we're turning a list of dicts into a flat dict then back into a list of dicts
+
+    # interate over the flat dict and create the metric config
+    metrics = []
+    for raw_metric_name, metric_name in metric_map.items():
+        if raw_metric_name.endswith('_total'):
+            if metric_name.endswith('.count'):
+                metric_name = metric_name[:-6]
+            raw_metric_name = raw_metric_name[:-6]
+        elif raw_metric_name.endswith('_count'):
+            if metric_name.endswith('.count'):
+                metric_name = metric_name[:-6]
+            raw_metric_name = raw_metric_name[:-6]
+        config = {raw_metric_name: {'name': metric_name}}
+        metrics.append(config)
+    return metrics

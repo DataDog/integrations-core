@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+# from datadog_checks.scylla.metrics  import construct_metrics_config
 
 CHECK_NAME = 'scylla'
 NAMESPACE = 'scylla.'
@@ -807,6 +808,22 @@ def get_metrics(metric_groups):
     return sorted(m for g in metric_groups for m in metric_map[g])
 
 
+def construct_metrics_config(metrics):
+    """Given a list of metrics, return a list of dicts with the metric name and type"""
+    metrics = []
+    for raw_metric_name, metric_name in metric_map.items():
+        if raw_metric_name.endswith('_total'):
+            if metric_name.endswith('.count'):
+                metric_name = metric_name[:-6]
+            raw_metric_name = raw_metric_name[:-6]
+        elif raw_metric_name.endswith('_count'):
+            if metric_name.endswith('.count'):
+                metric_name = metric_name[:-6]
+            raw_metric_name = raw_metric_name[:-6]
+        config = {raw_metric_name: {'name': metric_name}}
+        metrics.append(config)
+    return metrics
+
 INSTANCE_DEFAULT_GROUPS = [
     'scylla.cache',
     'scylla.compaction_manager',
@@ -821,4 +838,6 @@ INSTANCE_DEFAULT_GROUPS = [
 INSTANCE_DEFAULT_METRICS = get_metrics(INSTANCE_DEFAULT_GROUPS)
 INSTANCE_ADDITIONAL_GROUPS = additional_instance_groups
 INSTANCE_ADDITIONAL_METRICS = get_metrics(additional_instance_groups)
+INSTANCE_DEFAULT_METRICS_V2 = construct_metrics_config(INSTANCE_DEFAULT_METRICS)
+INSTANCE_ADDITIONAL_METRICS_V2 = construct_metrics_config(INSTANCE_ADDITIONAL_METRICS)
 FLAKY_METRICS = flaky_metrics
