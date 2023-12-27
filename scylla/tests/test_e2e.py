@@ -6,7 +6,6 @@ import platform
 
 import pytest
 
-from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.scylla import ScyllaCheck
 
 from .common import INSTANCE_DEFAULT_METRICS, INSTANCE_DEFAULT_METRICS_V2

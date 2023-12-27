@@ -36,12 +36,12 @@ def test_instance_default_check(aggregator, instance_legacy, mock_db_data):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.unit
 @pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
+@pytest.mark.unit
 def test_instance_default_check_omv2(aggregator, instance, mock_db_data):
     c = ScyllaCheck('scylla', {}, [instance])
 
-    c.check(instance_legacy)
+    c.check(instance)
 
     for m in INSTANCE_DEFAULT_METRICS_V2:
         if m in FLAKY_METRICS:
@@ -59,9 +59,9 @@ def test_instance_additional_check(aggregator, instance_legacy, mock_db_data):
     instance = deepcopy(instance_legacy)
     instance['metric_groups'] = additional_metric_groups
 
-    c = ScyllaCheck('scylla', {}, [instance])
+    c = ScyllaCheck('scylla', {}, [instance_legacy])
 
-    c.check(instance)
+    c.check(instance_legacy)
 
     metrics_to_check = get_metrics(INSTANCE_DEFAULT_GROUPS + additional_metric_groups)
 
@@ -74,8 +74,8 @@ def test_instance_additional_check(aggregator, instance_legacy, mock_db_data):
     aggregator.assert_service_check('scylla.prometheus.health', count=1)
 
 
-@pytest.mark.unit
 @pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
+@pytest.mark.unit
 def test_instance_additional_check_omv2(aggregator, instance, mock_db_data):
     # add additional metric groups for validation
     additional_metric_groups = ['scylla.alien', 'scylla.sstables']
@@ -103,9 +103,9 @@ def test_instance_full_additional_check(aggregator, instance_legacy, mock_db_dat
     instance = deepcopy(instance_legacy)
     instance['metric_groups'] = INSTANCE_ADDITIONAL_GROUPS
 
-    c = ScyllaCheck('scylla', {}, [instance])
+    c = ScyllaCheck('scylla', {}, [instance_legacy])
 
-    c.check(instance)
+    c.check(instance_legacy)
 
     metrics_to_check = INSTANCE_DEFAULT_METRICS + INSTANCE_ADDITIONAL_METRICS
 
@@ -118,8 +118,8 @@ def test_instance_full_additional_check(aggregator, instance_legacy, mock_db_dat
     aggregator.assert_service_check('scylla.prometheus.health', count=1)
 
 
-@pytest.mark.unit
 @pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
+@pytest.mark.unit
 def test_instance_full_additional_check_omv2(aggregator, instance, mock_db_data):
     instance = deepcopy(instance)
     instance['metric_groups'] = INSTANCE_ADDITIONAL_GROUPS
@@ -147,13 +147,13 @@ def test_instance_invalid_group_check(aggregator, instance_legacy, mock_db_data)
     instance['metric_groups'] = additional_metric_groups
 
     with pytest.raises(ConfigurationError):
-        ScyllaCheck('scylla', {}, [instance])
+        ScyllaCheck('scylla', {}, [instance_legacy])
 
     aggregator.assert_service_check('scylla.prometheus.health', count=0)
 
 
-@pytest.mark.unit
 @pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
+@pytest.mark.unit
 def test_instance_invalid_group_check_omv2(aggregator, instance, mock_db_data):
     additional_metric_groups = ['scylla.bogus', 'scylla.sstables']
 
@@ -172,13 +172,13 @@ def test_invalid_instance(aggregator, instance_legacy, mock_db_data):
     instance.pop('prometheus_url')
 
     with pytest.raises(CheckException):
-        ScyllaCheck('scylla', {}, [instance])
+        ScyllaCheck('scylla', {}, [instance_legacy])
 
     aggregator.assert_service_check('scylla.prometheus.health', count=0)
 
 
-@pytest.mark.unit
 @pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
+@pytest.mark.unit
 def test_invalid_instance_omv2(aggregator, instance, mock_db_data):
     instance = deepcopy(instance)
     instance.pop('openmetrics_endpoint')
@@ -205,8 +205,8 @@ def test_instance_integration_check(aggregator, instance_legacy, mock_db_data):
     aggregator.assert_service_check('scylla.prometheus.health', count=1)
 
 
-@pytest.mark.integration
 @pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
+@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_instance_integration_check_omv2(aggregator, instance, mock_db_data):
     c = ScyllaCheck('scylla', {}, [instance])

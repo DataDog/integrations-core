@@ -4,7 +4,6 @@
 
 # metrics namespaced under 'scylla'
 
-import pdb
 
 SCYLLA_ALIEN = {
     'scylla_alien_receive_batch_queue_length': 'alien.receive_batch_queue_length',
@@ -660,7 +659,6 @@ def construct_metrics_config(metrics):
     # turns the metrics from a list of dicts to a flat dict
     metric_map = {}
     for metric_group in metrics:
-        # pdb.set_trace()
         metric_map.update(metric_group)  # we're turning a list of dicts into a flat dict then back into a list of dicts
 
     # interate over the flat dict and create the metric config
