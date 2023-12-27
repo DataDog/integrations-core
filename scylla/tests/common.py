@@ -798,101 +798,102 @@ elif os.environ['SCYLLA_VERSION'] == "5.2.6":
         'scylla_forward_service_requests_executed',
     ]
 
-    non_conforming_metrics = [
-        'scylla.cache.bytes_total',
-    ]
-
-    omv2_count_metrics = [
-        'scylla.cache.concurrent_misses_same_key',
-        'scylla.cache.dummy_row_hits',
-        'scylla.cache.mispopulations',
-        'scylla.cache.partition_evictions',
-        'scylla.cache.partition_hits',
-        'scylla.cache.partition_insertions',
-        'scylla.cache.partition_merges',
-        'scylla.cache.partition_misses',
-        'scylla.cache.partition_removals',
-        'scylla.cache.pinned_dirty_memory_overload',
-        'scylla.cache.range_tombstone_reads',
-        'scylla.cache.reads',
-        'scylla.cache.reads_with_misses',
-        'scylla.cache.row_evictions',
-        'scylla.cache.row_hits',
-        'scylla.cache.row_insertions',
-        'scylla.cache.row_misses',
-        'scylla.cache.row_removals',
-        'scylla.cache.row_tombstone_reads',
-        'scylla.cache.rows_compacted_with_tombstones',
-        'scylla.cache.rows_dropped_by_tombstones',
-        'scylla.cache.rows_dropped_from_memtable',
-        'scylla.cache.rows_merged_from_memtable',
-        'scylla.cache.rows_processed_from_memtable',
-        'scylla.cache.sstable_partition_skips',
-        'scylla.cache.sstable_reader_recreations',
-        'scylla.cache.sstable_row_skips',
-        'scylla.cache.static_row_insertions',
-        'scylla.compaction_manager.completed_compactions',
-        'scylla.compaction_manager.failed_compactions',
-        'scylla.compaction_manager.validation_errors',
-        'scylla.gossip.heart_beat',
-        'scylla.reactor.abandoned_failed_futures',
-        'scylla.reactor.aio_bytes_read',
-        'scylla.reactor.aio_bytes_write',
-        'scylla.reactor.aio_errors',
-        'scylla.reactor.aio_outsizes',
-        'scylla.reactor.aio_reads',
-        'scylla.reactor.aio_writes',
-        'scylla.reactor.cpp_exceptions',
-        'scylla.reactor.cpu_busy_ms',
-        'scylla.reactor.cpu_steal_time_ms',
-        'scylla.reactor.fstream_read_bytes',
-        'scylla.reactor.fstream_read_bytes_blocked',
-        'scylla.reactor.fstream_reads',
-        'scylla.reactor.fstream_reads_ahead_bytes_discarded',
-        'scylla.reactor.fstream_reads_aheads_discarded',
-        'scylla.reactor.fstream_reads_blocked',
-        'scylla.reactor.fsyncs',
-        'scylla.reactor.io_threaded_fallbacks',
-        'scylla.reactor.logging_failures',
-        'scylla.reactor.polls',
-        'scylla.reactor.tasks_processed',
-        'scylla.storage.proxy.coordinator_background_replica_writes_failed_local_node',
-        'scylla.storage.proxy.coordinator_cas_prune',
-        'scylla.storage.proxy.coordinator_completed_reads_local_node',
-        'scylla.storage.proxy.coordinator_read_errors_local_node',
-        'scylla.storage.proxy.coordinator_read_latency',
-        'scylla.storage.proxy.coordinator_read_latency_summary',
-        'scylla.storage.proxy.coordinator_read_repair_write_attempts_local_node',
-        'scylla.storage.proxy.coordinator_reads_local_node',
-        'scylla.storage.proxy.coordinator_total_write_attempts_local_node',
-        'scylla.storage.proxy.coordinator_write_errors_local_node',
-        'scylla.storage.proxy.coordinator_write_latency',
-        'scylla.storage.proxy.coordinator_write_latency_summary',
-        'scylla.storage.proxy.replica_cross_shard_ops',
-        'scylla.streaming.total_incoming_bytes',
-        'scylla.streaming.total_outgoing_bytes',
-        'scylla.transport.auth_responses',
-        'scylla.transport.cql_connections',
-        'scylla.transport.cql_errors_total',
-        'scylla.transport.execute_requests',
-        'scylla.transport.options_requests',
-        'scylla.transport.prepare_requests',
-        'scylla.transport.query_requests',
-        'scylla.transport.register_requests',
-        'scylla.transport.requests_blocked_memory',
-        'scylla.transport.requests_served',
-        'scylla.transport.requests_shed',
-        'scylla.transport.startups',
-    ]
-
-    bucket_metrics = [
-        'scylla.storage.proxy.coordinator_read_latency.bucket',
-        'scylla.storage.proxy.coordinator_write_latency.bucket',
-    ]
-
     metric_map = modify_metrics_map(new_metrics_version_5, changed_or_removed_metrics_ver_5)
     additional_instance_groups = base_additional_groups + instance_5_additional_groups
     flaky_metrics = flaky_metrics_5
+
+
+non_conforming_metrics = [
+    'scylla.cache.bytes_total',
+]
+
+omv2_count_metrics = [
+    'scylla.cache.concurrent_misses_same_key',
+    'scylla.cache.dummy_row_hits',
+    'scylla.cache.mispopulations',
+    'scylla.cache.partition_evictions',
+    'scylla.cache.partition_hits',
+    'scylla.cache.partition_insertions',
+    'scylla.cache.partition_merges',
+    'scylla.cache.partition_misses',
+    'scylla.cache.partition_removals',
+    'scylla.cache.pinned_dirty_memory_overload',
+    'scylla.cache.range_tombstone_reads',
+    'scylla.cache.reads',
+    'scylla.cache.reads_with_misses',
+    'scylla.cache.row_evictions',
+    'scylla.cache.row_hits',
+    'scylla.cache.row_insertions',
+    'scylla.cache.row_misses',
+    'scylla.cache.row_removals',
+    'scylla.cache.row_tombstone_reads',
+    'scylla.cache.rows_compacted_with_tombstones',
+    'scylla.cache.rows_dropped_by_tombstones',
+    'scylla.cache.rows_dropped_from_memtable',
+    'scylla.cache.rows_merged_from_memtable',
+    'scylla.cache.rows_processed_from_memtable',
+    'scylla.cache.sstable_partition_skips',
+    'scylla.cache.sstable_reader_recreations',
+    'scylla.cache.sstable_row_skips',
+    'scylla.cache.static_row_insertions',
+    'scylla.compaction_manager.completed_compactions',
+    'scylla.compaction_manager.failed_compactions',
+    'scylla.compaction_manager.validation_errors',
+    'scylla.gossip.heart_beat',
+    'scylla.reactor.abandoned_failed_futures',
+    'scylla.reactor.aio_bytes_read',
+    'scylla.reactor.aio_bytes_write',
+    'scylla.reactor.aio_errors',
+    'scylla.reactor.aio_outsizes',
+    'scylla.reactor.aio_reads',
+    'scylla.reactor.aio_writes',
+    'scylla.reactor.cpp_exceptions',
+    'scylla.reactor.cpu_busy_ms',
+    'scylla.reactor.cpu_steal_time_ms',
+    'scylla.reactor.fstream_read_bytes',
+    'scylla.reactor.fstream_read_bytes_blocked',
+    'scylla.reactor.fstream_reads',
+    'scylla.reactor.fstream_reads_ahead_bytes_discarded',
+    'scylla.reactor.fstream_reads_aheads_discarded',
+    'scylla.reactor.fstream_reads_blocked',
+    'scylla.reactor.fsyncs',
+    'scylla.reactor.io_threaded_fallbacks',
+    'scylla.reactor.logging_failures',
+    'scylla.reactor.polls',
+    'scylla.reactor.tasks_processed',
+    'scylla.storage.proxy.coordinator_background_replica_writes_failed_local_node',
+    'scylla.storage.proxy.coordinator_cas_prune',
+    'scylla.storage.proxy.coordinator_completed_reads_local_node',
+    'scylla.storage.proxy.coordinator_read_errors_local_node',
+    'scylla.storage.proxy.coordinator_read_latency',
+    'scylla.storage.proxy.coordinator_read_latency_summary',
+    'scylla.storage.proxy.coordinator_read_repair_write_attempts_local_node',
+    'scylla.storage.proxy.coordinator_reads_local_node',
+    'scylla.storage.proxy.coordinator_total_write_attempts_local_node',
+    'scylla.storage.proxy.coordinator_write_errors_local_node',
+    'scylla.storage.proxy.coordinator_write_latency',
+    'scylla.storage.proxy.coordinator_write_latency_summary',
+    'scylla.storage.proxy.replica_cross_shard_ops',
+    'scylla.streaming.total_incoming_bytes',
+    'scylla.streaming.total_outgoing_bytes',
+    'scylla.transport.auth_responses',
+    'scylla.transport.cql_connections',
+    'scylla.transport.cql_errors_total',
+    'scylla.transport.execute_requests',
+    'scylla.transport.options_requests',
+    'scylla.transport.prepare_requests',
+    'scylla.transport.query_requests',
+    'scylla.transport.register_requests',
+    'scylla.transport.requests_blocked_memory',
+    'scylla.transport.requests_served',
+    'scylla.transport.requests_shed',
+    'scylla.transport.startups',
+]
+
+bucket_metrics = [
+    'scylla.storage.proxy.coordinator_read_latency.bucket',
+    'scylla.storage.proxy.coordinator_write_latency.bucket',
+]
 
 # expand the lists into a single list of metrics
 def get_metrics(metric_groups):
@@ -901,7 +902,6 @@ def get_metrics(metric_groups):
 
 
 def transform_metrics_omv2(metric_list):
-    """Given a list of metrics, return a list of dicts with the metric name and type"""
     metrics = []
     for metric_name in metric_list:
         if metric_name in non_conforming_metrics:
@@ -911,7 +911,6 @@ def transform_metrics_omv2(metric_list):
             metric_name += '.count'
 
         metrics.append(metric_name)
-
     return metrics
 
 
@@ -929,6 +928,6 @@ INSTANCE_DEFAULT_GROUPS = [
 INSTANCE_DEFAULT_METRICS = get_metrics(INSTANCE_DEFAULT_GROUPS)
 INSTANCE_ADDITIONAL_GROUPS = additional_instance_groups
 INSTANCE_ADDITIONAL_METRICS = get_metrics(additional_instance_groups)
-INSTANCE_DEFAULT_METRICS_V2 = transform_metrics_omv2(INSTANCE_DEFAULT_METRICS) + bucket_metrics
-INSTANCE_ADDITIONAL_METRICS_V2 = transform_metrics_omv2(INSTANCE_ADDITIONAL_METRICS)
+INSTANCE_DEFAULT_METRICS_V2 = transform_metrics_omv2(get_metrics(INSTANCE_DEFAULT_GROUPS)) + bucket_metrics
+INSTANCE_ADDITIONAL_METRICS_V2 = transform_metrics_omv2(get_metrics(additional_instance_groups))
 FLAKY_METRICS = flaky_metrics

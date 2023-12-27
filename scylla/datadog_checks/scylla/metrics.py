@@ -671,7 +671,6 @@ def construct_metrics_config(metrics):
         elif raw_metric_name.endswith('_count'):
             if metric_name.endswith('.count'):
                 metric_name = metric_name[:-6]
-            raw_metric_name = raw_metric_name[:-6]
         config = {raw_metric_name: {'name': metric_name}}
         metrics.append(config)
     return metrics
