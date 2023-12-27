@@ -18,7 +18,50 @@ ENV RUSTC_SHA256="3dc5ef50861ee18657f9db2eeb7392f9c2a6c95c90ab41e45ab4ca71476b43
 ENV RUSTUP_VERSION="1.24.3"
 ENV RUSTUP_SHA256="3dc5ef50861ee18657f9db2eeb7392f9c2a6c95c90ab41e45ab4ca71476b4338"
 
-ENV PATH="/opt/python/cp${PYTHON_MAJOR}-cp${PYTHON_MAJOR}/bin:${PATH}"
+# Install a more recent version of GCC
+ENV GCC_VERSION=10.4.0
+ENV GCC_SHA256=ab1974017834430de27fd803ade4389602a7d6ca1362496c57bef384b2a4cb07
+COPY scripts/build-gcc.sh /
+RUN chmod +x /build-gcc.sh \
+    && /build-gcc.sh \
+    && rm /build-gcc.sh
+ENV CC=/opt/gcc-${GCC_VERSION}/bin/gcc
+ENV CXX=/opt/gcc-${GCC_VERSION}/bin/g++
+
+# openssl
+RUN yum install -y perl-IPC-Cmd
+RUN curl "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" -o /tmp/openssl.tar.gz \
+ && echo "${OPENSSL_SHA256}  /tmp/openssl.tar.gz" | sha256sum --check \
+ && tar -C /tmp -xf /tmp/openssl.tar.gz \
+ && cd /tmp/openssl-${OPENSSL_VERSION} \
+ && ./config -Wl,-Bsymbolic-functions -fPIC shared no-ssl2 no-ssl3 \
+ && make \
+ && make install \
+ && rm -rf /tmp/openssl-${OPENSSL_VERSION} \
+ && rm -rf /tmp/openssl.tar.gz
+
+# Compile and install Python
+ENV PYTHON_VERSION=3.11.5
+ENV PYTHON_SHA256="a12a0a013a30b846c786c010f2c19dd36b7298d888f7c4bd1581d90ce18b5e58"
+RUN yum install -y libffi-devel
+RUN curl "https://python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz" -Lo /tmp/python.tar.gz \
+ && echo "${PYTHON_SHA256}  /tmp/python.tar.gz" | sha256sum --check \
+ && tar -C /tmp -xf /tmp/python.tar.gz \
+ && cd /tmp/Python-${PYTHON_VERSION} \
+ && ./configure --prefix=/opt/python/${PYTHON_VERSION} --with-ensurepip=yes --enable-shared --enable-ipv6 --with-dbmliborder= \
+ && make \
+ && make install \
+ && rm -rf /tmp/Python-${PYTHON_VERSION} \
+ && rm -rf /tmp/python.tar.gz
+
+# Rust toolchain
+RUN curl -sSL -o rustup-init "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/x86_64-unknown-linux-gnu/rustup-init" \
+ && echo "${RUSTUP_SHA256}  rustup-init" | sha256sum --check \
+ && chmod +x ./rustup-init \
+ && ./rustup-init -y --profile minimal --default-toolchain "${RUST_VERSION}" \
+ && echo "${RUSTC_SHA256}  $HOME/.cargo/bin/rustc" | sha256sum --check \
+ && rm ./rustup-init
+ENV PATH="/root/.cargo/bin:${PATH}"
 
 # MQ Client library required by pymqi
 RUN mkdir -p /opt/mqm \
@@ -35,21 +78,8 @@ RUN curl "https://kerberos.org/dist/krb5/1.20/krb5-${KRB5_VERSION}.tar.gz" -o /t
  && ./configure --without-keyutils --without-system-verto --without-libedit --disable-static \
  && make \
  && make install \
- && cd - \
  && rm -rf /tmp/krb5-${KRB5_VERSION}/src \
  && rm -rf /tmp/krb5.tar.gz
-
-# openssl
-RUN yum install -y perl-IPC-Cmd
-RUN curl "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" -o /tmp/openssl.tar.gz \
- && tar -C /tmp -xf /tmp/openssl.tar.gz \
- && echo "${OPENSSL_SHA256}  /tmp/openssl.tar.gz" | sha256sum --check \
- && cd /tmp/openssl-${OPENSSL_VERSION} \
- && ./config -Wl,-Bsymbolic-functions -fPIC shared no-ssl2 no-ssl3 \
- && make \
- && make install \
- && rm -rf /tmp/openssl-${OPENSSL_VERSION} \
- && rm -rf /tmp/openssl.tar.gz
 
 # libxml & libxslt for lxml
 RUN curl "https://download.gnome.org/sources/libxml2/2.10/libxml2-${LIBXML2_VERSION}.tar.xz" -Lo /tmp/libxml2.tar.xz \
@@ -76,15 +106,10 @@ RUN curl "https://download.gnome.org/sources/libxslt/1.1/libxslt-${LIBXSLT_VERSI
  && tar -C /tmp -xf /tmp/libxslt.tar.xz \
  && cd /tmp/libxslt-${LIBXSLT_VERSION} \
  && ./configure \
- --without-iconv \
  --without-python \
- --without-icu \
- --without-debug \
- --without-mem-debug \
- --without-run-debug \
- --without-legacy \
- --without-catalog \
- --without-docbook \
+ --without-crypto \
+ --without-profiler \
+ --without-debugger \
  --disable-static \
  && make \
  && make install \
@@ -94,34 +119,22 @@ RUN curl "https://download.gnome.org/sources/libxslt/1.1/libxslt-${LIBXSLT_VERSI
 # libpq and pg_config as needed by psycopg2
 RUN yum install -y postgresql_libs postgresql-devel
 
-# Rust toolchain
-RUN curl -sSL -o rustup-init "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/x86_64-unknown-linux-gnu/rustup-init" \
-    && echo "${RUSTUP_SHA256}  rustup-init" | sha256sum --check \
-    && chmod +x ./rustup-init \
-    && ./rustup-init -y --profile minimal --default-toolchain "${RUST_VERSION}" \
-    && echo "${RUSTC_SHA256}  $HOME/.cargo/bin/rustc" | sha256sum --check \
-    && rm ./rustup-init
-ENV PATH="/root/.cargo/bin:${PATH}"
-
-# Compile and install Python
-ENV PYTHON_VERSION=3.11.5
-ENV PYTHON_SHA256="a12a0a013a30b846c786c010f2c19dd36b7298d888f7c4bd1581d90ce18b5e58"
-RUN yum install -y libffi-devel
-RUN curl "https://python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz" -Lo /tmp/python.tar.gz \
- && echo "${PYTHON_SHA256}  /tmp/python.tar.gz" | sha256sum --check \
- && tar -C /tmp -xf /tmp/python.tar.gz \
- && cd /tmp/Python-${PYTHON_VERSION} \
- && ./configure --prefix=/opt/python/${PYTHON_VERSION} --with-ensurepip=yes --enable-shared --enable-ipv6 --with-dbmliborder= \
+# librdkafka for confluent-kafka
+ENV LIBRDKAFKA_VERSION="2.3.0"
+ENV LIBRDKAFKA_SHA256="2d49c35c77eeb3d42fa61c43757fcbb6a206daa560247154e60642bcdcc14d12"
+RUN curl "https://github.com/confluentinc/librdkafka/archive/refs/tags/v${LIBRDKAFKA_VERSION}.tar.gz" -Lo /tmp/librdkafka.tar.gz \
+ && echo "${LIBRDKAFKA_SHA256}  /tmp/librdkafka.tar.gz" | sha256sum --check \
+ && tar -C /tmp -xf /tmp/librdkafka.tar.gz \
+ && cd /tmp/librdkafka-${LIBRDKAFKA_VERSION} \
+ && ./configure \
  && make \
  && make install \
- && rm -rf /tmp/Python-${PYTHON_VERSION} \
- && rm -rf /tmp/python.tar.gz
+ && rm -rf /tmp/librdkafka-${LIBRDKAFKA_VERSION} \
+ && rm -rf /tmp/librdkafka.tar.gz
+
 
 ENV PATH="/opt/python/${PYTHON_VERSION}/bin:${PATH}"
 ENV LD_LIBRARY_PATH="/opt/python/3.11.5/lib/:${LD_LIBRARY_PATH}"
+ENV OPENSSL_DIR="/usr/local/lib64"
 
-# For cryptography
-ENV RUSTFLAGS="-C link-arg=-Wl,-rpath"
-ENV OPENSSLDIR="/usr/local/lib64"
-
-CMD ["python3", "-m", "pip", "install", "-r", "/home/requirements.in"]
+CMD ["bash", "/home/build_dependencies.sh"]
