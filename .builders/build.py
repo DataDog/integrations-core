@@ -109,7 +109,8 @@ def build_image():
             dependency_file = mount_dir / 'requirements.in'
             dependency_file.write_text('\n'.join(chain.from_iterable(read_dependencies().values())))
             shutil.copy(HERE / '..' / '.deps' / 'build_dependencies.txt', mount_dir)
-            shutil.copy(HERE / 'scripts' / 'build_dependencies.sh', mount_dir)
+            shutil.copytree(HERE / 'scripts', mount_dir / 'scripts')
+            shutil.copytree(HERE / 'patches', mount_dir / 'patches')
 
             check_process(['docker', 'run', '--rm', '-v', f'{mount_dir}:/home', image_name])
 

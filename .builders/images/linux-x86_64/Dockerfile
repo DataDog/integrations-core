@@ -137,4 +137,4 @@ ENV PATH="/opt/python/${PYTHON_VERSION}/bin:${PATH}"
 ENV LD_LIBRARY_PATH="/opt/python/3.11.5/lib/:${LD_LIBRARY_PATH}"
 ENV OPENSSL_DIR="/usr/local/lib64"
 
-CMD ["bash", "/home/build_dependencies.sh"]
+CMD ["bash", "/home/scripts/build_dependencies.sh"]

@@ -5,6 +5,7 @@ set -exu
 build_dependencies_file="/home/build_dependencies.txt"
 constraints_file="/home/constraints.txt"
 wheels_dir="/home/wheels_py3"
+patches_folder="/home/patches"
 
 touch "${constraints_file}"
 echo "bcrypt < 4.1.0" >> "${constraints_file}"
@@ -26,6 +27,16 @@ build_wheels() {
            -c "${constraints_file}" \
            "$@"
 }
+
+# pydantic-core
+pydantic_core_version=2.1.2
+curl -L "https://github.com/pydantic/pydantic-core/archive/refs/tags/v${pydantic_core_version}.tar.gz" \
+    | tar -C /tmp -xzf -
+pushd "/tmp/pydantic-core-${pydantic_core_version}"
+patch -p1 -i "${patches_folder}/pydantic-core-for-manylinux1.patch"
+build_wheels --no-deps .
+popd
+
 
 build_wheels -r /home/requirements.in
 
