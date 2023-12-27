@@ -6,6 +6,7 @@
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
+    "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into Zeek logs",
     "title": "zeek",
