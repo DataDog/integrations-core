@@ -166,7 +166,8 @@ RUN curl "https://www.unixodbc.org/unixODBC-${ODBC_VERSION}.tar.gz" -Lo /tmp/uni
 
 ENV PATH="/opt/python/${PYTHON_VERSION}/bin:${PATH}"
 ENV LD_LIBRARY_PATH="/opt/python/3.11.5/lib/:${LD_LIBRARY_PATH}"
-ENV OPENSSL_DIR="/usr/local/lib64"
+# Environment variables to help openssl crate find OpenSSL
+ENV OPENSSL_LIB_DIR="/usr/local/lib64"
+ENV OPENSSL_INCLUDE_DIR="/usr/local/include"
 
 CMD ["bash", "/home/scripts/build_dependencies.sh"]
-
