@@ -116,9 +116,6 @@ RUN curl "https://download.gnome.org/sources/libxslt/1.1/libxslt-${LIBXSLT_VERSI
  && rm -rf /tmp/libxslt-${LIBXSLT_VERSION} \
  && rm -rf /tmp/libxslt.tar.xz
 
-# libpq and pg_config as needed by psycopg2
-RUN yum install -y postgresql_libs postgresql-devel
-
 # librdkafka for confluent-kafka
 ENV LIBRDKAFKA_VERSION="2.3.0"
 ENV LIBRDKAFKA_SHA256="2d49c35c77eeb3d42fa61c43757fcbb6a206daa560247154e60642bcdcc14d12"
@@ -132,9 +129,44 @@ RUN curl "https://github.com/confluentinc/librdkafka/archive/refs/tags/v${LIBRDK
  && rm -rf /tmp/librdkafka-${LIBRDKAFKA_VERSION} \
  && rm -rf /tmp/librdkafka.tar.gz
 
+# libpq and pg_config as needed by psycopg2
+ENV POSTGRESQL_VERSION="16.0"
+ENV POSTGRESQL_SHA256="df9e823eb22330444e1d48e52cc65135a652a6fdb3ce325e3f08549339f51b99"
+RUN curl "https://ftp.postgresql.org/pub/source/v${POSTGRESQL_VERSION}/postgresql-${POSTGRESQL_VERSION}.tar.bz2" -Lo /tmp/postgresql.tar.bz2 \
+ && echo "${POSTGRESQL_SHA256}  /tmp/postgresql.tar.bz2" | sha256sum --check \
+ && tar -C /tmp -xf /tmp/postgresql.tar.bz2 \
+ && cd /tmp/postgresql-${POSTGRESQL_VERSION} \
+ && ./configure \
+ --without-readline \
+ --with-openssl \
+ --without-icu \
+ && make \
+ && make install \
+ && rm -rf /tmp/postgresql-${POSTGRESQL_VERSION} \
+ && rm -rf /tmp/postgres.tar.bz2
+# Add path to pg_config
+ENV PATH="/usr/local/pgsql/bin:${PATH}"
+
+# odbc for pyodbc
+ENV ODBC_VERSION="2.3.9"
+ENV ODBC_SHA256="52833eac3d681c8b0c9a5a65f2ebd745b3a964f208fc748f977e44015a31b207"
+RUN curl "https://www.unixodbc.org/unixODBC-${ODBC_VERSION}.tar.gz" -Lo /tmp/unixodbc.tar.gz \
+ && echo "${ODBC_SHA256}  /tmp/unixodbc.tar.gz" | sha256sum --check \
+ && tar -C /tmp -xf /tmp/unixodbc.tar.gz \
+ && cd /tmp/unixODBC-${ODBC_VERSION} \
+ && ./configure \
+ --disable-readline \
+ --with-included-ltdl \
+ --enable-ltdl-install \
+ && make \
+ && make install \
+ && rm -rf /tmp/unixODBC-${ODBC_VERSION} \
+ && rm -rf /tmp/unixobdc.tar.gz
+
 
 ENV PATH="/opt/python/${PYTHON_VERSION}/bin:${PATH}"
 ENV LD_LIBRARY_PATH="/opt/python/3.11.5/lib/:${LD_LIBRARY_PATH}"
 ENV OPENSSL_DIR="/usr/local/lib64"
 
 CMD ["bash", "/home/scripts/build_dependencies.sh"]
+
