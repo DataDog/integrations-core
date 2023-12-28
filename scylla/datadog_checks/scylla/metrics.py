@@ -655,8 +655,9 @@ ADDITIONAL_METRICS_MAP = {
 }
 
 NON_CONFORMING_LIST = [
-    'cache.bytes_total'
+    'cache.bytes_total',
 ]
+
 
 def construct_metrics_config(metrics):
     # turns the metrics from a list of dicts to a flat dict
@@ -671,9 +672,7 @@ def construct_metrics_config(metrics):
             if metric_name.endswith('.count'):
                 metric_name = metric_name[:-6]
             raw_metric_name = raw_metric_name[:-6]
-        elif raw_metric_name.endswith('_count'):
-            if metric_name.endswith('.count'):
-                metric_name = metric_name[:-6]
+
         config = {raw_metric_name: {'name': metric_name}}
         metrics.append(config)
     return metrics
