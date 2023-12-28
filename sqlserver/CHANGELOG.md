@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 15.2.1 / 2023-12-28
+
+***Fixed***:
+
+* Revert "[DBMON-2989] report sql obfuscation error count (#15990)" ([#16439](https://github.com/DataDog/integrations-core/pull/16439))
+* fix unexpected exception when reporting sqlserver statements obfuscate xml plan error ([#16461](https://github.com/DataDog/integrations-core/pull/16461))
+
 ## 15.2.0 / 2023-11-10
 
 ***Added***:
