@@ -1,4 +1,5 @@
-hatchling==0.25.1
+hatchling==1.21.0; python_version > '3.0'
+hatchling==0.25.1; python_version < '3.0'
 setuptools==66.1.1; python_version > '3.0'
 setuptools==40.9.0; python_version < '3.0'
 wheel==0.38.4; python_version > '3.0'
