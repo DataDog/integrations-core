@@ -18,16 +18,6 @@ ENV RUSTC_SHA256="3dc5ef50861ee18657f9db2eeb7392f9c2a6c95c90ab41e45ab4ca71476b43
 ENV RUSTUP_VERSION="1.24.3"
 ENV RUSTUP_SHA256="3dc5ef50861ee18657f9db2eeb7392f9c2a6c95c90ab41e45ab4ca71476b4338"
 
-# Install a more recent version of GCC
-ENV GCC_VERSION=10.4.0
-ENV GCC_SHA256=ab1974017834430de27fd803ade4389602a7d6ca1362496c57bef384b2a4cb07
-COPY scripts/build-gcc.sh /
-RUN chmod +x /build-gcc.sh \
-    && /build-gcc.sh \
-    && rm /build-gcc.sh
-ENV CC=/opt/gcc-${GCC_VERSION}/bin/gcc
-ENV CXX=/opt/gcc-${GCC_VERSION}/bin/g++
-
 # openssl
 RUN yum install -y perl-IPC-Cmd
 RUN curl "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" -o /tmp/openssl.tar.gz \
@@ -144,8 +134,9 @@ RUN curl "https://ftp.postgresql.org/pub/source/v${POSTGRESQL_VERSION}/postgresq
  && make install \
  && rm -rf /tmp/postgresql-${POSTGRESQL_VERSION} \
  && rm -rf /tmp/postgres.tar.bz2
-# Add path to pg_config
+# Add paths to pg_config and to the library
 ENV PATH="/usr/local/pgsql/bin:${PATH}"
+ENV LD_LIBRARY_PATH="/usr/local/pgsql/lib/:${LD_LIBRARY_PATH}"
 
 # odbc for pyodbc
 ENV ODBC_VERSION="2.3.9"
@@ -171,3 +162,4 @@ ENV OPENSSL_LIB_DIR="/usr/local/lib64"
 ENV OPENSSL_INCLUDE_DIR="/usr/local/include"
 
 CMD ["bash", "/home/scripts/build_dependencies.sh"]
+
