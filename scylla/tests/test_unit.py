@@ -169,7 +169,7 @@ def test_instance_invalid_group_check_omv2(aggregator, mock_db_data, instance):
 
     inst = deepcopy(instance)
     inst['metric_groups'] = additional_metric_groups
-    
+
     with pytest.raises(ConfigurationError):
         ScyllaCheck('scylla', {}, [inst])
 

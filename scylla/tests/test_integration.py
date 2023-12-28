@@ -8,8 +8,8 @@ from .common import (
     FLAKY_METRICS,
     INSTANCE_DEFAULT_METRICS,
     INSTANCE_DEFAULT_METRICS_V2,
-
 )
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
