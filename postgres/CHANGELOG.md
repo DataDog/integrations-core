@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 15.3.1 / 2023-12-28
+
+***Fixed***:
+
+* Revert "[DBMON-2989] report sql obfuscation error count (#15990)" ([#16439](https://github.com/DataDog/integrations-core/pull/16439))
+
 ## 15.3.0 / 2023-11-10
 
 ***Added***:
