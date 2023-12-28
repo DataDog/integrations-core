@@ -224,3 +224,30 @@ class TestReleaseTagPattern:
         integration = repo.integrations.get('ddev')
 
         assert integration.release_tag_pattern == r'ddev-v\d+\.\d+\.\d+'
+
+
+class TestMetrics:
+    def test_has_metrics(self, fake_repo):
+        integration = fake_repo.integrations.get('dummy')
+
+        metrics = list(integration.metrics)
+        assert len(metrics) == 1
+        metric = metrics[0]
+        assert metric.metric_name == 'dummy.metric'
+        assert metric.metric_type == 'gauge'
+        assert metric.interval == 10
+        assert metric.unit_name == 'seconds'
+        assert metric.per_unit_name == 'object'
+        assert metric.description == 'description'
+        assert metric.orientation == 0
+        assert metric.integration == 'dummy'
+        assert metric.short_name == 'short'
+        assert metric.curated_metric == ''
+
+    def test_has_no_metrics(self, fake_repo):
+        integration = fake_repo.integrations.get('no_metrics')
+        assert not list(integration.metrics)
+
+    def test_has_no_metadata_file(self, fake_repo):
+        integration = fake_repo.integrations.get('no_metadata_file')
+        assert not list(integration.metrics)

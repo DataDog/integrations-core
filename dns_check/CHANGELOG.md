@@ -2,7 +2,7 @@
 
 <!-- towncrier release notes start -->
 
-## 3.0.1 / 2023-11-10
+## 3.0.1 / 2023-11-10 / Agent 7.50.0
 
 ***Fixed***:
 

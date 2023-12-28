@@ -48,6 +48,13 @@ python = ["2.7", "{OLD_PYTHON_VERSION}"]
 """,
     )
 
+    write_file(
+        repo_path / 'dummy',
+        'metadata.csv',
+        """metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+dummy.metric,gauge,,,,description,0,dummy,,""",
+    )
+
     for integration in ('dummy', 'datadog_checks_dependency_provider'):
         write_file(
             repo_path / integration,

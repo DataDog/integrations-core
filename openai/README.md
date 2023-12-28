@@ -42,13 +42,19 @@ pip install ddtrace>=1.13
 ```
 
 
-3. Prefix your OpenAI Python application command with `ddtrace-run`.
+3. Prefix your OpenAI Python application command with `ddtrace-run` and the following environment variables as shown below: 
 
 ```shell
 DD_SERVICE="my-service" DD_ENV="staging" DD_API_KEY=<DATADOG_API_KEY> ddtrace-run python <your-app>.py
 ```
 
-**Note**: If the Agent is using a non-default hostname or port, be sure to also set `DD_AGENT_HOST`, `DD_TRACE_AGENT_PORT`, or `DD_DOGSTATSD_PORT`.
+**Notes**:
+<!-- partial
+{{% site-region region="us3,us5,eu,gov,ap1" %}}
+- Non-US1 customers must set `DD_SITE` on the application command to the correct Datadog site parameter as specified in the table in the <a href="https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site">Datadog Site</a> page (for example, `datadoghq.eu` for EU1 customers).{{% /site-region %}}
+partial -->
+
+- If the Agent is using a non-default hostname or port, be sure to also set `DD_AGENT_HOST`, `DD_TRACE_AGENT_PORT`, or `DD_DOGSTATSD_PORT`.
 
 See the [APM Python library documentation][2] for more advanced usage.
 
@@ -238,3 +244,4 @@ Additional helpful documentation, links, and articles:
 [10]: https://platform.openai.com/
 [11]: https://app.datadoghq.com/integrations/openai
 [12]: https://app.datadoghq.com/monitors/recommended?q=integration%3AOpenAI&only_installed=false&p=1
+[13]: https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site
