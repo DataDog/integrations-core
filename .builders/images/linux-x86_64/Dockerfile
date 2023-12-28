@@ -161,5 +161,9 @@ ENV LD_LIBRARY_PATH="/opt/python/3.11.5/lib/:${LD_LIBRARY_PATH}"
 ENV OPENSSL_LIB_DIR="/usr/local/lib64"
 ENV OPENSSL_INCLUDE_DIR="/usr/local/include"
 
+# Note: virtualenv v20.22.0 dropped support for creating py2-based virtual environments,
+# that's why we stick to an older version.
+RUN python3 -m pip install virtualenv==20.21.1
+
 CMD ["bash", "/home/scripts/build_dependencies.sh"]
 
