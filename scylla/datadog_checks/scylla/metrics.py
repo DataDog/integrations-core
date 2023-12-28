@@ -654,6 +654,9 @@ ADDITIONAL_METRICS_MAP = {
     'scylla.view': SCYLLA_VIEW,
 }
 
+NON_CONFORMING_LIST = [
+    'cache.bytes_total'
+]
 
 def construct_metrics_config(metrics):
     # turns the metrics from a list of dicts to a flat dict
@@ -664,7 +667,7 @@ def construct_metrics_config(metrics):
     # interate over the flat dict and create the metric config
     metrics = []
     for raw_metric_name, metric_name in metric_map.items():
-        if raw_metric_name.endswith('_total'):
+        if raw_metric_name.endswith('_total') and metric_name not in NON_CONFORMING_LIST:
             if metric_name.endswith('.count'):
                 metric_name = metric_name[:-6]
             raw_metric_name = raw_metric_name[:-6]

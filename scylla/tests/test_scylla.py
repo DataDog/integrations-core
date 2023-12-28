@@ -141,8 +141,6 @@ def test_instance_full_additional_check_omv2(aggregator, mock_db_data, dd_run_ch
     metrics_to_check = INSTANCE_DEFAULT_METRICS + INSTANCE_ADDITIONAL_METRICS
     transformed_metrics = transform_metrics_omv2(metrics_to_check) + bucket_metrics
 
-    # breakpoint()
-
     for m in metrics_to_check:
         if m in FLAKY_METRICS:
             aggregator.assert_metric(m, count=0)
