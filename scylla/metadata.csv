@@ -307,7 +307,7 @@ scylla.reactor.logging_failures,count,,,,Total number of logging failures,-1,scy
 scylla.reactor.polls,count,,,,Number of times pollers were executed,0,scylla,reactor polls,
 scylla.reactor.tasks_pending,gauge,,task,,Number of pending tasks in the queue,0,scylla,reactor tasks pending,
 scylla.reactor.tasks_processed,count,,task,,Total tasks processed,0,scylla,reactor tasks processed,
-scylla.reactor.timers_pending,gauge,,task,,Number of tasks in the timer-pending queue,0,scylla,reactor timers pending,
+scylla.reactor.timers_pending,count,,task,,Number of tasks in the timer-pending queue,0,scylla,reactor timers pending,
 scylla.reactor.utilization,gauge,,percent,,CPU utilization,0,scylla,reactor utilization,
 scylla.repair.row_from_disk_bytes,count,,byte,,,0,scylla,row from disk bytes,
 scylla.repair.row_from_disk_nr,count,,byte,,,0,scylla,row from disk nr,

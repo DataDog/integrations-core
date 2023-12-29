@@ -421,6 +421,7 @@ if os.environ['SCYLLA_VERSION'] == "3.3.1":
 
     flaky_metrics_3 = [
         'scylla.reactor.abandoned_failed_futures',
+        'scylla.reactor.abandoned_failed_futures.count',
         'scylla.storage.proxy.coordinator_cas_read_contention.count',
         'scylla.storage.proxy.coordinator_cas_read_contention.sum',
         'scylla.storage.proxy.coordinator_cas_read_latency.count',
@@ -800,10 +801,6 @@ elif os.environ['SCYLLA_VERSION'] == "5.2.6":
     flaky_metrics = flaky_metrics_5
 
 
-non_conforming_metrics = [
-    'scylla.cache.bytes_total',
-]
-
 omv2_count_metrics = [
     'scylla.alien.total_received_messages',
     'scylla.alien.total_sent_messages',
@@ -922,6 +919,7 @@ omv2_count_metrics = [
     'scylla.database.querier_cache_drops',
     'scylla.database.querier_cache_lookups',
     'scylla.database.querier_cache_misses',
+    'scylla.database.querier_cache_memory_based_evictions',
     'scylla.database.querier_cache_resource_based_evictions',
     'scylla.database.querier_cache_time_based_evictions',
     'scylla.database.reads_rate_limited',
@@ -984,6 +982,7 @@ omv2_count_metrics = [
     'scylla.lsa.memory_evicted',
     'scylla.lsa.memory_freed',
     'scylla.lsa.segments_compacted',
+    'scylla.lsa.segments_migrated',
     'scylla.memory.cross_cpu_free_operations',
     'scylla.memory.free_operations',
     'scylla.memory.malloc_failed',
@@ -1050,27 +1049,53 @@ omv2_count_metrics = [
     'scylla.sstables.row_tombstone_reads',
     'scylla.sstables.row_writes',
     'scylla.sstables.single_partition_reads',
+    'scylla.sstables.sstable_partition_reads',
     'scylla.sstables.static_row_writes',
     'scylla.sstables.tombstone_writes',
     'scylla.sstables.total_deleted',
     'scylla.sstables.total_open_for_reading',
     'scylla.sstables.total_open_for_writing',
     'scylla.stall.detector_reported',
+    'scylla.storage.proxy.coordinator_background_read_repairs',
     'scylla.storage.proxy.coordinator_background_replica_writes_failed_local_node',
+    'scylla.storage.proxy.coordinator_background_write_bytes',
+    'scylla.storage.proxy.coordinator_background_writes_failed',
+    'scylla.storage.proxy.coordinator_background_write_bytes',
+    'scylla.storage.proxy.coordinator_background_writes_failed',
+    'scylla.storage.proxy.coordinator_canceled_read_repairs',
     'scylla.storage.proxy.coordinator_cas_prune',
     'scylla.storage.proxy.coordinator_completed_reads_local_node',
+    'scylla.storage.proxy.coordinator_foreground_read_repair',
+    'scylla.storage.proxy.coordinator_queued_write_bytes',
+    'scylla.storage.proxy.coordinator_range_timeouts',
+    'scylla.storage.proxy.coordinator_range_unavailable',
     'scylla.storage.proxy.coordinator_read_errors_local_node',
     'scylla.storage.proxy.coordinator_read_latency',
     'scylla.storage.proxy.coordinator_read_latency_summary',
     'scylla.storage.proxy.coordinator_read_repair_write_attempts_local_node',
+    'scylla.storage.proxy.coordinator_read_retries',
+    'scylla.storage.proxy.coordinator_read_timeouts',
+    'scylla.storage.proxy.coordinator_read_unavailable',
     'scylla.storage.proxy.coordinator_reads_local_node',
+    'scylla.storage.proxy.coordinator_speculative_data_reads',
+    'scylla.storage.proxy.coordinator_speculative_digest_reads',
+    'scylla.storage.proxy.coordinator_throttled_writes',
     'scylla.storage.proxy.coordinator_total_write_attempts_local_node',
     'scylla.storage.proxy.coordinator_write_errors_local_node',
     'scylla.storage.proxy.coordinator_write_latency',
     'scylla.storage.proxy.coordinator_write_latency_summary',
+    'scylla.storage.proxy.coordinator_write_timeouts',
+    'scylla.storage.proxy.coordinator_write_unavailable',
     'scylla.storage.proxy.replica_cross_shard_ops',
+    'scylla.storage.proxy.replica_forwarded_mutations',
+    'scylla.storage.proxy.replica_forwarding_errors',
+    'scylla.storage.proxy.replica_reads',
+    'scylla.storage.proxy.replica_received_counter_updates',
+    'scylla.storage.proxy.replica_received_mutations',
     'scylla.streaming.total_incoming_bytes',
     'scylla.streaming.total_outgoing_bytes',
+    'scylla.thrift.served',
+    'scylla.thrift.thrift_connections',
     'scylla.tracing.dropped_records',
     'scylla.tracing.dropped_sessions',
     'scylla.tracing.keyspace_helper_bad_column_family_errors',
@@ -1094,6 +1119,14 @@ omv2_count_metrics = [
     'scylla.view.update_generator_queued_batches',
     'scylla.view.update_generator_sstables_to_move',
 ]
+# special case since the metric type is different in 3.3
+if os.environ.get('SCYLLA_VERSION') < '5.2.6':
+    omv2_count_metrics.append('scylla.reactor.timers_pending')
+    omv2_count_metrics.append('scylla.database.view_update_backlog')
+    omv2_count_metrics.append('scylla.memory.allocated_memory')
+    omv2_count_metrics.append('scylla.memory.free_memory')
+    omv2_count_metrics.append('scylla.memory.total_memory')
+
 
 bucket_metrics = [
     'scylla.storage.proxy.coordinator_read_latency.bucket',
@@ -1108,6 +1141,7 @@ def get_metrics(metric_groups):
 
 def transform_metrics_omv2(metric_list):
     metrics = []
+    # breakpoint()
     for metric_name in metric_list:
         if metric_name in omv2_count_metrics:
             metric_name += '.count'

@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
+from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 
 from .config_models import ConfigMixin
@@ -19,18 +19,10 @@ class ScyllaCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
     def get_default_config(self):
         metric_groups = self.instance.get('metric_groups', [])
         additional_metrics = []
-        if metric_groups:
-            errors = []
-            for group in metric_groups:
-                try:
-                    additional_metrics.append(ADDITIONAL_METRICS_MAP[group])
-                except KeyError:
-                    errors.append(group)
 
-            if errors:
-                raise ConfigurationError(
-                    'Invalid metric_groups found in scylla conf.yaml: {}'.format(', '.join(errors))
-                )
+        if metric_groups:
+            for group in metric_groups:
+                additional_metrics.append(ADDITIONAL_METRICS_MAP[group])
 
         metrics = INSTANCE_DEFAULT_METRICS + additional_metrics
 

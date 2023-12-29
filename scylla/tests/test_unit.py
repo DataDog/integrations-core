@@ -46,7 +46,6 @@ def test_instance_default_check_omv2(aggregator, mock_db_data, dd_run_check, ins
 
     dd_run_check(check)
     dd_run_check(check)
-
     for m in INSTANCE_DEFAULT_METRICS_V2:
         if m in FLAKY_METRICS:
             aggregator.assert_metric(m, count=0)
@@ -164,14 +163,15 @@ def test_instance_invalid_group_check(aggregator, mock_db_data, instance_legacy)
 
 @pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
 @pytest.mark.unit
-def test_instance_invalid_group_check_omv2(aggregator, mock_db_data, instance):
+def test_instance_invalid_group_check_omv2(aggregator, mock_db_data, dd_run_check, instance):
     additional_metric_groups = ['scylla.bogus', 'scylla.sstables']
 
     inst = deepcopy(instance)
     inst['metric_groups'] = additional_metric_groups
 
+    check = ScyllaCheck('scylla', {}, [inst])
     with pytest.raises(ConfigurationError):
-        ScyllaCheck('scylla', {}, [inst])
+        check.load_configuration_models()
 
     aggregator.assert_service_check('scylla.openmetrics.health', count=0)
 
