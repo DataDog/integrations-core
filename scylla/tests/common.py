@@ -1126,7 +1126,7 @@ if os.environ.get('SCYLLA_VERSION') < '5.2.6':
     omv2_count_metrics.append('scylla.memory.allocated_memory')
     omv2_count_metrics.append('scylla.memory.free_memory')
     omv2_count_metrics.append('scylla.memory.total_memory')
-
+    omv2_count_metrics.append('scylla.storage.proxy.coordinator_cas_read_timouts')
 
 bucket_metrics = [
     'scylla.storage.proxy.coordinator_read_latency.bucket',
@@ -1141,7 +1141,6 @@ def get_metrics(metric_groups):
 
 def transform_metrics_omv2(metric_list):
     metrics = []
-    # breakpoint()
     for metric_name in metric_list:
         if metric_name in omv2_count_metrics:
             metric_name += '.count'
@@ -1164,6 +1163,6 @@ INSTANCE_DEFAULT_GROUPS = [
 INSTANCE_DEFAULT_METRICS = get_metrics(INSTANCE_DEFAULT_GROUPS)
 INSTANCE_ADDITIONAL_GROUPS = additional_instance_groups
 INSTANCE_ADDITIONAL_METRICS = get_metrics(additional_instance_groups)
-INSTANCE_DEFAULT_METRICS_V2 = transform_metrics_omv2(get_metrics(INSTANCE_DEFAULT_GROUPS)) + bucket_metrics
-INSTANCE_ADDITIONAL_METRICS_V2 = transform_metrics_omv2(get_metrics(additional_instance_groups))
+INSTANCE_DEFAULT_METRICS_V2 = transform_metrics_omv2(INSTANCE_DEFAULT_METRICS) + bucket_metrics
+INSTANCE_ADDITIONAL_METRICS_V2 = transform_metrics_omv2(INSTANCE_ADDITIONAL_METRICS)
 FLAKY_METRICS = flaky_metrics
