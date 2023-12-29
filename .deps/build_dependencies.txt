@@ -13,3 +13,4 @@ cython<3.0.0
 pip-tools==7.3.0; python_version > '3.0'
 pip-tools==5.4.0; python_version < '3.0'
 tomli>=2.0.1
+auditwheel==5.4.0; sys_platform == 'linux'

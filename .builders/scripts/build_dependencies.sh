@@ -4,6 +4,7 @@ set -exu
 
 build_dependencies_file="/home/build_dependencies.txt"
 constraints_file="/home/constraints.txt"
+stg_dir="/home/stg_py3"
 wheels_dir="/home/wheels_py3"
 patches_folder="/home/patches"
 
@@ -18,8 +19,8 @@ python -m pip install -r ${build_dependencies_file}
 build_wheels() {
     python -m pip wheel \
            --no-build-isolation \
-           --find-links "${wheels_dir}" \
-           -w "${wheels_dir}" \
+           --find-links "${stg_dir}" \
+           -w "${stg_dir}" \
            -c "${constraints_file}" \
            "$@"
 }
@@ -36,3 +37,18 @@ popd
 
 build_wheels -r /home/requirements.in
 
+# Repair wheels
+python /home/scripts/repair_wheels.py \
+       --source-dir "${stg_dir}" \
+       --output-dir "${wheels_dir}" \
+       --exclude "libmqic_r.so"
+
+# Generate lockfile
+python -m piptools compile \
+       --no-index \
+       --generate-hashes \
+       --no-header \
+       --no-emit-find-links \
+       --find-links "${wheels_dir}" \
+       --output-file /home/frozen.txt \
+       /home/requirements.in
