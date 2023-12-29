@@ -8,7 +8,11 @@ stg_dir="/home/stg_py3"
 wheels_dir="/home/wheels_py3"
 patches_folder="/home/patches"
 
+# A constraints file that we pass to pip when building wheels.
+# Useful for adding additional constraints on specific transitive dependencies
+# or for achieving a consistent environment even when running `pip wheel` several times
 touch "${constraints_file}"
+# bcrypt >= 4.1.0 requires rust >= 1.64, which dropped support for glibc 2.12 (~Centos 6)
 echo "bcrypt < 4.1.0" >> "${constraints_file}"
 
 # Create and activate the build virtualenv and install build dependencies on it
@@ -33,8 +37,9 @@ pushd "/tmp/pydantic-core-${pydantic_core_version}"
 patch -p1 -i "${patches_folder}/pydantic-core-for-manylinux1.patch"
 build_wheels --no-deps .
 popd
+echo "pydantic-core == ${pydantic_core_version}" >> "${constraints_file}"
 
-
+# Collect and build everything
 build_wheels -r /home/requirements.in
 
 # Repair wheels
