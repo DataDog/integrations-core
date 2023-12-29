@@ -1,0 +1,36 @@
+{
+	"version": 2,
+	"created_at": "2023-12-26",
+	"last_updated_at": "2023-12-26",
+	"title": "Memory usage for device {{snmp_device.name}} in namespace {{device_namespace.name}} is outside of normal range",
+	"description": "Monitors memory usage on your SNMP devices to alert you when usage data appears abnormal on a weekly basis (i.e. this monday vs. last monday)",
+	"definition": {
+		"name": "[SNMP] Memory usage for device {{snmp_device.name}} in namespace {{device_namespace.name}} is outside of normal range",
+		"type": "query alert",
+		"query": "avg(last_4h):anomalies(avg:snmp.memory.usage{*} by {device_namespace,snmp_device}, 'basic', 2, direction='both', interval=60, alert_window='last_15m', count_default_zero='true', seasonality='weekly') >= 1",
+		"message": "{{#is_alert}} \n{{snmp_device.name}} in namespace {{device_namespace.name}} is reporting abnormal memory usage.\n{{/is_alert}} \n\n{{#is_recovery}} \nMemory usage for {{snmp_device.name}} in namespace {{device_namespace.name}} is back to normal.\n{{/is_recovery}}",
+		"tags": [
+            "integration:snmp"
+        ],
+		"options": {
+			"thresholds": {
+				"critical": 1,
+				"critical_recovery": 0
+			},
+			"notify_audit": false,
+			"require_full_window": false,
+			"notify_no_data": true,
+			"no_data_timeframe": 15,
+			"renotify_interval": 0,
+			"threshold_windows": {
+				"trigger_window": "last_15m",
+				"recovery_window": "last_15m"
+			},
+			"include_tags": true,
+			"new_group_delay": 60
+		}
+	},
+	"tags": [
+		"integration:snmp"
+	]
+}
