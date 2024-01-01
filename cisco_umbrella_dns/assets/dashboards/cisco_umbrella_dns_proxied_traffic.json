@@ -1128,13 +1128,13 @@
                             }
                         ],
                         "response_format": "timeseries",
-                "style": {
+                        "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
                             "line_width": "normal"
-                    },
+                        },
                         "display_type": "line"
-                }
+                    }
                 ]
             },
             "layout": {
@@ -1252,7 +1252,7 @@
                         "response_format": "scalar"
                     }
                 ],
-                        "style": {
+                "style": {
                     "display": {
                         "type": "stacked",
                         "legend": "automatic"
@@ -1327,7 +1327,7 @@
                 "type": "sunburst",
                 "legend": {
                     "type": "table"
-                    }
+                }
             },
             "layout": {
                 "x": 4,
@@ -1597,11 +1597,11 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "content",
-                                "width": "compact"
+                                "field": "@http.status_code",
+                                "width": "auto"
                             },
                             {
-                                "field": "@http.status_code",
+                                "field": "content",
                                 "width": "auto"
                             }
                         ]

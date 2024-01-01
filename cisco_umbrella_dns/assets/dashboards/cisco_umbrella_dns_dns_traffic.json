@@ -1113,11 +1113,11 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "content",
-                                "width": "compact"
+                                "field": "@returnmessage",
+                                "width": "auto"
                             },
                             {
-                                "field": "@returnmessage",
+                                "field": "content",
                                 "width": "auto"
                             }
                         ]
