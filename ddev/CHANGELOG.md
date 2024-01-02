@@ -2,6 +2,21 @@
 
 <!-- towncrier release notes start -->
 
+## 6.2.0 / 2024-01-02
+
+***Added***:
+
+* Fetch all the tags before generating the Agent changelog ([#16460](https://github.com/DataDog/integrations-core/pull/16460))
+* Add a script to generate all the metrics for a given integration ([#16472](https://github.com/DataDog/integrations-core/pull/16472))
+
+***Fixed***:
+
+* Unpin the `hatch` version ([#16427](https://github.com/DataDog/integrations-core/pull/16427))
+* Ignore `rethinkdb` when bumping the deps ([#16449](https://github.com/DataDog/integrations-core/pull/16449))
+* Override the default configuration when environment vars are provided in the `env start` command ([#16474](https://github.com/DataDog/integrations-core/pull/16474))
+* Update the README file for packages in the `integrations-changelog` command ([#16492](https://github.com/DataDog/integrations-core/pull/16492))
+* Bump the `datadog-checks-dev` minimum version to 29.0.1 ([#16506](https://github.com/DataDog/integrations-core/pull/16506))
+
 ## 6.1.0 / 2023-12-14
 
 ***Added***:
