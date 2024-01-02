@@ -123,12 +123,12 @@ def build_image():
                 shutil.rmtree(output_dir)
 
             # Move wheels to the output directory
-            wheels_dir = mount_dir / 'wheels'
-            shutil.move(wheels_dir, output_dir / 'wheels')
+            shutil.move(mount_dir / 'wheels_py2', output_dir / 'wheels_py2')
+            shutil.move(mount_dir / 'wheels_py3', output_dir / 'wheels_py3')
 
             # Move the final requirements file to the output directory
-            final_requirements = mount_dir / 'frozen.txt'
-            shutil.move(final_requirements, output_dir)
+            shutil.move(mount_dir / 'frozen_py2.txt', output_dir)
+            shutil.move(mount_dir / 'frozen_py3.txt', output_dir)
 
 
 def main():
