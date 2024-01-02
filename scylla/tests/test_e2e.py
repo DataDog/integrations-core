@@ -16,10 +16,7 @@ def test_check_ok(dd_agent_check, instance_legacy):
     aggregator = dd_agent_check(instance_legacy, rate=True)
 
     for metric in INSTANCE_DEFAULT_METRICS:
-        if metric in FLAKY_METRICS:
-            aggregator.assert_metric(metric, count=0)
-        else:
-            aggregator.assert_metric(metric)
+        aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_service_check('scylla.prometheus.health', ScyllaCheck.OK)
