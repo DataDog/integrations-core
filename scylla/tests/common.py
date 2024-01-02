@@ -421,6 +421,7 @@ if os.environ['SCYLLA_VERSION'] == "3.3.1":
 
     flaky_metrics_3 = [
         'scylla.reactor.abandoned_failed_futures',
+        'scylla.reactor.abandoned_failed_futures.count',
         'scylla.storage.proxy.coordinator_cas_read_contention.count',
         'scylla.storage.proxy.coordinator_cas_read_contention.sum',
         'scylla.storage.proxy.coordinator_cas_read_latency.count',
@@ -1126,9 +1127,6 @@ if os.environ.get('SCYLLA_VERSION') < '5.2.6':
     omv2_count_metrics.append('scylla.memory.free_memory')
     omv2_count_metrics.append('scylla.memory.total_memory')
     omv2_count_metrics.append('scylla.memory.used_memory')
-
-if os.environ.get('SCYLLA_VERSION') < '3.3.1':
-    omv2_count_metrics.remove('scylla.reactor.abandoned_failed_futures')
 
 bucket_metrics = [
     'scylla.storage.proxy.coordinator_read_latency.bucket',
