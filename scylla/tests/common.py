@@ -1126,6 +1126,8 @@ if os.environ.get('SCYLLA_VERSION') < '5.2.6':
     omv2_count_metrics.append('scylla.memory.free_memory')
     omv2_count_metrics.append('scylla.memory.total_memory')
     omv2_count_metrics.append('scylla.memory.used_memory')
+
+if os.environ.get('SCYLLA_VERSION') < '3.3.1':
     omv2_count_metrics.remove('scylla.reactor.abandoned_failed_futures')
 
 bucket_metrics = [

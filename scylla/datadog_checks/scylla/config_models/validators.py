@@ -8,7 +8,6 @@ from datadog_checks.scylla.metrics import ADDITIONAL_METRICS_MAP
 
 
 def initialize_instance(values, **kwargs):
-    # breakpoint()
     if 'metric_groups' in values:
         errors = []
         for group in values['metric_groups']:
