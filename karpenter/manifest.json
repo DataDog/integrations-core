@@ -45,6 +45,9 @@
     },
     "logs": {
       "source": "karpenter"
+    },
+    "monitors": {
+      "pod states": "assets/monitors/pod_state.json"
     }
   },
   "author": {

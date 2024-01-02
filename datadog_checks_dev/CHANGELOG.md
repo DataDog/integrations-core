@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 29.0.1 / 2024-01-02
+
+***Fixed***:
+
+* Set the Python version back to 3.9 in the templates ([#16504](https://github.com/DataDog/integrations-core/pull/16504))
+
 ## 29.0.0 / 2023-12-12
 
 ***Removed***:
