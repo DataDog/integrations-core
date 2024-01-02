@@ -33,6 +33,7 @@ def stop_orphaned_threads():
     DBMAsyncJob.executor = ThreadPoolExecutor()
 
 
+@pytest.mark.integration
 def test_collect_metadata(integration_check, dbm_instance, aggregator):
     check = integration_check(dbm_instance)
     check.check(dbm_instance)
@@ -45,6 +46,7 @@ def test_collect_metadata(integration_check, dbm_instance, aggregator):
     assert len(event["metadata"]) > 0
 
 
+@pytest.mark.integration
 def test_collect_schemas(integration_check, dbm_instance, aggregator):
     dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 0.5}
     dbm_instance['relations'] = [{'relation_regex': ".*"}]
@@ -73,7 +75,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
     tables_set = {'persons', "personsdup1", "personsdup2", "pgtable", "pg_newtable", "cities"}
     # if version isn't 9 or 10, check that partition master is in tables
     if float(POSTGRES_VERSION) >= 11:
-        tables_set.update({'test_part'})
+        tables_set.update({'test_part', 'test_part_no_children'})
     tables_not_reported_set = {'test_part1', 'test_part2'}
 
     tables_got = []
@@ -102,10 +104,49 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
         if float(POSTGRES_VERSION) >= 11:
             if table['name'] == 'test_part':
                 keys = list(table.keys())
-                assert_fields(keys, ["num_partitions", "partition_key"])
+                assert_fields(keys, ["indexes", "num_partitions", "partition_key"])
+                assert table['num_partitions'] == 2
+            elif table['name'] == 'test_part_no_children':
+                keys = list(table.keys())
+                assert_fields(keys, ["indexes", "num_partitions", "partition_key"])
+                assert table['num_partitions'] == 0
 
     assert_fields(tables_got, tables_set)
     assert_not_fields(tables_got, tables_not_reported_set)
+
+
+# @pytest.mark.integration
+# def test_collect_schemas_partitioned(integration_check, dbm_instance, aggregator):
+#     dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 0.5}
+#     dbm_instance['relations'] = [{'relation_regex': ".*"}]
+#     dbm_instance["database_autodiscovery"] = {"enabled": True, "include": ["datadog"]}
+#     del dbm_instance['dbname']
+#     check = integration_check(dbm_instance)
+
+#     admin_conn = psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER_ADMIN, password=PASSWORD_ADMIN)
+#     with admin_conn.cursor() as cursor:
+#         cursor.execute("DROP TABLE IF EXISTS test_part_no_children CASCADE")
+#         cursor.execute("CREATE TABLE test_part_no_children (id int, name varchar(40)) PARTITION BY RANGE (id)")
+#         # DO NOT create any partitions, we want to test that we can still collect the schema
+#         # even if the partitioned table has no children
+#     admin_conn.close()
+
+#     run_one_check(check, dbm_instance)
+#     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+#     schema_event = next(e for e in dbm_metadata if e['kind'] == 'pg_databases')
+
+#     database_metadata = schema_event['metadata']
+#     assert len(database_metadata) == 1
+
+#     schemas = database_metadata[0]['schemas']
+#     public = next(s for s in schemas if s['name'] == 'public')
+#     assert public is not None
+#     assert len(public['tables']) > 0
+#     print(database_metadata)
+#     test_part_no_children = next(t for t in public['tables'] if t['name'] == 'test_part_no_children')
+#     print(test_part_no_children)
+#     raise Exception('test')
+#     assert test_part_no_children is not None
 
 
 def assert_fields(keys: List[str], fields: List[str]):
