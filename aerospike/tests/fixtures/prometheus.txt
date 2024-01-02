@@ -112,3 +112,24 @@ aerospike_xdr_retry_no_node{cluster_name="null",dc="DC1",service="192.168.32.3:3
 # HELP aerospike_xdr_success success
 # TYPE aerospike_xdr_success counter
 aerospike_xdr_success{cluster_name="null",dc="DC1",service="192.168.32.3:3000"} 1
+# HELP aerospike_namespace_client_write_success client write success
+# TYPE aerospike_namespace_client_write_success counter
+aerospike_namespace_client_write_success{cluster_name="null",ns="DC1",service="192.168.32.3:3000",storage_engine="device"} 1.418680251e+09
+# HELP aerospike_namespace_client_write_timeout client write timeout
+# TYPE aerospike_namespace_client_write_timeout counter
+aerospike_namespace_client_write_timeout{cluster_name="null",ns="DC1",service="192.168.32.3:3000",storage_engine="device"} 144
+# HELP aerospike_namespace_client_write_filtered_out client write filtered out
+# TYPE aerospike_namespace_client_write_filtered_out counter
+aerospike_namespace_client_write_filtered_out{cluster_name="null",ns="DC1",service="192.168.32.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_read_filtered_out client read filtered out
+# TYPE aerospike_namespace_client_read_filtered_out counter
+aerospike_namespace_client_read_filtered_out{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_read_not_found client read not found
+# TYPE aerospike_namespace_client_read_not_found counter
+aerospike_namespace_client_read_not_found{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="device"} 2
+# HELP aerospike_namespace_client_read_success client read success
+# TYPE aerospike_namespace_client_read_success counter
+aerospike_namespace_client_read_success{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="device"} 100
+# HELP aerospike_namespace_client_read_timeout client read timeout
+# TYPE aerospike_namespace_client_read_timeout counter
+aerospike_namespace_client_read_timeout{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="device"} 0

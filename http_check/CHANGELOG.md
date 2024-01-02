@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 9.2.3 / 2023-12-04 / Agent 7.50.0
+
+***Fixed***:
+
+* Bump the cryptography version to 41.0.6 ([#16322](https://github.com/DataDog/integrations-core/pull/16322))
+
 ## 9.2.2 / 2023-11-10
 
 ***Fixed***:

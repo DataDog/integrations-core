@@ -58,6 +58,10 @@ def repo_with_fake_integrations(repo_with_history, config_file):
     config_file.model.repos['core'] = str(repo_with_history.path)
     config_file.save()
     expected_output = """
+## Datadog Agent version 7.41.0
+
+* datadog-checks-downloader: 4.0.0
+
 ## Datadog Agent version 7.40.0
 
 * datadog-onlywin: 1.0.0

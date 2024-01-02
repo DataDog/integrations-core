@@ -157,6 +157,9 @@ class SqlFractionMetric(BaseSqlServerMetric):
         return results, None
 
     def fetch_metric(self, results, columns, values_cache=None):
+        if not self.base_name:
+            self.log.error('Skipping counter. Missing base counter name')
+            return
         num_counters = results.get(self.sql_name.strip())
         base_counters = results.get(self.base_name.strip())
         if not num_counters or not base_counters:
@@ -490,7 +493,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
     CUSTOM_QUERIES_AVAILABLE = False
     TABLE = 'sys.database_files'
     DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = "select * from {table}".format(table=TABLE)
+    QUERY_BASE = "select *, CAST(FILEPROPERTY(name, 'SpaceUsed') as int) as space_used from {table}".format(table=TABLE)
     OPERATION_NAME = 'database_file_stats_metrics'
 
     DB_TYPE_MAP = {0: 'data', 1: 'transaction_log', 2: 'filestream', 3: 'unknown', 4: 'full_text'}
@@ -555,6 +558,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
             file_id = columns.index("file_id")
             file_type = columns.index("type")
             file_location = columns.index("physical_name")
+            filename_idx = columns.index("name")
             db_files_state_desc_index = columns.index("state_desc")
             value_column_index = columns.index(self.column)
         except ValueError as e:
@@ -566,12 +570,13 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
             if row[db_name] != self.instance:
                 continue
             column_val = row[value_column_index]
-            if self.column in ('size', 'max_size'):
+            if self.column in ('size', 'max_size', 'space_used'):
                 column_val *= 8  # size reported in 8 KB pages
 
             fileid = row[file_id]
             filetype = self.DB_TYPE_MAP[row[file_type]]
             location = row[file_location]
+            filename = row[filename_idx]
             db_files_state_desc = row[db_files_state_desc_index]
 
             metric_tags = [
@@ -580,6 +585,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
                 'file_id:{}'.format(str(fileid)),
                 'file_type:{}'.format(str(filetype)),
                 'file_location:{}'.format(str(location)),
+                'file_name:{}'.format(str(filename)),
                 'database_files_state_desc:{}'.format(str(db_files_state_desc)),
             ]
             metric_tags.extend(self.tags)

@@ -62,18 +62,25 @@ def dd_environment():
         'GITLAB_LOCAL_GITALY_PROMETHEUS_PORT': str(GITLAB_LOCAL_GITALY_PROMETHEUS_PORT),
     }
 
+    conditions = []
+
+    for _ in range(2):
+        conditions.extend(
+            [
+                CheckEndpoints(GITLAB_URL, attempts=100, wait=6),
+                CheckEndpoints(GITLAB_PROMETHEUS_ENDPOINT, attempts=100, wait=6),
+                CheckEndpoints(PROMETHEUS_ENDPOINT, attempts=100, wait=6),
+                CheckEndpoints(GITLAB_GITALY_PROMETHEUS_ENDPOINT, attempts=100, wait=10),
+                CheckEndpoints(GITLAB_READINESS_ENDPOINT, attempts=100, wait=10),
+                CheckEndpoints(GITLAB_LIVENESS_ENDPOINT, attempts=100, wait=10),
+                CheckEndpoints(GITLAB_HEALTH_ENDPOINT, attempts=100, wait=10),
+            ]
+        )
+
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'docker-compose.yml'),
         env_vars=env,
-        conditions=[
-            CheckEndpoints(GITLAB_URL, attempts=100, wait=6),
-            CheckEndpoints(GITLAB_PROMETHEUS_ENDPOINT, attempts=100, wait=6),
-            CheckEndpoints(PROMETHEUS_ENDPOINT, attempts=100, wait=6),
-            CheckEndpoints(GITLAB_GITALY_PROMETHEUS_ENDPOINT, attempts=100, wait=10),
-            CheckEndpoints(GITLAB_READINESS_ENDPOINT, attempts=100, wait=10),
-            CheckEndpoints(GITLAB_LIVENESS_ENDPOINT, attempts=100, wait=10),
-            CheckEndpoints(GITLAB_HEALTH_ENDPOINT, attempts=100, wait=10),
-        ],
+        conditions=conditions,
         wrappers=[create_log_volumes()],
     ):
         # run pre-test commands

@@ -2,10 +2,10 @@
 
 [[envs.default.matrix]]
 python = ["3.11"]
-version = ["2.6"]
+version = ["2.8"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
   # Does not work well on M1s
-  { key = "RAY_VERSION", value = "2.6.1", if = ["2.6"] },
+  { key = "RAY_VERSION", value = "2.8.1", if = ["2.8"] },
 ]

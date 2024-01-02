@@ -2,7 +2,20 @@
 
 <!-- towncrier release notes start -->
 
-## 7.2.0 / 2023-11-07
+## 7.3.0 / 2023-12-11
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+
+***Fixed***:
+
+* Fix error in property metric collection when an intermediate attribute is not defined ([#16296](https://github.com/DataDog/integrations-core/pull/16296))
+* Fix typo in log line ([#16314](https://github.com/DataDog/integrations-core/pull/16314))
+* Submit boolean properties as metric values ([#16315](https://github.com/DataDog/integrations-core/pull/16315))
+* Use correct size parameters when creating batches ([#16380](https://github.com/DataDog/integrations-core/pull/16380))
+
+## 7.2.0 / 2023-11-07 / Agent 7.50.0
 
 ***Added***:
 

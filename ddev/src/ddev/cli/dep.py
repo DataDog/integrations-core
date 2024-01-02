@@ -49,6 +49,8 @@ IGNORED_DEPS = {
     # Here's orjson switching to rustc 1.65:
     # https://github.com/ijl/orjson/commit/ce9bae876657ed377d761bf1234b040e2cc13d3c
     'orjson',
+    # 2.4.10 is broken on py2 and they did not yank the version
+    'rethinkdb',
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
@@ -322,6 +324,7 @@ def read_check_dependencies(repo, integrations=None):
         integrations = [repo.integrations.get(integration) for integration in integrations]
     elif integrations is None:
         integrations = list(repo.integrations.iter_agent_checks('all'))
+        integrations.append(repo.integrations.get('datadog_checks_base'))
     else:
         integrations = [repo.integrations.get(integrations)]
 

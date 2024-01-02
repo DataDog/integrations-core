@@ -60,6 +60,8 @@ def start(
     import os
     from contextlib import suppress
 
+    from datadog_checks.dev._env import deserialize_data
+
     from ddev.e2e.agent import get_agent_interface
     from ddev.e2e.config import EnvDataStorage
     from ddev.e2e.constants import DEFAULT_AGENT_TYPE, E2EEnvVars, E2EMetadata
@@ -121,6 +123,13 @@ def start(
         result = json.loads(result_file.read_text())
 
     metadata = result['metadata']
+
+    # TODO Remove once we have migrated the `docker_run` function
+    if serialized_volumes := metadata.get(E2EMetadata.ENV_VARS, {}).get(E2EEnvVars.DOCKER_VOLUMES):
+        volumes = metadata.get(E2EMetadata.DOCKER_VOLUMES, [])
+        volumes.extend(deserialize_data(serialized_volumes))
+        metadata[E2EMetadata.DOCKER_VOLUMES] = volumes
+
     env_data.write_metadata(metadata)
 
     config = result['config']
@@ -165,7 +174,6 @@ def _get_agent_env_vars(org_config, metadata, extra_env_vars, dogstatsd):
 
     # Use the environment variables defined by tests as defaults so tooling can override them
     env_vars: dict[str, str] = metadata.get('env_vars', {}).copy()
-    env_vars.update(ev.split('=', maxsplit=1) for ev in extra_env_vars)
 
     if api_key := org_config.get('api_key'):
         env_vars['DD_API_KEY'] = api_key
@@ -190,5 +198,7 @@ def _get_agent_env_vars(org_config, metadata, extra_env_vars, dogstatsd):
     # Enable logs Agent by default if the environment is mounting logs
     if any(ev.startswith(E2EEnvVars.LOGS_DIR_PREFIX) for ev in metadata.get(E2EMetadata.ENV_VARS, {})):
         env_vars.setdefault('DD_LOGS_ENABLED', 'true')
+
+    env_vars.update(ev.split('=', maxsplit=1) for ev in extra_env_vars)
 
     return env_vars
