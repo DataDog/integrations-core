@@ -7,14 +7,14 @@
 	"definition": {
 		"name": "[SNMP] Incoming traffic missing data for {{snmp_device.name}} on interface {{interface.name}} in {{device_namespace.name}}",
 		"type": "query alert",
-		"query": "sum(last_5m):sum:snmp.ifHCInOctets{*} by {device_namespace,snmp_device,interface,interface_alias}.as_count() > null",
+		"query": "sum(last_5m):sum:snmp.ifHCInOctets{*} by {device_namespace,snmp_device,interface,interface_alias}.as_count() > 100",
 		"message": "{{#is_alert}} \n{{snmp_device.name}} in namespace {{device_namespace.name}} is reporting missing data for octets received on interface {{interface_alias.name}}\n{{/is_alert}} \n\n{{#is_recovery}} \nDevice {{snmp_device.name}} in namespace {{device_namespace.name}} has interface {{interface_alias.name}} outgoing traffic in normal range.\n{{/is_recovery}}",
 		"tags": [
             "integration:snmp"
         ],
 		"options": {
 			"thresholds": {
-				"critical": null
+				"critical": 100
 			},
 			"notify_audit": false,
 			"include_tags": true,
