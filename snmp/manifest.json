@@ -56,12 +56,13 @@
       "[SNMP] Device Unreachable Alert": "assets/monitors/device_unreachable.json",
       "[SNMP] Interface Down Alert": "assets/monitors/interface_down.json",
       "[SNMP] LinkDown Trap Alert": "assets/monitors/traps_linkDown.json",
-      "[SNMP] CPU usage abnormal for {{snmp_device.name}} in namespace {{device_namespace.name}}": "assets/monitors/cpu_abnormal.json",
-      "[SNMP] Memory usage for device {{snmp_device.name}} in namespace {{device_namespace.name}} is outside of normal range": "assets/monitors/memory_abnormal.json",
-      "[SNMP] Received traffic for {{snmp_device.name}} on interface {{interface.name}}  in {{device_namespace.name}} is outside of normal range": "assets/monitors/interface_in_octets_abnormal.json",
-      "[SNMP] Outgoing octets for {{snmp_device.name}} on interface {{interface.name}}  in {{device_namespace.name}} is outside of normal range": "assets/monitors/interface_out_octets_abnormal.json",
-      "[SNMP] Bandwidth usage for incoming traffic for device {{snmp_device.name}} on interface {{interface.name}} in {{device_namespace.name}} is outside of normal range": "assets/monitors/interface_bandwidth_usage_out_abnormal.json",
-      "[SNMP] Bandwidth usage for outgoing traffic for device {{snmp_device.name}} on interface {{interface.name}} in {{device_namespace.name}} is outside of normal range": "assets/monitors/interface_bandwidth_usage_in_abnormal.json"
+      "[SNMP] CPU usage high for {{snmp_device.name}} in namespace {{device_namespace.name}}": "assets/monitors/high_cpu.json",
+      "[SNMP] High memory usage for device {{snmp_device.name}} in namespace {{device_namespace.name}}": "assets/monitors/high_memory.json",
+      "[SNMP] Incoming traffic missing data for {{snmp_device.name}} on interface {{interface.name}} in {{device_namespace.name}}": "assets/monitors/missing_interface_in_octets.json",
+      "[SNMP] Outgoing traffic missing data for {{snmp_device.name}} on interface {{interface.name}} in {{device_namespace.name}}": "assets/monitors/missing_interface_out_octets.json",
+      "[SNMP] High interface bandwidth usage for incoming traffic for device {{snmp_device.name}} on interface {{interface.name}} in {{device_namespace.name}}": "assets/monitors/high_interface_bandwidth_usage_in.json",
+      "[SNMP] High interface bandwidth usage for outgoing traffic for device {{snmp_device.name}} on interface {{interface.name}} in {{device_namespace.name}}": "assets/monitors/high_interface_bandwidth_usage_out.json",
+      "[SNMP] BGP peer state between {{snmp_device.name}} and neighbor {{neighbor.name}} is stuck in an unestablished state": "assets/monitors/bgp_peer_state_stuck.json"
     }
   }
 }
