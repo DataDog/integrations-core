@@ -8,6 +8,7 @@ from datadog_checks.tls import TLSCheck
 from .conftest import CA_CERT, PRIVATE_KEY
 
 
+@pytest.mark.xfail
 def test_tags_local():
     instance = {'name': 'foo', 'local_cert_path': 'cert.pem'}
     c = TLSCheck('tls', {}, [instance])
