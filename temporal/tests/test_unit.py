@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.temporal import TemporalCheck
 
-from .common import METRICS, TAGS
+from datadog_checks.dev.utils import get_metadata_metrics
+from .common import METRICS, TAGS, MOCKED_METRICS
 
 pytestmark = [pytest.mark.unit]
 
@@ -22,8 +22,10 @@ def test_check(dd_run_check, aggregator, check, mock_metrics):
             tags=expected_metric.get("tags", TAGS),
         )
 
-    for metric in get_metadata_metrics():
-        aggregator.assert_metric(name=metric, tags=TAGS)
+    for metric in MOCKED_METRICS:
+        aggregator.assert_metric(name=metric)
+        for tag in TAGS:
+            aggregator.assert_metric_has_tag(metric, tag)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
