@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.temporal import TemporalCheck
 
-from datadog_checks.dev.utils import get_metadata_metrics
-from .common import METRICS, TAGS, MOCKED_METRICS
+from .common import METRICS, MOCKED_METRICS, TAGS
 
 pytestmark = [pytest.mark.unit]
 

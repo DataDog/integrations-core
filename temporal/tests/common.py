@@ -72,26 +72,26 @@ METRICS = [
         "value": 4,
         "type": AggregatorStub.GAUGE,
         "tags": TAGS
-                + [
-                    "namespace:default",
-                    "operation:MatchingEngine",
-                    "queue_type:Normal",
-                    "service_name:matching",
-                    "task_type:Activity",
-                ],
+        + [
+            "namespace:default",
+            "operation:MatchingEngine",
+            "queue_type:Normal",
+            "service_name:matching",
+            "task_type:Activity",
+        ],
     },
     {
         "name": "loaded_task_queue_count",
         "value": 2,
         "type": AggregatorStub.GAUGE,
         "tags": TAGS
-                + [
-                    "namespace:default",
-                    "operation:MatchingEngine",
-                    "queue_type:Sticky",
-                    "service_name:matching",
-                    "task_type:Workflow",
-                ],
+        + [
+            "namespace:default",
+            "operation:MatchingEngine",
+            "queue_type:Sticky",
+            "service_name:matching",
+            "task_type:Workflow",
+        ],
     },
 ]
 
