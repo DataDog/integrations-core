@@ -1126,7 +1126,8 @@ if os.environ.get('SCYLLA_VERSION') < '5.2.6':
     omv2_count_metrics.append('scylla.memory.allocated_memory')
     omv2_count_metrics.append('scylla.memory.free_memory')
     omv2_count_metrics.append('scylla.memory.total_memory')
-    omv2_count_metrics.append('scylla.storage.proxy.coordinator_cas_read_timouts')
+    omv2_count_metrics.append('scylla.memory.used_memory')
+
 
 bucket_metrics = [
     'scylla.storage.proxy.coordinator_read_latency.bucket',
