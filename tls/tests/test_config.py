@@ -20,6 +20,8 @@ def test_tags_local_hostname():
     instance = {'name': 'foo', 'local_cert_path': 'cert.pem', 'server_hostname': 'www.google.com'}
     c = TLSCheck('tls', {}, [instance])
 
+    assert False
+
     assert c._tags == ['name:foo', 'server_hostname:www.google.com']
 
 
