@@ -6,7 +6,7 @@
   "tags": [
     "integration:singlestore"
   ],
-  "description": "Notify your team before your SingleStore license expires.",
+  "description": "The license governs how long you are allowed to use the SingleStoreDB software and what features or capabilities you have access to. This monitor tracks the time left for your license to alert when you need to renew.",
   "definition": {
     "message": "{{#is_alert}}\nSingleStore license will expire in 7 days on node {{singlestore_node_name.name}}\n{{/is_alert}} \n\n{{#is_warning}}\nSingleStore license will expire in 30 days on node {{singlestore_node_name.name}}\n{{/is_warning}} ",
     "name": "[SingleStore] License will expire soon",
