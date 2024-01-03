@@ -4,7 +4,6 @@
 import pytest
 
 from datadog_checks.scylla import ScyllaCheck
-
 from tests.common import FLAKY_METRICS, INSTANCE_DEFAULT_METRICS
 
 

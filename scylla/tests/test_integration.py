@@ -12,6 +12,7 @@ from .common import (
     INSTANCE_DEFAULT_METRICS_V2,
 )
 
+
 @pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')

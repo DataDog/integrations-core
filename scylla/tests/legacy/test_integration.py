@@ -2,11 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from six import PY2
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.scylla import ScyllaCheck
-
 from tests.common import (
     FLAKY_METRICS,
     INSTANCE_DEFAULT_METRICS,

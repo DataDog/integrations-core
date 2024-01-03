@@ -13,10 +13,8 @@ from datadog_checks.scylla import ScyllaCheck
 from .common import (
     FLAKY_METRICS,
     INSTANCE_ADDITIONAL_GROUPS,
-    INSTANCE_ADDITIONAL_METRICS,
     INSTANCE_ADDITIONAL_METRICS_V2,
     INSTANCE_DEFAULT_GROUPS,
-    INSTANCE_DEFAULT_METRICS,
     INSTANCE_DEFAULT_METRICS_V2,
     bucket_metrics,
     get_metrics,
@@ -37,7 +35,6 @@ def test_instance_default_check_omv2(aggregator, mock_db_data, dd_run_check, ins
         else:
             aggregator.assert_metric(m)
     aggregator.assert_all_metrics_covered()
-
 
 
 @pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')

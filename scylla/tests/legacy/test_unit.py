@@ -4,12 +4,10 @@
 from copy import deepcopy
 
 import pytest
-from six import PY2
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.scylla import ScyllaCheck
-
 from tests.common import (
     FLAKY_METRICS,
     INSTANCE_ADDITIONAL_GROUPS,
@@ -102,4 +100,3 @@ def test_invalid_instance(aggregator, mock_db_data, instance_legacy):
         ScyllaCheck('scylla', {}, [inst])
 
     aggregator.assert_service_check('scylla.prometheus.health', count=0)
-
