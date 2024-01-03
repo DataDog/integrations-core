@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -37,29 +38,23 @@ EXPECTED_METRICS = {
         "fluxcd.process.max_fds",
         "fluxcd.process.open_fds",
         "fluxcd.process.resident_memory.bytes",
-        "fluxcd.process.start_time.seconds",
+        "fluxcd.process.start_time",
         "fluxcd.process.virtual_memory.bytes",
         "fluxcd.process.virtual_memory.max.bytes",
         "fluxcd.workqueue.adds.count",
         "fluxcd.workqueue.depth",
-        "fluxcd.workqueue.longest_running_processor.seconds",
+        "fluxcd.workqueue.longest_running_processor",
         "fluxcd.workqueue.retries.count",
-        "fluxcd.workqueue.unfinished_work.seconds",
+        "fluxcd.workqueue.unfinished_work",
     },
 }
 
 
-def test_mock_assert_metrics_v1(dd_run_check, aggregator, check, mock_metrics_v1):
+@pytest.mark.parametrize("fluxcd_version", ["v1", "v2"])
+def test_assert_metrics_v1(dd_run_check, aggregator, check, request, fluxcd_version):
+    _mock_response = request.getfixturevalue(f"mock_metrics_{fluxcd_version}")
     dd_run_check(check)
-    for metric_name in EXPECTED_METRICS["v1"]:
-        aggregator.assert_metric(metric_name)
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-
-
-def test_mock_assert_metrics_v2(dd_run_check, aggregator, check, mock_metrics_v2):
-    dd_run_check(check)
-    for metric_name in EXPECTED_METRICS["v2"]:
+    for metric_name in EXPECTED_METRICS[fluxcd_version]:
         aggregator.assert_metric(metric_name)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

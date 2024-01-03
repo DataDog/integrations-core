@@ -21,14 +21,14 @@ FLUX_V2_METRICS = {
     "process_max_fds": "process.max_fds",
     "process_open_fds": "process.open_fds",
     "process_resident_memory_bytes": "process.resident_memory.bytes",
-    "process_start_time_seconds": "process.start_time.seconds",
+    "process_start_time_seconds": "process.start_time",
     "process_virtual_memory_bytes": "process.virtual_memory.bytes",
     "process_virtual_memory_max_bytes": "process.virtual_memory.max.bytes",
     "workqueue_adds": "workqueue.adds",
     "workqueue_depth": "workqueue.depth",
-    "workqueue_longest_running_processor_seconds": "workqueue.longest_running_processor.seconds",
+    "workqueue_longest_running_processor_seconds": "workqueue.longest_running_processor",
     "workqueue_retries": "workqueue.retries",
-    "workqueue_unfinished_work_seconds": "workqueue.unfinished_work.seconds",
+    "workqueue_unfinished_work_seconds": "workqueue.unfinished_work",
 }
 assert sorted(FLUX_V2_METRICS) == list(FLUX_V2_METRICS)
 METRIC_MAP = {**FLUX_V1_METRICS, **FLUX_V2_METRICS}
