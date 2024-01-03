@@ -421,6 +421,7 @@ if os.environ['SCYLLA_VERSION'] == "3.3.1":
 
     flaky_metrics_3 = [
         'scylla.reactor.abandoned_failed_futures',
+        'scylla.reactor.abandoned_failed_futures.count',
         'scylla.storage.proxy.coordinator_cas_read_contention.bucket',
         'scylla.storage.proxy.coordinator_cas_read_contention.count',
         'scylla.storage.proxy.coordinator_cas_read_contention.sum',

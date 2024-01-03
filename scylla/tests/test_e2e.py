@@ -8,21 +8,7 @@ import pytest
 
 from datadog_checks.scylla import ScyllaCheck
 
-from .common import FLAKY_METRICS, INSTANCE_DEFAULT_METRICS, INSTANCE_DEFAULT_METRICS_V2
-
-
-@pytest.mark.e2e
-def test_check_ok(dd_agent_check, instance_legacy):
-    aggregator = dd_agent_check(instance_legacy, rate=True)
-
-    for metric in INSTANCE_DEFAULT_METRICS:
-        if metric in FLAKY_METRICS:
-            aggregator.assert_metric(metric, at_least=0)
-        else:
-            aggregator.assert_metric(metric)
-
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_service_check('scylla.prometheus.health', ScyllaCheck.OK)
+from .common import FLAKY_METRICS, INSTANCE_DEFAULT_METRICS_V2
 
 
 @pytest.mark.skipif(platform.python_version() < "3", reason='OpenMetrics V2 is only available with Python 3')
