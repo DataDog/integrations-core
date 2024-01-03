@@ -1077,6 +1077,13 @@ omv2_count_metrics = [
     'scylla.storage.proxy.coordinator_background_writes_failed',
     'scylla.storage.proxy.coordinator_canceled_read_repairs',
     'scylla.storage.proxy.coordinator_cas_prune',
+    'scylla.storage.proxy.coordinator_cas_read_timouts',
+    'scylla.storage.proxy.coordinator_cas_read_unavailable',
+    'scylla.storage.proxy.coordinator_cas_read_unfinished_commit',
+    'scylla.storage.proxy.coordinator_cas_write_condition_not_met',
+    'scylla.storage.proxy.coordinator_cas_write_timeouts',
+    'scylla.storage.proxy.coordinator_cas_write_unavailable',
+    'scylla.storage.proxy.coordinator_cas_write_unfinished_commit',
     'scylla.storage.proxy.coordinator_completed_reads_local_node',
     'scylla.storage.proxy.coordinator_foreground_read_repair',
     'scylla.storage.proxy.coordinator_queued_write_bytes',
@@ -1089,6 +1096,7 @@ omv2_count_metrics = [
     'scylla.storage.proxy.coordinator_read_retries',
     'scylla.storage.proxy.coordinator_read_timeouts',
     'scylla.storage.proxy.coordinator_read_unavailable',
+    'scylla.storage.proxy.coordinator_reads_coordinator_outside_replica_set',
     'scylla.storage.proxy.coordinator_reads_local_node',
     'scylla.storage.proxy.coordinator_speculative_data_reads',
     'scylla.storage.proxy.coordinator_speculative_digest_reads',
@@ -1099,6 +1107,7 @@ omv2_count_metrics = [
     'scylla.storage.proxy.coordinator_write_latency_summary',
     'scylla.storage.proxy.coordinator_write_timeouts',
     'scylla.storage.proxy.coordinator_write_unavailable',
+    'scylla.storage.proxy.coordinator_writes_coordinator_outside_replica_set',
     'scylla.storage.proxy.replica_cross_shard_ops',
     'scylla.storage.proxy.replica_forwarded_mutations',
     'scylla.storage.proxy.replica_forwarding_errors',
@@ -1142,6 +1151,10 @@ if os.environ.get('SCYLLA_VERSION') < '5.2.6':
     omv2_count_metrics.append('scylla.memory.used_memory')
 
 bucket_metrics = [
+    'scylla.storage.proxy.coordinator_cas_read_contention.bucket',
+    'scylla.storage.proxy.coordinator_cas_read_latency.bucket',
+    'scylla.storage.proxy.coordinator_cas_write_contention.bucket',
+    'scylla.storage.proxy.coordinator_cas_write_latency.bucket',
     'scylla.storage.proxy.coordinator_read_latency.bucket',
     'scylla.storage.proxy.coordinator_write_latency.bucket',
 ]
