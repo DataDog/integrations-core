@@ -7,15 +7,15 @@
 	"definition": {
 		"name": "[SNMP] CPU usage high for {{snmp_device.name}} in namespace {{device_namespace.name}}",
 		"type": "query alert",
-		"query": "avg(last_5m):avg:snmp.cpu.usage{*} by {snmp_device,device_namespace} >= 100",
-		"message": "{{#is_alert}} \n{{snmp_device.name}} in namespace {{device_namespace.name}} is reporting high CPU usage (at or above 100%).\n{{/is_alert}} \n\n{{#is_recovery}} \nCPU usage for {{snmp_device.name}} in namespace {{device_namespace.name}} is back to normal.\n{{/is_recovery}}",
+		"query": "avg(last_5m):avg:snmp.cpu.usage{*} by {snmp_device,device_namespace} >= 90",
+		"message": "{{#is_alert}} \n{{snmp_device.name}} in namespace {{device_namespace.name}} is reporting high CPU usage (at or above 90%).\n{{/is_alert}} \n\n{{#is_recovery}} \nCPU usage for {{snmp_device.name}} in namespace {{device_namespace.name}} is back to normal.\n{{/is_recovery}}",
 		"tags": [
             "integration:snmp"
         ],
 		"options": {
 			"thresholds": {
-				"critical": 100,
-				"warning": 90
+				"critical": 90,
+				"warning": 80
 			},
 			"notify_audit": false,
 			"notify_no_data": true,
