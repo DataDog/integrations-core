@@ -6,7 +6,7 @@
   "tags": [
     "integration:rabbitmq"
   ],
-  "description": "Notify your team when a RabbitMQ message unacknowledged rate is higher than usual.",
+  "description": "Unacked messages are those that have been delivered to a consumer but have not been acknowledged as processed or handled. This monitor tracks the ratio of unacked messages to avoid potential bottlenecks which could lead to delays in message processing.",
   "definition": {
     "message": "{{#is_alert}}\nThe ratio of unacknowledged to acknowledged messages in this queue is higher than usual. \nPlease check your message pipeline. \n{{/is_alert}}",
     "name": "[RabbitMQ - OMV2] Unacknowledged Messages are higher than usual",
