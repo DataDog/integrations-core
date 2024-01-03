@@ -27,7 +27,7 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
     "Private :: Do Not Upload",
-    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.11",
     "Topic :: System :: Monitoring",
 ]
 dependencies = [

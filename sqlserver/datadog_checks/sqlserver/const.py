@@ -86,6 +86,7 @@ INSTANCE_METRICS = [
     ('sqlserver.memory.optimizer', 'Optimizer Memory (KB)', ''),
     ('sqlserver.memory.granted_workspace', 'Granted Workspace Memory (KB)', ''),
     ('sqlserver.memory.lock', 'Lock Memory (KB)', ''),
+    ('sqlserver.memory.stolen', 'Stolen Server Memory (KB)', ''),
     ('sqlserver.memory.log_pool_memory', 'Log Pool Memory (KB)', ''),
     # SQLServer:Buffer Manager
     ('sqlserver.buffer.cache_hit_ratio', 'Buffer cache hit ratio', ''),  # RAW_LARGE_FRACTION
@@ -183,11 +184,14 @@ TASK_SCHEDULER_METRICS = OS_SCHEDULER_METRICS + OS_TASK_METRICS
 #   0 = False, 1 = True
 DATABASE_FILES_METRICS = [
     ('sqlserver.database.files.size', 'sys.database_files', 'size'),
+    ('sqlserver.database.files.space_used', 'sys.database_files', 'space_used'),
     ('sqlserver.database.files.state', 'sys.database_files', 'state'),
 ]
 DATABASE_STATS_METRICS = [
     ('sqlserver.database.state', 'sys.databases', 'state'),
     ('sqlserver.database.is_sync_with_backup', 'sys.databases', 'is_sync_with_backup'),
+    ('sqlserver.database.is_in_standby', 'sys.databases', 'is_in_standby'),
+    ('sqlserver.database.is_read_only', 'sys.databases', 'is_read_only'),
 ]
 DATABASE_BACKUP_METRICS = [
     ('sqlserver.database.backup_count', 'msdb.dbo.backupset', 'backup_set_id_count'),
@@ -244,3 +248,5 @@ TEMPDB_FILE_SPACE_USAGE_METRICS = [
     ),
     ('sqlserver.tempdb.file_space_usage.mixed_extent_space', 'sys.dm_db_file_space_usage', 'mixed_extent_space'),
 ]
+
+PROC_CHAR_LIMIT = 500

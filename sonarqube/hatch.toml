@@ -1,7 +1,7 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.9"]
+python = ["2.7", "3.11"]
 version = ["7.9", "8.5", "9.3"]
 
 # You can use M1 env if you want to run on M1 processor machine

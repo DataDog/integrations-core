@@ -21,6 +21,7 @@ def test_status(dd_agent_check, instance, ping_url_tag):
         'php_fpm.requests.slow',
         'php_fpm.requests.accepted',
         'php_fpm.processes.max_reached',
+        'php_fpm.processes.max_active',
         'php_fpm.status.duration',
     ]
 
@@ -45,6 +46,7 @@ def test_status_fastcgi(dd_agent_check, instance_fastcgi, ping_url_tag_fastcgi):
         'php_fpm.requests.slow',
         'php_fpm.requests.accepted',
         'php_fpm.processes.max_reached',
+        'php_fpm.processes.max_active',
         'php_fpm.status.duration',
     ]
 

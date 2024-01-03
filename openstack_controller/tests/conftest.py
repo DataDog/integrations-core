@@ -163,16 +163,21 @@ def mock_responses(microversion_headers):
         for ironic_subdir in ironic_subdirs:
             process_dir(ironic_subdir, responses_map)
 
-    def method(method, url, file='response', headers=None):
+    def method(method, url, file='response', headers=None, params=None):
         filename = file
-        url = url.replace("?", "/")
-        if any(re.search(pattern, url) for pattern in NOVA_ENDPOINTS):
+        request_path = url
+        request_path = request_path.replace('?', '/')
+        if params:
+            param_string = '/'.join('{}={}'.format(key, str(val)) for key, val in params.items())
+            request_path = '{}/{}'.format(url, param_string)
+        if any(re.search(pattern, request_path) for pattern in NOVA_ENDPOINTS):
             microversion = headers.get('X-OpenStack-Nova-API-Version') if headers else microversion_headers[0]
             filename = f'{file}-{microversion}' if microversion else file
-        if any(re.search(pattern, url) for pattern in IRONIC_ENDPOINTS):
+        if any(re.search(pattern, request_path) for pattern in IRONIC_ENDPOINTS):
             microversion = headers.get('X-OpenStack-Ironic-API-Version') if headers else microversion_headers[1]
             filename = f'{file}-{microversion}' if microversion else file
-        response = responses_map.get(method, {}).get(url, {}).get(filename)
+
+        response = responses_map.get(method, {}).get(request_path, {}).get(filename)
         return response
 
     create_responses_tree()
@@ -181,8 +186,8 @@ def mock_responses(microversion_headers):
 
 @pytest.fixture
 def mock_http_call(mock_responses):
-    def call(method, url, file='response', headers=None):
-        response = mock_responses(method, url, file=file, headers=headers)
+    def call(method, url, file='response', headers=None, params=None):
+        response = mock_responses(method, url, file=file, headers=headers, params=params)
         if response:
             return response
         http_response = requests.models.Response()
@@ -541,7 +546,7 @@ def connection_baremetal(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
 
-    def nodes(details):
+    def nodes(details, limit=None):
         if http_error and 'nodes' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['nodes'])
         return [
@@ -768,7 +773,7 @@ def mock_http_get(request, monkeypatch, mock_http_call):
         url = get_url_path(url)
         if http_error and url in http_error:
             raise requests.exceptions.HTTPError(response=http_error[url])
-        json_data = mock_http_call(method, url, headers=kwargs.get('headers'))
+        json_data = mock_http_call(method, url, headers=kwargs.get('headers'), params=kwargs.get('params'))
         return MockResponse(json_data=json_data, status_code=200)
 
     mock_get = mock.MagicMock(side_effect=get)

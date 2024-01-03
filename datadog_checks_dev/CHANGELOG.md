@@ -2,6 +2,27 @@
 
 <!-- towncrier release notes start -->
 
+## 29.0.1 / 2024-01-02
+
+***Fixed***:
+
+* Set the Python version back to 3.9 in the templates ([#16504](https://github.com/DataDog/integrations-core/pull/16504))
+
+## 29.0.0 / 2023-12-12
+
+***Removed***:
+
+* Remove pyro4 and serpent dependencies ([#16269](https://github.com/DataDog/integrations-core/pull/16269))
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+* Make the `spec.yaml` file mandatory in integrations-core if there are configuration files ([#16345](https://github.com/DataDog/integrations-core/pull/16345))
+
+***Fixed***:
+
+* Make the `config_models` files mandatory in integrations-core ([#16311](https://github.com/DataDog/integrations-core/pull/16311))
+
 ## 28.0.1 / 2023-11-10
 
 ***Fixed***:

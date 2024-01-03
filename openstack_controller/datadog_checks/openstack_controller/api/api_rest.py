@@ -195,10 +195,9 @@ class ApiRest(Api):
         return response.json().get('limits', [])
 
     def get_compute_limits(self, project_id):
+        params = {'tenant_id': project_id}
         response = self.http.get(
-            '{}/limits?tenant_id={}'.format(
-                self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value), project_id
-            )
+            '{}/limits'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value)), params=params
         )
         response.raise_for_status()
         return response.json().get('limits', {})
@@ -218,10 +217,9 @@ class ApiRest(Api):
         return response.json().get('quota_set', {})
 
     def get_compute_servers(self, project_id):
+        params = {'project_id': project_id}
         response = self.http.get(
-            '{}/servers/detail?project_id={}'.format(
-                self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value), project_id
-            )
+            '{}/servers/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value)), params=params
         )
         response.raise_for_status()
         return response.json().get('servers', [])
@@ -280,10 +278,9 @@ class ApiRest(Api):
         return response.json().get('agents', [])
 
     def get_network_networks(self, project_id):
+        params = {'project_id': project_id}
         response = self.http.get(
-            '{}/v2.0/networks?project_id={}'.format(
-                self._catalog.get_endpoint_by_type(Component.Types.NETWORK.value), project_id
-            )
+            '{}/v2.0/networks'.format(self._catalog.get_endpoint_by_type(Component.Types.NETWORK.value)), params=params
         )
         response.raise_for_status()
         return response.json().get('networks', [])
@@ -294,6 +291,43 @@ class ApiRest(Api):
         )
         response.raise_for_status()
         return response.json().get('quota', [])
+
+    def make_paginated_request(self, url, resource_name, marker_name, params=None):
+        marker = None
+        item_list = []
+        params = {} if params is None else params
+        while True:
+            self.log.debug(
+                "making paginated request [limit=%s, marker=%s]",
+                self.config.paginated_limit,
+                marker,
+            )
+
+            params['limit'] = self.config.paginated_limit
+            if marker is not None:
+                params['marker'] = marker
+
+            response = self.http.get(url, params=params)
+            response.raise_for_status()
+
+            response_json = response.json()
+            resources = response_json.get(resource_name, [])
+            if len(resources) > 0:
+                last_item = resources[-1]
+                next = last_item.get('next')
+                item_list.extend(resources)
+                if next is None:
+                    break
+
+                marker = last_item.get(marker_name)
+            else:
+                marker = None
+                break
+
+            if marker is None:
+                break
+
+        return item_list
 
     def get_baremetal_nodes(self):
         def use_legacy_nodes_resource(microversion):
@@ -311,15 +345,24 @@ class ApiRest(Api):
             self.log.debug("Collecting baremetal nodes with use_legacy_nodes_resource =%s", legacy_microversion)
             return legacy_microversion
 
-        self.log.debug("getting baremetal nodes [microversion=%s]", self.config.ironic_microversion)
-        response = self.http.get(
-            '{}/v1/{}'.format(
-                self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value),
-                ('nodes/detail' if use_legacy_nodes_resource(self.config.ironic_microversion) else 'nodes?detail=True'),
-            )
-        )
-        response.raise_for_status()
-        return response.json().get('nodes', [])
+        ironic_endpoint = self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)
+
+        params = {}
+        if use_legacy_nodes_resource(self.config.ironic_microversion):
+            url = '{}/v1/nodes/detail'.format(ironic_endpoint)
+        else:
+            params = {'detail': True}
+            url = '{}/v1/nodes'.format(ironic_endpoint)
+
+        if self.config.paginated_limit is not None:
+            return self.make_paginated_request(url, 'nodes', 'uuid', params)
+
+        else:
+            response = self.http.get(url, params=params)
+            response.raise_for_status()
+
+            response_json = response.json()
+            return response_json.get("nodes", [])
 
     def get_baremetal_conductors(self):
         response = self.http.get(
@@ -329,10 +372,10 @@ class ApiRest(Api):
         return response.json().get('conductors', [])
 
     def get_load_balancer_loadbalancers(self, project_id):
+        params = {'project_id': project_id}
         response = self.http.get(
-            '{}/v2/lbaas/loadbalancers?project_id={}'.format(
-                self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value), project_id
-            )
+            '{}/v2/lbaas/loadbalancers'.format(self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value)),
+            params=params,
         )
         response.raise_for_status()
         return response.json().get('loadbalancers', [])
@@ -347,10 +390,10 @@ class ApiRest(Api):
         return response.json().get('stats', {})
 
     def get_load_balancer_listeners(self, project_id):
+        params = {'project_id': project_id}
         response = self.http.get(
-            '{}/v2/lbaas/listeners?project_id={}'.format(
-                self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value), project_id
-            )
+            '{}/v2/lbaas/listeners'.format(self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value)),
+            params=params,
         )
         response.raise_for_status()
         return response.json().get('listeners', [])
@@ -365,46 +408,50 @@ class ApiRest(Api):
         return response.json().get('stats', {})
 
     def get_load_balancer_pools(self, project_id):
+        params = {'project_id': project_id}
         response = self.http.get(
-            '{}/v2/lbaas/pools?project_id={}'.format(
-                self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value), project_id
-            )
+            '{}/v2/lbaas/pools'.format(self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value)),
+            params=params,
         )
         response.raise_for_status()
         return response.json().get('pools', [])
 
     def get_load_balancer_pool_members(self, pool_id, project_id):
+        params = {'project_id': project_id}
         response = self.http.get(
-            '{}/v2/lbaas/pools/{}/members?project_id={}'.format(
-                self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value), pool_id, project_id
-            )
+            '{}/v2/lbaas/pools/{}/members'.format(
+                self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value), pool_id
+            ),
+            params=params,
         )
         response.raise_for_status()
         return response.json().get('members', [])
 
     def get_load_balancer_healthmonitors(self, project_id):
+        params = {'project_id': project_id}
         response = self.http.get(
-            '{}/v2/lbaas/healthmonitors?project_id={}'.format(
-                self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value), project_id
-            )
+            '{}/v2/lbaas/healthmonitors'.format(
+                self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value)
+            ),
+            params=params,
         )
         response.raise_for_status()
         return response.json().get('healthmonitors', [])
 
     def get_load_balancer_quotas(self, project_id):
+        params = {'project_id': project_id}
         response = self.http.get(
-            '{}/v2/lbaas/quotas?project_id={}'.format(
-                self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value), project_id
-            )
+            '{}/v2/lbaas/quotas'.format(self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value)),
+            params=params,
         )
         response.raise_for_status()
         return response.json().get('quotas', [])
 
     def get_load_balancer_amphorae(self, project_id):
+        params = {'project_id': project_id}
         response = self.http.get(
-            '{}/v2/octavia/amphorae?project_id={}'.format(
-                self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value), project_id
-            )
+            '{}/v2/octavia/amphorae'.format(self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value)),
+            params=params,
         )
         response.raise_for_status()
         return response.json().get('amphorae', [])

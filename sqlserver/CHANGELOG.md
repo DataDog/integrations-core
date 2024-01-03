@@ -2,7 +2,14 @@
 
 <!-- towncrier release notes start -->
 
-## 15.2.0 / 2023-11-10
+## 15.2.1 / 2023-12-28
+
+***Fixed***:
+
+* Revert "[DBMON-2989] report sql obfuscation error count (#15990)" ([#16439](https://github.com/DataDog/integrations-core/pull/16439))
+* fix unexpected exception when reporting sqlserver statements obfuscate xml plan error ([#16461](https://github.com/DataDog/integrations-core/pull/16461))
+
+## 15.2.0 / 2023-11-10 / Agent 7.50.0
 
 ***Added***:
 
@@ -32,7 +39,7 @@
 * Bump the `pyodbc` version to 5.0.1 ([#16041](https://github.com/DataDog/integrations-core/pull/16041))
 * Fix config option `dbm_enabled` type to ensure it is a boolean ([#16078](https://github.com/DataDog/integrations-core/pull/16078))
 
-## 15.0.3 / 2023-11-08
+## 15.0.3 / 2023-11-08 / Agent 7.49.1
 
 ***Fixed***
 

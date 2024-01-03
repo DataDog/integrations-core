@@ -2,7 +2,6 @@
 base-package-features = ["deps", "db", "json"]
 check-types = false
 mypy-args = [
-  "--py2",
   "--check-untyped-defs",
   "--follow-imports",
   "silent",
@@ -15,19 +14,19 @@ mypy-deps = [
 ]
 
 [[envs.default.matrix]]
-python = ["3.9"]
+python = ["3.11"]
 version = [
   "5.7",  # EOL October 21, 2023
   "8.0",  # EOL April, 2026
 ]
 
 [[envs.default.matrix]]
-python = ["3.9"]
+python = ["3.11"]
 version = ["8.0"]
 replication = ["group"]
 
 [[envs.default.matrix]]
-python = ["3.9"]
+python = ["3.11"]
 flavor = ["mariadb"]
 version = [
   "10.2",  # EOL 23 May 2022

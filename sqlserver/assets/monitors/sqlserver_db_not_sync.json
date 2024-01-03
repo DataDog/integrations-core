@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2021-01-08",
   "last_updated_at": "2021-01-13",
-  "title": "Database is not marked for replication sync",
+  "title": "Database not in sync",
   "tags": [
     "integration:sql-server"
   ],
-  "description": "Notify your team when your database is not in sync with its backup.",
+  "description": "Backups are essential for data protection, disaster recovery, and maintenance operations. This monitor tracks how synchronized your database is with its backup. Alerts help to avoid scenarios where backups are are incomplete, leaving your data at risk.",
   "definition": {
     "message": "SQLServer database is not marked for replication sync. It may not be synced with its backup.",
     "name": "[SQLServer] Database is not marked for replication sync",

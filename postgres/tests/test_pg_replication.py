@@ -115,6 +115,7 @@ def test_conflicts_lock(aggregator, integration_check, pg_instance, pg_replica_i
     cur.execute('update persons SET personid = 1 where personid = 1;')
     cur.execute('vacuum full persons;')
     time.sleep(0.2)
+    conn.close()
 
     _wait_for_value(
         pg_replica_instance2,
@@ -126,7 +127,6 @@ def test_conflicts_lock(aggregator, integration_check, pg_instance, pg_replica_i
     aggregator.assert_metric('postgresql.conflicts.lock', value=1, tags=expected_tags)
 
     replica_con.close()
-    conn.close()
 
 
 @requires_over_10
@@ -146,6 +146,7 @@ def test_conflicts_snapshot(aggregator, integration_check, pg_instance, pg_repli
     cur.execute('update persons SET personid = 1 where personid = 1;')
     time.sleep(1.2)
     cur.execute('vacuum verbose persons;')
+    conn.close()
     time.sleep(0.2)
 
     _wait_for_value(
@@ -157,7 +158,6 @@ def test_conflicts_snapshot(aggregator, integration_check, pg_instance, pg_repli
     aggregator.assert_metric('postgresql.conflicts.snapshot', value=1, tags=expected_tags)
 
     replica2_con.close()
-    conn.close()
 
 
 @pytest.mark.skip(reason="Failing on master")

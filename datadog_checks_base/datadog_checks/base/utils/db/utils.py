@@ -303,7 +303,14 @@ class DBMAsyncJob(object):
                         "dd.{}.async_job.inactive_stop".format(self._dbms), 1, tags=self._job_tags, raw=True
                     )
                     break
-                self._run_job_rate_limited()
+                if self._check.should_profile_memory():
+                    self._check.profile_memory(
+                        self._run_job_rate_limited,
+                        namespaces=[self._check.name, self._job_name],
+                        extra_tags=self._job_tags,
+                    )
+                else:
+                    self._run_job_rate_limited()
         except Exception as e:
             if self._cancel_event.isSet():
                 # canceling can cause exceptions if the connection is closed the middle of the check run

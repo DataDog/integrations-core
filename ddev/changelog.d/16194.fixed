@@ -1,1 +1,0 @@
-Exclude psycopg2 when checking for dependency updates

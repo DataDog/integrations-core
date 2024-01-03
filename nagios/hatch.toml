@@ -1,7 +1,7 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.9"]
+python = ["2.7", "3.11"]
 version = ["4.4"]
 
 [envs.default.overrides]

@@ -13,7 +13,7 @@ mypy-deps = [
 ]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.9"]
+python = ["2.7", "3.11"]
 version = ["9.0", "10.0", "11.0"]
 
 [envs.default.overrides]

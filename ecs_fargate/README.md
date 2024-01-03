@@ -73,7 +73,7 @@ partial -->
 <!-- xxx tab "AWS CLI" xxx -->
 ##### AWS CLI Task Definition
 
-1. Download [datadog-agent-ecs-fargate.json][42]. **Note**: If you are using Internet Explorer, this may download as gzip file, which contains the JSON file mentioned below.**
+1. Download [datadog-agent-ecs-fargate.json][42]. **Note**: If you are using Internet Explorer, this may download as a gzip file, which contains the JSON file mentioned below.
 <!-- partial
 {{< site-region region="us,us3,us5,eu,ap1,gov" >}}
 2. Update the JSON with a `TASK_NAME`, your [Datadog API Key][41], and the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}). **Note**: The environment variable `ECS_FARGATE` is already set to `"true"`.
@@ -482,7 +482,7 @@ After this has been added edit the application container in your Task Definition
 <!-- xxx tab "AWS CLI" xxx -->
 ##### AWS CLI
 
-Edit the existing task definition JSON file that you have to contain the `log_router` container and the updated `logConfiguration` for your application container, as described in the previous section. Once this is done you can create a new revision of your task definition with:
+Edit your existing JSON task definition file to include the `log_router` container and the updated `logConfiguration` for your application container, as described in the previous section. After this is done, create a new revision of your task definition with the following command:
 
 ```bash
 aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-agent-ecs-fargate.json
@@ -745,6 +745,17 @@ partial -->
 
 3. Ensure your application is running in the same task definition as the Datadog Agent container.
 
+### Process collection
+
+<div class="alert alert-warning">You can view your ECS Fargate processes in Datadog. To see their relationship to ECS Fargate containers, use the Datadog Agent v7.50.0 or later.</div>
+
+You can monitor processes in ECS Fargate in Datadog by using the [Live Processes page][56]. To enable process collection, add the [`PidMode` parameter][57] in the Task Definition and set it to `task` as follows:
+
+```text
+"pidMode": "task"
+```
+To filter processes by ECS, use the `AWS Fargate` Containers facet or enter `fargate:ecs` in the search query on the Live Processes page.
+
 ## Out-of-the-box tags
 
 The Agent can autodiscover and attach tags to all data emitted by the entire task or an individual container within this task. The list of tags automatically attached depends on the Agent's [cardinality configuration][33].
@@ -852,4 +863,5 @@ Need help? Contact [Datadog support][18].
 [53]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/cpp?tab=containers#instrument-your-application
 [54]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/dotnet-core?tab=containers#custom-instrumentation
 [55]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/dotnet-framework?tab=containers#custom-instrumentation
-
+[56]: https://app.datadoghq.com/process
+[57]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#other_task_definition_params

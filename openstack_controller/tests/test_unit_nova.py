@@ -5,9 +5,11 @@
 
 import logging
 import os
+from importlib.metadata import metadata
 
 import mock
 import pytest
+from packaging.version import Version
 
 import tests.configs as configs
 import tests.metrics as metrics
@@ -36,6 +38,10 @@ pytestmark = [
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.skipif(
+    Version(metadata("datadog_checks_base")["VERSION"]) < Version("34.1.2"),
+    reason='assert_external_tags was added in version 34.1.2',
+)
 def test_external_tags(datadog_agent, dd_run_check, check):
     dd_run_check(check)
     datadog_agent.assert_external_tags(
@@ -504,8 +510,7 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
         pytest.param(
             {
                 'http_error': {
-                    '/compute/v2.1/limits?tenant_id=1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                    '/compute/v2.1/limits?tenant_id=6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                    '/compute/v2.1/limits': MockResponse(status_code=500),
                 }
             },
             None,
@@ -552,10 +557,13 @@ def test_limits_exception(aggregator, check, dd_run_check, mock_http_get, connec
     if api_type == ApiType.REST:
         args_list = []
         for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        num_calls = sum('http://127.0.0.1:8774/compute/v2.1/limits?tenant_id=' in arg for arg in args_list)
-        assert num_calls == 2
+            args, kwargs = call
+            tenant_id = kwargs.get('params', {}).get('tenant_id')
+            args_list += [(list(args), tenant_id)]
+
+        assert args_list.count((['http://127.0.0.1:8774/compute/v2.1/limits'], '1e6e233e637d4d55a50a62b63398ad15')) == 1
+        assert args_list.count((['http://127.0.0.1:8774/compute/v2.1/limits'], '6e39099cccde4f809b003d9e0dd09304')) == 1
+
     if api_type == ApiType.SDK:
         assert connection_compute.get_limits.call_count == 2
 
@@ -1670,12 +1678,7 @@ def test_quota_sets_metrics_excluding_demo_project(aggregator, check, dd_run_che
         pytest.param(
             {
                 'http_error': {
-                    '/compute/v2.1/servers/detail?project_id=1e6e233e637d4d55a50a62b63398ad15': MockResponse(
-                        status_code=500
-                    ),
-                    '/compute/v2.1/servers/detail?project_id=6e39099cccde4f809b003d9e0dd09304': MockResponse(
-                        status_code=500
-                    ),
+                    '/compute/v2.1/servers/detail': MockResponse(status_code=500),
                 }
             },
             None,
@@ -1710,20 +1713,18 @@ def test_servers_exception(aggregator, check, dd_run_check, mock_http_get, conne
     if api_type == ApiType.REST:
         args_list = []
         for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+            args, kwargs = call
+            project_id = kwargs.get('params', {}).get('project_id')
+            args_list += [(list(args), project_id)]
         assert (
-            args_list.count(
-                'http://127.0.0.1:8774/compute/v2.1/servers/detail?project_id=1e6e233e637d4d55a50a62b63398ad15'
-            )
+            args_list.count((['http://127.0.0.1:8774/compute/v2.1/servers/detail'], '1e6e233e637d4d55a50a62b63398ad15'))
             == 1
         )
         assert (
-            args_list.count(
-                'http://127.0.0.1:8774/compute/v2.1/servers/detail?project_id=6e39099cccde4f809b003d9e0dd09304'
-            )
+            args_list.count((['http://127.0.0.1:8774/compute/v2.1/servers/detail'], '6e39099cccde4f809b003d9e0dd09304'))
             == 1
         )
+
     if api_type == ApiType.SDK:
         assert connection_compute.servers.call_count == 2
         assert (
@@ -1790,18 +1791,16 @@ def test_servers_disable_call(aggregator, check, dd_run_check, mock_http_get, co
     if api_type == ApiType.REST:
         args_list = []
         for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+            args, kwargs = call
+            project_id = kwargs.get('params', {}).get('project_id')
+            args_list += [(list(args), project_id)]
+
         assert (
-            args_list.count(
-                'http://127.0.0.1:8774/compute/v2.1/servers/detail?project_id=1e6e233e637d4d55a50a62b63398ad15'
-            )
+            args_list.count((['http://127.0.0.1:8774/compute/v2.1/servers/detail'], '1e6e233e637d4d55a50a62b63398ad15'))
             == 0
         )
         assert (
-            args_list.count(
-                'http://127.0.0.1:8774/compute/v2.1/servers/detail?project_id=6e39099cccde4f809b003d9e0dd09304'
-            )
+            args_list.count((['http://127.0.0.1:8774/compute/v2.1/servers/detail'], '6e39099cccde4f809b003d9e0dd09304'))
             == 1
         )
     if api_type == ApiType.SDK:

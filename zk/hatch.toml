@@ -1,12 +1,12 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.9"]
+python = ["2.7", "3.11"]
 version = ["3.5.8", "3.6.2"]
 ssl = ["ssl"]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.9"]
+python = ["2.7", "3.11"]
 version = ["3.5.8", "3.6.2"]
 
 [envs.default.overrides]

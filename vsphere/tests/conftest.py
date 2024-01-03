@@ -7,7 +7,7 @@ import pytest
 from mock import MagicMock, Mock, patch
 from pyVmomi import vim
 
-from datadog_checks.vsphere.legacy.vsphere_legacy import DEFAULT_MAX_HIST_METRICS
+from datadog_checks.vsphere.constants import DEFAULT_MAX_QUERY_METRICS
 
 from .common import (
     DEFAULT_INSTANCE,
@@ -23,6 +23,8 @@ from .common import (
     PERF_METRIC_ID,
     PROPERTIES_EX,
     REALTIME_INSTANCE,
+    VM_INVALID_GATEWAY_PROPERTIES_EX,
+    VM_INVALID_PROPERTIES_EX,
     VM_PROPERTIES_EX,
     VSPHERE_VERSION,
     MockHttpV6,
@@ -125,7 +127,7 @@ def query_events():
 @pytest.fixture
 def query_options():
     def QueryOptions(name):
-        return [MagicMock(value=DEFAULT_MAX_HIST_METRICS)]
+        return [MagicMock(value=DEFAULT_MAX_QUERY_METRICS)]
 
     yield QueryOptions
 
@@ -154,6 +156,16 @@ def properties_ex():
 @pytest.fixture
 def vm_properties_ex():
     return VM_PROPERTIES_EX
+
+
+@pytest.fixture
+def vm_invalid_properties_ex():
+    return VM_INVALID_PROPERTIES_EX
+
+
+@pytest.fixture
+def vm_invalid_gateway_properties_ex():
+    return VM_INVALID_GATEWAY_PROPERTIES_EX
 
 
 @pytest.fixture

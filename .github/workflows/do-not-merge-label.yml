@@ -1,0 +1,23 @@
+name: Check do-not-merge labels
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - labeled
+      - unlabeled
+      - synchronize
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Check do-not-merge labels
+    steps:
+      - name: Get PR labels
+        id: pr-labels
+        uses: joerick/pr-labels-action@v1.0.9
+
+      - run: |
+          echo "A 'do-not-merge/*' label has been found in this PR."
+          exit 1
+        if: contains(steps.pr-labels.outputs.labels, 'do-not-merge')

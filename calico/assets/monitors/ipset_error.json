@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2022-03-18",
   "last_updated_at": "2022-03-18",
-  "title": "error with ipsets",
+  "title": "IPset is failing",
   "tags": [
     "integration:calico"
   ],
-  "description": "Get notified when Calico fails to apply networking rules using ipset.",
+  "description": "IPset command is used to create and manage sets of IP addresses for network and firewall configurations. This monitor tracks the errors related to IPset command to indicate a potential issue with Calico's IPset functionality.",
   "definition": {
     "message": "Calico encountered a problem applying networking rules using ipset.",
     "name": "[Calico] error with ipsets",

@@ -41,7 +41,12 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "java org.apache.spark.deploy.SparkSubmit",
+        "java org.apache.spark.deploy.worker.Worker",
+        "java org.apache.spark.deploy.master.Master"
+      ]
     },
     "dashboards": {
       "spark": "assets/dashboards/spark_dashboard.json"
