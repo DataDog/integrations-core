@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2021-03-18",
   "last_updated_at": "2021-03-18",
-  "title": "High disk store percentage on {{host.name}}",
+  "title": "Host is running out of disk space",
   "tags": [
     "integration:activemq"
   ],
-  "description": "Notify your team when disk store usage exceeds thresholds.",
+  "description": "Disk space is critical for message persistence and overall broker performance. This monitor oversees the overall disk space utilization of ActiveMQ Artermis and triggers if the amount equals or succeeds 95%.",
   "definition": {
     "message": "Please check host {{host.name}}, as disk store usage is abnormally high at {{value}}.",
     "name": "[ActiveMQ Artemis] High disk store percentage on {{host.name}}",
