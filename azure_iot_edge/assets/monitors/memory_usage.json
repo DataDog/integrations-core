@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2020-10-22",
   "last_updated_at": "2020-10-22",
-  "title": "IoT Edge device {{host}} is running out of memory",
+  "title": "Device is running out of memory",
   "tags": [
     "integration:azure-iot-edge"
   ],
-  "description": "Triggers an alert when an IoT Edge device is running out of memory",
+  "description": "An IoT device can approach or exceed the limits of its available physical or virtual memory resources. This monitor tracks the memory utilization to avoid potential memory problems that can impact the device's performance and functionality.",
   "definition": {
     "message": "Please check device {{host}}, as Edge Agent reports usage of more than {{threshold}}% of available RAM for the last hour.",
     "name": "[Azure IoT Edge] IoT Edge device {{host}} is running out of memory",
