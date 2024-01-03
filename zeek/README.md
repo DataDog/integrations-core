@@ -1,6 +1,6 @@
 ## Overview
 
-* Zeek is the world's leading platform for network security monitoring. It interprets what it sees and creates compact, high-fidelity transaction logs, file content, and fully customized output, suitable for manual review on disk or in a more analyst-friendly tool like a security and information event management (SIEM) system.
+* [Zeek][6] is the world's leading platform for network security monitoring. It interprets what it sees and creates compact, high-fidelity transaction logs, file content, and fully customized output, suitable for manual review on disk or in a more analyst-friendly tool like a security and information event management (SIEM) system.
 
 This integration provides visualization and log enrichments for Connection Logs, DNS & DHCP Logs, Network Protocols, Files, Detections and Miscellaneous eventtypes.
 
@@ -187,3 +187,4 @@ For any further assistance, do contact [Datadog support][3].
 [3]: https://docs.datadoghq.com/help/
 [4]: https://docs.datadoghq.com/agent/
 [5]: https://github.com/corelight/json-streaming-logs
+[6]: https://zeek.org/
