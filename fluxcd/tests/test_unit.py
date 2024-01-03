@@ -51,7 +51,7 @@ EXPECTED_METRICS = {
 
 
 @pytest.mark.parametrize("fluxcd_version", ["v1", "v2"])
-def test_assert_metrics_v1(dd_run_check, aggregator, check, request, fluxcd_version):
+def test_assert_metrics(dd_run_check, aggregator, check, request, fluxcd_version):
     _mock_response = request.getfixturevalue(f"mock_metrics_{fluxcd_version}")
     dd_run_check(check)
     for metric_name in EXPECTED_METRICS[fluxcd_version]:
