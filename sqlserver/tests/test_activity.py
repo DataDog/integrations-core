@@ -151,7 +151,6 @@ def test_collect_load_activity(
     # the second query should be fred's, which is currently blocked on
     # bob who is holding a table lock
     blocked_row = event['sqlserver_activity'][1]
-    print(blocked_row)
     # assert the data that was collected is correct
     assert blocked_row['user_name'] == "fred", "incorrect user_name"
     assert blocked_row['session_status'] == "running", "incorrect session_status"

@@ -284,7 +284,7 @@ class SqlserverActivity(DBMAsyncJob):
         available_columns = [c for c in all_expected_columns if c in all_columns]
         missing_columns = set(all_expected_columns) - set(available_columns)
         if missing_columns:
-            self._log.warning("missing the following expected columns from sys.dm_exec_requests: %s", missing_columns)
+            self._log.info("missing the following expected columns from sys.dm_exec_requests: %s", missing_columns)
         self._log.debug("found available sys.dm_exec_requests columns: %s", available_columns)
         return available_columns
 
