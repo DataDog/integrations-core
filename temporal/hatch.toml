@@ -1,0 +1,10 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["3.11"]
+version = ["1.19"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "TEMPORAL_VERSION", value = "1.19.1", if = ["1.19"] },
+]

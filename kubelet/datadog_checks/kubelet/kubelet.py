@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
-import logging
 import re
 import sys
 from collections import defaultdict
@@ -24,6 +23,7 @@ from .common import (
     CADVISOR_DEFAULT_PORT,
     PodListUtils,
     get_container_label,
+    get_prometheus_url,
     replace_container_rt_prefix,
     tags_for_docker,
 )
@@ -34,6 +34,7 @@ from .summary import SummaryScraperMixin
 KUBELET_HEALTH_PATH = '/healthz'
 NODE_SPEC_PATH = '/spec'
 POD_LIST_PATH = '/pods'
+CADVISOR_METRICS_PATH = '/metrics/cadvisor'
 KUBELET_METRICS_PATH = '/metrics'
 STATS_PATH = '/stats/summary/'
 PROBES_METRICS_PATH = '/metrics/probes'
@@ -67,6 +68,7 @@ WHITELISTED_CONTAINER_STATE_REASONS = {
         'containercreating',
         'createcontainererror',
         'invalidimagename',
+        'createcontainerconfigerror',
     ],
     'terminated': ['oomkilled', 'containercannotrun', 'error'],
 }
@@ -129,8 +131,6 @@ DEFAULT_ENABLED_GAUGES = [
 ]
 DEFAULT_POD_LEVEL_METRICS = ['network.*']
 
-log = logging.getLogger('collector')
-
 
 class KubeletCheck(
     CadvisorPrometheusScraperMixin,
@@ -174,14 +174,6 @@ class KubeletCheck(
             raise Exception('Kubelet check only supports one configured instance.')
         inst = instances[0] if instances else None
 
-        cadvisor_instance = self._create_cadvisor_prometheus_instance(inst)
-
-        if len(inst.get('ignore_metrics', {})) > 0:
-            # Add entries from configuration to ignore_metrics in the cadvisor collector.
-            cadvisor_instance['ignore_metrics'].extend(
-                m for m in inst.get('ignore_metrics', {}) if m not in cadvisor_instance['ignore_metrics']
-            )
-
         # configuring the collection of some of the metrics (via the cadvisor or the summary endpoint)
         self.max_depth = inst.get('max_depth', DEFAULT_MAX_DEPTH)
         enabled_gauges = inst.get('enabled_gauges', DEFAULT_ENABLED_GAUGES)
@@ -191,10 +183,25 @@ class KubeletCheck(
         pod_level_metrics = inst.get('pod_level_metrics', DEFAULT_POD_LEVEL_METRICS)
         self.pod_level_metrics = ["{0}.{1}".format(self.NAMESPACE, x) for x in pod_level_metrics]
 
-        kubelet_instance = self._create_kubelet_prometheus_instance(inst)
-        probes_instance = self._create_probes_prometheus_instance(inst)
+        # configuring the different instances use to scrape the 3 kubelet endpoints
+        prom_url, get_prom_url_err = get_prometheus_url("dummy_url/cadvisor")
+
+        cadvisor_instance = self._create_cadvisor_prometheus_instance(inst, prom_url)
+        if len(inst.get('ignore_metrics', {})) > 0:
+            # Add entries from configuration to ignore_metrics in the cadvisor collector.
+            cadvisor_instance['ignore_metrics'].extend(
+                m for m in inst.get('ignore_metrics', {}) if m not in cadvisor_instance['ignore_metrics']
+            )
+
+        kubelet_instance = self._create_kubelet_prometheus_instance(inst, prom_url)
+        probes_instance = self._create_probes_prometheus_instance(inst, prom_url)
         generic_instances = [cadvisor_instance, kubelet_instance, probes_instance]
+
         super(KubeletCheck, self).__init__(name, init_config, generic_instances)
+
+        # we need to wait that `super()` was executed to have the self.log instance created
+        if get_prom_url_err:
+            self.log.warning('get_prometheus_url() failed to query the kublet, err: %s', get_prom_url_err)
 
         self.cadvisor_legacy_port = inst.get('cadvisor_port', CADVISOR_DEFAULT_PORT)
         self.cadvisor_legacy_url = None
@@ -232,19 +239,16 @@ class KubeletCheck(
 
         self.first_run = True
 
-    def _create_kubelet_prometheus_instance(self, instance):
+    def _create_kubelet_prometheus_instance(self, instance, prom_url):
         """
         Create a copy of the instance and set default values.
         This is so the base class can create a scraper_config with the proper values.
         """
-        kubelet_conn_info = get_connection_info()
-        endpoint = kubelet_conn_info.get('url')
-
         kubelet_instance = deepcopy(instance)
         kubelet_instance.update(
             {
                 'namespace': self.NAMESPACE,
-                'prometheus_url': instance.get('kubelet_metrics_endpoint', urljoin(endpoint, KUBELET_METRICS_PATH)),
+                'prometheus_url': instance.get('kubelet_metrics_endpoint', urljoin(prom_url, KUBELET_METRICS_PATH)),
                 'metrics': [
                     DEFAULT_GAUGES,
                     DEPRECATED_GAUGES,
@@ -278,15 +282,21 @@ class KubeletCheck(
             if not kube_ns:
                 continue
 
-            # get volumes
-            volumes = pod.get('spec', {}).get('volumes')
-            if not volumes:
-                continue
-
             # get pod id
             pod_id = pod.get('metadata', {}).get('uid')
             if not pod_id:
                 self.log.debug('skipping pod with no uid')
+                continue
+
+            # get pod name
+            pod_name = pod.get('metadata', {}).get('name')
+            if not pod_name:
+                self.log.debug('skipping pod with no name')
+                continue
+
+            # get volumes
+            volumes = pod.get('spec', {}).get('volumes')
+            if not volumes:
                 continue
 
             # get tags from tagger
@@ -298,11 +308,19 @@ class KubeletCheck(
             for excluded_tag in self.VOLUME_TAG_KEYS_TO_EXCLUDE:
                 tags = [t for t in tags if not t.startswith(excluded_tag + ':')]
 
-            # get PVC
             for v in volumes:
+                # get PVC
                 pvc_name = v.get('persistentVolumeClaim', {}).get('claimName')
                 if pvc_name:
                     pod_tags_by_pvc['{}/{}'.format(kube_ns, pvc_name)].update(tags)
+
+                # get standalone PVC associated to potential EVC
+                # when a generic ephemeral volume is created, an associated pvc named <pod_name>-<volume_name>
+                # is created (https://docs.openshift.com/container-platform/4.11/storage/generic-ephemeral-vols.html).
+                evc = v.get('ephemeral', {}).get('volumeClaimTemplate')
+                volume_name = v.get('name')
+                if evc and volume_name:
+                    pod_tags_by_pvc['{}/{}-{}'.format(kube_ns, pod_name, volume_name)].update(tags)
 
         return pod_tags_by_pvc
 
@@ -315,6 +333,8 @@ class KubeletCheck(
         endpoint = kubelet_conn_info.get('url')
         if endpoint is None:
             raise CheckException("Unable to detect the kubelet URL automatically: " + kubelet_conn_info.get('err', ''))
+
+        self._update_kubelet_url_and_bearer_token(instance, endpoint)
 
         self.kube_health_url = urljoin(endpoint, KUBELET_HEALTH_PATH)
         self.node_spec_url = urljoin(endpoint, NODE_SPEC_PATH)
@@ -601,6 +621,24 @@ class KubeletCheck(
 
             gauge_name = '{}.containers.{}.{}'.format(self.NAMESPACE, metric_name, state_name)
             self.gauge(gauge_name, 1, tags + reason_tags)
+
+    def _update_kubelet_url_and_bearer_token(self, instance, endpoint):
+        if 'cadvisor_metrics_endpoint' in instance:
+            cadvisor_metrics_endpoint = instance.get(
+                'cadvisor_metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH)
+            )
+        else:
+            cadvisor_metrics_endpoint = instance.get('metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH))
+
+        self.update_prometheus_url(instance, self.cadvisor_scraper_config, cadvisor_metrics_endpoint)
+
+        kubelet_metrics_endpoint = instance.get('kubelet_metrics_endpoint', urljoin(endpoint, KUBELET_METRICS_PATH))
+        self.update_prometheus_url(instance, self.kubelet_scraper_config, kubelet_metrics_endpoint)
+
+        probes_metrics_endpoint = urljoin(endpoint, PROBES_METRICS_PATH)
+        if self.detect_probes(self.get_http_handler(self.probes_scraper_config), probes_metrics_endpoint):
+            instance_probes_metrics_endpoint = instance.get('probes_metrics_endpoint', probes_metrics_endpoint)
+            self.update_prometheus_url(instance, self.probes_scraper_config, instance_probes_metrics_endpoint)
 
     @staticmethod
     def parse_quantity(string):

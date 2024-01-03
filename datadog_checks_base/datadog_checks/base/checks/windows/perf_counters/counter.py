@@ -168,7 +168,17 @@ class PerfObject:
 
     def collect(self):
         for counter in self.counters:
-            counter.collect()
+            try:
+                counter.collect()
+            except Exception as e:
+                # If one counter fails to be collected we still should try to collect
+                # the rest of the counters. Log the error and move on.
+                self.logger.error(
+                    'Error collecting counter `%s` for object `%s`: `%s`',
+                    counter.name,
+                    self.name,
+                    e,
+                )
 
         # Collect "instance" metrics directly from a MultiCounter counter object
         if self.has_multiple_instances and len(self.counters) > 0:
@@ -213,11 +223,31 @@ class PerfObject:
             self._configure_counters()
             if self.counters:
                 for counter in self.counters:
-                    counter.refresh()
+                    try:
+                        counter.refresh()
+                    except Exception as e:
+                        # If one counter fails to be refreshed (created) we still should try to refresh
+                        # the rest of the counters. Log the error and move on.
+                        self.logger.error(
+                            'Error refreshing counter `%s` for object `%s`: `%s`',
+                            counter.name,
+                            self.name,
+                            e,
+                        )
 
     def clear(self):
         for counter in self.counters:
-            counter.clear()
+            try:
+                counter.clear()
+            except Exception as e:
+                # If one counter fails to be cleared we still should try to clear
+                # the rest of the counters. Log the error and move on.
+                self.logger.error(
+                    'Error clearing counter `%s` for object `%s`: `%s`',
+                    counter.name,
+                    self.name,
+                    e,
+                )
 
     def _configure_counters(self):
         if self.use_localized_counters:
@@ -465,12 +495,13 @@ class SingleCounter(CounterBase):
         self.counter_handle = None
 
     def collect(self):
-        try:
-            value = get_counter_value(self.counter_handle)
-        except pywintypes.error as error:
-            self.handle_counter_value_error(error)
-        else:
-            self.transformer(value, tags=self.tags)
+        if self.counter_handle is not None:
+            try:
+                value = get_counter_value(self.counter_handle)
+            except pywintypes.error as error:
+                self.handle_counter_value_error(error)
+            else:
+                self.transformer(value, tags=self.tags)
 
     def refresh(self):
         if self.counter_handle is None:

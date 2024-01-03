@@ -4,7 +4,7 @@ set -e
 # pg_monitor is only available on 10+
 # prior to version 10 there was no `pg_read_all_stats` role so by adding a database to which the agent can't connect
 # it causes many of the tests to fail since some stats queries fail (like reading the size of the database to which you can't connect)
-# therefore we will only add this database to which you can't connect in 10+ for testing purposes
+# therefore we will only add this database to which you can't connect in 10+ for testing purposes.
 if [[ !("$PG_MAJOR" == 9.* ) ]]; then
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-'EOSQL'
     GRANT pg_monitor TO datadog;
@@ -91,4 +91,16 @@ done
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" dogs_nofunc <<-'EOSQL'
     DROP FUNCTION datadog.explain_statement(l_query text, out explain JSON)
+EOSQL
+
+# Somehow, on old postgres version (11 and 12), wal_level is incorrectly set despite
+# being present in postgresql.conf. Alter and restart to make sure we have the correct wal_level.
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-'EOSQL'
+    ALTER SYSTEM SET wal_level = logical;
+EOSQL
+pg_ctl -D /var/lib/postgresql/data -w restart
+
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-'EOSQL'
+    SELECT * FROM pg_create_physical_replication_slot('replication_slot');
+    SELECT * FROM pg_create_logical_replication_slot('logical_slot', 'test_decoding');
 EOSQL

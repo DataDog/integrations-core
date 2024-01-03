@@ -1,0 +1,19 @@
+[env.collectors.datadog-checks]
+
+[envs.default.env-vars]
+DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
+
+[[envs.default.matrix]]
+python = ["3.11"]
+version = ["1.20"]
+auth = ["no-auth", "auth"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "WEAVIATE_VERSION", value = "1.20.0", if = ["1.20"] },
+]
+matrix.auth.env-vars = [
+  { key = "USE_AUTH", value = "true", if = ["auth"] },
+]
+
+[envs.bench]

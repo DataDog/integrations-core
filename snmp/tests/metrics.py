@@ -47,6 +47,7 @@ IF_RATES = [
 ]
 IF_SCALAR_GAUGE = ['ifNumber']
 IF_GAUGES = ['ifAdminStatus', 'ifOperStatus', 'ifSpeed', 'ifHighSpeed']
+IF_CUSTOM_SPEED_GAUGES = ['ifInSpeed', 'ifOutSpeed']  # corecheck only
 IF_BANDWIDTH_USAGE = ['ifBandwidthInUsage.rate', 'ifBandwidthOutUsage.rate']
 
 # Generic IP metrics for routers

@@ -163,7 +163,7 @@ class _GitIgnoreMatcher:
         """Create a matcher with parents linked up to the provided `repo_root`"""
         # Create all the intermediate instances between the `repo_root` and the `path`
         # and link them together.
-        parents = [parent for parent in reversed(path.relative_to(repo_root).parents)]
+        parents = list(reversed(path.relative_to(repo_root).parents))
         instance = cls(repo_root)
         for parent in parents[1:]:
             instance = instance.for_path(repo_root / parent)

@@ -15,8 +15,7 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Network",
-      "Category::Autodiscovery"
+      "Category::Network"
     ]
   },
   "author": {

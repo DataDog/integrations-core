@@ -6,8 +6,7 @@ from copy import deepcopy
 import pytest
 
 INSTANCE = {
-    'prometheus_url': 'http://localhost:10055/metrics',
-    'tags': ['custom:tag'],
+    'prometheus_url': 'http://localhost:10257/metrics',
 }
 
 

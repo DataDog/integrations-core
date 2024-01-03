@@ -83,10 +83,11 @@ If your journal is located elsewhere, add a `path` parameter with the correspond
 
 ##### Filter journal units
 
-It's possible to filter in and out specific units by using these parameters:
+You can filter specific _system-level_ units by using these parameters:
 
-- `include_units`: Includes all units specified.
-- `exclude_units`: Excludes all units specified.
+- `include_units`: Includes all system-level units specified.
+- `exclude_units`: Excludes all system-level units specified.
+
 
 Example:
 
@@ -97,6 +98,41 @@ logs:
       include_units:
           - docker.service
           - sshd.service
+```
+
+In Datadog Agent version `7.37.0`+, you can filter _user-level_ units by using these parameters:
+
+- `include_user_units`: Includes all user-level units specified.
+- `exclude_user_units`: Excludes all user-level units specified.
+
+**Note**: Use the `*` wildcard in `exclude_units` or `exclude_user_units` to specify a particular Journald log.
+
+Example:
+
+```yaml
+logs:
+    # Collect all system-level unit logs.
+    - type: journald
+      exclude_user_units:
+          - '*'
+```
+
+##### Filter journal messages
+
+In Datadog Agent version `7.39.0`+, you can filter arbitrary messages using key-value pairs with these parameters:
+
+- `include_matches`: Includes messages matching `key=value`
+- `exclude_matches`: Excludes messages matching `key=value`
+
+
+Example:
+
+```yaml
+logs:
+    - type: journald
+      path: /var/log/journal/
+      include_matches:
+          - _TRANSPORT=kernel
 ```
 
 ##### Tailing the same journal multiple times
@@ -153,7 +189,7 @@ journald does not include any events.
 Need help? Contact [Datadog support][7].
 
 [1]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [5]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup

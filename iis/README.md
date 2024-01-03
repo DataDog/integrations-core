@@ -46,7 +46,7 @@ To configure this check for an Agent running on a host:
 
 3. [Restart the Agent][6].
 
-**Note**: Ensure the `datadog-agent` user has read access to tail the log files you want to collect from. See [Permission issues tailing log files][12] for more information.
+**Note**: Ensure the `datadog-agent` user has read and execute access to tail the log files you want to collect from. When IIS creates a new sub-folder (such as when a new site is created), the permissions of the parent folder are not automatically inherited. See [Permission issues tailing log files][12] for more information.
 
 
 ### Validation
@@ -73,7 +73,7 @@ Need help? Contact [Datadog support][10].
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/iis/images/iisgraph.png
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/basic_agent_usage/windows/#agent-check-directory-structure
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/iis/datadog_checks/iis/data/conf.yaml.example

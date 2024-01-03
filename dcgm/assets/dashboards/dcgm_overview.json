@@ -1,0 +1,872 @@
+{
+    "author_name": "Datadog",
+    "description": "**DCGM Exporter**\n\nThe DCGM exporter is a tool to connect with Nvidia DCGM and exposes GPU telemetry in containerized environments. This dashboard gives you GPU metrics so you can monitor your GPU's health and performance effectively. \n\n\n**Useful Links**\n\n* [Blog Post](https://www.datadoghq.com/blog/monitor-nvidia-gpus-with-datadog/)\n* [List of GPUs supported](https://docs.nvidia.com/datacenter/dcgm/latest/user-guide/getting-started.html)\n",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "Agent",
+            "prefix": "host"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "service",
+            "prefix": "service"
+        }
+    ],
+    "title": "DCGM Exporter (Nvidia GPU Monitoring) Overview",
+    "widgets": [
+        {
+            "definition": {
+                "banner_img": "/static/images/integration_dashboard/dcgm_hero_1.png",
+                "layout_type": "ordered",
+                "show_title": false,
+                "title": "New group",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "**DCGM Exporter**\n\nThe DCGM exporter is a tool to connect with Nvidia DCGM and exposes GPU telemetry in containerized environments. This dashboard gives you GPU metrics so you can monitor your GPU's health and performance effectively. ",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 5765057495183900,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "**Useful Links**\n\n* [Blog Post](https://www.datadoghq.com/blog/monitor-nvidia-gpus-with-datadog/)\n* [List of GPUs supported](https://docs.nvidia.com/datacenter/dcgm/latest/user-guide/getting-started.html)\n",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 607314244154516,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 3,
+                            "y": 0
+                        }
+                    }
+                ]
+            },
+            "id": 6955576996753366,
+            "layout": {
+                "height": 5,
+                "width": 5,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_green",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "green",
+                            "content": "This section provides you with key system information. There are DCGM alerts on the most important metrics. The service check speaks to the health of your DCGM environment, and the license status tells you what [kind](https://docs.nvidia.com/grid/13.0/grid-licensing-user-guide/index.html#:~:text=This%20example%20shows%20how%20to%20configure%20a%20licensed%20Linux%20client%20for%20NVIDIA%20Virtual%20Compute%20Server.) of licensed Linux client you are leveraging. ",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 2501952917707794,
+                        "layout": {
+                            "height": 1,
+                            "width": 7,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "color_preference": "text",
+                            "count": 50,
+                            "display_format": "countsAndList",
+                            "hide_zero_counts": true,
+                            "query": "tag:(integration:dcgm)",
+                            "show_last_triggered": false,
+                            "show_priority": false,
+                            "sort": "status,asc",
+                            "start": 0,
+                            "summary_type": "monitors",
+                            "title": "DCGM Monitor Summary",
+                            "type": "manage_status"
+                        },
+                        "id": 8740824674228522,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "=",
+                                            "palette": "white_on_green",
+                                            "value": 0
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:dcgm.vgpu_license_status{*} by {dcgm_fi_driver_version}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "DCGM Driver Version",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 568704879014816,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 3,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "check": "dcgm.openmetrics.health",
+                            "group_by": [],
+                            "grouping": "cluster",
+                            "tags": [],
+                            "time": {
+                                "live_span": "1d"
+                            },
+                            "title": "DCGM Health",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "check_status"
+                        },
+                        "id": 3431939964933534,
+                        "layout": {
+                            "height": 1,
+                            "width": 2,
+                            "x": 3,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "custom_links": [
+                                {
+                                    "label": "Possible License Values",
+                                    "link": "https://docs.nvidia.com/grid/13.0/grid-licensing-user-guide/index.html#:~:text=This%20example%20shows%20how%20to%20configure%20a%20licensed%20Linux%20client%20for%20NVIDIA%20Virtual%20Compute%20Server.?=&="
+                                }
+                            ],
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<=",
+                                            "custom_bg_color": "#a47ea9",
+                                            "palette": "custom_bg",
+                                            "value": 1
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:dcgm.vgpu_license_status{*}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "VGPU Licence Status",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 2061743333718854,
+                        "layout": {
+                            "height": 1,
+                            "width": 2,
+                            "x": 5,
+                            "y": 3
+                        }
+                    }
+                ]
+            },
+            "id": 8178300534998464,
+            "layout": {
+                "height": 5,
+                "width": 7,
+                "x": 5,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_green",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "GPU Temperature Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "green",
+                            "content": "This section provides you with an overview of your hardware temperature in different states (regular, mem, slowdown, shutdown). The temperatures should remain between the hot and cold thresholds to indicate healthy hardware and avoid performance throttle. The legend table below shows avg and max temperature values by state and service. ",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 6376944408711606,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value"
+                            ],
+                            "legend_layout": "vertical",
+                            "markers": [
+                                {
+                                    "display_type": "info dashed",
+                                    "value": "y < 30"
+                                },
+                                {
+                                    "display_type": "error dashed",
+                                    "value": "y > 70"
+                                }
+                            ],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Regular Temp",
+                                            "formula": "query1",
+                                            "style": {
+                                                "palette": "purple"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:dcgm.temperature{*} by {service}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "semantic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "time": {},
+                            "title": "GPU Temperature",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4220545334262462,
+                        "layout": {
+                            "height": 5,
+                            "width": 12,
+                            "x": 0,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 2213299403806616,
+            "layout": {
+                "height": 7,
+                "width": 12,
+                "x": 0,
+                "y": 5
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_green",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Utilization Metrics",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "green",
+                            "content": "This section shows percent of utilization for GPU and memory metrics. By monitoring GPU and memory utilization, you can ensure that your high-compute workloads are running at maximum efficiency. GPU utilization can also be measured by alternate metrics like [this one](https://docs.nvidia.com/datacenter/dcgm/latest/dcgm-api/dcgm-api-field-ids.html#c.DCGM_FI_PROF_GR_ENGINE_ACTIVE). You can update your integration template and DCGM exporter template to collect such additional metrics. \n\n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 1042082565617324,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:dcgm.gpu_utilization{$Agent}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "green"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "GPU Utilisation",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2594147831316846,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "area",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:dcgm.mem.copy_utilization{*} by {hostname}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "green"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Memory Copy Utilization",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5780514876525742,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 8025458456001434,
+            "layout": {
+                "height": 5,
+                "width": 12,
+                "x": 0,
+                "y": 12
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_green",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Power",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "green",
+                            "content": "Power usage is directly correlated with temperature, demand, and cost of running your GPU-supplemented infrastructure. The chart on the left shows power consumed by host currently. The graph on the right surfaces power over time by host, with measures of the average, min, and max power usage across the selected time range. ",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 3112822367847770,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend": {
+                                "type": "inline"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:dcgm.power_usage{*} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "title": "Power Usage by Host",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 1410815001152584,
+                        "layout": {
+                            "height": 4,
+                            "width": 3,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "area",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:dcgm.power_usage{$Agent} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "cool"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Power Usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1749822540525006,
+                        "layout": {
+                            "height": 4,
+                            "width": 9,
+                            "x": 3,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 3545700433373506,
+            "layout": {
+                "height": 6,
+                "is_column_break": true,
+                "width": 12,
+                "x": 0,
+                "y": 17
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_green",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Process-Specific Metrics",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "green",
+                            "content": "Framebuffer is a reserved memory bank within a GPU, and high usage can indicate performance slowdowns. Peripheral Component Interconnect Express (PCIe) is a serial expansion bus standard for connecting a computer to one or more peripheral devices. PCIe transmission is a measure for latency and data transfer rates. Higher clock frequencies provide performance increases. \n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 5673463017827586,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend": {
+                                "type": "automatic"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 + query2",
+                                            "limit": {
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:dcgm.fb_used{*} by {service,host}"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:dcgm.fb_free{*} by {service,host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "title": "Framebuffer Usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 271267673009448,
+                        "layout": {
+                            "height": 4,
+                            "width": 4,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Transmit",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Receive",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:dcgm.pcie_tx_throughput{$Agent}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:dcgm.pcie_rx_throughput{$Agent}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "orange"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "PCIe Transmission Throughput",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": false,
+                                "scale": "sqrt"
+                            }
+                        },
+                        "id": 8896033939498030,
+                        "layout": {
+                            "height": 4,
+                            "width": 8,
+                            "x": 4,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "=",
+                                            "palette": "white_on_green",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:dcgm.vgpu_license_status{*} by {dcgm_fi_process_name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {},
+                            "title": "DCGM Process Name",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 2839371544156156,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 5
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:dcgm.mem.clock{$Agent}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:dcgm.sm_clock{$Agent}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "dotted",
+                                        "line_width": "normal",
+                                        "palette": "green"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Memory and SM Clock Frequency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3446180236609690,
+                        "layout": {
+                            "height": 3,
+                            "width": 8,
+                            "x": 4,
+                            "y": 5
+                        }
+                    }
+                ]
+            },
+            "id": 1337901742269816,
+            "layout": {
+                "height": 9,
+                "width": 12,
+                "x": 0,
+                "y": 23
+            }
+        }
+    ]
+}

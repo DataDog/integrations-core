@@ -22,6 +22,8 @@ LABELS_REMAPPER = {'type': 'avi_type', 'tenant': 'avi_tenant'}
 class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = "avi_vantage"
 
+    DEFAULT_METRIC_LIMIT = 0
+
     def __init__(self, name, init_config, instances):
         super(AviVantageCheck, self).__init__(name, init_config, instances)
         # Required for storing the auth cookie
@@ -49,7 +51,8 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             instance_copy['metrics'] = [resource_metrics]
             instance_copy['rename_labels'] = LABELS_REMAPPER.copy()
             instance_copy['rename_labels']['name'] = entity + "_name"
-            instance_copy['rename_labels'].update(self.config.rename_labels)
+            if self.config.rename_labels is not None:
+                instance_copy['rename_labels'].update(self.config.rename_labels)
 
             scrapers[endpoint] = self.create_scraper(instance_copy)
 

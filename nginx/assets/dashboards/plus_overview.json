@@ -992,6 +992,5 @@
   "layout_type": "ordered",
   "is_read_only": true,
   "notify_list": [],
-  "reflow_type": "fixed",
-  "id": "49h-duh-3j9"
+  "reflow_type": "fixed"
 }

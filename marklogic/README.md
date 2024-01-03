@@ -116,7 +116,7 @@ Need help? Contact [Datadog support][13].
 
 [1]: https://www.marklogic.com
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations
-[3]: https://app.datadoghq.com/account/settings#agent
+[3]: https://app.datadoghq.com/account/settings/agent/latest
 [4]: https://docs.marklogic.com/guide/admin/pre_def_roles#id_64197
 [5]: https://docs.marklogic.com/guide/admin/pre_def_roles#id_28243
 [6]: https://docs.marklogic.com/REST/POST/manage/v2/users

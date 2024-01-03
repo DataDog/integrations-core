@@ -1,0 +1,2307 @@
+{
+    "author_name": "Datadog",
+    "description": "## Strimzi\n\nThis dashboard provides insights into your Strimzi Kafka Kubernetes operators, such as the reconciliation status and custom resource definitions (CRDs) that each operator sees.\n\nIf you would benefit from visualizing the topology of your streaming data pipelines, or from investigating localized bottlenecks within your data streams setup, check out [Data Streams Monitoring](https://www.datadoghq.com/product/data-streams-monitoring/).\n\nFor monitoring your Kafka and Zookeeper nodes on your Strimzi cluster, please refer to the [Kafka](https://docs.datadoghq.com/integrations/kafka/?tab=host) and [Zookeeper](https://docs.datadoghq.com/integrations/zk/?tab=host) integrations, respectively. ",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "host",
+            "prefix": "host"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "endpoint",
+            "prefix": "endpoint"
+        }
+    ],
+    "title": "Strimzi Overview",
+    "widgets": [
+        {
+            "definition": {
+                "banner_img": "",
+                "layout_type": "ordered",
+                "show_title": false,
+                "title": "New group",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "has_background": true,
+                            "has_border": false,
+                            "horizontal_align": "center",
+                            "sizing": "contain",
+                            "type": "image",
+                            "url": "/static/images/logos/strimzi_large.svg",
+                            "url_dark_theme": "/static/images/logos/strimzi_reversed_large.svg",
+                            "vertical_align": "center"
+                        },
+                        "id": 7207299687974972,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "**Strimzi**\n\nThis dashboard provides insights into your Strimzi Kafka Kubernetes operators, such the reconciliation status and custom resource definitions (CRDs) that each operator sees.\n\nIf you would benefit from visualizing the topology of your streaming data pipelines, or from investigating localized bottlenecks within your data streams setup, check out [Data Streams Monitoring](https://www.datadoghq.com/product/data-streams-monitoring/).\n\nFor monitoring your Kafka and Zookeeper nodes on your Strimzi cluster, please refer to the [Kafka](https://docs.datadoghq.com/integrations/kafka/?tab=host) and [Zookeeper](https://docs.datadoghq.com/integrations/zk/?tab=host) integrations, respectively. ",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 1295608946142416,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "**Useful Links**\n\n* [Integration Docs](https://docs.datadoghq.com/integrations/strimzi)\n* [Data Streams Monitoring](https://www.datadoghq.com/product/data-streams-monitoring/)\n* [Monitoring Kafka With Datadog](https://www.datadoghq.com/blog/monitor-kafka-with-datadog/)\n* [Monitoring Kafka Performance Metrics](https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/)\n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 4819629096334638,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 5
+                        }
+                    }
+                ]
+            },
+            "id": 1830689778744176,
+            "layout": {
+                "height": 8,
+                "width": 6,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "purple",
+                            "content": "This section provides you with an overview of your system activity.  The monitor summary notifies you of any active Strimzi alerts. ",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 2066654038346558,
+                        "layout": {
+                            "height": 1,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "color_preference": "text",
+                            "count": 50,
+                            "display_format": "countsAndList",
+                            "hide_zero_counts": true,
+                            "query": "strimzi",
+                            "show_last_triggered": false,
+                            "show_priority": false,
+                            "sort": "status,asc",
+                            "start": 0,
+                            "summary_type": "monitors",
+                            "title": "Strimzi Monitors",
+                            "type": "manage_status"
+                        },
+                        "id": 1850880364771522,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "formula": "query4"
+                                        },
+                                        {
+                                            "formula": "query5"
+                                        },
+                                        {
+                                            "formula": "query6"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:strimzi.cluster_operator.process.cpu_usage{*}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:strimzi.cluster_operator.system.cpu_usage{*}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:strimzi.user_operator.system.cpu_usage{*}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "avg:strimzi.user_operator.process.cpu_usage{*}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "avg:strimzi.topic_operator.process.cpu_usage{*}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query6",
+                                            "query": "avg:strimzi.topic_operator.system.cpu_usage{*}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "time": {},
+                            "title": "CPU System and Process Usage by Operator",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2808155032779164,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "check": "strimzi.user_operator.openmetrics.health",
+                            "group_by": [],
+                            "grouping": "cluster",
+                            "tags": [],
+                            "time": {},
+                            "title": "User Endpoint",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "check_status"
+                        },
+                        "id": 5134584488852072,
+                        "layout": {
+                            "height": 1,
+                            "width": 2,
+                            "x": 0,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "check": "strimzi.topic_operator.openmetrics.health",
+                            "group_by": [],
+                            "grouping": "cluster",
+                            "tags": [],
+                            "time": {},
+                            "title": "Topic Endpoint",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "check_status"
+                        },
+                        "id": 6049636866461936,
+                        "layout": {
+                            "height": 1,
+                            "width": 2,
+                            "x": 2,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "check": "strimzi.cluster_operator.openmetrics.health",
+                            "group_by": [],
+                            "grouping": "cluster",
+                            "tags": [],
+                            "time": {},
+                            "title": "Cluster Endpoint Endpoint",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "check_status"
+                        },
+                        "id": 2380486660813244,
+                        "layout": {
+                            "height": 1,
+                            "width": 2,
+                            "x": 4,
+                            "y": 6
+                        }
+                    }
+                ]
+            },
+            "id": 8941317805867360,
+            "layout": {
+                "height": 8,
+                "width": 6,
+                "x": 6,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Operator JVM Threads",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:strimzi.cluster_operator.jvm.threads.states_threads{$host,$endpoint} by {endpoint,host,state}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Cluster Operator Current Threads Count",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4647071824760058,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:strimzi.topic_operator.jvm.threads.states_threads{$host,$endpoint} by {endpoint,host,state}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Topic Operator Current Threads Count",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 844627226732072,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:strimzi.user_operator.jvm.threads.states_threads{$host,$endpoint} by {endpoint,host,state}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "User Operator Current Threads Count",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2843005068759460,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 0
+                        }
+                    }
+                ]
+            },
+            "id": 3578320810506866,
+            "layout": {
+                "height": 4,
+                "width": 12,
+                "x": 0,
+                "y": 8
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Cluster Operator",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "purple",
+                            "content": "This section is specific to the *Cluster Operator*. It goes through resource utilization, number of reconciliations broken down by completion status, and garbage collection. \n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 5378569603600024,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:strimzi.cluster_operator.resources{host:$host.value, endpoint:$endpoint.value} by {endpoint,host,namespace,kind}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Custom Resources Count",
+                            "type": "treemap"
+                        },
+                        "id": 7368343626981436,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "CPU Count",
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:strimzi.cluster_operator.system.cpu_count{$host,$endpoint} by {endpoint,host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Processors Available",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 8829989169581310,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "always",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "State",
+                                            "cell_display_mode": "number",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "palette": "white_on_green",
+                                                    "value": 0
+                                                },
+                                                {
+                                                    "comparator": "<",
+                                                    "palette": "white_on_red",
+                                                    "value": 1
+                                                }
+                                            ],
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:strimzi.cluster_operator.resource.state{$host,$endpoint} by {endpoint,host,kind,name,reason,resource_namespace}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Resource State (1 = ready, 0 = fail)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 6428119213445192,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:strimzi.cluster_operator.resources.paused{host:$host.value,endpoint:$endpoint.value}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {},
+                            "timeseries_background": {
+                                "type": "area"
+                            },
+                            "title": "Custom Paused Resources Count",
+                            "type": "query_value"
+                        },
+                        "id": 5210719337235312,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:strimzi.cluster_operator.reconciliations.duration_seconds.count{$host, $endpoint} by {endpoint,host,kind,namespace,selector}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Reconciliation Duration",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4449867539733798,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 7
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query4"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "sum:strimzi.cluster_operator.reconciliations.successful.count{$host,$endpoint} by {endpoint,host,namespace,selector,kind}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Successful Reconciliations Count",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6633807703832948,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 10
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Failed Reconciliations Count",
+                                            "formula": "query5"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "sum:strimzi.cluster_operator.reconciliations.failed.count{$host,$endpoint} by {endpoint,host,kind,namespace,selector}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Failed Reconciliations Count",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 428522984815670,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 10
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:strimzi.cluster_operator.reconciliations.periodical.count{$host,$endpoint} by {endpoint,host,namespace,selector,kind}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Periodical Reconciliations Count",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6693590795282536,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 13
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:strimzi.cluster_operator.reconciliations.locked.count{$host, $endpoint} by {endpoint,host,kind,namespace,selector}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Locked Reconciliations Count",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5940020868899976,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 13
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:strimzi.cluster_operator.jvm.gc.pause_seconds.count{*} by {action,cause}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:strimzi.cluster_operator.jvm.gc.pause_seconds.max{*} by {action,cause}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:strimzi.cluster_operator.jvm.gc.pause_seconds.sum{*} by {action,cause}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "time": {},
+                            "title": "Time spent - GC",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 981996742515862,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 16
+                        }
+                    }
+                ]
+            },
+            "id": 8449704549182622,
+            "layout": {
+                "height": 20,
+                "width": 12,
+                "x": 0,
+                "y": 12
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Operator JVM Memory",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "purple",
+                            "content": "The memory usage is broken down by operator, and whether it is committed for the JVM or already in use. An anomalous memory usage can indicate a bottleneck.\n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 5949212237600542,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:strimzi.cluster_operator.jvm.memory.committed_bytes{$host, $endpoint} by {area,endpoint,host,id}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Cluster Operator Committed Bytes",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3451983079778752,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:strimzi.topic_operator.jvm.memory.committed_bytes{$host,$endpoint} by {area,endpoint,host,id}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Topic Operator Committed Bytes",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3045076997229852,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:strimzi.user_operator.jvm.memory.committed_bytes{$host,$endpoint} by {area,endpoint,host,id}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "User Operator Committed Bytes",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5840645183239948,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:strimzi.cluster_operator.jvm.memory.used_bytes{$host, $endpoint} by {area,endpoint,host,id}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Cluster Operator Used Bytes",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4242140240127746,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:strimzi.topic_operator.jvm.memory.used_bytes{$host,$endpoint} by {area,endpoint,host,id}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Topic Operator Used Bytes",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6528986360904528,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:strimzi.user_operator.jvm.memory.used_bytes{$host,$endpoint} by {area,endpoint,host,id}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "User Operator Used Bytes",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5824110504190848,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 4
+                        }
+                    }
+                ]
+            },
+            "id": 1257485223744034,
+            "layout": {
+                "height": 8,
+                "is_column_break": true,
+                "width": 12,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Topics Operator",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "purple",
+                            "content": "This section is specific to the *Topics Operator*. It goes through resource utilization, number of reconciliations broken down by completion status, and garbage collection. \n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 6560429580217354,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:strimzi.topic_operator.resources{host:$host.value,endpoint:$endpoint.value} by {endpoint,host,kind}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Custom Resources Count",
+                            "type": "treemap"
+                        },
+                        "id": 3048000839179124,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "CPU Count",
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:strimzi.topic_operator.system.cpu_count{$host,$endpoint} by {endpoint,host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Processors Available",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 1111344207396798,
+                        "layout": {
+                            "height": 3,
+                            "width": 5,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "always",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "State",
+                                            "cell_display_mode": "number",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "palette": "white_on_green",
+                                                    "value": 0
+                                                },
+                                                {
+                                                    "comparator": "<",
+                                                    "palette": "white_on_red",
+                                                    "value": 1
+                                                }
+                                            ],
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:strimzi.topic_operator.resource.state{$host,$endpoint} by {endpoint,host,kind,name,reason,resource_namespace}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Resource State (1 = ready, 0 = fail)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 7412874527541538,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 5,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:strimzi.topic_operator.resources.paused{host:$host.value,endpoint:$endpoint.value} by {endpoint,host,kind,namespace,selector}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Custom Paused Resources Count",
+                            "type": "treemap"
+                        },
+                        "id": 2469433467081206,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 9,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:strimzi.topic_operator.reconciliations.duration_seconds.count{$host,$endpoint} by {endpoint,host,kind,namespace,selector}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Reconciliation Duration",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8359079533948424,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 7
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query4"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "sum:strimzi.topic_operator.reconciliations.successful.count{$host,$endpoint} by {endpoint,host,kind}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Successful Reconciliations Count",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 726506330871946,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 10
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Failed Reconciliations Count",
+                                            "formula": "query5"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "sum:strimzi.topic_operator.reconciliations.failed.count{$host,$endpoint} by {endpoint,host,kind,namespace,selector}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Failed Reconciliations Count",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2183201065932974,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 10
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:strimzi.topic_operator.reconciliations.periodical.count{$host,$endpoint} by {endpoint,host,kind}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Periodical Reconciliations Count",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2663849692539566,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 13
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:strimzi.topic_operator.reconciliations.locked.count{$host,$endpoint} by {endpoint,host,kind,namespace,selector}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Locked Reconciliations Count",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 200478321289146,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 13
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:strimzi.topic_operator.jvm.gc.pause_seconds.count{*} by {action,cause}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:strimzi.topic_operator.jvm.gc.pause_seconds.max{*} by {action,cause}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:strimzi.topic_operator.jvm.gc.pause_seconds.sum{*} by {action,cause}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "time": {},
+                            "title": "Time spent - GC",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 179415192226688,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 16
+                        }
+                    }
+                ]
+            },
+            "id": 7330098160786394,
+            "layout": {
+                "height": 20,
+                "width": 12,
+                "x": 0,
+                "y": 8
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "User Operator",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "purple",
+                            "content": "This section is specific to the *User Operator*. It goes through resource utilization, number of reconciliations broken down by completion status, and garbage collection. \n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 5350388481310844,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:strimzi.user_operator.resources{host:$host.value,endpoint:$endpoint.value} by {endpoint,host,kind}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Custom Resources Count",
+                            "type": "treemap"
+                        },
+                        "id": 1901400347523822,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "CPU Count",
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:strimzi.user_operator.system.cpu_count{$host,$endpoint} by {endpoint,host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Processors Available",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 3774515972618994,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "always",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "State",
+                                            "cell_display_mode": "number",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "palette": "white_on_green",
+                                                    "value": 0
+                                                },
+                                                {
+                                                    "comparator": "<",
+                                                    "palette": "white_on_red",
+                                                    "value": 1
+                                                }
+                                            ],
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:strimzi.user_operator.resource.state{$host,$endpoint} by {endpoint,host,kind,name,reason,resource_namespace}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Resource State (1 = ready, 0 = fail)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 7302190195670424,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:strimzi.user_operator.resources.paused{host:$host.value,endpoint:$endpoint.value} by {endpoint,host,kind,namespace,selector}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Custom Paused Resources Count",
+                            "type": "treemap"
+                        },
+                        "id": 3049007963791058,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:strimzi.user_operator.reconciliations.duration_seconds.count{$host,$endpoint} by {endpoint,host,kind,namespace,selector}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Reconciliation Duration",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6006838397432968,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 7
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query4"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "sum:strimzi.user_operator.reconciliations.successful.count{$host,$endpoint} by {endpoint,host,namespace,selector,kind}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Successful Reconciliations Count",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6104727270198336,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 10
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Failed Reconciliations Count",
+                                            "formula": "query5"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "sum:strimzi.user_operator.reconciliations.failed.count{$host,$endpoint} by {endpoint,host,kind,namespace,selector}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Failed Reconciliations Count",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3221367745250394,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 10
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:strimzi.user_operator.reconciliations.periodical.count{$host,$endpoint} by {endpoint,host,namespace,selector,kind}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Periodical Reconciliations Count",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2903639981446878,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 13
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:strimzi.user_operator.reconciliations.locked.count{$host,$endpoint} by {endpoint,host,kind,namespace,selector}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Locked Reconciliations Count",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4842003920159258,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 13
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:strimzi.user_operator.jvm.gc.pause_seconds.count{*} by {action,cause}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:strimzi.user_operator.jvm.gc.pause_seconds.max{*} by {action,cause}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:strimzi.user_operator.jvm.gc.pause_seconds.sum{*} by {action,cause}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "time": {},
+                            "title": "Time spent - GC",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3164015813705856,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 16
+                        }
+                    }
+                ]
+            },
+            "id": 4239426027200516,
+            "layout": {
+                "height": 20,
+                "width": 12,
+                "x": 0,
+                "y": 28
+            }
+        }
+    ]
+}

@@ -15,6 +15,9 @@ No additional installation is needed on your server.
 
 ### Configuration
 
+#### Requirements
+The Cloudera check requires version 7 of Cloudera Manager.
+
 #### Prepare Cloudera Manager
 1. In Cloudera Data Platform, navigate to the Management Console and click on the **User Management** tab.
 ![User Management][10]
@@ -81,6 +84,64 @@ For containerized environments, see the [Autodiscovery Integration Templates][3]
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
+#### Clusters Discovery
+
+You can configure how your clusters are discovered with the `clusters` configuration option with the following parameters:
+
+- `limit`
+: Maximum number of items to be autodiscovered.  
+**Default value**: `None` (all clusters will be processed)
+
+- `include`
+: Mapping of regular expression keys and component config values to autodiscover.  
+**Default value**: empty map
+
+- `exclude`
+: List of regular expressions with the patterns of components to exclude from autodiscovery.  
+**Default value**: empty list
+
+- `interval`
+: Validity time in seconds of the last list of clusters obtained through the endpoint.  
+**Default value**: `None` (no cache used)
+
+**Examples**:
+
+Process a maximum of `5` clusters with names that start with `my_cluster`:
+
+```yaml
+clusters:
+  limit: 5
+  include:
+    - 'my_cluster.*'
+```
+
+Process a maximum of `20` clusters and exclude those with names that start with `tmp_`:
+
+```yaml
+clusters:
+  limit: 20
+  include:
+    - '.*'
+  exclude:
+    - 'tmp_.*'
+```
+
+#### Custom Queries
+
+You can configure the Cloudera integration to collect custom metrics that are not be collected by default by running custom timeseries queries. These queries use [the tsquery language][14] to retrieve data from Cloudera Manager. 
+
+**Example**:
+
+Collect JVM garbage collection rate and JVM free memory with `cloudera_jvm` as a custom tag:
+
+```yaml
+custom_queries:
+- query: select last(jvm_gc_rate) as jvm_gc_rate, last(jvm_free_memory) as jvm_free_memory
+  tags: cloudera_jvm
+```
+
+Note: These queries can take advantage of metric expressions, resulting in queries such as `total_cpu_user + total_cpu_system`, `1000 * jvm_gc_time_ms / jvm_gc_count`, and `max(total_cpu_user)`. When using metric expressions, make sure to also include aliases for the metrics, otherwise the metric names may be incorrectly formatted. For example, `SELECT last(jvm_gc_count)` results in the metric `cloudera.<CATEGORY>.last_jvm_gc_count`. You can append an alias like in the following example: `SELECT last(jvm_gc_count) as jvm_gc_count` to generate the metric `cloudera.<CATEGORY>.jvm_gc_count`.
+
 ### Validation
 
 [Run the Agent's status subcommand][6] and look for `cloudera` under the Checks section.
@@ -93,7 +154,14 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
-The Cloudera integration does not include any events.
+The Cloudera integration collects events that are emitted from the `/events` endpoint from the Cloudera Manager API. The event levels are mapped as the following:
+
+| Cloudera                  | Datadog                        |
+|---------------------------|--------------------------------|
+| `UNKNOWN`                 | `error`                        |
+| `INFORMATIONAL`           | `info`                         |
+| `IMPORTANT`               | `info`                         |
+| `CRITICAL`                | `error`                        |
 
 ### Service Checks
 
@@ -135,9 +203,14 @@ You need to change the ownership of the `conf.yaml` to `dd-agent`:
 
 Need help? Contact [Datadog support][9].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Gain visibility into your Cloudera clusters with Datadog][15]
 
 [1]: https://www.cloudera.com/products/cloudera-data-platform.html
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/cloudera/datadog_checks/cloudera/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -149,3 +222,5 @@ Need help? Contact [Datadog support][9].
 [11]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cloudera/images/create_machine_user.png
 [12]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cloudera/images/set_workload_password.png
 [13]: https://docs.cloudera.com/data-hub/cloud/access-clusters/topics/mc-accessing-cluster-via-ssh.html
+[14]: https://docs.cloudera.com/cloudera-manager/7.9.0/monitoring-and-diagnostics/topics/cm-tsquery-syntax.html
+[15]: https://www.datadoghq.com/blog/cloudera-integration-announcement/

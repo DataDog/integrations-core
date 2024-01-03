@@ -12,12 +12,10 @@
     "title": "Amazon MSK (Agent)",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
       "Category::AWS",
-      "Category::Messaging",
-      "Category::Processing"
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {

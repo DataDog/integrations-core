@@ -2,17 +2,20 @@
 
 ## Overview
 
-Get metrics from CoreDNS in real time to visualize and monitor DNS failures and cache hits/misses.
+Get metrics from CoreDNS in real time to visualize and monitor DNS failures and cache hits or misses.
 
 ## Setup
+
+
+Starting with version 1.11.0, this OpenMetrics-based integration has a latest mode (enabled by setting `openmetrics_endpoint` to point to the target endpoint) and a legacy mode (enabled by setting `prometheus_url` instead). To get all the most up-to-date features, Datadog recommends enabling the latest mode. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][24].
+
+The latest mode of the CoreDNS check requires Python 3 and submits `.bucket` metrics and submits the `.sum` and `.count` histogram samples as monotonic count type. These metrics were previously submitted as `gauge` type in the legacy mode. See the [`metadata.csv` file][14] for a list of metrics available in each mode. 
+
+For hosts unable to use Python 3, or if you previously implemented this integration mode, see the `legacy` mode [configuration example][18]. For Autodiscovery users relying on the `coredns.d/auto_conf.yaml` file, this file enables the `prometheus_url` option for the `legacy` mode of the check by default. See the sample [coredns.d/auto_conf.yaml][19] for the default configuration options and the sample [coredns.d/conf.yaml.example][20] for all available configuration options.
 
 ### Installation
 
 The CoreDNS check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers.
-
-**Note**: The current version of the check (1.11.0+) uses [OpenMetrics][17] (OpenMetricsBaseCheckV2) for metric collection, which requires Python 3. For hosts unable to use Python 3, or to use the legacy OpenMetricsBaseCheckV1 version of this check, see the following [config][18]. There is an exception to that for Autodiscovery users relying on the `coredns.d/auto_conf.yaml` file, which enables the `prometheus_url` option for the OpenMetricsBaseCheckV1 legacy version of the check by default. See the sample [coredns.d/auto_conf.yaml][19] for the default configuration options and the sample [coredns.d/conf.yaml.example][20] for all available configuration options.
-
-**Note**: The OpenMetricsBaseCheckV2 version of the CoreDNS check now submits `.bucket` metrics and submits the `.sum` and `.count` histogram samples as monotonic count type. These metrics were previously submitted as gauge type in OpenMetricsBaseCheckV1. See the [metadata.csv][14] for the list of metrics available in each version. 
 
 ### Configuration
 <!-- xxx tabs xxx -->
@@ -31,7 +34,7 @@ LABEL "com.datadoghq.ad.init_configs"='[{}]'
 LABEL "com.datadoghq.ad.instances"='[{"openmetrics_endpoint":"http://%%host%%:9153/metrics", "tags":["dns-pod:%%host%%"]}]'
 ```
 
-To enable the legacy OpenMetricsBaseCheckV1 version of the check, replace `openmetrics_endpoint` with `prometheus_url`:
+To enable the legacy mode of this OpenMetrics-based check, replace `openmetrics_endpoint` with `prometheus_url`:
 
 ```yaml
 LABEL "com.datadoghq.ad.instances"='[{"prometheus_url":"http://%%host%%:9153/metrics", "tags":["dns-pod:%%host%%"]}]' 
@@ -39,8 +42,8 @@ LABEL "com.datadoghq.ad.instances"='[{"prometheus_url":"http://%%host%%:9153/met
 
 **Notes**:
 
-- The shipped `coredns.d/auto_conf.yaml` file enables the legacy OpenMetricsBaseCheckV1 option, `prometheus_url`, by default. 
-- The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the dd-agent that is polling the information using the service discovery.
+- The shipped `coredns.d/auto_conf.yaml` file enables the `prometheus_url` option by default for legacy mode. 
+- The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the service discovery.
 - The service discovery annotations need to be done on the pod. In case of a deployment, add the annotations to the metadata of the template's specifications. Do not add it at the outer specification level.
 
 #### Log collection
@@ -88,7 +91,7 @@ spec:
     - name: coredns
 ```
 
-**Annotations v2** (for Datadog Agent v7.36+)
+**Annotations v2** (for Datadog Agent v7.36 or later)
 
 ```yaml
 apiVersion: v1
@@ -115,7 +118,7 @@ spec:
     - name: coredns
 ```
 
-To enable the legacy OpenMetricsBaseCheckV1 version of the check, replace `openmetrics_endpoint` with `prometheus_url`:
+To enable the legacy mode of this OpenMetrics-based check, replace `openmetrics_endpoint` with `prometheus_url`:
 
 **Annotations v1** (for Datadog Agent < v7.36)
 
@@ -129,7 +132,7 @@ To enable the legacy OpenMetricsBaseCheckV1 version of the check, replace `openm
       ]
 ```
 
-**Annotations v2** (for Datadog Agent v7.36+)
+**Annotations v2** (for Datadog Agent v7.36 or later)
 
 ```yaml
           "instances": [
@@ -142,7 +145,7 @@ To enable the legacy OpenMetricsBaseCheckV1 version of the check, replace `openm
 
 **Notes**:
 
-- The shipped `coredns.d/auto_conf.yaml` file enables the legacy OpenMetricsBaseCheckV1 option, `prometheus_url`, by default.
+- The shipped `coredns.d/auto_conf.yaml` file enables the `prometheus_url` option by default for legacy mode. 
 - The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the service discovery.
 - The service discovery annotations need to be done on the pod. In case of a deployment, add the annotations to the metadata of the template's specifications. Do not add it at the outer specification level.
 
@@ -190,7 +193,7 @@ Set [Autodiscovery Integrations Templates][10] as Docker labels on your applicat
 }
 ```
 
-To enable the legacy OpenMetricsBaseCheckV1 version of the check, replace `openmetrics_endpoint` with `prometheus_url`:
+To enable the legacy mode of this OpenMetrics-based check, replace `openmetrics_endpoint` with `prometheus_url`:
 
 ```json
       "com.datadoghq.ad.instances": "[{\"prometheus_url\":\"http://%%host%%:9153/metrics\", \"tags\":[\"dns-pod:%%host%%\"]}]"
@@ -198,7 +201,7 @@ To enable the legacy OpenMetricsBaseCheckV1 version of the check, replace `openm
 
 **Notes**:
 
-- The shipped `coredns.d/auto_conf.yaml` file enables the legacy OpenMetricsBaseCheckV1 option, `prometheus_url`, by default.
+- The shipped `coredns.d/auto_conf.yaml` file enables the `prometheus_url` option by default for legacy mode. 
 - The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the service discovery.
 - The service discovery annotations need to be done on the pod. In case of a deployment, add the annotations to the metadata of the template's specifications. Do not add it at the outer specification level.
 
@@ -244,8 +247,16 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][16].
 
+## Further Reading
 
-[1]: https://app.datadoghq.com/account/settings#agent
+Additional helpful documentation, links, and articles:
+
+- [Key metrics for CoreDNS monitoring][21]
+- [Tools for collecting metrics and logs from CoreDNS][22]
+- [How to monitor CoreDNS with Datadog][23]
+
+
+[1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: http://docs.datadoghq.com/agent/docker/integrations/?tab=docker
 [3]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation
 [4]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
@@ -264,4 +275,8 @@ Need help? Contact [Datadog support][16].
 [17]: https://docs.datadoghq.com/integrations/openmetrics
 [18]: https://github.com/DataDog/integrations-core/blob/7.32.x/coredns/datadog_checks/coredns/data/conf.yaml.example
 [19]: https://github.com/DataDog/integrations-core/blob/master/coredns/datadog_checks/coredns/data/auto_conf.yaml
-[20]:https://github.com/DataDog/integrations-core/blob/master/coredns/datadog_checks/coredns/data/conf.yaml.example
+[20]: https://github.com/DataDog/integrations-core/blob/master/coredns/datadog_checks/coredns/data/conf.yaml.example
+[21]: https://www.datadoghq.com/blog/coredns-metrics/
+[22]: https://www.datadoghq.com/blog/coredns-monitoring-tools/
+[23]: https://www.datadoghq.com/blog/monitoring-coredns-with-datadog/
+[24]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations

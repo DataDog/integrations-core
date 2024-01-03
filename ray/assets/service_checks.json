@@ -1,0 +1,17 @@
+[
+    {
+        "agent_version": "7.49.0",
+        "integration": "Ray",
+        "check": "ray.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Ray openmetrics endpoint up",
+        "description": "Returns `CRITICAL` if the check cannot access the openmetrics metrics endpoint of Ray."
+    }
+]

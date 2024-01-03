@@ -32,7 +32,7 @@ from .const import (
 )
 
 
-class RabbitMQ(AgentCheck):
+class RabbitMQManagement(AgentCheck):
 
     """This check is for gathering statistics from the RabbitMQ
     Management Plugin (http://www.rabbitmq.com/management.html)
@@ -47,7 +47,7 @@ class RabbitMQ(AgentCheck):
     }
 
     def __init__(self, name, init_config, instances=None):
-        super(RabbitMQ, self).__init__(name, init_config, instances)
+        super(RabbitMQManagement, self).__init__(name, init_config, instances)
         self.already_alerted = []
         self.cached_vhosts = {}  # this is used to send CRITICAL rabbitmq.aliveness check if the server goes down
 

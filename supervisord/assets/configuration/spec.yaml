@@ -60,6 +60,42 @@ files:
             items:
               type: string
             example: [<PROCESS_NAME_1>, <PROCESS_NAME_2>]
+        - name: proc_regex_exclude
+          description: |
+            Regular expression pattern[s] for names of processes to exclude.
+          value:
+            type: array
+            items:
+              type: string
+            example: [<PROC_REGEX>]
+        - name: proc_names_exclude
+          description: |
+            The process not to monitor within this supervisord instance.
+          value:
+            type: array
+            items:
+              type: string
+            example: [<PROCESS_NAME_EXCLUDE_1>, <PROCESS_NAME_EXCLUDE_2>]
+        - name: status_mapping_override
+          description: |
+            The process status mapping override between supervisord status and Datadog status.
+
+            This setting overrides default mapping (supervisord => Datadog):
+              RUNNING  => up
+              BACKOFF  => down
+              STOPPING => down
+              STOPPED  => down
+              EXITED   => down
+              FATAL    => down
+              STARTING => unknown
+              UNKNOWN  => unknown
+
+            Available Datadog status are: up / down / unknown
+          value:
+            type: object
+            example:
+              <SUPERVISORD_STATUS_1>: <DATADOG_STATUS_1>
+              <SUPERVISORD_STATUS_2>: <DATADOG_STATUS_2>
         - template: instances/default
     - template: logs
       example:

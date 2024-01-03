@@ -1,0 +1,16 @@
+extends:
+  - palo-alto.yaml
+
+sysobjectid: 1.3.6.1.4.1.25461.2.3.*
+
+metadata:
+  device:
+    fields:
+      product_name:
+        value: "user palo-alto product name"
+
+metrics:
+  - MIB: PAN-COMMON-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.25461.2.1.2.3.1.0
+      name: panSessionUtilization_user

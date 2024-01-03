@@ -12,6 +12,10 @@ This integration sends your Linkerd metrics to Datadog, including application su
 
 ## Setup
 
+This OpenMetrics-based integration has a latest mode (enabled by setting `openmetrics_endpoint` to point to the target endpoint) and a legacy mode (enabled by setting `prometheus_url` instead). To get all the most up-to-date features, Datadog recommends enabling the latest mode. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][16].
+
+Metrics marked as `[OpenMetrics V1]` or `[OpenMetrics V2]` are only available using the corresponding mode of the Linkerd integration. Metrics not marked are collected by all modes.
+
 ### Installation
 
 The Linkerd check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your server.
@@ -26,8 +30,7 @@ The Linkerd check is included in the [Datadog Agent][2] package, so you don't ne
 To configure this check for an Agent running on a host:
 
 1. Edit the `linkerd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3].
-   See [sample linkerd.d/conf.yaml][4] for all available configuration options.
-   **Note**: This is a new default OpenMetrics check example. If you previously implemented this integration, see the [legacy example][5].
+   See the [sample `linkerd.d/conf.yaml`][4] for all available configuration options using the latest OpenMetrics check example. If you previously implemented this integration, see the [legacy example][5].
 
 2. [Restart the Agent][6].
 
@@ -84,7 +87,7 @@ See [metadata.csv][11] for a list of metrics provided by this integration.
 
 For Linkerd v1, see the [finagle metrics guide][12] for metric descriptions and [this gist][13] for an example of metrics exposed by Linkerd.
 
-**Note**: Linkerd is a Prometheus-based integration. Depending on your Linkerd configuration, some metrics might not be exposed by Linkerd. If any metric is not present in the curl output, the Datadog Agent is unable to collect that particular metric.
+Linkerd is a Prometheus-based integration. Depending on your Linkerd configuration, some metrics might not be exposed by Linkerd. If any metric is not present in the cURL output, the Datadog Agent is unable to collect that particular metric.
 
 To list the metrics exposed by your current configuration, run:
 
@@ -96,7 +99,7 @@ Where `linkerd_prometheus_endpoint` is the Linkerd Prometheus endpoint (you shou
 
 If you need to use a metric that is not provided by default, you can add an entry to `linkerd.yaml`.
 
-Simply follow the examples present in the [default configuration][4].
+For more information, see the examples in the [default configuration][4].
 
 
 ### Service Checks
@@ -109,7 +112,7 @@ Need help? Contact [Datadog support][15].
 
 
 [1]: https://linkerd.io
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/linkerd/datadog_checks/linkerd/data/conf.yaml.example
 [5]: https://github.com/DataDog/integrations-core/blob/7.30.x/linkerd/datadog_checks/linkerd/data/conf.yaml.example
@@ -123,3 +126,4 @@ Need help? Contact [Datadog support][15].
 [13]: https://gist.githubusercontent.com/arbll/2f63a5375a4d6d5acface6ca8a51e2ab/raw/bc35ed4f0f4bac7e2643a6009f45f9068f4c1d12/gistfile1.txt
 [14]: https://github.com/DataDog/integrations-core/blob/master/linkerd/assets/service_checks.json
 [15]: https://docs.datadoghq.com/help/
+[16]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations

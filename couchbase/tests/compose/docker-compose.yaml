@@ -1,0 +1,18 @@
+version: '3.5'
+
+services:
+  couchbase-standalone:
+    image: "couchbase/server:${COUCHBASE_VERSION}"
+    ports:
+      - 8091-8094:8091-8094
+      - 9102:9102
+    container_name: ${CB_CONTAINER_NAME}
+  couchbase-sync-gateway:
+    container_name: couchbase-sync-gateway
+    image: couchbase/sync-gateway:2.8.3-enterprise
+    command:
+      - "-adminInterface"
+      - ":4985"
+    ports:
+      - "4984:4984"
+      - "4985:4985"

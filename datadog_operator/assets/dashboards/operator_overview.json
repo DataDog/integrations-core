@@ -1,0 +1,1986 @@
+{
+    "title": "Datadog Operator",
+    "description": "The Datadog Operator is an open source Kubernetes Operator that enables you to deploy and configure the Datadog Agent in a Kubernetes environment.\n\nThe Datadog Operator dashboard gives you visibility into health and performance metrics of the Operator and overview of the resources it manages.\n\nFurther reading around the Datadog Operator and Kubernetes Controllers\n* [Datadog Operator](https://docs.datadoghq.com/containers/datadog_operator/)\n* [Kubernetes Metrics Reference](https://kubernetes.io/docs/reference/instrumentation/metrics/)\n* [Kubernetes Operator Pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)",
+    "widgets": [
+        {
+            "id": 7545770048236095,
+            "definition": {
+                "title": "Overview",
+                "background_color": "gray",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4981651194825710,
+                        "definition": {
+                            "type": "note",
+                            "content": "### The Datadog Operator is an open source Kubernetes Operator that enables you to deploy and configure the Datadog Agent in a Kubernetes environment.\n\nThe Datadog Operator dashboard gives you visibility into health and performance metrics of the Operator and overview of the resources it manages.\n\n***Some of the graphs assume `datadog` as the [DatadogAgent](https://docs.datadoghq.com/containers/kubernetes/installation/?tab=operator#deploy-an-agent-with-the-operator) resource name. They will appear empty if that's not the case.***\n\nFurther reading around the Datadog Operator and Kubernetes Controllers\n* [Datadog Operator](https://docs.datadoghq.com/containers/datadog_operator/)\n* [Kubernetes Metrics Reference](https://kubernetes.io/docs/reference/instrumentation/metrics/)\n* [Kubernetes Operator Pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)",
+                            "background_color": "white",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 5
+            }
+        },
+        {
+            "id": 1043440800796512,
+            "definition": {
+                "title": "Operator Health",
+                "background_color": "gray",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6186411348762308,
+                        "definition": {
+                            "title": "Reconcile Success %",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "100 * query2 / (query1 + query2)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "palette": "white_on_green",
+                                            "value": 100,
+                                            "comparator": ">="
+                                        },
+                                        {
+                                            "palette": "white_on_yellow",
+                                            "value": 100,
+                                            "comparator": "<"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "sum:datadog.operator.controller_runtime_reconcile_total{$scope,$cluster,kube_app_name:datadog-operator}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "query": "avg:datadog.operator.controller_runtime_reconcile_errors_total{$scope,$cluster,kube_app_name:datadog-operator}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "avg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": false,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6471498228325812,
+                        "definition": {
+                            "title": "Liveliness %",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "100 * query1 / (query1 + query2)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "palette": "white_on_green",
+                                            "value": 100,
+                                            "comparator": ">="
+                                        },
+                                        {
+                                            "palette": "white_on_yellow",
+                                            "value": 100,
+                                            "comparator": "<"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kubernetes.liveness_probe.success.total{$scope,$cluster,kube_app_name:datadog-operator}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "query": "sum:kubernetes.liveness_probe.failure.total{$scope,$cluster,kube_app_name:datadog-operator}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "aggregator": "avg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": false,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7383203049246142,
+                        "definition": {
+                            "title": "Operator Events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "event_timeline",
+                            "query": "source:kubernetes pod_name:datadog-operator* kube_cluster_name:$cluster.value",
+                            "tags_execution": "and"
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2602945341046877,
+                        "definition": {
+                            "title": "Reconcile Success %",
+                            "show_legend": false,
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:datadog.operator.controller_runtime_reconcile_total{$scope,$cluster,kube_app_name:datadog-operator}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        },
+                                        {
+                                            "query": "avg:datadog.operator.controller_runtime_reconcile_errors_total{$scope,$cluster,kube_app_name:datadog-operator}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "100 * query2 / (query1 + query2)"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1539429503861558,
+                        "definition": {
+                            "title": "Liveliness %",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kubernetes.liveness_probe.success.total{$scope,$cluster,kube_app_name:datadog-operator}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        },
+                                        {
+                                            "query": "sum:kubernetes.liveness_probe.failure.total{$scope,$cluster,kube_app_name:datadog-operator}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "100 * query1 / (query1 + query2)"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8217559501134989,
+                        "definition": {
+                            "title": "Operator Pods by Image Tag",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Pod Count",
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "sum:datadog.operator.go_info{$scope,$cluster,kube_app_name:datadog-operator,kube_cluster_name:*} by {kube_cluster_name,image_tag}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 4,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 8,
+                "height": 5
+            }
+        },
+        {
+            "id": 593587921519842,
+            "definition": {
+                "title": "Resources",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4177819226526334,
+                        "definition": {
+                            "title": "Clusters Total",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "count_nonzero(query1)"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kubernetes.pods.running{$scope,$cluster} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "avg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3935177360866698,
+                        "definition": {
+                            "title": "Operator Deployments",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "count_not_null(query1)"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "sum:datadog.operator.go_info{$scope,$cluster,kube_app_name:datadog-operator,kube_deployment:*} by {kube_deployment,kube_cluster_name,kube_namespace}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "avg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3065836499520781,
+                        "definition": {
+                            "title": "Agent Daemonset",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "count_not_null(query1)"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kubernetes.memory.rss{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_app_component:agent} by {kube_cluster_name,kube_namespace}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3694043503326461,
+                        "definition": {
+                            "title": "DCA Deployment",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "count_not_null(query1)"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kubernetes.memory.rss{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_app_component:cluster-agent} by {kube_cluster_name,kube_namespace}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1281905908203652,
+                        "definition": {
+                            "title": "CLC Deployments",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "count_not_null(query1)"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kubernetes.memory.rss{$scope,$cluster,kube_app_managed_by:datadog-operator, kube_app_component:cluster-checks-runner} by {kube_cluster_name,kube_namespace}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 10,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4969389085714657,
+                        "definition": {
+                            "title": "Nodes Total",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kubernetes_state.node.count{$scope,$cluster}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5639744773495079,
+                        "definition": {
+                            "title": "Operator Pods",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "sum:datadog.operator.go_info{$scope,$cluster,kube_app_name:datadog-operator}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [
+                                {
+                                    "link": "/dash/integration/Kubernetes%20-%20Pods",
+                                    "label": "View Pods overview"
+                                }
+                            ],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 2,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 339728456323580,
+                        "definition": {
+                            "title": "Agent Pods",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kubernetes.memory.rss{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_app_component:agent} by {pod_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "count_not_null(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2244006116740820,
+                        "definition": {
+                            "title": "DCA Pods",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "count_not_null(query1)"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kubernetes.memory.rss{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_app_component:cluster-agent} by {pod_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1642888553658669,
+                        "definition": {
+                            "title": "CLC Worker Pods",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "count_not_null(query1)"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kubernetes.memory.rss{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_app_component:cluster-checks-runner} by {pod_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 10,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 12,
+                "height": 5
+            }
+        },
+        {
+            "id": 6439676071842866,
+            "definition": {
+                "title": "Operator Errors",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6952001278071111,
+                        "definition": {
+                            "title": "Operator CrashLoopBackOff by Cluster",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Count",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kubernetes.containers.state.waiting{$scope,$cluster,kube_app_name:datadog-operator,reason:crashloopbackoff} by {kube_cluster_name,image_tag}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6958561304957835,
+                        "definition": {
+                            "title": "Operator Errors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "query": {
+                                        "query_string": "kube_app_name:datadog-operator status:error $scope $cluster",
+                                        "data_source": "logs_stream",
+                                        "indexes": []
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "image_tag",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "kube_cluster_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "pod_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "compact"
+                                        }
+                                    ],
+                                    "response_format": "event_list"
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 8,
+                            "height": 6
+                        }
+                    },
+                    {
+                        "id": 6180721101411125,
+                        "definition": {
+                            "title": "Reconcile Errors by Cluster",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "sum:datadog.operator.controller_runtime_reconcile_errors_total{$scope,$cluster,kube_app_name:datadog-operator,kube_cluster_name:*} by {kube_cluster_name,image_tag}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "sum"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6436491436372457,
+                        "definition": {
+                            "title": "Logged Errors by Pod",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Count",
+                                            "formula": "query2",
+                                            "limit": {
+                                                "count": 5,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query2",
+                                            "search": {
+                                                "query": "kube_app_name:datadog-operator status:error $scope $cluster"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "pod_name",
+                                                    "limit": 5,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "storage": "hot"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 4,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 10,
+                "width": 12,
+                "height": 7
+            }
+        },
+        {
+            "id": 3597454459481986,
+            "definition": {
+                "title": "Controller Performance",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6869562867974673,
+                        "definition": {
+                            "title": "Reconcile Counts by result",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:datadog.operator.controller_runtime_reconcile_total{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name,result}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7126730581417992,
+                        "definition": {
+                            "title": "Reconcile Result error %",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 * 100 / (query1 + query2 + query3 + query4)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:datadog.operator.controller_runtime_reconcile_total{$scope,$cluster,kube_app_name:datadog-operator,result:error} by {kube_cluster_name}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        },
+                                        {
+                                            "query": "sum:datadog.operator.controller_runtime_reconcile_total{$scope,$cluster,kube_app_name:datadog-operator,result:success} by {kube_cluster_name}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        },
+                                        {
+                                            "query": "sum:datadog.operator.controller_runtime_reconcile_total{$scope,$cluster,kube_app_name:datadog-operator,result:requeue} by {kube_cluster_name}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query3"
+                                        },
+                                        {
+                                            "query": "sum:datadog.operator.controller_runtime_reconcile_total{$scope,$cluster,kube_app_name:datadog-operator,result:requeue_after} by {kube_cluster_name}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query4"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5927604654245473,
+                        "definition": {
+                            "title": "Reconcile errors total",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:datadog.operator.controller_runtime_reconcile_errors_total{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7905199788293553,
+                        "definition": {
+                            "title": "Reconcile Duration Average Seconds",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query2 / query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "query": "avg:datadog.operator.controller_runtime_reconcile_time_seconds.sum{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        },
+                                        {
+                                            "query": "avg:datadog.operator.controller_runtime_reconcile_time_seconds.count{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6373892084974387,
+                        "definition": {
+                            "title": "Work Queue Work Duration Average Seconds",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "query": "avg:datadog.operator.workqueue_work_duration_seconds.sum{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        },
+                                        {
+                                            "query": "avg:datadog.operator.workqueue_work_duration_seconds.count{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 3,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7683573785436862,
+                        "definition": {
+                            "title": "Work Queue Duration Average Seconds",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "query": "avg:datadog.operator.workqueue_queue_duration_seconds.sum{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        },
+                                        {
+                                            "query": "avg:datadog.operator.workqueue_queue_duration_seconds.count{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 3,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3086510812227483,
+                        "definition": {
+                            "title": "Work Queue Depth",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:datadog.operator.workqueue_depth{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5026072239463127,
+                        "definition": {
+                            "title": "Work Queue Retries Total",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:datadog.operator.workqueue_retries_total{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 6,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2246786119938033,
+                        "definition": {
+                            "title": "Work Queue Adds Total",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:datadog.operator.workqueue_adds_total{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 6,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7987366423681764,
+                        "definition": {
+                            "title": "Work Queue Longest Running Processor in seconds",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "max:datadog.operator.workqueue_longest_running_processor_seconds{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 9,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7281557575030031,
+                        "definition": {
+                            "title": "Conroller Runtime Webhook Latency Average Seconds",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "query": "avg:datadog.operator.controller_runtime_webhook_latency_seconds.sum{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        },
+                                        {
+                                            "query": "avg:datadog.operator.controller_runtime_webhook_latency_seconds.count{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 9,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2207306838207780,
+                        "definition": {
+                            "title": "Webhook In-flight Requests",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:datadog.operator.controller_runtime_webhook_requests_in_flight{$scope,$cluster,kube_app_name:datadog-operator,kube_cluster_name:*} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 9,
+                            "width": 4,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 17,
+                "width": 12,
+                "height": 13
+            }
+        },
+        {
+            "id": 4249355165212482,
+            "definition": {
+                "title": "Controller Resources",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7754590189372844,
+                        "definition": {
+                            "title": "Node Counts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kubernetes_state.node.count{$scope,$cluster} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6702083665896444,
+                        "definition": {
+                            "title": "Operator CPU by Cluster",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kubernetes.cpu.usage.total{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4167304683556582,
+                        "definition": {
+                            "title": "Operator CPU Usage by Pod",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kubernetes.cpu.usage.total{$scope,$cluster,kube_app_name:datadog-operator} by {pod_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8545344100871300,
+                        "definition": {
+                            "title": "Memory by Cluster",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kubernetes.memory.usage{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3167946172785878,
+                        "definition": {
+                            "title": "Memory RSS by Cluster",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kubernetes.memory.rss{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}.fill(null)",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 3,
+                            "width": 4,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 30,
+                "width": 12,
+                "height": 7,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 4303708219789212,
+            "definition": {
+                "title": "Controller Runtime",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 1750356538848136,
+                        "definition": {
+                            "title": "Goroutines",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:datadog.operator.go_goroutines{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8923116835913945,
+                        "definition": {
+                            "title": "Threads",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:datadog.operator.go_threads{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 61019722226986,
+                        "definition": {
+                            "title": "Go Versions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "sum:datadog.operator.go_info{$scope,$cluster,kube_app_name:datadog-operator} by {version}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6850226066592312,
+                        "definition": {
+                            "title": "GC CPU Fraction",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:datadog.operator.go_memstats_gc_cpu_fraction{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3275547604809710,
+                        "definition": {
+                            "title": "GC Avg Time MS",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "1000 * query1 / query2"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:datadog.operator.go_gc_duration_seconds.sum{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        },
+                                        {
+                                            "query": "avg:datadog.operator.go_gc_duration_seconds.count{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 3,
+                            "width": 4,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 37,
+                "width": 12,
+                "height": 7
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "scope",
+            "prefix": "datacenter",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "cluster",
+            "prefix": "kube_cluster_name",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

@@ -15,9 +15,8 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Category::Orchestration",
-      "Category::Notification",
-      "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::Notifications",
+      "Category::Log Collection"
     ]
   },
   "author": {

@@ -1,4 +1,4 @@
-name: Go-Expvar
+name: Go Expvar
 files:
 - name: go_expvar.yaml
   options:

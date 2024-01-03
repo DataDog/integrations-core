@@ -1,4 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+kafka.net.bytes_out,gauge,,byte,second,Outgoing byte total.,0,kafka,bytes out total,
 kafka.net.bytes_out.rate,gauge,10,byte,second,Outgoing byte rate.,0,kafka,bytes out,
 kafka.net.bytes_in.rate,gauge,10,byte,second,Incoming byte rate.,0,kafka,bytes in,cpu
 kafka.net.bytes_rejected.rate,gauge,10,byte,second,Rejected byte rate.,-1,kafka,bytes rejected,
@@ -76,8 +77,8 @@ kafka.producer.throttle_time_max,gauge,10,millisecond,,The maximum time in ms a 
 kafka.producer.waiting_threads,gauge,10,thread,,The number of user threads blocked waiting for buffer memory to enqueue their records.,-1,kafka,waiting threads,
 kafka.consumer.max_lag,gauge,10,offset,,Maximum consumer lag.,-1,kafka,con max lag,
 kafka.consumer.fetch_rate,gauge,10,request,,The minimum rate at which the consumer sends fetch requests to a broker.,1,kafka,con min fetch,
-kafka.consumer.fetch_size_avg,gauge,10,request,,The average number of bytes fetched per request for a specific topic.,1,kafka,con avg fetch size,
-kafka.consumer.fetch_size_max,gauge,10,request,,The maximum number of bytes fetched per request for a specific topic.,1,kafka,con max fetch size,
+kafka.consumer.fetch_size_avg,gauge,10,byte,,The average number of bytes fetched per request for a specific topic.,1,kafka,con avg fetch size,
+kafka.consumer.fetch_size_max,gauge,10,byte,,The maximum number of bytes fetched per request for a specific topic.,1,kafka,con max fetch size,
 kafka.consumer.bytes_consumed,gauge,10,byte,second,The average number of bytes consumed per second for a specific topic.,1,kafka,con bytes consumed,
 kafka.consumer.bytes_in,gauge,10,byte,second,Consumer bytes in rate.,1,kafka,con bytes in,
 kafka.consumer.messages_in,gauge,10,message,second,Rate of consumer message consumption.,1,kafka,con msg rate,

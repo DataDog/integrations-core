@@ -11,8 +11,8 @@ from aiohttp import request
 from aiomultiprocess import Pool
 from packaging.markers import Marker
 from packaging.requirements import Requirement
-from packaging.specifiers import SpecifierSet
-from packaging.version import parse as parse_version
+from packaging.specifiers import InvalidSpecifier, SpecifierSet
+from packaging.version import InvalidVersion, Version
 
 from ..constants import get_agent_requirements
 from ..dependencies import (
@@ -28,32 +28,38 @@ from .console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
 
 # Dependencies to ignore when update dependencies
 IGNORED_DEPS = {
-    'psycopg2-binary',  # https://github.com/DataDog/integrations-core/pull/10456
     'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
-    'flup',  # https://github.com/DataDog/integrations-core/pull/1997
-    # https://github.com/DataDog/integrations-core/pull/10105;
-    # snowflake-connector-python caps cryptography which means we need to be careful with how we update it
-    # (and do so manually)
-    'cryptography',
     'dnspython',
-    'pymysql',  # https://github.com/DataDog/integrations-core/pull/12612
     'foundationdb',  # Breaking datadog_checks_base tests
     'openstacksdk',  # Breaking openstack_controller tests
     'pyasn1',  # Breaking snmp tests
     'pycryptodomex',  # Breaking snmp tests
     'pysnmp',  # Breaking snmp tests
-    'clickhouse-driver',  # Breaking clickhouse tests
-    'lz4',  # Breaking clickhouse tests
-    'pyodbc',  # Breaking sqlserver tests
     'psutil',  # Breaking disk tests
-    'keystoneauth1',  # Running our update command actually downgrades this 5.0.0 -> 3.18.0.
     'aerospike',  # v8+ breaks agent build.
+    'protobuf',  # 3.20.2->4.23.3 breaks kubernetes_state, kube_dns, gitlab and gitlab_runner tests.
+    'service-identity',  # 21.1->23.1 breaks tls tests.
+    'pyvmomi',  # 7->8 breaks vsphere tests.
+    # 4.3->4.4 changes the license field in the package metadata to something our validations cannot handle.
+    'pymongo',
+    # We need pydantic 2.0.2 for the rpm x64 agent build (see https://github.com/DataDog/datadog-agent/pull/18303)
+    'pydantic',
+    # We're not ready to switch to v3 of the postgress library, see:
+    # https://github.com/DataDog/integrations-core/pull/15859
+    'psycopg2-binary',
+    # orjson ... requires rustc 1.65+, but the latest we can have (thanks CentOS 6) is 1.62.
+    # We get the following error when compiling orjson on Centos 6:
+    # error: package `associative-cache v2.0.0` cannot be built because it requires rustc 1.65 or newer,
+    # while the currently active rustc version is 1.62.0-nightly
+    # Here's orjson switching to rustc 1.65:
+    # https://github.com/ijl/orjson/commit/ce9bae876657ed377d761bf1234b040e2cc13d3c
+    'orjson',
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
 SECURITY_DEPS = {'in-toto', 'tuf', 'securesystemslib'}
 
-SUPPORTED_PYTHON_MINOR_VERSIONS = {'2': '2.7', '3': '3.8'}
+SUPPORTED_PYTHON_MINOR_VERSIONS = {'2': '2.7', '3': '3.11'}
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage dependencies')
@@ -148,7 +154,11 @@ def sync():
 def filter_releases(releases):
     filtered_releases = []
     for version, artifacts in releases.items():
-        parsed_version = parse_version(version)
+        try:
+            parsed_version = Version(version)
+        except InvalidVersion:
+            continue
+
         if not parsed_version.is_prerelease:
             filtered_releases.append((parsed_version, artifacts))
 
@@ -158,7 +168,12 @@ def filter_releases(releases):
 def artifact_compatible_with_python(artifact, major_version):
     requires_python = artifact['requires_python']
     if requires_python is not None:
-        return SpecifierSet(requires_python).contains(SUPPORTED_PYTHON_MINOR_VERSIONS[major_version])
+        try:
+            specifiers = SpecifierSet(requires_python)
+        except InvalidSpecifier:
+            return False
+
+        return specifiers.contains(SUPPORTED_PYTHON_MINOR_VERSIONS[major_version])
 
     python_version = artifact['python_version']
     return f'py{major_version}' in python_version or f'cp{major_version}' in python_version
@@ -183,7 +198,7 @@ async def scrape_version_data(urls):
             latest_py3 = None
 
             versions = []
-            for parsed_version, artifacts in reversed(sorted(filter_releases(releases))):
+            for parsed_version, artifacts in sorted(filter_releases(releases), reverse=True):
                 version = str(parsed_version)
                 versions.append(version)
 

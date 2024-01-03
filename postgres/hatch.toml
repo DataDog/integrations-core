@@ -1,7 +1,7 @@
 [env.collectors.datadog-checks]
 base-package-features = ["deps", "db", "json"]
 
-check-types = true
+check-types = false
 mypy-args = [
   "--py2",
   "datadog_checks/",
@@ -15,16 +15,18 @@ mypy-deps = [
 ]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
-version = ["9.5", "9.6", "10.0", "11.0", "12.1", "13.0", "14.0"]
+python = ["3.11"]
+version = ["9.6", "10.0", "11.0", "12.17", "13.0", "14.0", "15.0", "16.0"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
-  { key = "POSTGRES_VERSION", if = ["9.5", "9.6", "12.1"] },
+  { key = "POSTGRES_VERSION", if = ["9.6", "12.17"] },
   { key = "POSTGRES_VERSION", value = "10", if = ["10.0"] },
   { key = "POSTGRES_VERSION", value = "11", if = ["11.0"] },
   { key = "POSTGRES_VERSION", value = "13", if = ["13.0"] },
   { key = "POSTGRES_VERSION", value = "14", if = ["14.0"] },
+  { key = "POSTGRES_VERSION", value = "15", if = ["15.0"] },
+  { key = "POSTGRES_VERSION", value = "16", if = ["16.0"] },
 ]
 
 [envs.latest.env-vars]

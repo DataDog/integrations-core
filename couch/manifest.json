@@ -12,12 +12,12 @@
     "title": "CouchDB",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Data Store",
+      "Category::Caching",
+      "Category::Data Stores",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {
@@ -37,7 +37,7 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "couch.",
+        "prefix": "couchdb.",
         "check": [
           "couchdb.couchdb.request_time.n",
           "couchdb.couchdb.request_time"
@@ -47,9 +47,7 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": [
-        "couchjs"
-      ]
+      "process_signatures": ["couchjs"]
     },
     "dashboards": {
       "couchdb": "assets/dashboards/CouchDB-overview_dashboard.json",

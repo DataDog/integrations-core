@@ -9,14 +9,15 @@ from copy import deepcopy
 import pytest
 import requests
 
+from datadog_checks.couchbase import Couchbase
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.docker import get_container_ip
+from datadog_checks.dev.http import MockResponse
 
 from .common import (
     BUCKET_NAME,
     CB_CONTAINER_NAME,
     COUCHBASE_MAJOR_VERSION,
-    CUSTOM_TAGS,
     DEFAULT_INSTANCE,
     HERE,
     INDEX_STATS_URL,
@@ -35,39 +36,26 @@ def instance():
 
 
 @pytest.fixture
-def instance_query():
-    return {
-        'server': URL,
-        'user': USER,
-        'password': PASSWORD,
-        'timeout': 1,
-        'tags': CUSTOM_TAGS,
-        'query_monitoring_url': QUERY_URL,
-    }
+def instance_query(instance):
+    instance['query_monitoring_url'] = QUERY_URL
+    return instance
 
 
 @pytest.fixture
-def instance_sg():
-    return {
-        'server': URL,
-        'user': USER,
-        'password': PASSWORD,
-        'timeout': 1,
-        'tags': CUSTOM_TAGS,
-        'sync_gateway_url': SG_URL,
-    }
+def instance_sg(instance):
+    instance['sync_gateway_url'] = SG_URL
+    return instance
 
 
 @pytest.fixture
-def instance_index_stats():
-    return {
-        'server': URL,
-        'user': USER,
-        'password': PASSWORD,
-        'timeout': 1,
-        'tags': CUSTOM_TAGS,
-        'index_stats_url': INDEX_STATS_URL,
-    }
+def instance_index_stats(instance):
+    instance['index_stats_url'] = INDEX_STATS_URL
+    return instance
+
+
+@pytest.fixture
+def check():
+    return lambda instance: Couchbase('couchbase', {}, [instance])
 
 
 @pytest.fixture(scope="session")
@@ -85,12 +73,12 @@ def dd_environment():
     if COUCHBASE_MAJOR_VERSION >= 7:
         conditions.append(WaitFor(load_sample_bucket))
     with docker_run(
-        compose_file=os.path.join(HERE, 'compose', 'standalone.compose'),
+        compose_file=os.path.join(HERE, 'compose', 'docker-compose.yaml'),
         env_vars={'CB_CONTAINER_NAME': CB_CONTAINER_NAME},
         conditions=conditions,
-        attempts=2,
+        sleep=15,
     ):
-        yield DEFAULT_INSTANCE
+        yield deepcopy(DEFAULT_INSTANCE)
 
 
 @pytest.fixture()
@@ -129,7 +117,9 @@ def couchbase_setup():
         '--bucket-ramsize',
         '100',
     ]
-    subprocess.check_call(create_bucket_args)
+
+    with open(os.devnull, 'w') as FNULL:
+        subprocess.check_call(create_bucket_args, stdout=FNULL)
 
 
 def couchbase_container():
@@ -149,7 +139,9 @@ def couchbase_container():
         '-p',
         PASSWORD,
     ]
-    return subprocess.call(status_args) == 0
+
+    with open(os.devnull, 'w') as FNULL:
+        return subprocess.call(status_args, stdout=FNULL) == 0
 
 
 def couchbase_init():
@@ -209,7 +201,8 @@ def load_sample_bucket():
         '-m',
         '256',
     ]
-    subprocess.check_call(bucket_loader_args)
+    with open(os.devnull, 'w') as FNULL:
+        subprocess.check_call(bucket_loader_args, stdout=FNULL)
 
 
 def node_stats():
@@ -219,7 +212,7 @@ def node_stats():
     r = requests.get('{}/pools/default'.format(URL), auth=(USER, PASSWORD))
     r.raise_for_status()
     stats = r.json()
-    return all(len(node_stats['interestingStats']) > 0 for node_stats in stats['nodes'])
+    return all(len(stats['interestingStats']) > 0 for stats in stats['nodes'])
 
 
 def bucket_stats():
@@ -230,3 +223,21 @@ def bucket_stats():
     r.raise_for_status()
     stats = r.json()
     return stats['op']['lastTStamp'] != 0
+
+
+def mock_http_responses(url, **_params):
+    mapping = {
+        'http://localhost:8091/pools/default': 'pools/default/default.json',
+        'http://localhost:8091/pools/default/buckets?v=62866031&uuid=f66f28b255e70b6f2618c15228238797': 'pools/default/buckets.json',  # noqa
+        'http://localhost:8091/pools/default/buckets/cb_bucket/stats': 'pools/default/buckets/cb_buckets/stats.json',
+        'http://localhost:8091/pools/default/tasks': 'pools/default/tasks.json',
+        'http://localhost:8093/admin/vitals': 'admin/vitals.json',
+    }
+
+    metrics_file = mapping.get(url)
+
+    if not metrics_file:
+        pytest.fail("url `{url}` not registered".format(url=url))
+
+    with open(os.path.join(HERE, 'fixtures', metrics_file)) as f:
+        return MockResponse(content=f.read())

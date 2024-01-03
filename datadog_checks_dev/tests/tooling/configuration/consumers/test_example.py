@@ -1712,3 +1712,79 @@ def test_parent_option_enabled():
                 # disabled_sub_option: foo.bar_none
         """
     )
+
+
+def test_multi_instances_w_nested_options():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - template: instances
+            multiple_instances_defined: true
+            options:
+            - name: Instance A
+              description: Instance A Example
+              options:
+              - name: option_w_options
+                enabled: true
+                description: Option with options description
+                options:
+                - name: sub_option_1
+                  required: true
+                  description: Sub_option_1 description
+                  value:
+                    type: boolean
+                    example: true
+                - name: sub_option_2
+                  description: Sub_option_2 description
+                  value:
+                    type: string
+                    example: foobar
+            - name: Instance B
+              description: Instance B Example
+              options:
+              - name: option_3
+                description: Option_3 description
+                value:
+                  type: boolean
+                  example: true
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## Every instance is scheduled independently of the others.
+        #
+        instances:
+
+            ## Instance A Example
+          -
+            ## Option with options description
+            #
+            option_w_options:
+
+                ## @param sub_option_1 - boolean - required
+                ## Sub_option_1 description
+                #
+                sub_option_1: true
+
+                ## @param sub_option_2 - string - optional - default: foobar
+                ## Sub_option_2 description
+                #
+                # sub_option_2: foobar
+
+            ## Instance B Example
+          -
+            ## @param option_3 - boolean - optional - default: true
+            ## Option_3 description
+            #
+            # option_3: true
+        """
+    )

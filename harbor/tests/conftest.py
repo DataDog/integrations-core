@@ -16,13 +16,10 @@ from datadog_checks.harbor.api import HarborAPI
 from datadog_checks.harbor.common import (
     CHARTREPO_HEALTH_URL,
     HEALTH_URL,
-    LOGIN_PRE_1_7_URL,
     LOGIN_URL,
     PING_URL,
     PROJECTS_URL,
-    REGISTRIES_PING_PRE_1_8_URL,
     REGISTRIES_PING_URL,
-    REGISTRIES_PRE_1_8_URL,
     REGISTRIES_URL,
     SYSTEM_INFO_URL,
     VOLUME_INFO_URL,
@@ -37,12 +34,9 @@ from .common import (
     INSTANCE,
     PROJECTS_FIXTURE,
     REGISTRIES_FIXTURE,
-    REGISTRIES_PRE_1_8_FIXTURE,
     SYSTEM_INFO_FIXTURE,
     URL,
     USERS_URL,
-    VERSION_1_6,
-    VERSION_1_8,
     VERSION_2_2,
     VOLUME_INFO_FIXTURE,
     VOLUME_INFO_PRE_2_2_FIXTURE,
@@ -131,21 +125,19 @@ def mocked_requests(_, *args, **kwargs):
                 return True
         return False
 
-    if match(args[0], LOGIN_PRE_1_7_URL, LOGIN_URL):
+    if match(args[0], LOGIN_URL):
         return MockResponse()
-    elif match(args[0], HEALTH_URL) and HARBOR_VERSION >= VERSION_1_8:
+    elif match(args[0], HEALTH_URL):
         return MockResponse(json_data=HEALTH_FIXTURE)
     elif match(args[0], PING_URL):
         return MockResponse('Pong')
-    elif match(args[0], CHARTREPO_HEALTH_URL) and HARBOR_VERSION >= VERSION_1_6:
+    elif match(args[0], CHARTREPO_HEALTH_URL):
         return MockResponse(json_data=CHARTREPO_HEALTH_FIXTURE)
     elif match(args[0], PROJECTS_URL):
         return MockResponse(json_data=PROJECTS_FIXTURE)
-    elif match(args[0], REGISTRIES_PRE_1_8_URL, REGISTRIES_URL):
-        if HARBOR_VERSION >= VERSION_1_8:
-            return MockResponse(json_data=REGISTRIES_FIXTURE)
-        return MockResponse(json_data=REGISTRIES_PRE_1_8_FIXTURE)
-    elif match(args[0], REGISTRIES_PING_PRE_1_8_URL, REGISTRIES_PING_URL):
+    elif match(args[0], REGISTRIES_URL):
+        return MockResponse(json_data=REGISTRIES_FIXTURE)
+    elif match(args[0], REGISTRIES_PING_URL):
         return MockResponse()
     elif match(args[0], VOLUME_INFO_URL):
         if HARBOR_VERSION < VERSION_2_2:

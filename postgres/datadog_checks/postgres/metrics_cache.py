@@ -9,6 +9,7 @@ from .util import (
     ACTIVITY_METRICS_8_3,
     ACTIVITY_METRICS_9_2,
     ACTIVITY_METRICS_9_6,
+    ACTIVITY_METRICS_10,
     ACTIVITY_METRICS_LT_8_3,
     ACTIVITY_QUERY_10,
     ACTIVITY_QUERY_LT_10,
@@ -18,6 +19,7 @@ from .util import (
     COUNT_METRICS,
     DATABASE_SIZE_METRICS,
     DBM_MIGRATED_METRICS,
+    NEWER_14_METRICS,
     NEWER_91_BGW_METRICS,
     NEWER_92_BGW_METRICS,
     NEWER_92_METRICS,
@@ -26,7 +28,7 @@ from .util import (
     REPLICATION_METRICS_10,
     REPLICATION_STATS_METRICS,
 )
-from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10
+from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10, V14
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +45,8 @@ class PostgresMetricsCache:
         self.replication_stats_metrics = None
         self.activity_metrics = None
         self._count_metrics = None
+        if self.config.relations:
+            self.table_activity_metrics = {}
 
     def clean_state(self):
         self.instance_metrics = None
@@ -51,6 +55,8 @@ class PostgresMetricsCache:
         self.replication_metrics = None
         self.replication_stats_metrics = None
         self.activity_metrics = None
+        if self.config.relations:
+            self.table_activity_metrics = {}
 
     def get_instance_metrics(self, version):
         """
@@ -71,10 +77,11 @@ class PostgresMetricsCache:
             if not self.config.dbm_enabled:
                 c_metrics = dict(c_metrics, **DBM_MIGRATED_METRICS)
             # select the right set of metrics to collect depending on postgres version
+            self.instance_metrics = dict(c_metrics)
             if version >= V9_2:
-                self.instance_metrics = dict(c_metrics, **NEWER_92_METRICS)
-            else:
-                self.instance_metrics = dict(c_metrics)
+                self.instance_metrics = dict(self.instance_metrics, **NEWER_92_METRICS)
+            if version >= V14:
+                self.instance_metrics = dict(self.instance_metrics, **NEWER_14_METRICS)
 
             # add size metrics if needed
             if self.config.collect_database_size_metrics:
@@ -89,6 +96,7 @@ class PostgresMetricsCache:
             "FROM pg_stat_database psd "
             "JOIN pg_database pd ON psd.datname = pd.datname",
             'relation': False,
+            'name': 'instance_metrics',
         }
 
         res["query"] += " WHERE " + " AND ".join(
@@ -122,6 +130,7 @@ class PostgresMetricsCache:
             'metrics': self.bgw_metrics,
             'query': "select {metrics_columns} FROM pg_stat_bgwriter",
             'relation': False,
+            'name': 'bgw_metrics',
         }
 
     def get_count_metrics(self):
@@ -152,6 +161,7 @@ class PostgresMetricsCache:
             'metrics': self.archiver_metrics,
             'query': "select {metrics_columns} FROM pg_stat_archiver",
             'relation': False,
+            'name': 'archiver_metrics',
         }
 
     def get_replication_metrics(self, version, is_aurora):
@@ -194,6 +204,14 @@ class PostgresMetricsCache:
             default_descriptors = [('application_name', 'app'), ('datname', 'db'), ('usename', 'user')]
             default_aggregations = [d[0] for d in default_descriptors]
 
+            if 'datname' in excluded_aggregations:
+                excluded_aggregations.remove('datname')
+                logger.warning(
+                    "datname is a required aggregation but was set in activity_metrics_excluded_aggregations. "
+                    "Ignoring it and using the following instead: %s",
+                    excluded_aggregations,
+                )
+
             aggregation_columns = [a for a in default_aggregations if a not in excluded_aggregations]
             descriptors = [d for d in default_descriptors if d[0] not in excluded_aggregations]
 
@@ -209,6 +227,8 @@ class PostgresMetricsCache:
                     aggregation_columns_group=',' + ', '.join(aggregation_columns),
                 )
 
+            if version >= V10:
+                metrics_query = ACTIVITY_METRICS_10
             if version >= V9_6:
                 metrics_query = ACTIVITY_METRICS_9_6
             elif version >= V9_2:
@@ -222,7 +242,8 @@ class PostgresMetricsCache:
                 if '{dd__user}' in q:
                     metrics_query[i] = q.format(dd__user=self.config.user)
 
-            metrics = {k: v for k, v in zip(metrics_query, ACTIVITY_DD_METRICS)}
+            metrics = dict(zip(metrics_query, ACTIVITY_DD_METRICS, strict=False))
+
             self.activity_metrics = (metrics, query, descriptors)
         else:
             metrics, query, descriptors = metrics_data
@@ -232,4 +253,5 @@ class PostgresMetricsCache:
             'metrics': metrics,
             'query': query,
             'relation': False,
+            'name': 'activity_metrics',
         }

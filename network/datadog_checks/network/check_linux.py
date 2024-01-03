@@ -414,13 +414,17 @@ class LinuxNetwork(Network):
 
     def _handle_ethtool_stats(self, iface, custom_tags):
         # read Ethtool metrics, if configured and available
+        self.log.debug("Handling ethtool stats")
         if not self._collect_ethtool_stats:
+            self.log.debug("Ethtool stat collection not configured")
             return
         if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
             # Skip this network interface.
+            self.log.debug("Skipping network interface %s", iface)
             return
         if iface in ['lo', 'lo0']:
             # Skip loopback ifaces as they don't support SIOCETHTOOL
+            self.log.debug("Skipping loopback interface %s", iface)
             return
 
         driver_name, driver_version, ethtool_stats_names, ethtool_stats = self._fetch_ethtool_stats(iface)
@@ -428,17 +432,24 @@ class LinuxNetwork(Network):
         tags.append('driver_name:{}'.format(driver_name))
         tags.append('driver_version:{}'.format(driver_version))
         if self._collect_ena_metrics:
+            self.log.debug("Getting ena metrics")
             ena_metrics = ethtool.get_ena_metrics(ethtool_stats_names, ethtool_stats)
+            self.log.debug("ena metrics to submit %s", ena_metrics)
             self._submit_ena_metrics(iface, ena_metrics, tags)
         if self._collect_ethtool_metrics:
+            self.log.debug("Getting ethtool metrics")
             ethtool_metrics = ethtool.get_ethtool_metrics(driver_name, ethtool_stats_names, ethtool_stats)
+            self.log.debug("ethtool metrics to submit %s", ethtool_metrics)
             self._submit_ethtool_metrics(iface, ethtool_metrics, tags)
 
     def _submit_ena_metrics(self, iface, vals_by_metric, tags):
+        self.log.debug("Submitting ena metrics for %s, %s, %s", iface, vals_by_metric, tags)
         if not vals_by_metric:
+            self.log.debug("No vals_by_metric, returning without submitting ena metrics")
             return
         if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
             # Skip this network interface.
+            self.log.debug("Skipping network interface %s", iface)
             return
 
         metric_tags = [] if tags is None else tags[:]
@@ -450,15 +461,19 @@ class LinuxNetwork(Network):
 
         count = 0
         for metric, val in iteritems(vals_by_metric):
+            self.log.debug("Submitting system.net.%s", metric)
             self.gauge('system.net.%s' % metric, val, tags=metric_tags)
             count += 1
         self.log.debug("tracked %s network ena metrics for interface %s", count, iface)
 
     def _submit_ethtool_metrics(self, iface, ethtool_metrics, base_tags):
+        self.log.debug("Submitting ethtool metrics for %s, %s, %s", iface, ethtool_metrics, base_tags)
         if not ethtool_metrics:
+            self.log.debug("No ethtool_metrics, returning without submitting ethtool metrics")
             return
         if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
             # Skip this network interface.
+            self.log.debug("Skipping network interface %s", iface)
             return
 
         base_tags_with_device = [] if base_tags is None else base_tags[:]
@@ -468,6 +483,7 @@ class LinuxNetwork(Network):
         for ethtool_tag, metric_map in iteritems(ethtool_metrics):
             tags = base_tags_with_device + [ethtool_tag]
             for metric, val in iteritems(metric_map):
+                self.log.debug("Submitting system.net.%s", metric)
                 self.monotonic_count('system.net.%s' % metric, val, tags=tags)
                 count += 1
         self.log.debug("tracked %s network ethtool metrics for interface %s", count, iface)
@@ -486,15 +502,19 @@ class LinuxNetwork(Network):
         ethtool_socket = None
         try:
             ethtool_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+            self.log.debug("ethtool_socket: %s", ethtool_socket)
             driver_name, driver_version = ethtool.get_ethtool_drvinfo(iface, ethtool_socket)
+            self.log.debug("driver_name = %s, driver_version = %s", driver_name, driver_version)
             stats_names, stats = ethtool.get_ethtool_stats(iface, ethtool_socket)
+            self.log.debug("Returning stats_names = %s, stats = %s", stats_names, stats)
             return driver_name, driver_version, stats_names, stats
         except OSError as e:
             # this will happen for interfaces that don't support SIOCETHTOOL - e.g. loopback or docker
             self.log.debug('OSError while trying to collect ethtool metrics for interface %s: %s', iface, str(e))
-        except Exception:
-            self.log.exception('Unable to collect ethtool metrics for interface %s', iface)
+        except Exception as generic_exception:
+            self.log.exception('Unable to collect ethtool metrics for interface %s. %s', iface, str(generic_exception))
         finally:
             if ethtool_socket is not None:
                 ethtool_socket.close()
+        self.log.debug("Returning default values for driver_name, driver_version, stats_names, stats")
         return None, None, [], []

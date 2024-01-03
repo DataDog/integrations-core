@@ -14,6 +14,7 @@ DEFAULT_IGNORE_DATABASES = [
     'template%',
     'rdsadmin',
     'azure_maintenance',
+    'cloudsqladmin',
     'postgres',
 ]
 
@@ -39,22 +40,30 @@ class PostgresConfig:
         self.dbstrict = is_affirmative(instance.get('dbstrict', False))
         self.disable_generic_tags = is_affirmative(instance.get('disable_generic_tags', False)) if instance else False
 
+        self.discovery_config = instance.get('database_autodiscovery', {"enabled": False})
+        if self.discovery_config['enabled'] and self.dbname != 'postgres':
+            raise ConfigurationError(
+                "'dbname' parameter should not be set when `database_autodiscovery` is enabled."
+                "To monitor more databases, add them to the `database_autodiscovery` includelist."
+            )
+
         self.application_name = instance.get('application_name', 'datadog-agent')
         if not self.isascii(self.application_name):
             raise ConfigurationError("Application name can include only ASCII characters: %s", self.application_name)
 
         self.query_timeout = int(instance.get('query_timeout', 5000))
+        self.idle_connection_timeout = instance.get('idle_connection_timeout', 60000)
         self.relations = instance.get('relations', [])
-        if self.relations and not self.dbname:
-            raise ConfigurationError('"dbname" parameter must be set when using the "relations" parameter.')
-
+        if self.relations and not (self.dbname or self.discovery_config['enabled']):
+            raise ConfigurationError(
+                '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
+            )
+        self.max_connections = instance.get('max_connections', 30)
         self.tags = self._build_tags(instance.get('tags', []))
 
-        ssl = instance.get('ssl', False)
+        ssl = instance.get('ssl', "allow")
         if ssl in SSL_MODES:
             self.ssl_mode = ssl
-        else:
-            self.ssl_mode = 'require' if is_affirmative(ssl) else 'disable'
 
         self.ssl_cert = instance.get('ssl_cert', None)
         self.ssl_root_cert = instance.get('ssl_root_cert', None)
@@ -89,17 +98,30 @@ class PostgresConfig:
         # statement samples & execution plans
         self.pg_stat_activity_view = instance.get('pg_stat_activity_view', 'pg_stat_activity')
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
+        self.settings_metadata_config = instance.get('collect_settings', {}) or {}
+        self.schemas_metadata_config = instance.get('collect_schemas', {"enabled": False})
+        if not self.relations and self.schemas_metadata_config['enabled']:
+            raise ConfigurationError(
+                'In order to collect schemas on this database, you must enable relation metrics collection.'
+            )
+
+        self.resources_metadata_config = instance.get('collect_resources', {}) or {}
         self.statement_activity_config = instance.get('query_activity', {}) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
+        self.managed_identity = instance.get('managed_identity', {})
         self.cloud_metadata = {}
         aws = instance.get('aws', {})
         gcp = instance.get('gcp', {})
         azure = instance.get('azure', {})
+        # Remap fully_qualified_domain_name to name
+        azure = {k if k != 'fully_qualified_domain_name' else 'name': v for k, v in azure.items()}
         if aws:
+            aws['managed_authentication'] = self._aws_managed_authentication(aws)
             self.cloud_metadata.update({'aws': aws})
         if gcp:
             self.cloud_metadata.update({'gcp': gcp})
         if azure:
+            azure['managed_authentication'] = self._azure_managed_authentication(azure, self.managed_identity)
             self.cloud_metadata.update({'azure': azure})
         obfuscator_options_config = instance.get('obfuscator_options', {}) or {}
         self.obfuscator_options = {
@@ -117,9 +139,25 @@ class PostgresConfig:
             'table_names': is_affirmative(obfuscator_options_config.get('collect_tables', True)),
             'collect_commands': is_affirmative(obfuscator_options_config.get('collect_commands', True)),
             'collect_comments': is_affirmative(obfuscator_options_config.get('collect_comments', True)),
+            # Config to enable/disable obfuscation of sql statements with go-sqllexer pkg
+            # Valid values for this can be found at https://github.com/DataDog/datadog-agent/blob/main/pkg/obfuscate/obfuscate.go#L108
+            'obfuscation_mode': obfuscator_options_config.get('obfuscation_mode', ''),
+            'remove_space_between_parentheses': is_affirmative(
+                obfuscator_options_config.get('remove_space_between_parentheses', False)
+            ),
+            'keep_null': is_affirmative(obfuscator_options_config.get('keep_null', False)),
+            'keep_boolean': is_affirmative(obfuscator_options_config.get('keep_boolean', False)),
+            'keep_positional_parameter': is_affirmative(
+                obfuscator_options_config.get('keep_positional_parameter', False)
+            ),
+            'keep_trailing_semicolon': is_affirmative(obfuscator_options_config.get('keep_trailing_semicolon', False)),
+            'keep_identifier_quotation': is_affirmative(
+                obfuscator_options_config.get('keep_identifier_quotation', False)
+            ),
         }
         self.log_unobfuscated_queries = is_affirmative(instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans = is_affirmative(instance.get('log_unobfuscated_plans', False))
+        self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 1800)
 
     def _build_tags(self, custom_tags):
         # Clean up tags in case there was a None entry in the instance
@@ -187,3 +225,38 @@ class PostgresConfig:
                 return True
             except UnicodeEncodeError:
                 return False
+
+    @staticmethod
+    def _aws_managed_authentication(aws):
+        if 'managed_authentication' not in aws:
+            # for backward compatibility
+            # if managed_authentication is not set, we assume it is enabled if region is set
+            managed_authentication = {}
+            managed_authentication['enabled'] = 'region' in aws
+        else:
+            managed_authentication = aws['managed_authentication']
+            enabled = is_affirmative(managed_authentication.get('enabled', False))
+            if enabled and 'region' not in aws:
+                raise ConfigurationError('AWS region must be set when using AWS managed authentication')
+            managed_authentication['enabled'] = enabled
+        return managed_authentication
+
+    @staticmethod
+    def _azure_managed_authentication(azure, managed_identity):
+        if 'managed_authentication' not in azure:
+            # for backward compatibility
+            # if managed_authentication is not set, we assume it is enabled if client_id is set in managed_identity
+            managed_authentication = {}
+            if managed_identity:
+                managed_authentication['enabled'] = 'client_id' in managed_identity
+                managed_authentication.update(managed_identity)
+            else:
+                managed_authentication['enabled'] = False
+        else:
+            # if managed_authentication is set, we ignore the legacy managed_identity config
+            managed_authentication = azure['managed_authentication']
+            enabled = is_affirmative(managed_authentication.get('enabled', False))
+            if enabled and 'client_id' not in managed_authentication:
+                raise ConfigurationError('Azure client_id must be set when using Azure managed authentication')
+            managed_authentication['enabled'] = enabled
+        return managed_authentication

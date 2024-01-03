@@ -15,7 +15,7 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Store"
+      "Category::Data Stores"
     ]
   },
   "author": {
@@ -42,9 +42,7 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": [
-        "riak-cs start"
-      ]
+      "process_signatures": ["riak-cs start"]
     },
     "dashboards": {
       "riakcs": "assets/dashboards/riakcs_dashboard.json"

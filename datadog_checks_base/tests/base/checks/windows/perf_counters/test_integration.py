@@ -228,3 +228,97 @@ def test_single_instance_counter_invalid_data_error_handling(aggregator, dd_run_
     dd_run_check(check)
     for mock_call in check.log.debug.mock_calls:
         assert not mock_call == log_debug_call
+
+
+def test_skip_typo_counter(aggregator, dd_run_check):
+    # Run correctly configured check
+    check = get_check(
+        {
+            'metrics': {
+                'Memory': {
+                    'name': 'mem',
+                    'tag_name': 'memory',
+                    'instance_counts': {
+                        'total': 'memory.total',
+                        'monitored': 'memory.monitored',
+                        'unique': 'memory.unique',
+                    },
+                    'counters': [
+                        {'Available Bytes': 'available_bytes'},
+                        {'Committed Bytes': 'committed_bytes'},
+                        {'Commit Limit': 'commit_limit'},
+                    ],
+                }
+            },
+            'server_tag': 'machine',
+        }
+    )
+
+    dd_run_check(check)
+    aggregator.assert_metric('test.mem.available_bytes')
+    aggregator.assert_metric('test.mem.committed_bytes')
+    aggregator.assert_metric('test.mem.commit_limit')
+
+    # Run check with typo. Typo has to be first, before the fix
+    # the following after typo counters metrics had not been collected
+    aggregator.reset()
+    check = get_check(
+        {
+            'metrics': {
+                'Memory': {
+                    'name': 'mem',
+                    'tag_name': 'memory',
+                    'instance_counts': {
+                        'total': 'memory.total',
+                        'monitored': 'memory.monitored',
+                        'unique': 'memory.unique',
+                    },
+                    'counters': [
+                        {'Foo': 'foo'},
+                        {'Available Bytes': 'available_bytes'},
+                        {'Committed Bytes': 'committed_bytes'},
+                        {'Commit Limit': 'commit_limit'},
+                    ],
+                }
+            },
+            'server_tag': 'machine',
+        }
+    )
+
+    dd_run_check(check)
+    aggregator.assert_metric('test.mem.available_bytes')
+    aggregator.assert_metric('test.mem.committed_bytes')
+    aggregator.assert_metric('test.mem.commit_limit')
+
+
+def test_validate_counter_names_sensitivity(aggregator, dd_run_check):
+    # Run check with different counter names of different casing to make sure
+    # the check is not affected since Windows Performance counters API
+    # are case insensitive.
+    aggregator.reset()
+    check = get_check(
+        {
+            'metrics': {
+                'mEmOrY': {
+                    'name': 'mem',
+                    'tag_name': 'memory',
+                    'instance_counts': {
+                        'total': 'memory.total',
+                        'monitored': 'memory.monitored',
+                        'unique': 'memory.unique',
+                    },
+                    'counters': [
+                        {'available bytes': 'available_bytes'},
+                        {'committeD byteS': 'committed_bytes'},
+                        {'cOmMiT lImIt': 'commit_limit'},
+                    ],
+                }
+            },
+            'server_tag': 'machine',
+        }
+    )
+
+    dd_run_check(check)
+    aggregator.assert_metric('test.mem.available_bytes')
+    aggregator.assert_metric('test.mem.committed_bytes')
+    aggregator.assert_metric('test.mem.commit_limit')

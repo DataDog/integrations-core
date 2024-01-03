@@ -116,7 +116,10 @@ class ZookeeperCheck(AgentCheck):
         self.host = self.instance.get('host', 'localhost')
         self.port = int(self.instance.get('port', 2181))
         self.timeout = float(self.instance.get('timeout', 3.0))
-        self.expected_mode = (self.instance.get('expected_mode') or '').strip()
+        self.expected_mode = self.instance.get('expected_mode') or []
+        if isinstance(self.expected_mode, str):
+            self.expected_mode = [self.expected_mode]
+        self.expected_mode = [x.strip() for x in self.expected_mode]
         self.base_tags = list(set(self.instance.get('tags', [])))
         self.sc_tags = ["host:{0}".format(self.host), "port:{0}".format(self.port)] + self.base_tags
         self.should_report_instance_mode = is_affirmative(self.instance.get("report_instance_mode", True))
@@ -178,12 +181,15 @@ class ZookeeperCheck(AgentCheck):
                 self.report_instance_mode(mode)
 
             if self.expected_mode:
-                if mode == self.expected_mode:
+                if mode in self.expected_mode:
                     status = AgentCheck.OK
                     message = None
                 else:
                     status = AgentCheck.CRITICAL
-                    message = u"Server is in %s mode but check expects %s mode" % (mode, self.expected_mode)
+                    message = u"Server is in %s mode but check expects %s mode" % (
+                        mode,
+                        ' or '.join(self.expected_mode),
+                    )
                 self.service_check('zookeeper.mode', status, message=message, tags=self.sc_tags)
 
         # Read metrics from the `mntr` output
@@ -229,7 +235,8 @@ class ZookeeperCheck(AgentCheck):
         chunk_size = 1024
         max_reads = 10000
         buf = StringIO()
-        sock.sendall(ensure_bytes(command))
+        # Zookeeper expects a newline character at the end of commands, add it to prevent removal by proxies
+        sock.sendall(ensure_bytes(command + "\n"))
         # Read the response into a StringIO buffer
         chunk = ensure_unicode(sock.recv(chunk_size))
         buf.write(chunk)

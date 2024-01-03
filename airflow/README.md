@@ -49,6 +49,8 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
 
 2. Update the Airflow configuration file `airflow.cfg` by adding the following configs:
 
+   <div class="alert alert-warning"> Do not set `statsd_datadog_enabled` to true. Enabling `statsd_datadog_enabled` can create conflicts. To prevent issues, ensure that the variable is set to `False`.</div>
+   
    ```conf
    [scheduler]
    statsd_on = True
@@ -177,16 +179,18 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
            name: "airflow.task.instance_created"
            tags:
              task_class: "$1"
-         - match: "airflow.ti.start.*.*"
-           name: "airflow.ti.start"
-           tags:
-             dag_id: "$1"
-             task_id: "$2"
-         - match: "airflow.ti.finish.*.*.*"
-           name: "airflow.ti.finish"
-           tags:
-             dag_id: "$1"
-             task_id: "$2"
+         - match: 'airflow\.ti\.start\.(.+)\.(\w+)'
+           match_type: regex
+           name: airflow.ti.start
+           tags: 
+             dagid: "$1"
+             taskid: "$2"
+         - match: 'airflow\.ti\.finish\.(\w+)\.(.+)\.(\w+)'
+           name: airflow.ti.finish
+           match_type: regex
+           tags: 
+             dagid: "$1"
+             taskid: "$2"
              state: "$3"
    ```
 
@@ -366,7 +370,7 @@ Need help? Contact [Datadog support][11].
 [1]: https://airflow.apache.org/docs/stable/metrics.html
 [2]: https://docs.datadoghq.com/developers/dogstatsd/
 [3]: https://docs.datadoghq.com/agent/
-[4]: https://app.datadoghq.com/account/settings#agent
+[4]: https://app.datadoghq.com/account/settings/agent/latest
 [5]: https://github.com/DataDog/integrations-core/blob/master/airflow/datadog_checks/airflow/data/conf.yaml.example
 [6]: https://airflow.apache.org/docs/apache-airflow/stable/logging-monitoring/metrics.html
 [7]: https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#metrics

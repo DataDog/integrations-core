@@ -25,9 +25,38 @@ INSTANCES = {
         'included_metrics': [r'envoy\.cluster\.'],
         'excluded_metrics': [r'envoy\.cluster\.out\.'],
     },
+    'include_exclude_metrics': {
+        'stats_url': 'http://{}:{}/stats'.format(HOST, PORT),
+        'include_metrics': [r'envoy\.cluster\.'],
+        'exclude_metrics': [r'envoy\.cluster\.out\.'],
+    },
     'collect_server_info': {
         'stats_url': 'http://{}:{}/stats'.format(HOST, PORT),
         'collect_server_info': 'false',
     },
 }
 ENVOY_VERSION = os.getenv('ENVOY_VERSION')
+
+EXT_METRICS = [
+    "envoy.cluster.ext_authz.denied",
+    "envoy.cluster.ext_authz.disabled",
+    "envoy.cluster.ext_authz.error",
+    "envoy.cluster.ext_authz.failure_mode_allowed",
+    "envoy.cluster.ext_authz.ok",
+]
+
+LOCAL_RATE_LIMIT_METRICS = [
+    "envoy.http_local_rate_limit.enabled",
+    "envoy.http_local_rate_limit.enforced",
+    "envoy.http_local_rate_limit.rate_limited",
+    "envoy.http_local_rate_limit.ok",
+]
+
+STAT_PREFIX_TAG = ['stat_prefix:http_local_rate_limiter', 'stat_prefix:foo_buz_112']
+
+RBAC_METRICS = [
+    "envoy.http.rbac.allowed",
+    "envoy.http.rbac.denied",
+    "envoy.http.rbac.shadow_allowed",
+    "envoy.http.rbac.shadow_denied",
+]

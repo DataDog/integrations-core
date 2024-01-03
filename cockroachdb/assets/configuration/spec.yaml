@@ -12,7 +12,9 @@ files:
         openmetrics_endpoint.required: false
         openmetrics_endpoint.value.example: http://localhost:8080/_status/vars
         tags.value.example:
-          - 'node:<NAME>'
+          - 'node:<NODE>'
+          - 'cluster:<CLUSTER>'
+          - 'region:<REGION>'
           - <KEY_1>:<VALUE_1>
           - <KEY_2>:<VALUE_2>
     - template: instances/openmetrics_legacy_base

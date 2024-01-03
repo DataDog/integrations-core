@@ -1945,6 +1945,5 @@
     "layout_type": "ordered",
     "is_read_only": false,
     "notify_list": [],
-    "reflow_type": "fixed",
-    "id": "fzh-f3u-5mz"
+    "reflow_type": "fixed"
 }

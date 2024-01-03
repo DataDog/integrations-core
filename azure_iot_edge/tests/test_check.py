@@ -2,15 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
-from typing import Callable
+from typing import Callable  # noqa: F401
 
 import pytest
 import requests
 
 from datadog_checks.azure_iot_edge import AzureIoTEdgeCheck
-from datadog_checks.azure_iot_edge.types import Instance
-from datadog_checks.base.stubs.aggregator import AggregatorStub
-from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub
+from datadog_checks.azure_iot_edge.types import Instance  # noqa: F401
+from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
+from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common

@@ -12,11 +12,10 @@
     "title": "Ambari",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Category::Processing",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::Network",
+      "Supported OS::Linux",
+      "Supported OS::macOS"
     ]
   },
   "author": {

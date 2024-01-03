@@ -1,0 +1,17 @@
+[
+    {
+        "agent_version": "7.47.0",
+        "integration": "dcgm",
+        "check": "dcgm.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "DCGM openmetrics endpoint up",
+        "description": "Returns `CRITICAL` if the check cannot access the openmetrics metrics endpoint of the DCGM Exporter."
+    }
+]

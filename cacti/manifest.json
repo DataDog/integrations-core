@@ -12,9 +12,9 @@
     "title": "Cacti",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Category::Monitoring",
-      "Category::Log Collection"
+      "Category::Developer Tools",
+      "Category::Log Collection",
+      "Supported OS::Linux"
     ]
   },
   "author": {

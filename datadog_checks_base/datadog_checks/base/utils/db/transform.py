@@ -6,10 +6,10 @@ from __future__ import division
 import re
 import time
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Tuple  # noqa: F401
 
-from datadog_checks.base.types import ServiceCheckStatus
-from datadog_checks.base.utils.db.types import Transformer, TransformerFactory
+from datadog_checks.base.types import ServiceCheckStatus  # noqa: F401
+from datadog_checks.base.utils.db.types import Transformer, TransformerFactory  # noqa: F401
 
 from ... import is_affirmative
 from ...constants import ServiceCheck
@@ -64,7 +64,7 @@ def get_tag_list(transformers, column_name, **modifiers):
     Tag name is determined by `column_name`. The column value represents a list of values. It is expected to be either
     a list of strings, or a comma-separated string.
 
-    For example, if the column is named `server_tag` and the column returned the value `'us,primary'`, then all
+    For example, if the column is named `server_tag` and the column returned the value `us,primary`, then all
     submissions for that row will be tagged by `server_tag:us` and `server_tag:primary`.
     """
     template = '%s:{}' % column_name
@@ -491,6 +491,7 @@ COLUMN_TRANSFORMERS = {
     'temporal_percent': get_temporal_percent,
     'monotonic_gauge': get_monotonic_gauge,
     'tag': get_tag,
+    'tag_not_null': get_tag,
     'tag_list': get_tag_list,
     'match': get_match,
     'service_check': get_service_check,

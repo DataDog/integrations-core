@@ -26,6 +26,7 @@ CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));
 INSERT INTO datadog_test.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
 CREATE USER bob FOR LOGIN bob;
 CREATE USER fred FOR LOGIN fred;
+CREATE CLUSTERED INDEX thingsindex ON datadog_test.dbo.ϑings (name);
 GO
 
 EXEC sp_addrolemember 'db_datareader', 'bob'
@@ -49,6 +50,23 @@ GO
 GRANT EXECUTE on bobProcParams to bob;
 GRANT EXECUTE on bobProc to bob;
 GRANT EXECUTE on bobProc to fred;
+GO
+
+CREATE PROCEDURE procedureWithLargeCommment AS
+/* 
+author: Datadog 
+usage: some random comments
+test: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+description: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+this comment has no actual meanings, just to test large sp with truncation
+the quick brown fox jumps over the lazy dog, the quick brown fox jumps over the lazy dog, the quick brown fox jumps over the lazy dog
+*/
+BEGIN
+    SELECT * FROM ϑings;
+END;
+GO
+GRANT EXECUTE on procedureWithLargeCommment to bob;
+GRANT EXECUTE on procedureWithLargeCommment to fred;
 GO
 
 -- create an offline database to have an unavailable database to test with
@@ -118,4 +136,28 @@ BEGIN
 END;
 GO
 GRANT EXECUTE on multiQueryProc to bob;
+GO
+
+-- test procedure with IF ELSE branches and temp tables
+CREATE PROCEDURE conditionalPlanTest
+ @Switch INTEGER
+AS
+BEGIN
+ SET NOCOUNT ON
+ CREATE TABLE #Ids (Id INTEGER PRIMARY KEY)
+
+ IF (@Switch > 0)
+  BEGIN
+   INSERT INTO #Ids (Id) VALUES (1)
+  END 
+
+ IF (@Switch > 1)
+  BEGIN
+   INSERT #Ids (Id) VALUES (2)
+  END
+
+ SELECT * FROM #Ids
+END
+GO
+GRANT EXECUTE on conditionalPlanTest to bob;
 GO

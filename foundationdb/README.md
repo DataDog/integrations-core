@@ -133,14 +133,14 @@ The FoundationDB check does not include any events.
 Need help? Contact [Datadog support][7].
 
 [1]: https://www.foundationdb.org/
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/foundationdb/datadog_checks/foundationdb/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/foundationdb/metadata.csv
 [7]: https://docs.datadoghq.com/help/
 [8]: https://apple.github.io/foundationdb/downloads.html
-[9]: https://app.datadoghq.com/account/settings#agent
+[9]: https://app.datadoghq.com/account/settings/agent/latest
 [10]: https://apple.github.io/foundationdb/administration.html#default-cluster-file
 [11]: https://apple.github.io/foundationdb/tls.html
 [12]: https://docs.datadoghq.com/agent/kubernetes/integrations/

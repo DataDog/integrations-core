@@ -12,8 +12,21 @@ from semver import VersionInfo
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.postgres import PostgreSql
+from datadog_checks.postgres.config import PostgresConfig
+from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 
-from .common import DB_NAME, HOST, PASSWORD, PORT, POSTGRES_IMAGE, USER
+from .common import (
+    DB_NAME,
+    HOST,
+    PASSWORD,
+    PORT,
+    PORT_REPLICA,
+    PORT_REPLICA2,
+    PORT_REPLICA_LOGICAL,
+    POSTGRES_IMAGE,
+    POSTGRES_VERSION,
+    USER,
+)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 INSTANCE = {
@@ -29,6 +42,10 @@ INSTANCE = {
 
 def connect_to_pg():
     psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, password=PASSWORD)
+    if float(POSTGRES_VERSION) >= 10.0:
+        psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA, password=PASSWORD)
+        psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA2, password=PASSWORD)
+        psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA_LOGICAL, password=PASSWORD)
 
 
 @pytest.fixture(scope='session')
@@ -36,8 +53,11 @@ def dd_environment(e2e_instance):
     """
     Start a standalone postgres server requiring authentication.
     """
+    compose_file = 'docker-compose.yaml'
+    if float(POSTGRES_VERSION) >= 10.0:
+        compose_file = 'docker-compose-replication.yaml'
     with docker_run(
-        os.path.join(HERE, 'compose', 'docker-compose.yaml'),
+        os.path.join(HERE, 'compose', compose_file),
         conditions=[WaitFor(connect_to_pg)],
         env_vars={"POSTGRES_IMAGE": POSTGRES_IMAGE},
     ):
@@ -65,10 +85,44 @@ def pg_instance():
     return copy.deepcopy(INSTANCE)
 
 
+@pytest.fixture
+def pg_replica_instance():
+    instance = copy.deepcopy(INSTANCE)
+    instance['port'] = PORT_REPLICA
+    return instance
+
+
+@pytest.fixture
+def pg_replica_instance2():
+    instance = copy.deepcopy(INSTANCE)
+    instance['port'] = PORT_REPLICA2
+    return instance
+
+
+@pytest.fixture
+def pg_replica_logical():
+    instance = copy.deepcopy(INSTANCE)
+    instance['port'] = PORT_REPLICA_LOGICAL
+    return instance
+
+
+@pytest.fixture
+def metrics_cache(pg_instance):
+    config = PostgresConfig(pg_instance)
+    return PostgresMetricsCache(config)
+
+
+@pytest.fixture
+def metrics_cache_replica(pg_replica_instance):
+    config = PostgresConfig(pg_replica_instance)
+    return PostgresMetricsCache(config)
+
+
 @pytest.fixture(scope='session')
 def e2e_instance():
     instance = copy.deepcopy(INSTANCE)
     instance['dbm'] = True
+    instance['collect_resources'] = {'collection_interval': 0.1}
     return instance
 
 
@@ -79,12 +133,12 @@ def mock_cursor_for_replica_stats():
         data = deque()
         connect.return_value = mock.MagicMock(cursor=mock.MagicMock(return_value=cursor))
 
-        def cursor_execute(query):
+        def cursor_execute(query, second_arg=""):
             if "FROM pg_stat_replication" in query:
                 data.appendleft(['app1', 'streaming', 'async', '1.1.1.1', 12, 12, 12, 12])
                 data.appendleft(['app2', 'backup', 'sync', '1.1.1.1', 13, 13, 13, 13])
             elif query == 'SHOW SERVER_VERSION;':
-                data.appendleft(['10.15'])
+                data.appendleft([POSTGRES_VERSION])
 
         def cursor_fetchall():
             while data:
@@ -93,8 +147,8 @@ def mock_cursor_for_replica_stats():
         def cursor_fetchone():
             return data.pop()
 
-        cursor.execute = cursor_execute
-        cursor.fetchall = cursor_fetchall
-        cursor.fetchone = cursor_fetchone
+        cursor.__enter__().execute = cursor_execute
+        cursor.__enter__().fetchall = cursor_fetchall
+        cursor.__enter__().fetchone = cursor_fetchone
 
         yield

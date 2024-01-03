@@ -1,4 +1,4 @@
-from typing import Set
+from typing import Set  # noqa: F401
 
 
 class SecretsSanitizer:

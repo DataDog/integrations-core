@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Dict
+from typing import Dict  # noqa: F401
 
 from datadog_checks.base import AgentCheck
 

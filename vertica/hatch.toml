@@ -1,14 +1,15 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
-version = ["10.1", "11.1", "12.0"]
+python = ["2.7", "3.11"]
+version = ["10.1", "11.1", "12.0", "23.3"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
   { key = "VERTICA_VERSION", value = "10.1.1-0", if = ["10.1"] },
   { key = "VERTICA_VERSION", value = "11.1.1-0", if = ["11.1"] },
-  { key = "VERTICA_VERSION", value = "12.0.0-0", if = ["12.0"] },
+  { key = "VERTICA_VERSION", value = "12.0.4-0", if = ["12.0"] },
+  { key = "VERTICA_VERSION", value = "23.3.0-0", if = ["23.3"] },
 ]
 
 [envs.default.env-vars]

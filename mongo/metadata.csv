@@ -233,7 +233,7 @@ mongodb.usage.remove.count,gauge,,commit,,Number of removes since server start (
 mongodb.usage.remove.time,gauge,,microsecond,,Total time spent performing removes in microseconds,-1,mongodb,,
 mongodb.usage.total.countps,gauge,,command,second,Number of operations per second,0,mongodb,,
 mongodb.usage.total.count,gauge,,command,,Number of operations since server start (deprecated),0,mongodb,,
-mongodb.usage.total.time,gauge,,microsecond,,Total time spent performing operations in microseconds,-1,mongodb,,
+mongodb.usage.total.time,gauge,,microsecond,,Total time spent holding locks in microseconds,-1,mongodb,,
 mongodb.usage.update.countps,gauge,,commit,second,Number of updates per second,0,mongodb,,
 mongodb.usage.update.count,gauge,,commit,,Number of updates since server start (deprecated),0,mongodb,,
 mongodb.usage.update.time,gauge,,microsecond,,Total time spent performing updates in microseconds,-1,mongodb,,

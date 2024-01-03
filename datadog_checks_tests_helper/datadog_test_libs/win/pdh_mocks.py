@@ -32,10 +32,7 @@ def pdh_mocks_fixture():
     pdhcollectquerydata = mock.patch('win32pdh.CollectQueryData', mock_CollectQueryData)
     pdhvalidatepath = mock.patch('win32pdh.ValidatePath', mock_ValidatePath)
 
-    yield regqueryvalueex.start(), pdhlookupbyindex.start(), \
-        pdhenumobjectitems.start(),  pdhmakecounterpath.start(), \
-        pdhaddcounter.start(), pdhgetformattedcountervalue.start(), pdhcollectquerydata.start(), \
-        pdhvalidatepath.start()
+    yield regqueryvalueex.start(), pdhlookupbyindex.start(), pdhenumobjectitems.start(), pdhmakecounterpath.start(), pdhaddcounter.start(), pdhgetformattedcountervalue.start(), pdhcollectquerydata.start(), pdhvalidatepath.start()  # noqa: E501
 
     regqueryvalueex.stop()
     pdhlookupbyindex.stop()
@@ -62,10 +59,7 @@ def pdh_mocks_fixture_bad_perf_strings():
     pdhcollectquerydata = mock.patch('win32pdh.CollectQueryData', mock_CollectQueryData)
     pdhvalidatepath = mock.patch('win32pdh.ValidatePath', mock_ValidatePath)
 
-    yield regqueryvalueex.start(), pdhlookupbyindex.start(), \
-        pdhenumobjectitems.start(),  pdhmakecounterpath.start(), \
-        pdhaddcounter.start(), pdhgetformattedcountervalue.start(), pdhcollectquerydata.start(), \
-        pdhvalidatepath.start()
+    yield regqueryvalueex.start(), pdhlookupbyindex.start(), pdhenumobjectitems.start(), pdhmakecounterpath.start(), pdhaddcounter.start(), pdhgetformattedcountervalue.start(), pdhcollectquerydata.start(), pdhvalidatepath.start()  # noqa: E501
 
     regqueryvalueex.stop()
     pdhlookupbyindex.stop()
@@ -159,7 +153,7 @@ def load_registry_values(fname):
     idx = 0
     idx_max = len(idx_array)
     while idx < idx_max:
-        ctr_index[int(idx_array[idx])] = idx_array[idx+1]
+        ctr_index[int(idx_array[idx])] = idx_array[idx + 1]
         idx += 2
     return idx_array, ctr_index
 

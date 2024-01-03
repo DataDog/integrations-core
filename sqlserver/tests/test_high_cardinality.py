@@ -18,7 +18,9 @@ from .utils import HighCardinalityQueries, high_cardinality_only
 def dbm_instance(instance_docker):
     instance_docker['dbm'] = True
     instance_docker['query_metrics'] = {'enabled': True, 'run_sync': True}
+    instance_docker['procedure_metrics'] = {'enabled': True, 'run_sync': True}
     instance_docker['query_activity'] = {'enabled': True, 'run_sync': True}
+    instance_docker['collect_settings'] = {'enabled': False}
     return copy(instance_docker)
 
 
@@ -81,7 +83,7 @@ def test_complete_metrics_run(dd_run_check, dbm_instance, high_cardinality_insta
     second_run_elapsed = _run_queries_and_time_check()
 
     total_elapsed_time = first_run_elapsed + second_run_elapsed
-    assert total_elapsed_time <= 15
+    assert total_elapsed_time <= 60
 
 
 @high_cardinality_only

@@ -21,7 +21,7 @@ def test_bad_config_string_regex_deprecated():
     c = Disk('disk', {}, [instance])
 
     assert_regex_equal(c._file_system_include, re.compile('test', re.I))
-    assert_regex_equal(c._file_system_exclude, re.compile('test|iso9660$', re.I))
+    assert_regex_equal(c._file_system_exclude, re.compile('test|iso9660$|tracefs$', re.I))
     assert_regex_equal(c._device_include, re.compile('test', IGNORE_CASE))
     assert_regex_equal(c._device_exclude, re.compile('test', IGNORE_CASE))
     assert_regex_equal(c._mount_point_include, re.compile('test', IGNORE_CASE))
@@ -40,7 +40,7 @@ def test_ignore_empty_regex_deprecated():
     c = Disk('disk', {}, [instance])
 
     assert_regex_equal(c._file_system_include, re.compile('test', re.I))
-    assert_regex_equal(c._file_system_exclude, re.compile('test|iso9660$', re.I))
+    assert_regex_equal(c._file_system_exclude, re.compile('test|iso9660$|tracefs$', re.I))
     assert_regex_equal(c._device_include, re.compile('test', IGNORE_CASE))
     assert_regex_equal(c._device_exclude, re.compile('test', IGNORE_CASE))
     assert_regex_equal(c._mount_point_include, re.compile('test', IGNORE_CASE))
@@ -160,7 +160,7 @@ def test_legacy_config():
     }
     c = Disk('disk', {}, [instance])
 
-    assert_regex_equal(c._file_system_exclude, re.compile('iso9660$|test$', re.I))
+    assert_regex_equal(c._file_system_exclude, re.compile('iso9660$|tracefs$|test$', re.I))
     assert_regex_equal(c._device_exclude, re.compile('test1$|test2', IGNORE_CASE))
     assert_regex_equal(c._mount_point_exclude, re.compile('(/host)?/proc/sys/fs/binfmt_misc$|test', IGNORE_CASE))
 

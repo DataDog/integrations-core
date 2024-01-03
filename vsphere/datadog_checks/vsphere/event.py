@@ -11,7 +11,7 @@ from pyVmomi import vim
 
 from datadog_checks.base import ensure_unicode
 
-from .constants import SOURCE_TYPE
+from .constants import MOR_TYPE_AS_STRING, SOURCE_TYPE
 
 EXCLUDE_FILTERS = {
     'AlarmStatusChangedEvent': [r'Gray to Green', r'Green to Gray'],
@@ -39,7 +39,7 @@ ALLOWED_EVENTS = [getattr(vim.event, event_type) for event_type in EXCLUDE_FILTE
 class VSphereEvent(object):
     UNKNOWN = 'unknown'
 
-    def __init__(self, raw_event, event_config, tags):
+    def __init__(self, raw_event, event_config, tags, event_resource_filters):
         self.raw_event = raw_event
         if self.raw_event and self.raw_event.__class__.__name__.startswith('vim.event'):
             self.event_type = self.raw_event.__class__.__name__[10:]
@@ -58,8 +58,18 @@ class VSphereEvent(object):
         else:
             self.event_config = event_config
 
+        self.event_resource_filters = event_resource_filters
+
     def _is_filtered(self):
         # Filter the unwanted types
+        if self.event_type == 'AlarmStatusChangedEvent':
+            # Get the entity type/name
+            self.entity_type = self.raw_event.entity.entity.__class__
+
+            self.host_type = MOR_TYPE_AS_STRING.get(self.entity_type, None)
+            if self.host_type not in self.event_resource_filters:
+                return True
+
         if self.event_type not in EXCLUDE_FILTERS:
             return True
 
@@ -148,14 +158,17 @@ class VSphereEvent(object):
                 md5(alarm_event.alarm.name.encode('utf-8')).hexdigest()[:10],
             )
 
-        # Get the entity type/name
-        if self.raw_event.entity.entity.__class__ == vim.VirtualMachine:
-            host_type = 'VM'
-        elif self.raw_event.entity.entity.__class__ == vim.HostSystem:
-            host_type = 'host'
-        else:
+        host_name = None
+        entity_name = self.raw_event.entity.name
+
+        # for backwards compatibility, vm host type is capitalized
+        if self.entity_type == vim.VirtualMachine:
+            self.host_type = 'VM'
+
+        if self.entity_type == vim.VirtualMachine or self.entity_type == vim.HostSystem:
+            host_name = entity_name
+        if self.host_type is None:
             return None
-        host_name = self.raw_event.entity.name
 
         # Need a getattr because from is a reserved keyword...
         trans_before = getattr(self.raw_event, 'from')  # noqa: B009
@@ -165,11 +178,11 @@ class VSphereEvent(object):
         if transition is None:
             return None
 
-        self.payload['msg_title'] = u"[{transition}] {monitor} on {host_type} {host_name} is now {status}".format(
+        self.payload['msg_title'] = u"[{transition}] {monitor} on {host_type} {entity_name} is now {status}".format(
             transition=transition,
             monitor=self.raw_event.alarm.name,
-            host_type=host_type,
-            host_name=host_name,
+            host_type=self.host_type,
+            entity_name=entity_name,
             status=trans_after,
         )
         self.payload['alert_type'] = TO_ALERT_TYPE[trans_after]
@@ -179,7 +192,8 @@ class VSphereEvent(object):
         ] = "vCenter monitor status changed on this alarm, " "it was {before} and it's now {after}.".format(
             before=trans_before, after=trans_after
         )
-        self.payload['host'] = host_name
+        if host_name is not None:
+            self.payload['host'] = host_name
         return self.payload
 
     def transform_vmmessageevent(self):

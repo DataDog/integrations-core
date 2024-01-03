@@ -6,11 +6,15 @@ import copy
 import pytest
 from six import PY2
 
+from datadog_checks.dev import get_here
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.istio import Istio
 
 from . import common
 from .utils import _assert_tags_excluded, get_fixture_path
+
+FIXTURE_DIR = '{}/fixtures'.format(get_here())
+
 
 pytestmark = [pytest.mark.skipif(PY2, reason='Test only available on Python 3')]
 
@@ -152,3 +156,37 @@ def test_exclude_labels(exclude_labels, expected_exclude_labels):
         instance["exclude_labels"] = exclude_labels
     check = Istio('istio', {}, [instance])
     assert check.instance["exclude_labels"] == expected_exclude_labels
+
+
+def test_non_conforming_metrics(aggregator, dd_run_check, mock_http_response):
+    """
+    Test non conforming metrics for V2 implementation such as histograms and gauges
+    ending with `_total`
+    """
+    mock_http_response(file_path=get_fixture_path(FIXTURE_DIR, 'non-conforming.txt'))
+
+    check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_ISTIOD_INSTANCE])
+    dd_run_check(check)
+
+    for metric in common.NON_CONFORMING_METRICS:
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_all_metrics_covered()
+
+
+def test_unverified_metrics(aggregator, dd_run_check, mock_http_response):
+    """
+    Test non conforming metrics for V2 implementation such as histograms and gauges
+    ending with `_total`
+    """
+    mock_http_response(file_path=get_fixture_path(FIXTURE_DIR, 'unverified-metrics.txt'))
+
+    check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_ISTIOD_INSTANCE])
+    dd_run_check(check)
+
+    for metric in common.MOCK_TEST_METRICS:
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_all_metrics_covered()

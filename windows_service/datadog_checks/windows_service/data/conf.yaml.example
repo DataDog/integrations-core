@@ -16,12 +16,16 @@ instances:
     ## @param services - (list of string or mapping) - required
     ## List of services to monitor e.g. Dnscache, wmiApSrv, etc.
     ##
-    ## Services can also be selectively monitored by their startup type.
+    ## Services can also be selectively monitored by their startup type and whether they have triggers
     ## The possible values for `startup_type` are:
     ##   - disabled
     ##   - manual
     ##   - automatic
     ##   - automatic_delayed_start
+    ##
+    ## The possible values for `trigger_start` are:
+    ##   - true
+    ##   - false
     ##
     ## If any service is set to `ALL`, all services registered with the SCM will be monitored, and
     ## all other patterns provided in this instance will be ignored.
@@ -36,6 +40,7 @@ instances:
       - <SERVICE_NAME_1>
       - name: <SERVICE_NAME_2>
       - startup_type: automatic
+        trigger_start: false
 
     ## @param disable_legacy_service_tag - boolean - optional - default: false
     ## Whether or not to stop submitting the tag `service` that has been renamed

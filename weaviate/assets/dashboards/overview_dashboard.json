@@ -1,0 +1,2613 @@
+{
+    "author_name": "Datadog",
+    "description": "**Weaviate**\n\nWeaviate is a self-hosted vector database that enables accurate and efficient storage and querying of unstructured data. This dashboard showcases important insights and metrics enabling you to monitor the health of your Weaviate instances. \n\n**Further reading:**\n\n- [Datadog Weaviate Integration Documentation](https://docs.datadoghq.com/integrations/weaviate/)\n- [How Datadog monitors Weaviate and other AI stack technologies](https://www.datadoghq.com/blog/ai-integrations)\n- [Weaviate Monitoring Docs](https://weaviate.io/developers/weaviate/configuration/monitoring)",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "host",
+            "prefix": "host"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "class_name",
+            "prefix": "class_name"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "shard_name",
+            "prefix": "shard_name"
+        }
+    ],
+    "title": "Weaviate Overview Dashboard",
+    "widgets": [
+        {
+            "definition": {
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "has_background": true,
+                            "has_border": false,
+                            "horizontal_align": "center",
+                            "sizing": "cover",
+                            "type": "image",
+                            "url": "/static/images/logos/weaviate_large.svg",
+                            "url_dark_theme": "/static/images/logos/weaviate_reversed_large.svg",
+                            "vertical_align": "center"
+                        },
+                        "id": 1590802316495700,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "transparent",
+                            "content": "**Weaviate**\n\nWeaviate is a self-hosted vector database that enables accurate and efficient storage and querying of unstructured data. This dashboard showcases important insights and metrics enabling you to monitor the health of your Weaviate instances. ",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 7992422381542136,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 0,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "transparent",
+                            "content": "**Further reading:**\n\n- [Datadog Weaviate Integration Documentation](https://docs.datadoghq.com/integrations/weaviate/)\n- [How Datadog monitors Weaviate and other AI stack technologies](https://www.datadoghq.com/blog/ai-integrations)\n- [Weaviate Monitoring Docs](https://weaviate.io/developers/weaviate/configuration/monitoring)",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 2961037249226966,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 3,
+                            "y": 3
+                        }
+                    }
+                ]
+            },
+            "id": 6756498291092174,
+            "layout": {
+                "height": 7,
+                "width": 6,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_yellow",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Weaviate Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "yellow",
+                            "content": "The overview section gives you a high-level overview of your system, including monitors with active alerts and service checks on the health of you Weaviate instance. ",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 102530281599378,
+                        "layout": {
+                            "height": 1,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "color_preference": "text",
+                            "count": 50,
+                            "display_format": "countsAndList",
+                            "hide_zero_counts": true,
+                            "query": "weaviate $class_name $shard_name",
+                            "show_last_triggered": false,
+                            "show_priority": false,
+                            "sort": "status,asc",
+                            "start": 0,
+                            "summary_type": "monitors",
+                            "title": "",
+                            "type": "manage_status"
+                        },
+                        "id": 1061819177647596,
+                        "layout": {
+                            "height": 4,
+                            "width": 4,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "no_group_hosts": true,
+                            "no_metric_hosts": false,
+                            "node_type": "host",
+                            "requests": {
+                                "fill": {
+                                    "q": "avg:weaviate.go.info{$host} by {host}"
+                                }
+                            },
+                            "scope": [
+                                "$host"
+                            ],
+                            "style": {
+                                "palette": "green_to_orange",
+                                "palette_flip": false
+                            },
+                            "title": "Host Reporting Weaviate Metrics",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "hostmap"
+                        },
+                        "id": 2041622573836122,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 4,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:weaviate.startup.progress{$host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {},
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            },
+                            "title": "Number of Weaviate Class Shard",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 3006011310190178,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 4,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "check": "weaviate.node.status",
+                            "group_by": [],
+                            "grouping": "cluster",
+                            "tags": [],
+                            "title": "Active Nodes",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "check_status"
+                        },
+                        "id": 6480153057394928,
+                        "layout": {
+                            "height": 1,
+                            "width": 2,
+                            "x": 0,
+                            "y": 5
+                        }
+                    },
+                    {
+                        "definition": {
+                            "check": "weaviate.liveness.status",
+                            "group_by": [],
+                            "grouping": "cluster",
+                            "tags": [],
+                            "title": "Liveness Check",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "check_status"
+                        },
+                        "id": 6289555577687450,
+                        "layout": {
+                            "height": 1,
+                            "width": 2,
+                            "x": 2,
+                            "y": 5
+                        }
+                    },
+                    {
+                        "definition": {
+                            "check": "weaviate.openmetrics.health",
+                            "group_by": [],
+                            "grouping": "cluster",
+                            "tags": [],
+                            "title": "OpenMetrics Endpoint",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "check_status"
+                        },
+                        "id": 8671913866754838,
+                        "layout": {
+                            "height": 1,
+                            "width": 2,
+                            "x": 4,
+                            "y": 5
+                        }
+                    }
+                ]
+            },
+            "id": 1001550520732506,
+            "layout": {
+                "height": 7,
+                "width": 6,
+                "x": 6,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_yellow",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Usage Statistics",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "yellow",
+                            "content": "Monitoring the size of the vector index and the duration of insert, delete, and maintenance operations is crucial to understand the efficiency and performance of the vector database. These metrics help identify potential storage issues, bottlenecks, and assess the impact of data modifications on system responsiveness.\n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 3663609905536602,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:weaviate.vector.index.size{$host,$class_name,$shard_name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Vector Index Size",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 7004887938345862,
+                        "layout": {
+                            "height": 3,
+                            "width": 2,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Vector Index Size",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:weaviate.vector.index.size{$host,$class_name,$shard_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Vector Index Size",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1359330702650728,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 2,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:weaviate.vector.index.size{$host,$class_name,$shard_name} by {class_name,shard_name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {},
+                            "title": "Vector Index Size",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 1542141926316054,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.vector.index.durations_ms.sum{operation:create,$host,$class_name,$shard_name}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.vector.index.durations_ms.count{operation:create,$host,$class_name,$shard_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Insert Operations Duration",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 8632689628471056,
+                        "layout": {
+                            "height": 3,
+                            "width": 2,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Avg Insert Duration",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.vector.index.durations_ms.sum{operation:create,$host,$class_name,$shard_name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.vector.index.durations_ms.count{operation:create,$host,$class_name,$shard_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Insert Operations Duration",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5407751152794876,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 2,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_green",
+                                            "value": 0.46
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_yellow",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.vector.index.durations_ms.sum{operation:create,$host,$class_name,$shard_name} by {class_name,shard_name}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.vector.index.durations_ms.count{operation:create,$host,$class_name,$shard_name} by {class_name,shard_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {},
+                            "title": "Insert Operations Duration",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 1704141929999666,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.vector.index.maintenance.durations_ms.sum{$host,$class_name,$shard_name}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.vector.index.maintenance.durations_ms.sum{$host,$class_name,$shard_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Vector Index Maintenance Operations Duration",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 4014216421196816,
+                        "layout": {
+                            "height": 3,
+                            "width": 2,
+                            "x": 0,
+                            "y": 7
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Avg Maintenance Duration ",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.vector.index.maintenance.durations_ms.sum{$host,$class_name,$shard_name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.vector.index.maintenance.durations_ms.sum{$host,$class_name,$shard_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Vector Index Maintenance Operations Duration",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2768127252312686,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 2,
+                            "y": 7
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.vector.index.maintenance.durations_ms.sum{$host,$class_name,$shard_name} by {class_name,shard_name}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.vector.index.maintenance.durations_ms.sum{$host,$class_name,$shard_name} by {class_name,shard_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {},
+                            "title": "Vector Index Maintenance Operations Duration",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 4956436798769702,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 7
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.vector.index.durations_ms.sum{operation:delete,$host,$class_name,$shard_name}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.vector.index.durations_ms.count{operation:delete,$host,$class_name,$shard_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Delete Operations Duration",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 2182745187782708,
+                        "layout": {
+                            "height": 3,
+                            "width": 2,
+                            "x": 0,
+                            "y": 10
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Avg Delete Duration",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.vector.index.durations_ms.sum{operation:delete,$host,$class_name,$shard_name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.vector.index.durations_ms.count{operation:delete,$host,$class_name,$shard_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Delete Operations Duration",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8748756829172282,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 2,
+                            "y": 10
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.vector.index.durations_ms.sum{operation:delete,$host,$class_name,$shard_name} by {class_name,shard_name}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.vector.index.durations_ms.count{operation:delete,$host,$class_name,$shard_name} by {class_name,shard_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {},
+                            "title": "Delete Operations Duration",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 6954113504095542,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 10
+                        }
+                    }
+                ]
+            },
+            "id": 8132605552695124,
+            "layout": {
+                "height": 14,
+                "width": 12,
+                "x": 0,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_yellow",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Query Statistics",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "yellow",
+                            "content": "Tracking query latency, rate, and concurrent read/write requests enables the evaluation of the vector database's overall responsiveness and load handling capabilities. It aids in optimizing query performance, identifying high-demand periods, and planning for scalability.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 838703613219358,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Average Query Latency",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.queries.durations_ms.sum{$host,$class_name,$shard_name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.queries.durations_ms.count{$host,$class_name,$shard_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Average Query Latency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 314769498226290,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Avg Query Latency",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.queries.filtered.vector.durations_ms.sum{$host,$class_name,$shard_name} by {operation}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.queries.filtered.vector.durations_ms.count{$host,$class_name,$shard_name} by {operation}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Filtered Query Latency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8474468170846172,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Number of Queries per Datapoint",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.queries.durations_ms.count{$host,$class_name,$shard_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Number of Queries",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4185435018270980,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Query Rate",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.queries.durations_ms.count{$host,$class_name,$shard_name}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Query Rate",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5963202217034586,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.concurrent.queries{(query_type:aggregate OR query_type:get_graphql OR query_type:get_object OR query_type:head_object) AND $host AND $class_name AND $shard_name} by {query_type}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {},
+                            "title": "Concurrent Read Requests",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 2103995914092012,
+                        "layout": {
+                            "height": 4,
+                            "width": 2,
+                            "x": 0,
+                            "y": 7
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.concurrent.queries{(query_type:aggregate OR query_type:get_graphql OR query_type:get_object OR query_type:head_object) AND $host AND $class_name AND $shard_name} by {query_type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Concurrent Read Requests",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1369575632865558,
+                        "layout": {
+                            "height": 4,
+                            "width": 4,
+                            "x": 2,
+                            "y": 7
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.concurrent.queries{(query_type:batch OR query_type:batch_references OR query_type:add_object OR query_type:update_object OR query_type:merge_object OR query_type:delete_object OR query_type:add_reference OR query_type:update_reference OR query_type:delete_reference) AND $host AND $class_name AND $shard_name} by {query_type}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {},
+                            "title": "Concurrent Write Requests",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 4088509475427038,
+                        "layout": {
+                            "height": 4,
+                            "width": 2,
+                            "x": 6,
+                            "y": 7
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.concurrent.queries{(query_type:batch OR query_type:batch_references OR query_type:add_object OR query_type:update_object OR query_type:merge_object OR query_type:delete_object OR query_type:add_reference OR query_type:update_reference OR query_type:delete_reference) AND $host AND $class_name AND $shard_name} by {query_type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Concurrent Write Requests",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3020375927427242,
+                        "layout": {
+                            "height": 4,
+                            "width": 4,
+                            "x": 8,
+                            "y": 7
+                        }
+                    }
+                ]
+            },
+            "id": 4864744210741192,
+            "layout": {
+                "height": 12,
+                "width": 12,
+                "x": 0,
+                "y": 21
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_yellow",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "LSM Statistics",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "yellow",
+                            "content": "LSM (Log-Structured Merge) stats provide insights into the underlying storage structure's health and efficiency. Monitoring segment and memtable sizes helps optimize space utilization, while tracking bloom filter access aids in evaluating query performance and data retrieval efficiency.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 4326225887611782,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Segment Size",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Total Segment Size",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.lsm.segment.size{strategy:replace,$host,$class_name,$shard_name} by {level,unit}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.lsm.segment.size{strategy:replace,$host,$class_name,$shard_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Segment Size of Replace Strategy",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2730782972931758,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Segment Size",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Total Segment Size",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.lsm.segment.size{strategy:setcollection,$host,$class_name,$shard_name} by {level,unit}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.lsm.segment.size{strategy:setcollection,$host,$class_name,$shard_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Segment Size of SetCollection Strategy",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 7740624991620230,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:weaviate.lsm.memtable.size{$host,$class_name,$shard_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Memtable Size",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2036359938040702,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Segment Size",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Total Segment size",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.lsm.segment.size{strategy:mapcollection,$host,$class_name,$shard_name} by {level,unit}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.lsm.segment.size{strategy:mapcollection,$host,$class_name,$shard_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "LSM Segment Size by Level and Unit",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6464345660072304,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend": {
+                                "type": "table"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.lsm.bloom.filters.duration_ms.count{$host,$class_name,$shard_name} by {operation}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Bloom Filter Access by Operation",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 7733177780142602,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 7
+                        }
+                    }
+                ]
+            },
+            "id": 8778821484470178,
+            "layout": {
+                "height": 11,
+                "is_column_break": true,
+                "width": 12,
+                "x": 0,
+                "y": 33
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_yellow",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Object Statistics",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "yellow",
+                            "content": "Measuring the average time taken for \"put\" (write) operations and batch delete duration is essential for understanding the write performance and efficiency of bulk deletion processes. This information is valuable for optimizing write-heavy workloads and data management.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 5577051726033858,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Avg PUT Latency",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.objects.durations_ms.sum{operation:put,$host,$class_name,$shard_name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.objects.durations_ms.count{operation:put,$host,$class_name,$shard_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Average PUT Duration",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 906094952522124,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Avg PUT Latency",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.objects.durations_ms.sum{$host,$class_name,$shard_name} by {step}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.objects.durations_ms.count{$host,$class_name,$shard_name} by {step}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Average PUT Duration by Step",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3654321417140970,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Avg Batch Deletion Latency",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.batch.delete.durations_ms.sum{$host,$class_name,$shard_name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.batch.delete.durations_ms.count{$host,$class_name,$shard_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Average Batch Delete Duration",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3837840669299180,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 272978917869624,
+            "layout": {
+                "height": 5,
+                "width": 12,
+                "x": 0,
+                "y": 44
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_yellow",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Import Statistics",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "yellow",
+                            "content": "These import-related metrics offer insights into the data loading process, ensuring smooth and efficient data ingestion. Monitoring tombstone cleanup threads and active LSM segments helps maintain database health and performance during data imports.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 2405472818355882,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend": {
+                                "type": "table"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.vector.index.operations{$host,$class_name,$shard_name} by {operation}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Vector Index Statistics by Operation",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 1409054713726564,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Avg Batch Object Latency",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.batch.durations_ms.sum{$host,$class_name,$shard_name} by {class_name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.batch.durations_ms.count{$host,$class_name,$shard_name} by {class_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Batch Objects Latency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8211661144704872,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Average Object Storage Latency",
+                                            "formula": "query1 / query2"
+                                        },
+                                        {
+                                            "alias": "Average Vector Storage Latency",
+                                            "formula": "query3 / query4"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.batch.durations_ms.sum{operation:object_storage,$host,$class_name,$shard_name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.batch.durations_ms.count{operation:object_storage,$host,$class_name,$shard_name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:weaviate.batch.durations_ms.sum{operation:vector_storage,$host,$class_name,$shard_name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "sum:weaviate.batch.durations_ms.count{operation:vector_storage,$host,$class_name,$shard_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Persistence Tasks",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2978333811234910,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Tombstone Threads Cleanup",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:weaviate.vector.index.tombstone.cleanup.threads{$host,$class_name,$shard_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Active Tombstone Cleanup Threads",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6549237534768636,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 7
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Tombstone Cleaned",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.vector.index.tombstone.cleaned.count{$host,$class_name,$shard_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Reassgined Nodes",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2659068621171774,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 7
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Active Tombstone",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:weaviate.vector.index.tombstones{$host,$class_name,$shard_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Active HNSW Index Tombstones",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2977395932656844,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 10
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Active Segments",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.lsm.active.segments{$host,$class_name,$shard_name} by {strategy,class_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Active LSM Segments by Strategy",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4342205786136412,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 10
+                        }
+                    }
+                ]
+            },
+            "id": 7732485178838784,
+            "layout": {
+                "height": 14,
+                "width": 12,
+                "x": 0,
+                "y": 49
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_yellow",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Backup and Startup Statistics",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "yellow",
+                            "content": "Keeping track of backup and startup-related metrics is vital for disaster recovery planning and assessing system reliability. Monitoring storage time, disk I/O, and data restoration provides crucial information to manage backups effectively and minimize downtime during startup and recovery scenarios.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 2966077856472704,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Restore Time",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:weaviate.backup.restore.ms.sum{$host,$class_name,$shard_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Time Spent on Restoring Backups",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1930675590281588,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Store Time",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:backup.store.to.backend.ms.sum{$host,$class_name,$shard_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Time Spent on Storing Backups",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4078840374041600,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 3,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Avg Startup Latency",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.startup.durations_ms.sum{$host,$class_name,$shard_name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.startup.durations_ms.count{$host,$class_name,$shard_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Startup Durations",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8396932704248178,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 6,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "HNSW Startup",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "LSM Starup",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.startup.durations_ms.sum{operation:hnsw_read_all_commitlogs,$host,$class_name,$shard_name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.startup.durations_ms.sum{operation:lsm_startup_bucket,$host,$class_name,$shard_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "LSM/HNSW Bucket Startup",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3672258466008788,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 9,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Data Restored",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:backup.restore.data.transferred.sum{$host,$class_name,$shard_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Data Restored",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3972174148272482,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Data Stored",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:backup.store.data.transferred.sum{$host,$class_name,$shard_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Data Stored",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 7915083366800250,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 3,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Avg Disk IO",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.startup.diskio.throughput.sum{$host,$class_name,$shard_name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:weaviate.startup.diskio.throughput.count{$host,$class_name,$shard_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Disk I/O",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1706432074467686,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 6,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Shard Startup",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:weaviate.startup.durations_ms.sum{operation:shard_total_init,$host,$class_name,$shard_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Shard Startup",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1419309995624830,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 9,
+                            "y": 4
+                        }
+                    }
+                ]
+            },
+            "id": 3920975128196952,
+            "layout": {
+                "height": 8,
+                "width": 12,
+                "x": 0,
+                "y": 63
+            }
+        }
+    ]
+}

@@ -811,24 +811,37 @@ JMX_METRICS_OVERRIDES = {
     'kafka_utils_Throttler_OneMinuteRate': 'gauge',
 }
 
+METRICS_AS_GAUGE_AND_COUNT = [
+    'kafka_controller_ControllerChannelManager_Count',
+    'kafka_controller_ControllerEventManager_Count',
+    'kafka_controller_ControllerStats_Count',
+    'kafka_network_Acceptor_Count',
+    'kafka_security_SimpleAclAuthorizer_Count',
+    'kafka_server_DelayedFetchMetrics_Count',
+    'kafka_server_FetchSessionCache_Count',
+    'kafka_server_FetcherStats_Count',
+    'kafka_server_KafkaRequestHandlerPool_Count',
+    'kafka_server_ReplicaManager_Count',
+    'kafka_server_SessionExpireListener_Count',
+    'kafka_server_ZooKeeperClientMetrics_Count',
+    'kafka_utils_Throttler_Count',
+]
+
 METRICS_WITH_NAME_AS_LABEL = {
     'kafka_network_RequestMetrics_Count': {
         'legacy_name': 'kafka.network.RequestMetrics.Count',
         'new_name': 'kafka.network.request',
         'label_name': 'name',
-        'metric_type': 'gauge',
     },
     'kafka_server_BrokerTopicMetrics_Count': {
         'legacy_name': 'kafka.server.BrokerTopicMetrics.Count',
         'new_name': 'kafka.server.broker_topics',
         'label_name': 'name',
-        'metric_type': 'gauge',
     },
     'kafka_server_ReplicaManager_Value': {
         'legacy_name': 'kafka.server.ReplicaManager.Value',
         'new_name': 'kafka.server.replica_manager',
         'label_name': 'name',
-        'metric_type': 'gauge',
     },
 }
 

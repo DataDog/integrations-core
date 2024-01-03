@@ -126,7 +126,7 @@ Need help? Contact [Datadog support][13].
 [2]: https://docs.datadoghq.com/developers/dogstatsd/
 [3]: https://druid.apache.org/docs/latest/operations/metrics.html
 [4]: https://docs.datadoghq.com/agent/
-[5]: https://app.datadoghq.com/account/settings#agent
+[5]: https://app.datadoghq.com/account/settings/agent/latest
 [6]: https://github.com/DataDog/integrations-core/blob/master/druid/datadog_checks/druid/data/conf.yaml.example
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [8]: https://druid.apache.org/docs/latest/development/extensions-contrib/statsd.html

@@ -9,9 +9,10 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence
+from types import MappingProxyType
+from typing import Any, Optional
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -20,127 +21,132 @@ from . import defaults, validators
 
 
 class AuthToken(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    reader: Optional[Mapping[str, Any]]
-    writer: Optional[Mapping[str, Any]]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    reader: Optional[MappingProxyType[str, Any]] = None
+    writer: Optional[MappingProxyType[str, Any]] = None
 
 
 class Column(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    name: Optional[str]
-    type: Optional[str]
-    value_path: Optional[str]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    name: Optional[str] = None
+    type: Optional[str] = None
+    value_path: Optional[str] = None
 
 
 class CustomQuery(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    columns: Optional[Sequence[Column]]
-    data_path: Optional[str]
-    endpoint: Optional[str]
-    payload: Optional[Mapping[str, Any]]
-    tags: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    columns: Optional[tuple[Column, ...]] = None
+    data_path: Optional[str] = None
+    endpoint: Optional[str] = None
+    payload: Optional[MappingProxyType[str, Any]] = None
+    tags: Optional[tuple[str, ...]] = None
 
 
 class MetricPatterns(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
 
 
 class Proxy(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    http: Optional[str]
-    https: Optional[str]
-    no_proxy: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    http: Optional[str] = None
+    https: Optional[str] = None
+    no_proxy: Optional[tuple[str, ...]] = None
 
 
 class InstanceConfig(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    admin_forwarder: Optional[bool]
-    allow_redirects: Optional[bool]
-    auth_token: Optional[AuthToken]
-    auth_type: Optional[str]
-    aws_host: Optional[str]
-    aws_region: Optional[str]
-    aws_service: Optional[str]
-    cat_allocation_stats: Optional[bool]
-    cluster_stats: Optional[bool]
-    connect_timeout: Optional[float]
-    custom_queries: Optional[Sequence[CustomQuery]]
-    detailed_index_stats: Optional[bool]
-    disable_generic_tags: Optional[bool]
-    disable_legacy_cluster_tag: Optional[bool]
-    empty_default_hostname: Optional[bool]
-    extra_headers: Optional[Mapping[str, Any]]
-    gc_collectors_as_rate: Optional[bool]
-    headers: Optional[Mapping[str, Any]]
-    index_stats: Optional[bool]
-    kerberos_auth: Optional[str]
-    kerberos_cache: Optional[str]
-    kerberos_delegate: Optional[bool]
-    kerberos_force_initiate: Optional[bool]
-    kerberos_hostname: Optional[str]
-    kerberos_keytab: Optional[str]
-    kerberos_principal: Optional[str]
-    log_requests: Optional[bool]
-    metric_patterns: Optional[MetricPatterns]
-    min_collection_interval: Optional[float]
-    node_name_as_host: Optional[bool]
-    ntlm_domain: Optional[str]
-    password: Optional[str]
-    pending_task_stats: Optional[bool]
-    persist_connections: Optional[bool]
-    proxy: Optional[Proxy]
-    pshard_graceful_timeout: Optional[bool]
-    pshard_stats: Optional[bool]
-    read_timeout: Optional[float]
-    request_size: Optional[float]
-    service: Optional[str]
-    skip_proxy: Optional[bool]
-    slm_stats: Optional[bool]
-    tags: Optional[Sequence[str]]
-    timeout: Optional[float]
-    tls_ca_cert: Optional[str]
-    tls_cert: Optional[str]
-    tls_ignore_warning: Optional[bool]
-    tls_private_key: Optional[str]
-    tls_protocols_allowed: Optional[Sequence[str]]
-    tls_use_host_header: Optional[bool]
-    tls_verify: Optional[bool]
+    model_config = ConfigDict(
+        validate_default=True,
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    admin_forwarder: Optional[bool] = None
+    allow_redirects: Optional[bool] = None
+    auth_token: Optional[AuthToken] = None
+    auth_type: Optional[str] = None
+    aws_host: Optional[str] = None
+    aws_region: Optional[str] = None
+    aws_service: Optional[str] = None
+    cat_allocation_stats: Optional[bool] = None
+    cluster_stats: Optional[bool] = None
+    connect_timeout: Optional[float] = None
+    custom_queries: Optional[tuple[CustomQuery, ...]] = None
+    detailed_index_stats: Optional[bool] = None
+    disable_generic_tags: Optional[bool] = None
+    disable_legacy_cluster_tag: Optional[bool] = None
+    empty_default_hostname: Optional[bool] = None
+    extra_headers: Optional[MappingProxyType[str, Any]] = None
+    gc_collectors_as_rate: Optional[bool] = None
+    headers: Optional[MappingProxyType[str, Any]] = None
+    index_stats: Optional[bool] = None
+    kerberos_auth: Optional[str] = None
+    kerberos_cache: Optional[str] = None
+    kerberos_delegate: Optional[bool] = None
+    kerberos_force_initiate: Optional[bool] = None
+    kerberos_hostname: Optional[str] = None
+    kerberos_keytab: Optional[str] = None
+    kerberos_principal: Optional[str] = None
+    log_requests: Optional[bool] = None
+    metric_patterns: Optional[MetricPatterns] = None
+    min_collection_interval: Optional[float] = None
+    node_name_as_host: Optional[bool] = None
+    ntlm_domain: Optional[str] = None
+    password: Optional[str] = None
+    pending_task_stats: Optional[bool] = None
+    persist_connections: Optional[bool] = None
+    proxy: Optional[Proxy] = None
+    pshard_graceful_timeout: Optional[bool] = None
+    pshard_stats: Optional[bool] = None
+    read_timeout: Optional[float] = None
+    request_size: Optional[float] = None
+    service: Optional[str] = None
+    skip_proxy: Optional[bool] = None
+    slm_stats: Optional[bool] = None
+    submit_events: Optional[bool] = None
+    tags: Optional[tuple[str, ...]] = None
+    timeout: Optional[float] = None
+    tls_ca_cert: Optional[str] = None
+    tls_cert: Optional[str] = None
+    tls_ignore_warning: Optional[bool] = None
+    tls_private_key: Optional[str] = None
+    tls_protocols_allowed: Optional[tuple[str, ...]] = None
+    tls_use_host_header: Optional[bool] = None
+    tls_verify: Optional[bool] = None
     url: str
-    use_legacy_auth_encoding: Optional[bool]
-    username: Optional[str]
+    use_legacy_auth_encoding: Optional[bool] = None
+    username: Optional[str] = None
 
-    @root_validator(pre=True)
+    @model_validator(mode='before')
     def _initial_validation(cls, values):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
-    @validator('*', pre=True, always=True)
-    def _ensure_defaults(cls, v, field):
-        if v is not None or field.required:
-            return v
+    @field_validator('*', mode='before')
+    def _validate(cls, value, info):
+        field = cls.model_fields[info.field_name]
+        field_name = field.alias or info.field_name
+        if field_name in info.context['configured_fields']:
+            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-        return getattr(defaults, f'instance_{field.name}')(field, v)
+        return validation.utils.make_immutable(value)
 
-    @validator('*')
-    def _run_validations(cls, v, field):
-        if not v:
-            return v
-
-        return getattr(validators, f'instance_{field.name}', identity)(v, field=field)
-
-    @root_validator(pre=False)
-    def _final_validation(cls, values):
-        return validation.core.finalize_config(getattr(validators, 'finalize_instance', identity)(values))
+    @model_validator(mode='after')
+    def _final_validation(cls, model):
+        return validation.core.check_model(getattr(validators, 'check_instance', identity)(model))

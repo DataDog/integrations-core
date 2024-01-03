@@ -12,13 +12,11 @@
     "title": "IBM WAS",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Web",
-      "Category::OS & System",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::OS & System",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {
