@@ -37,15 +37,13 @@ _Available for Agent versions >6.0_
    ```yaml
    logs:
      - type: file
-       path: /path/to/my/directory/file.log
+       path: C:\path\to\my\directory\file.log
        source: ruby
        service: "<MY_SERVICE>"
    ```
 
    Change the `path` and `service` parameter values and configure them for your environment.
    See the [sample active_directory.d/conf.yaml][4] for all available configuration options.
-
-   For Windows users, use `path: <DRIVE_LETTER>:\<PATH>`
 
 3. This integration is intended for the [Active Directory Module for Ruby][6]. If you are not using the Ruby module, change the `source` value to `active_directory` and configure the `path` for your environment.
 
