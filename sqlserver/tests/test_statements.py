@@ -9,8 +9,10 @@ import math
 import os
 import re
 import time
+from collections import namedtuple
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
+from unittest.mock import ANY
 
 import mock
 import pytest
@@ -28,7 +30,7 @@ from datadog_checks.sqlserver.const import (
 )
 from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
 
-from .common import CHECK_NAME
+from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME
 
 try:
     import pyodbc
@@ -54,6 +56,9 @@ def stop_orphaned_threads():
 def dbm_instance(instance_docker):
     instance_docker['dbm'] = True
     instance_docker['min_collection_interval'] = 1
+    instance_docker['procedure_metrics'] = {'enabled': False}
+    instance_docker['collect_settings'] = {'enabled': False}
+    instance_docker['query_activity'] = {'enabled': False}
     # set a very small collection interval so the tests go fast
     instance_docker['query_metrics'] = {
         'enabled': True,
@@ -295,6 +300,7 @@ def test_statement_metrics_and_plans(
     caplog.set_level(logging.INFO)
     if disable_secondary_tags:
         dbm_instance['query_metrics']['disable_secondary_tags'] = True
+    dbm_instance['query_activity'] = {'enabled': True, 'collection_interval': 2}
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     # the check must be run three times:
@@ -327,7 +333,7 @@ def test_statement_metrics_and_plans(
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
-    payload = dbm_metrics[0]
+    payload = next((n for n in dbm_metrics if n.get('kind') == 'query_metrics'), None)
     # host metadata
     assert payload['sqlserver_version'].startswith("Microsoft SQL Server"), "invalid version"
     assert payload['host'] == "stubbed.hostname", "wrong hostname"
@@ -426,7 +432,7 @@ def test_statement_metrics_and_plans(
 
     # internal debug metrics
     aggregator.assert_metric(
-        "dd.sqlserver.operation.time",
+        OPERATION_TIME_METRIC_NAME,
         tags=['agent_hostname:stubbed.hostname', 'operation:collect_statement_metrics_and_plans']
         + _expected_dbm_instance_tags(dbm_instance),
     )
@@ -465,14 +471,10 @@ def test_statement_metrics_limit(
     bob_conn.execute_with_retries(query, (), database=database)
     dd_run_check(check)
 
-    instance_tags = dbm_instance.get('tags', [])
-    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
-    expected_instance_tags | {"db:{}".format(database)}
-
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
-    payload = dbm_metrics[0]
+    payload = next((n for n in dbm_metrics if n.get('kind') == 'query_metrics'), None)
     # metrics rows
     sqlserver_rows = payload.get('sqlserver_rows', [])
     assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
@@ -649,7 +651,7 @@ def test_statement_cloud_metadata(
 
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(dbm_metrics) == 1, "should have collected exactly one metrics payload"
-    payload = dbm_metrics[0]
+    payload = next((n for n in dbm_metrics if n.get('kind') == 'query_metrics'), None)
     # host metadata
     assert payload['sqlserver_version'].startswith("Microsoft SQL Server"), "invalid version"
     assert payload['host'] == "stubbed.hostname", "wrong hostname"
@@ -726,7 +728,7 @@ def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
         matching = [r for r in rows if r['text'] == test_query]
-        assert matching, "the test query should be visible in the query stats"
+        assert matching, "the test query should be visible in the query stats, found all rows: {}".format(rows)
         row = matching[0]
 
         cursor.execute(
@@ -858,3 +860,125 @@ def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
         "dd.sqlserver.async_job.cancel",
         tags=_expected_dbm_instance_tags(dbm_instance) + ['job:query-metrics'],
     )
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "database,query,",
+    [
+        [
+            "master",
+            "EXEC conditionalPlanTest @Switch = 1",
+        ]
+    ],
+)
+def test_statement_conditional_stored_procedure_with_temp_table(
+    aggregator, dd_run_check, dbm_instance, bob_conn, database, query
+):
+    # This test covers a very special case where a stored procedure has a conditional branch
+    # and uses temp tables. The plan will be NULL if there are any statements involving temp tables that
+    # have not been executed. We simulate the case by running the stored procedure with a parameter that
+    # only executes the first branch of the conditional. The second branch will not be executed and the
+    # plan will be NULL. That being said, ALL executed statements in the stored procedure will have NULL plan.
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    dd_run_check(check)
+    bob_conn.execute_with_retries(query, (), database=database)
+    dd_run_check(check)
+    aggregator.reset()
+    bob_conn.execute_with_retries(query, (), database=database)
+    dd_run_check(check)
+
+    # dbm-metrics
+    dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
+    payload = dbm_metrics[0]
+    # metrics rows
+    sqlserver_rows = payload.get('sqlserver_rows', [])
+    assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
+
+    dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+    assert dbm_samples, "should have collected at least one sample"
+
+    matched_events = [s for s in dbm_samples if s['dbm_type'] == "plan" and "#Ids" in s['db']['statement']]
+    assert matched_events, "should have collected plan event"
+
+    for event in matched_events:
+        assert event['db']['plan']['definition'] is None
+        assert event['sqlserver']['plan_handle'] is not None
+        assert event['sqlserver']['query_hash'] is not None
+        assert event['sqlserver']['query_plan_hash'] is not None
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "stored_procedure_characters_limit",
+    [
+        500,
+        1000,
+        2000,
+    ],
+)
+def test_statement_stored_procedure_characters_limit(
+    aggregator, datadog_agent, dd_run_check, dbm_instance, bob_conn, stored_procedure_characters_limit
+):
+    dbm_instance['stored_procedure_characters_limit'] = stored_procedure_characters_limit
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    query = "EXEC procedureWithLargeCommment;"
+
+    def _obfuscate_sql(sql_query, options=None):
+        if "PROCEDURE procedureWithLargeCommment" in sql_query and len(sql_query) >= stored_procedure_characters_limit:
+            raise Exception('failed to obfuscate')
+        return json.dumps({'query': sql_query, 'metadata': {}})
+
+    # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        dd_run_check(check)
+        bob_conn.execute_with_retries(query, (), database="datadog_test")
+        dd_run_check(check)
+        aggregator.reset()
+        bob_conn.execute_with_retries(query, (), database="datadog_test")
+        dd_run_check(check)
+
+    # dbm-metrics
+    dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
+    payload = dbm_metrics[0]
+    # metrics rows
+    sqlserver_rows = payload.get('sqlserver_rows', [])
+    assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
+
+    matched_rows = [s for s in sqlserver_rows if s.get("procedure_name") == "procedurewithlargecommment"]
+    if stored_procedure_characters_limit > 500:
+        assert matched_rows, "should have collected the metric row with expected procedure name"
+        assert "procedure_signature" in matched_rows[0]
+
+
+def _mock_database_list():
+    Row = namedtuple('Row', 'name')
+    fetchall_results = [
+        Row('master'),
+        Row('tempdb'),
+        Row('msdb'),
+        Row('AdventureWorks2017'),
+        Row('CaseSensitive2018'),
+        Row('Fancy2020db'),
+    ]
+    mock_cursor = mock.MagicMock()
+    mock_cursor.fetchall.return_value = iter(fetchall_results)
+    # check excluded overrides included
+    mock_cursor.fetchall.return_value = iter(fetchall_results)
+    return fetchall_results, mock_cursor
+
+
+@pytest.mark.unit
+def test_metrics_lookback_multiplier(instance_docker):
+    instance_docker['query_metrics'] = {'collection_interval': 3}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    _, mock_cursor = _mock_database_list()
+
+    check.statement_metrics._load_raw_query_metrics_rows(mock_cursor)
+    mock_cursor.execute.assert_called_with(ANY, (6,))

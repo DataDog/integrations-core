@@ -6,6 +6,7 @@
 import os
 
 import pytest
+
 from ddev.utils.toml import dump_toml_data, load_toml_file
 
 
@@ -55,7 +56,7 @@ def test_error_extra_dependency(name, contents, expected_error_output, ddev, rep
     ],
 )
 @pytest.mark.requires_ci
-def test_validate_repo(repo, repository, expected_message, ddev, helpers, config_file):
+def test_validate_repo(repo, expected_message, ddev, helpers, config_file):
     config_file.model.repo = repo
     config_file.save()
 
@@ -64,33 +65,19 @@ def test_validate_repo(repo, repository, expected_message, ddev, helpers, config
     assert expected_message in helpers.remove_trailing_spaces(result.output)
 
 
-@pytest.mark.parametrize(
-    "repo, expected_error_output",
-    [
-        pytest.param("core", "Requirements file is not found. Out of sync, run", id="Core integrations"),
-    ],
-)
-def test_error_no_requirements_file(repo, repository, expected_error_output, ddev, helpers):
+def test_error_no_requirements_file(repository, ddev, helpers):
     agent_requirements_path = (
         repository.path / 'datadog_checks_base' / 'datadog_checks' / 'base' / 'data' / 'agent_requirements.in'
     )
     os.remove(agent_requirements_path)
 
     result = ddev("validate", "licenses")
+
+    expected_error_output = 'Requirements file is not found. Out of sync, run'
     assert expected_error_output in helpers.remove_trailing_spaces(result.output)
 
 
-@pytest.mark.parametrize(
-    "repo, expected_error_output",
-    [
-        pytest.param(
-            "core",
-            "Detected InvalidRequirement error in agent_requirements.in:1 Expected end",
-            id="Core integrations",
-        ),
-    ],
-)
-def test_invalid_requirement(repo, repository, expected_error_output, ddev, helpers):
+def test_invalid_requirement(repository, ddev, helpers):
     agent_requirements_path = (
         repository.path / 'datadog_checks_base' / 'datadog_checks' / 'base' / 'data' / 'agent_requirements.in'
     )
@@ -105,5 +92,6 @@ def test_invalid_requirement(repo, repository, expected_error_output, ddev, help
 
     result = ddev("validate", "licenses")
 
+    expected_error_output = 'Detected InvalidRequirement error in agent_requirements.in:1 Expected end'
     assert expected_error_output in helpers.remove_trailing_spaces(result.output)
     assert 'aerospike==^4.0.0' in helpers.remove_trailing_spaces(result.output)

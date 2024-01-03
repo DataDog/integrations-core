@@ -2333,7 +2333,7 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
         hostname='vm1',
     )
     assert (
-        "Could not sumbit property metric- no metric data: name=`vm.guest.guestFullName`, "
+        "Could not submit property metric- no metric data: name=`vm.guest.guestFullName`, "
         "value=`None`, hostname=`vm1`, base tags=`['vcenter_server:FAKE', 'vsphere_host:host1', "
         "'vsphere_folder:unknown', 'vsphere_type:vm']` additional tags=`{}`"
     ) in caplog.text
@@ -2393,7 +2393,7 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
         hostname='vm1',
     )
     assert (
-        "Could not sumbit property metric- no metric data: name=`vm.guest.toolsRunningStatus`, "
+        "Could not submit property metric- no metric data: name=`vm.guest.toolsRunningStatus`, "
         "value=`None`, hostname=`vm1`, base tags=`['vcenter_server:FAKE', 'vsphere_host:host1', "
         "'vsphere_folder:unknown', 'vsphere_type:vm']` additional tags=`{}`"
     ) in caplog.text
@@ -2485,7 +2485,7 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
         hostname='vm1',
     )
     assert (
-        "Could not sumbit property metric- unexpected metric value: "
+        "Could not submit property metric- unexpected metric value: "
         "name=`vm.config.cpuAllocation.overheadLimit`, value=`None`, hostname=`vm1`, "
         "base tags=`['vcenter_server:FAKE', 'vsphere_host:host1', 'vsphere_folder:unknown', "
         "'vsphere_type:vm']` additional tags=`{}`"
@@ -2497,7 +2497,7 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
         hostname='vm1',
     )
     assert (
-        "Could not sumbit property metric- unexpected metric value: "
+        "Could not submit property metric- unexpected metric value: "
         "name=`vm.config.memoryAllocation.overheadLimit`, value=`None`, hostname=`vm1`, "
         "base tags=`['vcenter_server:FAKE', 'vsphere_host:host1', 'vsphere_folder:unknown', "
         "'vsphere_type:vm']` additional tags=`{}`"
@@ -2509,6 +2509,27 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
         count=1,
         value=1,
         tags=base_tags_vm3 + ['guestFullName:Debian GNU/Linux 12 (32-bit)'],
+        hostname='vm3',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.guest.net',
+        count=1,
+        value=1,
+        tags=base_tags_vm3 + ['device_id:43', 'is_connected:False'],
+        hostname='vm3',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.guest.net.ipConfig.address',
+        count=1,
+        value=1,
+        tags=base_tags_vm3 + ['device_id:43', 'is_connected:False', 'nic_ip_address:fe80::170:46ff:fe27:6311'],
+        hostname='vm3',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.guest.net.ipConfig.address',
+        count=1,
+        value=1,
+        tags=base_tags_vm3 + ['device_id:43', 'is_connected:False', 'nic_ip_address:fe70::150:46ff:fe47:6311'],
         hostname='vm3',
     )
     aggregator.assert_metric(
@@ -2538,7 +2559,7 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
         hostname='vm3',
     )
     assert (
-        "Could not sumbit property metric- unexpected metric value: name=`vm.summary.config.memorySizeMB`, "
+        "Could not submit property metric- unexpected metric value: name=`vm.summary.config.memorySizeMB`, "
         "value=`None`, hostname=`vm3`, base tags=`['vcenter_server:FAKE', 'vsphere_host:host2', "
         "'vsphere_folder:unknown', 'vsphere_type:vm']` additional tags=`{}`"
     ) in caplog.text
@@ -2651,7 +2672,7 @@ def test_host_property_metrics(aggregator, realtime_instance, dd_run_check, capl
     aggregator.assert_metric(
         'vsphere.host.summary.runtime.inMaintenanceMode',
         count=1,
-        value=1,
+        value=0,
         tags=base_tags_host + ["inMaintenanceMode:False"],
         hostname='host1',
     )
@@ -2671,7 +2692,7 @@ def test_host_property_metrics(aggregator, realtime_instance, dd_run_check, capl
     )
 
     assert (
-        "Could not sumbit property metric- no metric data: "
+        "Could not submit property metric- no metric data: "
         "name=`host.hardware.cpuPowerManagementInfo.currentPolicy`, value=`None`, "
         "hostname=`host2`, base tags=`['vcenter_server:FAKE', 'vsphere_type:host']` "
         "additional tags=`{}`"
@@ -2708,22 +2729,52 @@ def test_cluster_property_metrics(aggregator, historical_instance, dd_run_check,
     historical_instance['collect_property_metrics'] = True
 
     service_instance.content.propertyCollector.RetrievePropertiesEx = vm_properties_ex
-    base_tags = ['vcenter_server:FAKE', 'vsphere_cluster:c1', 'vsphere_type:cluster']
+    base_tags = ['vcenter_server:FAKE', 'vsphere_type:cluster']
+    base_tags_cluster_1 = base_tags + ['vsphere_cluster:c1']
+    base_tags_cluster_2 = base_tags + ['vsphere_cluster:c2']
+
     check = VSphereCheck('vsphere', {}, [historical_instance])
     dd_run_check(check)
+
+    # cluster 1
     aggregator.assert_metric(
-        'vsphere.cluster.configuration.drsConfig.enabled', count=1, value=1, tags=base_tags + ['enabled:True']
+        'vsphere.cluster.configuration.drsConfig.enabled', count=1, value=1, tags=base_tags_cluster_1 + ['enabled:True']
     )
     aggregator.assert_metric(
-        'vsphere.cluster.configuration.dasConfig.enabled', count=1, value=1, tags=base_tags + ['enabled:True']
+        'vsphere.cluster.configuration.dasConfig.enabled', count=1, value=1, tags=base_tags_cluster_1 + ['enabled:True']
     )
     aggregator.assert_metric(
         'vsphere.cluster.configuration.drsConfig.defaultVmBehavior',
         count=1,
         value=1,
-        tags=base_tags + ['defaultVmBehavior:fullyAutomated'],
+        tags=base_tags_cluster_1 + ['defaultVmBehavior:fullyAutomated'],
     )
-    aggregator.assert_metric('vsphere.cluster.configuration.drsConfig.vmotionRate', count=1, value=2, tags=base_tags)
+    aggregator.assert_metric(
+        'vsphere.cluster.configuration.drsConfig.vmotionRate', count=1, value=2, tags=base_tags_cluster_1
+    )
+
+    # cluster 2
+    aggregator.assert_metric(
+        'vsphere.cluster.configuration.drsConfig.enabled',
+        count=1,
+        value=0,
+        tags=base_tags_cluster_2 + ['enabled:False'],
+    )
+    aggregator.assert_metric(
+        'vsphere.cluster.configuration.dasConfig.enabled',
+        count=1,
+        value=0,
+        tags=base_tags_cluster_2 + ['enabled:False'],
+    )
+    aggregator.assert_metric(
+        'vsphere.cluster.configuration.drsConfig.defaultVmBehavior',
+        count=1,
+        value=1,
+        tags=base_tags_cluster_2 + ['defaultVmBehavior:fullyAutomated'],
+    )
+    aggregator.assert_metric(
+        'vsphere.cluster.configuration.drsConfig.vmotionRate', count=1, value=1, tags=base_tags_cluster_2
+    )
 
 
 def test_datastore_property_metrics(aggregator, historical_instance, dd_run_check, service_instance, vm_properties_ex):
@@ -2737,7 +2788,7 @@ def test_datastore_property_metrics(aggregator, historical_instance, dd_run_chec
     aggregator.assert_metric('vsphere.datastore.summary.capacity', count=1, value=100, tags=base_tags)
 
 
-def test_property_metrics_filtered(
+def test_property_metrics_resource_filters(
     aggregator,
     realtime_instance,
     dd_run_check,
@@ -2814,6 +2865,121 @@ def test_property_metrics_filtered(
         count=0,
         hostname='host2',
     )
+
+
+def test_property_metrics_metric_filters(
+    aggregator,
+    default_instance,
+    dd_run_check,
+    service_instance,
+    vm_properties_ex,
+):
+
+    default_instance['collection_type'] = 'both'
+    default_instance['collect_property_metrics'] = True
+    default_instance['metric_filters'] = {
+        'host': ['host.summary.runtime.connectionState'],
+        'vm': ['vm.guest.net$', 'vm.summary.config.memorySizeMB', 'vm.guest.disk.freeSpace'],
+        'cluster': [],
+    }
+
+    service_instance.content.propertyCollector.RetrievePropertiesEx = vm_properties_ex
+
+    base_tags = ['vcenter_server:FAKE', 'vsphere_folder:unknown', 'vsphere_type:vm']
+    base_tags_vm1 = base_tags + ['vsphere_host:host1']
+    base_tags_vm3 = base_tags + ['vsphere_host:host2']
+
+    base_tags_host = ['vcenter_server:FAKE', 'vsphere_type:host']
+    base_tags_cluster = ['vcenter_server:FAKE', 'vsphere_type:cluster', 'vsphere_cluster:c1']
+    base_tags_datastore = ['vcenter_server:FAKE', 'vsphere_type:datastore', 'vsphere_datastore:ds1']
+
+    check = VSphereCheck('vsphere', {}, [default_instance])
+    dd_run_check(check)
+
+    # vms
+    aggregator.assert_metric('vsphere.vm.count', value=1, count=1, tags=base_tags_vm1)
+    aggregator.assert_metric('vsphere.vm.count', value=1, count=1, tags=base_tags_vm3)
+
+    aggregator.assert_metric(
+        'vsphere.vm.summary.config.memorySizeMB', count=1, value=2048, tags=base_tags_vm1, hostname='vm1'
+    )
+
+    aggregator.assert_metric(
+        'vsphere.vm.guest.disk.freeSpace',
+        count=1,
+        value=1270075392.0,
+        tags=base_tags_vm1 + ['disk_path:\\', 'file_system_type:ext4'],
+        hostname='vm1',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.guest.net',
+        count=1,
+        value=1,
+        tags=base_tags_vm1 + ['device_id:0', 'is_connected:True', 'nic_mac_address:00:61:58:72:53:13'],
+        hostname='vm1',
+    )
+
+    aggregator.assert_metric(
+        'vsphere.vm.guest.net',
+        count=1,
+        value=1,
+        tags=base_tags_vm1 + ['device_id:0', 'is_connected:True', 'nic_mac_address:00:61:58:72:53:13'],
+        hostname='vm1',
+    )
+
+    aggregator.assert_metric(
+        'vsphere.vm.guest.net',
+        count=1,
+        value=1,
+        tags=base_tags_vm3 + ['device_id:43', 'is_connected:False'],
+        hostname='vm3',
+    )
+
+    # hosts
+    aggregator.assert_metric('vsphere.host.count', value=2, count=2, tags=base_tags_host)
+    aggregator.assert_metric(
+        'vsphere.host.summary.runtime.connectionState',
+        count=1,
+        tags=base_tags_host + ['connectionState:connected'],
+        hostname='host1',
+    )
+    aggregator.assert_metric(
+        'vsphere.host.summary.runtime.connectionState',
+        count=1,
+        tags=base_tags_host + ['connectionState:notResponding'],
+        hostname='host2',
+    )
+
+    # clusters
+    aggregator.assert_metric('vsphere.cluster.count', value=1, count=1, tags=base_tags_cluster)
+    aggregator.assert_metric(
+        'vsphere.cluster.configuration.drsConfig.enabled', count=1, value=1, tags=base_tags_cluster + ['enabled:True']
+    )
+    aggregator.assert_metric(
+        'vsphere.cluster.configuration.dasConfig.enabled', count=1, value=1, tags=base_tags_cluster + ['enabled:True']
+    )
+    aggregator.assert_metric(
+        'vsphere.cluster.configuration.drsConfig.defaultVmBehavior',
+        count=1,
+        value=1,
+        tags=base_tags_cluster + ['defaultVmBehavior:fullyAutomated'],
+    )
+    aggregator.assert_metric(
+        'vsphere.cluster.configuration.drsConfig.vmotionRate', count=1, value=2, tags=base_tags_cluster
+    )
+
+    # datastores
+    aggregator.assert_metric('vsphere.datastore.count', value=1, count=1, tags=base_tags_datastore)
+    aggregator.assert_metric('vsphere.datastore.summary.freeSpace', count=1, value=305, tags=base_tags_datastore)
+    aggregator.assert_metric('vsphere.datastore.summary.capacity', count=1, value=100, tags=base_tags_datastore)
+
+    # other metrics and assert all covered
+    aggregator.assert_metric('datadog.vsphere.refresh_infrastructure_cache.time')
+    aggregator.assert_metric('datadog.vsphere.refresh_metrics_metadata_cache.time')
+    aggregator.assert_metric('datadog.vsphere.query_metrics.time')
+    aggregator.assert_metric('vsphere.cpu.totalmhz.avg')
+    aggregator.assert_metric('vsphere.datastore.busResets.sum')
+    aggregator.assert_all_metrics_covered()
 
 
 def test_property_metrics_expired_cache(
@@ -2899,3 +3065,312 @@ def test_property_metrics_expired_cache(
             tags=base_tags_host + ["currentPolicy:Balanced"],
             hostname='host1',
         )
+
+
+def test_property_metrics_invalid_ip_config(
+    aggregator, realtime_instance, dd_run_check, service_instance, vm_invalid_properties_ex
+):
+    realtime_instance['collect_property_metrics'] = True
+
+    service_instance.content.propertyCollector.RetrievePropertiesEx = vm_invalid_properties_ex
+
+    base_tags = ['vcenter_server:FAKE', 'vsphere_folder:unknown', 'vsphere_type:vm', 'vsphere_host:unknown']
+
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    aggregator.assert_metric('vsphere.vm.count', value=1, count=1, tags=base_tags)
+
+    aggregator.assert_metric(
+        'vsphere.vm.guest.net',
+        count=1,
+        value=1,
+        tags=base_tags + ['device_id:0', 'is_connected:True', 'nic_mac_address:00:61:58:72:53:13'],
+        hostname='vm1',
+    )
+
+    aggregator.assert_metric(
+        'vsphere.vm.guest.net.ipConfig.address',
+        count=0,
+        hostname='vm1',
+    )
+
+
+def test_property_metrics_invalid_ip_route_config(
+    aggregator, realtime_instance, dd_run_check, service_instance, vm_invalid_properties_ex
+):
+    realtime_instance['collect_property_metrics'] = True
+
+    service_instance.content.propertyCollector.RetrievePropertiesEx = vm_invalid_properties_ex
+
+    base_tags = ['vcenter_server:FAKE', 'vsphere_folder:unknown', 'vsphere_type:vm', 'vsphere_host:unknown']
+
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    aggregator.assert_metric('vsphere.vm.count', value=1, count=1, tags=base_tags)
+
+    aggregator.assert_metric(
+        'vsphere.vm.guest.ipStack.ipRoute',
+        count=0,
+        hostname='vm1',
+    )
+
+
+def test_property_metrics_invalid_ip_route_config_gateway(
+    aggregator, realtime_instance, dd_run_check, service_instance, vm_invalid_gateway_properties_ex
+):
+    realtime_instance['collect_property_metrics'] = True
+
+    service_instance.content.propertyCollector.RetrievePropertiesEx = vm_invalid_gateway_properties_ex
+
+    base_tags = ['vcenter_server:FAKE', 'vsphere_folder:unknown', 'vsphere_type:vm', 'vsphere_host:unknown']
+
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    aggregator.assert_metric('vsphere.vm.count', value=1, count=1, tags=base_tags)
+
+    aggregator.assert_metric(
+        'vsphere.vm.guest.ipStack.ipRoute',
+        count=1,
+        value=1,
+        tags=base_tags + ['network_dest_ip:fe83::', 'prefix_length:32'],
+        hostname='vm1',
+    )
+
+
+@pytest.mark.parametrize(
+    ('max_query_metrics', 'metrics_per_query', 'max_historical_metrics', 'expected_batch_num'),
+    [
+        pytest.param(
+            None,
+            None,
+            None,
+            4,
+            id='defaults',
+        ),
+        pytest.param(
+            1000,
+            1000,
+            1000,
+            4,
+            id='High custom settings',
+        ),
+        pytest.param(
+            None,
+            None,
+            1,
+            7,
+            id='lowest max historical metrics',
+        ),
+        pytest.param(
+            1,
+            None,
+            None,
+            7,
+            id='lowest max query metrics',
+        ),
+        pytest.param(
+            -1,
+            1000,
+            1,
+            7,
+            id='negative max query metrics but low max historical',
+        ),
+        pytest.param(
+            -1,
+            1000,
+            1000,
+            4,
+            id='negative max query metrics',
+        ),
+        pytest.param(
+            -1,
+            -1,
+            1,
+            7,
+            id='negative max query metrics and metrics per query',
+        ),
+        pytest.param(
+            -1,
+            -1,
+            -1,
+            4,
+            id='all negative',
+        ),
+        pytest.param(
+            -1,
+            -1,
+            2,
+            5,
+            id='larger than 1 batch size',
+        ),
+        pytest.param(
+            -1,
+            1,
+            1000,
+            7,
+            id='smaller max query metrics',
+        ),
+        pytest.param(
+            None,
+            None,
+            -1,
+            4,
+            id='negative max historical metrics',
+        ),
+        pytest.param(
+            1,
+            None,
+            -1,
+            7,
+            id='negative max historical metrics but low max query metrics ',
+        ),
+        pytest.param(
+            10,
+            None,
+            -1,
+            4,
+            id='negative max historical metrics and high max query metrics ',
+        ),
+        pytest.param(
+            1,
+            1,
+            1,
+            7,
+            id='multiple historical batches',
+        ),
+    ],
+)
+def test_make_batch_historical(
+    aggregator,
+    dd_run_check,
+    historical_instance,
+    service_instance,
+    max_query_metrics,
+    expected_batch_num,
+    metrics_per_query,
+    max_historical_metrics,
+):
+
+    # based on PERF_COUNTER_INFO: there are 7 metrics- counter IDs 100- 106
+    # 1 cluster metric, 1 datacenter metric, and 3 datastore metrics
+    #
+    # based on PROPERTIES_EX: there are 5 resources- 2 datacenters, 1 cluster, and 1 datastore
+    # counter 103 and 104 are realtime metrics
+
+    # counter 102 is a datacener and cluster metric
+    # 101 is a cluster metric
+    # 100 105 106 are datastore metrics
+
+    # in total, there are 7 metrics to query for, so that is the largest amount of batches
+    # the smallest number of batches is 4, 1 for all datastores + 1 for all datacenters + 1 for each cluster metric
+
+    if max_query_metrics is not None:
+        service_instance.content.setting.QueryOptions = mock.MagicMock(
+            return_value=[mock.MagicMock(value=max_query_metrics)]
+        )
+    if metrics_per_query is not None:
+        historical_instance['metrics_per_query'] = metrics_per_query
+    if max_historical_metrics is not None:
+        historical_instance['max_historical_metrics'] = max_historical_metrics
+
+    check = VSphereCheck('vsphere', {}, [historical_instance])
+    dd_run_check(check)
+    num_calls = service_instance.content.perfManager.QueryPerf.call_count
+    assert num_calls == expected_batch_num
+
+    # confirm some metrics are still collected
+    aggregator.assert_metric(
+        'vsphere.cpu.totalmhz.avg',
+        count=1,
+        value=5,
+        tags=['vcenter_server:FAKE', 'vsphere_cluster:c1', 'vsphere_type:cluster'],
+    )
+
+    aggregator.assert_metric(
+        'vsphere.datastore.busResets.sum',
+        count=1,
+        value=5,
+        tags=['vcenter_server:FAKE', 'vsphere_datastore:ds1', 'vsphere_type:datastore'],
+    )
+
+    aggregator.assert_metric(
+        'vsphere.vmop.numChangeDS.latest',
+        count=1,
+        value=7,
+        tags=['vcenter_server:FAKE', 'vsphere_datacenter:dc1', 'vsphere_type:datacenter'],
+    )
+
+
+@pytest.mark.parametrize(
+    ('max_query_metrics', 'metrics_per_query', 'max_historical_metrics', 'expected_batch_num'),
+    [
+        pytest.param(
+            None,
+            None,
+            None,
+            2,
+            id='defaults',
+        ),
+        pytest.param(
+            1,
+            None,
+            None,
+            2,
+            id='small max_query_metrics',
+        ),
+        pytest.param(
+            1,
+            1,
+            1,
+            6,
+            id='small max_query_metrics and historical metric',
+        ),
+        pytest.param(
+            None,
+            None,
+            1,
+            2,
+            id='ignore max_historical_metrics',
+        ),
+    ],
+)
+def test_make_batch_realtime(
+    aggregator,
+    dd_run_check,
+    realtime_instance,
+    service_instance,
+    max_query_metrics,
+    expected_batch_num,
+    metrics_per_query,
+    max_historical_metrics,
+):
+
+    if max_query_metrics is not None:
+        service_instance.content.setting.QueryOptions = mock.MagicMock(
+            return_value=[mock.MagicMock(value=max_query_metrics)]
+        )
+    if metrics_per_query is not None:
+        realtime_instance['metrics_per_query'] = metrics_per_query
+    if max_historical_metrics is not None:
+        realtime_instance['max_historical_metrics'] = max_historical_metrics
+
+    # there are 2 VMs, 1 host, and 2 metrics- so 2 * 2 + 2 * 1 = 6 max batches and 2 min batches
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    num_calls = service_instance.content.perfManager.QueryPerf.call_count
+    assert num_calls == expected_batch_num
+
+    aggregator.assert_metric(
+        'vsphere.cpu.costop.sum',
+        value=61,
+        count=1,
+        hostname='host1',
+        tags=['vcenter_server:FAKE'],
+    )
+    aggregator.assert_metric(
+        'vsphere.cpu.costop.sum',
+        value=52,
+        count=1,
+        hostname='vm1',
+        tags=['vcenter_server:FAKE'],
+    )

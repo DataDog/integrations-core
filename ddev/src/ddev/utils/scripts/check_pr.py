@@ -9,7 +9,20 @@ from __future__ import annotations
 import os
 import re
 import sys
+from collections import defaultdict
 from typing import Iterator
+
+# !!!!
+# Keep this in sync with datadog_checks_dev/datadog_checks/dev/tooling/constants.py
+# !!!!
+VALID_CHANGE_TYPES = [
+    'added',
+    'changed',
+    'deprecated',
+    'fixed',
+    'removed',
+    'security',
+]
 
 
 def changelog_entry_suffix(pr_number: int, pr_url: str) -> str:
@@ -98,7 +111,12 @@ def get_added_lines(git_diff: str) -> dict[str, dict[int, str]]:
     return files
 
 
-def get_changelog_errors(git_diff: str, suffix: str) -> list[tuple[str, int, str]]:
+def get_noncore_repo_changelog_errors(git_diff: str, suffix: str, private: bool = False) -> list[tuple[str, int, str]]:
+    '''
+    Extras and Marketplace repos manage their changelogs as a single file.
+
+    We make sure that what contributors write to it follows our formatting conventions.
+    '''
     targets: dict[str, dict[str, dict[int, str]]] = {}
     for filename, lines in get_added_lines(git_diff).items():
         target, _, path = filename.partition('/')
@@ -130,7 +148,7 @@ def get_changelog_errors(git_diff: str, suffix: str) -> list[tuple[str, int, str
 
         if lines_with_suffix == len(line_numbers_missing_suffix) == 0:
             errors.append((f'{target}/{changelog_file}', 1, 'Missing changelog entry'))
-        elif line_numbers_missing_suffix:
+        elif not private and line_numbers_missing_suffix:
             for line_number in line_numbers_missing_suffix:
                 errors.append(
                     (
@@ -144,7 +162,113 @@ def get_changelog_errors(git_diff: str, suffix: str) -> list[tuple[str, int, str
     return errors
 
 
-def changelog_impl(*, ref: str, diff_file: str, pr_file: str) -> None:
+def extract_filenames(git_diff: str) -> Iterator[str]:
+    for modification in re.split(r'^diff --git ', git_diff, flags=re.MULTILINE):
+        if not modification:
+            continue
+
+        # a/file b/file
+        # new file mode 100644
+        # index 0000000000..089fd64579
+        # --- a/file
+        # +++ b/file
+        metadata, *_ = re.split(r'^@@ ', modification, flags=re.MULTILINE)
+        *_, before, after = metadata.strip().splitlines()
+
+        # Binary files /dev/null and b/foo/archive.tar.gz differ
+        binary_indicator = 'Binary files '
+        if after.startswith(binary_indicator):
+            line = after[len(binary_indicator) :].rsplit(maxsplit=1)[0]
+            if line.startswith('/dev/null and '):
+                filename = line.split(maxsplit=2)[-1][2:]
+            elif line.endswith(' and /dev/null'):
+                filename = line.split(maxsplit=2)[0][2:]
+            else:
+                _, _, filename = line.partition(' and b/')
+
+            yield filename
+            continue
+
+        # --- a/file
+        # +++ /dev/null
+        before = before.split(maxsplit=1)[1]
+        after = after.split(maxsplit=1)[1]
+        filename = before[2:] if after == '/dev/null' else after[2:]
+        yield filename
+
+
+def gh_annotation(fpath, linenum, msg):
+    return f'::error file={fpath},line={linenum}::{"%0A".join(msg.splitlines())}'
+
+
+def get_core_repo_changelog_errors(git_diff: str, pr_number: int) -> list[str]:
+    '''
+    The integrations-core repo uses towncrier to stitch a release changelog from entry files.
+
+    The validation reflects this so it's different from extras and marketplace.
+    '''
+    targets: defaultdict[str, list[str]] = defaultdict(list)
+    for filename in extract_filenames(git_diff):
+        target, _, path = filename.partition('/')
+        if path:
+            targets[target].append(path)
+
+    fragments_dir = 'changelog.d'
+    errors: list[str] = []
+    for target, files in sorted(targets.items()):
+        changelog_needed = requires_changelog(target, iter(files))
+        changelog_entries = [f for f in files if f.startswith(fragments_dir)]
+        if not changelog_entries and not changelog_needed:
+            continue
+        if not changelog_entries and changelog_needed:
+            msg = (
+                f'Package "{target}" has changes that require a changelog. '
+                + 'Please run `ddev release changelog new` to add it.'
+            )
+            errors.append(msg)
+            errors.append(gh_annotation(f'{target}/changelog.d/{pr_number}.fixed', 0, msg))
+            continue
+        for entry_path in changelog_entries:
+            full_entry_path = f'{target}/{entry_path}'
+            if not changelog_needed:
+                msg = (
+                    "You added a changelog, but it's not needed for this change. To fix this please run:\n"
+                    + f'rm {full_entry_path}'
+                )
+                errors.append(msg)
+                errors.append(gh_annotation(full_entry_path, 0, msg))
+            entry_parents, entry_fname = os.path.split(entry_path)
+            entry_pr_num, _, entry_fname_rest = entry_fname.partition(".")
+            if int(entry_pr_num) != pr_number:
+                correct_entry_path = f'{entry_parents}/{pr_number}.{entry_fname_rest}'
+                msg = (
+                    'Your changelog entry has the wrong PR number. To fix this please run:\n'
+                    + f'mv {full_entry_path} {target}/{correct_entry_path}'
+                )
+                errors.append(msg)
+                errors.append(gh_annotation(full_entry_path, 0, msg))
+            change_type, _, _ = entry_fname_rest.partition(".")
+            if change_type not in VALID_CHANGE_TYPES:
+                msg = (
+                    f'Your changelog entry "{full_entry_path}" has an invalid change type, please rename the file. '
+                    f'Valid types are:\n{" ".join(VALID_CHANGE_TYPES)}'
+                )
+                errors.append(msg)
+                errors.append(gh_annotation(full_entry_path, 0, msg))
+
+    return errors
+
+
+def ensure_right_format(errors, on_ci):
+    for relative_path, line_number, message in errors:
+        yield (
+            gh_annotation(relative_path, line_number, message)
+            if on_ci
+            else f'{relative_path}, line {line_number}: {message}'
+        )
+
+
+def changelog_impl(*, ref: str, diff_file: str, pr_file: str, private: bool, repo: str) -> None:
     import json
 
     on_ci = os.environ.get('GITHUB_ACTIONS') == 'true'
@@ -168,17 +292,15 @@ def changelog_impl(*, ref: str, diff_file: str, pr_file: str) -> None:
         print('No changelog entries required (changelog/no-changelog label found)')
         return
 
-    errors = get_changelog_errors(git_diff, changelog_entry_suffix(pr_number, pr_url))
+    errors = (
+        get_core_repo_changelog_errors(git_diff, pr_number)
+        if repo == 'core'
+        else get_noncore_repo_changelog_errors(git_diff, changelog_entry_suffix(pr_number, pr_url), private=private)
+    )
     if not errors:
         return
-    elif os.environ.get('GITHUB_ACTIONS') == 'true':
-        for relative_path, line_number, message in errors:
-            message = '%0A'.join(message.splitlines())
-            print(f'::error file={relative_path},line={line_number}::{message}')
-    else:
-        for relative_path, line_number, message in errors:
-            print(f'{relative_path}, line {line_number}: {message}')
-
+    for error in errors if repo == "core" else ensure_right_format(errors, on_ci):
+        print(error)
     sys.exit(1)
 
 
@@ -187,10 +309,12 @@ def changelog_command(subparsers) -> None:
     parser.add_argument('--ref', default='origin/master')
     parser.add_argument('--diff-file')
     parser.add_argument('--pr-file')
+    parser.add_argument('--private', action='store_true')
+    parser.add_argument('--repo', default='core')
     parser.set_defaults(func=changelog_impl)
 
 
-def main():
+def main(args=None):
     import argparse
 
     parser = argparse.ArgumentParser(prog=__name__, allow_abbrev=False)
@@ -198,7 +322,7 @@ def main():
 
     changelog_command(subparsers)
 
-    kwargs = vars(parser.parse_args())
+    kwargs = vars(parser.parse_args(args=args))
     try:
         # We associate a command function with every subcommand parser.
         # This allows us to emulate Click's command group behavior.

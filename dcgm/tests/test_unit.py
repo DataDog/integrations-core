@@ -37,7 +37,7 @@ def test_successful_run(dd_run_check, aggregator, check):
     dd_run_check(check)
     aggregator.assert_service_check('dcgm.openmetrics.health', DcgmCheck.OK)
     for metric in EXPECTED_METRICS:
-        aggregator.assert_metric(name=f"dcgm.{metric}")
+        aggregator.assert_metric(name=metric)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
 

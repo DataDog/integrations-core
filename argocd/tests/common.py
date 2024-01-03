@@ -11,14 +11,17 @@ MOCKED_APP_CONTROLLER_WITH_OTHER_PARAMS = {
     'collect_histogram_buckets': True,
 }
 
+MOCKED_APPSET_CONTROLLER_INSTANCE = {'appset_controller_endpoint': 'http://appset_controller:8080'}
+
 MOCKED_API_SERVER_INSTANCE = {'api_server_endpoint': 'http://api_server:8083'}
 
 MOCKED_REPO_SERVER_INSTANCE = {'repo_server_endpoint': 'http://repo_server:8084'}
 
 MOCKED_NOTIFICATIONS_CONTROLLER_INSTANCE = {'notifications_controller_endpoint': 'http://notifications_controller:9001'}
 
-app_controller_ns, api_server_ns, repo_server_ns, notifications_controller_ns = (
+app_controller_ns, appset_controller_ns, api_server_ns, repo_server_ns, notifications_controller_ns = (
     "argocd.app_controller",
+    "argocd.appset_controller",
     "argocd.api_server",
     "argocd.repo_server",
     "argocd.notifications_controller",
@@ -105,6 +108,19 @@ app_controller_histograms = [
     'redis.request.duration.sum',
 ]
 
+appset_controller_counters = ['reconcile.errors.total', 'runtime.reconcile.total']
+
+appset_controller_gauges = [
+    'active.workers',
+    'max.concurrent.reconciles',
+]
+
+appset_controller_histograms = [
+    'reconcile.time_seconds.bucket',
+    'reconcile.time_seconds.count',
+    'reconcile.time_seconds.sum',
+]
+
 api_server_counters = [
     'redis.request.count',
     'grpc.server.handled.count',
@@ -147,6 +163,8 @@ NOT_EXPOSED_METRICS = [
     'argocd.app_controller.cluster.api.resources',
     'argocd.app_controller.cluster.cache.age.seconds',
     'argocd.app_controller.redis.request.duration',
+    'argocd.appset_controller.reconcile.errors.total',
+    'argocd.appset_controller.runtime.reconcile.total',
 ]
 
 # Additional metrics that aren't exposed in the E2E environment
@@ -160,6 +178,9 @@ E2E_NOT_EXPOSED_METRICS = [
     'argocd.app_controller.app.reconcile.count',
     'argocd.app_controller.app.reconcile.sum',
     'argocd.app_controller.kubectl.exec.pending',
+    'argocd.appset_controller.reconcile.time_seconds.bucket',
+    'argocd.appset_controller.reconcile.time_seconds.count',
+    'argocd.appset_controller.reconcile.time_seconds.sum',
     'argocd.api_server.redis.request.duration.bucket',
     'argocd.api_server.redis.request.duration.count',
     'argocd.api_server.redis.request.duration.sum',
@@ -181,6 +202,7 @@ E2E_NOT_EXPOSED_METRICS = [
 general = general_gauges + general_counters + general_summaries
 
 app_controller = app_controller_counters + app_controller_gauges + app_controller_histograms + general
+appset_controller = appset_controller_counters + appset_controller_gauges + appset_controller_histograms + general
 api_server = api_server_counters + api_server_histograms + general
 repo_server = repo_server_counters + repo_server_gauges + repo_server_histograms + general
 notifications_controller = notifications_controller_counters + general
@@ -194,6 +216,7 @@ def namespace_formatter(metrics, namespace):
 
 
 APP_CONTROLLER_METRICS = namespace_formatter(app_controller, app_controller_ns)
+APPSET_CONTROLLER_METRICS = namespace_formatter(appset_controller, appset_controller_ns)
 API_SERVER_METRICS = namespace_formatter(api_server, api_server_ns)
 REPO_SERVER_METRICS = namespace_formatter(repo_server, repo_server_ns)
 NOTIFICATIONS_CONTROLLER_METRICS = namespace_formatter(notifications_controller, notifications_controller_ns)

@@ -17,11 +17,11 @@ from datadog_checks.vsphere.constants import (
     ALL_RESOURCES,
     MAX_QUERY_METRICS_OPTION,
     MOR_TYPE_AS_STRING,
-    PROPERTIES_BY_RESOURCE_TYPE,
     UNLIMITED_HIST_METRICS_PER_QUERY,
 )
 from datadog_checks.vsphere.event import ALLOWED_EVENTS
 from datadog_checks.vsphere.types import InfrastructureData
+from datadog_checks.vsphere.utils import properties_to_collect
 
 CallableT = TypeVar('CallableT', bound=Callable)
 
@@ -193,7 +193,7 @@ class VSphereAPI(object):
                 property_spec.pathSet.append("guest.hostName")
 
             if self.config.collect_property_metrics:
-                properties = PROPERTIES_BY_RESOURCE_TYPE.get(MOR_TYPE_AS_STRING.get(resource), [])
+                properties = properties_to_collect(MOR_TYPE_AS_STRING.get(resource), self.config.metric_filters)
                 for property in properties:
                     property_spec.pathSet.append(property)
 

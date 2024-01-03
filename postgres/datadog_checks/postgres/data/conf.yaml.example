@@ -62,8 +62,9 @@ instances:
     #   - template%
     #   - rdsadmin
     #   - azure_maintenance
+    #   - cloudsqladmin
 
-    ## @param ssl - string - optional - default: false
+    ## @param ssl - string - optional - default: allow
     ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
     ## is negotiated with the server. There are six modes:
     ## - `disable`: Only tries a non-SSL connection.
@@ -77,39 +78,37 @@ instances:
     ##                  trusted CA and that the requested server host name matches the one in the certificate.
     ##
     ## For a detailed description of how these options work see https://www.postgresql.org/docs/current/libpq-ssl.html
-    ##
-    ## Note: `true` is an alias for `require`, and `false` is an alias for `disable`.
     #
-    # ssl: 'false'
+    # ssl: allow
 
-    ## @param ssl_root_cert - string - optional - default: false
+    ## @param ssl_root_cert - string - optional
     ## The path to the ssl root certificate.
     ##
     ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
     #
-    # ssl_root_cert: /home/datadog/server-ca.pem
+    # ssl_root_cert: <SSL_ROOT_CERT>
 
-    ## @param ssl_cert - string - optional - default: false
+    ## @param ssl_cert - string - optional
     ## The path to the ssl certificate.
     ##
     ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
     #
-    # ssl_cert: /home/datadog/client-cert.pem
+    # ssl_cert: <SSL_CERT>
 
-    ## @param ssl_key - string - optional - default: false
+    ## @param ssl_key - string - optional
     ## The path to the ssl client key.
     ##
     ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
     #
-    # ssl_key: /home/datadog/client-key.pem
+    # ssl_key: <SSL_KEY>
 
-    ## @param ssl_password - string - optional - default: false
+    ## @param ssl_password - string - optional
     ## The password for the secret key specified in ssl_key, allowing client certificate private keys to be stored
     ## in encrypted form on disk.
     ##
     ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
     #
-    # ssl_password: ssl_key_password
+    # ssl_password: <SSL_PASSWORD>
 
     ## @param query_timeout - integer - optional - default: 5000
     ## Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
@@ -182,6 +181,7 @@ instances:
     ## By default, datname, usename and application_name will be used.
     ## If applications with different application_name are creating a lot of short-lived queries,
     ## removing application_name from the aggregation can help generate more stable metrics.
+    ## Note that datname is a required aggregation on activity metrics and can't be excluded.
     #
     # activity_metrics_excluded_aggregations:
     #   - application_name
@@ -269,7 +269,7 @@ instances:
         #   - master$
         #   - AdventureWorks.*
 
-        ## @param exclude - list of strings - optional
+        ## @param exclude - list of strings - optional - default: ['cloudsqladmin']
         ## Regular expression for database names to exclude as part of `database_autodiscovery`.
         ## Character casing is ignored. The regular expressions start matching from the beginning,
         ## so to match anywhere, prepend `.*`. For exact matches append `$`.
@@ -279,6 +279,8 @@ instances:
         # exclude:
         #   - model
         #   - msdb
+        #   - cloudsqladmin
+        #   - rdsadmin
 
         ## @param refresh - integer - optional - default: 600
         ## Frequency in seconds of scans for new databases. Defaults to 10 minutes.
@@ -406,6 +408,33 @@ instances:
         #
         # collection_interval: 600
 
+    ## Enable collection of database schemas. In order to collect schemas from all user databases, 
+    ## enable `database_autodiscovery`. To collect from a single database, set `dbname` to collect 
+    ## the schema for that database.
+    ## Relation metrics must be enabled for schema collection.
+    #
+    # collect_schemas:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of database schemas. Requires `dbm: true` and relation metrics must be enabled.
+        #
+        # enabled: false
+
+        ## @param max_tables - number - optional - default: 1000
+        ## Maximum amount of tables the Agent collects from the instance.
+        #
+        # max_tables: 1000
+
+        ## @param max_columns - number - optional - default: 50
+        ## Maximum amount of columns the Agent collects per table.
+        #
+        # max_columns: 50
+
+        ## @param collection_interval - number - optional - default: 600
+        ## The database schema collection interval (in seconds).
+        #
+        # collection_interval: 600
+
     ## This block defines the configuration for AWS RDS and Aurora instances. 
     ##
     ## Complete this section if you have installed the Datadog AWS Integration 
@@ -430,6 +459,23 @@ instances:
         ## This value is used to configure IAM authentication.
         #
         # region: us-east-1
+
+        ## @param managed_authentication - mapping - optional
+        ## Configure section used for AWS IAM Authentication with RDS.
+        ##
+        ## This supports using IAM database authentication to connect to your database instance.
+        ##
+        ## For more information on configuration, see
+        ## https://docs.datadoghq.com/database_monitoring/guide/managed_authentication
+        ##
+        ## For more information on RDS IAM Authentication, see the AWS docs
+        ## https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.Connecting.html
+        ##
+        ## To enable IAM Authentication, set `aws.managed_authentication.enabled` to `true`.
+        ## If `aws.managed_authentication.enabled` is set, then the `password` fields will be ignored.
+        ## `aws.region` is required to enable IAM Authentication.
+        #
+        # managed_authentication: {}
 
     ## This block defines the configuration for Google Cloud SQL instances.
     ##
@@ -486,10 +532,64 @@ instances:
         #
         # fully_qualified_domain_name: my-postgres-database.database.windows.net
 
+        ## @param managed_authentication - mapping - optional
+        ## Configuration section used for Azure AD Authentication.
+        ##
+        ## This supports using System or User assigned managed identities.
+        ##
+        ## For more information on configuration, see
+        ## https://docs.datadoghq.com/database_monitoring/guide/managed_authentication
+        ##
+        ## For more information on Managed Identities, see the Azure docs
+        ## https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
+        ##
+        ## To enable Azure AD Authentication, set `azure.managed_authentication.enabled` to `true`.
+        ## If `azure.managed_authentication.enabled` is set, then the `password` fields will be ignored.
+        ## `azure.managed_authentication.client_id` is required to enable Azure AD Authentication.
+        ##
+        ## For more information on scopes, see the Azure docs
+        ## https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
+        #
+        # managed_authentication: {}
+
+    ## DEPRECATED: Please use `azure.managed_authentication` instead.
+    ##
+    ## Configuration section used for Azure AD Authentication.
+    ##
+    ## This supports using System or User assigned managed identities.
+    ## If this section is set, then the `username` and `password` fields will be ignored.
+    ##
+    ## For more information on Managed Identities, see the Azure docs
+    ## https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
+    #
+    # managed_identity:
+
+        ## @param client_id - string - optional
+        ## Client ID of the Managed Identity.
+        #
+        # client_id: <CLIENT_ID>
+
+        ## @param identity_scope - string - optional - default: https://ossrdbms-aad.database.windows.net/.default
+        ## The permission scope from where to access the identity token. This value is optional if using the default
+        ## identity scope for Azure managed databases.
+        ##
+        ## For more information on scopes, see the Azure docs
+        ## https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
+        #
+        # identity_scope: https://ossrdbms-aad.database.windows.net/.default
+
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
     #
     # obfuscator_options:
+
+        ## @param obfuscation_mode - string - optional - default: obfuscate_and_normalize
+        ## Set the obfuscation mode. The obfuscation mode determines how the SQL obfuscator will obfuscate your SQL
+        ## statements. The following modes are supported:
+        ## - `obfuscate_only`: Obfuscate the SQL statement without normalizing the statement.
+        ## - `obfuscate_and_normalize`: Obfuscate the SQL statement and normalize the statement.
+        #
+        # obfuscation_mode: obfuscate_and_normalize
 
         ## @param replace_digits - boolean - optional - default: false
         ## Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
@@ -536,6 +636,36 @@ instances:
         ## Only strings with the tag `$func$` are supported.
         #
         # keep_dollar_quoted_func: true
+
+        ## @param remove_space_between_parentheses - boolean - optional - default: false
+        ## Set to `true` to remove spaces between parentheses in your normalized SQL statements.
+        #
+        # remove_space_between_parentheses: false
+
+        ## @param keep_null - boolean - optional - default: false
+        ## Set to `true` to keep the keyword `NULL` in your obfuscated SQL statements.
+        #
+        # keep_null: false
+
+        ## @param keep_boolean - boolean - optional - default: false
+        ## Set to `true` to keep the keywords `TRUE` and `FALSE` in your obfuscated SQL statements.
+        #
+        # keep_boolean: false
+
+        ## @param keep_positional_parameter - boolean - optional - default: false
+        ## Set to `true` to keep positional parameters (e.g. `$1`) in your obfuscated SQL statements.
+        #
+        # keep_positional_parameter: false
+
+        ## @param keep_trailing_semicolon - boolean - optional - default: false
+        ## Set to `true` to keep trailing semicolons in your normalized SQL statements.
+        #
+        # keep_trailing_semicolon: false
+
+        ## @param keep_identifier_quotation - boolean - optional - default: false
+        ## Set to `true` to keep identifier quotations (e.g. `"my_table"`) in your normalized SQL statements.
+        #
+        # keep_identifier_quotation: false
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

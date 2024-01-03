@@ -630,6 +630,9 @@ def parse_version_parts(version):
 def has_e2e(check):
     for path, _, files in os.walk(get_test_directory(check)):
         for fn in files:
+            if fn == 'test_e2e.py':
+                return True
+
             if fn.startswith('test_') and fn.endswith('.py'):
                 with open(os.path.join(path, fn)) as test_file:
                     if 'pytest.mark.e2e' in test_file.read():

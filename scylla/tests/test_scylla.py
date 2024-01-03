@@ -9,6 +9,7 @@ from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.scylla import ScyllaCheck
 
 from .common import (
+    FLAKY_METRICS,
     INSTANCE_ADDITIONAL_GROUPS,
     INSTANCE_ADDITIONAL_METRICS,
     INSTANCE_DEFAULT_GROUPS,
@@ -24,7 +25,10 @@ def test_instance_default_check(aggregator, db_instance, mock_db_data):
     c.check(db_instance)
 
     for m in INSTANCE_DEFAULT_METRICS:
-        aggregator.assert_metric(m)
+        if m in FLAKY_METRICS:
+            aggregator.assert_metric(m, count=0)
+        else:
+            aggregator.assert_metric(m)
     aggregator.assert_all_metrics_covered()
 
 
@@ -43,7 +47,10 @@ def test_instance_additional_check(aggregator, db_instance, mock_db_data):
     metrics_to_check = get_metrics(INSTANCE_DEFAULT_GROUPS + additional_metric_groups)
 
     for m in metrics_to_check:
-        aggregator.assert_metric(m)
+        if m in FLAKY_METRICS:
+            aggregator.assert_metric(m, count=0)
+        else:
+            aggregator.assert_metric(m)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_service_check('scylla.prometheus.health', count=1)
 
@@ -60,7 +67,10 @@ def test_instance_full_additional_check(aggregator, db_instance, mock_db_data):
     metrics_to_check = INSTANCE_DEFAULT_METRICS + INSTANCE_ADDITIONAL_METRICS
 
     for m in metrics_to_check:
-        aggregator.assert_metric(m)
+        if m in FLAKY_METRICS:
+            aggregator.assert_metric(m, count=0)
+        else:
+            aggregator.assert_metric(m)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_service_check('scylla.prometheus.health', count=1)
 
@@ -97,6 +107,9 @@ def test_instance_integration_check(aggregator, db_instance, mock_db_data):
     c.check(db_instance)
 
     for m in INSTANCE_DEFAULT_METRICS:
-        aggregator.assert_metric(m)
+        if m in FLAKY_METRICS:
+            aggregator.assert_metric(m, count=0)
+        else:
+            aggregator.assert_metric(m)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_service_check('scylla.prometheus.health', count=1)

@@ -28,6 +28,7 @@
       }
     ],
     "classifier_tags": [
+      "Category::AI/ML",
       "Category::Metrics",
       "Category::Cost Management",
       "Submitted Data Type::Metrics",
@@ -47,7 +48,7 @@
       },
       "metrics": {
         "prefix": "openai.",
-        "check": "openai.request.duration",
+        "check": ["openai.request.duration", "openai.api.usage.n_requests"],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
@@ -59,9 +60,9 @@
       "OpenAI Usage Overview": "assets/dashboards/usage_overview_dashboard.json"
     },
     "monitors": {
-      "Request Limits": "assets/recommended_monitors/request_limits.json",
-      "Token per min Limits": "assets/recommended_monitors/tokens_limits.json",
-      "Abnormally High Token Usage": "assets/recommended_monitors/api_token_usage.json"
+      "Request Limits": "assets/monitors/request_limits.json",
+      "Token per min Limits": "assets/monitors/tokens_limits.json",
+      "Abnormally High Token Usage": "assets/monitors/api_token_usage.json"
     }
   },
   "author": {

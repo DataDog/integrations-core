@@ -139,6 +139,7 @@ def dd_environment():
         env_vars={'ORACLE_DATABASE_VERSION': ORACLE_DATABASE_VERSION},
         attempts=20,
         attempts_wait=5,
+        build=True,
     ):
         yield {
             'init_config': {"use_instant_client": use_instant_client},

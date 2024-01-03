@@ -207,7 +207,7 @@ metrics:
       # whose value is obtained from the 'ifDescr' column of the row.
       # This allows querying metrics by interface, e.g. 'interface:eth0'.
       - tag: interface
-        column:
+        symbol:
           OID: 1.3.6.1.2.1.2.2.1.2
           name: ifDescr
 ```
@@ -226,7 +226,7 @@ metrics:
         name: cieIfResetCount
     metric_tags:
       - MIB: IF-MIB
-        column:
+        symbol:
           OID: 1.3.6.1.2.1.31.1.1.1.1
           name: ifName
         table: ifXTable
@@ -245,7 +245,7 @@ metrics:
       - OID: 1.3.6.1.4.1.30932.1.10.1.3.110.1.3
         name: cpiPduBranchCurrent
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.30932.1.10.1.2.10.1.3
           name: cpiPduName
         table: cpiPduTable
@@ -289,7 +289,7 @@ metrics:
         name: ifInOctets
     metric_tags:
       - tag: if_type
-        column:
+        symbol:
           OID: 1.3.6.1.2.1.2.2.1.3
           name: ifType
         mapping:
@@ -503,7 +503,7 @@ metrics:
         constant_value_one: true
     metric_tags:
       - tag: status
-        column:
+        symbol:
           OID: 1.2.3.4
           name: myStatus
         mapping:
@@ -664,7 +664,7 @@ metrics:
         name: ifInErrors
     metric_tags:
       - tag: interface
-        column:
+        symbol:
           OID: 1.3.6.1.2.1.2.2.1.2
           name: ifDescr
           extract_value: '([a-zA-Z0-9_]+)' # will ignore surrounding non-printable characters
@@ -706,7 +706,7 @@ metrics:
       - OID: 1.3.6.1.4.1.29671.1.1.4.1.5
         name: devClientCount
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.3.6.1.4.1.29671.1.1.4.1.1
           name: devMac
           format: mac_address
@@ -729,7 +729,7 @@ metrics:
       - OID: 1.2.3.4.6.7.1.2
         name: myOidSymbol
     metric_tags:
-      - column:
+      - symbol:
           OID: 1.2.3.4.6.7.1.3
           name: oidValueWithIpAsBytes
           format: ip_address

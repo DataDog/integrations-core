@@ -13,7 +13,7 @@ mypy-deps = [
 ]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.9"]
+python = ["2.7", "3.11"]
 # Can't support lower 2.3 patch versions due to: https://github.com/rethinkdb/rethinkdb/issues/6108
 version = ["2.3", "2.4"]
 

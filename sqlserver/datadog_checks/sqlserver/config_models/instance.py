@@ -65,6 +65,15 @@ class Gcp(BaseModel):
     project_id: Optional[str] = None
 
 
+class ManagedIdentity(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    client_id: Optional[str] = None
+    identity_scope: Optional[str] = None
+
+
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -83,8 +92,26 @@ class ObfuscatorOptions(BaseModel):
     collect_comments: Optional[bool] = None
     collect_metadata: Optional[bool] = None
     collect_tables: Optional[bool] = None
+    keep_boolean: Optional[bool] = None
+    keep_identifier_quotation: Optional[bool] = None
+    keep_null: Optional[bool] = None
+    keep_positional_parameter: Optional[bool] = None
     keep_sql_alias: Optional[bool] = None
+    keep_trailing_semicolon: Optional[bool] = None
+    obfuscation_mode: Optional[str] = None
+    remove_space_between_parentheses: Optional[bool] = None
     replace_digits: Optional[bool] = None
+
+
+class ProcedureMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    dm_exec_procedure_stats_row_limit: Optional[int] = None
+    enabled: Optional[bool] = None
+    max_procedures: Optional[int] = None
 
 
 class QueryActivity(BaseModel):
@@ -132,6 +159,7 @@ class InstanceConfig(BaseModel):
     database: Optional[str] = None
     database_autodiscovery: Optional[bool] = None
     database_autodiscovery_interval: Optional[int] = None
+    database_instance_collection_interval: Optional[float] = None
     db_fragmentation_object_names: Optional[tuple[str, ...]] = None
     dbm: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
@@ -144,11 +172,16 @@ class InstanceConfig(BaseModel):
     include_ao_metrics: Optional[bool] = None
     include_db_fragmentation_metrics: Optional[bool] = None
     include_fci_metrics: Optional[bool] = None
+    include_index_usage_metrics: Optional[bool] = None
     include_instance_metrics: Optional[bool] = None
     include_master_files_metrics: Optional[bool] = None
+    include_primary_log_shipping_metrics: Optional[bool] = None
+    include_secondary_log_shipping_metrics: Optional[bool] = None
     include_task_scheduler_metrics: Optional[bool] = None
+    include_tempdb_file_space_usage_metrics: Optional[bool] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
+    managed_identity: Optional[ManagedIdentity] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     obfuscator_options: Optional[ObfuscatorOptions] = None
@@ -157,12 +190,14 @@ class InstanceConfig(BaseModel):
     password: Optional[str] = None
     proc_only_if: Optional[str] = None
     proc_only_if_database: Optional[str] = None
+    procedure_metrics: Optional[ProcedureMetrics] = None
     query_activity: Optional[QueryActivity] = None
     query_metrics: Optional[QueryMetrics] = None
     reported_hostname: Optional[str] = None
     server_version: Optional[str] = None
     service: Optional[str] = None
     stored_procedure: Optional[str] = None
+    stored_procedure_characters_limit: Optional[int] = None
     tags: Optional[tuple[str, ...]] = None
     use_global_custom_queries: Optional[str] = None
     username: Optional[str] = None

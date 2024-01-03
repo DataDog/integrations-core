@@ -1,0 +1,39 @@
+# This file is manually created as a way to test provide parsing tests for some of these metrics
+# TYPE istio_mcp_clients_total counter
+istio_mcp_clients_total{} 1
+# TYPE istio_mcp_request_nacks_total counter
+istio_mcp_request_nacks_total{} 1
+# TYPE istio_mcp_request_acks_total counter
+istio_mcp_request_acks_total{} 1
+# TYPE galley_istio_networking_virtualservices gauge
+galley_istio_networking_virtualservices{} 1
+# TYPE galley_istio_networking_destinationrules gauge
+galley_istio_networking_destinationrules{} 1
+# TYPE galley_istio_networking_gateways gauge
+galley_istio_networking_gateways{} 1
+# TYPE galley_istio_authentication_meshpolicies gauge
+galley_istio_authentication_meshpolicies{} 1
+# TYPE galley_source_kube_event_error_total counter
+galley_source_kube_event_error_total{} 1
+# TYPE galley_source_kube_dynamic_converter_failure_total counter
+galley_source_kube_dynamic_converter_failure_total{} 1
+# TYPE galley_validation_cert_key_update_errors counter
+galley_validation_cert_key_update_errors{} 1
+# TYPE galley_validation_http_error counter
+galley_validation_http_error{} 1
+# TYPE mixer_config_rule_config_errors_total counter
+mixer_config_rule_config_errors_total{} 1
+# TYPE mixer_config_rule_config_match_error_total counter
+mixer_config_rule_config_match_error_total{} 1
+# TYPE mixer_config_unsatisfied_action_handler_total counter
+mixer_config_unsatisfied_action_handler_total{} 1
+# TYPE mixer_config_adapter_info_config_errors_total counter
+mixer_config_adapter_info_config_errors_total{} 1
+# TYPE mixer_config_adapter_info_configs_total counter
+mixer_config_adapter_info_configs_total{} 1
+# TYPE mixer_config_handler_validation_error_total counter
+mixer_config_handler_validation_error_total{} 1
+# TYPE mixer_config_instance_config_errors_total counter
+mixer_config_instance_config_errors_total{} 1
+# TYPE mixer_handler_handler_build_failures_total counter
+mixer_handler_handler_build_failures_total{} 1

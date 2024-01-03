@@ -8,7 +8,14 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
-from .common import DEFAULT_INSTANCE, ENVOY_VERSION, FLAKY_METRICS, PROMETHEUS_METRICS, requires_new_environment
+from .common import (
+    DEFAULT_INSTANCE,
+    ENVOY_VERSION,
+    FLAKY_METRICS,
+    LOCAL_RATE_LIMIT_METRICS,
+    PROMETHEUS_METRICS,
+    requires_new_environment,
+)
 
 pytestmark = [requires_new_environment, pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -24,7 +31,7 @@ def test_check(aggregator, dd_run_check, check):
     dd_run_check(c)
     dd_run_check(c)
 
-    for metric in PROMETHEUS_METRICS:
+    for metric in PROMETHEUS_METRICS + LOCAL_RATE_LIMIT_METRICS:
         formatted_metric = "envoy.{}".format(metric)
         if metric in FLAKY_METRICS:
             aggregator.assert_metric(formatted_metric, at_least=0)

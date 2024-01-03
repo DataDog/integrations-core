@@ -86,10 +86,6 @@ on:
         required: false
         default: false
         type: boolean
-      recommended-monitors:
-        required: false
-        default: false
-        type: boolean
       saved-views:
         required: false
         default: false
@@ -113,7 +109,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      PYTHON_VERSION: "3.9"
+      PYTHON_VERSION: "3.11"
       TARGET: ${{ github.event_name == 'pull_request' && 'changed' || '' }}
 
     steps:
@@ -214,10 +210,6 @@ jobs:
     - name: Validate README files
       if: inputs.readmes
       run: ddev validate readmes $TARGET
-
-    - name: Validate recommended monitors
-      if: inputs.recommended-monitors
-      run: ddev validate recommended-monitors $TARGET
 
     - name: Validate saved views
       if: inputs.saved-views

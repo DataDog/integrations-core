@@ -23,6 +23,9 @@ except ImportError:
 def dbm_instance(instance_docker):
     instance_docker['dbm'] = True
     instance_docker['min_collection_interval'] = 1
+    instance_docker['query_metrics'] = {'enabled': False}
+    instance_docker['query_activity'] = {'enabled': False}
+    instance_docker['procedure_metrics'] = {'enabled': False}
     # set a very small collection interval so the tests go fast
     instance_docker['collect_settings'] = {
         'enabled': True,
@@ -82,7 +85,8 @@ def test_sqlserver_collect_settings(aggregator, dd_run_check, dbm_instance):
     check.initialize_connection()
     check.check(dbm_instance)
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
-    event = dbm_metadata[0]
+    event = next((e for e in dbm_metadata if e['kind'] == 'sqlserver_configs'), None)
+    assert event is not None
     assert event['dbms'] == "sqlserver"
     assert event['kind'] == "sqlserver_configs"
     assert len(event["metadata"]) > 0

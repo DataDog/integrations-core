@@ -61,6 +61,10 @@ class Repository:
     def agent_changelog(self) -> Path:
         return self.path / 'AGENT_CHANGELOG.md'
 
+    @cached_property
+    def agent_integrations_file(self) -> Path:
+        return self.path / 'AGENT_INTEGRATIONS.md'
+
 
 class IntegrationRegistry:
     def __init__(self, repo: Repository):

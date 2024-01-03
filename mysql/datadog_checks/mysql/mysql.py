@@ -5,18 +5,28 @@
 from __future__ import division
 
 import copy
+import time
 import traceback
 from collections import defaultdict
 from contextlib import closing, contextmanager
 from typing import Any, Dict, List, Optional  # noqa: F401
 
 import pymysql
+from cachetools import TTLCache
 from six import PY3, iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
-from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
+from datadog_checks.base.utils.db.utils import (
+    default_json_event_encoding,
+    tracked_query,
+)
+from datadog_checks.base.utils.db.utils import (
+    resolve_db_host as agent_host_resolver,
+)
+from datadog_checks.base.utils.serialization import json
 
+from .__about__ import __version__
 from .activity import MySQLActivity
 from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
 from .config import MySQLConfig
@@ -119,8 +129,16 @@ class MySql(AgentCheck):
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
         self._mysql_metadata = MySQLMetadata(self, self._config, self._get_connection_args())
         self._query_activity = MySQLActivity(self, self._config, self._get_connection_args())
+        # _database_instance_emitted: limit the collection and transmission of the database instance metadata
+        self._database_instance_emitted = TTLCache(
+            maxsize=1,
+            ttl=self._config.database_instance_collection_interval,
+        )  # type: TTLCache
 
         self._runtime_queries = None
+        # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
+        # go through the agent internal metrics submission processing those tags
+        self._non_internal_tags = copy.deepcopy(self.tags)
         self.set_resource_tags()
 
     def execute_query_raw(self, query):
@@ -140,10 +158,8 @@ class MySql(AgentCheck):
         if self._resolved_hostname is None:
             if self._config.reported_hostname:
                 self._resolved_hostname = self._config.reported_hostname
-            elif self._config.dbm_enabled or self.disable_generic_tags:
-                self._resolved_hostname = self.resolve_db_host()
             else:
-                self._resolved_hostname = self.agent_hostname
+                self._resolved_hostname = self.resolve_db_host()
         return self._resolved_hostname
 
     @property
@@ -226,6 +242,10 @@ class MySql(AgentCheck):
                 )
                 results = dict(cursor.fetchall())
                 self.events_wait_current_enabled = self._get_variable_enabled(results, 'events_waits_current')
+                self.log.debug(
+                    '`events_wait_current_enabled` was false. Setting it to %s',
+                    self.events_wait_current_enabled or False,
+                )
         return self.events_wait_current_enabled
 
     def resolve_db_host(self):
@@ -233,6 +253,13 @@ class MySql(AgentCheck):
 
     def _get_debug_tags(self):
         return ['agent_hostname:{}'.format(datadog_agent.get_hostname())]
+
+    def debug_stats_kwargs(self, tags=None):
+        tags = self.tags + self._get_debug_tags() + (tags or [])
+        return {
+            'tags': tags,
+            "hostname": self.resolved_hostname,
+        }
 
     @classmethod
     def get_library_versions(cls):
@@ -254,6 +281,7 @@ class MySql(AgentCheck):
                 # version collection
                 self.version = get_version(db)
                 self._send_metadata()
+                self._send_database_instance_metadata()
 
                 self.is_mariadb = self.version.flavor == "MariaDB"
                 if self._get_is_aurora(db):
@@ -303,6 +331,7 @@ class MySql(AgentCheck):
             self,
             queries=queries,
             hostname=self.resolved_hostname,
+            track_operation_time=True,
         )
 
     @property
@@ -410,18 +439,22 @@ class MySql(AgentCheck):
         metrics = copy.deepcopy(STATUS_VARS)
 
         # collect results from db
-        results = self._get_stats_from_status(db)
-        results.update(self._get_stats_from_variables(db))
+        with tracked_query(self, operation="status_metrics"):
+            results = self._get_stats_from_status(db)
+        with tracked_query(self, operation="variables_metrics"):
+            results.update(self._get_stats_from_variables(db))
 
         if not is_affirmative(
             self._config.options.get('disable_innodb_metrics', False)
         ) and self._is_innodb_engine_enabled(db):
-            results.update(self.innodb_stats.get_stats_from_innodb_status(db))
+            with tracked_query(self, operation="innodb_metrics"):
+                results.update(self.innodb_stats.get_stats_from_innodb_status(db))
             self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
 
         # Binary log statistics
         if self._get_variable_enabled(results, 'log_bin'):
-            results['Binlog_space_usage_bytes'] = self._get_binary_log_stats(db)
+            with tracked_query(self, operation="binary_log_metrics"):
+                results['Binlog_space_usage_bytes'] = self._get_binary_log_stats(db)
 
         # Compute key cache utilization metric
         key_blocks_unused = collect_scalar('Key_blocks_unused', results)
@@ -468,33 +501,39 @@ class MySql(AgentCheck):
                 "[Deprecated] The `extra_performance_metrics` option will be removed in a future release. "
                 "Utilize the `custom_queries` feature if the functionality is needed.",
             )
-            results['perf_digest_95th_percentile_avg_us'] = self._get_query_exec_time_95th_us(db)
-            results['query_run_time_avg'] = self._query_exec_time_per_schema(db)
+            with tracked_query(self, operation="exec_time_95th_metrics"):
+                results['perf_digest_95th_percentile_avg_us'] = self._get_query_exec_time_95th_us(db)
+            with tracked_query(self, operation="exec_time_per_schema_metrics"):
+                results['query_run_time_avg'] = self._query_exec_time_per_schema(db)
             metrics.update(PERFORMANCE_VARS)
 
         if is_affirmative(self._config.options.get('schema_size_metrics', False)):
             # report avg query response time per schema to Datadog
-            results['information_schema_size'] = self._query_size_per_schema(db)
+            with tracked_query(self, operation="schema_size_metrics"):
+                results['information_schema_size'] = self._query_size_per_schema(db)
             metrics.update(SCHEMA_VARS)
 
         if is_affirmative(self._config.options.get('table_rows_stats_metrics', False)) and self.userstat_enabled:
             # report size of tables in MiB to Datadog
             self.log.debug("Collecting Table Row Stats Metrics.")
-            (rows_read_total, rows_changed_total) = self._query_rows_stats_per_table(db)
+            with tracked_query(self, operation="table_rows_stats_metrics"):
+                (rows_read_total, rows_changed_total) = self._query_rows_stats_per_table(db)
             results['information_table_rows_read_total'] = rows_read_total
             results['information_table_rows_changed_total'] = rows_changed_total
             metrics.update(TABLE_ROWS_STATS_VARS)
 
         if is_affirmative(self._config.options.get('table_size_metrics', False)):
             # report size of tables in MiB to Datadog
-            (table_index_size, table_data_size) = self._query_size_per_table(db)
+            with tracked_query(self, operation="table_size_metrics"):
+                (table_index_size, table_data_size) = self._query_size_per_table(db)
             results['information_table_index_size'] = table_index_size
             results['information_table_data_size'] = table_data_size
             metrics.update(TABLE_VARS)
 
         if is_affirmative(self._config.options.get('system_table_size_metrics', False)):
             # report size of tables in MiB to Datadog
-            (table_index_size, table_data_size) = self._query_size_per_table(db, system_tables=True)
+            with tracked_query(self, operation="system_table_size_metrics"):
+                (table_index_size, table_data_size) = self._query_size_per_table(db, system_tables=True)
             if results.get('information_table_index_size'):
                 results['information_table_index_size'].update(table_index_size)
             else:
@@ -508,9 +547,11 @@ class MySql(AgentCheck):
         if is_affirmative(self._config.options.get('replication', self._config.dbm_enabled)):
             if self.performance_schema_enabled and self._is_group_replication_active(db):
                 self.log.debug('Collecting group replication metrics.')
-                self._collect_group_replica_metrics(db, results)
+                with tracked_query(self, operation="group_replication_metrics"):
+                    self._collect_group_replica_metrics(db, results)
             else:
-                replication_metrics = self._collect_replication_metrics(db, results, above_560)
+                with tracked_query(self, operation="replication_metrics"):
+                    replication_metrics = self._collect_replication_metrics(db, results, above_560)
                 metrics.update(replication_metrics)
                 self._check_replication_status(results)
 
@@ -1213,3 +1254,24 @@ class MySql(AgentCheck):
 
         for warning in messages:
             self.warning(warning)
+
+    def _send_database_instance_metadata(self):
+        if self.resolved_hostname not in self._database_instance_emitted:
+            event = {
+                "host": self.resolved_hostname,
+                "agent_version": datadog_agent.get_version(),
+                "dbms": "mysql",
+                "kind": "database_instance",
+                "collection_interval": self._config.database_instance_collection_interval,
+                'dbms_version': self.version.version + '+' + self.version.build,
+                'integration_version': __version__,
+                "tags": self._non_internal_tags,
+                "timestamp": time.time() * 1000,
+                "cloud_metadata": self._config.cloud_metadata,
+                "metadata": {
+                    "dbm": self._config.dbm_enabled,
+                    "connection_host": self._config.host,
+                },
+            }
+            self._database_instance_emitted[self.resolved_hostname] = event
+            self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))

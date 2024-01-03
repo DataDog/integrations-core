@@ -9,6 +9,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
+    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     assert_extend_generic_if,
     create_e2e_core_test_config,
@@ -19,7 +20,8 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_dell_sonicwall(dd_agent_check):
-    config = create_e2e_core_test_config('dell-sonicwall')
+    profile = 'dell-sonicwall'
+    config = create_e2e_core_test_config(profile)
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -46,10 +48,23 @@ def test_e2e_profile_dell_sonicwall(dd_agent_check):
     aggregator.assert_metric('snmp.sonicNatTranslationCount', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
         [
+            'sonic_sa_stat_dst_addr_begin:235.185.120.197',
+            'sonic_sa_stat_dst_addr_end:248.89.108.190',
+            'sonic_sa_stat_peer_gateway:47.169.129.76',
+            'sonic_sa_stat_src_addr_begin:57.166.34.35',
+            'sonic_sa_stat_src_addr_end:167.235.34.58',
             'sonic_sa_stat_create_time:Jaded driving acted quaintly',
             'sonic_sa_stat_user_name:but forward zombies but acted kept zombies Jaded',
         ],
-        ['sonic_sa_stat_create_time:driving quaintly oxen Jaded forward', 'sonic_sa_stat_user_name:kept but'],
+        [
+            'sonic_sa_stat_dst_addr_begin:60.247.243.34',
+            'sonic_sa_stat_dst_addr_end:157.82.31.152',
+            'sonic_sa_stat_peer_gateway:158.64.168.219',
+            'sonic_sa_stat_src_addr_begin:140.76.154.238',
+            'sonic_sa_stat_src_addr_end:240.205.65.247',
+            'sonic_sa_stat_create_time:driving quaintly oxen Jaded forward',
+            'sonic_sa_stat_user_name:kept but',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -90,5 +105,6 @@ def test_e2e_profile_dell_sonicwall(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
+    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

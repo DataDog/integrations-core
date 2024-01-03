@@ -83,7 +83,14 @@ class ObfuscatorOptions(BaseModel):
     collect_comments: Optional[bool] = None
     collect_metadata: Optional[bool] = None
     collect_tables: Optional[bool] = None
+    keep_boolean: Optional[bool] = None
+    keep_identifier_quotation: Optional[bool] = None
+    keep_null: Optional[bool] = None
+    keep_positional_parameter: Optional[bool] = None
     keep_sql_alias: Optional[bool] = None
+    keep_trailing_semicolon: Optional[bool] = None
+    obfuscation_mode: Optional[str] = None
+    remove_space_between_parentheses: Optional[bool] = None
     replace_digits: Optional[bool] = None
 
 
@@ -169,6 +176,7 @@ class InstanceConfig(BaseModel):
     collect_settings: Optional[CollectSettings] = None
     connect_timeout: Optional[float] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
+    database_instance_collection_interval: Optional[float] = None
     dbm: Optional[bool] = None
     defaults_file: Optional[str] = None
     disable_generic_tags: Optional[bool] = None

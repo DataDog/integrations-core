@@ -4,7 +4,7 @@
 CLICKHOUSE_REPOSITORY = "clickhouse/clickhouse-server"
 
 [[envs.default.matrix]]
-python = ["2.7", "3.9"]
+python = ["2.7", "3.11"]
 version = ["18", "19", "20", "21.8", "22.7"]
 
 [envs.default.overrides]

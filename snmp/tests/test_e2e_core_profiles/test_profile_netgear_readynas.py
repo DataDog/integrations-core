@@ -9,6 +9,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
+    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     assert_extend_generic_ucd,
     create_e2e_core_test_config,
@@ -19,7 +20,8 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_netgear_readynas(dd_agent_check):
-    config = create_e2e_core_test_config('netgear-readynas')
+    profile = 'netgear-readynas'
+    config = create_e2e_core_test_config(profile)
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -43,6 +45,7 @@ def test_e2e_profile_netgear_readynas(dd_agent_check):
             'netgear_readynasos_disk_model:acted but driving',
             'netgear_readynasos_disk_serial:their quaintly zombies acted zombies',
             'netgear_readynasos_disk_slot_name:their oxen forward Jaded but',
+            'netgear_readynasos_disk_state:online',
         ],
         [
             'netgear_readynasos_disk_id:but kept',
@@ -50,6 +53,7 @@ def test_e2e_profile_netgear_readynas(dd_agent_check):
             'netgear_readynasos_disk_model:kept their',
             'netgear_readynasos_disk_serial:but driving their driving acted driving zombies their Jaded',
             'netgear_readynasos_disk_slot_name:acted',
+            'netgear_readynasos_disk_state:offline',
         ],
     ]
     for tag_row in tag_rows:
@@ -91,15 +95,24 @@ def test_e2e_profile_netgear_readynas(dd_agent_check):
         )
 
     tag_rows = [
-        ['netgear_readynasos_volume_name:quaintly'],
-        ['netgear_readynasos_volume_name:zombies kept Jaded Jaded kept Jaded acted their'],
+        ['netgear_readynasos_volume_name:quaintly', 'netgear_readynasos_volume_status:redundant'],
+        [
+            'netgear_readynasos_volume_name:zombies kept Jaded Jaded kept Jaded acted their',
+            'netgear_readynasos_volume_status:unknown',
+        ],
     ]
     for tag_row in tag_rows:
+        aggregator.assert_metric(
+            'snmp.netgear.readynasos.volumeRAIDLevel', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
         aggregator.assert_metric(
             'snmp.netgear.readynasos.volumeFreeSpace', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
             'snmp.netgear.readynasos.volumeSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.netgear.readynasos.volumeRAIDLevel', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
     tag_rows = [
@@ -126,12 +139,13 @@ def test_e2e_profile_netgear_readynas(dd_agent_check):
         'name': 'netgear-readynas.device.name',
         'profile': 'netgear-readynas',
         'status': 1,
-        'sys_object_id': '1.3.6.1.4.1.4526.100.12.1',
+        'sys_object_id': '1.3.6.1.4.1.4526.100.16.1',
         'vendor': 'netgear',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
+    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

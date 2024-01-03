@@ -9,6 +9,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
+    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     create_e2e_core_test_config,
     get_device_ip_from_config,
@@ -18,7 +19,8 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_cyberpower_pdu(dd_agent_check):
-    config = create_e2e_core_test_config('cyberpower-pdu')
+    profile = 'cyberpower-pdu'
+    config = create_e2e_core_test_config(profile)
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -41,7 +43,8 @@ def test_e2e_profile_cyberpower_pdu(dd_agent_check):
     aggregator.assert_metric('snmp.cyberpower.ePDUStatusInputFrequency', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.cyberpower.ePDUStatusInputVoltage', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.cyberpower.envirHumidity', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cyberpower.envir_temperature', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cyberpower.envirTemperature', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cyberpower.envirTemperatureCelsius', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
         ['e_pdu_load_status_index:5', 'e_pdu_load_status_load_state:load_overload'],
         ['e_pdu_load_status_index:7', 'e_pdu_load_status_load_state:load_overload'],
@@ -153,10 +156,10 @@ def test_e2e_profile_cyberpower_pdu(dd_agent_check):
             'snmp.cyberpower.ePDU2DeviceStatusApparentPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cyberpower.ePDU2DeviceStatusLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cyberpower.ePDU2DeviceStatusCurrentLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.cyberpower.ePDU2DeviceStatusPeakLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cyberpower.ePDU2DeviceStatusCurrentPeakLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
             'snmp.cyberpower.ePDU2DeviceStatusPowerFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
@@ -231,5 +234,6 @@ def test_e2e_profile_cyberpower_pdu(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
+    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

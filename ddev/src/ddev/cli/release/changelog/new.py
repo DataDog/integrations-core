@@ -28,81 +28,34 @@ def new(app: Application, entry_type: str | None, targets: tuple[str], message: 
     By default, changelog entries will be created for all integrations that have changed code. To create
     entries only for specific targets, you may pass them as additional arguments after the entry type.
     """
-    from ddev.release.constants import ENTRY_TYPES
-    from ddev.utils.scripts.check_pr import changelog_entry_suffix
+    from datadog_checks.dev.tooling.commands.release.changelog import towncrier
 
-    derive_message = message is None
+    from ddev.release.constants import ENTRY_TYPES
+
     latest_commit = app.repo.git.latest_commit
     pr = app.github.get_pull_request(latest_commit.sha)
+    message_based_on_git = ''
     if pr is not None:
         pr_number = pr.number
-        pr_url = pr.html_url
-        if message is None:
-            message = pr.title
+        message_based_on_git = pr.title
     else:
         pr_number = app.github.get_next_issue_number()
-        pr_url = f'https://github.com/{app.github.repo_id}/pull/{pr_number}'
-        if message is None:
-            message = latest_commit.subject
+        message_based_on_git = latest_commit.subject
 
     if entry_type is not None:
-        entry_type = entry_type.capitalize()
         if entry_type not in ENTRY_TYPES:
             app.abort(f'Unknown entry type: {entry_type}')
     else:
         entry_type = click.prompt('Entry type?', type=click.Choice(ENTRY_TYPES, case_sensitive=False))
 
-    expected_suffix = changelog_entry_suffix(pr_number, pr_url)
-    entry = f'* {message.rstrip()}{expected_suffix}'
-    if derive_message and (new_entry := click.edit(entry)) is not None:
-        entry = new_entry
-    entry = entry.strip()
-
-    entry_priority = ENTRY_TYPES.index(entry_type)
+    create_cmd = [
+        'create',
+        '--content',
+        message or click.edit(text=message_based_on_git, require_save=False) or message_based_on_git,
+        f'{pr_number}.{entry_type}',
+    ]
     edited = 0
-
-    for target in app.repo.integrations.iter_changed_code(targets):
-        changelog = target.path / 'CHANGELOG.md'
-        lines = changelog.read_text().splitlines()
-
-        unreleased = False
-        current_entry_type: str | None = None
-        i = 0
-        for i, line in enumerate(lines):
-            if line == '## Unreleased':
-                unreleased = True
-                continue
-            elif unreleased and line.startswith('## '):
-                break
-            elif line.startswith('***'):
-                # e.g. ***Added***:
-                current_entry_type = line[3:-4]
-
-                try:
-                    current_entry_priority = ENTRY_TYPES.index(current_entry_type)
-                except ValueError:
-                    app.abort(
-                        f'{changelog.relative_to(app.repo.path)}, line {i}: unknown entry type {current_entry_type}'
-                    )
-
-                if current_entry_priority > entry_priority:
-                    break
-
-        if current_entry_type is None or current_entry_type != entry_type:
-            for line in reversed(
-                (
-                    f'***{entry_type}***:',
-                    '',
-                    entry,
-                    '',
-                )
-            ):
-                lines.insert(i, line)
-        else:
-            lines.insert(i - 1, entry)
-
-        lines.append('')
-        changelog.write_text('\n'.join(lines))
+    for check in app.repo.integrations.iter_changed_code(targets):
+        towncrier(check.path, *create_cmd)
         edited += 1
-
     app.display_success(f'Added {edited} changelog entr{"ies" if edited > 1 else "y"}')
