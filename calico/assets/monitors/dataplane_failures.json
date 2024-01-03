@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2022-03-18",
   "last_updated_at": "2022-03-18",
-  "title": "dataplane failure",
+  "title": "Dataplane is failing",
   "tags": [
     "integration:calico"
   ],
-  "description": "Get notified when Calico encounters a dataplane failure.",
+  "description": "Dataplane is responsible for managing network traffic and enforcing network policies in cloud-native platforms. This monitor tracks the number of issues with dataplane to identify and address potential issues that could affect the network policies.",
   "definition": {
     "message": "Calico encountered a problem with dataplane.",
     "name": "[Calico] dataplane failure",
