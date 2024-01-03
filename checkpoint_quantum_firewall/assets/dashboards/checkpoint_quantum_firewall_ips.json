@@ -1,5 +1,5 @@
 {
-    "title": "Checkpoint Quantum Firewall: IPS",
+    "title": "Checkpoint Quantum Firewall - IPS",
     "description": "- This dashboard gives insights about Intrusion Prevention System (IPS) related logs.",
     "widgets": [
         {
@@ -771,6 +771,10 @@
                             },
                             {
                                 "field": "smartdefense_profile",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "malware_rule_name",
                                 "width": "auto"
                             }
                         ]

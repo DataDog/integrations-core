@@ -1183,13 +1183,17 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:checkpoint_quantum_firewall @product:\"Application Control\" @appi_name:* $Checkpoint_Server $Action $Application_Category $Application_Name",
+                            "query_string": "source:checkpoint_quantum_firewall @product:\"Application Control\" $Checkpoint_Server $Action $Application_Category $Application_Name ",
                             "indexes": [],
                             "storage": "hot"
                         },
                         "columns": [
                             {
                                 "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "checkpoint_firewall_severity",
                                 "width": "auto"
                             },
                             {

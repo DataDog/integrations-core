@@ -740,11 +740,11 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "service",
+                                "field": "checkpoint_firewall_severity",
                                 "width": "auto"
                             },
                             {
-                                "field": "action",
+                                "field": "checkpoint_firewall_action",
                                 "width": "auto"
                             },
                             {

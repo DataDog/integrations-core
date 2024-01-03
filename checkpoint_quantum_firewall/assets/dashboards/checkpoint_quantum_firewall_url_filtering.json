@@ -7,6 +7,7 @@
             "definition": {
                 "type": "image",
                 "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Check_Point_logo_2022.svg/481px-Check_Point_logo_2022.svg.png",
+                "url_dark_theme": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Check_Point_logo_2022.svg/481px-Check_Point_logo_2022.svg.png",
                 "sizing": "scale-down",
                 "has_background": true,
                 "has_border": false,
@@ -609,7 +610,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"URL Filtering\" @checkpoint_firewall_action:Reject $Checkpoint_Server $Application_Name $Application_Category $Action "
+                                    "query": "source:checkpoint_quantum_firewall @product:\"URL Filtering\" @checkpoint_firewall_action:(Drop OR Reject OR Block) $Checkpoint_Server $Application_Name $Application_Category $Action "
                                 },
                                 "storage": "hot"
                             }
@@ -667,7 +668,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"URL Filtering\" @checkpoint_firewall_action:Accept @app_risk:[4 TO 5] $Checkpoint_Server $Application_Name $Application_Category $Action "
+                                    "query": "source:checkpoint_quantum_firewall @product:\"URL Filtering\" @checkpoint_firewall_action:(Accept OR Allow) @app_risk:[4 TO 5] $Checkpoint_Server $Application_Name $Application_Category $Action "
                                 },
                                 "storage": "hot"
                             }
@@ -977,7 +978,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "@severity",
+                                "field": "@checkpoint_firewall_severity",
                                 "width": "auto"
                             },
                             {

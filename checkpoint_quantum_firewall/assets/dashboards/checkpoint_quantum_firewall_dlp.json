@@ -1,5 +1,5 @@
 {
-    "title": "Checkpoint Quantum Firewall: DLP",
+    "title": "Checkpoint Quantum Firewall - DLP",
     "description": "- This dashboard gives insights about Data Loss Prevention(DLP) related logs.",
     "widgets": [
         {
@@ -7,6 +7,7 @@
             "definition": {
                 "type": "image",
                 "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Check_Point_logo_2022.svg/481px-Check_Point_logo_2022.svg.png",
+                "url_dark_theme": "",
                 "sizing": "scale-down",
                 "has_background": true,
                 "has_border": false,
@@ -555,11 +556,15 @@
                                 "width": "auto"
                             },
                             {
+                                "field": "network.destination.ip",
+                                "width": "auto"
+                            },
+                            {
                                 "field": "checkpoint_firewall_action",
                                 "width": "auto"
                             },
                             {
-                                "field": "severity",
+                                "field": "checkpoint_firewall_severity",
                                 "width": "auto"
                             },
                             {

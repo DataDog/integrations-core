@@ -813,15 +813,19 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "service",
+                                "field": "checkpoint_firewall_severity",
                                 "width": "auto"
                             },
                             {
-                                "field": "action",
+                                "field": "checkpoint_firewall_action",
                                 "width": "auto"
                             },
                             {
                                 "field": "src",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "dst",
                                 "width": "auto"
                             },
                             {
@@ -842,6 +846,10 @@
                             },
                             {
                                 "field": "os_name",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "malware_action",
                                 "width": "auto"
                             },
                             {

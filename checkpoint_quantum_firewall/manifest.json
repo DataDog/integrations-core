@@ -12,78 +12,43 @@
     "title": "checkpoint_quantum_firewall",
     "media": [
       {
-        "caption": "Chekpoint Quantum Firewall - Audit",
+        "caption": "Checkpoint Quantum Firewall - Audit",
         "image_url": "images/checkpoint_quantum_firewall_audit.png",
         "media_type": "image"
       },
       {
-        "caption": "Chekpoint Quantum Firewall - Application Control",
+        "caption": "Checkpoint Quantum Firewall - Application Control",
         "image_url": "images/checkpoint_quantum_firewall_application_control.png",
         "media_type": "image"
       },
       {
-        "caption": "Chekpoint Quantum Firewall - URL Filtering",
+        "caption": "Checkpoint Quantum Firewall - URL Filtering",
         "image_url": "images/checkpoint_quantum_firewall_url_filtering.png",
         "media_type": "image"
       },
       {
-        "caption": "Chekpoint Quantum Firewall - Identity Awareness",
+        "caption": "Checkpoint Quantum Firewall - Identity Awareness",
         "image_url": "images/checkpoint_quantum_firewall_identity_awareness.png",
         "media_type": "image"
       },
       {
-        "caption": "Chekpoint Quantum Firewall - DLP",
-        "image_url": "images/checkpoint_quantum_firewall_dlp.png",
-        "media_type": "image"
-      },
-      {
-        "caption": "Chekpoint Quantum Firewall - IPS",
+        "caption": "Checkpoint Quantum Firewall - IPS",
         "image_url": "images/checkpoint_quantum_firewall_ips.png",
         "media_type": "image"
       },
       {
-        "caption": "Chekpoint Quantum Firewall - Anti Spam & Email Security",
-        "image_url": "images/checkpoint_quantum_firewall_anti_spam_and_email_security.png",
-        "media_type": "image"
-      },
-      {
-        "caption": "Chekpoint Quantum Firewall - Anti Exploit",
-        "image_url": "images/checkpoint_quantum_firewall_anti_exploit.png",
-        "media_type": "image"
-      },
-      {
-        "caption": "Chekpoint Quantum Firewall - Firewall",
+        "caption": "Checkpoint Quantum Firewall - Firewall",
         "image_url": "images/checkpoint_quantum_firewall_firewall.png",
         "media_type": "image"
       },
       {
-        "caption": "Chekpoint Quantum Firewall - Anti Ransomware",
-        "image_url": "images/checkpoint_quantum_firewall_anti_ransomware.png",
-        "media_type": "image"
-      },
-      {
-        "caption": "Chekpoint Quantum Firewall - Threat Emulation",
+        "caption": "Checkpoint Quantum Firewall - Threat Emulation",
         "image_url": "images/checkpoint_quantum_firewall_threat_emulation.png",
         "media_type": "image"
       },
       {
-        "caption": "Chekpoint Quantum Firewall - Anti Virus",
-        "image_url": "images/checkpoint_quantum_firewall_anti_virus.png",
-        "media_type": "image"
-      },
-      {
-        "caption": "Chekpoint Quantum Firewall - HTTPS Inspection",
-        "image_url": "images/checkpoint_quantum_firewall_https_inspection.png",
-        "media_type": "image"
-      },
-      {
-        "caption": "Chekpoint Quantum Firewall - Anti Bot",
+        "caption": "Checkpoint Quantum Firewall - Anti Bot",
         "image_url": "images/checkpoint_quantum_firewall_anti_bot.png",
-        "media_type": "image"
-      },
-      {
-        "caption": "Chekpoint Quantum Firewall - Anti Malware",
-        "image_url": "images/checkpoint_quantum_firewall_anti_malware.png",
         "media_type": "image"
       }
     ],
@@ -111,7 +76,7 @@
       "Checkpoint Quantum Firewall: Audit": "assets/dashboards/checkpoint_quantum_firewall_audit.json",
       "Checkpoint Quantum Firewall: Application Control": "assets/dashboards/checkpoint_quantum_firewall_application_control.json",
       "Checkpoint Quantum Firewall: URL Filtering": "assets/dashboards/checkpoint_quantum_firewall_url_filtering.json",
-      "Checkpoint Quantum Firewall: Identity_awareness": "assets/dashboards/checkpoint_quantum_firewall_identity_awareness.json",
+      "Checkpoint Quantum Firewall: Identity Awareness": "assets/dashboards/checkpoint_quantum_firewall_identity_awareness.json",
       "Checkpoint Quantum Firewall: DLP": "assets/dashboards/checkpoint_quantum_firewall_dlp.json",
       "Checkpoint Quantum Firewall: IPS": "assets/dashboards/checkpoint_quantum_firewall_ips.json",
       "Checkpoint Quantum Firewall: Anti Spam & Email Security": "assets/dashboards/checkpoint_quantum_firewall_anti_spam_and_email_security.json",

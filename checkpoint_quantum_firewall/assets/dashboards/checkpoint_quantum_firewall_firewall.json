@@ -1,5 +1,5 @@
 {
-    "title": "Checkpoint Quantum Firewall: Firewall",
+    "title": "Checkpoint Quantum Firewall - Firewall",
     "description": "- This dashboard gives insights about firewall related logs.",
     "widgets": [
         {
@@ -209,7 +209,7 @@
                         ],
                         "response_format": "scalar",
                         "style": {
-                            "palette": "semantic"
+                            "palette": "datadog16"
                         }
                     }
                 ],
@@ -392,7 +392,7 @@
                         ],
                         "response_format": "scalar",
                         "style": {
-                            "palette": "semantic"
+                            "palette": "datadog16"
                         }
                     }
                 ],
@@ -531,10 +531,7 @@
                     }
                 ],
                 "autoscale": true,
-                "precision": 2,
-                "timeseries_background": {
-                    "type": "area"
-                }
+                "precision": 2
             },
             "layout": {
                 "x": 0,
@@ -578,10 +575,7 @@
                     }
                 ],
                 "autoscale": true,
-                "precision": 2,
-                "timeseries_background": {
-                    "type": "area"
-                }
+                "precision": 2
             },
             "layout": {
                 "x": 6,
@@ -1247,6 +1241,10 @@
                                 "width": "auto"
                             },
                             {
+                                "field": "checkpoint_firewall_severity",
+                                "width": "auto"
+                            },
+                            {
                                 "field": "network.client.ip",
                                 "width": "auto"
                             },
@@ -1259,7 +1257,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "action",
+                                "field": "checkpoint_firewall_action",
                                 "width": "auto"
                             },
                             {

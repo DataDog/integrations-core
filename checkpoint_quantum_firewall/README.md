@@ -1,6 +1,6 @@
 ## Overview
 
-- Check Point Next Generation Firewall is a security gateway that includes application control and IPS protection, with integrated management of security events -- all in one appliance. Other Features include: Identity Awareness, URL Filtering, Anti-Bot, Anti-Virus, Anti-Spam etc
+- Check Point Next Generation Firewall is a security gateway that includes application control and IPS protection, with integrated management of security events -- all in one appliance. Other Features include: Identity Awareness, URL Filtering, Anti-Bot, Anti-Virus, Anti-Spam etc.
 
 This integration provides log enrichments, visualization, and detection rules for various Checkpoint Quantum Firewall Logs.
 
@@ -15,7 +15,7 @@ This integration provides log enrichments, visualization, and detection rules fo
 
 **Checkpoint Quantum Firewall:**
 
-- You have the [Datadog Agent][5] installed and running
+- You have the [Datadog Agent][5] installed and running.
 
 ### Configuration
 
@@ -45,7 +45,7 @@ This integration provides log enrichments, visualization, and detection rules fo
    1. Connect to the command line on the Management Server / Log Server:
    2. Log in to the Expert mode.
       - Enter your administrative credentials (After entering credentials, expert mode is enabled).
-   3. In order to configure new target for the exported logs enter below commands:
+   3. In order to configure new target for the exported logs enter the below commands:
       ```yaml
       cp_log_export add name <Name of Log Exporter Configuration> target-server <HostName or IP address of Target Server> target-port <Port on Target Server> protocol {tcp | udp} format json
       ```

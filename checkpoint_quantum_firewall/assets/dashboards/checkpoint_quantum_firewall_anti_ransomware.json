@@ -1,5 +1,5 @@
 {
-    "title": "Checkpoint Quantum Firewall: Anti Ransomware",
+    "title": "Checkpoint Quantum Firewall - Anti Ransomware",
     "description": "- This dashboard gives insights about anti ransomware related logs.",
     "widgets": [
         {
@@ -738,11 +738,11 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "@checkpoint_firewall_client_name",
+                                "field": "checkpoint_firewall_severity",
                                 "width": "auto"
                             },
                             {
-                                "field": "client_version",
+                                "field": "checkpoint_firewall_action",
                                 "width": "auto"
                             },
                             {
@@ -754,11 +754,15 @@
                                 "width": "auto"
                             },
                             {
+                                "field": "file_type",
+                                "width": "auto"
+                            },
+                            {
                                 "field": "file_size",
                                 "width": "auto"
                             },
                             {
-                                "field": "policy_number",
+                                "field": "os_name",
                                 "width": "auto"
                             },
                             {
