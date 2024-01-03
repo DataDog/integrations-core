@@ -1,0 +1,136 @@
+## Overview
+
+- Check Point Next Generation Firewall is a security gateway that includes application control and IPS protection, with integrated management of security events -- all in one appliance. Other Features include: Identity Awareness, URL Filtering, Anti-Bot, Anti-Virus, Anti-Spam etc
+
+This integration provides log enrichments, visualization, and detection rules for various Checkpoint Quantum Firewall Logs.
+
+#### Supported Logs:
+
+- Checkpoint Quantum Firewall - JSON Format
+  - **Event Types -** Firewall, URL Filtering, IPS, Identity Awareness, Application Control, Threat Emulation, Audit, Anti Ransomware, Anti Spam & Email Security, Anti Exploit, Anti Bot, Anti Virus, HTTPS Inspection, DLP, Anti Malware
+
+## Setup
+
+### Installation
+
+**Checkpoint Quantum Firewall:**
+
+- You have the [Datadog Agent][5] installed and running
+
+### Configuration
+
+#### Log collection
+
+**Checkpoint Quantum Firewall:**
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in datadog.yaml:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add this configuration block to your checkpoint_quantum_firewall.d/conf.yaml file to start collecting your Checkpoint Quantum Firewall logs.
+
+   ```yaml
+   logs:
+     - type: tcp/udp
+       port: <PORT-NUMBER>
+       service: checkpoint_quantum_firewall
+       source: checkpoint_quantum_firewall
+   ```
+
+3. [Restart the Agent][2].
+
+4. Configuring Syslog Message Forwarding from Checkpoint Quantum Firewall
+   1. Connect to the command line on the Management Server / Log Server:
+   2. Log in to the Expert mode.
+      - Enter your administrative credentials (After entering credentials, expert mode is enabled).
+   3. In order to configure new target for the exported logs enter below commands:
+      ```yaml
+      cp_log_export add name <Name of Log Exporter Configuration> target-server <HostName or IP address of Target Server> target-port <Port on Target Server> protocol {tcp | udp} format json
+      ```
+      - In above commands, specify Syslog Server Details:
+        Provide the following information:
+        - name: The Name of the syslog server. For instance: datadog_syslog
+        - target-server: The destination where you want to send the Checkpoint Quantum Firewall logs.
+        - target-port: The port on which the syslog server is listening (typically 514).
+        - protocol: Protocol name, which protocol will be used to send logs (tcp/udp).
+        - format: Format must be 'json'.
+   4. In order to save and add syslog server configuration hit below command:
+      ```yaml
+      cp_log_export restart name <Name of Log Exporter Configuration>
+      ```
+   5. For more details to configure syslog click [Here][6]
+
+### Validation
+
+[Run the Agent's status subcommand][3] and look for `checkpoint_quantum_firewall` under the Checks section.
+
+## Data Collected
+
+### Metrics
+
+The checkpoint_quantum_firewall integration does not include any metrics.
+
+### Events
+
+The checkpoint_quantum_firewall integration does not include any events.
+
+### Service Checks
+
+The checkpoint_quantum_firewall integration does not include any service checks.
+
+## Troubleshooting
+
+**Checkpoint Quantum Firewall:**
+
+#### Permission denied while port binding:
+
+If you see a **Permission denied** error while port binding in the Agent logs, see the following instructions:
+
+1.  Binding to a port number under 1024 requires elevated permissions. Follow the instructions below to set this up.
+
+    - Grant access to the port using the `setcap` command:
+
+      ```
+      sudo setcap CAP_NET_BIND_SERVICE=+ep /opt/datadog-agent/bin/agent/agent
+      ```
+
+    - Verify the setup is correct by running the `getcap` command:
+
+      ```
+      sudo getcap /opt/datadog-agent/bin/agent/agent
+      ```
+
+      With the expected output:
+
+      ```
+      /opt/datadog-agent/bin/agent/agent = cap_net_bind_service+ep
+      ```
+
+      **Note**: Re-run this `setcap` command every time you upgrade the Agent.
+
+2.  [Restart the Agent][2].
+
+#### Data is not being collected:
+
+Make sure that traffic is bypassed from the configured port if the firewall is enabled.
+
+#### Port already in use:
+
+If you see the **Port <PORT-NO\> Already in Use** error, see the following instructions. The example below is for PORT-NO = 514:
+
+On systems using Syslog, if the Agent listens for Checkpoint Quantum Firewall logs on port 514, the following error can appear in the Agent logs: `Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use`.
+
+This error occurs because by default, Syslog listens on port 514. To resolve this error, take **one** of the following steps:
+
+- Disable Syslog
+- Configure the Agent to listen on a different, available port
+
+For any further assistance, do contact [Datadog support][4].
+
+[2]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[4]: https://docs.datadoghq.com/help/
+[5]: https://docs.datadoghq.com/agent/
+[6]: https://sc1.checkpoint.com/documents/R81.20/WebAdminGuides/EN/CP_R81.20_LoggingAndMonitoring_AdminGuide/Content/Topics-LMG/Log-Exporter-Configuration-in-CLI-Basic.htm?tocpath=Log%20Exporter%7CConfiguring%20Log%20Exporter%20in%20CLI%7C_____1
