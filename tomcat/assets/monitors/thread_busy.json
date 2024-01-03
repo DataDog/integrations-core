@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2021-03-09",
   "last_updated_at": "2021-03-09",
-  "title": "% of busy threads is high for host: {{host.name}}",
+  "title": "Busy threads number is high",
   "tags": [
     "integration:tomcat"
   ],
-  "description": "Notifies when Tomcat current amount of busy threads represents a high percentage of the maximum number of allowed worker threads for a specific host.",
+  "description": "A thread is an execution unit within the Tomcat web server that is responsible for handling incoming requests and performing various tasks. This monitor tracks the utilization of Tomcat threads on various hosts.",
   "definition": {
     "message": "{{#is_alert}}\n\nALERT: The current amount of busy threads represents {{value}} % of the maximum number of allowed worker threads for host: {{host.name}}\n\n{{/is_alert}} \n\n{{#is_warning}}\n\nWARNING: The current amount of busy threads represents {{value}} % of the maximum number of allowed worker threads for host: {{host.name}}\n\n{{/is_warning}} \n\n",
     "name": "[Tomcat] % of busy threads is high for host: {{host.name}}",

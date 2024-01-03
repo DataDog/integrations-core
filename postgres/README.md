@@ -66,7 +66,7 @@ grant SELECT ON pg_stat_activity_dd to datadog;
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 
-**Note**: When generating custom metrics that require querying additional tables, you may need to grant the `SELECT` permission on those tables to the `datadog` user. Example: `grant SELECT on <TABLE_NAME> to datadog;`. Check the [FAQ section](#faq) for more information.
+**Note**: When generating custom metrics that require querying additional tables, you may need to grant the `SELECT` permission on those tables to the `datadog` user. Example: `grant SELECT on <TABLE_NAME> to datadog;`. Check the [FAQ section][30] for more information.
 
 #### Host
 
@@ -458,3 +458,4 @@ Additional helpful documentation, links, and articles:
 [27]: https://docs.datadoghq.com/agent/docker/apm/
 [28]: https://docs.datadoghq.com/database_monitoring/
 [29]: https://docs.datadoghq.com/database_monitoring/#postgres
+[30]: https://docs.datadoghq.com/integrations/postgres/?tab=host#faq
