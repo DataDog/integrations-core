@@ -33,7 +33,6 @@ def stop_orphaned_threads():
     DBMAsyncJob.executor = ThreadPoolExecutor()
 
 
-@pytest.mark.integration
 def test_collect_metadata(integration_check, dbm_instance, aggregator):
     check = integration_check(dbm_instance)
     check.check(dbm_instance)
@@ -46,7 +45,6 @@ def test_collect_metadata(integration_check, dbm_instance, aggregator):
     assert len(event["metadata"]) > 0
 
 
-@pytest.mark.integration
 def test_collect_schemas(integration_check, dbm_instance, aggregator):
     dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 0.5}
     dbm_instance['relations'] = [{'relation_regex': ".*"}]
