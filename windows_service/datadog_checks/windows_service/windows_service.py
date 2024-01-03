@@ -250,6 +250,15 @@ class WindowsService(AgentCheck):
 
         service_statuses = win32service.EnumServicesStatus(scm_handle, type_filter, state_filter)
 
+        # Sort service filters in reverse order on the regex pattern so more specific (longer)
+        # regex patterns are tested first. This is to handle cases when a pattern is a prefix of
+        # another pattern.
+        # Service filters without a name field don't report UNKNOWN, but if they match a service
+        # before a filter with a name then the name filter may report UNKONWN. Reverse sorting on
+        # the length prevents this by putting service filters without a name last in the list.
+        # See test_name_regex_order()
+        service_filters = sorted(service_filters, reverse=True, key=lambda x: len(x.name or ""))
+
         for short_name, _, service_status in service_statuses:
             service_view = ServiceView(scm_handle, short_name)
 

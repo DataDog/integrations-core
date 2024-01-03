@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 7.6.0 / 2023-11-10 / Agent 7.50.0
+
+***Added***:
+
+* Added CreateContainerConfigError wait reason ([#16143](https://github.com/DataDog/integrations-core/pull/16143))
+
 ## 7.5.0 / 2023-07-10 / Agent 7.47.0
 
 ***Added***:

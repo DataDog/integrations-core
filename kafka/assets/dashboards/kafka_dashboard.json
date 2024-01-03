@@ -500,56 +500,49 @@
           {
             "id": 75077178454600,
             "definition": {
-              "title": "Clean and Unclean Leader Elections",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
+                "title": "Clean and Unclean Leader Elections",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "time": {},
+                "type": "timeseries",
+                "requests": [
                     {
-                      "formula": "query1"
-                    },
-                    {
-                      "formula": "query2"
+                        "formulas": [
+                            {
+                                "formula": "query2"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "sum:kafka.replication.leader_elections.rate{$datacenter}"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "bars"
                     }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:kafka.replication.leader_elections{$datacenter}.weighted()"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query2",
-                      "query": "sum:kafka.replication.leader_elections.rate{$datacenter}.weighted()"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "bars"
-                }
-              ]
+                ]
             },
             "layout": {
-              "x": 0,
-              "y": 1,
-              "width": 4,
-              "height": 2
+                "x": 0,
+                "y": 1,
+                "width": 4,
+                "height": 2
             }
           },
           {
@@ -1529,172 +1522,155 @@
     {
       "id": 4737895714824992,
       "definition": {
-        "title": "Broker JVM Metrics",
-        "background_color": "purple",
-        "show_title": true,
-        "type": "group",
-        "layout_type": "ordered",
-        "widgets": [
-          {
-            "id": 5500612573375596,
-            "definition": {
-              "type": "note",
-              "content": "Kafka brokers are Java applications that expose JVM metrics to inform on the broker's system health. Garbage collection metrics like those below provide key insights into free memory, broker performance, and heap size. You may need to enable the [Datadog's Zookeeper Integration](https://docs.datadoghq.com/integrations/zk/?tab=host) for this section to populate. \n",
-              "background_color": "gray",
-              "font_size": "14",
-              "text_align": "center",
-              "vertical_align": "top",
-              "show_tick": false,
-              "tick_pos": "50%",
-              "tick_edge": "left",
-              "has_padding": true
-            },
-            "layout": {
-              "x": 0,
-              "y": 0,
-              "width": 12,
-              "height": 1
-            }
-          },
-          {
-            "id": 5260033322648958,
-            "definition": {
-              "title": "JVM GC ",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:jvm.gc.cms.count{$datacenter} by {host}.weighted()"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
+          "title": "Broker JVM Metrics",
+          "background_color": "purple",
+          "show_title": true,
+          "type": "group",
+          "layout_type": "ordered",
+          "widgets": [
+              {
+                  "id": 5500612573375596,
+                  "definition": {
+                      "type": "note",
+                      "content": "Kafka brokers are Java applications that expose JVM metrics to inform on the broker's system health. Garbage collection metrics like those below provide key insights into free memory, broker performance, and heap size. You need to enable [new_gc_metrics](https://docs.datadoghq.com/integrations/java/?tab=host#configuration-options) for this section to populate. \n",
+                      "background_color": "gray",
+                      "font_size": "14",
+                      "text_align": "center",
+                      "vertical_align": "top",
+                      "show_tick": false,
+                      "tick_pos": "50%",
+                      "tick_edge": "left",
+                      "has_padding": true
                   },
-                  "display_type": "area"
-                }
-              ]
-            },
-            "layout": {
-              "x": 0,
-              "y": 1,
-              "width": 4,
-              "height": 3
-            }
-          },
-          {
-            "id": 3147053810778090,
-            "definition": {
-              "title": "ParNew Time by Broker",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "type": "heatmap",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "max:jvm.gc.parnew.time{$datacenter} by {host}"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic"
+                  "layout": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 12,
+                      "height": 1
                   }
-                }
-              ]
-            },
-            "layout": {
-              "x": 4,
-              "y": 1,
-              "width": 4,
-              "height": 3
-            }
-          },
-          {
-            "id": 201953558221222,
-            "definition": {
-              "title": "CMS Time by Broker",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:jvm.gc.collectors.old.collection_time{$datacenter} by {host}"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
+              },
+              {
+                  "id": 5260033322648958,
+                  "definition": {
+                      "title": "JVM GC Count by Type",
+                      "title_size": "16",
+                      "title_align": "left",
+                      "show_legend": true,
+                      "legend_layout": "auto",
+                      "legend_columns": [
+                          "avg",
+                          "min",
+                          "max",
+                          "value",
+                          "sum"
+                      ],
+                      "time": {},
+                      "type": "timeseries",
+                      "requests": [
+                          {
+                              "formulas": [
+                                  {
+                                      "formula": "query1"
+                                  },
+                                  {
+                                      "formula": "query2"
+                                  }
+                              ],
+                              "queries": [
+                                  {
+                                      "data_source": "metrics",
+                                      "name": "query1",
+                                      "query": "sum:jvm.gc.major_collection_count{$datacenter} by {type}.weighted()"
+                                  },
+                                  {
+                                      "data_source": "metrics",
+                                      "name": "query2",
+                                      "query": "sum:jvm.gc.minor_collection_count{$datacenter} by {type}.weighted()"
+                                  }
+                              ],
+                              "response_format": "timeseries",
+                              "style": {
+                                  "palette": "dog_classic",
+                                  "line_type": "solid",
+                                  "line_width": "normal"
+                              },
+                              "display_type": "area"
+                          }
+                      ]
                   },
-                  "display_type": "bars"
-                }
-              ]
-            },
-            "layout": {
-              "x": 8,
-              "y": 1,
-              "width": 4,
-              "height": 3
-            }
-          }
-        ]
+                  "layout": {
+                      "x": 0,
+                      "y": 1,
+                      "width": 6,
+                      "height": 3
+                  }
+              },
+              {
+                  "id": 3147053810778090,
+                  "definition": {
+                      "title": "JVM GC Time by Type",
+                      "title_size": "16",
+                      "title_align": "left",
+                      "show_legend": true,
+                      "legend_layout": "auto",
+                      "legend_columns": [
+                          "avg",
+                          "min",
+                          "max",
+                          "value",
+                          "sum"
+                      ],
+                      "time": {},
+                      "type": "timeseries",
+                      "requests": [
+                          {
+                              "formulas": [
+                                  {
+                                      "formula": "query1"
+                                  },
+                                  {
+                                      "formula": "query2"
+                                  }
+                              ],
+                              "queries": [
+                                  {
+                                      "data_source": "metrics",
+                                      "name": "query1",
+                                      "query": "sum:jvm.gc.major_collection_time{$datacenter} by {type}.weighted()"
+                                  },
+                                  {
+                                      "data_source": "metrics",
+                                      "name": "query2",
+                                      "query": "sum:jvm.gc.minor_collection_time{$datacenter} by {type}.weighted()"
+                                  }
+                              ],
+                              "response_format": "timeseries",
+                              "style": {
+                                  "palette": "dog_classic",
+                                  "line_type": "solid",
+                                  "line_width": "normal"
+                              },
+                              "display_type": "line"
+                          }
+                      ]
+                  },
+                  "layout": {
+                      "x": 6,
+                      "y": 1,
+                      "width": 6,
+                      "height": 3
+                  }
+              }
+          ]
       },
       "layout": {
-        "x": 0,
-        "y": 6,
-        "width": 12,
-        "height": 5
+          "x": 0,
+          "y": 1,
+          "width": 12,
+          "height": 5
       }
-    },
+  },
+
     {
       "id": 8466685701903458,
       "definition": {

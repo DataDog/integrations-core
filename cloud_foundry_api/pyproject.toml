@@ -26,7 +26,7 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
     "Programming Language :: Python :: 2.7",
-    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.11",
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
 ]
@@ -40,7 +40,7 @@ dynamic = [
 [project.optional-dependencies]
 deps = [
     "semver==2.13.0; python_version < '3.0'",
-    "semver==3.0.1; python_version > '3.0'",
+    "semver==3.0.2; python_version > '3.0'",
 ]
 
 [project.urls]

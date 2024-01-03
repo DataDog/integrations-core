@@ -151,7 +151,6 @@ ADDITIONAL_LICENSES = {
 
 PACKAGE_REPO_OVERRIDES = {
     'PyYAML': 'https://github.com/yaml/pyyaml',
-    'Pyro4': 'https://github.com/irmen/Pyro4',
     'contextlib2': 'https://github.com/jazzband/contextlib2',
     'dnspython': 'https://github.com/rthalley/dnspython',
     'foundationdb': 'https://github.com/apple/foundationdb',

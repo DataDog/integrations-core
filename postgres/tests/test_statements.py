@@ -243,6 +243,7 @@ def test_statement_metrics(
                 'azure': {
                     'deployment_type': 'flexible_server',
                     'name': 'test-server.database.windows.net',
+                    'managed_authentication': {'enabled': False},
                 },
             },
         ),
@@ -257,6 +258,7 @@ def test_statement_metrics(
                 'azure': {
                     'deployment_type': 'flexible_server',
                     'name': 'test-server.database.windows.net',
+                    'managed_authentication': {'enabled': False},
                 },
             },
         ),
@@ -271,12 +273,11 @@ def test_statement_metrics(
                 },
             },
             {
-                'aws': {
-                    'instance_endpoint': 'foo.aws.com',
-                },
+                'aws': {'instance_endpoint': 'foo.aws.com', 'managed_authentication': {'enabled': False}},
                 'azure': {
                     'deployment_type': 'flexible_server',
                     'name': 'test-server.database.windows.net',
+                    'managed_authentication': {'enabled': False},
                 },
             },
         ),

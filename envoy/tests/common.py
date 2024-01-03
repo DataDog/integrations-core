@@ -214,6 +214,10 @@ PROMETHEUS_METRICS = [
     "http.passthrough_internal_redirect_predicate.count",
     "http.passthrough_internal_redirect_too_many_redirects.count",
     "http.passthrough_internal_redirect_unsafe_scheme.count",
+    "http.rbac_allowed.count",
+    "http.rbac_denied.count",
+    "http.rbac_shadow_allowed.count",
+    "http.rbac_shadow_denied.count",
     "http.rq_direct_response.count",
     "http.rq_redirect.count",
     "http.rq_reset_after_downstream_response_started.count",
@@ -370,7 +374,18 @@ PROMETHEUS_METRICS = [
     "vhost.vcluster.upstream_rq.count",
 ]
 
-FLAKY_METRICS = {
+LOCAL_RATE_LIMIT_METRICS = [
+    "http.local_rate_limit_enabled.count",
+    "http.local_rate_limit_enforced.count",
+    "http.local_rate_limit_rate_limited.count",
+    "http.local_rate_limit_ok.count",
+]
+
+CONNECT_STATE_METRIC = ['control_plane.connected_state']
+
+RATE_LIMIT_STAT_PREFIX_TAG = 'stat_prefix:http_local_rate_limiter'
+
+FLAKY_METRICS = [
     "listener.downstream_cx_active",
     "listener.downstream_cx_destroy.count",
     "cluster.internal.upstream_rq.count",
@@ -380,9 +395,9 @@ FLAKY_METRICS = {
     "cluster.upstream_rq_xx.count",
     "access_logs.grpc_access_log.logs_written.count",
     "access_logs.grpc_access_log.logs_dropped.count",
-}
+]
 
-MOCKED_PROMETHEUS_METRICS = {
+MOCKED_PROMETHEUS_METRICS = [
     "cluster.assignment_stale.count",
     "cluster.assignment_timeout_received.count",
     "cluster.bind_errors.count",
@@ -584,6 +599,10 @@ MOCKED_PROMETHEUS_METRICS = {
     "http.downstream_rq_xx.count",
     "http.no_cluster.count",
     "http.no_route.count",
+    "http.rbac_allowed.count",
+    "http.rbac_denied.count",
+    "http.rbac_shadow_allowed.count",
+    "http.rbac_shadow_denied.count",
     "http.rq.count",
     "http.rq_direct_response.count",
     "http.rq_redirect.count",
@@ -594,6 +613,10 @@ MOCKED_PROMETHEUS_METRICS = {
     "http.tracing.not_traceable.count",
     "http.tracing.random_sampling.count",
     "http.tracing.service_forced.count",
+    "http.local_rate_limit_enabled.count",
+    "http.local_rate_limit_enforced.count",
+    "http.local_rate_limit_rate_limited.count",
+    "http.local_rate_limit_ok.count",
     "listener.admin.downstream_cx.count",
     "listener.admin.downstream_cx_active",
     "listener.admin.downstream_cx_destroy.count",
@@ -688,7 +711,7 @@ MOCKED_PROMETHEUS_METRICS = {
     "tcp.on_demand_cluster_timeout.count",
     "tcp.upstream_flush.count",
     "tcp.upstream_flush_active",
-}
+]
 
 
 def get_fixture_path(filename):

@@ -134,12 +134,17 @@ INSTANCE_METRICS_DATABASE = [
 
 # AlwaysOn metrics
 # datadog metric name, sql table, column name, tag
-AO_METRICS = [
+AO_AG_SYNC_METRICS = [
     ('sqlserver.ao.ag_sync_health', 'sys.dm_hadr_availability_group_states', 'synchronization_health'),
+]
+AO_REPLICA_SYNC_METRICS = [
     ('sqlserver.ao.replica_sync_state', 'sys.dm_hadr_database_replica_states', 'synchronization_state'),
+]
+AO_REPLICA_FAILOVER_METRICS = [
     ('sqlserver.ao.replica_failover_mode', 'sys.availability_replicas', 'failover_mode'),
     ('sqlserver.ao.replica_failover_readiness', 'sys.availability_replicas', 'is_failover_ready'),
 ]
+AO_METRICS = AO_AG_SYNC_METRICS + AO_REPLICA_SYNC_METRICS + AO_REPLICA_FAILOVER_METRICS
 
 AO_METRICS_PRIMARY = [
     ('sqlserver.ao.primary_replica_health', 'sys.dm_hadr_availability_group_states', 'primary_recovery_health'),
@@ -151,17 +156,20 @@ AO_METRICS_SECONDARY = [
 
 # Non-performance table metrics - can be database specific
 # datadog metric name, sql table, column name
-TASK_SCHEDULER_METRICS = [
+OS_SCHEDULER_METRICS = [
     ('sqlserver.scheduler.current_tasks_count', 'sys.dm_os_schedulers', 'current_tasks_count'),
     ('sqlserver.scheduler.current_workers_count', 'sys.dm_os_schedulers', 'current_workers_count'),
     ('sqlserver.scheduler.active_workers_count', 'sys.dm_os_schedulers', 'active_workers_count'),
     ('sqlserver.scheduler.runnable_tasks_count', 'sys.dm_os_schedulers', 'runnable_tasks_count'),
     ('sqlserver.scheduler.work_queue_count', 'sys.dm_os_schedulers', 'work_queue_count'),
+]
+OS_TASK_METRICS = [
     ('sqlserver.task.context_switches_count', 'sys.dm_os_tasks', 'context_switches_count'),
     ('sqlserver.task.pending_io_count', 'sys.dm_os_tasks', 'pending_io_count'),
     ('sqlserver.task.pending_io_byte_count', 'sys.dm_os_tasks', 'pending_io_byte_count'),
     ('sqlserver.task.pending_io_byte_average', 'sys.dm_os_tasks', 'pending_io_byte_average'),
 ]
+TASK_SCHEDULER_METRICS = OS_SCHEDULER_METRICS + OS_TASK_METRICS
 
 # Non-performance table metrics
 # datadog metric name, sql table, column name
@@ -173,13 +181,21 @@ TASK_SCHEDULER_METRICS = [
 #   4 = Suspect, 5 = Emergency, 6 = Offline, 7 = Copying, 10 = Offline_Secondary
 # Is Sync with Backup enum:
 #   0 = False, 1 = True
-DATABASE_METRICS = [
+DATABASE_FILES_METRICS = [
     ('sqlserver.database.files.size', 'sys.database_files', 'size'),
+    ('sqlserver.database.files.space_used', 'sys.database_files', 'space_used'),
     ('sqlserver.database.files.state', 'sys.database_files', 'state'),
+]
+DATABASE_STATS_METRICS = [
     ('sqlserver.database.state', 'sys.databases', 'state'),
     ('sqlserver.database.is_sync_with_backup', 'sys.databases', 'is_sync_with_backup'),
+    ('sqlserver.database.is_in_standby', 'sys.databases', 'is_in_standby'),
+    ('sqlserver.database.is_read_only', 'sys.databases', 'is_read_only'),
+]
+DATABASE_BACKUP_METRICS = [
     ('sqlserver.database.backup_count', 'msdb.dbo.backupset', 'backup_set_id_count'),
 ]
+DATABASE_METRICS = DATABASE_FILES_METRICS + DATABASE_STATS_METRICS + DATABASE_BACKUP_METRICS
 
 DATABASE_INDEX_METRICS = [
     ('sqlserver.index.user_seeks', 'sys.dm_db_index_usage_stats', 'user_seeks'),
@@ -231,3 +247,5 @@ TEMPDB_FILE_SPACE_USAGE_METRICS = [
     ),
     ('sqlserver.tempdb.file_space_usage.mixed_extent_space', 'sys.dm_db_file_space_usage', 'mixed_extent_space'),
 ]
+
+PROC_CHAR_LIMIT = 500

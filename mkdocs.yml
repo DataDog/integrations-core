@@ -145,6 +145,7 @@ markdown_extensions:
   - pymdownx.caret:
   - pymdownx.critic:
   - pymdownx.details:
+  - pymdownx.superfences:
   - pymdownx.emoji:
       # https://github.com/twitter/twemoji
       # https://raw.githubusercontent.com/facelessuser/pymdown-extensions/master/pymdownx/twemoji_db.py

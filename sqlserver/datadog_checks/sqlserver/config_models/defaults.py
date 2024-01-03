@@ -84,6 +84,14 @@ def instance_include_master_files_metrics():
     return False
 
 
+def instance_include_primary_log_shipping_metrics():
+    return False
+
+
+def instance_include_secondary_log_shipping_metrics():
+    return False
+
+
 def instance_include_task_scheduler_metrics():
     return False
 
@@ -118,6 +126,10 @@ def instance_proc_only_if_database():
 
 def instance_server_version():
     return '2014'
+
+
+def instance_stored_procedure_characters_limit():
+    return 500
 
 
 def instance_use_global_custom_queries():

@@ -356,6 +356,7 @@ files:
               - "model"
               - "msdb"
               - "cloudsqladmin"
+              - "rdsadmin"
             display_default:
               - "cloudsqladmin"
         - name: refresh
@@ -570,6 +571,27 @@ files:
           value:
             type: string
             example: us-east-1
+        - name: managed_authentication
+          description: |
+            Configure section used for AWS IAM Authentication with RDS.
+
+            This supports using IAM database authentication to connect to your database instance.
+
+            For more information on configuration, see
+            https://docs.datadoghq.com/database_monitoring/guide/managed_authentication
+            
+            For more information on RDS IAM Authentication, see the AWS docs
+            https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.Connecting.html
+
+            To enable IAM Authentication, set `aws.managed_authentication.enabled` to `true`.
+            If `aws.managed_authentication.enabled` is set, then the `password` fields will be ignored.
+            `aws.region` is required to enable IAM Authentication.
+          value:
+            type: object
+            properties:
+            - name: enabled
+              type: boolean
+              example: false
 
     - name: gcp
       description: |
@@ -631,9 +653,40 @@ files:
           value:
             type: string
             example: my-postgres-database.database.windows.net
+        - name: managed_authentication
+          description: |
+            Configuration section used for Azure AD Authentication.
+        
+            This supports using System or User assigned managed identities.
+
+            For more information on configuration, see
+            https://docs.datadoghq.com/database_monitoring/guide/managed_authentication
+            
+            For more information on Managed Identities, see the Azure docs
+            https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
+
+            To enable Azure AD Authentication, set `azure.managed_authentication.enabled` to `true`.
+            If `azure.managed_authentication.enabled` is set, then the `password` fields will be ignored.
+            `azure.managed_authentication.client_id` is required to enable Azure AD Authentication.
+
+            For more information on scopes, see the Azure docs
+            https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
+          value:
+            type: object
+            properties:
+            - name: enabled
+              type: boolean
+              example: false
+            - name: client_id
+              type: string
+            - name: identity_scope
+              type: string
+              example: https://ossrdbms-aad.database.windows.net/.default
 
     - name: managed_identity
       description: |
+        DEPRECATED: Please use `azure.managed_authentication` instead.
+
         Configuration section used for Azure AD Authentication.
         
         This supports using System or User assigned managed identities.
@@ -663,6 +716,16 @@ files:
         Configure how the SQL obfuscator behaves.
         Note: This option only applies when `dbm` is enabled.
       options:
+        - name: obfuscation_mode
+          description: |
+            Set the obfuscation mode. The obfuscation mode determines how the SQL obfuscator will obfuscate your SQL
+            statements. The following modes are supported:
+            - `obfuscate_only`: Obfuscate the SQL statement without normalizing the statement.
+            - `obfuscate_and_normalize`: Obfuscate the SQL statement and normalize the statement.
+          value:
+            type: string
+            example: obfuscate_and_normalize
+            display_default: obfuscate_and_normalize
         - name: replace_digits
           description: |
             Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
@@ -718,6 +781,48 @@ files:
             type: boolean
             example: true
             display_default: true
+        - name: remove_space_between_parentheses
+          description: |
+            Set to `true` to remove spaces between parentheses in your normalized SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: keep_null
+          description: |
+            Set to `true` to keep the keyword `NULL` in your obfuscated SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: keep_boolean
+          description: |
+            Set to `true` to keep the keywords `TRUE` and `FALSE` in your obfuscated SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: keep_positional_parameter
+          description: |
+            Set to `true` to keep positional parameters (e.g. `$1`) in your obfuscated SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: keep_trailing_semicolon
+          description: |
+            Set to `true` to keep trailing semicolons in your normalized SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: keep_identifier_quotation
+          description: |
+            Set to `true` to keep identifier quotations (e.g. `"my_table"`) in your normalized SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
     - name: log_unobfuscated_queries
       hidden: true
       description: |

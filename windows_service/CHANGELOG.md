@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.7.1 / 2023-11-10 / Agent 7.50.0
+
+***Fixed***:
+
+* Fix regression introduced in Agent 7.41.0 when handling service name patterns that are a prefix of another pattern ([#16120](https://github.com/DataDog/integrations-core/pull/16120))
+
 ## 4.7.0 / 2023-10-26
 
 ***Added***:

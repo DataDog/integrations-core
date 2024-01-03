@@ -61,6 +61,7 @@ class InstanceConfig(BaseModel):
     included_messages: Optional[tuple[str, ...]] = None
     interpret_messages: Optional[bool] = None
     legacy_mode: Optional[bool] = None
+    legacy_mode_v2: Optional[bool] = None
     log_file: Optional[tuple[str, ...]] = None
     message_filters: Optional[tuple[str, ...]] = None
     metric_patterns: Optional[MetricPatterns] = None

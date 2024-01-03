@@ -59,7 +59,7 @@ IGNORED_DEPS = {
 # Dependencies for the downloader that are security-related and should be updated separately from the others
 SECURITY_DEPS = {'in-toto', 'tuf', 'securesystemslib'}
 
-SUPPORTED_PYTHON_MINOR_VERSIONS = {'2': '2.7', '3': '3.9'}
+SUPPORTED_PYTHON_MINOR_VERSIONS = {'2': '2.7', '3': '3.11'}
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage dependencies')

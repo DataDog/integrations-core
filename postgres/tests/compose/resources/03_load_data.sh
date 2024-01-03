@@ -6,10 +6,10 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     INSERT INTO cities VALUES ('New York', 'USA'), ('Beautiful city of lights', 'France');
     CREATE TABLE persons (personid SERIAL, lastname VARCHAR(255), firstname VARCHAR(255), address VARCHAR(255), city VARCHAR(255) DEFAULT 'New York',  CONSTRAINT fk_city FOREIGN KEY (city) REFERENCES cities(city));
     INSERT INTO persons (lastname, firstname, address, city) VALUES ('Cavaille', 'Leo', 'Midtown', 'New York'), ('Someveryveryveryveryveryveryveryveryveryverylongname', 'something', 'Avenue des Champs Elysees', 'Beautiful city of lights');
-    CREATE TABLE personsdup1 (personid SERIAL, lastname VARCHAR(255), firstname VARCHAR(255), address VARCHAR(255), city VARCHAR(255));
-    INSERT INTO personsdup1 (lastname, firstname, address, city) VALUES ('Cavaille', 'Leo', 'Midtown', 'New York'), ('Someveryveryveryveryveryveryveryveryveryverylongname', 'something', 'Avenue des Champs Elysees', 'Beautiful city of lights');
-    CREATE TABLE Personsdup2 (personid SERIAL, lastname VARCHAR(255), firstname VARCHAR(255), address VARCHAR(255), city VARCHAR(255));
-    INSERT INTO Personsdup2 (lastname, firstname, address, city) VALUES ('Cavaille', 'Leo', 'Midtown', 'New York'), ('Someveryveryveryveryveryveryveryveryveryverylongname', 'something', 'Avenue des Champs Elysees', 'Beautiful city of lights');
+    CREATE TABLE personsdup1 AS TABLE persons;
+    CREATE TABLE personsdup2 AS TABLE persons;
+    CREATE TABLE persons_indexed AS TABLE persons;
+    ALTER TABLE persons_indexed ADD PRIMARY KEY (personid);
     CREATE TABLE pgtable (personid SERIAL, lastname VARCHAR(255), firstname VARCHAR(255), address VARCHAR(255), city VARCHAR(255));
     INSERT INTO pgtable (lastname, firstname, address, city) VALUES ('Cavaille', 'Leo', 'Midtown', 'New York'), ('Someveryveryveryveryveryveryveryveryveryverylongname', 'something', 'Avenue des Champs Elysees', 'Beautiful city of lights');
     CREATE TABLE pg_newtable (personid SERIAL, lastname VARCHAR(255), firstname VARCHAR(255), address VARCHAR(255), city VARCHAR(255));
@@ -20,6 +20,15 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bob;
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO blocking_bob;
 EOSQL
+
+# Create publication for logical replication tests
+if [[ !("$PG_MAJOR" == 9.*) ]]; then
+psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -p5432 datadog_test <<-EOSQL
+    CREATE PUBLICATION publication_persons for table persons_indexed;
+    CREATE PUBLICATION publication_cities for table cities;
+    CREATE PUBLICATION publication_persons_2 for table persons_indexed;
+EOSQL
+fi
 
 if [[ !("$PG_MAJOR" == 9.*) && !("$PG_MAJOR" == 10) ]]; then
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL

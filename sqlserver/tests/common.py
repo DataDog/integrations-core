@@ -118,14 +118,24 @@ EXPECTED_QUERY_EXECUTOR_AO_METRICS_SECONDARY = [
     'sqlserver.ao.redo_rate',
     'sqlserver.ao.filestream_send_rate',
 ]
-EXPECTED_QUERY_EXECUTOR_AO_METRICS_COMMON = [
+EXPECTED_QUERY_EXECUTOR_AO_METRICS_REPLICA_COMMON = [
     'sqlserver.ao.is_primary_replica',
     'sqlserver.ao.replica_status',
+]
+EXPECTED_QUERY_EXECUTOR_AO_METRICS_QUORUM_COMMON = [
     'sqlserver.ao.quorum_type',
     'sqlserver.ao.quorum_state',
+]
+EXPECTED_QUERY_EXECUTOR_AO_METRICS_MEMBER_COMMON = [
     'sqlserver.ao.member.type',
     'sqlserver.ao.member.state',
 ]
+EXPECTED_QUERY_EXECUTOR_AO_METRICS_COMMON = (
+    EXPECTED_QUERY_EXECUTOR_AO_METRICS_REPLICA_COMMON
+    + EXPECTED_QUERY_EXECUTOR_AO_METRICS_QUORUM_COMMON
+    + EXPECTED_QUERY_EXECUTOR_AO_METRICS_MEMBER_COMMON
+)
+
 # Our test environment does not have failover clustering enabled, so these metrics are not expected.
 # To test them follow this guide:
 # https://cloud.google.com/compute/docs/instances/sql-server/configure-failover-cluster-instance

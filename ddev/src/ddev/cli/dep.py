@@ -39,6 +39,18 @@ IGNORED_DEPS = {
     # Somehow we do not load the right version. Until we find out how and why, we need to keep both
     # libs in sync with the same version of odpi.
     'oracledb',
+    # We're not ready to switch to v3 of the postgres library, see:
+    # https://github.com/DataDog/integrations-core/pull/15859
+    'psycopg2-binary',
+    # orjson ... requires rustc 1.65+, but the latest we can have (thanks CentOS 6) is 1.62.
+    # We get the following error when compiling orjson on Centos 6:
+    # error: package `associative-cache v2.0.0` cannot be built because it requires rustc 1.65 or newer,
+    # while the currently active rustc version is 1.62.0-nightly
+    # Here's orjson switching to rustc 1.65:
+    # https://github.com/ijl/orjson/commit/ce9bae876657ed377d761bf1234b040e2cc13d3c
+    'orjson',
+    # 2.4.10 is broken on py2 and they did not yank the version
+    'rethinkdb',
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
@@ -312,6 +324,7 @@ def read_check_dependencies(repo, integrations=None):
         integrations = [repo.integrations.get(integration) for integration in integrations]
     elif integrations is None:
         integrations = list(repo.integrations.iter_agent_checks('all'))
+        integrations.append(repo.integrations.get('datadog_checks_base'))
     else:
         integrations = [repo.integrations.get(integrations)]
 

@@ -13,13 +13,15 @@ from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.http import RequestsWrapper
 
+from .sli_metrics import SliMetricsScraperMixin
+
 NEW_1_24_COUNTERS = {
     # This metric replaces the deprecated node_collector_evictions_number metric as of k8s v1.24+
     'node_collector_evictions_total': 'nodes.evictions',
 }
 
 
-class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
+class KubeControllerManagerCheck(KubeLeaderElectionMixin, SliMetricsScraperMixin, OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
     DEFAULT_IGNORE_DEPRECATED = False
 
@@ -149,6 +151,13 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
 
                 instance['health_url'] = url
 
+                slis_instance = self.create_sli_prometheus_instance(instance)
+                instance['sli_scraper_config'] = self.get_scraper_config(slis_instance)
+                if instance.get('slis_available') is None:
+                    instance['slis_available'] = self.detect_sli_endpoint(
+                        self.get_http_handler(instance['sli_scraper_config']), slis_instance.get('prometheus_url')
+                    )
+
     def check(self, instance):
         # Get the configuration for this specific instance
         scraper_config = self.get_scraper_config(instance)
@@ -181,6 +190,10 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
             self.check_election_status(leader_config)
 
         self._perform_service_check(instance)
+
+        if instance.get('sli_scraper_config') and instance.get('slis_available'):
+            self.log.debug('Processing kube controller manager SLI metrics')
+            self.process(instance['sli_scraper_config'], metric_transformers=self.sli_transformers)
 
     def _ignore_deprecated_metric(self, metric, scraper_config):
         return metric.documentation.startswith("(Deprecated)")

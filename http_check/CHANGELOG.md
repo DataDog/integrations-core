@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 9.2.3 / 2023-12-04 / Agent 7.50.0
+
+***Fixed***:
+
+* Bump the cryptography version to 41.0.6 ([#16322](https://github.com/DataDog/integrations-core/pull/16322))
+
+## 9.2.2 / 2023-11-10
+
+***Fixed***:
+
+* Allow using an integer for the expected status code in the config ([#16163](https://github.com/DataDog/integrations-core/pull/16163))
+
 ## 9.2.1 / 2023-10-26 / Agent 7.49.0
 
 ***Fixed***:

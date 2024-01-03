@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.1.0 / 2023-11-10 / Agent 7.50.0
+
+***Added***:
+
+* Updated dependencies. ([#16154](https://github.com/DataDog/integrations-core/pull/16154))
+
 ## 5.0.1 / 2023-10-18
 
 ***Fixed***:

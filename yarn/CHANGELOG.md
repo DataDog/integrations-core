@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.1.0 / 2023-11-10 / Agent 7.50.0
+
+***Added***:
+
+* Add `yarn.metrics.decommissioning_nodes` metric ([#15980](https://github.com/DataDog/integrations-core/pull/15980))
+
 ## 5.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:

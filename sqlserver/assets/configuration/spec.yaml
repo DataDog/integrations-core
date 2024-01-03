@@ -162,6 +162,22 @@ files:
       value:
         type: boolean
         example: false
+    - name: include_primary_log_shipping_metrics
+      description: |
+        Include log_shipping_primary metrics for a log shipping setup. Required to run
+        against the primary instance in a transaction log shipping configuration. Note that
+        the Datadog user needs to be present in msdb and must be added to the db_datareader role.
+      value:
+        type: boolean
+        example: false
+    - name: include_secondary_log_shipping_metrics
+      description: |
+        Include log_shipping_secondary metrics for a log shipping setup. Required to run
+        against a secondary instance in a transaction log shipping configuration. Note that
+        the Datadog user needs to be present in msdb and must be added to the db_datareader role.
+      value:
+        type: boolean
+        example: false
     - name: include_instance_metrics
       description: |
         Include server-level instance metrics.  When setting up multiple instances for
@@ -184,8 +200,8 @@ files:
     - name: include_index_usage_metrics
       description: |
         Configure the collection of user table index usage statistics from the `sys.dm_db_index_usage_stats` DMV.
-        
-        Because the `sys.dm_db_index_usage_stats` view is scoped to the current database, enable 
+
+        Because the `sys.dm_db_index_usage_stats` view is scoped to the current database, enable
         `database_autodiscovery` or set `database`.
       value:
         type: boolean
@@ -201,7 +217,7 @@ files:
           type: string
     - name: include_tempdb_file_space_usage_metrics
       description: |
-        Include tempdb file space usage metrics for how space is used in tempdb data files. 
+        Include tempdb file space usage metrics for how space is used in tempdb data files.
       value:
         type: boolean
         example: true
@@ -379,6 +395,16 @@ files:
           value:
             type: number
             example: 10
+    - name: stored_procedure_characters_limit
+      description: |
+        Limit the number of characters of the text of a stored procedure that is collected.
+        The characters limit is applicable to both query metrics and query samples.
+        Please be aware that increasing this value may affect performance,
+        as more data will be gathered from the database and sent to Datadog.
+      value:
+        type: integer
+        example: 500
+        display_default: 500
 
     - name: aws
       description: |
@@ -495,6 +521,16 @@ files:
         Configure how the SQL obfuscator behaves.
         Note: This option only applies when `dbm` is enabled.
       options:
+        - name: obfuscation_mode
+          description: |
+            Set the obfuscation mode. The obfuscation mode determines how the SQL obfuscator will obfuscate your SQL
+            statements. The following modes are supported:
+            - `obfuscate_only`: Obfuscate the SQL statement without normalizing the statement.
+            - `obfuscate_and_normalize`: Obfuscate the SQL statement and normalize the statement.
+          value:
+            type: string
+            example: obfuscate_and_normalize
+            display_default: obfuscate_and_normalize
         - name: replace_digits
           description: |
             Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
@@ -541,6 +577,48 @@ files:
             type: boolean
             example: true
             display_default: true
+        - name: remove_space_between_parentheses
+          description: |
+            Set to `true` to remove spaces between parentheses in your normalized SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: keep_null
+          description: |
+            Set to `true` to keep the keyword `NULL` in your obfuscated SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: keep_boolean
+          description: |
+            Set to `true` to keep the keywords `TRUE` and `FALSE` in your obfuscated SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: keep_positional_parameter
+          description: |
+            Set to `true` to keep positional parameters (e.g. `$1`) in your obfuscated SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: keep_trailing_semicolon
+          description: |
+            Set to `true` to keep trailing semicolons in your normalized SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: keep_identifier_quotation
+          description: |
+            Set to `true` to keep identifier quotations (e.g. `"my_table"`) in your normalized SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
     - name: log_unobfuscated_queries
       hidden: true
       description: |

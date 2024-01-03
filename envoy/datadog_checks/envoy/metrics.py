@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from .utils import make_metric_tree
+from .utils import make_metric_tree, modify_metrics_dict
 
 METRIC_PREFIX = 'envoy.'
 
@@ -368,6 +368,15 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_tcp_on_demand_cluster_timeout': 'tcp.on_demand_cluster_timeout',
     'envoy_tcp_upstream_flush': 'tcp.upstream_flush',
     'envoy_tcp_upstream_flush_active': 'tcp.upstream_flush_active',
+    'envoy_http_rbac_allowed': 'http.rbac_allowed',
+    'envoy_http_rbac_denied': 'http.rbac_denied',
+    'envoy_http_rbac_shadow_allowed': 'http.rbac_shadow_allowed',
+    'envoy_http_rbac_shadow_denied': 'http.rbac_shadow_denied',
+    'envoy_http_local_rate_limit_enabled': 'http.local_rate_limit_enabled',
+    'envoy_http_local_rate_limit_enforced': 'http.local_rate_limit_enforced',
+    'envoy_http_local_rate_limit_rate_limited': 'http.local_rate_limit_rate_limited',
+    'envoy_http_local_rate_limit_ok': 'http.local_rate_limit_ok',
+    'envoy_control_plane_connected_state': 'control_plane.connected_state',
 }
 
 # fmt: off
@@ -3853,7 +3862,73 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'http.rbac.allowed': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.rbac.denied': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.rbac.shadow_allowed': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.rbac.shadow_denied': {
+        'tags': (
+            ('stat_prefix',),
+            ('shadow_rule_prefix',),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    # "*." to match at the beginning of raw metric if it doesn't have a standard name
+    '*.http_local_rate_limit.enabled': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    '*.http_local_rate_limit.enforced': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    '*.http_local_rate_limit.rate_limited': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    '*.http_local_rate_limit.ok': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
 }
 # fmt: on
 
+MOD_METRICS = modify_metrics_dict(METRICS)
 METRIC_TREE = make_metric_tree(METRICS)

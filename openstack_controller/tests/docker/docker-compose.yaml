@@ -50,3 +50,11 @@ services:
       - ./etc/caddy/octavia:/etc/caddy/
     ports:
       - "9876:80"
+  openstack-glance:
+    image: caddy:2.6.2-alpine
+    container_name: openstack-glance
+    volumes:
+      - ../fixtures:/usr/share/caddy
+      - ./etc/caddy/glance:/etc/caddy/
+    ports:
+      - "9292:80"

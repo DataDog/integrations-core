@@ -4,8 +4,10 @@
 import psycopg2
 import pytest
 
-from .common import DB_NAME, HOST, assert_metric_at_least
-from .utils import requires_over_10
+from datadog_checks.postgres.util import QUERY_PG_REPLICATION_SLOTS_STATS
+
+from .common import DB_NAME, HOST, _iterate_metric_name, assert_metric_at_least
+from .utils import requires_over_10, requires_over_14
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -114,3 +116,19 @@ def test_logical_replication_slots(aggregator, integration_check, pg_instance):
         lower_bound=restart_age,
         tags=expected_tags,
     )
+
+
+@requires_over_14
+def test_replication_slot_stats(aggregator, integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    expected_tags = pg_instance['tags'] + [
+        'port:{}'.format(pg_instance['port']),
+        'slot_name:logical_slot',
+        'slot_state:inactive',
+        'slot_type:logical',
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
+    for metric_name in _iterate_metric_name(QUERY_PG_REPLICATION_SLOTS_STATS):
+        aggregator.assert_metric(metric_name, count=1, tags=expected_tags)

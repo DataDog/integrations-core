@@ -118,6 +118,12 @@ class ApiSdk(Api):
         response.raise_for_status()
         return response.elapsed.total_seconds() * 1000
 
+    def call_paginated_api(self, method_name, *args, **kwargs):
+        if kwargs.get('limit') is None:
+            kwargs.pop('limit')
+
+        return method_name(*args, **kwargs)
+
     def get_identity_regions(self):
         return [region.to_dict(original_names=True) for region in self.connection.identity.regions()]
 
@@ -202,7 +208,12 @@ class ApiSdk(Api):
         return self.connection.network.get_quota(project_id, details=True).to_dict(original_names=True)
 
     def get_baremetal_nodes(self):
-        return [node.to_dict(original_names=True) for node in self.connection.baremetal.nodes(details=True)]
+        return [
+            node.to_dict(original_names=True)
+            for node in self.call_paginated_api(
+                self.connection.baremetal.nodes, details=True, limit=self.config.paginated_limit
+            )
+        ]
 
     def get_baremetal_conductors(self):
         return [conductor.to_dict(original_names=True) for conductor in self.connection.baremetal.conductors()]
@@ -266,3 +277,6 @@ class ApiSdk(Api):
         )
         response.raise_for_status()
         return response.json().get('amphora_stats', [])
+
+    def get_glance_images(self):
+        return [image.to_dict(original_names=True) for image in self.connection.image.images()]

@@ -34,7 +34,7 @@ def test_sys_metrics(aggregator, check):
     cur = mock.MagicMock()
     con.cursor.return_value = cur
     metrics = copy.deepcopy(queries.SystemMetrics['columns'][1]['items'])
-    cur.fetchall.return_value = zip([0] * len(metrics.keys()), metrics.keys())
+    cur.fetchall.return_value = zip([0] * len(metrics.keys()), metrics.keys(), strict=True)
 
     check._cached_connection = con
     check._query_manager.queries = [Query(queries.SystemMetrics)]
