@@ -4,12 +4,6 @@
 
 ## 29.0.1 / 2024-01-02
 
-***Added***:
-
-* Extend messages from dependency validation. ([#15558](https://github.com/DataDog/integrations-core/pull/15558))
-    1. Say which ddev command to run to fix particular type of error.
-    2. Report success at the end.
-
 ***Fixed***:
 
 * Set the Python version back to 3.9 in the templates ([#16504](https://github.com/DataDog/integrations-core/pull/16504))
