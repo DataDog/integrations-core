@@ -88,6 +88,8 @@ paramiko = ['LGPL-2.1-only']
 oracledb = ['Apache-2.0']
 # https://github.com/psycopg/psycopg/blob/master/LICENSE.txt
 psycopg = ['LGPL-3.0-only']
+# https://github.com/psycopg/psycopg/blob/master/psycopg_pool/LICENSE.txt
+psycopg-pool = ['LGPL-3.0-only']
 # https://github.com/psycopg/psycopg2/blob/master/LICENSE
 # https://github.com/psycopg/psycopg2/blob/master/doc/COPYING.LESSER
 psycopg2-binary = ['LGPL-3.0-only', 'BSD-3-Clause']
@@ -110,7 +112,6 @@ win-inet-pton = ['Unlicense']
 
 [overrides.dependencies.repo]
 PyYAML = 'https://github.com/yaml/pyyaml'
-Pyro4 = 'https://github.com/irmen/Pyro4'
 contextlib2 = 'https://github.com/jazzband/contextlib2'
 dnspython = 'https://github.com/rthalley/dnspython'
 foundationdb = 'https://github.com/apple/foundationdb'
@@ -138,17 +139,14 @@ exclude = ["openmetrics"]
 [overrides.validate.metrics]
 exclude = [
     'disk',
-    'go_expvar',
     'go-metro',
-    'http',
+    'http_check',
     'kubelet',
-    'kubernetes',
     'kubernetes_state',
     'network',
     'ntp',
     'process',
-    'riak_cs',
     'system_core',
     'system_swap',
-    'tcp',
+    'tcp_check',
 ]

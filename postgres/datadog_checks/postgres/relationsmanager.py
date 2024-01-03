@@ -35,6 +35,7 @@ LOCK_METRICS = {
         ('nspname', 'schema'),
         ('datname', 'db'),
         ('relname', 'table'),
+        ('granted', 'granted'),
     ],
     'metrics': {'lock_count': ('postgresql.locks', AgentCheck.gauge)},
     'query': """
@@ -43,6 +44,7 @@ SELECT mode,
        pn.nspname,
        pd.datname,
        pc.relname,
+       granted,
        count(*) AS {metrics_columns}
   FROM pg_locks l
   JOIN pg_database pd ON (l.database = pd.oid)
@@ -51,8 +53,9 @@ SELECT mode,
  WHERE {relations}
    AND l.mode IS NOT NULL
    AND pc.relname NOT LIKE 'pg^_%%' ESCAPE '^'
- GROUP BY pd.datname, pc.relname, pn.nspname, locktype, mode""",
+ GROUP BY pd.datname, pc.relname, pn.nspname, locktype, mode, granted""",
     'relation': True,
+    'name': 'lock_metrics',
 }
 
 # The pg_stat_all_tables contain one row for each table in the current database,
@@ -75,12 +78,17 @@ REL_METRICS = {
         'autovacuum_count': ('postgresql.autovacuumed', AgentCheck.monotonic_count),
         'analyze_count': ('postgresql.analyzed', AgentCheck.monotonic_count),
         'autoanalyze_count': ('postgresql.autoanalyzed', AgentCheck.monotonic_count),
+        'EXTRACT(EPOCH FROM -age(last_vacuum))': ('postgresql.last_vacuum_age', AgentCheck.gauge),
+        'EXTRACT(EPOCH FROM -age(last_autovacuum))': ('postgresql.last_autovacuum_age', AgentCheck.gauge),
+        'EXTRACT(EPOCH FROM -age(last_analyze))': ('postgresql.last_analyze_age', AgentCheck.gauge),
+        'EXTRACT(EPOCH FROM -age(last_autoanalyze))': ('postgresql.last_autoanalyze_age', AgentCheck.gauge),
     },
     'query': """
 SELECT relname,schemaname,{metrics_columns}
   FROM pg_stat_user_tables
  WHERE {relations}""",
     'relation': True,
+    'name': 'rel_metrics',
 }
 
 
@@ -103,6 +111,7 @@ SELECT relname,
   FROM pg_stat_user_indexes
  WHERE {relations}""",
     'relation': True,
+    'name': 'idx_metrics',
 }
 
 
@@ -190,7 +199,9 @@ SELECT relname,
   FROM pg_statio_user_tables
  WHERE {relations}""",
     'relation': True,
+    'name': 'statio_metrics',
 }
+
 # adapted from https://wiki.postgresql.org/wiki/Show_database_bloat and https://github.com/bucardo/check_postgres/
 TABLE_BLOAT_QUERY = """
 SELECT
@@ -241,6 +252,7 @@ TABLE_BLOAT = {
     },
     'query': TABLE_BLOAT_QUERY,
     'relation': True,
+    'name': 'table_bloat_metrics',
 }
 
 
@@ -296,6 +308,7 @@ INDEX_BLOAT = {
     },
     'query': INDEX_BLOAT_QUERY,
     'relation': True,
+    'name': 'index_bloat_metrics',
 }
 
 RELATION_METRICS = [LOCK_METRICS, REL_METRICS, IDX_METRICS, STATIO_METRICS]

@@ -1,0 +1,1 @@
+Add `cpu_usage.pct` metric from `ELAPSED_CPU_PERCENTAGE` retrieved from query

@@ -4,58 +4,93 @@
 }
 :80 {
     root * /usr/share/caddy/
-    @get_v2_1_4bfc1 {
+    @get_compute_v_2_1 {
         method GET
-        header X-Auth-Token "demo_test"
-        path /v2.1/4bfc1
+        path /compute/v2.1
     }
-    route @get_v2_1_4bfc1 {
-        rewrite /v2.1/4bfc1 /v2.1/4bfc1/get.json
+    route @get_compute_v_2_1 {
+        rewrite * /GET/compute/v2.1/response.json
         file_server
     }
-    @get_limits {
+    @get_compute_v_2_1_limits {
         method GET
-        header X-Auth-Token "demo_test"
-        path /v2.1/4bfc1/limits
+        header "X-Auth-Token" "demo_test"
+        path /compute/v2.1/limits
     }
-    route @get_limits {
-        rewrite /v2.1/4bfc1/limits /v2.1/4bfc1/limits/{query.tenant_id}.json
+    route @get_compute_v_2_1_limits {
+        rewrite * /GET/compute/v2.1/limits/response.json
         file_server
     }
-    @get_servers_detail {
+    @get_compute_v_2_1_os_services {
         method GET
-        header X-Auth-Token "demo_test"
-        path /v2.1/4bfc1/servers/detail
+        header "X-Auth-Token" "demo_test"
+        path /compute/v2.1/os-services
     }
-    route @get_servers_detail {
-        rewrite /v2.1/4bfc1/servers/detail /v2.1/4bfc1/servers/detail/get.json
+    route @get_compute_v_2_1_os_services {
+        rewrite * /GET/compute/v2.1/os-services/response.json
         file_server
     }
-    @get_os_hypervisors_detail {
+    @get_compute_v_2_1_flavors_detail {
         method GET
-        header X-Auth-Token "demo_test"
-        path /v2.1/4bfc1/os-hypervisors/detail
+        header "X-Auth-Token" "demo_test"
+        path /compute/v2.1/flavors/detail
     }
-    route @get_os_hypervisors_detail {
-        rewrite /v2.1/4bfc1/os-hypervisors/detail /v2.1/4bfc1/os-hypervisors/detail/get.json
+    route @get_compute_v_2_1_flavors_detail {
+        rewrite * /GET/compute/v2.1/flavors/detail/response.json
         file_server
     }
-    @get_os_aggregates_detail {
+    @get_compute_v_2_1_hypervisors_detail {
         method GET
-        header X-Auth-Token "demo_test"
-        path /v2.1/4bfc1/os-aggregates
+        header "X-Auth-Token" "demo_test"
+        path /compute/v2.1/os-hypervisors/detail
     }
-    route @get_os_aggregates_detail {
-        rewrite /v2.1/4bfc1/os-aggregates /v2.1/4bfc1/os-aggregates/get.json
+    route @get_compute_v_2_1_hypervisors_detail {
+        rewrite * /GET/compute/v2.1/os-hypervisors/detail/response.json
         file_server
     }
-    @get_os_hypervisors_uptime {
+    @get_compute_v_2_1_hypervisors_1_uptime {
         method GET
-        header X-Auth-Token "demo_test"
-        path /v2.1/4bfc1/os-hypervisors/*/uptime
+        header "X-Auth-Token" "demo_test"
+        path /compute/v2.1/os-hypervisors/1/uptime
     }
-    route @get_os_hypervisors_uptime {
-        rewrite /v2.1/4bfc1/os-hypervisors/*/uptime /v2.1/4bfc1/os-hypervisors/uptime/get.json
+    route @get_compute_v_2_1_hypervisors_1_uptime {
+        rewrite * /GET/compute/v2.1/os-hypervisors/1/uptime/response.json
+        file_server
+    }
+    @get_compute_v_2_1_quota_sets {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /compute/v2.1/os-quota-sets/*
+    }
+    route @get_compute_v_2_1_quota_sets {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+    @get_compute_v_2_1_servers_detail {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /compute/v2.1/servers/detail
+    }
+    route @get_compute_v_2_1_servers_detail {
+        rewrite * /GET{http.request.uri.path}/{query}/response.json
+        file_server
+    }
+    @get_compute_v_2_1_flavors_id {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /compute/v2.1/flavors/*
+    }
+    route @get_compute_v_2_1_flavors_id {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+    @get_compute_v_2_1_servers_diagnostic {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /compute/v2.1/servers/*/diagnostics
+    }
+    route @get_compute_v_2_1_servers_diagnostic {
+        rewrite * /GET{http.request.uri.path}/response.json
         file_server
     }
     file_server browse

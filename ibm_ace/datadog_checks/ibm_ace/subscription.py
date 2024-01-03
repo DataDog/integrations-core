@@ -15,6 +15,11 @@ from datadog_checks.base.utils.time import get_timestamp
 from .flows import get_statistics
 from .resources import get_resource
 
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
 # https://www.ibm.com/docs/en/app-connect/12.0?topic=performance-resource-statistics
 # https://www.ibm.com/docs/en/app-connect/12.0?topic=data-message-flow-accounting-statistics-collection-options
 SNAPSHOT_UPDATE_INTERVAL = 20
@@ -22,8 +27,9 @@ SNAPSHOT_UPDATE_INTERVAL = 20
 
 def get_unique_name(check_id, topic_string):
     # https://www.ibm.com/docs/en/ibm-mq/9.2?topic=reference-crtmqmsub-create-mq-subscription#q084220___q084220SUBNAME
+    hostname = datadog_agent.get_hostname()
     data = topic_string.encode('utf-8')
-    return f'datadog-{check_id}-{hashlib.sha256(data).hexdigest()}'
+    return f'datadog-{check_id}-{hostname}-{hashlib.sha256(data).hexdigest()}'
 
 
 class Subscription(ABC):

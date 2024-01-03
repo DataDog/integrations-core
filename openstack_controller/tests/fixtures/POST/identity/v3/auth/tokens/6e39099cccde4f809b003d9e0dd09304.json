@@ -1,0 +1,194 @@
+{
+  "token": {
+    "methods": [
+      "password"
+    ],
+    "user": {
+      "domain": {
+        "id": "default",
+        "name": "Default"
+      },
+      "id": "78205c506b534738bc851d3e189a00c3",
+      "name": "admin",
+      "password_expires_at": null
+    },
+    "audit_ids": [
+      "aYBT-QLsTGyEITuk42WzJg"
+    ],
+    "expires_at": "2023-04-21T13:18:35.000000Z",
+    "issued_at": "2023-04-21T12:18:35.000000Z",
+    "project": {
+      "domain": {
+        "id": "default",
+        "name": "Default"
+      },
+      "id": "6e39099cccde4f809b003d9e0dd09304",
+      "name": "admin"
+    },
+    "is_domain": false,
+    "roles": [
+      {
+        "id": "1df2b751094e4337bb0545c93eef445d",
+        "name": "service"
+      },
+      {
+        "id": "5c90d9c6535d423aaf91af4db9f0d86a",
+        "name": "ResellerAdmin"
+      },
+      {
+        "id": "e7a17189523f43909a93316a8b006f17",
+        "name": "admin"
+      },
+      {
+        "id": "7ccf33ede2224c79b2593a67cfcd8f26",
+        "name": "reader"
+      },
+      {
+        "id": "3305e6f8eb664efd80611df34ab2fd53",
+        "name": "member"
+      }
+    ],
+    "catalog": [
+      {
+        "endpoints": [
+          {
+            "id": "658ae4230da74d0d91c6dc6defa65b78",
+            "interface": "public",
+            "region_id": "RegionOne",
+            "url": "http://10.164.0.11/placement",
+            "region": "RegionOne"
+          }
+        ],
+        "id": "155d28a57a054d5fae86410b566ffca1",
+        "type": "placement",
+        "name": "placement"
+      },
+      {
+        "endpoints": [
+          {
+            "id": "debb3264d4d848bc938dfcd60dd88526",
+            "interface": "public",
+            "region_id": "RegionOne",
+            "url": "http://127.0.0.1:8774/compute/v2/6e39099cccde4f809b003d9e0dd09304",
+            "region": "RegionOne"
+          }
+        ],
+        "id": "17d8088bf93b41b19ae971eb6f2aa7a5",
+        "type": "compute_legacy",
+        "name": "nova_legacy"
+      },
+      {
+        "endpoints": [
+          {
+            "id": "7e4c8d8ffb954d38be184d05ed1de624",
+            "interface": "public",
+            "region_id": "RegionOne",
+            "url": "http://127.0.0.1:8080/identity",
+            "region": "RegionOne"
+          }
+        ],
+        "id": "271afc4cc62e493592b6be9b87bfb108",
+        "type": "identity",
+        "name": "keystone"
+      },
+      {
+        "endpoints": [
+          {
+            "id": "ee9f0d215b414339935c1b60caddb179",
+            "interface": "public",
+            "region_id": "RegionOne",
+            "url": "http://127.0.0.1:8776/volume/v3/6e39099cccde4f809b003d9e0dd09304",
+            "region": "RegionOne"
+          }
+        ],
+        "id": "3ef836a26c2c40acabb07a6415384f20",
+        "type": "volumev3",
+        "name": "cinderv3"
+      },
+      {
+        "endpoints": [
+          {
+            "id": "407107c9ed614c1db506ff519e0bb5c5",
+            "interface": "public",
+            "region_id": "RegionOne",
+            "url": "http://127.0.0.1:8776/volume/v3/6e39099cccde4f809b003d9e0dd09304",
+            "region": "RegionOne"
+          }
+        ],
+        "id": "55b21161725a461793a2222749229306",
+        "type": "block-storage",
+        "name": "cinder"
+      },
+      {
+        "endpoints": [
+          {
+            "id": "b07762182a06438b8aa03a71e52c232c",
+            "interface": "public",
+            "region_id": "RegionOne",
+            "url": "http://127.0.0.1:9696/networking",
+            "region": "RegionOne"
+          }
+        ],
+        "id": "7dca0a2e55d74d66995f3105ed69608f",
+        "type": "network",
+        "name": "neutron"
+      },
+      {
+        "endpoints": [
+          {
+            "id": "b8af839f440c4603ae2189173ffc8786",
+            "interface": "public",
+            "region_id": "RegionOne",
+            "url": "http://127.0.0.1:9292/image",
+            "region": "RegionOne"
+          }
+        ],
+        "id": "82624ab61fb04f058d043facf315fa3c",
+        "type": "image",
+        "name": "glance"
+      },
+      {
+        "endpoints": [
+          {
+            "id": "42fa91d5ea1848bcac0f04e7958d016f",
+            "interface": "public",
+            "region_id": "RegionOne",
+            "url": "http://127.0.0.1:8774/compute/v2.1",
+            "region": "RegionOne"
+          }
+        ],
+        "id": "9aca42df11e84366924013b2f1a1259b",
+        "type": "compute",
+        "name": "nova"
+      },
+      {
+        "endpoints": [
+          {
+            "id": "61b7b2b0e5794548892ef59330710afd",
+            "interface": "public",
+            "region_id": "RegionOne",
+            "url": "http://127.0.0.1:6385/baremetal",
+            "region": "RegionOne"
+          }
+        ],
+        "id": "9756483c52864bbc8bbda7549737fe09",
+        "type": "baremetal",
+        "name": "ironic"
+      },
+      {
+        "endpoints": [
+          {
+            "id": "e3cf892a48ff48738025aba7f3b50879",
+            "interface": "public",
+            "region_id": "RegionOne",
+            "url": "http://127.0.0.1:9876/load-balancer",
+            "region": "RegionOne"
+          }
+        ],
+        "id": "953e317ff87c4da980fd8ececa569559",
+        "type": "load-balancer",
+        "name": "octavia"
+      }
+    ]
+  }
+}

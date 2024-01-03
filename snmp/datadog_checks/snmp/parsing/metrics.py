@@ -456,6 +456,14 @@ def _parse_table_metric_tag(mib, parsed_table, metric_tag):
         index: 2
     ```
     """
+
+    # Renamed `symbol` to `column` for backward compatibility with this change:
+    #   Deprecate `metric_tags[].column` in favour of `symbol`
+    #   https://github.com/DataDog/datadog-agent/pull/20030
+    if 'symbol' in metric_tag:
+        metric_tag['column'] = metric_tag['symbol']
+        del metric_tag['symbol']
+
     if 'column' in metric_tag:
         metric_tag = cast(ColumnTableMetricTag, metric_tag)
         metric_tag_mib = metric_tag.get('MIB', mib)

@@ -9,6 +9,7 @@ from .util import (
     ACTIVITY_METRICS_8_3,
     ACTIVITY_METRICS_9_2,
     ACTIVITY_METRICS_9_6,
+    ACTIVITY_METRICS_10,
     ACTIVITY_METRICS_LT_8_3,
     ACTIVITY_QUERY_10,
     ACTIVITY_QUERY_LT_10,
@@ -44,6 +45,8 @@ class PostgresMetricsCache:
         self.replication_stats_metrics = None
         self.activity_metrics = None
         self._count_metrics = None
+        if self.config.relations:
+            self.table_activity_metrics = {}
 
     def clean_state(self):
         self.instance_metrics = None
@@ -52,6 +55,8 @@ class PostgresMetricsCache:
         self.replication_metrics = None
         self.replication_stats_metrics = None
         self.activity_metrics = None
+        if self.config.relations:
+            self.table_activity_metrics = {}
 
     def get_instance_metrics(self, version):
         """
@@ -91,12 +96,12 @@ class PostgresMetricsCache:
             "FROM pg_stat_database psd "
             "JOIN pg_database pd ON psd.datname = pd.datname",
             'relation': False,
+            'name': 'instance_metrics',
         }
 
-        if len(self.config.ignore_databases) > 0:
-            res["query"] += " WHERE " + " AND ".join(
-                "psd.datname not ilike '{}'".format(db) for db in self.config.ignore_databases
-            )
+        res["query"] += " WHERE " + " AND ".join(
+            "psd.datname not ilike '{}'".format(db) for db in self.config.ignore_databases
+        )
 
         if self.config.dbstrict:
             res["query"] += " AND psd.datname in('{}')".format(self.config.dbname)
@@ -125,6 +130,7 @@ class PostgresMetricsCache:
             'metrics': self.bgw_metrics,
             'query': "select {metrics_columns} FROM pg_stat_bgwriter",
             'relation': False,
+            'name': 'bgw_metrics',
         }
 
     def get_count_metrics(self):
@@ -155,6 +161,7 @@ class PostgresMetricsCache:
             'metrics': self.archiver_metrics,
             'query': "select {metrics_columns} FROM pg_stat_archiver",
             'relation': False,
+            'name': 'archiver_metrics',
         }
 
     def get_replication_metrics(self, version, is_aurora):
@@ -197,6 +204,14 @@ class PostgresMetricsCache:
             default_descriptors = [('application_name', 'app'), ('datname', 'db'), ('usename', 'user')]
             default_aggregations = [d[0] for d in default_descriptors]
 
+            if 'datname' in excluded_aggregations:
+                excluded_aggregations.remove('datname')
+                logger.warning(
+                    "datname is a required aggregation but was set in activity_metrics_excluded_aggregations. "
+                    "Ignoring it and using the following instead: %s",
+                    excluded_aggregations,
+                )
+
             aggregation_columns = [a for a in default_aggregations if a not in excluded_aggregations]
             descriptors = [d for d in default_descriptors if d[0] not in excluded_aggregations]
 
@@ -212,6 +227,8 @@ class PostgresMetricsCache:
                     aggregation_columns_group=',' + ', '.join(aggregation_columns),
                 )
 
+            if version >= V10:
+                metrics_query = ACTIVITY_METRICS_10
             if version >= V9_6:
                 metrics_query = ACTIVITY_METRICS_9_6
             elif version >= V9_2:
@@ -225,7 +242,8 @@ class PostgresMetricsCache:
                 if '{dd__user}' in q:
                     metrics_query[i] = q.format(dd__user=self.config.user)
 
-            metrics = {k: v for k, v in zip(metrics_query, ACTIVITY_DD_METRICS)}
+            metrics = dict(zip(metrics_query, ACTIVITY_DD_METRICS, strict=False))
+
             self.activity_metrics = (metrics, query, descriptors)
         else:
             metrics, query, descriptors = metrics_data
@@ -235,4 +253,5 @@ class PostgresMetricsCache:
             'metrics': metrics,
             'query': query,
             'relation': False,
+            'name': 'activity_metrics',
         }

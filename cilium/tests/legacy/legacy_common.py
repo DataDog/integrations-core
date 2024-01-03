@@ -40,6 +40,7 @@ AGENT_DEFAULT_METRICS = [
     'cilium.triggers_policy.update_folds',
     'cilium.unreachable.health_endpoints',
     'cilium.unreachable.nodes',
+    "cilium.kvstore.quorum_errors.total",
 ]
 
 ADDL_AGENT_METRICS = [
@@ -49,6 +50,11 @@ ADDL_AGENT_METRICS = [
     'cilium.subprocess.start.total',
     'cilium.process.cpu.seconds.total',
     'cilium.policy.regeneration.total',
+    'cilium.proxy.redirects',
+    'cilium.proxy.upstream_reply.seconds.count',
+    'cilium.proxy.upstream_reply.seconds.sum',
+    'cilium.proxy.datapath.update_timeout.total',
+    'cilium.policy.l7.total',
     'cilium.policy.l7_denied.total',
     'cilium.policy.l7_forwarded.total',
     'cilium.policy.l7_parse_errors.total',
@@ -61,6 +67,9 @@ ADDL_AGENT_METRICS = [
     'cilium.k8s_client.api_calls.count',
     'cilium.ipam.events.total',
     'cilium.fqdn.gc_deletions.total',
+    'cilium.fqdn.active_names',
+    'cilium.fqdn.active_ips',
+    'cilium.fqdn.alive_zombie_connections',
     'cilium.forward_bytes.total',
     'cilium.forward_count.total',
     'cilium.errors_warning.total',
@@ -88,6 +97,8 @@ ADDL_AGENT_METRICS = [
     'cilium.policy.implementation_delay.count',
     'cilium.policy.implementation_delay.sum',
     'cilium.endpoint.regenerations.total',
+    "cilium.kvstore.sync_queue_size",
+    "cilium.kvstore.initial_sync_completed",
 ]
 
 OPERATOR_METRICS = [
@@ -162,4 +173,11 @@ OPERATOR_AWS_METRICS = [
     'cilium.operator.ipam.resync.latency.seconds.sum',
     'cilium.operator.num_ceps_per_ces.count',
     'cilium.operator.num_ceps_per_ces.sum',
+]
+
+OPERATOR_AZURE_METRICS = [
+    'cilium.operator.azure.api.duration.seconds.count',
+    'cilium.operator.azure.api.duration.seconds.sum',
+    'cilium.operator.azure.api.rate_limit.duration.seconds.count',
+    'cilium.operator.azure.api.rate_limit.duration.seconds.sum',
 ]

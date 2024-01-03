@@ -2,12 +2,12 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import threading
+import copy
+import select
 import time
 
-import psycopg
+import psycopg2
 import pytest
-from psycopg import ClientCursor
 
 from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION
 
@@ -26,27 +26,48 @@ def wait_on_result(cursor=None, sql=None, binds=None, expected_value=None):
     return True
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.skipif(
     POSTGRES_VERSION is None or float(POSTGRES_VERSION) < 9.2,
     reason='Deadlock test requires version 9.2 or higher (make sure POSTGRES_VERSION is set)',
 )
 def test_deadlock(aggregator, dd_run_check, integration_check, pg_instance):
+    '''
+    This test creates a deadlock by having two connections update the same two rows in opposite order.
+    conn1 - open new transaction (implicitly), update row 1, do not commit (transaction left open)
+    conn2 - open new transaction (explicitly), update row 2, update row 1, (attempt to) commit
+    conn1 - update row 2, (attempt to) commit
+    conn2 is blocked waiting for conn1 to update row 1
+    conn1 is blocked waiting for conn2 to update row 2
+    deadlock occurs
+    '''
     check = integration_check(pg_instance)
     check._connect()
     conn = check._new_connection(pg_instance['dbname'])
     cursor = conn.cursor()
 
-    def execute_in_thread(q, args):
-        with psycopg.connect(
-            host=HOST, dbname=DB_NAME, user="bob", password="bob", cursor_factory=ClientCursor
-        ) as tconn:
-            with tconn.cursor() as cur:
-                # this will block, and eventually throw when
-                # the deadlock is created
-                try:
-                    cur.execute(q, args)
-                except psycopg.errors.DeadlockDetected:
-                    pass
+    def wait(conn):
+        while True:
+            state = conn.poll()
+            if state == psycopg2.extensions.POLL_OK:
+                break
+            elif state == psycopg2.extensions.POLL_WRITE:
+                select.select([], [conn.fileno()], [])
+            elif state == psycopg2.extensions.POLL_READ:
+                select.select([conn.fileno()], [], [])
+            else:
+                raise psycopg2.OperationalError("poll() returned %s" % state)
+            time.sleep(0.1)
+
+    conn_args = {'host': HOST, 'dbname': DB_NAME, 'user': "bob", 'password': "bob"}
+    conn_args_async = copy.copy(conn_args)
+    conn_args_async["async_"] = 1
+    conn1 = psycopg2.connect(**conn_args)
+    conn1.autocommit = False
+
+    conn2 = psycopg2.connect(**conn_args_async)
+    wait(conn2)
 
     appname = 'deadlock sess'
     appname1 = appname + '1'
@@ -58,25 +79,22 @@ def test_deadlock(aggregator, dd_run_check, integration_check, pg_instance):
     cursor.execute(deadlock_count_sql, (DB_NAME,))
     deadlocks_before = cursor.fetchone()[0]
 
-    conn_args = {'host': HOST, 'dbname': DB_NAME, 'user': "bob", 'password': "bob"}
-    conn1 = psycopg.connect(**conn_args, autocommit=False, cursor_factory=ClientCursor)
-
     cur1 = conn1.cursor()
     cur1.execute(appname_sql, (appname1,))
     cur1.execute(update_sql, (1,))
 
-    args = (appname2, 2, 1)
-    query = """SET application_name=%s;
+    cur2 = conn2.cursor()
+    cur2.execute(
+        """SET application_name=%s;
 begin transaction;
 {};
 {};
 commit;
 """.format(
-        update_sql, update_sql
+            update_sql, update_sql
+        ),
+        (appname2, 2, 1),
     )
-    # ... now execute the test query in a separate thread
-    lock_task = threading.Thread(target=execute_in_thread, args=(query, args))
-    lock_task.start()
 
     lock_count_sql = """SELECT COUNT(1)
    FROM  pg_catalog.pg_locks         blocked_locks
@@ -106,8 +124,11 @@ commit;
     try:
         cur1.execute(update_sql, (2,))
         cur1.execute("commit")
-    except psycopg.errors.DeadlockDetected:
+    except psycopg2.errors.DeadlockDetected:
         pass
+
+    conn1.close()
+    conn2.close()
 
     dd_run_check(check)
 
@@ -123,3 +144,5 @@ commit;
             'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
         ],
     )
+
+    conn.close()

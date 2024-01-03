@@ -16,4 +16,7 @@ RUN chown root:root /u01/app/oracle/product/12.2.0/dbhome_1/admin/InfraDB/listen
 RUN chown root:root /u01/app/oracle/product/12.2.0/dbhome_1/admin/InfraDB/sqlnet.ora
 RUN chown root:root /u01/app/oracle/product/12.2.0/dbhome_1/admin/InfraDB/server_wallet
 
+# If you need to regenerate the keys, uncomment this and run the script in the README from the test folder
+# RUN yum -y install java
+
 USER oracle

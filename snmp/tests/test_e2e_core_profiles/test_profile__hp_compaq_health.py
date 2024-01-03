@@ -9,6 +9,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
+    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     create_e2e_core_test_config,
     get_device_ip_from_config,
@@ -18,7 +19,8 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile__hp_compaq_health(dd_agent_check):
-    config = create_e2e_core_test_config('_hp-compaq-health')
+    profile = '_hp-compaq-health'
+    config = create_e2e_core_test_config(profile)
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -52,8 +54,8 @@ def test_e2e_profile__hp_compaq_health(dd_agent_check):
     aggregator.assert_metric('snmp.cpqHeThermalSystemFanStatus', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.cpqHeThermalTempStatus', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
-        ['temperature_index:4'],
-        ['temperature_index:6'],
+        ['temperature_index:11'],
+        ['temperature_index:13'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -64,8 +66,8 @@ def test_e2e_profile__hp_compaq_health(dd_agent_check):
         )
 
     tag_rows = [
-        ['battery_index:19'],
-        ['battery_index:6'],
+        ['battery_index:24'],
+        ['battery_index:27'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -74,8 +76,8 @@ def test_e2e_profile__hp_compaq_health(dd_agent_check):
         aggregator.assert_metric('snmp.cpqHeSysBatteryStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['mem_board_index:0'],
-        ['mem_board_index:13'],
+        ['mem_board_index:15'],
+        ['mem_board_index:7'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -83,15 +85,21 @@ def test_e2e_profile__hp_compaq_health(dd_agent_check):
         )
 
     tag_rows = [
-        ['chassis_num:21', 'power_supply_status:giveupOnStartup'],
-        ['chassis_num:3', 'power_supply_status:fanFailure'],
+        ['chassis_num:22'],
+        ['chassis_num:8'],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric(
+            'snmp.cpqHeFltTolPowerSupplyStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+
+    tag_rows = [
+        ['chassis_num:22', 'power_supply_status:nvram_invalid'],
+        ['chassis_num:8', 'power_supply_status:general_failure'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
             'snmp.cpqHeFltTolPowerSupply', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.cpqHeFltTolPowerSupplyStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
             'snmp.cpqHeFltTolPowerSupplyCapacityMaximum', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
@@ -115,5 +123,6 @@ def test_e2e_profile__hp_compaq_health(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
+    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

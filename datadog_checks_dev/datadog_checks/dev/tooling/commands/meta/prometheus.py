@@ -250,3 +250,9 @@ def parse(ctx, endpoint, fh, check, here):
     )
 
     echo_info(metric_map)
+
+    metric_list = (
+        '\nMETRICS = [\n' '{}\n' ']'.format('\n'.join("    '{}',".format(data['dd_name']) for _, data in metric_items))
+    )
+
+    echo_info(metric_list)

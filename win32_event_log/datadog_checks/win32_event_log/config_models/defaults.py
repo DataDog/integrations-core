@@ -20,6 +20,14 @@ def shared_interpret_messages():
     return True
 
 
+def shared_legacy_mode():
+    return True
+
+
+def shared_legacy_mode_v2():
+    return False
+
+
 def shared_tag_event_id():
     return False
 
@@ -58,6 +66,10 @@ def instance_interpret_messages():
 
 def instance_legacy_mode():
     return True
+
+
+def instance_legacy_mode_v2():
+    return False
 
 
 def instance_min_collection_interval():

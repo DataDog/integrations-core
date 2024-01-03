@@ -30,7 +30,7 @@ METRIC_MAP = {
     'DCGM_FI_DEV_CORRECTABLE_REMAPPED_ROWS': 'correctable_remapped_rows',
     'DCGM_FI_DEV_ROW_REMAP_FAILURE': 'row_remap_failure',
     'DCGM_FI_DEV_UNCORRECTABLE_REMAPPED_ROWS': 'uncorrectable_remapped_rows',
-    # Metrics recommended by NVIDIA
+    # More recommended metrics
     'DCGM_FI_DEV_CLOCK_THROTTLE_REASONS': 'clock_throttle_reasons',
     'DCGM_FI_DEV_FB_RESERVED': 'frame_buffer.reserved',
     'DCGM_FI_DEV_FB_TOTAL': 'frame_buffer.total',
@@ -38,4 +38,12 @@ METRIC_MAP = {
     'DCGM_FI_DEV_POWER_MGMT_LIMIT': 'power_management_limit',
     'DCGM_FI_DEV_PSTATE': 'pstate',
     'DCGM_FI_DEV_SLOWDOWN_TEMP': 'slowdown_temperature',
+    'DCGM_FI_PROF_DRAM_ACTIVE': 'dram.active',
+    'DCGM_FI_PROF_GR_ENGINE_ACTIVE': 'gr_engine_active',
+    'DCGM_FI_PROF_PIPE_FP16_ACTIVE': 'pipe.fp16_active',
+    'DCGM_FI_PROF_PIPE_FP32_ACTIVE': 'pipe.fp32_active',
+    'DCGM_FI_PROF_PIPE_FP64_ACTIVE': 'pipe.fp64_active',
+    'DCGM_FI_PROF_PIPE_TENSOR_ACTIVE': 'pipe.tensor_active',
+    'DCGM_FI_PROF_SM_ACTIVE': 'sm_active',
+    'DCGM_FI_PROF_SM_OCCUPANCY': 'sm_occupancy',
 }

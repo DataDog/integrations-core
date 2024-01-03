@@ -26,11 +26,11 @@ files:
       Note: All '%' characters must be escaped as '%%'.
     options:
     - name: host
-      description: | 
-        Host and port of your SQL server. If a port is ommitted, a default port of 1433 will be used. 
+      description: |
+        Host and port of your SQL server. If a port is ommitted, a default port of 1433 will be used.
         If you use Sql Server Browser Service or a similar port autodiscovery service, pass in a port
-        of 0 to omit port from your connection string. This should allow SSBS to autodiscover the 
-        correct database port. 
+        of 0 to omit port from your connection string. This should allow SSBS to autodiscover the
+        correct database port.
       required: true
       value:
         type: string
@@ -45,9 +45,9 @@ files:
         type: string
     - name: server_version
       description: |
-        Server version year of sqlserver the agent will connect to. 
+        Server version year of sqlserver the agent will connect to.
         Important for validating connection string attributes for older sqlserver versions.
-        
+
         This is required if connecting to a SQLServer instance older than 2014.
       value:
         type: string
@@ -66,7 +66,7 @@ files:
         type: string
     - name: database_autodiscovery
       description: |
-        Auto-discover and monitor databases. Supported for the metrics check. 
+        Auto-discover and monitor databases. Supported for the metrics check.
         If `true`, overrides `database` option.
         Can be combined with `autodiscovery_include` and `autodiscovery_exclude` options.
       value:
@@ -104,6 +104,8 @@ files:
         example:
           - model
           - msdb
+          - model_replicatedmaster
+          - model_msdb
     - name: database_autodiscovery_interval
       description: |
         Frequency in seconds of scans for new databases.  Defaults to `3600`.
@@ -160,6 +162,22 @@ files:
       value:
         type: boolean
         example: false
+    - name: include_primary_log_shipping_metrics
+      description: |
+        Include log_shipping_primary metrics for a log shipping setup. Required to run
+        against the primary instance in a transaction log shipping configuration. Note that
+        the Datadog user needs to be present in msdb and must be added to the db_datareader role.
+      value:
+        type: boolean
+        example: false
+    - name: include_secondary_log_shipping_metrics
+      description: |
+        Include log_shipping_secondary metrics for a log shipping setup. Required to run
+        against a secondary instance in a transaction log shipping configuration. Note that
+        the Datadog user needs to be present in msdb and must be added to the db_datareader role.
+      value:
+        type: boolean
+        example: false
     - name: include_instance_metrics
       description: |
         Include server-level instance metrics.  When setting up multiple instances for
@@ -179,6 +197,15 @@ files:
       value:
         type: boolean
         example: false
+    - name: include_index_usage_metrics
+      description: |
+        Configure the collection of user table index usage statistics from the `sys.dm_db_index_usage_stats` DMV.
+
+        Because the `sys.dm_db_index_usage_stats` view is scoped to the current database, enable
+        `database_autodiscovery` or set `database`.
+      value:
+        type: boolean
+        example: true
     - name: db_fragmentation_object_names
       description: |
         Fragmentation metrics normally emit metrics for all objects within a database.
@@ -188,6 +215,12 @@ files:
         type: array
         items:
           type: string
+    - name: include_tempdb_file_space_usage_metrics
+      description: |
+        Include tempdb file space usage metrics for how space is used in tempdb data files.
+      value:
+        type: boolean
+        example: true
     - name: adoprovider
       description: |
         Choose the ADO provider.  Note that the (default) provider
@@ -236,6 +269,22 @@ files:
         type: boolean
         example: false
         display_default: false
+    - name: collect_settings
+      description: Configure collection of sys.configurations. This is an alpha feature.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of sys.configurations. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          description: |
+            Set the database settings collection interval (in seconds). Each collection involves a single query to
+            `sys.configurations`.
+          value:
+            type: number
+            example: 600
     - name: query_metrics
       description: Configure collection of query metrics
       options:
@@ -247,7 +296,7 @@ files:
             example: true
         - name: disable_secondary_tags
           description: |
-            Disable the secondary tags on query aggregate metrics, such as `user` and `database`. This is an optimization 
+            Disable the secondary tags on query aggregate metrics, such as `user` and `database`. This is an optimization
             for certain database workloads which result in long metric collection times.
           value:
             type: boolean
@@ -286,8 +335,42 @@ files:
           hidden: true
         - name: max_queries
           description: |
-            Limit the number of queries sent to the backend. 
+            Limit the number of queries sent to the backend.
             Note: The only time this value would need to be set is in special cases where the query limit
+            applied on the backend is being modified.
+          value:
+            type: integer
+            example: 250
+            display_default: 250
+          hidden: true
+    - name: procedure_metrics
+      description: Configure collection of procedure metrics
+      options:
+        - name: enabled
+          description: |
+            Enable collection of procedure metrics. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the procedure metric collection interval (in seconds). Each collection involves one query to
+            sys.dm_exec_procedure_stats. If a non-default value is chosen then that exact same value must
+            be used for *every* check instance. Running different instances with different collection intervals
+            is not supported.
+          value:
+            type: number
+            example: 60
+        - name: dm_exec_procedure_stats_row_limit
+          description: |
+            Set the maximum number of procedure stats rows that can be retrieved in a single check run.
+          value:
+            type: integer
+            example: 10000
+        - name: max_procedures
+          description: |
+            Limit the number of procedures sent to the backend.
+            Note: The only time this value would need to be set is in special cases where the procedure limit
             applied on the backend is being modified.
           value:
             type: integer
@@ -312,23 +395,33 @@ files:
           value:
             type: number
             example: 10
+    - name: stored_procedure_characters_limit
+      description: |
+        Limit the number of characters of the text of a stored procedure that is collected.
+        The characters limit is applicable to both query metrics and query samples.
+        Please be aware that increasing this value may affect performance,
+        as more data will be gathered from the database and sent to Datadog.
+      value:
+        type: integer
+        example: 500
+        display_default: 500
 
     - name: aws
       description: |
-        This block defines the configuration for AWS RDS and Aurora instances. 
-        
-        Complete this section if you have installed the Datadog AWS Integration 
-        (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances 
+        This block defines the configuration for AWS RDS and Aurora instances.
+
+        Complete this section if you have installed the Datadog AWS Integration
+        (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances
         with SQL Server integration telemetry.
-        
+
         These values are only applied when `dbm: true` option is set.
       options:
         - name: instance_endpoint
           description: |
-            Equal to the Endpoint.Address of the instance the agent is connecting to. 
+            Equal to the Endpoint.Address of the instance the agent is connecting to.
             This value is optional if the value of `host` is already configured to the instance endpoint.
-            
-            For more information on instance endpoints, 
+
+            For more information on instance endpoints,
             see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
           value:
             type: string
@@ -337,9 +430,9 @@ files:
     - name: gcp
       description: |
         This block defines the configuration for Google Cloud SQL instances.
-        
-        Complete this section if you have installed the Datadog GCP Integration 
-        (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances 
+
+        Complete this section if you have installed the Datadog GCP Integration
+        (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances
         with SQL Server integration telemetry.
 
         These values are only applied when `dbm: true` option is set.
@@ -347,7 +440,7 @@ files:
         - name: project_id
           description: |
             Equal to the GCP resource's project ID.
-            
+
             For more information on project IDs,
             See the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
           value:
@@ -356,7 +449,7 @@ files:
         - name: instance_id
           description: |
             Equal to the GCP resource's instance ID.
-            
+
             For more information on instance IDs,
             See the GCP docs https://cloud.google.com/sql/docs/sqlserver/instance-settings#instance-id-2ndgen
           value:
@@ -365,24 +458,24 @@ files:
 
     - name: azure
       description: |
-        This block defines the configuration for Azure Managed Instance, Azure SQL Database or 
+        This block defines the configuration for Azure Managed Instance, Azure SQL Database or
         SQLServer on Virtual Machines.
-        
-        Complete this section if you have installed the Datadog Azure Integration 
-        (https://docs.datadoghq.com/integrations/azure) to enrich instances 
+
+        Complete this section if you have installed the Datadog Azure Integration
+        (https://docs.datadoghq.com/integrations/azure) to enrich instances
         with SQL Server integration telemetry.
 
         These values are only applied when `dbm: true` option is set.
       options:
         - name: deployment_type
           description: |
-            Equal to the deployment type for the managed database. 
-            
+            Equal to the deployment type for the managed database.
+
             Acceptable values are:
-              - `sql_database` 
+              - `sql_database`
               - `managed_instance`
               - `virtual_machine`
-            
+
             For more information on deployment types, see the Azure
             docs https://docs.microsoft.com/en-us/azure/azure-sql/azure-sql-iaas-vs-paas-what-is-overview?view=azuresql
           value:
@@ -391,17 +484,53 @@ files:
         - name: fully_qualified_domain_name
           description: |
             Equal to the name of the SQL Database, Managed Instance (SQL MI) or virtual machine.
-            
+
             This value is optional if the value of `host` is already configured to the fully qualified domain name.
           value:
             type: string
             example: my-sqlserver-database.database.windows.net
+
+    - name: managed_identity
+      description: |
+        Configuration section used for Azure AD Authentication.
+
+        This supports using System or User assigned managed identities.
+        If this section is set, then the `username` and `password` fields will be ignored.
+
+        For more information on Managed Identities, see the Azure docs
+        https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
+      options:
+        - name: client_id
+          description: |
+            Client ID of the Managed Identity.
+          value:
+            type: string
+        - name: identity_scope
+          description: |
+            The permission scope from where to access the identity token. This value is optional if using the default
+            identity scope for Azure managed databases.
+
+            For more information on scopes, see the Azure docs
+            https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
+          value:
+            type: string
+            example: https://database.windows.net/.default
 
     - name: obfuscator_options
       description: |
         Configure how the SQL obfuscator behaves.
         Note: This option only applies when `dbm` is enabled.
       options:
+        - name: obfuscation_mode
+          description: |
+            Set the obfuscation mode. The obfuscation mode determines how the SQL obfuscator will obfuscate your SQL
+            statements. The following modes are supported:
+            - `obfuscate_only`: Obfuscate the SQL statement without normalizing the statement.
+            - `obfuscate_and_normalize`: Obfuscate the SQL statement and normalize the statement.
+          value:
+            type: string
+            example: obfuscate_and_normalize
+            display_default: obfuscate_and_normalize
         - name: replace_digits
           description: |
             Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
@@ -448,6 +577,48 @@ files:
             type: boolean
             example: true
             display_default: true
+        - name: remove_space_between_parentheses
+          description: |
+            Set to `true` to remove spaces between parentheses in your normalized SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: keep_null
+          description: |
+            Set to `true` to keep the keyword `NULL` in your obfuscated SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: keep_boolean
+          description: |
+            Set to `true` to keep the keywords `TRUE` and `FALSE` in your obfuscated SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: keep_positional_parameter
+          description: |
+            Set to `true` to keep positional parameters (e.g. `$1`) in your obfuscated SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: keep_trailing_semicolon
+          description: |
+            Set to `true` to keep trailing semicolons in your normalized SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: keep_identifier_quotation
+          description: |
+            Set to `true` to keep identifier quotations (e.g. `"my_table"`) in your normalized SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
     - name: log_unobfuscated_queries
       hidden: true
       description: |
@@ -498,14 +669,17 @@ files:
       value:
         type: boolean
         example: false
+    - name: database_instance_collection_interval
+      hidden: true
+      description: |
+        Set the database instance collection interval (in seconds). The database instance collection sends
+        basic information about the database instance along with a signal that it still exists.
+        This collection does not involve any additional queries to the database.
+      value:
+        type: number
+        example: 1800
+        display_default: false
     - template: instances/default
-      overrides:
-        disable_generic_tags.hidden: False
-        disable_generic_tags.enabled: True
-        disable_generic_tags.description: |
-            Generic tags such as `host` are replaced by `sqlserver_host` to avoid
-            getting mixed with other integration tags.
-
   - template: logs
     example:
     - type: file

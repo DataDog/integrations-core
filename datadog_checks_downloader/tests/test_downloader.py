@@ -14,11 +14,12 @@ import subprocess
 import sys
 from collections import defaultdict, namedtuple
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import datetime, time
 from urllib.parse import urljoin
 
 import pytest
 import requests
+from flaky import flaky
 from freezegun import freeze_time
 from packaging.version import parse as parse_version
 from tenacity import retry, stop_after_attempt, wait_exponential
@@ -51,6 +52,7 @@ EXCLUDED_INTEGRATIONS = [
     "datadog-docker-daemon",
     "datadog-dd-cluster-agent",  # excluding this since actual integration is called `datadog-cluster-agent`
     "datadog-kubernetes",  # excluding this since `kubernetes` check is Agent v5 only
+    "datadog-go-metro",  # excluding this since `go-metro` check is Agent v5 only
 ]
 
 # Specific integration versions released for the last time by a revoked developer but not shipped anymore.
@@ -58,6 +60,11 @@ EXCLUDED_INTEGRATION_VERSION = [
     "simple/datadog-ibm-mq/datadog_ibm_mq-4.1.0rc1-py2.py3-none-any.whl",
     "simple/datadog-network/datadog_network-9.1.1rc1-py2.py3-none-any.whl",
 ]
+
+
+def delay_rerun(*args):
+    time.sleep(10)
+    return True
 
 
 @contextmanager
@@ -79,6 +86,7 @@ def _do_run_downloader(argv):
 
 
 @pytest.mark.online
+@flaky(max_runs=3, rerun_filter=delay_rerun)
 def test_download(capfd, distribution_name, distribution_version, temporary_local_repo, disable_verification, mocker):
     """Test datadog-checks-downloader successfully downloads and validates a wheel file."""
     argv = [distribution_name, "--version", distribution_version]

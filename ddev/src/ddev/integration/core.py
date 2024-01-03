@@ -8,6 +8,7 @@ import re
 from functools import cached_property
 from typing import TYPE_CHECKING, Iterator
 
+from ddev.integration.metrics import Metric
 from ddev.repo.constants import NOT_SHIPPABLE
 from ddev.utils.fs import Path
 
@@ -67,6 +68,9 @@ class Integration:
                 if f.endswith('.py'):
                     yield Path(root, f)
 
+    def requires_changelog_entry(self, path: Path) -> bool:
+        return self.package_directory in path.parents or (self.is_package and path == (self.path / 'pyproject.toml'))
+
     @property
     def release_tag_pattern(self) -> str:
         version_part = r'\d+\.\d+\.\d+'
@@ -97,9 +101,73 @@ class Integration:
         return normalized_integration.lower()
 
     @cached_property
+    def project_file(self) -> Path:
+        return self.path / 'pyproject.toml'
+
+    @cached_property
     def metrics_file(self) -> Path:
         relative_path = self.manifest.get('/assets/integration/metrics/metadata_path', 'metadata.csv')
         return self.path / relative_path
+
+    @property
+    def metrics(self) -> Iterator[Metric]:
+        if not self.metrics_file.exists():
+            return
+
+        import csv
+
+        with open(self.metrics_file) as csvfile:
+            for row in csv.DictReader(csvfile):
+                yield Metric(
+                    metric_name=row['metric_name'],
+                    metric_type=row['metric_type'],
+                    interval=int(row['interval']) if row['interval'] else None,
+                    unit_name=row['unit_name'],
+                    per_unit_name=row['per_unit_name'],
+                    description=row['description'],
+                    orientation=int(row['orientation']) if row['orientation'] else None,
+                    integration=row['integration'],
+                    short_name=row['short_name'],
+                    curated_metric=row['curated_metric'],
+                )
+
+    @cached_property
+    def config_spec(self) -> Path:
+        relative_path = self.manifest.get('/assets/integration/configuration/spec', 'assets/configuration/spec.yaml')
+        return self.path / relative_path
+
+    @cached_property
+    def minimum_base_package_version(self) -> str | None:
+        from packaging.requirements import Requirement
+        from packaging.utils import canonicalize_name
+
+        from ddev.utils.toml import load_toml_data
+
+        data = load_toml_data(self.project_file.read_text())
+        for entry in data['project'].get('dependencies', []):
+            dep = Requirement(entry)
+            if canonicalize_name(dep.name) == 'datadog-checks-base':
+                if dep.specifier:
+                    specifier = str(sorted(dep.specifier, key=str)[-1])
+
+                    version_index = 0
+                    for i, c in enumerate(specifier):
+                        if c.isdigit():
+                            version_index = i
+                            break
+
+                    return specifier[version_index:]
+                else:
+                    return None
+
+        return None
+
+    @property
+    def project_metadata(self) -> dict:
+        import tomli
+
+        with open(self.project_file, 'rb') as f:
+            return tomli.load(f)
 
     @cached_property
     def is_valid(self) -> bool:
@@ -115,7 +183,7 @@ class Integration:
 
     @cached_property
     def is_package(self) -> bool:
-        return (self.path / 'pyproject.toml').is_file()
+        return self.project_file.is_file()
 
     @cached_property
     def is_tile(self) -> bool:

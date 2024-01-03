@@ -51,6 +51,11 @@ instances:
     #
     # app_controller_endpoint: http://argocd-metrics:8082/metrics
 
+    ## @param appset_controller_endpoint - string - optional
+    ## Endpoint exposing the ApplicationSet Controller's Prometheus metrics.
+    #
+    # appset_controller_endpoint: http://argocd-applicationset-controller:8080/metrics
+
     ## @param api_server_endpoint - string - optional
     ## Endpoint exposing the API Server's Prometheus metrics.
     #

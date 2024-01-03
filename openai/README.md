@@ -10,6 +10,8 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Python" xxx -->
 
+**Note**: This setup method does not collect `openai.api.usage.*` metrics. To collect these metrics, also follow the API key setup instructions.
+
 ### Installation
 
 <!-- NOTE: This section is overwritten by the OpenAI configuration component exported in -->
@@ -40,13 +42,19 @@ pip install ddtrace>=1.13
 ```
 
 
-3. Prefix your OpenAI Python application command with `ddtrace-run`.
+3. Prefix your OpenAI Python application command with `ddtrace-run` and the following environment variables as shown below: 
 
 ```shell
 DD_SERVICE="my-service" DD_ENV="staging" DD_API_KEY=<DATADOG_API_KEY> ddtrace-run python <your-app>.py
 ```
 
-**Note**: If the Agent is using a non-default hostname or port, be sure to also set `DD_AGENT_HOST`, `DD_TRACE_AGENT_PORT`, or `DD_DOGSTATSD_PORT`.
+**Notes**:
+<!-- partial
+{{% site-region region="us3,us5,eu,gov,ap1" %}}
+- Non-US1 customers must set `DD_SITE` on the application command to the correct Datadog site parameter as specified in the table in the <a href="https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site">Datadog Site</a> page (for example, `datadoghq.eu` for EU1 customers).{{% /site-region %}}
+partial -->
+
+- If the Agent is using a non-default hostname or port, be sure to also set `DD_AGENT_HOST`, `DD_TRACE_AGENT_PORT`, or `DD_DOGSTATSD_PORT`.
 
 See the [APM Python library documentation][2] for more advanced usage.
 
@@ -97,6 +105,8 @@ DEBUG:ddtrace.contrib.openai._logging.py:sent 2 logs to 'http-intake.logs.datado
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Node.js" xxx -->
+
+**Note**: This setup method does not collect `openai.api.usage.*` metrics. To collect these metrics, also follow the API key setup instructions.
 
 ### Installation
 
@@ -173,6 +183,22 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 }
 ```
 
+<!-- xxz tabs xxx -->
+<!-- xxx tab "API Key" xxx -->
+
+**Note**: This setup method only collects `openai.api.usage.*` metrics. To collect all metrics provided by this integration, also follow the APM setup instructions.
+
+### Installation
+
+1. Login to your [OpenAI Account][10].
+2. Navigate to **View API Keys** under account settings.
+3. Click the **Create a new secret key** button.
+4. Copy the created API Key to your clipboard.
+
+### Configuration
+
+1. Navigate to the configuration tab inside Datadog [OpenAI integration tile][11].
+2. Enter an account name and OpenAI API key copied above in the accounts configuration.
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -180,6 +206,8 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 ## Data Collected
 
 ### Metrics
+
+The `openai.api.usage.*` metrics are only collected with the API key setup method. All remaining metrics below are collected with the APM setup methods.
 
 See [metadata.csv][4] for a list of metrics provided by this integration.
 
@@ -202,6 +230,7 @@ Additional helpful documentation, links, and articles:
 
 - [Monitor your OpenAI usage with Datadog][6]
 - [Monitor Azure OpenAI with Datadog][7]
+- [OpenAI Monitor Templates][12]
 
 [1]: https://openai.com/
 [2]: https://ddtrace.readthedocs.io/en/stable/installation_quickstart.html
@@ -212,3 +241,7 @@ Additional helpful documentation, links, and articles:
 [7]: https://www.datadoghq.com/blog/monitor-azure-openai-with-datadog/
 [8]: https://datadoghq.dev/dd-trace-js/interfaces/plugins.openai.html
 [9]: https://github.com/DataDog/dd-trace-js
+[10]: https://platform.openai.com/
+[11]: https://app.datadoghq.com/integrations/openai
+[12]: https://app.datadoghq.com/monitors/recommended?q=integration%3AOpenAI&only_installed=false&p=1
+[13]: https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site

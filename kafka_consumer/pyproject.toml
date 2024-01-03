@@ -22,7 +22,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.11",
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
 ]
@@ -32,14 +32,13 @@ dependencies = [
 dynamic = [
     "version",
 ]
-
 license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
     # confluent-kafka is built in omnibus, so bumping it here will have no real effect
     # if you bump this version, also bump the one in the `hatch.toml` file
-    "confluent-kafka==2.1.1; python_version > '3.0'",
+    "confluent-kafka==2.3.0; python_version > '3.0'",
 ]
 
 [project.urls]

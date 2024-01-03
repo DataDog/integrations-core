@@ -4,6 +4,7 @@
 import os
 
 import pytest
+
 from ddev.integration.core import Integration
 from ddev.repo.config import RepositoryConfig
 from ddev.repo.constants import NOT_SHIPPABLE

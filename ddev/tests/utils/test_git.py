@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import subprocess
+
 from ddev.repo.core import Repository
 
 
@@ -94,3 +96,18 @@ def test_filtered_tags(repository):
     repo.git.capture('tag', 'baz')
 
     assert repo.git.filter_tags('^ba') == ['bar', 'baz']
+
+
+def test_fetch_tags(repository, mocker):
+    mock = mocker.patch('subprocess.run')
+    repo = Repository(repository.path.name, str(repository.path))
+    repo.git.fetch_tags()
+    assert mock.call_args_list == [
+        mocker.call(
+            ['git', 'fetch', '--all', '--tags', '--force'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            encoding='utf-8',
+            check=True,
+        ),
+    ]

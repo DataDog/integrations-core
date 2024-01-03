@@ -20,6 +20,7 @@ def get_fixture_path(filename):
 
 def test_openmetricsv2_check(aggregator, dd_run_check, instance_openmetrics_v2, mock_http_response):
     mock_http_response(file_path=get_fixture_path('prometheus.txt'))
+
     check = AerospikeCheck('aerospike', {}, [instance_openmetrics_v2])
     dd_run_check(check)
 

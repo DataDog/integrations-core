@@ -1,0 +1,65 @@
+name: Update the Agent changelog
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  update_agent_changelog:
+    name: Update the Agent Changelog
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        ref: master
+        fetch-depth: 0
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    - name: Install ddev from local folder
+      run: |-
+        pip install -e ./datadog_checks_dev[cli]
+        pip install -e ./ddev
+    - name: Configure ddev
+      run: |-
+        ddev config set repos.core .
+        ddev config set repo core
+    - name: Update the Agent changelog
+      run: |-
+        ddev release agent changelog --write --force
+    - name: Update the Agent integrations file
+      run: |-
+        ddev release agent integrations --write --force
+    - name: Update the integration changelogs
+      run: |-
+        ddev release agent integrations-changelog --write
+    - name: Create Pull Request
+      id: cpr
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.DD_CHANGELOG_CHECK_TOKEN }}
+        commit-message: Finalize Agent release ${{ env.AGENT_VERSION }}
+        body: |
+          ### What does this PR do?
+          Finalize Agent release ${{ env.AGENT_VERSION }} updating the changelog files.
+
+          ### Motivation
+          
+          Agent ${{ env.AGENT_VERSION }} has been released.
+
+          ### Additional Notes
+          <!-- Anything else we should know when reviewing? -->
+          
+          This PR was automatically generated.
+        title: Finalize Agent release ${{ env.AGENT_VERSION }}
+        branch: bot/update-agent-changelog-${{ env.AGENT_VERSION }}
+        branch-suffix: timestamp
+        delete-branch: true
+        base: master
+        labels: bot,qa/skip-qa
+        draft: false
+      env:
+        AGENT_VERSION: ${{ github.ref_name }}

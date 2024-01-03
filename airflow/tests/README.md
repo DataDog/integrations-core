@@ -9,13 +9,13 @@
 Example:
 
 ```bash
-ddev env start airflow py38
+ddev env start airflow py39
 ```
 
 ### 2. Check the agent is receiving the airflow statsd metrics
 
 ```bash
-docker exec -it dd_airflow_py38 agent dogstatsd-stats
+docker exec -it dd_airflow_py39 agent dogstatsd-stats
 ```
 
 ### TODO: Create e2e testing assertions for DogStatsD metrics instead of manual checking the result.

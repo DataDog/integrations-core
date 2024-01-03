@@ -70,6 +70,8 @@ METRICS = {
     'apiserver_storage_list_fetched_objects_total': 'storage_list_fetched_objects_total',
     'apiserver_storage_list_evaluated_objects_total': 'storage_list_evaluated_objects_total',
     'apiserver_storage_list_returned_objects_total': 'storage_list_returned_objects_total',
+    'apiserver_flowcontrol_current_inqueue_requests': 'flowcontrol_current_inqueue_requests',
+    'apiserver_flowcontrol_dispatched_requests_total': 'flowcontrol_dispatched_requests_total',
     # For Kubernetes >= 1.26
     # https://github.com/kubernetes/kubernetes/pull/112690
     'kubernetes_feature_enabled': 'kubernetes_feature_enabled',
@@ -77,6 +79,12 @@ METRICS = {
     'apiserver_flowcontrol_request_concurrency_limit': 'flowcontrol_request_concurrency_limit',
     'apiserver_flowcontrol_current_executing_requests': 'flowcontrol_current_executing_requests',
     'apiserver_flowcontrol_rejected_requests_total': 'flowcontrol_rejected_requests_total',
+    'apiserver_storage_db_total_size_in_bytes': 'etcd.db.total_size',
+    # For Kubernetes >= 1.28
+    'apiserver_storage_size_bytes': 'etcd.db.total_size',
+    'apiserver_flowcontrol_nominal_limit_seats': 'flowcontrol_request_concurrency_limit',
+    'etcd_requests_total': 'etcd_requests_total',
+    'etcd_request_errors_total': 'etcd_request_errors_total',
 }
 
 
@@ -193,7 +201,7 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
     def rest_client_requests_total(self, metric, scraper_config):
         self.submit_metric('.rest_client_requests_total', metric, scraper_config)
 
-    def http_requests_total(self, metric, scraper_config):
+    def http_requests_total(self, metric, scraper_config):  # SKIP_HTTP_VALIDATION
         self.submit_metric('.http_requests_total', metric, scraper_config)
 
     def apiserver_request_count(self, metric, scraper_config):

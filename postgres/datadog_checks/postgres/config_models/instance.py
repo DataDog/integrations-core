@@ -12,12 +12,20 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import Any, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
 
 from . import defaults, validators
+
+
+class ManagedAuthentication(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = Field(None, example=False)
 
 
 class Aws(BaseModel):
@@ -26,7 +34,18 @@ class Aws(BaseModel):
         frozen=True,
     )
     instance_endpoint: Optional[str] = None
+    managed_authentication: Optional[ManagedAuthentication] = None
     region: Optional[str] = None
+
+
+class ManagedAuthentication1(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    client_id: Optional[str] = None
+    enabled: Optional[bool] = Field(None, example=False)
+    identity_scope: Optional[str] = Field(None, example='https://ossrdbms-aad.database.windows.net/.default')
 
 
 class Azure(BaseModel):
@@ -36,6 +55,18 @@ class Azure(BaseModel):
     )
     deployment_type: Optional[str] = None
     fully_qualified_domain_name: Optional[str] = None
+    managed_authentication: Optional[ManagedAuthentication1] = None
+
+
+class CollectSchemas(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_columns: Optional[float] = None
+    max_tables: Optional[float] = None
 
 
 class CollectSettings(BaseModel):
@@ -68,6 +99,15 @@ class Gcp(BaseModel):
     project_id: Optional[str] = None
 
 
+class ManagedIdentity(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    client_id: Optional[str] = None
+    identity_scope: Optional[str] = None
+
+
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -86,8 +126,15 @@ class ObfuscatorOptions(BaseModel):
     collect_comments: Optional[bool] = None
     collect_metadata: Optional[bool] = None
     collect_tables: Optional[bool] = None
+    keep_boolean: Optional[bool] = None
     keep_dollar_quoted_func: Optional[bool] = None
+    keep_identifier_quotation: Optional[bool] = None
+    keep_null: Optional[bool] = None
+    keep_positional_parameter: Optional[bool] = None
     keep_sql_alias: Optional[bool] = None
+    keep_trailing_semicolon: Optional[bool] = None
+    obfuscation_mode: Optional[str] = None
+    remove_space_between_parentheses: Optional[bool] = None
     replace_digits: Optional[bool] = None
 
 
@@ -154,11 +201,13 @@ class InstanceConfig(BaseModel):
     collect_database_size_metrics: Optional[bool] = None
     collect_default_database: Optional[bool] = None
     collect_function_metrics: Optional[bool] = None
+    collect_schemas: Optional[CollectSchemas] = None
     collect_settings: Optional[CollectSettings] = None
     collect_wal_metrics: Optional[bool] = None
     custom_queries: Optional[tuple[MappingProxyType[str, Any], ...]] = None
     data_directory: Optional[str] = None
     database_autodiscovery: Optional[DatabaseAutodiscovery] = None
+    database_instance_collection_interval: Optional[float] = None
     dbm: Optional[bool] = None
     dbname: Optional[str] = None
     dbstrict: Optional[bool] = None
@@ -170,6 +219,7 @@ class InstanceConfig(BaseModel):
     ignore_databases: Optional[tuple[str, ...]] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
+    managed_identity: Optional[ManagedIdentity] = None
     max_connections: Optional[int] = None
     max_relations: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None

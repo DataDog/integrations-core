@@ -13,12 +13,16 @@ from datadog_checks.postgres.util import (
     NEWER_14_METRICS,
     QUERY_PG_CONTROL_CHECKPOINT,
     QUERY_PG_REPLICATION_SLOTS,
+    QUERY_PG_REPLICATION_SLOTS_STATS,
     QUERY_PG_STAT_WAL_RECEIVER,
     QUERY_PG_UPTIME,
     REPLICATION_STATS_METRICS,
     SLRU_METRICS,
     SNAPSHOT_TXID_METRICS,
+    STAT_SUBSCRIPTION_METRICS,
+    STAT_SUBSCRIPTION_STATS_METRICS,
     STAT_WAL_METRICS,
+    SUBSCRIPTION_STATE_METRICS,
     WAL_FILE_METRICS,
 )
 from datadog_checks.postgres.version_utils import VersionUtils
@@ -27,6 +31,7 @@ HOST = get_docker_hostname()
 PORT = '5432'
 PORT_REPLICA = '5433'
 PORT_REPLICA2 = '5434'
+PORT_REPLICA_LOGICAL = '5435'
 USER = 'datadog'
 USER_ADMIN = 'dd_admin'
 PASSWORD = 'datadog'
@@ -96,14 +101,29 @@ CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_co
 CONNECTION_METRICS_DB = ['postgresql.connections']
 COMMON_DBS = ['dogs', 'postgres', 'dogs_nofunc', 'dogs_noschema', DB_NAME]
 
+CHECK_PERFORMANCE_METRICS = [
+    'archiver_metrics',
+    'bgw_metrics',
+    'connections_metrics',
+    'count_metrics',
+    'instance_metrics',
+    'replication_metrics',
+    'replication_stats_metrics',
+    'slru_metrics',
+]
+
 requires_static_version = pytest.mark.skipif(USING_LATEST, reason='Version `latest` is ever-changing, skipping')
 
 
 def _iterate_metric_name(query):
-    for column in query['columns']:
-        if column['type'].startswith('tag'):
-            continue
-        yield column['name']
+    if 'columns' in query:
+        for column in query['columns']:
+            if column['type'].startswith('tag'):
+                continue
+            yield column['name']
+    else:
+        for metric in query['metrics'].values():
+            yield metric[0]
 
 
 def _get_expected_tags(check, pg_instance, **kwargs):
@@ -116,24 +136,46 @@ def _get_expected_tags(check, pg_instance, **kwargs):
     return base_tags
 
 
-def assert_metric_at_least(aggregator, metric_name, lower_bound=None, higher_bound=None, count=None, tags=None):
+def assert_metric_at_least(
+    aggregator,
+    metric_name,
+    lower_bound=None,
+    higher_bound=None,
+    count=None,
+    tags=None,
+    min_count=None,
+    max_count=None,
+):
     found_values = 0
     expected_tags = normalize_tags(tags, sort=True)
     aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
     for metric in aggregator.metrics(metric_name):
         if expected_tags and expected_tags == sorted(metric.tags):
             if lower_bound is not None:
-                assert metric.value >= lower_bound, 'Expected {} with tags {} to have a value >= {}, got {}'.format(
-                    metric_name, expected_tags, lower_bound, metric.value
+                assert metric.value >= lower_bound, (
+                    f'Expected {metric_name} with tags {expected_tags} to have a value >= {lower_bound}, '
+                    f'got {metric.value}'
                 )
             if higher_bound is not None:
-                assert metric.value <= higher_bound, 'Expected {} with tags {} to have a value <= {}, got {}'.format(
-                    metric_name, expected_tags, higher_bound, metric.value
+                assert metric.value <= higher_bound, (
+                    f'Expected {metric_name} with tags {expected_tags} to have a value <= {higher_bound}, '
+                    f'got {metric.value}'
                 )
             found_values += 1
+
     if count:
-        assert found_values == count, 'Expected to have {} with tags {} values for metric {}, got {}'.format(
-            count, expected_tags, metric_name, found_values
+        assert (
+            found_values == count
+        ), f'Expected to have {count} with tags {expected_tags} values for metric {metric_name}, got {found_values}'
+    if min_count:
+        assert found_values >= min_count, (
+            f'Expected to have at least {min_count} with tags {expected_tags} values for metric {metric_name},'
+            f' got {found_values}'
+        )
+    if max_count:
+        assert found_values <= max_count, (
+            f'Expected to have at most {max_count} with tags {expected_tags} values for metric {metric_name},'
+            f' got {found_values}'
         )
 
 
@@ -148,13 +190,13 @@ def check_common_metrics(aggregator, expected_tags, count=1):
 
 
 def check_db_count(aggregator, expected_tags, count=1):
-    table_count = 5
+    table_count = 7
     # We create 2 additional partition tables when partition is available
     if float(POSTGRES_VERSION) >= 11.0:
-        table_count = 7
+        table_count = 9
     # And PG >= 14 will also report the parent table
     if float(POSTGRES_VERSION) >= 14.0:
-        table_count = 8
+        table_count = 10
     aggregator.assert_metric(
         'postgresql.table.count',
         value=table_count,
@@ -227,11 +269,12 @@ def check_physical_replication_slots(aggregator, expected_tags):
 def check_logical_replication_slots(aggregator, expected_tags):
     logical_replication_slot_tags = expected_tags + [
         'slot_name:logical_slot',
-        'slot_persistence:permanent',
         'slot_state:inactive',
         'slot_type:logical',
     ]
-    check_replication_slots(aggregator, expected_tags=logical_replication_slot_tags)
+    check_replication_slots(aggregator, expected_tags=logical_replication_slot_tags + ['slot_persistence:permanent'])
+    # Only logical replication slots will have rows in pg_stats_replication_slots
+    check_replication_slots_stats(aggregator, expected_tags=logical_replication_slot_tags)
 
 
 def check_replication_slots(aggregator, expected_tags, count=1):
@@ -247,6 +290,13 @@ def check_replication_slots(aggregator, expected_tags, count=1):
             'postgresql.replication_slot.xmin_age',
         ]:
             continue
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
+def check_replication_slots_stats(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 14.0:
+        return
+    for metric_name in _iterate_metric_name(QUERY_PG_REPLICATION_SLOTS_STATS):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
@@ -312,4 +362,39 @@ def check_stat_wal_metrics(aggregator, expected_tags, count=1):
         return
 
     for metric_name in _iterate_metric_name(STAT_WAL_METRICS):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
+def check_performance_metrics(aggregator, expected_tags, count=1, is_aurora=False):
+    expected_metrics = set(CHECK_PERFORMANCE_METRICS)
+    if is_aurora:
+        expected_metrics = expected_metrics - {'replication_metrics'}
+    if float(POSTGRES_VERSION) < 13.0:
+        expected_metrics = expected_metrics - {'slru_metrics'}
+    if float(POSTGRES_VERSION) < 10.0:
+        expected_metrics = expected_metrics - {'replication_stats_metrics'}
+    for name in expected_metrics:
+        aggregator.assert_metric(
+            'dd.postgres.operation.time', count=count, tags=expected_tags + ['operation:{}'.format(name)]
+        )
+
+
+def check_subscription_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 10:
+        return
+    for metric_name in _iterate_metric_name(STAT_SUBSCRIPTION_METRICS):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
+def check_subscription_state_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 14:
+        return
+    for metric_name in _iterate_metric_name(SUBSCRIPTION_STATE_METRICS):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
+def check_subscription_stats_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 15:
+        return
+    for metric_name in _iterate_metric_name(STAT_SUBSCRIPTION_STATS_METRICS):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)

@@ -1,0 +1,1 @@
+PostgreSQL: Add replication slots stats metric from pg_stat_replication_slots

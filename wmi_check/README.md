@@ -4,12 +4,12 @@
 
 ## Overview
 
+**Note:** Datadog no longer maintains or recommends the use of this integration. Instead, use the [Windows performance counters integration][2] in all cases due to its significantly lower overhead and thus better scalability.
+
 Get metrics from your Windows applications and servers with Windows Management Instrumentation (WMI) in real time to
 
 - Visualize their performance.
 - Correlate their activity with the rest of your applications.
-
-**Note:** It is recommended that the [Windows performance counters check][2] be used instead in all cases due to its significantly lower overhead and thus better scalability.
 
 ## Setup
 

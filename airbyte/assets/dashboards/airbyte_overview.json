@@ -198,7 +198,7 @@
             "queries": [{
               "name": "query1",
               "data_source": "metrics",
-              "query": "sum:airbyte.worker.job_succeeded_by_release_stage{*}.as_count()",
+              "query": "sum:airbyte.worker.job.succeeded_by_release_stage{*}.as_count()",
               "aggregator": "avg"
             }],
             "formulas": [{
@@ -396,11 +396,11 @@
             }],
             "response_format": "timeseries",
             "queries": [{
-              "query": "sum:airbyte.worker.job_failed_by_release_stage{*}.as_count().rollup(sum, 3600)",
+              "query": "sum:airbyte.worker.job.failed_by_release_stage{*}.as_count().rollup(sum, 3600)",
               "data_source": "metrics",
               "name": "query1"
             }, {
-              "query": "sum:airbyte.worker.job_succeeded_by_release_stage{*}.as_count().rollup(sum, 3600)",
+              "query": "sum:airbyte.worker.job.succeeded_by_release_stage{*}.as_count().rollup(sum, 3600)",
               "data_source": "metrics",
               "name": "query2"
             }],
@@ -456,7 +456,7 @@
             }],
             "response_format": "timeseries",
             "queries": [{
-              "query": "sum:airbyte.worker.attempt_failed_by_failure_origin{* AND failure_origin IN (replication,airbyte_platform,unknown,persistence)}.as_count()",
+              "query": "sum:airbyte.worker.attempt.failed_by_failure_origin{* AND failure_origin IN (replication,airbyte_platform,unknown,persistence)}.as_count()",
               "data_source": "metrics",
               "name": "query1"
             }],
@@ -504,7 +504,7 @@
             }],
             "response_format": "timeseries",
             "queries": [{
-              "query": "sum:airbyte.worker.attempt_failed_by_failure_origin{* AND failure_origin IN (normalization)}.as_count()",
+              "query": "sum:airbyte.worker.attempt.failed_by_failure_origin{* AND failure_origin IN (normalization)}.as_count()",
               "data_source": "metrics",
               "name": "query1"
             }],
@@ -557,7 +557,7 @@
             }],
             "response_format": "timeseries",
             "queries": [{
-              "query": "sum:airbyte.worker.attempt_failed_by_failure_origin{* AND failure_origin IN (source,destination)}.as_count()",
+              "query": "sum:airbyte.worker.attempt.failed_by_failure_origin{* AND failure_origin IN (source,destination)}.as_count()",
               "data_source": "metrics",
               "name": "query1"
             }],
@@ -640,7 +640,7 @@
               "formula": "query1"
             }],
             "queries": [{
-              "query": "sum:airbyte.worker.job_created_by_release_stage{*}.as_count()",
+              "query": "sum:airbyte.worker.job.created_by_release_stage{*}.as_count()",
               "data_source": "metrics",
               "name": "query1"
             }],
@@ -674,7 +674,7 @@
               "formula": "query1"
             }],
             "queries": [{
-              "query": "sum:airbyte.worker.job_succeeded_by_release_stage{*}.as_count()",
+              "query": "sum:airbyte.worker.job.succeeded_by_release_stage{*}.as_count()",
               "data_source": "metrics",
               "name": "query1"
             }],
@@ -726,7 +726,7 @@
               "formula": "query1"
             }],
             "queries": [{
-              "query": "sum:airbyte.worker.job_failed_by_release_stage{*}.as_count()",
+              "query": "sum:airbyte.worker.job.failed_by_release_stage{*}.as_count()",
               "data_source": "metrics",
               "name": "query1"
             }],
@@ -760,7 +760,7 @@
               "formula": "query1"
             }],
             "queries": [{
-              "query": "sum:airbyte.worker.job_cancelled_by_release_stage{*}.as_count()",
+              "query": "sum:airbyte.worker.job.cancelled_by_release_stage{*}.as_count()",
               "data_source": "metrics",
               "name": "query1"
             }],
@@ -894,7 +894,7 @@
             }],
             "response_format": "scalar",
             "queries": [{
-              "query": "avg:airbyte.worker.job_created_by_release_stage{*}.as_count()",
+              "query": "avg:airbyte.worker.job.created_by_release_stage{*}.as_count()",
               "data_source": "metrics",
               "name": "query1",
               "aggregator": "sum"
@@ -922,7 +922,7 @@
             }],
             "response_format": "scalar",
             "queries": [{
-              "query": "avg:airbyte.worker.job_succeeded_by_release_stage{*}.as_count()",
+              "query": "avg:airbyte.worker.job.succeeded_by_release_stage{*}.as_count()",
               "data_source": "metrics",
               "name": "query1",
               "aggregator": "sum"
@@ -950,7 +950,7 @@
             }],
             "response_format": "scalar",
             "queries": [{
-              "query": "avg:airbyte.worker.job_failed_by_release_stage{*}.as_count()",
+              "query": "avg:airbyte.worker.job.failed_by_release_stage{*}.as_count()",
               "data_source": "metrics",
               "name": "query1",
               "aggregator": "sum"
@@ -980,7 +980,7 @@
               "formula": "query1"
             }],
             "queries": [{
-              "query": "sum:airbyte.worker.attempt_failed_by_failure_origin{*} by {failure_origin}.as_count()",
+              "query": "sum:airbyte.worker.attempt.failed_by_failure_origin{*} by {failure_origin}.as_count()",
               "data_source": "metrics",
               "name": "query1"
             }],
@@ -1147,19 +1147,19 @@
             "queries": [{
               "data_source": "metrics",
               "name": "attempt",
-              "query": "sum:airbyte.worker.state_commit_attempt{*}.as_count()"
+              "query": "sum:airbyte.worker.state_commit.attempt{*}.as_count()"
             }, {
               "data_source": "metrics",
               "name": "successful",
-              "query": "sum:airbyte.worker.state_commit_attempt_successful{*}.as_count()"
+              "query": "sum:airbyte.worker.state_commit.attempt_successful{*}.as_count()"
             }, {
               "data_source": "metrics",
               "name": "failed",
-              "query": "sum:airbyte.worker.state_commit_attempt_failed{*}.as_count()"
+              "query": "sum:airbyte.worker.state_commit.attempt_failed{*}.as_count()"
             }, {
               "data_source": "metrics",
               "name": "not_attempted",
-              "query": "sum:airbyte.worker.state_commit_not_attempted{*}.as_count()"
+              "query": "sum:airbyte.worker.state_commit.not_attempted{*}.as_count()"
             }],
             "response_format": "timeseries",
             "style": {
@@ -1172,7 +1172,7 @@
           "x": 0,
           "y": 1,
           "width": 6,
-          "height": 6
+          "height": 3
         }
       }, {
         "id": 8045473871209916,
@@ -1206,58 +1206,6 @@
           "height": 3
         }
       }, {
-        "id": 2867948821695662,
-        "definition": {
-          "title": "Stats Commit Attempts",
-          "show_legend": true,
-          "legend_layout": "horizontal",
-          "legend_columns": ["avg", "min", "max", "value", "sum"],
-          "type": "timeseries",
-          "requests": [{
-            "formulas": [{
-              "alias": "attempt",
-              "formula": "attempt"
-            }, {
-              "alias": "successful",
-              "formula": "successful"
-            }, {
-              "alias": "failed",
-              "formula": "failed"
-            }, {
-              "alias": "not attempted",
-              "formula": "not_attempted"
-            }],
-            "queries": [{
-              "data_source": "metrics",
-              "name": "attempt",
-              "query": "sum:airbyte.worker.stats_commit_attempt{*}.as_count()"
-            }, {
-              "data_source": "metrics",
-              "name": "successful",
-              "query": "sum:airbyte.worker.stats_commit_attempt_successful{*}.as_count()"
-            }, {
-              "data_source": "metrics",
-              "name": "failed",
-              "query": "sum:airbyte.worker.stats_commit_attempt_failed{*}.as_count()"
-            }, {
-              "data_source": "metrics",
-              "name": "not_attempted",
-              "query": "sum:airbyte.worker.stats_commit_not_attempted{*}.as_count()"
-            }],
-            "response_format": "timeseries",
-            "style": {
-              "palette": "dog_classic"
-            },
-            "display_type": "line"
-          }]
-        },
-        "layout": {
-          "x": 9,
-          "y": 1,
-          "width": 3,
-          "height": 3
-        }
-      }, {
         "id": 3468777261531490,
         "definition": {
           "title": "State Final Flush",
@@ -1276,49 +1224,11 @@
             "queries": [{
               "data_source": "metrics",
               "name": "state_buffered",
-              "query": "sum:airbyte.worker.state_commit_close_successful{*}.as_count()"
+              "query": "sum:airbyte.worker.state_commit.close_successful{*}.as_count()"
             }, {
               "data_source": "metrics",
               "name": "query1",
-              "query": "sum:airbyte.worker.state_commit_not_attempted{*}.as_count()"
-            }],
-            "response_format": "timeseries",
-            "style": {
-              "palette": "dog_classic"
-            },
-            "display_type": "line"
-          }]
-        },
-        "layout": {
-          "x": 6,
-          "y": 4,
-          "width": 3,
-          "height": 3
-        }
-      }, {
-        "id": 245311246681378,
-        "definition": {
-          "title": "Stats Final Flush",
-          "show_legend": true,
-          "legend_layout": "horizontal",
-          "legend_columns": ["avg", "min", "max", "value", "sum"],
-          "type": "timeseries",
-          "requests": [{
-            "formulas": [{
-              "alias": "success",
-              "formula": "state_buffered"
-            }, {
-              "alias": "failure",
-              "formula": "query1"
-            }],
-            "queries": [{
-              "data_source": "metrics",
-              "name": "state_buffered",
-              "query": "sum:airbyte.worker.stats_commit_close_successful{*}.as_count()"
-            }, {
-              "data_source": "metrics",
-              "name": "query1",
-              "query": "sum:airbyte.worker.stats_commit_not_attempted{*}.as_count()"
+              "query": "sum:airbyte.worker.state_commit.not_attempted{*}.as_count()"
             }],
             "response_format": "timeseries",
             "style": {
@@ -1329,7 +1239,7 @@
         },
         "layout": {
           "x": 9,
-          "y": 4,
+          "y": 1,
           "width": 3,
           "height": 3
         }
@@ -1339,7 +1249,7 @@
       "x": 0,
       "y": 30,
       "width": 12,
-      "height": 8
+      "height": 5
     }
   }],
   "template_variables": [{

@@ -541,6 +541,16 @@ ADDITIONAL_METRICS_BY_VERSION = {
             "indexing_pressure.memory.limit_in_bytes",
         ),
     },
+    (8, 0, 0): {
+        # The in_flight_requests stat has been renamed inflight_requests in logs and diagnostic APIs.
+        # https://www.elastic.co/guide/en/elasticsearch/reference/current/migrating-8.0.html#breaking_80_rest_api_changes
+        'elasticsearch.breakers.inflight_requests.tripped': ('gauge', 'breakers.inflight_requests.tripped'),
+        'elasticsearch.breakers.inflight_requests.overhead': ('gauge', 'breakers.inflight_requests.overhead'),
+        'elasticsearch.breakers.inflight_requests.estimated_size_in_bytes': (
+            'gauge',
+            'breakers.inflight_requests.estimated_size_in_bytes',
+        ),
+    },
 }
 VERSIONS_THAT_ADD_METRICS = sorted(ADDITIONAL_METRICS_BY_VERSION)
 

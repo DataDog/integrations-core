@@ -1,11 +1,13 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import psycopg
+import psycopg2
 import pytest
 
-from .common import DB_NAME, HOST, assert_metric_at_least
-from .utils import requires_over_10
+from datadog_checks.postgres.util import QUERY_PG_REPLICATION_SLOTS_STATS
+
+from .common import DB_NAME, HOST, _iterate_metric_name, assert_metric_at_least
+from .utils import requires_over_10, requires_over_14
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -14,29 +16,14 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 def test_physical_replication_slots(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     redo_lsn_age = 0
-
-    conn = psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", autocommit=True)
-
-    def execute_query(conn, query):
+    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         with conn.cursor() as cur:
-            try:
-                cur.execute(query)
-            except psycopg.errors.DuplicateObject:
-                pass
+            cur.execute("select pg_wal_lsn_diff(pg_current_wal_lsn(), redo_lsn) from pg_control_checkpoint();")
+            redo_lsn_age = int(cur.fetchall()[0][0])
 
-    replication_slot_queries = [
-        "select * from pg_create_physical_replication_slot('phys_1');",
-        "select * from pg_create_physical_replication_slot('phys_2', true);",
-        "select * from pg_create_physical_replication_slot('phys_3', true, true);",
-    ]
-
-    with conn.cursor() as cur:
-        cur.execute("select pg_wal_lsn_diff(pg_current_wal_lsn(), redo_lsn) from pg_control_checkpoint();")
-        redo_lsn_age = int(cur.fetchall()[0][0])
-
-    for query in replication_slot_queries:
-        execute_query(conn, query)
-
+            cur.execute("select * from pg_create_physical_replication_slot('phys_1');")
+            cur.execute("select * from pg_create_physical_replication_slot('phys_2', true);")
+            cur.execute("select * from pg_create_physical_replication_slot('phys_3', true, true);")
     check.check(pg_instance)
 
     #     slot_name     | slot_type | temporary | active | active_pid | xmin | restart_lsn
@@ -79,6 +66,7 @@ def test_physical_replication_slots(aggregator, integration_check, pg_instance):
         tags=expected_phys2_tags,
         count=1,
     )
+
     assert_metric_at_least(
         aggregator,
         'postgresql.replication_slot.restart_delay_bytes',
@@ -94,13 +82,11 @@ def test_physical_replication_slots(aggregator, integration_check, pg_instance):
         count=1,
     )
 
-    conn.close()
-
 
 @requires_over_10
 def test_logical_replication_slots(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
-    with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn) FROM pg_replication_slots;")
             restart_age = cur.fetchall()[0][0]
@@ -130,3 +116,19 @@ def test_logical_replication_slots(aggregator, integration_check, pg_instance):
         lower_bound=restart_age,
         tags=expected_tags,
     )
+
+
+@requires_over_14
+def test_replication_slot_stats(aggregator, integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    expected_tags = pg_instance['tags'] + [
+        'port:{}'.format(pg_instance['port']),
+        'slot_name:logical_slot',
+        'slot_state:inactive',
+        'slot_type:logical',
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
+    for metric_name in _iterate_metric_name(QUERY_PG_REPLICATION_SLOTS_STATS):
+        aggregator.assert_metric(metric_name, count=1, tags=expected_tags)

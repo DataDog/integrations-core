@@ -1,0 +1,38 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "44210c4a-0fe6-4702-88bf-d720e492a806",
+  "app_id": "wincrashdetect",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor your Windows hosts for system crashes.",
+    "title": "Windows Crash Detection",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Windows",
+      "Category::OS & System"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
+  "assets": {
+    "integration": {
+      "source_type_name": "Windows Crash Detection",
+      "configuration": {},
+      "events": {
+        "creates_events": true
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
+  }
+}

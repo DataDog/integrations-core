@@ -178,7 +178,7 @@ class MarklogicCheck(AgentCheck):
     def _collect_resource_request_metrics(self, resource_type, name, group, tags):
         # type: (str, str, str, List[str]) -> None
         """Collect request metrics of a specific resource"""
-        data = self.api.get_requests_data(resource=resource_type, name=name, group=group)
+        data = self.api.get_requests_data(resource=resource_type, name=name, group=group)  # SKIP_HTTP_VALIDATION
         metrics = parse_per_resource_request_metrics(data, tags)
         self.submit_metrics(metrics)
 

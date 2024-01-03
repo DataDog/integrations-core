@@ -9,6 +9,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
+    assert_all_profile_metrics_and_tags_covered,
     assert_common_metrics,
     assert_extend_generic_host_resources_base,
     assert_extend_generic_if,
@@ -20,7 +21,8 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_western_digital_mycloud_ex2_ultra(dd_agent_check):
-    config = create_e2e_core_test_config('western-digital-mycloud-ex2-ultra')
+    profile = 'western-digital-mycloud-ex2-ultra'
+    config = create_e2e_core_test_config(profile)
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
@@ -33,6 +35,8 @@ def test_e2e_profile_western_digital_mycloud_ex2_ultra(dd_agent_check):
         'wdmycloudex2_agent_ver:oxen quaintly zombies driving oxen their oxen',
         'wdmycloudex2_host_name:but oxen quaintly but Jaded',
         'wdmycloudex2_software_version:kept driving',
+        'wdmycloudex2_ftp_server:disable',
+        'wdmycloudex2_net_type:active_directory',
     ]
 
     # --- TEST EXTENDED METRICS ---
@@ -157,5 +161,6 @@ def test_e2e_profile_western_digital_mycloud_ex2_ultra(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
     # --- CHECK COVERAGE ---
+    assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

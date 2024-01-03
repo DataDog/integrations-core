@@ -37,7 +37,7 @@ def _verbose_status(counts: dict, as_json: bool) -> List[str]:
     if as_json:
         return [json.dumps(counts, indent=2)]
 
-    totals = dict(zip(headers, [0] * len(headers)))
+    totals = dict(zip(headers, [0] * len(headers), strict=False))
 
     output = []
     output.append(row_format.format('', '', '', 'In', 'Issues', 'Awaiting', ''))

@@ -4,6 +4,7 @@
 import os
 
 import pytest
+
 from ddev.config.model import ConfigurationError, RootConfig, get_github_token, get_github_user
 
 

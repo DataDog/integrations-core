@@ -83,7 +83,11 @@ Deploy a [containerized version of the Datadog Agent][7] on your Kubernetes clus
 
   See the [Datadog helm-charts repository][9] for a full list of configurable values.
 
+#### Admission Controller
+ 
+To use [Admission Controller](https://docs.datadoghq.com/containers/cluster_agent/admission_controller/?tab=operator) with Autopilot, set the [`configMode`](https://github.com/DataDog/helm-charts/blob/main/charts/datadog/values.yaml#L922) of the Admission Controller to either `service` or `hostip`. 
 
+Because Autopilot does not allow `socket` mode, Datadog recommends using `service` (with `hostip` as a fallback) to provide a more robust layer of abstraction for the controller. 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
