@@ -932,7 +932,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"Application Control\" @action:(Drop OR Reject OR Block) $Checkpoint_Server $Action $Application_Category $Application_Name"
+                                    "query": "source:checkpoint_quantum_firewall @product:\"Application Control\" @checkpoint_firewall_action:(Drop OR Reject OR Block) $Checkpoint_Server $Action $Application_Category $Application_Name"
                                 },
                                 "storage": "hot"
                             }

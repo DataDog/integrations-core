@@ -572,7 +572,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Ransomware @action:Detect $Checkpoint_Server $Action"
+                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Ransomware @checkpoint_firewall_action:Detect $Checkpoint_Server $Action"
                                 },
                                 "storage": "hot"
                             }
