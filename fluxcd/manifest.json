@@ -19,10 +19,10 @@
     ]
   },
   "author": {
-    "support_email": "melchior.moulin@blablacar.com",
-    "homepage": "https://github.com/DataDog/integrations-extras",
-    "sales_email": "melchior.moulin@blablacar.com",
-    "name": "Community"
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
   },
   "oauth": {},
   "assets": {
