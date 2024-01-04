@@ -11,7 +11,6 @@ name = "datadog-zeek"
 description = "The zeek check"
 readme = "README.md"
 license = "BSD-3-Clause"
-requires-python = ">=3.9"
 keywords = [
     "datadog",
     "datadog agent",
@@ -27,11 +26,10 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
     "Private :: Do Not Upload",
-    "Programming Language :: Python :: 3.9",
     "Topic :: System :: Monitoring",
 ]
 dependencies = [
-    "datadog-checks-base>=32.6.0",
+    "datadog-checks-base>=4.2.0",
 ]
 dynamic = [
     "version",
