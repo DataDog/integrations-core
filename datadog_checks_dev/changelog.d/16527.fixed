@@ -1,0 +1,1 @@
+Remove setuptools depedency for jmx and logs integrations. Make them consistent with the `check` template.
