@@ -15,6 +15,12 @@ This integration provides visualization and log enrichments for Connection Logs,
 
 ### Installation
 
+To install the Zeek integration follow the steps below:
+
+**Note:** This step is not necessary for Agent version >= 7.18.0.
+
+1. [Install][7] the 1.0 release (`zeek==1.0.0`)
+
 **Opensource Zeek:**
 1. [Install the Agent][4] on your Zeek machine.
 2. Setup json-streaming-logs package
@@ -188,3 +194,4 @@ For any further assistance, do contact [Datadog support][3].
 [4]: https://docs.datadoghq.com/agent/
 [5]: https://github.com/corelight/json-streaming-logs
 [6]: https://zeek.org/
+[7]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install

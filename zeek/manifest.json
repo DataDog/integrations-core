@@ -64,6 +64,9 @@
   "assets": {
     "integration": {
       "source_type_name": "zeek",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
       "events": {
         "creates_events": false
       },
