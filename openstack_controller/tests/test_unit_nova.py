@@ -1997,6 +1997,15 @@ def test_servers_pagination(
             1,
             id='api one invalid server',
         ),
+        pytest.param(
+            {
+                'mock_data': {
+                    '/compute/v2.1/servers/detail': {"servers": [{"test": "attr"}], "servers_links": [{"rel": "test"}]},
+                }
+            },
+            1,
+            id='api one invalid server link',
+        ),
     ],
     indirect=['mock_http_get'],
 )
