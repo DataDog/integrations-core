@@ -9,7 +9,6 @@ name = "datadog-{project_name}"
 description = "The {integration_name} check"
 readme = "README.md"
 license = "BSD-3-Clause"
-requires-python = ">=3.9"
 keywords = [
     "datadog",
     "datadog agent",
@@ -29,7 +28,7 @@ classifiers = [
     "Topic :: System :: Monitoring",
 ]
 dependencies = [
-    "datadog-checks-base>=32.6.0",
+    "datadog-checks-base>=4.2.0",
 ]
 dynamic = [
     "version",
