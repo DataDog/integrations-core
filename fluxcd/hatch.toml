@@ -2,6 +2,3 @@
 
 [[envs.default.matrix]]
 python = ["3.11"]
-
-[envs.default]
-e2e-env = false

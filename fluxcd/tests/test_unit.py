@@ -7,49 +7,7 @@ from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.fluxcd import FluxcdCheck
 
-EXPECTED_METRICS = {
-    "v1": {
-        "fluxcd.controller.runtime.active.workers",
-        "fluxcd.controller.runtime.max.concurrent.reconciles",
-        "fluxcd.controller.runtime.reconcile.count",
-        "fluxcd.controller.runtime.reconcile.errors.count",
-        "fluxcd.controller.runtime.reconcile.time.seconds.bucket",
-        "fluxcd.controller.runtime.reconcile.time.seconds.count",
-        "fluxcd.controller.runtime.reconcile.time.seconds.sum",
-        "fluxcd.gotk.reconcile.condition",
-        "fluxcd.gotk.reconcile.duration.seconds.bucket",
-        "fluxcd.gotk.reconcile.duration.seconds.count",
-        "fluxcd.gotk.reconcile.duration.seconds.sum",
-        "fluxcd.gotk.suspend.status",
-    },
-    "v2": {
-        "fluxcd.controller.runtime.active.workers",
-        "fluxcd.controller.runtime.max.concurrent.reconciles",
-        "fluxcd.controller.runtime.reconcile.count",
-        "fluxcd.controller.runtime.reconcile.errors.count",
-        "fluxcd.controller.runtime.reconcile.time.seconds.bucket",
-        "fluxcd.controller.runtime.reconcile.time.seconds.count",
-        "fluxcd.controller.runtime.reconcile.time.seconds.sum",
-        "fluxcd.gotk.reconcile.condition",
-        "fluxcd.gotk.reconcile.duration.seconds.bucket",
-        "fluxcd.gotk.reconcile.duration.seconds.count",
-        "fluxcd.gotk.reconcile.duration.seconds.sum",
-        "fluxcd.gotk.suspend.status",
-        "fluxcd.leader_election_master_status",
-        "fluxcd.process.cpu_seconds.count",
-        "fluxcd.process.max_fds",
-        "fluxcd.process.open_fds",
-        "fluxcd.process.resident_memory",
-        "fluxcd.process.start_time",
-        "fluxcd.process.virtual_memory",
-        "fluxcd.process.virtual_memory.max",
-        "fluxcd.workqueue.adds.count",
-        "fluxcd.workqueue.depth",
-        "fluxcd.workqueue.longest_running_processor",
-        "fluxcd.workqueue.retries.count",
-        "fluxcd.workqueue.unfinished_work",
-    },
-}
+from .common import EXPECTED_METRICS
 
 
 @pytest.mark.parametrize("fluxcd_version", ["v1", "v2"])

@@ -6,12 +6,45 @@ from unittest import mock
 
 import pytest
 
+from datadog_checks.dev import get_here
+from datadog_checks.dev.kind import kind_run
+from datadog_checks.dev.kube_port_forward import port_forward
+from datadog_checks.dev.subprocess import run_command
 from datadog_checks.fluxcd import FluxcdCheck
 
+HERE = get_here()
+opj = os.path.join
 
-@pytest.fixture(scope="session")
+
+def setup_fluxcd():
+    run_command(["kubectl", "apply", "--filename", opj(HERE, 'kind', "install.yaml")])
+    run_command(
+        [
+            "kubectl",
+            "wait",
+            "deployments",
+            "--all",
+            "--for=condition=Available",
+            "--namespace",
+            "flux-system",
+            "--timeout=300s",
+        ]
+    )
+
+
+@pytest.fixture(scope='session')
 def dd_environment():
-    yield
+    with kind_run(conditions=[setup_fluxcd]) as kubeconfig:
+        with port_forward(kubeconfig, 'flux-system', 8080, 'deployment', 'source-controller') as (
+            src_controller_host,
+            src_controller_port,
+        ):
+            src_controller_endpoint = 'http://{}:{}/metrics'.format(src_controller_host, src_controller_port)
+
+            instance = {
+                'openmetrics_endpoint': src_controller_endpoint,
+            }
+            yield instance
 
 
 @pytest.fixture
