@@ -31,7 +31,7 @@ from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.explain_parameterized_queries import ExplainParameterizedQueries
 
-from .util import DatabaseConfigurationError, warning_with_tags
+from .util import DatabaseConfigurationError, DBExplainError, warning_with_tags
 from .version_utils import V9_6, V10
 
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
@@ -119,47 +119,6 @@ class StatementTruncationState(Enum):
     unknown = 'unknown'
 
 
-class DBExplainError(Enum):
-    """
-    Denotes the various reasons a query may not have an explain statement.
-    """
-
-    # may be due to a misconfiguration of the database during setup or the Agent is
-    # not able to access the required function
-    database_error = 'database_error'
-
-    # datatype mismatch occurs when return type is not json, for instance when multiple queries are explained
-    datatype_mismatch = 'datatype_mismatch'
-
-    # this could be the result of a missing EXPLAIN function
-    invalid_schema = 'invalid_schema'
-
-    # a value retrieved from the EXPLAIN function could be invalid
-    invalid_result = 'invalid_result'
-
-    # some statements cannot be explained i.e AUTOVACUUM
-    no_plans_possible = 'no_plans_possible'
-
-    # there could be a problem with the EXPLAIN function (missing, invalid permissions, or an incorrect definition)
-    failed_function = 'failed_function'
-
-    # a truncated statement can't be explained
-    query_truncated = "query_truncated"
-
-    # connection error may be due to a misconfiguration during setup
-    connection_error = 'connection_error'
-
-    # clients using the extended query protocol or prepared statements can't be explained due to
-    # the separation of the parsed query and raw bind parameters
-    parameterized_query = 'parameterized_query'
-
-    # search path may be different when the client executed a query from where we executed it.
-    undefined_table = 'undefined_table'
-
-    # the statement was explained with the prepared statement workaround
-    explained_with_prepared_statement = 'explained_with_prepared_statement'
-
-
 DEFAULT_COLLECTION_INTERVAL = 1
 DEFAULT_ACTIVITY_COLLECTION_INTERVAL = 10
 
@@ -210,7 +169,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._activity_last_query_start = None
         # The value is loaded when connecting to the main database
         self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
-        self._explain_parameterized_queries = ExplainParameterizedQueries(check, config)
+        self._explain_parameterized_queries = ExplainParameterizedQueries(check, config, self._explain_function)
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
 
         self._collection_strategy_cache = TTLCache(
@@ -654,11 +613,9 @@ class PostgresStatementSamples(DBMAsyncJob):
             # instead of trying to explain it then failing
             if self._explain_parameterized_queries._is_parameterized_query(statement):
                 if is_affirmative(self._config.statement_samples_config.get('explain_parameterized_queries', True)):
-                    plan = self._explain_parameterized_queries.explain_statement(
+                    return self._explain_parameterized_queries.explain_statement(
                         dbname, statement, obfuscated_statement
                     )
-                    if plan:
-                        return plan, DBExplainError.explained_with_prepared_statement, None
                 e = psycopg2.errors.UndefinedParameter("Unable to explain parameterized query")
                 self._log.debug(
                     "Unable to collect execution plan, clients using the extended query protocol or prepared statements"
