@@ -17,8 +17,6 @@ This integration provides visualization and log enrichments for Connection Logs,
 
 To install the Zeek integration follow the steps below:
 
-**Note:** This step is not necessary for Agent version >= 7.18.0.
-
 1. [Install][7] the 1.0 release (`zeek==1.0.0`)
 
 **Opensource Zeek:**
