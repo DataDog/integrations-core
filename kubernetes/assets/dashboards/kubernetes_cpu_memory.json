@@ -110,7 +110,7 @@
             "layout": {
               "x": 0,
               "y": 0,
-              "width": 7,
+              "width": 2,
               "height": 4
             }
           },
@@ -203,9 +203,9 @@
               "has_search_bar": "auto"
             },
             "layout": {
-              "x": 7,
+              "x": 2,
               "y": 0,
-              "width": 5,
+              "width": 10,
               "height": 4
             }
           },
@@ -538,49 +538,49 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "sum:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "avg"
                     },
                     {
-                      "query": "sum:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query7",
                       "aggregator": "avg"
                     },
                     {
-                      "query": "sum:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query5",
                       "aggregator": "avg"
                     },
                     {
-                      "query": "sum:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query8",
                       "aggregator": "avg"
                     },
                     {
-                      "query": "avg:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "avg:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query9",
                       "aggregator": "avg"
                     },
                     {
-                      "query": "avg:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "avg:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query10",
                       "aggregator": "avg"
                     },
                     {
-                      "query": "sum:kubernetes.cpu.limits{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.cpu.limits{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query2",
                       "aggregator": "avg"
                     },
                     {
-                      "query": "sum:kubernetes.memory.limits{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.memory.limits{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query6",
                       "aggregator": "avg"
@@ -690,32 +690,32 @@
                   ],
                   "queries": [
                     {
-                      "query": "sum:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "sum:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query7"
                     },
                     {
-                      "query": "sum:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query5"
                     },
                     {
-                      "query": "sum:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query8"
                     },
                     {
-                      "query": "sum:kubernetes.cpu.limits{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.cpu.limits{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query2"
                     },
                     {
-                      "query": "sum:kubernetes.memory.limits{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.memory.limits{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query6"
                     }
@@ -765,32 +765,32 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "sum:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "sum:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query7"
                     },
                     {
-                      "query": "sum:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query5"
                     },
                     {
-                      "query": "sum:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query8"
                     },
                     {
-                      "query": "sum:kubernetes.cpu.limits{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.cpu.limits{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query2"
                     },
                     {
-                      "query": "sum:kubernetes.memory.limits{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.memory.limits{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query6"
                     }
@@ -879,32 +879,32 @@
                   ],
                   "queries": [
                     {
-                      "query": "avg:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "avg:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query7"
                     },
                     {
-                      "query": "avg:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "avg:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "sum:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query5"
                     },
                     {
-                      "query": "sum:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query8"
                     },
                     {
-                      "query": "sum:kubernetes.cpu.limits{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.cpu.limits{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query2"
                     },
                     {
-                      "query": "sum:kubernetes.memory.limits{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.memory.limits{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query6"
                     }
@@ -928,7 +928,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query0",
-                      "query": "avg:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}"
+                      "query": "avg:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -979,32 +979,32 @@
                   ],
                   "queries": [
                     {
-                      "query": "avg:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "avg:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query8"
                     },
                     {
-                      "query": "avg:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "avg:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query5"
                     },
                     {
-                      "query": "sum:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "sum:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query7"
                     },
                     {
-                      "query": "sum:kubernetes.cpu.limits{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.cpu.limits{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query2"
                     },
                     {
-                      "query": "sum:kubernetes.memory.limits{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "query": "sum:kubernetes.memory.limits{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
                       "data_source": "metrics",
                       "name": "query6"
                     }
@@ -1028,7 +1028,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query0",
-                      "query": "avg:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}"
+                      "query": "avg:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1057,7 +1057,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 20,
+        "y": 0,
         "width": 12,
         "height": 11,
         "is_column_break": true
@@ -1277,7 +1277,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 31,
+        "y": 11,
         "width": 12,
         "height": 7
       }
@@ -1317,6 +1317,12 @@
     {
       "name": "kube_daemon_set",
       "prefix": "kube_daemon_set",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "kube_stateful_set",
+      "prefix": "kube_stateful_set",
       "available_values": [],
       "default": "*"
     }
