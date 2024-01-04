@@ -15,7 +15,7 @@ class ScyllaCheck(OpenMetricsBaseCheck):
     This is a legacy implementation that will be removed at some point, refer to check.py for the new implementation.
     """
 
-    METRIC_PREFIX = 'coredns.'
+    METRIC_PREFIX = 'scylla.'
 
     """
     Collect Scylla metrics from Prometheus endpoint
