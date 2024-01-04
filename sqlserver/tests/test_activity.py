@@ -305,9 +305,6 @@ def test_activity_nested_blocking_transactions(
     assert root_blocker["client_port"]
     assert root_blocker["client_address"]
     assert root_blocker["host_name"]
-    assert root_blocker["transaction_state"]
-    assert root_blocker["transaction_start"]
-    assert root_blocker["transaction_type"]
     # Expect to capture the query signature for the root blocker
     # query text is not captured from the req dmv
     # but available in the connection dmv with most_recent_sql_handle
@@ -335,9 +332,6 @@ def test_activity_nested_blocking_transactions(
     assert tx2["query_start"]
     assert tx2["query_hash"]
     assert tx2["query_plan_hash"]
-    assert tx2["transaction_state"]
-    assert tx2["transaction_start"]
-    assert tx2["transaction_type"]
 
     assert tx3["user_name"] == "fred"
     assert tx3["database_name"] == "datadog_test"
@@ -350,9 +344,6 @@ def test_activity_nested_blocking_transactions(
     assert tx3["query_start"]
     assert tx3["query_hash"]
     assert tx3["query_plan_hash"]
-    assert tx3["transaction_state"]
-    assert tx3["transaction_start"]
-    assert tx3["transaction_type"]
 
     assert isinstance(tx2["query_hash"], str)
     assert isinstance(tx2["query_plan_hash"], str)

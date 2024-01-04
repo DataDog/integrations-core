@@ -64,21 +64,12 @@ SELECT
     sess.host_name as host_name,
     sess.program_name as program_name,
     sess.is_user_process as is_user_process,
-    CONVERT(
-        NVARCHAR, TODATETIMEOFFSET(at.transaction_begin_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
-    ) as transaction_start,
-    at.transaction_state as transaction_state,
-    at.transaction_type as transaction_type,
     {exec_request_columns}
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
         ON sess.session_id = c.session_id
     INNER JOIN sys.dm_exec_requests req
         ON c.connection_id = req.connection_id
-    LEFT JOIN sys.dm_tran_session_transactions st
-        ON sess.session_id = st.session_id
-    LEFT JOIN sys.dm_tran_active_transactions at
-        ON st.transaction_id = at.transaction_id
     CROSS APPLY sys.dm_exec_sql_text(req.sql_handle) qt
 WHERE
     sess.session_id != @@spid AND
@@ -110,19 +101,10 @@ SELECT
     c.client_net_address as client_address,
     sess.host_name as host_name,
     sess.program_name as program_name,
-    sess.is_user_process as is_user_process,
-    CONVERT(
-        NVARCHAR, TODATETIMEOFFSET(at.transaction_begin_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
-    ) as transaction_start,
-    at.transaction_state as transaction_state,
-    at.transaction_type as transaction_type
+    sess.is_user_process as is_user_process
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
         ON sess.session_id = c.session_id
-    LEFT JOIN sys.dm_tran_session_transactions st
-        ON sess.session_id = st.session_id
-    LEFT JOIN sys.dm_tran_active_transactions at
-        ON st.transaction_id = at.transaction_id
     CROSS APPLY sys.dm_exec_sql_text(c.most_recent_sql_handle) lqt
 WHERE sess.status = 'sleeping'
     AND sess.session_id IN ({blocking_session_ids})
