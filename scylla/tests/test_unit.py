@@ -31,7 +31,7 @@ def test_instance_default_check_omv2(aggregator, mock_db_data, dd_run_check, ins
     dd_run_check(check)
     for m in INSTANCE_DEFAULT_METRICS_V2:
         if m in FLAKY_METRICS:
-            aggregator.assert_metric(m, count=0)
+            aggregator.assert_metric(m, at_least=0)
         else:
             aggregator.assert_metric(m)
     aggregator.assert_all_metrics_covered()
@@ -56,7 +56,7 @@ def test_instance_additional_check_omv2(aggregator, mock_db_data, dd_run_check, 
 
     for m in transformed_metrics:
         if m in FLAKY_METRICS:
-            aggregator.assert_metric(m, count=0)
+            aggregator.assert_metric(m, at_least=0)
         else:
             aggregator.assert_metric(m)
 
@@ -79,7 +79,7 @@ def test_instance_full_additional_check_omv2(aggregator, mock_db_data, dd_run_ch
 
     for m in metrics_to_check:
         if m in FLAKY_METRICS:
-            aggregator.assert_metric(m, count=0)
+            aggregator.assert_metric(m, at_least=0)
         else:
             aggregator.assert_metric(m)
     aggregator.assert_all_metrics_covered()

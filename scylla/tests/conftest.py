@@ -37,7 +37,9 @@ def instance():
 def mock_db_data():
     if os.environ['SCYLLA_VERSION'].startswith('5.'):
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'scylla_5_metrics.txt')
-    else:
+    elif os.environ['SCYLLA_VERSION'].startswith('3.3'):
+        f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'scylla_3_3_metrics.txt')
+    elif os.environ['SCYLLA_VERSION'].startswith('3.1'):
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'scylla_metrics.txt')
 
     with open(f_name, 'r') as f:

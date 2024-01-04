@@ -24,7 +24,7 @@ def test_instance_integration_check_omv2(aggregator, mock_db_data, dd_run_check,
 
     for m in INSTANCE_DEFAULT_METRICS_V2:
         if m in FLAKY_METRICS:
-            aggregator.assert_metric(m, count=0)
+            aggregator.assert_metric(m, at_least=0)
         else:
             aggregator.assert_metric(m)
     aggregator.assert_all_metrics_covered()

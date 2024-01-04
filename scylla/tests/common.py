@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-# from datadog_checks.scylla.metrics  import construct_metrics_config
-
 CHECK_NAME = 'scylla'
 NAMESPACE = 'scylla.'
 
@@ -422,37 +420,39 @@ if os.environ['SCYLLA_VERSION'] == "3.3.1":
     flaky_metrics_3 = [
         'scylla.reactor.abandoned_failed_futures',
         'scylla.reactor.abandoned_failed_futures.count',
-        'scylla.storage.proxy.coordinator_cas_read_contention.bucket',
         'scylla.storage.proxy.coordinator_cas_read_contention.count',
         'scylla.storage.proxy.coordinator_cas_read_contention.sum',
-        'scylla.storage.proxy.coordinator_cas_read_latency.bucket',
         'scylla.storage.proxy.coordinator_cas_read_latency.count',
         'scylla.storage.proxy.coordinator_cas_read_latency.sum',
         'scylla.storage.proxy.coordinator_cas_read_timouts',
-        'scylla.storage.proxy.coordinator_cas_read_timouts.count',
         'scylla.storage.proxy.coordinator_cas_read_unavailable',
-        'scylla.storage.proxy.coordinator_cas_read_unavailable.count',
         'scylla.storage.proxy.coordinator_cas_read_unfinished_commit',
-        'scylla.storage.proxy.coordinator_cas_read_unfinished_commit.count',
         'scylla.storage.proxy.coordinator_cas_write_condition_not_met',
-        'scylla.storage.proxy.coordinator_cas_write_condition_not_met.count',
-        'scylla.storage.proxy.coordinator_cas_write_contention.bucket',
         'scylla.storage.proxy.coordinator_cas_write_contention.count',
         'scylla.storage.proxy.coordinator_cas_write_contention.sum',
-        'scylla.storage.proxy.coordinator_cas_write_latency.bucket',
         'scylla.storage.proxy.coordinator_cas_write_latency.count',
         'scylla.storage.proxy.coordinator_cas_write_latency.sum',
         'scylla.storage.proxy.coordinator_cas_write_timeouts',
-        'scylla.storage.proxy.coordinator_cas_write_timeouts.count',
         'scylla.storage.proxy.coordinator_cas_write_unavailable',
-        'scylla.storage.proxy.coordinator_cas_write_unavailable.count',
         'scylla.storage.proxy.coordinator_cas_write_unfinished_commit',
-        'scylla.storage.proxy.coordinator_cas_write_unfinished_commit.count',
         'scylla.storage.proxy.coordinator_reads_coordinator_outside_replica_set',
-        'scylla.storage.proxy.coordinator_reads_coordinator_outside_replica_set.count',
         'scylla.storage.proxy.coordinator_writes_coordinator_outside_replica_set',
-        'scylla.storage.proxy.coordinator_writes_coordinator_outside_replica_set.count',
         'scylla.transport.requests_memory_available',
+        'scylla.storage.proxy.coordinator_cas_read_contention.count',
+        'scylla.storage.proxy.coordinator_cas_read_contention.sum',
+        'scylla.storage.proxy.coordinator_cas_read_timouts.count',
+        'scylla.storage.proxy.coordinator_cas_read_unavailable.count',
+        'scylla.storage.proxy.coordinator_cas_read_unfinished_commit.count',
+        'scylla.storage.proxy.coordinator_cas_write_condition_not_met.count',
+        'scylla.storage.proxy.coordinator_cas_write_contention.count',
+        'scylla.storage.proxy.coordinator_cas_write_contention.sum',
+        'scylla.storage.proxy.coordinator_cas_write_latency.count',
+        'scylla.storage.proxy.coordinator_cas_write_latency.sum',
+        'scylla.storage.proxy.coordinator_cas_write_timeouts.count',
+        'scylla.storage.proxy.coordinator_cas_write_unavailable.count',
+        'scylla.storage.proxy.coordinator_cas_write_unfinished_commit.count',
+        'scylla.storage.proxy.coordinator_reads_coordinator_outside_replica_set.count',
+        'scylla.storage.proxy.coordinator_writes_coordinator_outside_replica_set.count',
     ]
 
     metric_map = modify_metrics_map(new_metrics_version_3_3)
@@ -1077,6 +1077,8 @@ omv2_count_metrics = [
     'scylla.storage.proxy.coordinator_background_writes_failed',
     'scylla.storage.proxy.coordinator_canceled_read_repairs',
     'scylla.storage.proxy.coordinator_cas_prune',
+    'scylla.storage.proxy.coordinator_cas_read_contention',
+    'scylla.storage.proxy.coordinator_cas_read_latency',
     'scylla.storage.proxy.coordinator_cas_read_timouts',
     'scylla.storage.proxy.coordinator_cas_read_unavailable',
     'scylla.storage.proxy.coordinator_cas_read_unfinished_commit',
@@ -1141,6 +1143,7 @@ omv2_count_metrics = [
     'scylla.view.update_generator_queued_batches',
     'scylla.view.update_generator_sstables_to_move',
 ]
+
 # special case since the metric type is different in 3.3
 if os.environ.get('SCYLLA_VERSION') < '5.2.6':
     omv2_count_metrics.append('scylla.reactor.timers_pending')
@@ -1151,13 +1154,17 @@ if os.environ.get('SCYLLA_VERSION') < '5.2.6':
     omv2_count_metrics.append('scylla.memory.used_memory')
 
 bucket_metrics = [
-    'scylla.storage.proxy.coordinator_cas_read_contention.bucket',
-    'scylla.storage.proxy.coordinator_cas_read_latency.bucket',
-    'scylla.storage.proxy.coordinator_cas_write_contention.bucket',
-    'scylla.storage.proxy.coordinator_cas_write_latency.bucket',
     'scylla.storage.proxy.coordinator_read_latency.bucket',
     'scylla.storage.proxy.coordinator_write_latency.bucket',
 ]
+
+if os.environ.get('SCYLLA_VERSION') == '3.3.1':
+    bucket_metrics = bucket_metrics + [
+        'scylla.storage.proxy.coordinator_cas_read_contention.bucket',
+        'scylla.storage.proxy.coordinator_cas_read_latency.bucket',
+        'scylla.storage.proxy.coordinator_cas_write_contention.bucket',
+        'scylla.storage.proxy.coordinator_cas_write_latency.bucket',
+    ]
 
 # expand the lists into a single list of metrics
 def get_metrics(metric_groups):
