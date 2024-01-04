@@ -454,7 +454,7 @@ def connection_compute(request, mock_responses):
             )
         )
 
-    def servers(project_id, details):
+    def servers(project_id, details, limit=None):
         if http_error and 'servers' in http_error and project_id in http_error['servers']:
             raise requests.exceptions.HTTPError(response=http_error['servers'][project_id])
         return [

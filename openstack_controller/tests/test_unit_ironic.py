@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import copy
 import logging
 import os
 
@@ -11,7 +12,6 @@ import tests.configs as configs
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.openstack_controller.api.type import ApiType
-from datadog_checks.openstack_controller.openstack_controller import OpenStackControllerCheck
 from tests.common import remove_service_from_catalog
 from tests.metrics import (
     CONDUCTORS_METRICS_IRONIC_MICROVERSION_1_80,
@@ -385,10 +385,19 @@ def test_nodes_metrics(aggregator, check, dd_run_check, metrics):
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
 def test_ironic_nodes_pagination(
-    aggregator, dd_run_check, instance, paginated_limit, metrics, api_type, mock_http_get, connection_baremetal
+    aggregator,
+    dd_run_check,
+    instance,
+    openstack_controller_check,
+    paginated_limit,
+    metrics,
+    api_type,
+    mock_http_get,
+    connection_baremetal,
 ):
-    instance['paginated_limit'] = paginated_limit
-    dd_run_check(OpenStackControllerCheck('test', {}, [instance]))
+    paginated_instance = copy.deepcopy(instance)
+    paginated_instance['paginated_limit'] = paginated_limit
+    dd_run_check(openstack_controller_check(paginated_instance))
     for metric in metrics:
         aggregator.assert_metric(
             metric['name'],

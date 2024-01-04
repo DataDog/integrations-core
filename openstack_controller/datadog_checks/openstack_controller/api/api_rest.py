@@ -218,11 +218,13 @@ class ApiRest(Api):
 
     def get_compute_servers(self, project_id):
         params = {'project_id': project_id}
-        response = self.http.get(
-            '{}/servers/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value)), params=params
+        return self.make_paginated_request(
+            '{}/servers/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value)),
+            'servers',
+            'id',
+            next_signifier='servers_links',
+            params=params,
         )
-        response.raise_for_status()
-        return response.json().get('servers', [])
 
     def get_compute_server_diagnostics(self, server_id):
         response = self.http.get(
@@ -292,10 +294,22 @@ class ApiRest(Api):
         response.raise_for_status()
         return response.json().get('quota', [])
 
-    def make_paginated_request(self, url, resource_name, marker_name, params=None):
+    def make_paginated_request(self, url, resource_name, marker_name, next_signifier='next', params=None):
+        def make_request(url, params):
+            resp = self.http.get(url, params=params)
+            resp.raise_for_status()
+            response_json = resp.json()
+            return response_json
+
         marker = None
         item_list = []
         params = {} if params is None else params
+
+        if self.config.paginated_limit is None:
+            response_json = make_request(url, params)
+            objects = response_json.get(resource_name, [])
+            return objects
+
         while True:
             self.log.debug(
                 "making paginated request [limit=%s, marker=%s]",
@@ -307,17 +321,26 @@ class ApiRest(Api):
             if marker is not None:
                 params['marker'] = marker
 
-            response = self.http.get(url, params=params)
-            response.raise_for_status()
-
-            response_json = response.json()
+            response_json = make_request(url, params)
             resources = response_json.get(resource_name, [])
             if len(resources) > 0:
                 last_item = resources[-1]
-                next = last_item.get('next')
                 item_list.extend(resources)
-                if next is None:
-                    break
+
+                if next_signifier == '{}_links'.format(resource_name):
+                    has_next_link = False
+                    links = response_json.get(next_signifier, [])
+                    for link in links:
+                        link_type = link.get('rel')
+                        if link_type == 'next':
+                            has_next_link = True
+                            break
+                    if not has_next_link:
+                        break
+                else:
+                    next_item = last_item.get(next_signifier)
+                    if next_item is None:
+                        break
 
                 marker = last_item.get(marker_name)
             else:
@@ -354,15 +377,7 @@ class ApiRest(Api):
             params = {'detail': True}
             url = '{}/v1/nodes'.format(ironic_endpoint)
 
-        if self.config.paginated_limit is not None:
-            return self.make_paginated_request(url, 'nodes', 'uuid', params)
-
-        else:
-            response = self.http.get(url, params=params)
-            response.raise_for_status()
-
-            response_json = response.json()
-            return response_json.get("nodes", [])
+        return self.make_paginated_request(url, 'nodes', 'uuid', params=params)
 
     def get_baremetal_conductors(self):
         response = self.http.get(
