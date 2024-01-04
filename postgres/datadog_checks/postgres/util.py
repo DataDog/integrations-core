@@ -609,6 +609,7 @@ SELECT s.schemaname,
     ON o.funcname = s.funcname;
 """,
     'relation': False,
+    'use_global_db_tag': True,
     'name': 'function_metrics',
 }
 
