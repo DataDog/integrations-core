@@ -50,6 +50,18 @@ spec:
 # (...)
 ```
 
+#### Log collection
+
+_Available for Agent versions >6.0_
+
+Karpenter logs can be collected from the different Karpenter pods through Kubernetes. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][11].
+
+See the [Autodiscovery Integration Templates][3] for guidance on applying the parameters below.
+
+| Parameter      | Value                                                   |
+| -------------- | ------------------------------------------------------- |
+| `<LOG_CONFIG>` | `{"source": "karpenter", "service": "<SERVICE_NAME>"}`  |
+
 ### Validation
 
 [Run the Agent's status subcommand][6] and look for `karpenter` under the Checks section.
@@ -83,3 +95,4 @@ Need help? Contact [Datadog support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/karpenter/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://karpenter.sh/docs/reference/metrics/
+[11]: https://docs.datadoghq.com/agent/kubernetes/log/

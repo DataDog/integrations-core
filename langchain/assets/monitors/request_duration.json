@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2023-07-21",
   "last_updated_at": "2023-07-21",
-  "title": "Request Duration Spike",
+  "title": "Request duration is increasing",
   "tags": [
     "integration:langchain"
   ],
-  "description": "Notify your team when requests made with LangChain have increased latency",
+  "description": "By default, LangChain will wait indefinitely for a response from the model provider. This monitor tracks the request duration to alert when requests made with LangChain have increased latency.",
   "definition": {
     "message": "{{#is_alert}}\n\nALERT: The duration of your LangChain requests is higher than normal. The average LangChain request duration is currently over {{value}} seconds. \n\n{{/is_alert}}",
     "name": "[LangChain] Request Duration Spike",

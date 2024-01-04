@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2021-02-12",
   "last_updated_at": "2021-02-23",
-  "title": "Low number of idle workers",
+  "title": "Idle workers number is low",
   "tags": [
     "integration:apache"
   ],
-  "description": "Notify your team when the number of idle workers is running low.",
+  "description": "Idle workers in Apache are available server threads that can handle incoming requests. This monitor tracks anomalies in Apache's idle workers count, detecting when it falls below expected levels to identify performance issues in Apache web servers.",
   "definition": {
     "message": "The number of idle workers is abnormally low: {{value}}. You may see slower request processing times.",
     "name": "[Apache] Low number of idle workers",
