@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2023-present
+# (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 # Here you can include additional config validators or transformers
