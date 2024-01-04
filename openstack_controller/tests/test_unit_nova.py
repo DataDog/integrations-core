@@ -1950,7 +1950,6 @@ def test_servers_pagination(
             params = kwargs.get('params', {})
             project_id = params.get('project_id')
             limit = params.get('limit')
-            params.get('marker')
             args_list += [(args[0], project_id, limit)]
         servers_url = 'http://127.0.0.1:8774/compute/v2.1/servers/detail'
         assert (
