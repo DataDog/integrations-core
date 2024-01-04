@@ -63,6 +63,7 @@ SELECT
     c.client_net_address as client_address,
     sess.host_name as host_name,
     sess.program_name as program_name,
+    sess.is_user_process as is_user_process,
     {exec_request_columns}
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
@@ -70,7 +71,9 @@ FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_requests req
         ON c.connection_id = req.connection_id
     CROSS APPLY sys.dm_exec_sql_text(req.sql_handle) qt
-WHERE sess.session_id != @@spid AND sess.status != 'sleeping'
+WHERE
+    sess.session_id != @@spid AND
+    sess.status != 'sleeping'
 """,
 ).strip()
 
@@ -97,7 +100,8 @@ SELECT
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
-    sess.program_name as program_name
+    sess.program_name as program_name,
+    sess.is_user_process as is_user_process
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
         ON sess.session_id = c.session_id
@@ -238,7 +242,7 @@ class SqlserverActivity(DBMAsyncJob):
                 self._check.histogram(
                     "dd.sqlserver.activity.collect_activity.max_bytes.rows_dropped",
                     len(normalized_rows) - len(rows),
-                    **self._check.debug_stats_kwargs()
+                    **self._check.debug_stats_kwargs(),
                 )
                 self._check.warning(
                     "Exceeded the limit of activity rows captured (%s of %s rows included). "
@@ -263,7 +267,7 @@ class SqlserverActivity(DBMAsyncJob):
         available_columns = [c for c in all_expected_columns if c in all_columns]
         missing_columns = set(all_expected_columns) - set(available_columns)
         if missing_columns:
-            self._log.debug("missing the following expected columns from sys.dm_exec_requests: %s", missing_columns)
+            self._log.info("missing the following expected columns from sys.dm_exec_requests: %s", missing_columns)
         self._log.debug("found available sys.dm_exec_requests columns: %s", available_columns)
         return available_columns
 
