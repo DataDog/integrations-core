@@ -66,9 +66,10 @@ class ExplainParameterizedQueries:
                 Returns: (plan)
     '''
 
-    def __init__(self, check, config):
+    def __init__(self, check, config, explain_function):
         self._check = check
         self._config = config
+        self._explain_function = explain_function
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def explain_statement(self, dbname, statement, obfuscated_statement):
@@ -100,7 +101,7 @@ class ExplainParameterizedQueries:
                 logger.debug(
                     "Unable to explain parameterized query. "
                     "The explain function %s was executed but no plan was returned",
-                    self._config.statement_samples_config.get('explain_function', 'datadog.explain_statement'),
+                    self._explain_function,
                 )
                 return None, DBExplainError.no_plan_returned_with_prepared_statement, None
         except Exception as e:
@@ -149,9 +150,7 @@ class ExplainParameterizedQueries:
             return self._execute_query_and_fetch_rows(
                 dbname,
                 EXPLAIN_QUERY.format(
-                    explain_function=self._config.statement_samples_config.get(
-                        'explain_function', 'datadog.explain_statement'
-                    ),
+                    explain_function=self._explain_function,
                     statement=execute_prepared_statement_query,
                 ),
             )
