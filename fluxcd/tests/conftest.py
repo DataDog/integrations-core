@@ -23,7 +23,7 @@ def instance():
 
 @pytest.fixture
 def check(instance):
-    return FluxcdCheck("gitea", {}, [instance])
+    return FluxcdCheck("fluxcd", {}, [instance])
 
 
 @pytest.fixture()
