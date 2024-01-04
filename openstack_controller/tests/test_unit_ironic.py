@@ -330,7 +330,7 @@ def test_nodes_metrics(aggregator, check, dd_run_check, metrics):
 
 
 @pytest.mark.parametrize(
-    ('connection_baremetal', 'paginated_limit', 'instance', 'metrics', 'api_type'),
+    ('connection_baremetal', 'paginated_limit', 'instance', 'metrics', 'api_type', 'expected_api_call_count'),
     [
         pytest.param(
             None,
@@ -338,6 +338,7 @@ def test_nodes_metrics(aggregator, check, dd_run_check, metrics):
             configs.REST,
             NODES_METRICS_IRONIC_MICROVERSION_DEFAULT,
             ApiType.REST,
+            4,
             id='api rest no microversion',
         ),
         pytest.param(
@@ -346,6 +347,7 @@ def test_nodes_metrics(aggregator, check, dd_run_check, metrics):
             configs.REST,
             NODES_METRICS_IRONIC_MICROVERSION_DEFAULT,
             ApiType.REST,
+            1,
             id='api rest no microversion',
         ),
         pytest.param(
@@ -354,6 +356,7 @@ def test_nodes_metrics(aggregator, check, dd_run_check, metrics):
             configs.REST_IRONIC_MICROVERSION_1_80,
             NODES_METRICS_IRONIC_MICROVERSION_1_80,
             ApiType.REST,
+            4,
             id='api rest microversion 1.80',
         ),
         pytest.param(
@@ -362,6 +365,7 @@ def test_nodes_metrics(aggregator, check, dd_run_check, metrics):
             configs.SDK,
             NODES_METRICS_IRONIC_MICROVERSION_DEFAULT,
             ApiType.SDK,
+            1,
             id='api sdk no microversion',
         ),
         pytest.param(
@@ -370,6 +374,7 @@ def test_nodes_metrics(aggregator, check, dd_run_check, metrics):
             configs.SDK_IRONIC_MICROVERSION_1_80,
             NODES_METRICS_IRONIC_MICROVERSION_1_80,
             ApiType.SDK,
+            1,
             id='api sdk microversion 1.80',
         ),
         pytest.param(
@@ -378,6 +383,7 @@ def test_nodes_metrics(aggregator, check, dd_run_check, metrics):
             configs.SDK_IRONIC_MICROVERSION_1_80,
             NODES_METRICS_IRONIC_MICROVERSION_1_80,
             ApiType.SDK,
+            1,
             id='api sdk microversion 1.80',
         ),
     ],
@@ -392,6 +398,7 @@ def test_ironic_nodes_pagination(
     paginated_limit,
     metrics,
     api_type,
+    expected_api_call_count,
     mock_http_get,
     connection_baremetal,
 ):
@@ -406,8 +413,6 @@ def test_ironic_nodes_pagination(
             tags=metric['tags'],
             hostname=metric.get('hostname'),
         )
-    num_nodes = 4
-    api_call_count = 1 if paginated_limit > num_nodes else num_nodes // paginated_limit
     if api_type == ApiType.REST:
         args_list = []
         for call in mock_http_get.call_args_list:
@@ -419,9 +424,9 @@ def test_ironic_nodes_pagination(
             if instance.get("ironic_microversion", None) != "1.80"
             else 'http://127.0.0.1:6385/baremetal/v1/nodes'
         )
-        assert args_list.count(baremetal_url) == api_call_count
+        assert args_list.count(baremetal_url) == expected_api_call_count
     if api_type == ApiType.SDK:
-        assert connection_baremetal.nodes.call_count == 1
+        assert connection_baremetal.nodes.call_count == expected_api_call_count
 
 
 @pytest.mark.parametrize(

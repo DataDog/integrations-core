@@ -1859,13 +1859,15 @@ def test_servers_metrics(aggregator, check, dd_run_check, metrics):
 
 
 @pytest.mark.parametrize(
-    ('instance', 'metrics', 'paginated_limit', 'api_type'),
+    ('instance', 'metrics', 'paginated_limit', 'api_type', 'expected_api_calls_proj1', 'expected_api_calls_proj2'),
     [
         pytest.param(
             configs.REST,
             metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT,
             3,
             ApiType.REST,
+            3,
+            1,
             id='api rest small limit',
         ),
         pytest.param(
@@ -1873,6 +1875,8 @@ def test_servers_metrics(aggregator, check, dd_run_check, metrics):
             metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT,
             1000,
             ApiType.REST,
+            1,
+            1,
             id='api rest high limit',
         ),
         pytest.param(
@@ -1880,6 +1884,8 @@ def test_servers_metrics(aggregator, check, dd_run_check, metrics):
             metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_2_93,
             3,
             ApiType.REST,
+            3,
+            1,
             id='api rest microversion 2.93',
         ),
         pytest.param(
@@ -1887,6 +1893,8 @@ def test_servers_metrics(aggregator, check, dd_run_check, metrics):
             metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT,
             3,
             ApiType.SDK,
+            1,
+            1,
             id='api sdk no microversion',
         ),
         pytest.param(
@@ -1894,6 +1902,8 @@ def test_servers_metrics(aggregator, check, dd_run_check, metrics):
             metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT,
             1000,
             ApiType.SDK,
+            1,
+            1,
             id='api sdk high limit',
         ),
         pytest.param(
@@ -1901,6 +1911,8 @@ def test_servers_metrics(aggregator, check, dd_run_check, metrics):
             metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_2_93,
             3,
             ApiType.SDK,
+            1,
+            1,
             id='api sdk microversion 2.93',
         ),
     ],
@@ -1912,6 +1924,8 @@ def test_servers_pagination(
     metrics,
     openstack_controller_check,
     paginated_limit,
+    expected_api_calls_proj1,
+    expected_api_calls_proj2,
     api_type,
     dd_run_check,
     mock_http_get,
@@ -1929,15 +1943,6 @@ def test_servers_pagination(
             hostname=metric.get('hostname'),
         )
 
-    num_servers_project_1 = 8
-    api_call_count_project_1 = (
-        1 if paginated_limit >= num_servers_project_1 else num_servers_project_1 // paginated_limit + 1
-    )
-
-    num_servers_project_2 = 3
-    api_call_count_project_2 = (
-        1 if paginated_limit >= num_servers_project_2 else num_servers_project_2 // paginated_limit + 1
-    )
     if api_type == ApiType.REST:
         args_list = []
         for call in mock_http_get.call_args_list:
@@ -1950,11 +1955,11 @@ def test_servers_pagination(
         servers_url = 'http://127.0.0.1:8774/compute/v2.1/servers/detail'
         assert (
             args_list.count((servers_url, '1e6e233e637d4d55a50a62b63398ad15', paginated_limit))
-            == api_call_count_project_1
+            == expected_api_calls_proj1
         )
         assert (
             args_list.count((servers_url, '6e39099cccde4f809b003d9e0dd09304', paginated_limit))
-            == api_call_count_project_2
+            == expected_api_calls_proj2
         )
 
     if api_type == ApiType.SDK:
@@ -1962,13 +1967,13 @@ def test_servers_pagination(
             connection_compute.servers.call_args_list.count(
                 mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', details=True, limit=paginated_limit)
             )
-            == 1
+            == expected_api_calls_proj1
         )
         assert (
             connection_compute.servers.call_args_list.count(
                 mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', details=True, limit=paginated_limit)
             )
-            == 1
+            == expected_api_calls_proj2
         )
 
 
