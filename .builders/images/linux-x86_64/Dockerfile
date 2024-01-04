@@ -43,7 +43,12 @@ RUN curl "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" -o /
  && echo "${OPENSSL_SHA256}  /tmp/openssl.tar.gz" | sha256sum --check \
  && tar -C /tmp -xf /tmp/openssl.tar.gz \
  && cd /tmp/openssl-${OPENSSL_VERSION} \
- && ./config -Wl,-Bsymbolic-functions -fPIC shared no-ssl2 no-ssl3 \
+ && ./config -Wl,-Bsymbolic-functions \
+ -fPIC \
+ shared \
+ # This prevents the creation of dynamically loaded modules that would be problematic to bundle into Python wheels
+ no-module \
+ no-comp no-idea no-mdc2 no-rc5 no-ssl3 no-gost \
  && make \
  && make install \
  && rm -rf /tmp/openssl-${OPENSSL_VERSION} \
