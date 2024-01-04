@@ -4,6 +4,7 @@
 
 
 import copy
+import json
 import logging
 import os
 from importlib.metadata import metadata
@@ -1974,6 +1975,39 @@ def test_servers_pagination(
             )
             == expected_api_calls_proj2
         )
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'paginated_limit'),
+    [
+        pytest.param(
+            {
+                'data': {
+                    '/servers/detail': json.dumps({"servers": []}),
+                }
+            },
+            1,
+            id='api empty servers',
+        ),
+        pytest.param(
+            {
+                'data': {
+                    '/servers/detail': json.dumps({"servers": [{"test": "attr"}]}),
+                }
+            },
+            1,
+            id='api one invalid server',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+def test_pagination_invalid_no_exception(
+    openstack_controller_check, dd_run_check, paginated_limit, mock_http_get
+):
+    paginated_instance = copy.deepcopy(configs.REST)
+    paginated_instance['paginated_limit'] = paginated_limit
+    check = openstack_controller_check(paginated_instance)
+    dd_run_check(check)
 
 
 @pytest.mark.parametrize(

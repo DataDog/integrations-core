@@ -767,12 +767,16 @@ def get_url_path(url):
 def mock_http_get(request, monkeypatch, mock_http_call):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.pop('http_error', {})
+    data = param.pop('data', {})
 
     def get(url, *args, **kwargs):
         method = 'GET'
         url = get_url_path(url)
         if http_error and url in http_error:
             raise requests.exceptions.HTTPError(response=http_error[url])
+        if data and url in data:
+            return MockResponse(json_data=data, status_code=200)
+
         json_data = mock_http_call(method, url, headers=kwargs.get('headers'), params=kwargs.get('params'))
         return MockResponse(json_data=json_data, status_code=200)
 
