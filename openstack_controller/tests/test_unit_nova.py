@@ -4,7 +4,6 @@
 
 
 import copy
-import json
 import logging
 import os
 from importlib.metadata import metadata
@@ -1982,8 +1981,8 @@ def test_servers_pagination(
     [
         pytest.param(
             {
-                'data': {
-                    '/servers/detail': json.dumps({"servers": []}),
+                'mock_data': {
+                    '/compute/v2.1/servers/detail': {"servers": []},
                 }
             },
             1,
@@ -1991,8 +1990,8 @@ def test_servers_pagination(
         ),
         pytest.param(
             {
-                'data': {
-                    '/servers/detail': json.dumps({"servers": [{"test": "attr"}]}),
+                'mock_data': {
+                    '/compute/v2.1/servers/detail': {"servers": [{"test": "attr"}], "servers_links": [{"rel": "next"}]},
                 }
             },
             1,
@@ -2001,7 +2000,8 @@ def test_servers_pagination(
     ],
     indirect=['mock_http_get'],
 )
-def test_pagination_invalid_no_exception(openstack_controller_check, dd_run_check, paginated_limit, mock_http_get):
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_pagination_invalid_no_exception(openstack_controller_check, dd_run_check, paginated_limit):
     paginated_instance = copy.deepcopy(configs.REST)
     paginated_instance['paginated_limit'] = paginated_limit
     check = openstack_controller_check(paginated_instance)

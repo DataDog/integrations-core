@@ -344,7 +344,6 @@ class ApiRest(Api):
 
                 marker = last_item.get(marker_name)
             else:
-                marker = None
                 break
 
             if marker is None:
