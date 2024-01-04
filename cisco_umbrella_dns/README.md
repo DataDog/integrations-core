@@ -6,7 +6,7 @@ Cisco Umbrella is the leading platform for network DNS security monitoring. Umbr
 
 This integration offers visualizations and log enrichments for Cisco Umbrella DNS and Proxy logs.
 
-### Supported Logs:
+### Supported Logs
 
 - Cisco Umbrella DNS Logs
 - Cisco Umbrella Proxy Logs
@@ -17,12 +17,12 @@ This integration offers visualizations and log enrichments for Cisco Umbrella DN
 
 #### Cisco Umbrella DNS Configuration
 
-1. Login via [Umbrella > Login](https://login.umbrella.com/) with your credentials
-2. From the left panel, click on Admin
-3. Then, click on API Keys
-4. Create a new API Key using Add button
-5. Apply reports.aggregations:read and reports.granularEvents:read key scopes to the API key
-6. Copy the API Key and Key Secret
+1. Login to [**Umbrella** > **Login**][1] with your credentials.
+2. From the left panel, click on **Admin**.
+3. Then, click on **API Keys**.
+4. Create a new API Key using the **Add** button.
+5. Apply `reports.aggregations:read` and `reports.granularEvents:read` key scopes to the API key.
+6. Copy the API Key and Key Secret.
 
 #### Cisco Umbrella DNS DataDog Integration Configuration
 
@@ -34,8 +34,8 @@ Configure the Datadog endpoint to forward Cisco Umbrella DNS events as logs to D
 | Cisco Umbrella DNS Parameters | Description                                                                |
 | ----------------------------- | -------------------------------------------------------------------------- |
 | Host                          | The API server host of Cisco Umbrella. Default host is `api.umbrella.com`. |
-| API Key                       | The API Key from Cisco Umbrella                                            |
-| Key Secret                    | The Key Secret from Cisco Umbrella                                         |
+| API Key                       | The API Key from Cisco Umbrella.                                           |
+| Key Secret                    | The Key Secret from Cisco Umbrella.                                        |
 
 ## Data Collected
 
@@ -53,4 +53,7 @@ The Cisco Umbrella DNS integration does not include any events.
 
 ## Support
 
-For further assistance, contact [Datadog Support](https://docs.datadoghq.com/help/).
+For further assistance, contact [Datadog Support][2].
+
+[1]: https://login.umbrella.com/
+[2]: https://docs.datadoghq.com/help/
