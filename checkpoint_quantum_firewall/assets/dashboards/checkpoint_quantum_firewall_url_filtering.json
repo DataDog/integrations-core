@@ -968,7 +968,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:checkpoint_quantum_firewall @product:\"URL Filtering\" @appi_name:* $Checkpoint_Server $Application_Name $Application_Category $Action",
+                            "query_string": "source:checkpoint_quantum_firewall @product:\"URL Filtering\" $Checkpoint_Server $Application_Name $Application_Category $Action ",
                             "indexes": [],
                             "storage": "hot"
                         },

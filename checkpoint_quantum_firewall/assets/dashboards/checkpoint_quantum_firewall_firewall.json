@@ -1123,7 +1123,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@network.client.ip",
+                                        "facet": "@network.destination.ip",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -1187,7 +1187,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@network.client.ip",
+                                        "facet": "@network.destination.ip",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",

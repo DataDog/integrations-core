@@ -64,6 +64,9 @@
   },
   "assets": {
     "integration": {
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
       "source_type_name": "checkpoint_quantum_firewall",
       "events": {
         "creates_events": false

@@ -13,9 +13,9 @@ This integration provides log enrichments, visualization, and detection rules fo
 
 ### Installation
 
-**Checkpoint Quantum Firewall:**
+To install the Checkpoint Quantum Firewall integration follow the steps below:
 
-- You have the [Datadog Agent][5] installed and running.
+1. [Install][5] the 1.0 release (`checkpoint_quantum_firewall==1.0.0`)
 
 ### Configuration
 
@@ -34,12 +34,12 @@ This integration provides log enrichments, visualization, and detection rules fo
    ```yaml
    logs:
      - type: tcp/udp
-       port: <PORT-NUMBER>
+       port: <PORT>
        service: checkpoint_quantum_firewall
        source: checkpoint_quantum_firewall
    ```
 
-3. [Restart the Agent][2].
+3. [Restart the Agent][1].
 
 4. Configuring Syslog Message Forwarding from Checkpoint Quantum Firewall
    1. Connect to the command line on the Management Server / Log Server:
@@ -60,11 +60,11 @@ This integration provides log enrichments, visualization, and detection rules fo
       ```yaml
       cp_log_export restart name <Name of Log Exporter Configuration>
       ```
-   5. For more details to configure syslog click [Here][6]
+   5. For more details to configure syslog click [here][4]
 
 ### Validation
 
-[Run the Agent's status subcommand][3] and look for `checkpoint_quantum_firewall` under the Checks section.
+[Run the Agent's status subcommand][2] and look for `checkpoint_quantum_firewall` under the Checks section.
 
 ## Data Collected
 
@@ -110,7 +110,7 @@ If you see a **Permission denied** error while port binding in the Agent logs, s
 
       **Note**: Re-run this `setcap` command every time you upgrade the Agent.
 
-2.  [Restart the Agent][2].
+2.  [Restart the Agent][1].
 
 #### Data is not being collected:
 
@@ -127,10 +127,10 @@ This error occurs because by default, Syslog listens on port 514. To resolve thi
 - Disable Syslog
 - Configure the Agent to listen on a different, available port
 
-For any further assistance, do contact [Datadog support][4].
+For any further assistance, do contact [Datadog support][3].
 
-[2]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[4]: https://docs.datadoghq.com/help/
-[5]: https://docs.datadoghq.com/agent/
-[6]: https://sc1.checkpoint.com/documents/R81.20/WebAdminGuides/EN/CP_R81.20_LoggingAndMonitoring_AdminGuide/Content/Topics-LMG/Log-Exporter-Configuration-in-CLI-Basic.htm?tocpath=Log%20Exporter%7CConfiguring%20Log%20Exporter%20in%20CLI%7C_____1
+[1]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[2]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[3]: https://docs.datadoghq.com/help/
+[4]: https://sc1.checkpoint.com/documents/R81.20/WebAdminGuides/EN/CP_R81.20_LoggingAndMonitoring_AdminGuide/Content/Topics-LMG/Log-Exporter-Configuration-in-CLI-Basic.htm?tocpath=Log%20Exporter%7CConfiguring%20Log%20Exporter%20in%20CLI%7C_____1
+[5]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install

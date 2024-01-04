@@ -89,7 +89,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"Identity Awareness\" $Checkpoint_Server "
+                                    "query": "source:checkpoint_quantum_firewall @product:\"Identity Awareness\" $Checkpoint_Server $Identity-Source $Identity-Type"
                                 },
                                 "storage": "hot"
                             }
@@ -143,7 +143,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"Identity Awareness\" $Checkpoint_Server "
+                                    "query": "source:checkpoint_quantum_firewall @product:\"Identity Awareness\" $Checkpoint_Server $Identity-Source $Identity-Type"
                                 },
                                 "storage": "hot"
                             }
@@ -203,7 +203,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"Identity Awareness\" $Checkpoint_Server "
+                                    "query": "source:checkpoint_quantum_firewall @product:\"Identity Awareness\" $Checkpoint_Server $Identity-Source $Identity-Type"
                                 },
                                 "storage": "hot"
                             }
