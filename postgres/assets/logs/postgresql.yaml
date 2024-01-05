@@ -1,5 +1,6 @@
 id: postgresql
 metric_id: postgres
+backend_only: false
 facets:
   - name: Database
     source: log

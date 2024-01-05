@@ -1,5 +1,6 @@
 id: hive
 metric_id: hive
+backend_only: false
 facets:
   - name: Operation Type
     source: log

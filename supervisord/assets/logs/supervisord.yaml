@@ -1,5 +1,6 @@
 id: supervisord
 metric_id: supervisord
+backend_only: false
 facets:
 pipeline:
   type: pipeline

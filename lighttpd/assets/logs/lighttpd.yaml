@@ -1,5 +1,6 @@
 id: lighttpd
 metric_id: lighttpd
+backend_only: false
 facets:
   - name: Method
     source: log

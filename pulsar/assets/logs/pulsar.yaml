@@ -1,5 +1,6 @@
 id: pulsar
 metric_id: pulsar
+backend_only: false
 facets:
   - name: Method
     source: log

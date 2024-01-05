@@ -1,5 +1,6 @@
 id: weave-npc
 metric_id: nginx-ingress-controller
+backend_only: false
 facets:
   - name: Client IP
     source: log

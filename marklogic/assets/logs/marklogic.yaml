@@ -1,5 +1,6 @@
 id: marklogic
 metric_id: marklogic
+backend_only: false
 facets:
   - name: Operation Type
     source: log

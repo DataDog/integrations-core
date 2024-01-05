@@ -1,5 +1,6 @@
 id: sshd
 metric_id: ssh
+backend_only: false
 facets:
   - name: Client IP
     source: log

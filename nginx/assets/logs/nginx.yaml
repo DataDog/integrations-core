@@ -1,5 +1,6 @@
 id: nginx
 metric_id: nginx
+backend_only: false
 facets:
   - name: Method
     source: log

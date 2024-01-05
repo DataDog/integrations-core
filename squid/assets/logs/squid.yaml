@@ -1,5 +1,6 @@
 id: squid
 metric_id: squid
+backend_only: false
 facets:
   - name: Method
     source: log
