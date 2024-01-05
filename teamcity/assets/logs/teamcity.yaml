@@ -1,5 +1,6 @@
 id: teamcity
 metric_id: teamcity
+backend_only: false
 facets:
   - name: Logger Name
     source: log

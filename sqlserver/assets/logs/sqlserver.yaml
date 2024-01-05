@@ -1,5 +1,6 @@
 id: sqlserver
 metric_id: sql-server
+backend_only: false
 facets:
   - name: Thread Name
     source: log
