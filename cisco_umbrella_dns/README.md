@@ -6,11 +6,6 @@ Cisco Umbrella is the leading platform for network DNS security monitoring. Umbr
 
 This integration offers visualizations and log enrichments for Cisco Umbrella DNS and Proxy logs.
 
-### Supported Logs
-
-- Cisco Umbrella DNS Logs
-- Cisco Umbrella Proxy Logs
-
 ## Setup
 
 ### Configuration
