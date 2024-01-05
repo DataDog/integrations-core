@@ -2,8 +2,8 @@
 	"version": 2,
 	"created_at": "2023-12-26",
 	"last_updated_at": "2023-12-26",
-	"title": "High CPU usage for {{snmp_device.name}} in namespace {{device_namespace.name}}",
-	"description": "Alert when CPU usage on your SNMP devices is too high",
+	"title": "SNMP device CPU usage is high",
+	"description": "CPU usage measures the percentage of processing capacity that is in use and provides insights into the overall health and efficiency of the device. This monitor alerts if the CPU usage goes above 90%, suggesting potential performance issues",
 	"definition": {
 		"name": "[SNMP] CPU usage high for {{snmp_device.name}} in namespace {{device_namespace.name}}",
 		"type": "query alert",

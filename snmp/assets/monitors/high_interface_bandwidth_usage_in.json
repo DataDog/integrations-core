@@ -2,8 +2,8 @@
 	"version": 2,
 	"created_at": "2023-12-27",
 	"last_updated_at": "2023-12-27",
-	"title": "High interface bandwidth usage for incoming traffic for device {{snmp_device.name}} on interface {{interface.name}} in {{device_namespace.name}}",
-	"description": "Detect high levels of bandwidth utilization for received traffic on the network interface",
+	"title": "Interface bandwidth usage for incoming traffic is high",
+	"description": "Interface bandwidth utilization represents how much data can be received from the interface in a given amount of time. This monitor will alert if the incoming traffic from a particular network interface exceeds 90%, providing insights if there are potential network issues.",
 	"definition": {
 		"name": "[SNMP] High interface bandwidth usage for incoming traffic for device {{snmp_device.name}} on interface {{interface.name}} in {{device_namespace.name}}",
 		"type": "query alert",
