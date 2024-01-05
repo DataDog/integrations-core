@@ -1,5 +1,6 @@
 id: vault
 metric_id: vault
+backend_only: false
 facets:
   - name: Method
     source: log

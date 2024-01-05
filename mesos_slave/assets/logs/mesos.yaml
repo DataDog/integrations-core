@@ -1,5 +1,6 @@
 id: mesos
 metric_id: mesos
+backend_only: false
 facets:
   - name: Method
     source: log

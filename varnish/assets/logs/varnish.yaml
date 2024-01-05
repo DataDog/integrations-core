@@ -1,5 +1,6 @@
 id: varnish
 metric_id: varnish
+backend_only: false
 facets:
   - name: Method
     source: log

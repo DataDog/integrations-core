@@ -1,5 +1,6 @@
 id: cassandra
 metric_id: cassandra
+backend_only: false
 facets:
   - name: Operation Type
     source: log

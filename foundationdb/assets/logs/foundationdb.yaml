@@ -1,4 +1,5 @@
 id: foundationdb
+backend_only: false
 facets:
   - name: Event Name
     source: log
@@ -109,4 +110,4 @@ pipeline:
           _machine_ip_and_port %{ip:machine.ip}:%{port:machine.port}
         supportRules: ''
       samples:
-        - "127.0.0.1:4500"
+        - 127.0.0.1:4500

@@ -1,5 +1,6 @@
 id: hudi
 metric_id: hudi
+backend_only: false
 facets:
   - name: Logger Name
     source: log

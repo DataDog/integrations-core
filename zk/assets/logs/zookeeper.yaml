@@ -1,5 +1,6 @@
 id: zookeeper
 metric_id: zookeeper
+backend_only: false
 facets:
   - name: Logger Name
     source: log

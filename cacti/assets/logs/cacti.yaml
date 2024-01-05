@@ -1,5 +1,6 @@
 id: cacti
 metric_id: cacti
+backend_only: false
 facets:
   - name: Thread Name
     source: log

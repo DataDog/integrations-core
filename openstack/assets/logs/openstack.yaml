@@ -1,6 +1,6 @@
 id: openstack
 metric_id: openstack
-
+backend_only: false
 facets:
   - name: Method
     source: log
