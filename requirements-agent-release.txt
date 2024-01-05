@@ -15,7 +15,7 @@ datadog-boundary==2.1.0
 datadog-btrfs==2.1.0; sys_platform != 'win32'
 datadog-cacti==2.1.0; sys_platform == 'linux2'
 datadog-calico==2.1.0
-datadog-cassandra-nodetool==1.12.1
+datadog-cassandra-nodetool==1.13.0
 datadog-cassandra==1.18.0
 datadog-ceph==2.9.1; sys_platform != 'win32'
 datadog-cert-manager==3.1.1
