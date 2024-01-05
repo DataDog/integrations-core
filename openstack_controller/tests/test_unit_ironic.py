@@ -16,6 +16,7 @@ from tests.common import remove_service_from_catalog
 from tests.metrics import (
     CONDUCTORS_METRICS_IRONIC_MICROVERSION_1_80,
     CONDUCTORS_METRICS_IRONIC_MICROVERSION_DEFAULT,
+    IRONIC_NODE_COUNT,
     NODES_METRICS_IRONIC_MICROVERSION_1_80,
     NODES_METRICS_IRONIC_MICROVERSION_DEFAULT,
 )
@@ -459,7 +460,7 @@ def test_pagination_invalid_no_exception(aggregator, openstack_controller_check,
     paginated_instance['paginated_limit'] = paginated_limit
     check = openstack_controller_check(paginated_instance)
     dd_run_check(check)
-    aggregator.assert_metric("openstack.ironic.node.count", count=0)
+    aggregator.assert_metric(IRONIC_NODE_COUNT, count=0)
 
 
 @pytest.mark.parametrize(
