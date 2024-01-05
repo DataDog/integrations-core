@@ -152,7 +152,7 @@ datadog-strimzi==2.1.0
 datadog-supervisord==2.6.0
 datadog-system-core==2.2.0
 datadog-system-swap==1.16.0
-datadog-tcp-check==4.7.1
+datadog-tcp-check==4.8.0
 datadog-teamcity==4.0.1
 datadog-temporal==2.0.0
 datadog-tenable==1.4.1
