@@ -1,5 +1,6 @@
 id: exchange-server
 metric_id: exchange-server
+backend_only: false
 facets:
   - name: Event ID
     source: log

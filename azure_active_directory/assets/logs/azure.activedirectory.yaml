@@ -1,5 +1,6 @@
 id: azure.activedirectory
 metric_id: azure-active-directory
+backend_only: false
 facets:
   - name: Duration
     source: log

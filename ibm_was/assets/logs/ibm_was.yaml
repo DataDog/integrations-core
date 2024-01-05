@@ -1,5 +1,6 @@
 id: ibm_was
 metric_id: ibm-was
+backend_only: false
 facets:
   - name: Thread Name
     source: log

@@ -1,5 +1,6 @@
 id: hdfs_datanode
 metric_id: hdfs-datanode
+backend_only: false
 facets:
   - name: Logger Name
     source: log

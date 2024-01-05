@@ -1,5 +1,6 @@
 id: glusterfs
 metric_id: glusterfs
+backend_only: false
 facets:
   - name: GlusterFS Domain
     source: log

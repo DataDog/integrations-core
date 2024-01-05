@@ -1,5 +1,6 @@
 id: haproxy
 metric_id: haproxy
+backend_only: false
 facets:
   - name: Duration
     source: log

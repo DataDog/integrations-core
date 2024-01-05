@@ -1,5 +1,6 @@
 id: kyototycoon
 metric_id: kyoto-tycoon
+backend_only: false
 facets:
   - name: Method
     source: log

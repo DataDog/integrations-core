@@ -1,5 +1,6 @@
 id: harbor
 metric_id: harbor
+backend_only: false
 facets:
   - name: Database
     source: log

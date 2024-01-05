@@ -1,5 +1,6 @@
 id: ambari
 metric_id: ambari
+backend_only: false
 facets:
   - name: Thread Name
     source: log

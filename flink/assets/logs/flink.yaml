@@ -1,5 +1,6 @@
 id: flink
 metric_id: flink
+backend_only: false
 facets:
   - name: Logger Name
     source: log
