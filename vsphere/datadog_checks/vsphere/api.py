@@ -332,7 +332,7 @@ class VSphereAPI(object):
         query_filter.type = ALLOWED_EVENTS
         try:
             events = event_manager.QueryEvents(query_filter)
-        except TypeError as e:
+        except KeyError as e:
             self.log.debug("Error parsing bulk events: %s", e)
 
             if self.config.use_collect_events_fallback:
@@ -361,7 +361,7 @@ class VSphereAPI(object):
         while True:
             try:
                 collected_events = event_collector.ReadNextEvents(1)  # Read with page_size=1
-            except TypeError as e:
+            except KeyError as e:
                 self.log.debug("Cannot parse event, skipped: %s", e)
                 continue
             if len(collected_events) == 0:

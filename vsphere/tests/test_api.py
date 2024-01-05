@@ -183,9 +183,9 @@ def test_get_new_events_failure_without_fallback(realtime_instance):
         config = VSphereConfig(realtime_instance, {}, MagicMock())
         api = VSphereAPI(config, MagicMock())
 
-        api._conn.content.eventManager.QueryEvents.side_effect = TypeError("some parse error")
+        api._conn.content.eventManager.QueryEvents.side_effect = KeyError("some parse error")
 
-        with pytest.raises(TypeError):
+        with pytest.raises(KeyError):
             api.get_new_events(start_time=dt.datetime.now())
 
 
@@ -200,16 +200,16 @@ def test_get_new_events_with_fallback(realtime_instance):
         event3 = vim.event.Event(key=3)
         event_collector = MagicMock()
         api._conn.content.eventManager.QueryEvents.side_effect = [
-            TypeError("some parse error"),
+            KeyError("some parse error"),
             [event1],
-            TypeError("event parse error"),
+            KeyError("event parse error"),
             [event3],
         ]
         api._conn.content.eventManager.CreateCollectorForEvents.return_value = event_collector
 
         event_collector.ReadNextEvents.side_effect = [
             [event1],
-            TypeError("event parse error"),
+            KeyError("event parse error"),
             [event3],
             [],
         ]
