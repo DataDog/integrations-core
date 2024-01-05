@@ -1,6 +1,6 @@
 {
     "title": "Zeek - Files",
-    "description": "-   This dashboard provides details for Files, Portable Executable and X.509 Certificate Info.",
+    "description": "-   This dashboard provides details for Files, Portable Executable, and X.509 Certificate Info.",
     "widgets": [
         {
             "id": 4116167915972166,

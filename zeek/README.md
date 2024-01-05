@@ -1,25 +1,21 @@
 ## Overview
 
-* [Zeek][6] is the world's leading platform for network security monitoring. It interprets what it sees and creates compact, high-fidelity transaction logs, file content, and fully customized output, suitable for manual review on disk or in a more analyst-friendly tool like a security and information event management (SIEM) system.
+* [Zeek][6] is the world's leading platform for network security monitoring. It interprets what it sees and creates compact, high-fidelity transaction logs, and file content. It can create fully customized output, suitable for manual review on disk or in a more analyst-friendly tool like a security and information event management (SIEM) system.
 
-This integration provides visualization and log enrichments for Connection Logs, DNS & DHCP Logs, Network Protocols, Files, Detections and Miscellaneous eventtypes.
-
-#### Supported Logs:
-
-- Opensource Zeek - JSON Format
-  - **Event Types -** conn, dhcp, dns, ftp, http, ntp, rdp, smtp, snmp, socks, ssh, ssl, syslog, tunnel, files, pe, intel, notice, signatures, traceroute, known-certs, known-modbus, known-services, known-hosts, software, x509, dpd, weird, captureloss, reporter, ldap, ldap-search, smb-files, smb-mappings
-- Corelight Zeek - Syslog RFC 3164 (Legacy) Format
-  - **Event Types -** conn, dhcp, dns, ftp, http, ntp, rdp, smtp, snmp, socks, ssh, ssl, syslog, tunnel, files, pe, intel, notice, signatures, traceroute, known-certs, known-modbus, known-services, known-hosts, software, x509, dpd, weird, captureloss, reporter, ldap, ldap-search, smb-files, smb-mappings, conn-long, conn-red, encrypted-dns, generic-dns-tunnels, smtp-links, suricata-corelight
+This integration provides visualization and log enrichments for Connection Logs, DNS & DHCP Logs, Network Protocols, Files, Detections, and Miscellaneous event types.
 
 ## Setup
 
 ### Installation
 
-To install the Zeek integration follow the steps below:
+To install the Zeek integration, use the `datadog-agent integration install` command and follow the steps below. For more information, see the [Integration Management][7] documentation.
 
-1. [Install][7] the 1.0 release (`zeek==1.0.0`)
+Linux command
+  ```shell
+  sudo -u dd-agent -- datadog-agent integration install datadog-zeek==1.0.0
+  ```
 
-**Opensource Zeek:**
+#### Opensource Zeek
 1. [Install the Agent][4] on your Zeek machine.
 2. Setup json-streaming-logs package
    - Install [Corelight Zeek plugin][5] for JSON logging
@@ -38,49 +34,51 @@ To install the Zeek integration follow the steps below:
      /opt/zeek/bin/zeekctl restart
      ```
 
-**Corelight Zeek:**
-* You have the [Datadog Agent][4] installed and running
+#### Corelight Zeek
+* Have the [Datadog Agent][4] installed and running.
 
 ### Configuration
 
 #### Log collection
 
-**Opensource Zeek:**
-1. Collecting logs is disabled by default in the Datadog Agent. Enable it in datadog.yaml:
-    ```
+#### Opensource Zeek
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`.
+    ```yaml
     logs_enabled: true
     ```
 
-2. Add this configuration block to your zeek.d/conf.yaml file to start collecting your Zeek logs.
-    ```
-    logs:
-    - type: file
-        path: /opt/zeek/logs/current/*.log
-        exclude_paths:
-          - /opt/zeek/logs/current/*.*.log
-        service: zeek
-        source: zeek
-    ```
-**Note:** Ensure to include the log file's paths within the `exclude_paths` parameter to prevent the ingestion of unsupported or undesired log files during the monitoring process.
-  
-eg.
-  ```
+2. Add this configuration block to your zeek.d/conf.yaml file to start collecting your Zeek logs.  
+ **Note**: Include the log file's paths within the `exclude_paths` parameter to prevent the ingestion of unsupported or undesired log files during the monitoring process.
+
+ eg.
+   ```yaml
+   # Example of excluded paths
   exclude_paths:
     - /opt/zeek/logs/current/ntlm.log
     - /opt/zeek/logs/current/radius.log
     - /opt/zeek/logs/current/rfb.log
-  ```
+   ```
+
+   ```yaml
+    logs:
+    - type: file
+      path: /opt/zeek/logs/current/*.log
+      exclude_paths:
+        - /opt/zeek/logs/current/*.*.log
+      service: zeek
+      source: zeek
+   ```
 
 3. [Restart the Agent][1].
 
-**Corelight Zeek:**
+#### Corelight Zeek
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in datadog.yaml:
-    ```
+    ```yaml
     logs_enabled: true
     ```
 
-2. Add this configuration block to your zeek.d/conf.yaml file to start collecting your logs
-    ```
+2. Add this configuration block to your `zeek.d/conf.yaml` file to start collecting your logs.
+    ```yaml
     logs:
     - type: tcp
       port: <PORT>
@@ -94,22 +92,16 @@ eg.
     1. Access the Corelight Sensor UI:  
        - Open a web browser and navigate to the IP address or hostname of your Corelight sensor.
        - Log in with your administrative credentials.
-    2. Navigate to the Zeek Configuration Page:  
-       The exact path may vary depending on your sensor's firmware version. Look for options related to "Zeek" or "Logging".  
-       Common paths include:  
+    2. Navigate to the Zeek Configuration Page. The exact path may vary depending on your sensor's firmware version. Look for options related to "Zeek" or "Logging". Common paths include:  
         - Settings > Logging
         - Configuration > Zeek > Logging
-    3. Enable Syslog Output:
-        - Locate the option to enable syslog output for Zeek logs.
-        - Select the checkbox or toggle to activate it.
-    4. Specify Syslog Server Details:
-       Provide the following information:
-       - Syslog server IP address: The destination where you want to send the Zeek logs.
-       - Syslog port: The port on which the syslog server is listening (typically 514).
-       - Facility: The syslog facility to use.
-       - Severity level: The minimum severity of events to send.
-    5. Save and Apply Changes:  
-       - Click the "Save" or "Apply" button to commit the configuration changes.
+    3. Locate the option to enable syslog output for Zeek logs and select the checkbox or toggle to activate.
+    4. Specify Syslog Server Details. Provide the following information:  
+       - **Syslog server IP address**: The destination where you want to send the Zeek logs.
+       - **Syslog port**: The port on which the syslog server is listening (typically 514).
+       - **Facility**: The syslog facility to use.
+       - **Severity level**: The minimum severity of events to send.
+    5. Click the **Save** or **Apply** button to commit the configuration changes.  
 
 
 ### Validation
@@ -118,51 +110,59 @@ eg.
 
 ## Data Collected
 
+### Logs
+
+The Zeek integration collects following log-types.
+
+| Format     | Event Types    | 
+| ---------  | -------------- | 
+| Opensource Zeek - JSON Format | conn, dhcp, dns, ftp, http, ntp, rdp, smtp, snmp, socks, ssh, ssl, syslog, tunnel, files, pe, intel, notice, signatures, traceroute, known-certs, known-modbus, known-services, known-hosts, software, x509, dpd, weird, captureloss, reporter, ldap, ldap-search, smb-files, smb-mappings |
+| Corelight Zeek - Syslog RFC 3164 (Legacy) Format | conn, dhcp, dns, ftp, http, ntp, rdp, smtp, snmp, socks, ssh, ssl, syslog, tunnel, files, pe, intel, notice, signatures, traceroute, known-certs, known-modbus, known-services, known-hosts, software, x509, dpd, weird, captureloss, reporter, ldap, ldap-search, smb-files, smb-mappings, conn-long, conn-red, encrypted-dns, generic-dns-tunnels, smtp-links, suricata-corelight |
 ### Metrics
 
-The zeek integration does not include any metrics.
+The Zeek integration does not include any metrics.
 
 ### Events
 
-The zeek integration does not include any events.
+The Zeek integration does not include any events.
 
 ### Service Checks
 
-The zeek integration does not include any service checks.
+The Zeek integration does not include any service checks.
 
 ## Troubleshooting
 
 **Opensource Zeek:**
 
-If you see a **Permission denied** error while monitoring the log files, see the following instruction
+If you see a **Permission denied** error while monitoring the log files, give read permission to dd-agent user to monitor the log files.
 
-   1. Give read permission to dd-agent user to monitor the log files
-      ```
-      sudo chown -R dd-agent:dd-agent /opt/zeek/current/
-      ```
+  ```sh
+  sudo chown -R dd-agent:dd-agent /opt/zeek/current/
+  ```
+
 **Corelight Zeek:**
 
 #### Permission denied while port binding:
 
 If you see a **Permission denied** error while port binding in the Agent logs, see the following instructions:
 
-   1. Binding to a port number under 1024 requires elevated permissions. Follow the instructions below to set this up.
+   1. Binding to a port number under 1024 requires elevated permissions. Grant access to the port using the `setcap` command:
 
       - Grant access to the port using the `setcap` command:
 
-         ```
+         ```shell
          sudo setcap CAP_NET_BIND_SERVICE=+ep /opt/datadog-agent/bin/agent/agent
          ```
 
       - Verify the setup is correct by running the `getcap` command:
 
-         ```
+         ```shell
          sudo getcap /opt/datadog-agent/bin/agent/agent
          ```
 
          With the expected output:
 
-         ```
+         ```shell
          /opt/datadog-agent/bin/agent/agent = cap_net_bind_service+ep
          ```
 
@@ -184,7 +184,7 @@ This error occurs because by default, Syslog listens on port 514. To resolve thi
 - Disable Syslog
 - Configure the Agent to listen on a different, available port
 
-For any further assistance, do contact [Datadog support][3].
+For any further assistance, contact [Datadog support][3].
 
 [1]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

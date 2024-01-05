@@ -1,6 +1,6 @@
 {
     "title": "Zeek - Detection",
-    "description": "-   This dashboard provides insights for intel, notice, signatures and traceroute.",
+    "description": "-   This dashboard provides insights for intel, notice, signatures, and traceroute.",
     "widgets": [
         {
             "id": 6922826412015940,

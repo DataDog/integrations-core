@@ -1,6 +1,6 @@
 {
     "title": "Zeek - Miscellaneous",
-    "description": "- This dashboard provides details for Dynamic Protocol Detection Failures, weirds, LDAP and LDAP search.",
+    "description": "- This dashboard provides details for Dynamic Protocol Detection Failures, weirds, LDAP, and LDAP search.",
     "widgets": [
         {
             "id": 1256106701437384,

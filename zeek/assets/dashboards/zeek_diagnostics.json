@@ -1,6 +1,6 @@
 {
     "title": "Zeek - Diagnostics",
-    "description": "- This dashboard will provide details for Internal error/warning/info messages(reporter.log) and packet loss(capture_loss.log) information",
+    "description": "- This dashboard provides details for Internal error/warning/info messages(reporter.log) and packet loss(capture_loss.log) information",
     "widgets": [
         {
             "id": 4304863390358042,

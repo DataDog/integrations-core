@@ -1,6 +1,6 @@
 {
     "title": "Zeek - DHCP",
-    "description": "- This dashboard will provide the details of DHCP traffic",
+    "description": "- This dashboard provides the details of DHCP traffic",
     "widgets": [
         {
             "id": 242566509227850,

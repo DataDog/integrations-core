@@ -1,6 +1,6 @@
 {
     "title": "Zeek - Network Observations",
-    "description": "-   This dashboard provides details for network observations such as Known Hosts, Known SSL Certificates, Known Modbus, Known Services and Software being used on the network.",
+    "description": "-   This dashboard provides details for network observations such as Known Hosts, Known SSL Certificates, Known Modbus, Known Services, and Software being used on the network.",
     "widgets": [
         {
             "id": 2121675370387006,

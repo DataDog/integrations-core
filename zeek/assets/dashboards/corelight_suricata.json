@@ -1,6 +1,6 @@
 {
     "title": "Corelight Suricata",
-    "description": "-   This dashboard will give the signature-based alerts.",
+    "description": "-   This dashboard gives an overview of the Corelight Suricata signature-based alerts.",
     "widgets": [
         {
             "id": 9006949429401854,
