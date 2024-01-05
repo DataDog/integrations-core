@@ -50,7 +50,7 @@
       "Datacenter Overview": "assets/dashboards/datacenter_overview.json",
       "Netflow Monitoring": "assets/dashboards/netflow_monitoring.json",
       "Datadog NDM Environment": "assets/dashboards/datadog_ndm_environment.json",
-      "BPG_OSPF Overview": "assets/dashboards/bgp_ospf_overview.json"
+      "BGP & OSPF Overview": "assets/dashboards/bgp_ospf_overview.json"
     },
     "monitors": {
       "[SNMP] Device Down Alert": "assets/monitors/device_down.json",
