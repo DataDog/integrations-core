@@ -370,10 +370,344 @@ LiveClientsMetrics = {
         {'name': 'host_id', 'type': 'tag'},
         {'name': 'voltdb_hostname', 'type': 'tag'},
         {'name': 'liveclients.connection_id', 'type': 'gauge'},
-        {'name': 'liveclients.client_hostname', 'type': 'gauge'},
+        {'name': 'liveclients.client_hostname', 'type': 'tag'},
         {'name': 'liveclients.admin', 'type': 'gauge'},
         {'name': 'liveclients.outstanding_request_bytes', 'type': 'monotonic_gauge'},
         {'name': 'liveclients.outstanding_response_messages', 'type': 'gauge'},
         {'name': 'liveclients.outstanding_transactions', 'type': 'monotonic_gauge'},
+    ],
+}
+
+# https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php#sysprocstatpartitioncount
+# One row per procedure, summarized across the cluster.
+
+InitiatorMetrics = {
+    'name': 'initiator',
+    'query': '@Statistics:[INITIATOR]',
+    'columns': [
+        None,  # TIMESTAMP
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
+        {'name': 'initiator.site_id', 'type': 'tag'},
+        None,  # CONNECTION_ID
+        {'name': 'connection_hostname', 'type': 'tag'},
+        {'name': 'procedure_name', 'type': 'tag'},
+        {'name': 'initiator.invocations', 'type': 'monotonic_gauge'},
+        {'name': 'initiator.avg_execution_time', 'type': 'gauge'},
+        {'name': 'initiator.min_execution_time', 'type': 'gauge'},
+        {'name': 'initiator.max_execution_time', 'type': 'gauge'},
+        {'name': 'initiator.aborts', 'type': 'monotonic_count'},
+        {'name': 'initiator.failures', 'type': 'monotonic_count'},
+    ],
+}
+
+# https://docs.voltdb.com/v11docs/UsingVoltDB/sysprocstatistics.php#sysprocstatpartitioncount
+# One row per procedure, summarized across the cluster.
+
+PartitionCountMetrics = {
+    'name': 'partitioncount',
+    'query': '@Statistics:[PARTITIONCOUNT]',
+    'columns': [
+        None,  # TIMESTAMP
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
+        {'name': 'partitioncount.partition_count', 'type': 'gauge'},
+    ],
+}
+
+# https://docs.voltdb.com/v11docs/UsingVoltDB/sysprocstatistics.php#sysprocstatttl
+# One row per procedure, summarized across the cluster.
+
+TtlMetrics = {
+    'name': 'ttl',
+    'query': '@Statistics:[TTL]',
+    'columns': [
+        None,  # TIMESTAMP
+        {'name': 'ttl.table_name', 'type': 'tag'},
+        {'name': 'ttl.rows_deleted', 'type': 'tag'},
+        {'name': 'ttl.rows_deleted_last_round', 'type': 'gauge'},
+        {'name': 'ttl.rows_remaining', 'type': 'gauge'},
+        {'name': 'ttl.last_delete_timestamp', 'type': 'gauge'},
+    ],
+}
+
+# https://docs.voltdb.com/v11docs/UsingVoltDB/sysprocstatistics.php#sysprocstatcompoundproc
+# One row per procedure, summarized across the cluster.
+
+CompoundProcCallsMetrics = {
+    'name': 'compoundproccalls',
+    'query': '@Statistics:[COMPOUNDPROCCALLS]',
+    'columns': [
+        None,  # TIMESTAMP
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
+        {'name': 'compoundproccalls.procedure', 'type': 'gauge'},
+        {'name': 'compoundproccalls.called_procedure', 'type': 'gauge'},
+        {'name': 'compoundproccalls.invocations', 'type': 'gauge'},
+    ],
+}
+
+# https://docs.voltdb.com/v11docs/UsingVoltDB/sysprocstatistics.php#sysprocstatcompoundproccalls
+# One row per procedure, summarized across the cluster.
+
+CompoundProcSummaryMetrics = {
+    'name': 'compoundprocsummary',
+    'query': '@Statistics:[COMPOUNDPROCSUMMARY]',
+    'columns': [
+        None,  # TIMESTAMP
+        {'name': 'compoundprocsummary.procedure', 'type': 'gauge'},
+        {'name': 'compoundprocsummary.invocations', 'type': 'gauge'},
+        {'name': 'compoundprocsummary.min_elapsed_time', 'type': 'gauge'},
+        {'name': 'compoundprocsummary.max_elapsed_time', 'type': 'gauge'},
+        {'name': 'compoundprocsummary.avg_elapsed_time', 'type': 'gauge'},
+        {'name': 'compoundprocsummary.aborts', 'type': 'monotonic_count'},
+        {'name': 'compoundprocsummary.failure', 'type': 'monotonic_count'},
+    ],
+}
+
+# https://docs.voltdb.com/v11docs/UsingVoltDB/sysprocstatistics.php#sysprocstatproceduredetail
+# One row per procedure, summarized across the cluster.
+
+ProcedureDetailMetrics = {
+    'name': 'proceduredetail',
+    'query': '@Statistics:[PROCEDUREDETAIL]',
+    'columns': [
+        None,  # TIMESTAMP
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
+        {'name': 'proceduredetail.site_id', 'type': 'tag'},
+        {'name': 'proceduredetail.partition_id', 'type': 'gauge'},
+        {'name': 'procedure', 'type': 'tag'},
+        {'name': 'proceduredetail.statement', 'type': 'source'},
+        {'name': 'proceduredetail.invocations', 'type': 'gauge'},
+        {'name': 'proceduredetail.timed_invocations', 'type': 'gauge'},
+        {'name': 'proceduredetail.min_execution_time', 'type': 'gauge'},
+        {'name': 'proceduredetail.max_execution_time', 'type': 'gauge'},
+        {'name': 'proceduredetail.avg_execution_time', 'type': 'gauge'},
+        {'name': 'proceduredetail.min_result_size', 'type': 'gauge'},
+        {'name': 'proceduredetail.max_result_size', 'type': 'gauge'},
+        {'name': 'proceduredetail.avg_result_size', 'type': 'gauge'},
+        {'name': 'proceduredetail.min_parameter_set_size', 'type': 'gauge'},
+        {'name': 'proceduredetail.max_parameter_set_size', 'type': 'gauge'},
+        {'name': 'proceduredetail.avg_parameter_set_size', 'type': 'gauge'},
+        {'name': 'proceduredetail.aborts', 'type': 'monotonic_count'},
+        {'name': 'proceduredetail.failures', 'type': 'monotonic_count'},
+    ],
+}
+
+# https://docs.voltdb.com/v11docs/UsingVoltDB/sysprocstatistics.php#sysprocstatprocedureinput
+# One row per procedure, summarized across the cluster.
+
+ProcedureInputMetrics = {
+    'name': 'procedureinput',
+    'query': '@Statistics:[PROCEDUREINPUT]',
+    'columns': [
+        None,  # TIMESTAMP
+        {'name': 'procedure', 'type': 'tag'},
+        {'name': 'procedureinput.weighted_perc', 'type': 'gauge'},
+        {'name': 'procedureinput.invocations', 'type': 'gauge'},
+        {'name': 'procedureinput.min_parameter_set_size', 'type': 'gauge'},
+        {'name': 'procedureinput.max_parameter_set_size', 'type': 'gauge'},
+        {'name': 'procedureinput.avg_parameter_set_size', 'type': 'gauge'},
+        {'name': 'procedureinput.total_parameter_set_size_mb', 'type': 'gauge'},
+    ],
+}
+
+# https://docs.voltdb.com/v11docs/UsingVoltDB/sysprocstatistics.php#sysprocstattask
+# One row per procedure, summarized across the cluster.
+
+TaskMetrics = {
+    'name': 'task',
+    'query': '@Statistics:[TASK]',
+    'columns': [
+        None,  # TIMESTAMP
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
+        {'name': 'task.partition_id', 'type': 'tag'},
+        {'name': 'task.task_name', 'type': 'tag'},
+        {'name': 'task.state', 'type': 'tag'},
+        {'name': 'task.scope', 'type': 'tag'},
+        {'name': 'task.scheduler_invocations', 'type': 'gauge'},
+        {'name': 'task.scheduler_total_execution', 'type': 'gauge'},
+        {'name': 'task.scheduler_min_execution', 'type': 'gauge'},
+        {'name': 'task.scheduler_max_execution', 'type': 'gauge'},
+        {'name': 'task.scheduler_avg_execution', 'type': 'gauge'},
+        {'name': 'task.scheduler_total_wait_time', 'type': 'gauge'},
+        {'name': 'task.scheduler_min_wait_time', 'type': 'gauge'},
+        {'name': 'task.scheduler_max_wait_time', 'type': 'gauge'},
+        {'name': 'task.scheduler_avg_wait_time', 'type': 'gauge'},
+        {'name': 'task.scheduler_status', 'type': 'gauge'},
+        {'name': 'task.procedure_invocations', 'type': 'gauge'},
+        {'name': 'task.procedure_total_execution', 'type': 'gauge'},
+        {'name': 'task.procedure_min_execution', 'type': 'gauge'},
+        {'name': 'task.procedure_max_execution', 'type': 'gauge'},
+        {'name': 'task.procedure_avg_execution', 'type': 'gauge'},
+        {'name': 'task.procedure_total_wait_time', 'type': 'gauge'},
+        {'name': 'task.procedure_min_wait_time', 'type': 'gauge'},
+        {'name': 'task.procedure_max_wait_time', 'type': 'gauge'},
+        {'name': 'task.procedure_avg_wait_time', 'type': 'gauge'},
+        {'name': 'task.procedure_failures', 'type': 'monotonic_count'},
+    ],
+}
+
+# https://docs.voltdb.com/v11docs/UsingVoltDB/sysprocstatistics.php#sysprocstattopic
+# One row per procedure, summarized across the cluster.
+
+TopicMetrics = {
+    'name': 'topic',
+    'query': '@Statistics:[TOPIC]',
+    'columns': [
+        None,  # TIMESTAMP
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
+        {'name': 'topic.site_id', 'type': 'gauge'},
+        {'name': 'topic.topic', 'type': 'gauge'},
+        {'name': 'topic.partition_id', 'type': 'gauge'},
+        {'name': 'topic.first_offset', 'type': 'gauge'},
+        {'name': 'topic.last_offset', 'type': 'gauge'},
+        {'name': 'topic.first_offset_timestamp', 'type': 'gauge'},
+        {'name': 'topic.last_offset_timestamp', 'type': 'gauge'},
+        {'name': 'topic.bytes_on_disk', 'type': 'gauge'},
+        {'name': 'topic.bytes_fetched', 'type': 'gauge'},
+        {'name': 'topic.state', 'type': 'gauge'},
+        {'name': 'topic.master', 'type': 'gauge'},
+        {'name': 'topic.retention_policy', 'type': 'gauge'},
+        {'name': 'topic.rows_skipped', 'type': 'gauge'},
+        {'name': 'topic.error_offset', 'type': 'gauge'},
+        {'name': 'topic.error_message', 'type': 'gauge'},
+    ],
+}
+
+#https://docs.voltdb.com/v11docs/UsingVoltDB/sysprocstatistics.php#sysprocstatrebalance
+# One row per procedure, summarized across the cluster.
+
+RebalanceMetrics = {
+    'name': 'rebalance',
+    'query': '@Statistics:[REBALANCE]',
+    'columns': [
+        {'name': 'rebalance.total_ranges', 'type': 'gauge'},
+        {'name': 'rebalance.percentage_moved', 'type': 'monotonic_gauge'},
+        {'name': 'relabance.moved_rows', 'type': 'gauge'},
+        {'name': 'rebalance.rows_per_second', 'type': 'monotonic_gauge'},
+        {'name': 'rebalance.estimated_remaining', 'type': 'gauge'},
+        {'name': 'rebalance.megabytes_per_second', 'type': 'gauge'},
+        {'name': 'rebalance.call_per_second', 'type': 'gauge'},
+        {'name': 'rebalance.call_latency', 'type': 'gauge'},
+    ],
+}
+
+# https://docs.voltdb.com/v11docs/UsingVoltDB/sysprocstatistics.php#sysprocstatplanner
+# One row per procedure, summarized across the cluster.
+PlannerMetrics = {
+    'name': 'planner',
+    'query': '@Statistics:[PLANNER]',
+    'columns': [
+        None,  # TIMESTAMP
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
+        {'name': 'planner.site_id', 'type': 'tag'},
+        {'name': 'planner.partition_id', 'type': 'tag'},
+        {'name': 'planner.cache1_level', 'type': 'gauge'},
+        {'name': 'planner.cache2_level', 'type': 'gauge'},
+        {'name': 'planner.cache1_hits', 'type': 'monotonic_gauge'},
+        {'name': 'planner.cache2_hits', 'type': 'monotonic_gauge'},
+        {'name': 'planner.cache_misses', 'type': 'monotonic_gauge'},
+        {'name': 'planner.plan_time_min', 'type': 'gauge'},
+        {'name': 'planner.plan_time_max', 'type': 'gauge'},
+        {'name': 'planner.plan_time_avg', 'type': 'gauge'},
+        {'name': 'planner.failures', 'type': 'monotonic_count'},
+    ],
+}
+
+#https://docs.voltdb.com/v11docs/UsingVoltDB/sysprocstatistics.php#sysprocstatclockskew
+# One row per procedure, summarized across the cluster.
+
+ClockSkewMetrics = {
+    'name': 'clockskew',
+    'query': '@Statistics:[CLOCKSKEW]',
+    'columns': [
+        None,  # TIMESTAMP
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
+        {'name': 'clockskew.skew_time', 'type': 'gauge'},
+        {'name': 'clockskew.remote_host_id', 'type': 'gauge'},
+        {'name': 'clockskew.remote_hostname', 'type': 'tag'},
+    ],
+}
+
+#https://docs.voltdb.com/v11docs/UsingVoltDB/sysprocstatistics.php#sysprocstatlimits
+# One row per procedure, summarized across the cluster.
+
+LimitsMetrics = {
+    'name': 'limits',
+    'query': '@Statistics:[LIMITS]',
+    'columns': [
+        None,  # TIMESTAMP
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
+        {'name': 'limits.file_descriptors_limit', 'type': 'gauge'},
+        {'name': 'limits.file_descriptors_open', 'type': 'monotonic_gauge'},
+        {'name': 'limits.client_connections_limit', 'type': 'gauge'},
+        {'name': 'limits.client_connections_open', 'type': 'monotonic_gauge'},
+        {'name': 'limits.accepted_connections', 'type': 'gauge'},
+        {'name': 'limits.dropped_connections', 'type': 'gauge'},
+    ],
+}
+
+# https://docs.voltdb.com/v11docs/UsingVoltDB/sysprocstatistics.php#sysprocstatsnapshotstatus
+# One row per procedure, summarized across the cluster.
+
+SnapshotsSummaryMetrics = {
+    'name': 'snapshotsummary',
+    'query': '@Statistics:[SNAPSHOTSUMMARY]',
+    'columns': [
+        {'name': 'snapshotsummary.nonce', 'type': 'gauge'},
+        {'name': 'snapshotsummary.txnid', 'type': 'gauge'},
+        None,  # TYPE
+        {'name': 'snapshotsummary.path', 'type': 'source'},
+        {'name': 'snapshotsummary.start_time', 'type': 'gauge'},
+        {'name': 'snapshotsummary.end_time', 'type': 'gauge'},
+        {'name': 'snapshotsummary.duration', 'type': 'gauge'},
+        {'name': 'snapshotsummary.progress_pct', 'type': 'gauge'},
+        None,  # RESULT
+    ],
+}
+
+# https://docs.voltdb.com/v11docs/UsingVoltDB/sysprocstatistics.php#sysprocstatcompoundproc
+# One row per procedure, summarized across the cluster.
+
+CompoundProcMetrics = {
+    'name': 'compoundproc',
+    'query': '@Statistics:[COMPOUNDPROC]',
+    'columns': [
+        None,  # TIMESTAMP
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
+        {'name': 'procedure', 'type': 'tag'},
+        {'name': 'compoundproc.invocations', 'type': 'monotonic_gauge'},
+        {'name': 'compoundproc.min_elapsed_time', 'type': 'gauge'},
+        {'name': 'compoundproc.max_elapsed_time', 'type': 'gauge'},
+        {'name': 'compoundproc.avg_elapsed_time', 'type': 'gauge'},
+        {'name': 'compoundproc.aborts', 'type': 'monotonic_count'},
+        {'name': 'compoundproc.failures', 'type': 'monotonic_count'},
+    ],
+}
+
+# https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php#sysprocstatqueueprio
+# One row per procedure, summarized across the cluster.
+
+QueuePriorityMetrics = {
+    'name': 'queuepriority',
+    'query': '@Statistics:[QUEUEPRIORITY]',
+    'columns': [
+        None,  # TIMESTAMP
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
+        {'name': 'site_id', 'type': 'tag'},
+        None,  # PRIORITY
+        {'name': 'queuepriority.current_depth', 'type': 'monotonic_gauge'},
+        {'name': 'queuepriority.poll_count', 'type': 'monotonic_gauge'},
+        {'name': 'queuepriority.avg_wait', 'type': 'gauge'},
+        {'name': 'queuepriority.max_wait', 'type': 'gauge'},
     ],
 }
