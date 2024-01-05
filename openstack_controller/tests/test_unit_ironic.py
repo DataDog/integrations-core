@@ -430,6 +430,39 @@ def test_ironic_nodes_pagination(
 
 
 @pytest.mark.parametrize(
+    ('mock_http_get', 'paginated_limit'),
+    [
+        pytest.param(
+            {
+                'mock_data': {
+                    '/baremetal/v1/nodes/detail': {"nodes": []},
+                }
+            },
+            1,
+            id='api empty nodes',
+        ),
+        pytest.param(
+            {
+                'mock_data': {
+                    '/baremetal/v1/nodes/detail': {"node": [{"test": "attr"}]},
+                }
+            },
+            1,
+            id='api no nodes ',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_pagination_invalid_no_exception(aggregator, openstack_controller_check, dd_run_check, paginated_limit):
+    paginated_instance = copy.deepcopy(configs.REST)
+    paginated_instance['paginated_limit'] = paginated_limit
+    check = openstack_controller_check(paginated_instance)
+    dd_run_check(check)
+    aggregator.assert_metric("openstack.ironic.node.count", count=0)
+
+
+@pytest.mark.parametrize(
     ('mock_http_get', 'connection_baremetal', 'instance', 'api_type'),
     [
         pytest.param(
