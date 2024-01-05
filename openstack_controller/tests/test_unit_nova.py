@@ -2000,7 +2000,10 @@ def test_servers_pagination(
         pytest.param(
             {
                 'mock_data': {
-                    '/compute/v2.1/servers/detail': {"servers": [{"test": "attr"}], "servers_links": [{"rel": "test"}]},
+                    '/compute/v2.1/servers/detail': {
+                        "servers": [{"test": "attr", "id": "test"}],
+                        "servers_links": [{"rel": "test"}],
+                    },
                 }
             },
             1,
