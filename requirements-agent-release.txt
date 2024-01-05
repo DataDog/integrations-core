@@ -123,7 +123,7 @@ datadog-php-fpm==3.2.0
 datadog-postfix==1.14.0; sys_platform != 'win32'
 datadog-postgres==16.0.0
 datadog-powerdns-recursor==2.4.0
-datadog-presto==2.7.1
+datadog-presto==2.8.0
 datadog-process==3.0.0
 datadog-prometheus==3.5.1
 datadog-proxysql==5.0.1
