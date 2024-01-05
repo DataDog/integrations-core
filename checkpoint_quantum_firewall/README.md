@@ -2,13 +2,6 @@
 
 - Check Point Next Generation Firewall is a security gateway that includes application control and IPS protection, with integrated management of security events -- all in one appliance. Other Features include: Identity Awareness, URL Filtering, Anti-Bot, Anti-Virus, Anti-Spam etc.
 
-This integration provides log enrichments, visualization, and detection rules for various Checkpoint Quantum Firewall Logs.
-
-#### Supported Logs:
-
-- Checkpoint Quantum Firewall - JSON Format
-  - **Event Types -** Firewall, URL Filtering, IPS, Identity Awareness, Application Control, Threat Emulation, Audit, Anti Ransomware, Anti Spam & Email Security, Anti Exploit, Anti Bot, Anti Virus, HTTPS Inspection, DLP, Anti Malware
-
 ## Setup
 
 ### Installation
@@ -67,6 +60,10 @@ To install the Checkpoint Quantum Firewall integration follow the steps below:
 [Run the Agent's status subcommand][2] and look for `checkpoint_quantum_firewall` under the Checks section.
 
 ## Data Collected
+
+### Logs
+
+The checkpoint_quantum_firewall integration collects Firewall, URL Filtering, IPS, Identity Awareness, Application Control, Threat Emulation, Audit, Anti Ransomware, Anti Spam & Email Security, Anti Exploit, Anti Bot, Anti Virus, HTTPS Inspection, DLP, and Anti Malware logs.
 
 ### Metrics
 
