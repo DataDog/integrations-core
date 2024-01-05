@@ -1,1 +1,0 @@
-[DBMON-3147] Add managed_authentication config option to explicitly enable or disable AWS IAM Authentication and Azure Managed Identity Authentication

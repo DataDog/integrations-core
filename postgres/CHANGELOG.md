@@ -2,6 +2,33 @@
 
 <!-- towncrier release notes start -->
 
+## 16.0.0 / 2024-01-05
+
+***Changed***:
+
+* Always use the database instance's resolved hostname for metrics regardless of how dbm and disable_generic_tags is set. For non-dbm customers or users of disable_generic_tags, this change will result in the host tag having a different value than before. It is possible that dashboards and monitors using the integration's metrics will need to be updated if they relied on the faulty host tagging. ([#16199](https://github.com/DataDog/integrations-core/pull/16199))
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+* PostgreSQL: Add metrics for logical replication subscriptions ([#16191](https://github.com/DataDog/integrations-core/pull/16191))
+* PostgreSQL: Add replication slots stats metric from pg_stat_replication_slots ([#16197](https://github.com/DataDog/integrations-core/pull/16197))
+* [DBMON-3147] Add managed_authentication config option to explicitly enable or disable AWS IAM Authentication and Azure Managed Identity Authentication ([#16221](https://github.com/DataDog/integrations-core/pull/16221))
+* Add metrics tracking vacuum, analyze and cluster progress ([#16236](https://github.com/DataDog/integrations-core/pull/16236))
+* PostgreSQL: Add granted tag to `postgresql.locks` metric ([#16268](https://github.com/DataDog/integrations-core/pull/16268))
+* Add metrics tracking vacuum and analyze age ([#16272](https://github.com/DataDog/integrations-core/pull/16272))
+* Create `postgresql.create_index.*` metrics tracking progress of index creation ([#16330](https://github.com/DataDog/integrations-core/pull/16330))
+* Update dependencies ([#16394](https://github.com/DataDog/integrations-core/pull/16394)), ([#16448](https://github.com/DataDog/integrations-core/pull/16448)), ([#16502](https://github.com/DataDog/integrations-core/pull/16502))
+* add new obfuscator options to customize SQL obfuscation and normaliza… ([#16429](https://github.com/DataDog/integrations-core/pull/16429))
+
+***Fixed***:
+
+* PostgreSQL: Exclude manually launched vacuum from pg_stat_activity metrics ([#16206](https://github.com/DataDog/integrations-core/pull/16206))
+* Exclude manual vacuum from reported xid and xmin age ([#16290](https://github.com/DataDog/integrations-core/pull/16290))
+* add rdsadmin to autodiscovery exclusion list ([#16396](https://github.com/DataDog/integrations-core/pull/16396))
+* [DBMON-3302] emit correct error message when explain parameterized query fails ([#16516](https://github.com/DataDog/integrations-core/pull/16516))
+* [DBMON-3299] Improve edge case handling on partitioned table activity query  when a partitioned table has no children (partitioned sub-tables) ([#16517](https://github.com/DataDog/integrations-core/pull/16517))
+
 ## 15.3.1 / 2023-12-28 / Agent 7.50.2
 
 ***Fixed***:
