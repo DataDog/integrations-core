@@ -2013,11 +2013,13 @@ def test_servers_pagination(
     indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_pagination_invalid_no_exception(openstack_controller_check, dd_run_check, paginated_limit):
+def test_pagination_invalid_no_exception(aggregator, openstack_controller_check, dd_run_check, paginated_limit):
     paginated_instance = copy.deepcopy(configs.REST)
     paginated_instance['paginated_limit'] = paginated_limit
     check = openstack_controller_check(paginated_instance)
     dd_run_check(check)
+    for metric in metrics.NOVA_SERVER_DETAILS_METRICS:
+        aggregator.assert_metric(metric, count=0)
 
 
 @pytest.mark.parametrize(

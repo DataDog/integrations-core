@@ -109,11 +109,16 @@ NOVA_SERVER_FLAVOR_METRICS = {
     'openstack.nova.server.flavor.rxtx_factor',
 }
 
-NOVA_SERVER_METRICS = {
+NOVA_SERVER_METRIC = {
     'openstack.nova.server.count',
+}
+
+NOVA_SERVER_DETAILS_METRICS = {
     'openstack.nova.server.active',
     'openstack.nova.server.error',
 }
+
+NOVA_SERVER_METRICS = NOVA_SERVER_METRIC | NOVA_SERVER_DETAILS_METRICS
 
 NOVA_ALL_DIAGNOSTIC_METRICS = (
     NOVA_SERVER_DIAGNOSTIC_METRICS
