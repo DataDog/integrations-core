@@ -1,0 +1,1 @@
+When host auto discovery is enabled, do nothing and emit OK for check status
