@@ -82,24 +82,6 @@ spec:
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
-Fluxcd metrics are available on the OpenMetrics endpoint. Additionally, Fluxcd allows you to [export custom application-level metrics][10]. You can configure the Fluxcd integration to collect these metrics using the `extra_metrics` option. All Fluxcd metrics, including your custom metrics, use the `fluxcd.` prefix.
-
-**Note:** Custom Fluxcd metrics are considered standard metrics in Datadog.
-
-This is an example configuration leveraging the `extra_metrics` option:
-
-```yaml
-init_config:
-  ...
-instances:
-  - openmetrics_endpoint: http://<FLUXCD_ADDRESS>:8080
-    # Also collect your own Fluxcd metrics
-    extra_metrics:
-      - my_custom_fluxcd_metric
-```
-
-See the [sample configuration file][4] for all available configuration options
-
 ### Validation
 
 [Run the Agent's status subcommand][6] and look for `fluxcd` under the Checks section.
@@ -132,4 +114,3 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/fluxcd/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/fluxcd/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
-[10]: https://docs.datadoghq.com/developers/integrations/python/
