@@ -104,7 +104,7 @@ To configure this check for an Agent running on a host:
 
 Edit the `mysql.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7] to start collecting your MySQL [metrics](#metric-collection) and [logs](#log-collection).
 
-For a full list of available configuration options, see the [sample mysql.d/conf.yaml][8].
+For a full list of available configuration options, see the [sample `mysql.d/conf.yaml`][8].
 
 ##### Metric collection
 
