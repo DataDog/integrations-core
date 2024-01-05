@@ -78,7 +78,7 @@ datadog-ignite==2.4.0
 datadog-iis==3.1.0; sys_platform == 'win32'
 datadog-impala==2.1.0
 datadog-istio==5.3.0
-datadog-jboss-wildfly==2.1.1
+datadog-jboss-wildfly==2.2.0
 datadog-journald==1.1.1
 datadog-kafka-consumer==4.1.4
 datadog-kafka==2.14.1
