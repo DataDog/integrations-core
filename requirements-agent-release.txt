@@ -135,7 +135,7 @@ datadog-rethinkdb==3.1.0
 datadog-riak==3.4.0
 datadog-riakcs==2.11.0
 datadog-sap-hana==3.1.0
-datadog-scylla==2.5.0
+datadog-scylla==2.6.0
 datadog-sidekiq==1.3.1
 datadog-silk==2.0.0
 datadog-singlestore==2.0.1
