@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 3.3.0 / 2024-01-05
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+* Add local rate limit metrics ([#16313](https://github.com/DataDog/integrations-core/pull/16313))
+* Add new RBAC metrics in Legacy check ([#16432](https://github.com/DataDog/integrations-core/pull/16432))
+* Add connect state metric for OpenmetricsV2 and add way to collect shadow prefixes in legacy check for rbac metrics ([#16453](https://github.com/DataDog/integrations-core/pull/16453))
+* Add a `endpoint` tag to every metric in the legacy version of the check ([#16478](https://github.com/DataDog/integrations-core/pull/16478))
+
 ## 3.2.0 / 2023-11-10 / Agent 7.50.0
 
 ***Added***:
