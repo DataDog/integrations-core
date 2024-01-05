@@ -1029,3 +1029,16 @@ def assert_state_set(check):
     if POSTGRES_VERSION != '9.3':
         assert check.metrics_cache.archiver_metrics
     assert check.metrics_cache.replication_metrics
+
+
+def test_host_autodiscover_init_config(aggregator, pg_instance):
+    init = {
+        'autodiscover_hosts': {
+            'enabled': True,
+        }
+    }
+    check_with_init = PostgreSql('test_instance', init, {})
+    assert check_with_init._config.autodiscovery_enabled is True
+    check_with_init.check({})
+    # assert that the service check is OK
+    aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.OK)

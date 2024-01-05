@@ -105,7 +105,7 @@ class PostgreSql(AgentCheck):
                 "DEPRECATION NOTICE: The managed_identity option is deprecated and will be removed in a future version."
                 " Please use the new azure.managed_authentication option instead."
             )
-        self._config = PostgresConfig(self.instance)
+        self._config = PostgresConfig(self.init_config, self.instance)
         self.cloud_metadata = self._config.cloud_metadata
         self.tags = self._config.tags
         # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
@@ -954,6 +954,16 @@ class PostgreSql(AgentCheck):
         }
 
     def check(self, _):
+        if self._config.host_autodiscovery_enabled and not self._config.host:
+            # emit status check that we are waiting on remote-config to
+            # push instance configuration to us, skip this check
+            self.service_check(
+                self.SERVICE_CHECK_NAME,
+                AgentCheck.OK,
+                tags=self._get_service_check_tags(),
+            )
+            self.log.info("Waiting for remote configuration to push instance configuration")
+            return
         tags = copy.copy(self.tags)
         # Collect metrics
         try:
