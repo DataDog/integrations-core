@@ -164,7 +164,7 @@ datadog-torchserve==2.1.0
 datadog-traffic-server==2.1.0
 datadog-twemproxy==1.15.0
 datadog-twistlock==3.4.0
-datadog-varnish==2.0.0
+datadog-varnish==2.1.0
 datadog-vault==4.0.1
 datadog-vertica==4.3.0
 datadog-voltdb==3.0.0
