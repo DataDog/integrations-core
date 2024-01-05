@@ -109,7 +109,7 @@ datadog-nagios==1.13.0
 datadog-network==3.1.0
 datadog-nfsstat==1.13.0; sys_platform == 'linux2'
 datadog-nginx-ingress-controller==2.4.1
-datadog-nginx==6.0.0
+datadog-nginx==6.1.0
 datadog-nvidia-triton==1.0.0
 datadog-openldap==1.11.1
 datadog-openmetrics==4.0.0
