@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from uuid import uuid4
 from datetime import datetime
+from uuid import uuid4
 
 from ..fs import (
     create_file,
@@ -127,7 +127,7 @@ To install the {integration_name} check on your host:
         'support_type': support_type,
         'integration_links': integration_links,
         # Source Type IDs are unique-per-integration integers
-        # This uses the current timestamp with the subtraction to start the IDs at around a few million, allowing room to grow.
+        # Based on current timestamp with subtraction to start the IDs at around a few million, allowing room to grow.
         "source_type_id": int(datetime.utcnow().timestamp()) - 1700000000,
     }
     config.update(kwargs)
