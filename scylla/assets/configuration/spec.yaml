@@ -48,7 +48,7 @@ files:
         openmetrics_endpoint.value.example: http://localhost:9180/metrics
         openmetrics_endpoint.display_priority: 4
         openmetrics_endpoint.description: |
-          To enable Scylla metrics using OpenMetricsBaseCheckV2 you must specify the 
+          To enable Scylla metrics using OpenMetricsBaseCheckV2, you must specify the 
           `openmetrics_endpoint` option.
 
           Either `prometheus_url` or `openmetrics_endpoint` must be specified.
