@@ -34,7 +34,7 @@ This integration collects and reports Windows Registry information using both of
 
 ### Validation
 
-Check the information page in the Datadog Agent Manager or run the Agent's `status` [subcommand][7] and look for `windows_registry` under the Checks section.
+Check the information page in the Datadog Agent Manager or run the Agent's `status` [subcommand][7] and look for `windows_registry` under the **Checks** section.
 
 ## Data Collected
 
