@@ -176,7 +176,6 @@ OPERATOR_METRICS = {
     'cilium_operator_ipam_interface_candidates': 'operator.ipam.interface_candidates',
     'cilium_operator_ipam_empty_interface_slots': 'operator.ipam.empty_interface_slots',
     'cilium_operator_ipam_ip_allocation_ops': 'operator.ipam.ip_allocation_ops',
-    'cilium_operator_ipam_release_ops': 'operator.ipam.release_ops',
 }
 
 AGENT_V2_METRICS = deepcopy(AGENT_METRICS)

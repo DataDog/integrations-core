@@ -190,6 +190,7 @@ cilium.operator.ipam.allocation_ops,count,,operation,,"[OpenMetrics V1] Count of
 cilium.operator.ipam.allocation_ops.count,count,,operation,,"[OpenMetrics V2] Count of IP allocation operations. Available in Cilium v1.8+",0,cilium,ipam allocation ops,
 cilium.operator.ipam.release_ops,count,,operation,,"[OpenMetrics V1] Count of IP release operations. Available in Cilium v1.8+",0,cilium,ipam release ops,
 cilium.operator.ipam.release_ops.count,count,,operation,,"[OpenMetrics V2] Count of IP release operations. Available in Cilium v1.8+",0,cilium,ipam release ops,
+
 cilium.operator.ipam.interface_creation_ops,count,,operation,,"[OpenMetrics V1] Count of interfaces allocated. Available in Cilium v1.8+",0,cilium,ipam creation ops,
 cilium.operator.ipam.interface_creation_ops.count,count,,operation,,"[OpenMetrics V2] Count of interfaces allocated. Available in Cilium v1.8+",0,cilium,ipam creation ops,
 cilium.operator.ipam.available,gauge,,unit,,"[OpenMetrics V1 and V2] Number of interfaces with addresses available. Available in Cilium v1.8+",0,cilium,available ips,
@@ -252,3 +253,9 @@ cilium.operator.identity_gc.runs,gauge,,garbage collection,,"[OpenMetrics V1 and
 cilium.operator.num_ceps_per_ces.sum,count,,unit,,"[OpenMetrics V1 and V2] Sum of CEPs batched in a CES. Available in Cilium v1.11+",0,cilium,cep per ces sum,
 cilium.operator.num_ceps_per_ces.count,count,,unit,,"[OpenMetrics V1 and V2] Count of CEPs batched in a CES. Available in Cilium v1.11+",0,cilium,cep per ces count,
 cilium.operator.num_ceps_per_ces.bucket,count,,unit,,"[OpenMetrics V2] Sample of CEPs batched in a CES. Available in Cilium v1.11+",0,cilium,cep per ces sample,
+cilium.operator.ipam.empty_interface_slots,count,,,,"[OpenMetrics V1] . Available in Cilium v1.13+",0,cilium,ipam empty interface,
+cilium.operator.ipam.empty_interface_slots.count,count,,,,"[OpenMetrics V2] . Available in Cilium v1.13+",0,cilium,ipam empty interface,
+cilium.operator.ipam.candidate_interface_slots,count,,,,"[OpenMetrics V1] . Available in Cilium v1.13+",0,cilium,ipam candidate interface,
+cilium.operator.ipam.candidate_interface_slots.count,count,,,,"[OpenMetrics V2] . Available in Cilium v1.13+",0,cilium,ipam candidate interface,
+cilium.operator.ipam.ip_allocation_ops,count,,,,"[OpenMetrics V1] . Available in Cilium v1.13+",0,cilium,ipam ip allocation ops,
+cilium.operator.ipam.ip_allocation_ops.count,count,,,,"[OpenMetrics V2] . Available in Cilium v1.13+",0,cilium,ipam ip allocation ops,
