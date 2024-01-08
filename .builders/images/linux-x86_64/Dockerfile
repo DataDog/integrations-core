@@ -1,8 +1,6 @@
 ARG BASE_IMAGE=quay.io/pypa/manylinux2010_x86_64
 FROM ${BASE_IMAGE}
 
-ARG PYTHON_MAJOR
-
 ENV IBM_MQ_VERSION="9.2.4.0"
 ENV IBM_MQ_SHA256="d0d583eba72daf20b3762976f8831c2e23150ace90509520e12f8cda5b5bdb49"
 ENV KRB5_VERSION="1.20.1"
@@ -43,6 +41,14 @@ RUN curl "https://python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSIO
  && make install \
  && rm -rf /tmp/Python-${PYTHON_VERSION} \
  && rm -rf /tmp/python.tar.gz
+
+ENV PATH="/opt/python/${PYTHON_VERSION}/bin:${PATH}"
+ENV LD_LIBRARY_PATH="/opt/python/${PYTHON_VERSION}/lib:${LD_LIBRARY_PATH}"
+
+# Set up virtual environment for Python 3
+RUN /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location --upgrade pip \
+ && /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location virtualenv \
+ && /opt/python/${PYTHON_VERSION}/bin/python3 -m virtualenv /py3
 
 # Rust toolchain
 RUN curl -sSL -o rustup-init "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/x86_64-unknown-linux-gnu/rustup-init" \
@@ -155,15 +161,16 @@ RUN curl "https://www.unixodbc.org/unixODBC-${ODBC_VERSION}.tar.gz" -Lo /tmp/uni
  && rm -rf /tmp/unixobdc.tar.gz
 
 
-ENV PATH="/opt/python/${PYTHON_VERSION}/bin:${PATH}"
-ENV LD_LIBRARY_PATH="/opt/python/3.11.5/lib/:${LD_LIBRARY_PATH}"
 # Environment variables to help openssl crate find OpenSSL
 ENV OPENSSL_LIB_DIR="/usr/local/lib64"
 ENV OPENSSL_INCLUDE_DIR="/usr/local/include"
 
-# Note: virtualenv v20.22.0 dropped support for creating py2-based virtual environments,
-# that's why we stick to an older version.
-RUN python3 -m pip install virtualenv==20.21.1
+# Set up extra build information
+ENV PIP_CONSTRAINT="/pip_constraints.txt"
+ENV PIP_CONSTRAINT_FILE="${PIP_CONSTRAINT}"
+RUN touch "${PIP_CONSTRAINT_FILE}"
 
-CMD ["bash", "/home/scripts/build_dependencies.sh"]
+COPY build_script.sh /build_script.sh
+ENV DD_BUILD_COMMAND="bash /build_script.sh"
 
+CMD ["python3", "/home/scripts/build_wheels.py"]

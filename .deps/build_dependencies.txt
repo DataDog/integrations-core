@@ -1,3 +1,4 @@
+# Required for building all dependent Python packages
 hatchling==1.21.0; python_version > '3.0'
 hatchling==0.25.1; python_version < '3.0'
 setuptools==66.1.1; python_version > '3.0'
@@ -10,7 +11,9 @@ setuptools-rust>=1.7.0; python_version > '3.0'
 maturin; python_version > '3.0'
 cffi>=1.12
 cython<3.0.0
-pip-tools==7.3.0; python_version > '3.0'
-pip-tools==5.4.0; python_version < '3.0'
 tomli>=2.0.1
+
+# Required for tooling
+urllib3
 auditwheel==5.4.0; sys_platform == 'linux'
+delvewheel==1.5.2; sys_platform == 'win32'

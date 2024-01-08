@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 import argparse
-import re
 import shutil
 import subprocess
 import sys
 from contextlib import contextmanager
-from functools import cache
 from itertools import chain
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -43,17 +41,6 @@ def check_process(*args, **kwargs) -> subprocess.CompletedProcess:
     return process
 
 
-@cache
-def default_python_version() -> str:
-    constants_path = HERE.parent / 'ddev' / 'src' / 'ddev' / 'repo' / 'constants.py'
-    contents = constants_path.read_text(encoding='utf-8')
-    match = re.search(r'^PYTHON_VERSION = [\'"](.+)[\'"]$', contents, re.MULTILINE)
-    if not match:
-        abort(f'Could not find PYTHON_VERSION in {constants_path}')
-
-    return match.group(1)
-
-
 @contextmanager
 def temporary_directory() -> Generator[Path, None, None]:
     with TemporaryDirectory() as directory:
@@ -84,35 +71,57 @@ def build_macos():
 def build_image():
     parser = argparse.ArgumentParser(prog='builder', allow_abbrev=False)
     parser.add_argument('image')
+    parser.add_argument('output_dir')
     parser.add_argument('--python')
     parser.add_argument('--no-run', action='store_true')
+    parser.add_argument('-v', '--verbose', action='store_true')
     args = parser.parse_args()
 
     image = args.image
-    python_version = args.python or default_python_version()
-    python_tag = python_version.replace('.', '')
-
     image_path = HERE / 'images' / image
     if not image_path.is_dir():
         abort(f'Image does not exist: {image_path}')
 
-    image_name = f'datadog/agent-int-builder-{image}:{python_version}'
-    check_process(
-        ['docker', 'build', str(image_path), '-t', image_name, '--build-arg', f'PYTHON_MAJOR={python_tag}'],
-    )
+    image_name = f'datadog/agent-int-builder-{image}:latest'
+    with temporary_directory() as temp_dir:
+        build_context_dir = shutil.copytree(image_path, temp_dir, dirs_exist_ok=True)
+
+        # Copy utilities shared by multiple images
+        for entry in image_path.parent.iterdir():
+            if entry.is_file():
+                shutil.copy2(entry, build_context_dir)
+
+        build_command = ['docker', 'build', str(build_context_dir), '-t', image_name]
+        if args.verbose:
+            build_command.extend(['--progress', 'plain'])
+
+        check_process(build_command)
 
     if not args.no_run:
         with temporary_directory() as temp_dir:
             mount_dir = temp_dir / 'mnt'
             mount_dir.mkdir()
+            internal_mount_dir = 'C:\\mnt' if image.startswith('windows-') else '/home'
 
             dependency_file = mount_dir / 'requirements.in'
             dependency_file.write_text('\n'.join(chain.from_iterable(read_dependencies().values())))
-            shutil.copy(HERE / '..' / '.deps' / 'build_dependencies.txt', mount_dir)
+            shutil.copy(HERE.parent / '.deps' / 'build_dependencies.txt', mount_dir)
             shutil.copytree(HERE / 'scripts', mount_dir / 'scripts')
             shutil.copytree(HERE / 'patches', mount_dir / 'patches')
 
-            check_process(['docker', 'run', '--rm', '-v', f'{mount_dir}:/home', image_name])
+            check_process(['docker', 'run', '--rm', '-v', f'{mount_dir}:{internal_mount_dir}', image_name])
+
+            output_dir = Path(args.output_dir)
+            if output_dir.is_dir():
+                shutil.rmtree(output_dir)
+
+            # Move wheels to the output directory
+            wheels_dir = mount_dir / 'wheels'
+            shutil.move(wheels_dir, output_dir / 'wheels')
+
+            # Move the final requirements file to the output directory
+            final_requirements = mount_dir / 'frozen.txt'
+            shutil.move(final_requirements, output_dir)
 
 
 def main():
