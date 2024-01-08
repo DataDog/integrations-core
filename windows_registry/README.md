@@ -15,7 +15,7 @@ The Windows Registry integration is included in the [Datadog Agent][1] package. 
 
 ### Configuration
 
-This integration collects and reports Windows Registry information using both of following methods:
+This integration collects and reports Windows Registry information using both of the following methods:
 
 - As [Datadog Metrics][2]
 - As [Datadog Logs][3]
