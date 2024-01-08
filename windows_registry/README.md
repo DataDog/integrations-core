@@ -4,8 +4,8 @@
 
 Watch for changes in Windows Registry keys and forward them to Datadog. Enable this integration to:
 
-- Understand system and application level health and status through Windows Registry values
-- Monitor for unexpected changes impacting security and compliance requirements
+- Understand system and application level health and status through Windows Registry values.
+- Monitor for unexpected changes impacting security and compliance requirements.
 
 ## Setup
 
