@@ -40,7 +40,7 @@ Check the information page in the Datadog Agent Manager or run the Agent's `stat
 
 ### Metrics
 
-All metrics collected by the Windows Registry integration are forwarded to Datadog as [custom metrics][11], which may impact your billing .
+All metrics collected by the Windows Registry integration are forwarded to Datadog as [custom metrics][11], which may impact your billing.
 
 ### Logs
 
