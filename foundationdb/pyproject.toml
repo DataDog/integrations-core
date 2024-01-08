@@ -40,7 +40,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "foundationdb==6.3.24; python_version > '3.0'",
+    "foundationdb==7.3.27; python_version > '3.0'",
 ]
 
 [project.urls]

@@ -9,6 +9,6 @@ protocol = ["tls"]
 
 [envs.default]
 dependencies = [
-  "foundationdb==6.3.24",
+  "foundationdb==7.3.27",
 ]
 e2e-env = false
