@@ -6,6 +6,9 @@ build_wheels() {
     /py${DD_BUILD_PYTHON_VERSION}/bin/python -m pip wheel "$@"
 }
 
+# bcrypt >= 4.1.0 requires rust >= 1.64, which dropped support for glibc 2.12 (~Centos 6)
+echo "bcrypt < 4.1.0" >> "${PIP_CONSTRAINT_FILE}"
+
 if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
     # pydantic-core
     pydantic_core_version="2.1.2"

@@ -168,9 +168,7 @@ ENV OPENSSL_INCLUDE_DIR="/usr/local/include"
 # Set up extra build information
 ENV PIP_CONSTRAINT="/pip_constraints.txt"
 ENV PIP_CONSTRAINT_FILE="${PIP_CONSTRAINT}"
-
-# # bcrypt >= 4.1.0 requires rust >= 1.64, which dropped support for glibc 2.12 (~Centos 6)
-RUN echo "bcrypt < 4.1.0" >> "${PIP_CONSTRAINT_FILE}"
+RUN touch "${PIP_CONSTRAINT_FILE}"
 
 COPY build_script.sh /build_script.sh
 ENV DD_BUILD_COMMAND="bash /build_script.sh"
