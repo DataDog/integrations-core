@@ -27,7 +27,6 @@ IGNORED_DEPS = {
     'psutil',  # Breaking disk tests
     'aerospike',  # v8+ breaks agent build.
     'protobuf',  # 3.20.2->4.23.3 breaks kubernetes_state, kube_dns, gitlab and gitlab_runner tests.
-    'service-identity',  # 21.1->23.1 breaks tls tests.
     'pyvmomi',  # 7->8 breaks vsphere tests.
     # 4.3->4.4 changes the license field in the package metadata to something our validations cannot handle.
     'pymongo',
