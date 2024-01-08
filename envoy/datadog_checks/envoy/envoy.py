@@ -53,6 +53,8 @@ class Envoy(AgentCheck):
         if self.stats_url is None:
             raise ConfigurationError('Envoy configuration setting `stats_url` is required')
 
+        self.custom_tags.append("endpoint:{}".format(self.stats_url))
+
         included_metrics = {
             re.sub(r'^envoy\\?\.', '', s, 1)
             for s in self.instance.get(

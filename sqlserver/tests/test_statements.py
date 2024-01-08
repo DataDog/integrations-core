@@ -911,6 +911,52 @@ def test_statement_conditional_stored_procedure_with_temp_table(
         assert event['sqlserver']['query_plan_hash'] is not None
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "stored_procedure_characters_limit",
+    [
+        500,
+        1000,
+        2000,
+    ],
+)
+def test_statement_stored_procedure_characters_limit(
+    aggregator, datadog_agent, dd_run_check, dbm_instance, bob_conn, stored_procedure_characters_limit
+):
+    dbm_instance['stored_procedure_characters_limit'] = stored_procedure_characters_limit
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    query = "EXEC procedureWithLargeCommment;"
+
+    def _obfuscate_sql(sql_query, options=None):
+        if "PROCEDURE procedureWithLargeCommment" in sql_query and len(sql_query) >= stored_procedure_characters_limit:
+            raise Exception('failed to obfuscate')
+        return json.dumps({'query': sql_query, 'metadata': {}})
+
+    # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        dd_run_check(check)
+        bob_conn.execute_with_retries(query, (), database="datadog_test")
+        dd_run_check(check)
+        aggregator.reset()
+        bob_conn.execute_with_retries(query, (), database="datadog_test")
+        dd_run_check(check)
+
+    # dbm-metrics
+    dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
+    payload = dbm_metrics[0]
+    # metrics rows
+    sqlserver_rows = payload.get('sqlserver_rows', [])
+    assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
+
+    matched_rows = [s for s in sqlserver_rows if s.get("procedure_name") == "procedurewithlargecommment"]
+    if stored_procedure_characters_limit > 500:
+        assert matched_rows, "should have collected the metric row with expected procedure name"
+        assert "procedure_signature" in matched_rows[0]
+
+
 def _mock_database_list():
     Row = namedtuple('Row', 'name')
     fetchall_results = [

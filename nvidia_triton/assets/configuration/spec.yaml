@@ -32,3 +32,8 @@ files:
       value:
         display_default: 8000
         type: integer
+  - template: logs
+    example:
+    - type: docker
+      source: nvidia_triton
+      service: <SERVICE>

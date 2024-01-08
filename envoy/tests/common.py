@@ -381,6 +381,8 @@ LOCAL_RATE_LIMIT_METRICS = [
     "http.local_rate_limit_ok.count",
 ]
 
+CONNECT_STATE_METRIC = ['control_plane.connected_state']
+
 RATE_LIMIT_STAT_PREFIX_TAG = 'stat_prefix:http_local_rate_limiter'
 
 FLAKY_METRICS = [

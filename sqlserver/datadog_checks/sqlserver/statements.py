@@ -22,7 +22,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.utils import PROC_CHAR_LIMIT, extract_sql_comments_and_procedure_name
+from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name
 
 try:
     import datadog_agent
@@ -282,7 +282,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             query_metrics_columns=', '.join(['qs.{} as {}'.format(col, col) for col in available_columns]),
             query_metrics_column_sums=', '.join(['sum(qs.{}) as {}'.format(c, c) for c in available_columns]),
             limit=self.dm_exec_query_stats_row_limit,
-            proc_char_limit=PROC_CHAR_LIMIT,
+            proc_char_limit=self._config.stored_procedure_characters_limit,
         )
         return self._statement_metrics_query
 
@@ -327,11 +327,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     "dd.sqlserver.statements.error",
                     1,
                     **self._check.debug_stats_kwargs(tags=["error:obfuscate-query-{}".format(type(e))])
-                )
-                self._check.count(
-                    "dd.sqlserver.obfuscation.error",
-                    1,
-                    **self._check.debug_stats_kwargs(tags=["error:{}".format(type(e)), "error_msg:{}".format(e)])
                 )
                 continue
 
@@ -517,7 +512,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     else:
                         self.log.debug("Failed to obfuscate plan | %s", context)
                     collection_errors = [{'code': "obfuscate_xml_plan_error", 'message': str(e)}]
-                    self._config.count(
+                    self._check.count(
                         "dd.sqlserver.statements.error",
                         1,
                         **self._check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(e))])

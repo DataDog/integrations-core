@@ -1,0 +1,33 @@
+{
+    "version": 2,
+    "created_at": "2023-12-19",
+    "last_updated_at": "2023-12-19",
+    "title": "Envoy instance disconnected from control plane",
+    "description": "Connectivity to the control plane is critical for Envoy to function properly. This alert will notify you when an Envoy instance has been disconnected from the control plane for more than 10 minutes.",
+    "definition": {
+        "id": 136667779,
+        "name": "Envoy instance disconnected from control plane",
+        "type": "query alert",
+        "query": "max(last_10m):avg:envoy.control_plane.connected_state{*} by {host,endpoint} <= 0",
+        "message": "{{#is_alert}}\nThe Envoy instance has been disconnected disconnected from the management/control plane server for the last 10 minutes on {{host.name}} on Envoy instance {{endpoint.name}}.\n{{/is_alert}} \n\n{{#is_recovery}}\nThe Envoy instance connection is now stable again with the management/control plane server.\n{{/is_recovery}}",
+        "tags": [],
+        "options": {
+            "thresholds": {
+                "critical": 0
+            },
+            "notify_audit": false,
+            "include_tags": true,
+            "new_group_delay": 60,
+            "notify_no_data": false,
+            "avalanche_window": 10,
+            "silenced": {
+                "*": null
+            }
+        },
+        "priority": null,
+        "restricted_roles": null
+    },
+    "tags": [
+        "integration:envoy"
+    ]
+}

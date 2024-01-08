@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 4.1.0 / 2023-10-26
+## 4.2.0 / 2024-01-05
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+
+## 4.1.0 / 2023-10-26 / Agent 7.50.0
 
 ***Added***:
 

@@ -136,24 +136,46 @@ def _get_expected_tags(check, pg_instance, **kwargs):
     return base_tags
 
 
-def assert_metric_at_least(aggregator, metric_name, lower_bound=None, higher_bound=None, count=None, tags=None):
+def assert_metric_at_least(
+    aggregator,
+    metric_name,
+    lower_bound=None,
+    higher_bound=None,
+    count=None,
+    tags=None,
+    min_count=None,
+    max_count=None,
+):
     found_values = 0
     expected_tags = normalize_tags(tags, sort=True)
     aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
     for metric in aggregator.metrics(metric_name):
         if expected_tags and expected_tags == sorted(metric.tags):
             if lower_bound is not None:
-                assert metric.value >= lower_bound, 'Expected {} with tags {} to have a value >= {}, got {}'.format(
-                    metric_name, expected_tags, lower_bound, metric.value
+                assert metric.value >= lower_bound, (
+                    f'Expected {metric_name} with tags {expected_tags} to have a value >= {lower_bound}, '
+                    f'got {metric.value}'
                 )
             if higher_bound is not None:
-                assert metric.value <= higher_bound, 'Expected {} with tags {} to have a value <= {}, got {}'.format(
-                    metric_name, expected_tags, higher_bound, metric.value
+                assert metric.value <= higher_bound, (
+                    f'Expected {metric_name} with tags {expected_tags} to have a value <= {higher_bound}, '
+                    f'got {metric.value}'
                 )
             found_values += 1
+
     if count:
-        assert found_values == count, 'Expected to have {} with tags {} values for metric {}, got {}'.format(
-            count, expected_tags, metric_name, found_values
+        assert (
+            found_values == count
+        ), f'Expected to have {count} with tags {expected_tags} values for metric {metric_name}, got {found_values}'
+    if min_count:
+        assert found_values >= min_count, (
+            f'Expected to have at least {min_count} with tags {expected_tags} values for metric {metric_name},'
+            f' got {found_values}'
+        )
+    if max_count:
+        assert found_values <= max_count, (
+            f'Expected to have at most {max_count} with tags {expected_tags} values for metric {metric_name},'
+            f' got {found_values}'
         )
 
 
@@ -174,7 +196,7 @@ def check_db_count(aggregator, expected_tags, count=1):
         table_count = 9
     # And PG >= 14 will also report the parent table
     if float(POSTGRES_VERSION) >= 14.0:
-        table_count = 10
+        table_count = 11
     aggregator.assert_metric(
         'postgresql.table.count',
         value=table_count,

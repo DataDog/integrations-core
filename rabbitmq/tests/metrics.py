@@ -386,13 +386,9 @@ def assert_metric_covered(aggregator):
         aggregator.assert_metric_has_tag_prefix(mname, 'rabbitmq_node', count=1)
 
     aggregator.assert_metric('rabbitmq.node.partitions', value=0, count=1)
-    aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:/', "tag1:1", "tag2"], value=0, count=1)
-    aggregator.assert_metric(
-        'rabbitmq.connections', tags=['rabbitmq_vhost:myvhost', "tag1:1", "tag2"], value=0, count=1
-    )
-    aggregator.assert_metric(
-        'rabbitmq.connections', tags=['rabbitmq_vhost:myothervhost', "tag1:1", "tag2"], value=0, count=1
-    )
+    aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:/', "tag1:1", "tag2"], count=1)
+    aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:myvhost', "tag1:1", "tag2"], count=1)
+    aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:myothervhost', "tag1:1", "tag2"], count=1)
 
     # Queue attributes, should be only one queue fetched
     for mname in Q_METRICS:

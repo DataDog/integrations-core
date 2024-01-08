@@ -18,7 +18,8 @@ from .common import (
     HOST,
     INSTANCES,
     LOCAL_RATE_LIMIT_METRICS,
-    RATE_LIMIT_STAT_PREFIX_TAG,
+    RBAC_METRICS,
+    STAT_PREFIX_TAG,
 )
 
 CHECK_NAME = 'envoy'
@@ -252,24 +253,55 @@ def test_metadata_not_collected(datadog_agent, check):
     check.log.assert_not_called()
 
 
-def test_stats_prefix_ext_auth(aggregator, fixture_path, mock_http_response, check, dd_run_check):
+@pytest.mark.parametrize(
+    ('fixture_file', 'metrics', 'standard_tags', 'additional_tags'),
+    [
+        (
+            './legacy/stat_prefix',
+            EXT_METRICS,
+            ['cluster_name:foo', 'envoy_cluster:foo'],
+            ['stat_prefix:bar'],
+        ),
+        (
+            './legacy/rbac_metric.txt',
+            RBAC_METRICS,
+            ['stat_prefix:foo_buz_112'],
+            ['shadow_rule_prefix:shadow_rule_prefix'],
+        ),
+    ],
+    ids=[
+        "stats_prefix_ext_auth",
+        "rbac_prefix_shadow",
+    ],
+)
+def test_stats_prefix_optional_tags(
+    aggregator,
+    fixture_path,
+    mock_http_response,
+    check,
+    dd_run_check,
+    fixture_file,
+    metrics,
+    standard_tags,
+    additional_tags,
+):
     instance = INSTANCES['main']
-    tags = ['cluster_name:foo', 'envoy_cluster:foo']
-    tags_prefix = tags + ['stat_prefix:bar']
+    standard_tags.append('endpoint:{}'.format(instance["stats_url"]))
+    tags_prefix = standard_tags + additional_tags
     c = check(instance)
-    mock_http_response(file_path=fixture_path('./legacy/stat_prefix')).return_value
+    mock_http_response(file_path=fixture_path(fixture_file)).return_value
     dd_run_check(c)
 
     # To ensure that this change didn't break the old behavior, both the value and the tags are asserted.
     # The fixture is created with a specific value and the EXT_METRICS list is done in alphabetical order
     # allowing for value to also be asserted
-    for index, metric in enumerate(EXT_METRICS):
+    for index, metric in enumerate(metrics):
         aggregator.assert_metric(
             metric,
-            value=index + 5,
+            value=index + len(metrics),
             tags=tags_prefix,
         )
-        aggregator.assert_metric(metric, value=index, tags=tags)
+        aggregator.assert_metric(metric, value=index, tags=standard_tags)
 
 
 def test_local_rate_limit_metrics(aggregator, fixture_path, mock_http_response, check, dd_run_check):
@@ -281,7 +313,7 @@ def test_local_rate_limit_metrics(aggregator, fixture_path, mock_http_response, 
 
     for metric in LOCAL_RATE_LIMIT_METRICS:
         aggregator.assert_metric(metric)
-        for tag in RATE_LIMIT_STAT_PREFIX_TAG:
+        for tag in STAT_PREFIX_TAG:
             aggregator.assert_metric_has_tag(metric, tag, count=1)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

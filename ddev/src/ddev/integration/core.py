@@ -8,6 +8,7 @@ import re
 from functools import cached_property
 from typing import TYPE_CHECKING, Iterator
 
+from ddev.integration.metrics import Metric
 from ddev.repo.constants import NOT_SHIPPABLE
 from ddev.utils.fs import Path
 
@@ -107,6 +108,28 @@ class Integration:
     def metrics_file(self) -> Path:
         relative_path = self.manifest.get('/assets/integration/metrics/metadata_path', 'metadata.csv')
         return self.path / relative_path
+
+    @property
+    def metrics(self) -> Iterator[Metric]:
+        if not self.metrics_file.exists():
+            return
+
+        import csv
+
+        with open(self.metrics_file) as csvfile:
+            for row in csv.DictReader(csvfile):
+                yield Metric(
+                    metric_name=row['metric_name'],
+                    metric_type=row['metric_type'],
+                    interval=int(row['interval']) if row['interval'] else None,
+                    unit_name=row['unit_name'],
+                    per_unit_name=row['per_unit_name'],
+                    description=row['description'],
+                    orientation=int(row['orientation']) if row['orientation'] else None,
+                    integration=row['integration'],
+                    short_name=row['short_name'],
+                    curated_metric=row['curated_metric'],
+                )
 
     @cached_property
     def config_spec(self) -> Path:

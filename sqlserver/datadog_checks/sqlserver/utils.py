@@ -9,7 +9,6 @@ from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DRIVER_CONFIG_DIR = os.path.join(CURRENT_DIR, 'data', 'driver_config')
-PROC_CHAR_LIMIT = 500
 
 
 # Database is used to store both the name and physical_database_name
@@ -48,9 +47,7 @@ def construct_use_statement(database):
 
 def is_statement_proc(text):
     if text:
-        # take first 500 chars, upper case and split into string
-        # to get individual keywords
-        t = text[0:PROC_CHAR_LIMIT].upper().split()
+        t = text.upper().split()
         idx_create = _get_index_for_keyword(t, 'CREATE')
         idx_proc = _get_index_for_keyword(t, 'PROCEDURE')
         if idx_proc < 0:

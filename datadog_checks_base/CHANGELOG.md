@@ -2,7 +2,20 @@
 
 <!-- towncrier release notes start -->
 
-## 34.3.1 / 2023-12-04
+## 35.0.0 / 2024-01-05
+
+***Removed***:
+
+* remove pyro4 and serpent dependencies ([#16269](https://github.com/DataDog/integrations-core/pull/16269))
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+* Bump the snowflake version to 3.5.0 ([#16324](https://github.com/DataDog/integrations-core/pull/16324))
+* Update dependencies ([#16394](https://github.com/DataDog/integrations-core/pull/16394)), ([#16448](https://github.com/DataDog/integrations-core/pull/16448)), ([#16502](https://github.com/DataDog/integrations-core/pull/16502))
+* conditionally enable memory profile for DBMAsyncJob ([#16479](https://github.com/DataDog/integrations-core/pull/16479))
+
+## 34.3.1 / 2023-12-04 / Agent 7.50.0
 
 ***Fixed***:
 
@@ -50,13 +63,13 @@
 * Bump the `pymysql` version to 1.1.0 on Python 3 ([#16042](https://github.com/DataDog/integrations-core/pull/16042))
 * Bump the `pyodbc` version to 5.0.1 ([#16041](https://github.com/DataDog/integrations-core/pull/16041))
 
-## 34.0.3 / 2023-11-08
+## 34.0.3 / 2023-11-08 / Agent 7.49.1
 
 ***Fixed***:
 
 * Fix `aarch64` compatibility of the `sqlserver` and `ibm_was` checks by downgrading `lxml` to version 4.9.2 ([16080](https://github.com/DataDog/integrations-core/pull/16080))
 
-## 34.0.2 / 2023-10-27
+## 34.0.2 / 2023-10-27 / Agent 7.49.0
 
 ***Fixed***:
 
@@ -84,7 +97,7 @@
 
 * Fix type `bytes` is not JSON serializable for dbm events ([#15763](https://github.com/DataDog/integrations-core/pull/15763))
 
-## 33.1.0 / 2023-08-25
+## 33.1.0 / 2023-08-25 / Agent 7.48.0
 
 ***Security***:
 
@@ -145,7 +158,7 @@
 * Revert "Bump pydantic version in the agent_requirements.in file (#153… ([#15338](https://github.com/DataDog/integrations-core/pull/15338))
 * Bump pydantic version in the agent_requirements.in file ([#15320](https://github.com/DataDog/integrations-core/pull/15320))
 
-## 32.5.1 / 2023-07-19
+## 32.5.1 / 2023-07-19 / Agent 7.47.0
 
 ***Fixed***:
 

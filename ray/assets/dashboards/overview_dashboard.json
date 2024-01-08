@@ -1,0 +1,1632 @@
+{
+    "author_name": "Datadog",
+    "description": "**Ray**\n\nThis dashboard provides insights into your Ray services. You can use the dashboard to track health status, performance, and resource utilization metrics from all your services. You can also get in-depth information on the workload deployment that are currently running in your instance, the workers they leverage, and the resource consumption breakdown. \n\n**Useful Links**\n\n* [Integration Docs](https://docs.datadoghq.com/integrations/ray)\n* [Blog](https://www.datadoghq.com/blog/monitor-ray-with-datadog)",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "service",
+            "prefix": "service"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "host",
+            "prefix": "host"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "node",
+            "prefix": "node"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "component",
+            "prefix": "component"
+        }
+    ],
+    "title": "Ray Overview Dashboard",
+    "widgets": [
+        {
+            "definition": {
+                "banner_img": "",
+                "layout_type": "ordered",
+                "show_title": false,
+                "title": "New group",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "has_background": true,
+                            "has_border": true,
+                            "horizontal_align": "center",
+                            "sizing": "contain",
+                            "type": "image",
+                            "url": "/static/images/logos/ray_large.svg",
+                            "url_dark_theme": "/static/images/logos/ray_reversed_large.svg",
+                            "vertical_align": "center"
+                        },
+                        "id": 3838651690068190,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "**Ray**\n\nThis dashboard provides insights into your Ray services. You can use the dashboard to track health status, performance, and resource utilization metrics from all your services. You can also get in-depth information on the workload deployment that are currently running in your instance, the workers they leverage, and the resource consumption breakdown. ",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 5765057495183900,
+                        "layout": {
+                            "height": 4,
+                            "width": 3,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "**Useful Links**\n\n* [Integration Docs](https://docs.datadoghq.com/integrations/ray)\n* [Blog](https://www.datadoghq.com/blog/monitor-ray-with-datadog)\n",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 607314244154516,
+                        "layout": {
+                            "height": 4,
+                            "width": 3,
+                            "x": 3,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 6955576996753366,
+            "layout": {
+                "height": 7,
+                "width": 6,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "This section provides you with an overview of your system activity.  The monitor summary notifies you of Ray alerts. ",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 2433716659549980,
+                        "layout": {
+                            "height": 1,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "color_preference": "text",
+                            "count": 50,
+                            "display_format": "countsAndList",
+                            "hide_zero_counts": true,
+                            "query": "ray.io",
+                            "show_last_triggered": false,
+                            "show_priority": false,
+                            "sort": "status,asc",
+                            "start": 0,
+                            "summary_type": "groups",
+                            "title": "Ray Monitor Summary",
+                            "type": "manage_status"
+                        },
+                        "id": 8740824674228522,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "check": "ray.openmetrics.health",
+                            "group_by": [],
+                            "grouping": "cluster",
+                            "tags": [],
+                            "time": {
+                                "live_span": "1d"
+                            },
+                            "title": "Service checks",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "check_status"
+                        },
+                        "id": 3431939964933534,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:ray.cluster.active_nodes{$service,$host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            },
+                            "title": "Nodes",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 4356505464961250,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 3,
+                            "y": 4
+                        }
+                    }
+                ]
+            },
+            "id": 8178300534998464,
+            "layout": {
+                "height": 7,
+                "width": 6,
+                "x": 6,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Resource Utilization Metrics",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "This section provides a breakdown of your resource utilization. This includes a summary of CPU, Memory, USS and RSS by component as well as network speeds, disk usage and node-specific memory/cpu usage.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 3524283164149716,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "palette": "white_on_yellow",
+                                                    "value": 15
+                                                },
+                                                {
+                                                    "comparator": ">",
+                                                    "palette": "white_on_red",
+                                                    "value": 60
+                                                },
+                                                {
+                                                    "comparator": ">",
+                                                    "palette": "white_on_green",
+                                                    "value": 0
+                                                }
+                                            ],
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "cell_display_mode": "trend",
+                                            "formula": "query4"
+                                        },
+                                        {
+                                            "cell_display_mode": "trend",
+                                            "formula": "query5"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:ray.component.mem_shared{*} by {component}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:ray.component.cpu_percentage{*} by {component}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "avg:ray.component.uss{*} by {component}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "avg:ray.component.rss{*} by {component}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Resource Usage by Components ",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 5907266281280340,
+                        "layout": {
+                            "height": 6,
+                            "width": 12,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:ray.node.network.received{*} by {service}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:ray.node.network.sent{*} by {service}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Node Network Speeds",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1104009546721264,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 0,
+                            "y": 7
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend": {
+                                "type": "automatic"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 + query2",
+                                            "limit": {
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:ray.cluster.active_nodes{*} by {service}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:ray.cluster.active_nodes{*} by {service}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "title": "Nodes (Active/Fail/Pending)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 3531655451473916,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 6,
+                            "y": 7
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:ray.component.cpu_percentage{$service}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "area"
+                            },
+                            "title": "CPU of all components on node",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 2893103864406290,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 9,
+                            "y": 7
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "available",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "shared",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "total",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "used",
+                                            "formula": "query4"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:ray.node.mem.available{*} by {service}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:ray.node.mem.shared{*} by {service}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:ray.node.mem.total{*} by {service}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "avg:ray.node.mem.used{*} by {service}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "time": {},
+                            "title": "Ray Node Memory",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3446286850058486,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 6,
+                            "y": 10
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Free",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Used",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:ray.node.disk.free{$service,$host}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:ray.node.disk.usage{$service,$host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Disk Usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": false,
+                                "scale": "log"
+                            }
+                        },
+                        "id": 5009738032661612,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 11
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:ray.node.gpus_utilization{*} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Node GPU Utilization",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 870829157681004,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 14
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Queued Queries",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Replica Restarts",
+                                            "formula": "query4"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:ray.serve.deployment.queued_queries{*}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "sum:ray.serve.deployment.replica.starts{*}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Queries Waiting for Replica Assignments vs Replica Restarts",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 442436673003936,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 14
+                        }
+                    }
+                ]
+            },
+            "id": 959789313432540,
+            "layout": {
+                "height": 18,
+                "width": 12,
+                "x": 0,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Logs",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "When investigating logs, you can refer to the timeseries data to see the ratio of a certain log status to other expected statuses. In situations where you notice an increase in the ratio of error logs, you can refer to the log stream set up to filter erroneous logs.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 4153974323492632,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "a"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "data_source": "logs",
+                                            "group_by": [
+                                                {
+                                                    "facet": "status",
+                                                    "limit": 50,
+                                                    "should_exclude_missing": true,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "a",
+                                            "search": {
+                                                "query": "source:ray "
+                                            },
+                                            "storage": "online_archives"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "semantic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Count per Log Status",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8479415087389006,
+                        "layout": {
+                            "height": 4,
+                            "width": 8,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "compact"
+                                        }
+                                    ],
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "indexes": [],
+                                        "query_string": "source:ray status:error ",
+                                        "storage": "hot"
+                                    },
+                                    "response_format": "event_list"
+                                }
+                            ],
+                            "time": {
+                                "live_span": "1mo"
+                            },
+                            "title": "Error Logs",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "list_stream"
+                        },
+                        "id": 2307319545140206,
+                        "layout": {
+                            "height": 4,
+                            "width": 4,
+                            "x": 8,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 1911052397730552,
+            "layout": {
+                "height": 6,
+                "width": 12,
+                "x": 0,
+                "y": 25
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Scheduler Metrics",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "Scheduler metrics categorize Pending and Failed tasks by the reason they are blocked, and showcase the time for workloads (e.g. task/actor/etc.) to be placed. Users can troubleshoot task failures, and optimize task placement algorithms using this data. ",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 2501952917707794,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend": {
+                                "type": "table"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "max",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "max:ray.scheduler.unscheduleable_tasks{*} by {reason,nodeaddress}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "title": "Pending Tasks with Reason for Blocker",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 5313203282719858,
+                        "layout": {
+                            "height": 5,
+                            "width": 12,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend": {
+                                "type": "table"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "max",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "max:ray.scheduler.failed_worker_startup{*} by {reason,nodeaddress}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "title": "Failed Tasks with Reason for Worker Unavailability",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 8936048485216646,
+                        "layout": {
+                            "height": 4,
+                            "width": 12,
+                            "x": 0,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "change_type": "absolute",
+                                    "formulas": [
+                                        {
+                                            "formula": "hour_before(query1)"
+                                        },
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "increase_good": true,
+                                    "order_by": "change",
+                                    "order_dir": "asc",
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:ray.scheduler.placement_time.sum{*} by {workloadtype,workerid}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Time for Workload to be placed",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "change"
+                        },
+                        "id": 2788205553571296,
+                        "layout": {
+                            "height": 5,
+                            "width": 12,
+                            "x": 0,
+                            "y": 10
+                        }
+                    }
+                ]
+            },
+            "id": 3042283118937458,
+            "layout": {
+                "height": 16,
+                "is_column_break": true,
+                "width": 12,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Process",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "Processes are lightweight, parallel units of computation that encapsulate tasks or functions. They provide a flexible way to distribute and execute workloads within the Ray framework. This section provides the resource usage and status of processes.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 7064250345570960,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Processes created by Worker Pool",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Workers started from Cached Worker Processes",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Cumulative number of lease requests from raylet",
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:ray.internal_num.processes.started{*}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:ray.internal_num.processes.started.from_cache{*}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:ray.internal_num.spilled_tasks{*}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Processes Started",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1870381558866414,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Job Mismatch",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Environment Mismatch",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:ray.internal_num.processes.skipped.job_mismatch{*} by {service,component}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:ray.internal_num.processes.skipped.runtime_environment_mismatch{*} by {service,component}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Processes Skipped",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 994532257112456,
+                        "layout": {
+                            "height": 2,
+                            "width": 12,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:ray.process.cpu_seconds.count{$service,$host}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "time": {},
+                            "title": "CPU Usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": false,
+                                "scale": "log"
+                            }
+                        },
+                        "id": 6010260285436924,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Open",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Max",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:ray.process.open_fds{$service,$host}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:ray.process.max_fds{$service,$host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "File descriptors",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": false,
+                                "scale": "log"
+                            }
+                        },
+                        "id": 5609772683109400,
+                        "layout": {
+                            "height": 2,
+                            "width": 12,
+                            "x": 0,
+                            "y": 9
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Virtual",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Resident",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:ray.process.virtual_memory{$service,$host}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:ray.process.resident_memory{$service,$host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Virtual and Resident Memory",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": false,
+                                "scale": "log"
+                            }
+                        },
+                        "id": 6966822935599484,
+                        "layout": {
+                            "height": 2,
+                            "width": 12,
+                            "x": 0,
+                            "y": 11
+                        }
+                    }
+                ]
+            },
+            "id": 490832987302744,
+            "layout": {
+                "height": 14,
+                "width": 12,
+                "x": 0,
+                "y": 16
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Serve",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "This section provides information on HTTP requests and Queued queries for Ray Serve.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 7924116123644004,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:ray.serve.num_http_requests{$service, $host} by {status_code,application}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Number of HTTP Requests",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4986655360776724,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:ray.serve.http_request_latency.sum{$service,$host} by {application}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "HTTP Request Latency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1170771293853962,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 6,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend": {
+                                "type": "automatic"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:ray.serve.deployment.queued_queries{$service,$host} by {application}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "classic"
+                                    }
+                                }
+                            ],
+                            "title": "Current Number of Queued Queries per Application",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 6255318614136780,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 0,
+                            "y": 5
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "vertical",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:ray.serve.deployment.queued_queries{$service,$host} by {application}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:ray.serve.deployment.queued_queries{$service,$host} by {application}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Queued queries",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4034336023274302,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 6,
+                            "y": 5
+                        }
+                    }
+                ]
+            },
+            "id": 4905175075577830,
+            "layout": {
+                "height": 10,
+                "width": 12,
+                "x": 0,
+                "y": 30
+            }
+        }
+    ]
+}
