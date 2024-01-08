@@ -2,6 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 35.0.0 / 2024-01-05
+
+***Removed***:
+
+* remove pyro4 and serpent dependencies ([#16269](https://github.com/DataDog/integrations-core/pull/16269))
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+* Bump the snowflake version to 3.5.0 ([#16324](https://github.com/DataDog/integrations-core/pull/16324))
+* Update dependencies ([#16394](https://github.com/DataDog/integrations-core/pull/16394)), ([#16448](https://github.com/DataDog/integrations-core/pull/16448)), ([#16502](https://github.com/DataDog/integrations-core/pull/16502))
+* conditionally enable memory profile for DBMAsyncJob ([#16479](https://github.com/DataDog/integrations-core/pull/16479))
+
 ## 34.3.1 / 2023-12-04 / Agent 7.50.0
 
 ***Fixed***:
