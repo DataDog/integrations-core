@@ -1,73 +1,50 @@
 ARG BASE_IMAGE=quay.io/pypa/manylinux2010_x86_64
 FROM ${BASE_IMAGE}
 
-ENV IBM_MQ_VERSION="9.2.4.0"
-ENV IBM_MQ_SHA256="d0d583eba72daf20b3762976f8831c2e23150ace90509520e12f8cda5b5bdb49"
-ENV KRB5_VERSION="1.20.1"
-ENV KRB5_SHA256="704aed49b19eb5a7178b34b2873620ec299db08752d6a8574f95d41879ab8851"
-ENV OPENSSL_VERSION="3.0.12"
-ENV OPENSSL_SHA256="f93c9e8edde5e9166119de31755fc87b4aa34863662f67ddfcba14d0b6b69b61"
-ENV LIBXML2_VERSION="2.10.3"
-ENV LIBXML2_SHA256="5d2cc3d78bec3dbe212a9d7fa629ada25a7da928af432c93060ff5c17ee28a9c"
-ENV LIBXSLT_VERSION="1.1.37"
-ENV LIBXSLT_SHA256="3a4b27dc8027ccd6146725950336f1ec520928f320f144eb5fa7990ae6123ab4"
-ENV RUST_VERSION="nightly-2022-05-15"
-ENV RUSTC_SHA256="3dc5ef50861ee18657f9db2eeb7392f9c2a6c95c90ab41e45ab4ca71476b4338"
-ENV RUSTUP_VERSION="1.24.3"
-ENV RUSTUP_SHA256="3dc5ef50861ee18657f9db2eeb7392f9c2a6c95c90ab41e45ab4ca71476b4338"
+# Script for the common task of fetching a source tarball, compiling and installing it
+COPY install-from-source.sh /
 
-# Compile and install Python 2
-ENV PYTHON2_VERSION=2.7.18
-ENV PYTHON2_SHA256="da3080e3b488f648a3d7a4560ddee895284c3380b11d6de75edb986526b9a814"
 # For Python 2, we get openssl(1) via yum just to get the necessary headers,
 # and we remove the package after compilation to prevent it from interfering
 # with the use of openssl3 everywhere else
-RUN yum install -y openssl-devel \
- && curl "https://python.org/ftp/python/${PYTHON2_VERSION}/Python-${PYTHON2_VERSION}.tgz" -Lo /tmp/python.tar.gz \
- && echo "${PYTHON2_SHA256}  /tmp/python.tar.gz" | sha256sum --check \
- && tar -C /tmp -xf /tmp/python.tar.gz \
- && cd /tmp/Python-${PYTHON2_VERSION} \
- && ./configure --prefix=/opt/python/${PYTHON2_VERSION} --with-ensurepip=yes --enable-shared --enable-ipv6 --enable-unicode=ucs4 \
- && make \
- && make install \
- && rm -rf /tmp/Python-${PYTHON2_VERSION} \
- && rm -rf /tmp/python.tar.gz \
+ENV PYTHON2_VERSION=2.7.18
+RUN yum install -y openssl-devel && \
+ DOWNLOAD_URL="https://python.org/ftp/python/${PYTHON2_VERSION}/Python-${PYTHON2_VERSION}.tgz" \
+ VERSION="${PYTHON2_VERSION}" \
+ SHA256="da3080e3b488f648a3d7a4560ddee895284c3380b11d6de75edb986526b9a814" \
+ RELATIVE_PATH=Python-{{version}} \
+ bash install-from-source.sh \
+ --prefix=/opt/python/${PYTHON2_VERSION} --with-ensurepip=yes --enable-shared --enable-ipv6 --enable-unicode=ucs4 \
  && yum remove -y openssl-devel
+
 ENV LD_LIBRARY_PATH="/opt/python/${PYTHON2_VERSION}/lib:${LD_LIBRARY_PATH}"
 # Set up virtual environment for Python 2
 RUN /opt/python/${PYTHON2_VERSION}/bin/python -m pip install --no-warn-script-location virtualenv \
  && /opt/python/${PYTHON2_VERSION}/bin/python -m virtualenv /py2
 
 # openssl
-RUN yum install -y perl-IPC-Cmd
-RUN curl "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" -o /tmp/openssl.tar.gz \
- && echo "${OPENSSL_SHA256}  /tmp/openssl.tar.gz" | sha256sum --check \
- && tar -C /tmp -xf /tmp/openssl.tar.gz \
- && cd /tmp/openssl-${OPENSSL_VERSION} \
- && ./config -Wl,-Bsymbolic-functions \
- -fPIC \
- shared \
+RUN yum install -y perl-IPC-Cmd && \
+ DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
+ VERSION="3.0.12" \
+ SHA256="f93c9e8edde5e9166119de31755fc87b4aa34863662f67ddfcba14d0b6b69b61" \
+ RELATIVE_PATH="openssl-{{version}}" \
+ # no-module prevents the creation of dynamically loaded modules that would be problematic to bundle into Python wheels
+ CONFIGURE_SCRIPT="config" \
+ CONFIGURE_ARGS="-Wl,-Bsymbolic-functions -fPIC shared no-module no-comp no-idea no-mdc2 no-rc5 no-ssl3 no-gost" \
+ bash install-from-source.sh \
+ -fPIC shared \
  # This prevents the creation of dynamically loaded modules that would be problematic to bundle into Python wheels
  no-module \
- no-comp no-idea no-mdc2 no-rc5 no-ssl3 no-gost \
- && make \
- && make install \
- && rm -rf /tmp/openssl-${OPENSSL_VERSION} \
- && rm -rf /tmp/openssl.tar.gz
+ no-comp no-idea no-mdc2 no-rc5 no-ssl3 no-gost
 
 # Compile and install Python 3
-ENV PYTHON_VERSION=3.11.5
-ENV PYTHON_SHA256="a12a0a013a30b846c786c010f2c19dd36b7298d888f7c4bd1581d90ce18b5e58"
-RUN yum install -y libffi-devel
-RUN curl "https://python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz" -Lo /tmp/python.tar.gz \
- && echo "${PYTHON_SHA256}  /tmp/python.tar.gz" | sha256sum --check \
- && tar -C /tmp -xf /tmp/python.tar.gz \
- && cd /tmp/Python-${PYTHON_VERSION} \
- && ./configure --prefix=/opt/python/${PYTHON_VERSION} --with-ensurepip=yes --enable-shared --enable-ipv6 --with-dbmliborder= \
- && make \
- && make install \
- && rm -rf /tmp/Python-${PYTHON_VERSION} \
- && rm -rf /tmp/python.tar.gz
+ENV PYTHON3_VERSION=3.11.5
+RUN yum install -y libffi-devel && \
+ DOWNLOAD_URL="https://python.org/ftp/python/{{version}}/Python-{{version}}.tgz" \
+ VERSION="${PYTHON3_VERSION}" \
+ SHA256="a12a0a013a30b846c786c010f2c19dd36b7298d888f7c4bd1581d90ce18b5e58" \
+ RELATIVE_PATH="Python-{{version}}" \
+ bash install-from-source.sh --prefix=/opt/python/${PYTHON_VERSION} --with-ensurepip=yes --enable-shared --enable-ipv6 --with-dbmliborder=
 ENV PATH="/opt/python/${PYTHON_VERSION}/bin:${PATH}"
 ENV LD_LIBRARY_PATH="/opt/python/${PYTHON_VERSION}/lib:${LD_LIBRARY_PATH}"
 # Set up virtual environment for Python 3
@@ -76,6 +53,10 @@ RUN /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-lo
  && /opt/python/${PYTHON_VERSION}/bin/python3 -m virtualenv /py3
 
 # Rust toolchain
+ENV RUST_VERSION="nightly-2022-05-15"
+ENV RUSTC_SHA256="3dc5ef50861ee18657f9db2eeb7392f9c2a6c95c90ab41e45ab4ca71476b4338"
+ENV RUSTUP_VERSION="1.24.3"
+ENV RUSTUP_SHA256="3dc5ef50861ee18657f9db2eeb7392f9c2a6c95c90ab41e45ab4ca71476b4338"
 RUN curl -sSL -o rustup-init "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/x86_64-unknown-linux-gnu/rustup-init" \
  && echo "${RUSTUP_SHA256}  rustup-init" | sha256sum --check \
  && chmod +x ./rustup-init \
@@ -85,6 +66,8 @@ RUN curl -sSL -o rustup-init "https://static.rust-lang.org/rustup/archive/${RUST
 ENV PATH="/root/.cargo/bin:${PATH}"
 
 # MQ Client library required by pymqi
+ENV IBM_MQ_VERSION="9.2.4.0"
+ENV IBM_MQ_SHA256="d0d583eba72daf20b3762976f8831c2e23150ace90509520e12f8cda5b5bdb49"
 RUN mkdir -p /opt/mqm \
  && curl "https://s3.amazonaws.com/dd-agent-omnibus/ibm-mq-backup/${IBM_MQ_VERSION}-IBM-MQC-Redist-LinuxX64.tar.gz" -o /tmp/mq_client.tar.gz \
  && echo "${IBM_MQ_SHA256}  /tmp/mq_client.tar.gz" | sha256sum --check \
@@ -92,22 +75,20 @@ RUN mkdir -p /opt/mqm \
  && rm -rf /tmp/mq_client.tar.gz
 
 # krb5 for dependencies that require kerberos support
-RUN curl "https://kerberos.org/dist/krb5/1.20/krb5-${KRB5_VERSION}.tar.gz" -o /tmp/krb5.tar.gz \
- && echo "${KRB5_SHA256}  /tmp/krb5.tar.gz" | sha256sum --check \
- && tar -C /tmp -xf /tmp/krb5.tar.gz \
- && cd /tmp/krb5-${KRB5_VERSION}/src \
- && ./configure --without-keyutils --without-system-verto --without-libedit --disable-static \
- && make \
- && make install \
- && rm -rf /tmp/krb5-${KRB5_VERSION}/src \
- && rm -rf /tmp/krb5.tar.gz
+RUN \
+ DOWNLOAD_URL="https://kerberos.org/dist/krb5/1.20/krb5-{{version}}.tar.gz" \
+ VERSION="1.20.1" \
+ SHA256="704aed49b19eb5a7178b34b2873620ec299db08752d6a8574f95d41879ab8851" \
+ RELATIVE_PATH="krb5-{{version}}/src" \
+ bash install-from-source.sh --without-keyutils --without-system-verto --without-libedit --disable-static
 
 # libxml & libxslt for lxml
-RUN curl "https://download.gnome.org/sources/libxml2/2.10/libxml2-${LIBXML2_VERSION}.tar.xz" -Lo /tmp/libxml2.tar.xz \
- && echo "${LIBXML2_SHA256}  /tmp/libxml2.tar.xz" | sha256sum --check \
- && tar -C /tmp -xf /tmp/libxml2.tar.xz \
- && cd /tmp/libxml2-${LIBXML2_VERSION} \
- && ./configure \
+RUN \
+ DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.10/libxml2-{{version}}.tar.xz" \
+ VERSION="2.10.3" \
+ SHA256="5d2cc3d78bec3dbe212a9d7fa629ada25a7da928af432c93060ff5c17ee28a9c" \
+ RELATIVE_PATH="libxml2-{{version}}" \
+ bash install-from-source.sh \
  --without-iconv \
  --without-python \
  --without-icu \
@@ -117,73 +98,46 @@ RUN curl "https://download.gnome.org/sources/libxml2/2.10/libxml2-${LIBXML2_VERS
  --without-legacy \
  --without-catalog \
  --without-docbook \
- --disable-static \
- && make \
- && make install \
- && rm -rf /tmp/libxml2-${LIBXML2_VERSION} \
- && rm -rf /tmp/libxml2.tar.xz
-RUN curl "https://download.gnome.org/sources/libxslt/1.1/libxslt-${LIBXSLT_VERSION}.tar.xz" -Lo /tmp/libxslt.tar.xz \
- && echo "${LIBXSLT_SHA256}  /tmp/libxslt.tar.xz" | sha256sum --check \
- && tar -C /tmp -xf /tmp/libxslt.tar.xz \
- && cd /tmp/libxslt-${LIBXSLT_VERSION} \
- && ./configure \
+ --disable-static
+
+RUN \
+ DOWNLOAD_URL="https://download.gnome.org/sources/libxslt/1.1/libxslt-{{version}}.tar.xz" \
+ VERSION="1.1.37" \
+ SHA256="3a4b27dc8027ccd6146725950336f1ec520928f320f144eb5fa7990ae6123ab4" \
+ RELATIVE_PATH="libxslt-{{version}}" \
+ bash install-from-source.sh \
  --without-python \
  --without-crypto \
  --without-profiler \
  --without-debugger \
- --disable-static \
- && make \
- && make install \
- && rm -rf /tmp/libxslt-${LIBXSLT_VERSION} \
- && rm -rf /tmp/libxslt.tar.xz
+ --disable-static
 
 # librdkafka for confluent-kafka
-ENV LIBRDKAFKA_VERSION="2.3.0"
-ENV LIBRDKAFKA_SHA256="2d49c35c77eeb3d42fa61c43757fcbb6a206daa560247154e60642bcdcc14d12"
-RUN curl "https://github.com/confluentinc/librdkafka/archive/refs/tags/v${LIBRDKAFKA_VERSION}.tar.gz" -Lo /tmp/librdkafka.tar.gz \
- && echo "${LIBRDKAFKA_SHA256}  /tmp/librdkafka.tar.gz" | sha256sum --check \
- && tar -C /tmp -xf /tmp/librdkafka.tar.gz \
- && cd /tmp/librdkafka-${LIBRDKAFKA_VERSION} \
- && ./configure \
- && make \
- && make install \
- && rm -rf /tmp/librdkafka-${LIBRDKAFKA_VERSION} \
- && rm -rf /tmp/librdkafka.tar.gz
+RUN \
+ DOWNLOAD_URL="https://github.com/confluentinc/librdkafka/archive/refs/tags/v{{version}}.tar.gz" \
+ VERSION="2.3.0" \
+ SHA256="2d49c35c77eeb3d42fa61c43757fcbb6a206daa560247154e60642bcdcc14d12" \
+ RELATIVE_PATH="librdkafka-{{version}}" \
+ bash install-from-source.sh
 
 # libpq and pg_config as needed by psycopg2
-ENV POSTGRESQL_VERSION="16.0"
-ENV POSTGRESQL_SHA256="df9e823eb22330444e1d48e52cc65135a652a6fdb3ce325e3f08549339f51b99"
-RUN curl "https://ftp.postgresql.org/pub/source/v${POSTGRESQL_VERSION}/postgresql-${POSTGRESQL_VERSION}.tar.bz2" -Lo /tmp/postgresql.tar.bz2 \
- && echo "${POSTGRESQL_SHA256}  /tmp/postgresql.tar.bz2" | sha256sum --check \
- && tar -C /tmp -xf /tmp/postgresql.tar.bz2 \
- && cd /tmp/postgresql-${POSTGRESQL_VERSION} \
- && ./configure \
- --without-readline \
- --with-openssl \
- --without-icu \
- && make \
- && make install \
- && rm -rf /tmp/postgresql-${POSTGRESQL_VERSION} \
- && rm -rf /tmp/postgres.tar.bz2
+RUN \
+ DOWNLOAD_URL="https://ftp.postgresql.org/pub/source/v{{version}}/postgresql-{{version}}.tar.bz2" \
+ VERSION="16.0" \
+ SHA256="df9e823eb22330444e1d48e52cc65135a652a6fdb3ce325e3f08549339f51b99" \
+ RELATIVE_PATH="postgresql-{{version}}" \
+ bash install-from-source.sh --without-readline --with-openssl --without-icu
 # Add paths to pg_config and to the library
 ENV PATH="/usr/local/pgsql/bin:${PATH}"
 ENV LD_LIBRARY_PATH="/usr/local/pgsql/lib/:${LD_LIBRARY_PATH}"
 
 # odbc for pyodbc
-ENV ODBC_VERSION="2.3.9"
-ENV ODBC_SHA256="52833eac3d681c8b0c9a5a65f2ebd745b3a964f208fc748f977e44015a31b207"
-RUN curl "https://www.unixodbc.org/unixODBC-${ODBC_VERSION}.tar.gz" -Lo /tmp/unixodbc.tar.gz \
- && echo "${ODBC_SHA256}  /tmp/unixodbc.tar.gz" | sha256sum --check \
- && tar -C /tmp -xf /tmp/unixodbc.tar.gz \
- && cd /tmp/unixODBC-${ODBC_VERSION} \
- && ./configure \
- --disable-readline \
- --with-included-ltdl \
- --enable-ltdl-install \
- && make \
- && make install \
- && rm -rf /tmp/unixODBC-${ODBC_VERSION} \
- && rm -rf /tmp/unixobdc.tar.gz
+RUN \
+ DOWNLOAD_URL="https://www.unixodbc.org/unixODBC-{{version}}.tar.gz" \
+ VERSION="2.3.9" \
+ SHA256="52833eac3d681c8b0c9a5a65f2ebd745b3a964f208fc748f977e44015a31b207" \
+ RELATIVE_PATH=unixODBC-{{version}} \
+ bash install-from-source.sh --disable-readline --with-included-ltdl --enable-ltdl-install
 
 # Environment variables to help openssl crate find OpenSSL
 ENV OPENSSL_LIB_DIR="/usr/local/lib64"
