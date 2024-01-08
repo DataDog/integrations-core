@@ -95,6 +95,23 @@ GO
 GRANT EXECUTE on conditionalPlanTest to bob;
 GO
 
+CREATE PROCEDURE procedureWithLargeCommment AS
+/* 
+author: Datadog 
+usage: some random comments
+test: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+description: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+this comment has no actual meanings, just to test large sp with truncation
+the quick brown fox jumps over the lazy dog, the quick brown fox jumps over the lazy dog, the quick brown fox jumps over the lazy dog
+*/
+BEGIN
+    SELECT * FROM ϑings;
+END;
+GO
+GRANT EXECUTE on procedureWithLargeCommment to bob;
+GRANT EXECUTE on procedureWithLargeCommment to fred;
+GO
+
 -- Create test database for integration tests.
 -- Only bob and fred have read/write access to this database.
 CREATE DATABASE datadog_test;

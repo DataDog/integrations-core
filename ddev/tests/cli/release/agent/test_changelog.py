@@ -14,12 +14,16 @@ def test_changelog_without_arguments(fake_changelog, ddev):
 
 
 def test_changelog_write_without_force_aborts_when_changelog_already_exists(
-    repo_with_fake_changelog, fake_changelog, ddev
+    repo_with_fake_changelog,
+    fake_changelog,
+    ddev,
+    mocker,
 ):
     repo, fake_changelog = repo_with_fake_changelog
 
     # Create the changelog to trigger the condition
     open(repo.path / 'AGENT_CHANGELOG.md', 'w').close()
+    mock_fetch_tags = mocker.patch('ddev.utils.git.GitManager.fetch_tags')
 
     result = ddev('release', 'agent', 'changelog', '--write')
     assert result.exit_code == 1
@@ -28,17 +32,24 @@ def test_changelog_write_without_force_aborts_when_changelog_already_exists(
         result.output,
     )
 
+    assert mock_fetch_tags.call_count == 1
 
-def test_changelog_write_force(repo_with_fake_changelog, fake_changelog, ddev):
+
+def test_changelog_write_force(repo_with_fake_changelog, fake_changelog, ddev, mocker):
     repo, fake_changelog = repo_with_fake_changelog
+    mock_fetch_tags = mocker.patch('ddev.utils.git.GitManager.fetch_tags')
 
     result = ddev('release', 'agent', 'changelog', '--write', '--force')
     assert result.exit_code == 0
     with open(repo.path / 'AGENT_CHANGELOG.md') as f:
         assert f.read().rstrip('\n') == fake_changelog
 
+    assert mock_fetch_tags.call_count == 1
 
-def test_changelog_since_to(fake_changelog, ddev):
+
+def test_changelog_since_to(fake_changelog, ddev, mocker):
+    mock_fetch_tags = mocker.patch('ddev.utils.git.GitManager.fetch_tags')
+
     result = ddev('release', 'agent', 'changelog', '--since', '7.38.0', '--to', '7.39.0')
     assert result.exit_code == 0
 
@@ -52,6 +63,7 @@ def test_changelog_since_to(fake_changelog, ddev):
         "**BREAKING CHANGE**"
     )
     assert result.output.rstrip('\n') == expected_output.strip('\n')
+    assert mock_fetch_tags.call_count == 1
 
 
 @pytest.fixture

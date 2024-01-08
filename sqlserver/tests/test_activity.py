@@ -575,6 +575,114 @@ def test_truncate_on_max_size_bytes(dbm_instance, datadog_agent, rows, expected_
             assert result_rows[index]['user_name'] == user
 
 
+@pytest.mark.unit
+def test_activity_stored_procedure_failed_to_obfuscate(dbm_instance, datadog_agent):
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        large_comment = "/* " + "a" * 5000 + " */"
+        statement_text = "SELECT * FROM ϑings"
+        procedure_text = f"CREATE PROCEDURE dbo.sp_test {large_comment} AS BEGIN {statement_text} END;"
+        metadata = {'tables_csv': 'ϑings', 'commands': ['SELECT'], 'comments': [large_comment]}
+        rows = [
+            {
+                "user_name": "newbob",
+                "id": 1,
+                "statement_text": statement_text,
+                "text": procedure_text,
+                "query_start": new_time(),
+            },
+        ]
+        # the first call to obfuscate query text will succeed
+        # the second call to obfuscate procedure text will fail
+        mock_agent.side_effect = [
+            json.dumps({'query': statement_text, 'metadata': metadata}),
+            Exception("failed to obfuscate"),
+        ]
+        result_rows = check.activity._normalize_queries_and_filter_rows(rows, 10000)
+        # procedure text obfuscation will fail but the activity row will still be collected
+        assert len(result_rows) == 1
+        assert result_rows[0]['text'] == statement_text
+        assert result_rows[0]['is_proc'] is True
+        assert 'procedure_signature' not in result_rows[0]
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_activity_stored_procedure_truncated(
+    aggregator,
+    instance_docker,
+    dd_run_check,
+    dbm_instance,
+    datadog_agent,
+):
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    def _obfuscate_sql(sql_query, options=None):
+        if "PROCEDURE procedureWithLargeCommment" in sql_query:
+            raise Exception("failed to obfuscate")
+        return json.dumps({'query': sql_query, 'metadata': {}})
+
+    blocking_query = "INSERT INTO ϑings WITH (TABLOCK, HOLDLOCK) (name) VALUES ('puppy')"
+    fred_conn = _get_conn_for_user(instance_docker, "fred", _autocommit=True)
+    bob_conn = _get_conn_for_user(instance_docker, "bob")
+
+    def run_test_query(c, q):
+        cur = c.cursor()
+        cur.execute("USE datadog_test")
+        cur.execute(q)
+
+    run_test_query(fred_conn, "EXEC procedureWithLargeCommment")
+
+    # bob's query blocks until the tx is completed
+    run_test_query(bob_conn, blocking_query)
+
+    # fred's query will get blocked by bob, so it needs
+    # to be run asynchronously
+    executor = concurrent.futures.ThreadPoolExecutor(1)
+    f_q = executor.submit(run_test_query, fred_conn, "EXEC procedureWithLargeCommment")
+    while not f_q.running():
+        if f_q.done():
+            break
+        print("waiting on fred's query to execute")
+        time.sleep(1)
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        dd_run_check(check)
+
+    # commit and close bob's transaction
+    bob_conn.commit()
+    bob_conn.close()
+
+    while not f_q.done():
+        print("blocking query finished, waiting for fred's query to complete")
+        time.sleep(1)
+    # clean up fred's connection
+    # and shutdown executor
+    fred_conn.close()
+    executor.shutdown(wait=True)
+
+    executor = concurrent.futures.ThreadPoolExecutor(1)
+    b_q = executor.submit(run_test_query, bob_conn)
+    while not b_q.running():
+        if b_q.done():
+            break
+        time.sleep(1)
+
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    assert dbm_activity, "should have collected at least one activity"
+
+    matching_activity = []
+    for event in dbm_activity:
+        for activity in event['sqlserver_activity']:
+            if activity['query_signature'] == "2fa838aee8217d23":
+                matching_activity.append(activity)
+    assert len(matching_activity) == 1
+    assert matching_activity[0]['is_proc'] is True
+    assert matching_activity[0]['procedure_name'].lower() == "procedurewithlargecommment"
+    assert matching_activity[0]['text'] == "SELECT * FROM ϑings"
+
+
 @pytest.mark.parametrize(
     "file",
     [

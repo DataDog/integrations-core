@@ -141,7 +141,7 @@ To configure this check for an Agent running on a host:
       relations:
         - relation_name: products
         - relation_name: external_seller_products
-    - host: example-service–replica-1.example-host.com
+    - host: example-service-replica-1.example-host.com
       port: 5432
       username: datadog
       password: '<PASSWORD>'
@@ -150,7 +150,7 @@ To configure this check for an Agent running on a host:
           relkind:
             - r
             - i
-    - host: example-service–replica-2.example-host.com
+    - host: example-service-replica-2.example-host.com
       port: 5432
       username: datadog
       password: '<PASSWORD>'

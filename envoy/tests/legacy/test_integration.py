@@ -7,9 +7,10 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
-from .common import ENVOY_VERSION, EXT_METRICS, INSTANCES
+from .common import ENVOY_VERSION, EXT_METRICS, INSTANCES, RBAC_METRICS
 
 CHECK_NAME = 'envoy'
+UNIQUE_METRICS = EXT_METRICS + RBAC_METRICS
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -22,9 +23,9 @@ def test_success(aggregator, check, dd_run_check):
     metrics_collected = 0
     for metric in METRICS:
         collected_metrics = aggregator.metrics(METRIC_PREFIX + metric)
-        # The ext_auth metrics are excluded because the stats_prefix is not always present.
+        # The ext_auth and rbac metrics are excluded because the stats_prefix is not always present.
         # They're tested in a different test.
-        if collected_metrics and collected_metrics[0].name not in EXT_METRICS:
+        if collected_metrics and collected_metrics[0].name not in UNIQUE_METRICS:
             expected_tags = [t for t in METRICS[metric]['tags'] if t]
             for tag_set in expected_tags:
                 assert all(

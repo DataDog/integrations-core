@@ -10,6 +10,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy.metrics import PROMETHEUS_METRICS_MAP
 
 from .common import (
+    CONNECT_STATE_METRIC,
     DEFAULT_INSTANCE,
     LOCAL_RATE_LIMIT_METRICS,
     MOCKED_PROMETHEUS_METRICS,
@@ -46,6 +47,9 @@ def test_check(aggregator, dd_run_check, check, mock_http_response):
 
     for metric in MOCKED_PROMETHEUS_METRICS + LOCAL_RATE_LIMIT_METRICS:
         aggregator.assert_metric("envoy.{}".format(metric))
+
+    for metric in CONNECT_STATE_METRIC:
+        aggregator.assert_metric('envoy.{}'.format(metric))
 
     aggregator.assert_service_check(
         "envoy.openmetrics.health", status=AgentCheck.OK, tags=['endpoint:http://localhost:8001/stats/prometheus']
