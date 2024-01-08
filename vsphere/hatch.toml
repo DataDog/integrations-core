@@ -18,7 +18,7 @@ mypy-args = [
 ]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.9"]
+python = ["2.7", "3.11"]
 version = ["6.7", "7.0"]
 
 [envs.default]

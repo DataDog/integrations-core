@@ -71,7 +71,7 @@ setup(
         'Topic :: System :: Monitoring',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.11',
     ],
     packages=['datadog_checks'],
     include_package_data=True,

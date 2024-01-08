@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2021-10-28",
   "last_updated_at": "2021-10-28",
-  "title": "Unclean leader election",
+  "title": "Unclean leader election detected",
   "tags": [
     "integration:confluent-platform"
   ],
-  "description": "Get notified if an unclean leader election has taken place.",
+  "description": "The unclean leader election setting decides whether a replica might take over as the leader in case of failures. However, appointing an unsynchronized replica as leader risks message loss for any data it hasn't yet replicated. This monitor tracks unclean leader elects for each individual instance.",
   "definition": {
     "message": "An unclean leader election has occurred in your cluster. This is an indication of potential data loss. \n\nIf this unclean leader election was not intentional, consider disabling unclean leader election in your Broker settings.",
     "name": "[Confluent Platform] Unclean leader election",

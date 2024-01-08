@@ -36,6 +36,53 @@ class DatabaseConfigurationError(Enum):
     autodiscovered_metrics_exceeds_collection_interval = "autodiscovered-metrics-exceeds-collection-interval"
 
 
+class DBExplainError(Enum):
+    """
+    Denotes the various reasons a query may not have an explain statement.
+    """
+
+    # may be due to a misconfiguration of the database during setup or the Agent is
+    # not able to access the required function
+    database_error = 'database_error'
+
+    # datatype mismatch occurs when return type is not json, for instance when multiple queries are explained
+    datatype_mismatch = 'datatype_mismatch'
+
+    # this could be the result of a missing EXPLAIN function
+    invalid_schema = 'invalid_schema'
+
+    # a value retrieved from the EXPLAIN function could be invalid
+    invalid_result = 'invalid_result'
+
+    # some statements cannot be explained i.e AUTOVACUUM
+    no_plans_possible = 'no_plans_possible'
+
+    # there could be a problem with the EXPLAIN function (missing, invalid permissions, or an incorrect definition)
+    failed_function = 'failed_function'
+
+    # a truncated statement can't be explained
+    query_truncated = "query_truncated"
+
+    # connection error may be due to a misconfiguration during setup
+    connection_error = 'connection_error'
+
+    # clients using the extended query protocol or prepared statements can't be explained due to
+    # the separation of the parsed query and raw bind parameters
+    parameterized_query = 'parameterized_query'
+
+    # search path may be different when the client executed a query from where we executed it.
+    undefined_table = 'undefined_table'
+
+    # the statement was explained with the prepared statement workaround
+    explained_with_prepared_statement = 'explained_with_prepared_statement'
+
+    # the statement was tried to be explained with the prepared statement workaround but failedd
+    failed_to_explain_with_prepared_statement = 'failed_to_explain_with_prepared_statement'
+
+    # the statement was tried to be explained with the prepared statement workaround but no plan was returned
+    no_plan_returned_with_prepared_statement = 'no_plan_returned_with_prepared_statement'
+
+
 def warning_with_tags(warning_message, *args, **kwargs):
     if args:
         warning_message = warning_message % args
@@ -340,6 +387,35 @@ QUERY_PG_REPLICATION_SLOTS = {
     ],
 }
 
+# Require PG14+
+QUERY_PG_REPLICATION_SLOTS_STATS = {
+    'name': 'pg_replication_slots_stats',
+    'columns': [
+        {'name': 'slot_name', 'type': 'tag'},
+        {'name': 'slot_type', 'type': 'tag'},
+        {'name': 'slot_state', 'type': 'tag'},
+        {'name': 'postgresql.replication_slot.spill_txns', 'type': 'monotonic_count'},
+        {'name': 'postgresql.replication_slot.spill_count', 'type': 'monotonic_count'},
+        {'name': 'postgresql.replication_slot.spill_bytes', 'type': 'monotonic_count'},
+        {'name': 'postgresql.replication_slot.stream_txns', 'type': 'monotonic_count'},
+        {'name': 'postgresql.replication_slot.stream_count', 'type': 'monotonic_count'},
+        {'name': 'postgresql.replication_slot.stream_bytes', 'type': 'monotonic_count'},
+        {'name': 'postgresql.replication_slot.total_txns', 'type': 'monotonic_count'},
+        {'name': 'postgresql.replication_slot.total_bytes', 'type': 'monotonic_count'},
+    ],
+    'query': """
+SELECT
+    stat.slot_name,
+    slot_type,
+    CASE WHEN active THEN 'active' ELSE 'inactive' END,
+    spill_txns, spill_count, spill_bytes,
+    stream_txns, stream_count, stream_bytes,
+    total_txns, total_bytes
+FROM pg_stat_replication_slots AS stat
+JOIN pg_replication_slots ON pg_replication_slots.slot_name = stat.slot_name
+""".strip(),
+}
+
 CONNECTION_METRICS = {
     'descriptors': [],
     'metrics': {
@@ -411,6 +487,112 @@ select txid_snapshot_xmin(txid_current_snapshot), txid_snapshot_xmax(txid_curren
     ],
 }
 
+# Requires PG10+
+VACUUM_PROGRESS_METRICS = {
+    'name': 'vacuum_progress_metrics',
+    'query': """
+SELECT v.datname, c.relname, v.phase,
+       v.heap_blks_total, v.heap_blks_scanned, v.heap_blks_vacuumed,
+       v.index_vacuum_count, v.max_dead_tuples, v.num_dead_tuples
+  FROM pg_stat_progress_vacuum as v
+  JOIN pg_class c on c.oid = v.relid
+""",
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'phase', 'type': 'tag'},
+        {'name': 'postgresql.vacuum.heap_blks_total', 'type': 'gauge'},
+        {'name': 'postgresql.vacuum.heap_blks_scanned', 'type': 'gauge'},
+        {'name': 'postgresql.vacuum.heap_blks_vacuumed', 'type': 'gauge'},
+        {'name': 'postgresql.vacuum.index_vacuum_count', 'type': 'gauge'},
+        {'name': 'postgresql.vacuum.max_dead_tuples', 'type': 'gauge'},
+        {'name': 'postgresql.vacuum.num_dead_tuples', 'type': 'gauge'},
+    ],
+}
+
+# Requires PG13+
+ANALYZE_PROGRESS_METRICS = {
+    'name': 'analyze_progress_metrics',
+    'query': """
+SELECT r.datname, c.relname, child.relname, r.phase,
+       r.sample_blks_total, r.sample_blks_scanned,
+       r.ext_stats_total, r.ext_stats_computed,
+       r.child_tables_total, r.child_tables_done
+  FROM pg_stat_progress_analyze as r
+  JOIN pg_class c on c.oid = r.relid
+  LEFT JOIN pg_class child on child.oid = r.current_child_table_relid
+""",
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'child_relation', 'type': 'tag_not_null'},
+        {'name': 'phase', 'type': 'tag'},
+        {'name': 'postgresql.analyze.sample_blks_total', 'type': 'gauge'},
+        {'name': 'postgresql.analyze.sample_blks_scanned', 'type': 'gauge'},
+        {'name': 'postgresql.analyze.ext_stats_total', 'type': 'gauge'},
+        {'name': 'postgresql.analyze.ext_stats_computed', 'type': 'gauge'},
+        {'name': 'postgresql.analyze.child_tables_total', 'type': 'gauge'},
+        {'name': 'postgresql.analyze.child_tables_done', 'type': 'gauge'},
+    ],
+}
+
+# Requires PG12+
+CLUSTER_VACUUM_PROGRESS_METRICS = {
+    'name': 'cluster_vacuum_progress_metrics',
+    'query': """
+SELECT
+       v.datname, c.relname, v.command, v.phase,
+       i.relname,
+       heap_tuples_scanned, heap_tuples_written, heap_blks_total, heap_blks_scanned, index_rebuild_count
+  FROM pg_stat_progress_cluster as v
+  LEFT JOIN pg_class c on c.oid = v.relid
+  LEFT JOIN pg_class i on i.oid = v.cluster_index_relid
+""",
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'command', 'type': 'tag'},
+        {'name': 'phase', 'type': 'tag'},
+        {'name': 'index', 'type': 'tag_not_null'},
+        {'name': 'postgresql.cluster_vacuum.heap_tuples_scanned', 'type': 'gauge'},
+        {'name': 'postgresql.cluster_vacuum.heap_tuples_written', 'type': 'gauge'},
+        {'name': 'postgresql.cluster_vacuum.heap_blks_total', 'type': 'gauge'},
+        {'name': 'postgresql.cluster_vacuum.heap_blks_scanned', 'type': 'gauge'},
+        {'name': 'postgresql.cluster_vacuum.index_rebuild_count', 'type': 'gauge'},
+    ],
+}
+
+# Requires PG12+
+INDEX_PROGRESS_METRICS = {
+    'name': 'index_progress_metrics',
+    'query': """
+SELECT
+       p.datname, c.relname, i.relname, p.command, p.phase,
+       lockers_total, lockers_done,
+       blocks_total, blocks_done,
+       tuples_total, tuples_done,
+       partitions_total, partitions_done
+  FROM pg_stat_progress_create_index as p
+  LEFT JOIN pg_class c on c.oid = p.relid
+  LEFT JOIN pg_class i on i.oid = p.index_relid
+""",
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'index', 'type': 'tag_not_null'},
+        {'name': 'command', 'type': 'tag'},
+        {'name': 'phase', 'type': 'tag'},
+        {'name': 'postgresql.create_index.lockers_total', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.lockers_done', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.blocks_total', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.blocks_done', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.tuples_total', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.tuples_done', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.partitions_total', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.partitions_done', 'type': 'gauge'},
+    ],
+}
+
 WAL_FILE_METRICS = {
     'name': 'wal_metrics',
     'query': """
@@ -477,14 +659,30 @@ SELECT s.schemaname,
     'name': 'function_metrics',
 }
 
+# The metrics we retrieve from pg_stat_activity when the postgres version >= 10
+# The query will have a where condition removing manual vacuum and backends
+# other than client backends
+ACTIVITY_METRICS_10 = [
+    "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
+    "SUM(CASE WHEN state = 'idle in transaction' THEN 1 ELSE 0 END)",
+    "COUNT(CASE WHEN state = 'active' AND (usename NOT IN ('postgres', '{dd__user}')) THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN wait_event is NOT NULL THEN 1 ELSE null END)",
+    "COUNT(CASE WHEN wait_event is NOT NULL AND state = 'active' THEN 1 ELSE null END)",
+    "max(EXTRACT(EPOCH FROM (clock_timestamp() - xact_start)))",
+    "max(age(backend_xid))",
+    "max(age(backend_xmin))",
+]
+
 # The metrics we retrieve from pg_stat_activity when the postgres version >= 9.6
 ACTIVITY_METRICS_9_6 = [
     "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
     "SUM(CASE WHEN state = 'idle in transaction' THEN 1 ELSE 0 END)",
-    "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
+    "COUNT(CASE WHEN state = 'active' AND (query !~* '^vacuum ' AND query !~ '^autovacuum:' "
+    "AND usename NOT IN ('postgres', '{dd__user}')) THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN wait_event is NOT NULL AND query !~* '^vacuum ' AND query !~ '^autovacuum:' "
     "THEN 1 ELSE null END )",
-    "COUNT(CASE WHEN wait_event is NOT NULL AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
-    "COUNT(CASE WHEN wait_event is NOT NULL AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN wait_event is NOT NULL AND query !~* '^vacuum ' AND query !~ '^autovacuum:' AND state = 'active' "
+    "THEN 1 ELSE null END )",
     "max(EXTRACT(EPOCH FROM (clock_timestamp() - xact_start)))",
     "max(age(backend_xid))",
     "max(age(backend_xmin))",
@@ -494,10 +692,11 @@ ACTIVITY_METRICS_9_6 = [
 ACTIVITY_METRICS_9_2 = [
     "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
     "SUM(CASE WHEN state = 'idle in transaction' THEN 1 ELSE 0 END)",
-    "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
-    "THEN 1 ELSE null END )",
-    "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
-    "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN state = 'active' AND (query !~* '^vacuum ' AND query !~ '^autovacuum:' "
+    "AND usename NOT IN ('postgres', '{dd__user}')) THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN waiting = 't' AND query !~* '^vacuum ' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN waiting = 't' AND query !~* '^vacuum ' AND query !~ '^autovacuum:' "
+    "AND state = 'active' THEN 1 ELSE null END )",
     "max(EXTRACT(EPOCH FROM (clock_timestamp() - xact_start)))",
     "null",  # backend_xid is not available
     "null",  # backend_xmin is not available
@@ -507,10 +706,11 @@ ACTIVITY_METRICS_9_2 = [
 ACTIVITY_METRICS_8_3 = [
     "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
     "SUM(CASE WHEN current_query LIKE '<IDLE> in transaction' THEN 1 ELSE 0 END)",
-    "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
-    "THEN 1 ELSE null END )",
-    "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
-    "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN state = 'active' AND (query !~* '^vacuum ' AND query !~ '^autovacuum:' "
+    "AND usename NOT IN ('postgres', '{dd__user}')) THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN waiting = 't' AND query !~* '^vacuum ' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN waiting = 't' AND query !~* '^vacuum ' AND query !~ '^autovacuum:' "
+    "AND state = 'active' THEN 1 ELSE null END )",
     "max(EXTRACT(EPOCH FROM (clock_timestamp() - xact_start)))",
     "null",  # backend_xid is not available
     "null",  # backend_xmin is not available
@@ -520,10 +720,11 @@ ACTIVITY_METRICS_8_3 = [
 ACTIVITY_METRICS_LT_8_3 = [
     "SUM(CASE WHEN query_start IS NOT NULL THEN 1 ELSE 0 END)",
     "SUM(CASE WHEN current_query LIKE '<IDLE> in transaction' THEN 1 ELSE 0 END)",
-    "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
-    "THEN 1 ELSE null END )",
-    "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
-    "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN state = 'active' AND (query !~* '^vacuum ' AND query !~ '^autovacuum:' "
+    "AND usename NOT IN ('postgres', '{dd__user}')) THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN waiting = 't' AND query !~* '^vacuum ' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
+    "COUNT(CASE WHEN waiting = 't' AND query !~* '^vacuum ' AND query !~ '^autovacuum:' "
+    "AND state = 'active' THEN 1 ELSE null END )",
     "max(EXTRACT(EPOCH FROM (clock_timestamp() - query_start)))",
     "null",  # backend_xid is not available
     "null",  # backend_xmin is not available
@@ -546,7 +747,7 @@ ACTIVITY_QUERY_10 = """
 SELECT {aggregation_columns_select}
     {{metrics_columns}}
 FROM pg_stat_activity
-WHERE backend_type = 'client backend'
+WHERE backend_type = 'client backend' AND query !~* '^vacuum '
 GROUP BY datid {aggregation_columns_group}
 """
 
@@ -557,3 +758,64 @@ SELECT {aggregation_columns_select}
 FROM pg_stat_activity
 GROUP BY datid {aggregation_columns_group}
 """
+
+# Requires PG10+
+STAT_SUBSCRIPTION_METRICS = {
+    'name': 'stat_subscription_metrics',
+    'query': """
+SELECT  subname,
+        EXTRACT(EPOCH FROM (age(current_timestamp, last_msg_send_time))),
+        EXTRACT(EPOCH FROM (age(current_timestamp, last_msg_receipt_time))),
+        EXTRACT(EPOCH FROM (age(current_timestamp, latest_end_time)))
+FROM pg_stat_subscription
+""",
+    'columns': [
+        {'name': 'subscription_name', 'type': 'tag'},
+        {'name': 'postgresql.subscription.last_msg_send_age', 'type': 'gauge'},
+        {'name': 'postgresql.subscription.last_msg_receipt_age', 'type': 'gauge'},
+        {'name': 'postgresql.subscription.latest_end_age', 'type': 'gauge'},
+    ],
+}
+
+# Requires PG14+
+# While pg_subscription is available since PG10,
+# pg_subscription.oid is only publicly accessible starting PG14.
+SUBSCRIPTION_STATE_METRICS = {
+    'name': 'subscription_state_metrics',
+    'query': """
+select
+    pg_subscription.subname,
+    srrelid::regclass,
+    CASE srsubstate
+        WHEN 'i' THEN 'initialize'
+        WHEN 'd' THEN 'data_copy'
+        WHEN 'f' THEN 'finished_copy'
+        WHEN 's' THEN 'synchronized'
+        WHEN 'r' THEN 'ready'
+    END,
+    1
+from pg_subscription_rel
+join pg_subscription ON pg_subscription.oid = pg_subscription_rel.srsubid""".strip(),
+    'columns': [
+        {'name': 'subscription_name', 'type': 'tag'},
+        {'name': 'relation', 'type': 'tag'},
+        {'name': 'state', 'type': 'tag'},
+        {'name': 'postgresql.subscription.state', 'type': 'gauge'},
+    ],
+}
+
+# Requires PG15+
+STAT_SUBSCRIPTION_STATS_METRICS = {
+    'name': 'stat_subscription_stats_metrics',
+    'query': """
+SELECT subname,
+       apply_error_count,
+       sync_error_count
+FROM pg_stat_subscription_stats
+""",
+    'columns': [
+        {'name': 'subscription_name', 'type': 'tag'},
+        {'name': 'postgresql.subscription.apply_error', 'type': 'monotonic_count'},
+        {'name': 'postgresql.subscription.sync_error', 'type': 'monotonic_count'},
+    ],
+}

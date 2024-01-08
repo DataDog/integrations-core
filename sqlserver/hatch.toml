@@ -2,7 +2,7 @@
 base-package-features = ["deps", "db", "json"]
 
 [[envs.default.matrix]]
-python = ["3.9"]
+python = ["3.11"]
 os = ["linux"]
 version = ["2017", "2019", "2022"]
 setup = ["single", "ha"]
@@ -12,7 +12,7 @@ setup = ["single", "ha"]
 # time out. until we're able to modify and parallelize the work we'll limit the per-driver tests to only a single
 # sqlserver version
 [[envs.default.matrix]]
-python = ["3.9"]
+python = ["3.11"]
 os = ["windows"]
 driver = ["SQLOLEDB", "SQLNCLI11", "MSOLEDBSQL", "odbc"]
 version = ["2019"]

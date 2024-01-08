@@ -19,11 +19,11 @@ LIBRDKAFKA_VERSION = "020300"
 CONFLUENT_KAFKA_VERSION = "2.3.0"
 
 [[envs.default.matrix]]
-python = ["3.9"]
+python = ["3.11"]
 version = ["2.6", "3.3"]
 
 [[envs.default.matrix]]
-python = ["3.9"]
+python = ["3.11"]
 version = ["3.3"]
 auth = ["ssl", "kerberos"]
 

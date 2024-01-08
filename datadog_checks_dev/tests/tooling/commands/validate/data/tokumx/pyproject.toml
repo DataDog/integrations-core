@@ -1,0 +1,6 @@
+[project]
+name = "datadog-tokumx"
+authors = [{ name = "Agent Integrations", email = "agent-integrations@datadoghq.com" }]
+
+[tool.hatch.version]
+path = "datadog_checks/tokumx/__about__.py"

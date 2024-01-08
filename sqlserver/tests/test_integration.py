@@ -194,6 +194,7 @@ def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autod
         'file_id:1',
         'file_location:/var/opt/mssql/data/master.mdf',
         'file_type:data',
+        'file_name:master',
     ] + instance_tags
     msdb_tags = [
         'database:msdb',
@@ -202,11 +203,14 @@ def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autod
         'file_id:1',
         'file_location:/var/opt/mssql/data/MSDBData.mdf',
         'file_type:data',
+        'file_name:MSDBData',
     ] + instance_tags
     aggregator.assert_metric('sqlserver.database.files.size', tags=master_tags)
     aggregator.assert_metric('sqlserver.database.files.size', tags=msdb_tags)
     aggregator.assert_metric('sqlserver.database.files.state', tags=master_tags)
     aggregator.assert_metric('sqlserver.database.files.state', tags=msdb_tags)
+    aggregator.assert_metric('sqlserver.database.files.space_used', tags=master_tags)
+    aggregator.assert_metric('sqlserver.database.files.space_used', tags=msdb_tags)
 
 
 @pytest.mark.integration

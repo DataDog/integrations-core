@@ -49,6 +49,20 @@ the build process, install `libxslt-dev` (or `libxslt-devel` for RPM).
 
 #### Enable monitoring
 
+The IBM Db2 integration pulls data using the following table functions: 
+* `MON_GET_TABLESPACE`
+* `MON_GET_TRANSACTION_LOG`
+* `MON_GET_BUFFERPOOL`
+* `MON_GET_DATABASE`
+* `MON_GET_INSTANCE`
+
+For more information about these table functions, see the [official IBM documentation][17].
+
+To monitor a Db2 instance, create a Db2 user with either the `EXECUTE` permission on the above five table functions, or grant the Db2 user one of the following roles:
+* `DATAACCESS` authority
+* `DBADM` authority
+* `SQLADM` authority
+
 To monitor the health of an instance, its associated databases, and database objects, enable the database system monitor switches for each of the objects you want to monitor: 
 * Statement
 * Lock
@@ -181,7 +195,6 @@ Then it's most likely caused by one of the following scenarios:
 - The CLI Driver isn't able to locate the database due to the absence of `db2cli.ini` and `db2dsdriver.cfg`
 
 The Agent requires the information in both of the above scenarios to determine where to properly connect to the database. To solve this issue, you can either include a host and port parameter for every instance of the `ibm_db2` check experiencing this issue. Alternatively, if you want to use the DSNs defined in either the `db2cli.ini` or `db2dsdriver.cfg` files, you can copy those files over to the `clidriver` directory that the Agent uses. Under normal circumstances, that directory is located at `/opt/datadog-agent/embedded/lib/python3.9/site-packages/clidriver/cfg` for Linux.
-- 
 
 ### Installing `ibm_db` client library offline
 
@@ -261,3 +274,4 @@ Additional helpful documentation, links, and articles:
 [14]: https://pypi.org/project/ibm-db/#files
 [15]: https://docs.datadoghq.com/developers/guide/custom-python-package/?tab=linux
 [16]: https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/
+[17]: https://www.ibm.com/docs/en/db2oc?topic=views-monitor-procedures-functions

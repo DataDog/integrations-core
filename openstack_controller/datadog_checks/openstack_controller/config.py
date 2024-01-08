@@ -47,6 +47,7 @@ class OpenstackConfig:
         self.ironic_microversion = config.ironic_microversion
         self.endpoint_interface = config.endpoint_interface
         self.endpoint_region_id = config.endpoint_region_id
+        self.paginated_limit = config.paginated_limit
         self.api_type = None
         self.validate()
 

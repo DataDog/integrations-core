@@ -49,6 +49,8 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
 
 2. Update the Airflow configuration file `airflow.cfg` by adding the following configs:
 
+   <div class="alert alert-warning"> Do not set `statsd_datadog_enabled` to true. Enabling `statsd_datadog_enabled` can create conflicts. To prevent issues, ensure that the variable is set to `False`.</div>
+   
    ```conf
    [scheduler]
    statsd_on = True
@@ -241,7 +243,7 @@ _Available for Agent versions >6.0_
       ```yaml
       logs:
         - type: file
-          path: "<PATH_TO_AIRFLOW>/logs/!(scheduler)/*/*.log"
+          path: "<PATH_TO_AIRFLOW>/logs/*/*/*/*.log"
           source: airflow
           log_processing_rules:
             - type: multi_line

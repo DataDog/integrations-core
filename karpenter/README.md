@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [Karpenter][1] through the Datadog Agent. For more information, see [Karpenter monitoring][10]
+This check monitors [Karpenter][1] through the Datadog Agent. For more information, see [Karpenter monitoring][10].
 
 ## Setup
 
@@ -12,13 +12,13 @@ Follow the instructions below to install and configure this check for an Agent r
 
 Starting from Agent release 7.50.0, the Karpenter check is included in the [Datadog Agent][2] package. No additional installation is needed in your environment.
 
-This check uses [OpenMetrics][5] to collect metrics from the OpenMetrics endpoint TorchServe can expose, which requires Python 3.
+This check uses [OpenMetrics][5] to collect metrics from the OpenMetrics endpoint that Karpenter exposes, which requires Python 3.
 
 ### Configuration
 
 #### Metric collection
 
-Make sure that the Prometheus-formatted metrics are exposed in your Karpenter cluster and which port. You can configure the port by following the instructions on the [Metrics][10] page in the Karpenter documentation. For the Agent to start collecting metrics, the Karpenter pods need to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [sample karpenter.d/conf.yaml][4].
+Make sure that the Prometheus-formatted metrics are exposed in your Karpenter cluster and on which port. You can configure the port by following the instructions on the [Metrics][10] page in the Karpenter documentation. For the Agent to start collecting metrics, the Karpenter pods need to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [sample karpenter.d/conf.yaml][4].
 
 **Note**: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. For example, the `karpenter.nodes.terminated` metric is exposed only after a node is terminated.
 
@@ -50,6 +50,18 @@ spec:
 # (...)
 ```
 
+#### Log collection
+
+_Available for Agent versions >6.0_
+
+Karpenter logs can be collected from the different Karpenter pods through Kubernetes. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][11].
+
+See the [Autodiscovery Integration Templates][3] for guidance on applying the parameters below.
+
+| Parameter      | Value                                                   |
+| -------------- | ------------------------------------------------------- |
+| `<LOG_CONFIG>` | `{"source": "karpenter", "service": "<SERVICE_NAME>"}`  |
+
 ### Validation
 
 [Run the Agent's status subcommand][6] and look for `karpenter` under the Checks section.
@@ -75,11 +87,12 @@ Need help? Contact [Datadog support][9].
 
 [1]: https://karpenter.sh/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[3]: https://docs.datadoghq.com/containers/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/karpenter/datadog_checks/karpenter/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/integrations/openmetrics/
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[6]: https://docs.datadoghq.com/agent/configuration/agent-commands/?tab=agentv6v7#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/karpenter/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/karpenter/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://karpenter.sh/docs/reference/metrics/
+[11]: https://docs.datadoghq.com/agent/kubernetes/log/

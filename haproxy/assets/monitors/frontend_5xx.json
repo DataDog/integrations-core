@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2021-03-01",
   "last_updated_at": "2021-03-01",
-  "title": "Anomalous number of frontend 5xx HTTP responses for host: {{host.name}}",
+  "title": "Number of frontend 5xx HTTP responses is high",
   "tags": [
     "integration:haproxy"
   ],
-  "description": "Notifies when HAProxy frontend 5xx errors are higher than usual for a specific host.",
+  "description": "When HAProxy generates a frontend 5xx error, it means that the client request was not fulfilled due to an issue on the server side. This monitor tracks anomalies in the 5xx frontend response rate for HAProxy to identify and address server errors.",
   "definition": {
     "message": "An anomalous number of HAProxy frontend 5xx HTTP responses for host: {{host.name}}  has been detected over the last 15mins.",
     "name": "[HAProxy] Anomalous number of frontend 5xx HTTP responses for host: {{host.name}}",

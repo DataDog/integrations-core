@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 34.3.1 / 2023-12-04 / Agent 7.50.0
+
+***Fixed***:
+
+* Bump the cryptography version to 41.0.6 ([#16322](https://github.com/DataDog/integrations-core/pull/16322))
+
 ## 34.3.0 / 2023-11-10
 
 ***Added***:
@@ -44,13 +50,13 @@
 * Bump the `pymysql` version to 1.1.0 on Python 3 ([#16042](https://github.com/DataDog/integrations-core/pull/16042))
 * Bump the `pyodbc` version to 5.0.1 ([#16041](https://github.com/DataDog/integrations-core/pull/16041))
 
-## 34.0.3 / 2023-11-08
+## 34.0.3 / 2023-11-08 / Agent 7.49.1
 
 ***Fixed***:
 
 * Fix `aarch64` compatibility of the `sqlserver` and `ibm_was` checks by downgrading `lxml` to version 4.9.2 ([16080](https://github.com/DataDog/integrations-core/pull/16080))
 
-## 34.0.2 / 2023-10-27
+## 34.0.2 / 2023-10-27 / Agent 7.49.0
 
 ***Fixed***:
 
@@ -78,7 +84,7 @@
 
 * Fix type `bytes` is not JSON serializable for dbm events ([#15763](https://github.com/DataDog/integrations-core/pull/15763))
 
-## 33.1.0 / 2023-08-25
+## 33.1.0 / 2023-08-25 / Agent 7.48.0
 
 ***Security***:
 
@@ -139,7 +145,7 @@
 * Revert "Bump pydantic version in the agent_requirements.in file (#153… ([#15338](https://github.com/DataDog/integrations-core/pull/15338))
 * Bump pydantic version in the agent_requirements.in file ([#15320](https://github.com/DataDog/integrations-core/pull/15320))
 
-## 32.5.1 / 2023-07-19
+## 32.5.1 / 2023-07-19 / Agent 7.47.0
 
 ***Fixed***:
 

@@ -12,11 +12,11 @@ mypy-deps = [
 ]
 
 [[envs.default.matrix]]
-python = ["3.9"]
+python = ["3.11"]
 version = ["9"]
 
 [[envs.default.matrix]]
-python = ["3.9"]
+python = ["3.11"]
 version = ["9"]
 setup = ["cluster"]
 

@@ -37,7 +37,7 @@ def integrations_changelog(app: Application, integrations: tuple[str], since: st
 
     # Process all checks if no check is passed
     if not integrations:
-        integrations = [integration.name for integration in app.repo.integrations.iter('all')]
+        integrations = [integration.name for integration in app.repo.integrations.iter_all('all')]
 
     changes_per_agent = get_changes_per_agent(app.repo, since, to)
 

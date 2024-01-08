@@ -47,6 +47,8 @@ def changelog(app: Application, since: str, to: str, write: bool, force: bool):
     """
     from ddev.cli.release.agent.common import get_changes_per_agent
 
+    app.repo.git.fetch_tags()
+
     changes_per_agent = get_changes_per_agent(app.repo, since, to)
 
     # store the changelog in memory

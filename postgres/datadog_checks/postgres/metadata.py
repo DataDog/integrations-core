@@ -362,7 +362,7 @@ class PostgresMetadata(DBMAsyncJob):
                 # get activity
                 cursor.execute(PARTITION_ACTIVITY_QUERY.format(parent_oid=info['id']))
                 row = cursor.fetchone()
-                return row['total_activity']
+                return row.get('total_activity', 0) if row else 0
 
         # if relation metrics are enabled, sorted based on last activity information
         table_info = sorted(table_info, key=sort_tables, reverse=True)
