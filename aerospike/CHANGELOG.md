@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 2.1.0 / 2024-01-05
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+* Collect more `client_read` and `client_write` metrics by default ([#16423](https://github.com/DataDog/integrations-core/pull/16423))
+
 ## 2.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:
