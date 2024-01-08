@@ -21,7 +21,6 @@ IGNORED_DEPS = {
     'foundationdb',  # Breaking datadog_checks_base tests
     'openstacksdk',  # Breaking openstack_controller tests
     'pyasn1',  # Breaking snmp tests
-    'pycryptodomex',  # Breaking snmp tests
     'pysnmp',  # Breaking snmp tests
     'pyodbc',  # Breaking sqlserver tests
     'psutil',  # Breaking disk tests
