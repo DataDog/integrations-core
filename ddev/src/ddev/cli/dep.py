@@ -18,7 +18,6 @@ from packaging.version import InvalidVersion, Version
 IGNORED_DEPS = {
     'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
     'pymysql',  # https://github.com/DataDog/integrations-core/pull/12612
-    'foundationdb',  # Breaking datadog_checks_base tests
     'openstacksdk',  # Breaking openstack_controller tests
     'pyasn1',  # Breaking snmp tests
     'pycryptodomex',  # Breaking snmp tests
