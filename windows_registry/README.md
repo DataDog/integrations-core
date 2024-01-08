@@ -1,4 +1,4 @@
-# Windows Registry Integration (Beta)
+# Windows Registry Integration
 
 ## Overview
 
