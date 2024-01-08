@@ -100,7 +100,8 @@ scandir==1.10.0
 securesystemslib[crypto,pynacl]==0.28.0; python_version > '3.0'
 semver==2.13.0; python_version < '3.0'
 semver==3.0.2; python_version > '3.0'
-service-identity[idna]==21.1.0
+service-identity[idna]==21.1.0; python_version < '3.0'
+service-identity[idna]==23.1.0; python_version > '3.0'
 simplejson==3.19.2
 six==1.16.0
 snowflake-connector-python==3.6.0; python_version > '3.0'
