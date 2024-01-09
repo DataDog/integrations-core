@@ -126,7 +126,7 @@ class PostgreSql(AgentCheck):
         # initialize connections if host autodiscovery is disabled or if host autodiscovery is enabled but the host
         # is set in the config
         if not self._config.host_autodiscovery_enabled or (
-                self._config.host_autodiscovery_enabled and self._config.host
+            self._config.host_autodiscovery_enabled and self._config.host
         ):
             self.check_initializations.append(self._connect)
             self.check_initializations.append(self.load_version)
