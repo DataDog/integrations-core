@@ -98,7 +98,7 @@ def main():
 
         # Repair wheels
         check_process([
-            str(python_path), '-u', str(MOUNT_DIR / 'scripts' / 'repair_wheels.py'),
+            sys.executable, '-u', str(MOUNT_DIR / 'scripts' / 'repair_wheels.py'),
             '--source-dir', str(staged_wheel_dir),
             '--output-dir', str(wheels_dir),
         ])
