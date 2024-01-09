@@ -76,8 +76,6 @@ ENV LD_LIBRARY_PATH="/opt/python/${PYTHON_VERSION}/lib:${LD_LIBRARY_PATH}"
 # that's why we stick to an older version.
 RUN /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location --upgrade pip \
  && /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location virtualenv==20.21.1 \
- # We also install requirements for wheel repair
- urllib3 auditwheel==5.4.0 \
  && /opt/python/${PYTHON_VERSION}/bin/python3 -m virtualenv /py3 \
  && /opt/python/${PYTHON_VERSION}/bin/python3 -m virtualenv --python /opt/python/${PYTHON2_VERSION}/bin/python /py2
 

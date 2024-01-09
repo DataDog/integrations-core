@@ -75,7 +75,7 @@ RUN Get-RemoteFile `
     Start-Process -Wait python-$Env:PYTHON_VERSION-amd64.exe -ArgumentList '/quiet', 'InstallAllUsers=1'; `
     Remove-Item python-$Env:PYTHON_VERSION-amd64.exe; `
     & 'C:\Program Files\Python311\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
-    & 'C:\Program Files\Python311\python.exe' -m pip install --no-warn-script-location virtualenv urllib3 delvewheel==1.5.2; `
+    & 'C:\Program Files\Python311\python.exe' -m pip install --no-warn-script-location virtualenv; `
     & 'C:\Program Files\Python311\python.exe' -m virtualenv 'C:\py3'; `
     Add-ToPath -Append 'C:\Program Files\Python311'
 
