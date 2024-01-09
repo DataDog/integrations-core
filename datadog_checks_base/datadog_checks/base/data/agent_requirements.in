@@ -73,7 +73,7 @@ pymysql==1.1.0; python_version > '3.0'
 pyodbc==5.0.1; (sys_platform != 'darwin' or platform_machine != 'arm64') and python_version > '3.0'
 pysmi==0.3.4
 pysnmp-mibs==0.1.6
-pysnmp==4.4.9
+pysnmp==4.4.12
 pysocks==1.7.1
 python-binary-memcached==0.26.1; sys_platform != 'win32' and python_version < '3.0'
 python-binary-memcached==0.31.2; sys_platform != 'win32' and python_version > '3.0'
