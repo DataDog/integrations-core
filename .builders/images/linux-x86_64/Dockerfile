@@ -33,8 +33,10 @@ RUN yum install -y openssl-devel \
  && rm -rf /tmp/Python-${PYTHON2_VERSION} \
  && rm -rf /tmp/python.tar.gz \
  && yum remove -y openssl-devel
-
 ENV LD_LIBRARY_PATH="/opt/python/${PYTHON2_VERSION}/lib:${LD_LIBRARY_PATH}"
+# Set up virtual environment for Python 2
+RUN /opt/python/${PYTHON2_VERSION}/bin/python -m pip install --no-warn-script-location virtualenv \
+ && /opt/python/${PYTHON2_VERSION}/bin/python -m virtualenv /py2
 
 # openssl
 RUN yum install -y perl-IPC-Cmd
@@ -66,17 +68,12 @@ RUN curl "https://python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSIO
  && make install \
  && rm -rf /tmp/Python-${PYTHON_VERSION} \
  && rm -rf /tmp/python.tar.gz
-
 ENV PATH="/opt/python/${PYTHON_VERSION}/bin:${PATH}"
 ENV LD_LIBRARY_PATH="/opt/python/${PYTHON_VERSION}/lib:${LD_LIBRARY_PATH}"
-
 # Set up virtual environment for Python 3
-# Note: virtualenv v20.22.0 dropped support for creating py2-based virtual environments,
-# that's why we stick to an older version.
 RUN /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location --upgrade pip \
- && /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location virtualenv==20.21.1 \
- && /opt/python/${PYTHON_VERSION}/bin/python3 -m virtualenv /py3 \
- && /opt/python/${PYTHON_VERSION}/bin/python3 -m virtualenv --python /opt/python/${PYTHON2_VERSION}/bin/python /py2
+ && /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location virtualenv \
+ && /opt/python/${PYTHON_VERSION}/bin/python3 -m virtualenv /py3
 
 # Rust toolchain
 RUN curl -sSL -o rustup-init "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/x86_64-unknown-linux-gnu/rustup-init" \

@@ -97,7 +97,6 @@ def main():
         check_process(command_args, env=env_vars)
 
         # Repair wheels
-        # We use the base python3 where the necessary packages for repair are installed
         check_process([
             sys.executable, '-u', str(MOUNT_DIR / 'scripts' / 'repair_wheels.py'),
             '--source-dir', str(staged_wheel_dir),
