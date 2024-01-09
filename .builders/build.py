@@ -72,7 +72,7 @@ def build_image():
     parser = argparse.ArgumentParser(prog='builder', allow_abbrev=False)
     parser.add_argument('image')
     parser.add_argument('output_dir')
-    parser.add_argument('--python')
+    parser.add_argument('--python', default='3')
     parser.add_argument('--no-run', action='store_true')
     parser.add_argument('-v', '--verbose', action='store_true')
     args = parser.parse_args()
@@ -82,6 +82,7 @@ def build_image():
     if not image_path.is_dir():
         abort(f'Image does not exist: {image_path}')
 
+    windows_image = image.startswith('windows-')
     image_name = f'datadog/agent-int-builder-{image}:latest'
     with temporary_directory() as temp_dir:
         build_context_dir = shutil.copytree(image_path, temp_dir, dirs_exist_ok=True)
@@ -92,7 +93,9 @@ def build_image():
                 shutil.copy2(entry, build_context_dir)
 
         build_command = ['docker', 'build', str(build_context_dir), '-t', image_name]
-        if args.verbose:
+
+        # For some reason this is not supported for Windows images
+        if args.verbose and not windows_image:
             build_command.extend(['--progress', 'plain'])
 
         check_process(build_command)
@@ -101,7 +104,7 @@ def build_image():
         with temporary_directory() as temp_dir:
             mount_dir = temp_dir / 'mnt'
             mount_dir.mkdir()
-            internal_mount_dir = 'C:\\mnt' if image.startswith('windows-') else '/home'
+            internal_mount_dir = 'C:\\mnt' if windows_image else '/home'
 
             dependency_file = mount_dir / 'requirements.in'
             dependency_file.write_text('\n'.join(chain.from_iterable(read_dependencies().values())))
@@ -109,7 +112,11 @@ def build_image():
             shutil.copytree(HERE / 'scripts', mount_dir / 'scripts')
             shutil.copytree(HERE / 'patches', mount_dir / 'patches')
 
-            check_process(['docker', 'run', '--rm', '-v', f'{mount_dir}:{internal_mount_dir}', image_name])
+            check_process([
+                'docker', 'run', '--rm',
+                '-v', f'{mount_dir}:{internal_mount_dir}',
+                image_name, '--python', args.python,
+            ])
 
             output_dir = Path(args.output_dir)
             if output_dir.is_dir():

@@ -51,7 +51,7 @@ def check_process(*args, **kwargs) -> subprocess.CompletedProcess:
 
 def main():
     parser = argparse.ArgumentParser(prog='wheel-builder', allow_abbrev=False)
-    parser.add_argument('--python', default='3')
+    parser.add_argument('--python', required=True)
     args = parser.parse_args()
 
     python_version = args.python
