@@ -51,7 +51,7 @@ def check_process(*args, **kwargs) -> subprocess.CompletedProcess:
 
 def main():
     parser = argparse.ArgumentParser(prog='wheel-builder', allow_abbrev=False)
-    parser.add_argument('--python', default='3')
+    parser.add_argument('--python', required=True)
     args = parser.parse_args()
 
     python_version = args.python
@@ -98,7 +98,7 @@ def main():
 
         # Repair wheels
         check_process([
-            str(python_path), '-u', str(MOUNT_DIR / 'scripts' / 'repair_wheels.py'),
+            sys.executable, '-u', str(MOUNT_DIR / 'scripts' / 'repair_wheels.py'),
             '--source-dir', str(staged_wheel_dir),
             '--output-dir', str(wheels_dir),
         ])

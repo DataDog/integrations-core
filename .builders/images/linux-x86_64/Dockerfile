@@ -165,6 +165,10 @@ RUN curl "https://www.unixodbc.org/unixODBC-${ODBC_VERSION}.tar.gz" -Lo /tmp/uni
 ENV OPENSSL_LIB_DIR="/usr/local/lib64"
 ENV OPENSSL_INCLUDE_DIR="/usr/local/include"
 
+# Set up runner
+COPY runner_dependencies.txt /runner_dependencies.txt
+RUN python3 -m pip install --no-warn-script-location -r /runner_dependencies.txt
+
 # Set up extra build information
 ENV PIP_CONSTRAINT="/pip_constraints.txt"
 ENV PIP_CONSTRAINT_FILE="${PIP_CONSTRAINT}"
