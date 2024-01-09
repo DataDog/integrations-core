@@ -66,7 +66,9 @@ psycopg,PyPI,LGPL-3.0-only,Copyright (C) 2020 The Psycopg Team
 psycopg-pool,PyPI,LGPL-3.0-only,Copyright (C) 2020 The Psycopg Team
 psycopg2-binary,PyPI,BSD-3-Clause,Copyright 2013 Federico Di Gregorio
 psycopg2-binary,PyPI,LGPL-3.0-only,Copyright (C) 2013 Federico Di Gregorio
+pyasn1,PyPI,BSD-2-Clause,"Copyright (c) 2005-2020, Ilya Etingof <etingof@gmail.com>"
 pyasn1,PyPI,BSD-3-Clause,"Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>"
+pyasn1,PyPI,BSD-3-Clause,"Copyright (c) 2005-2020, Ilya Etingof <etingof@gmail.com>"
 pycryptodomex,PyPI,BSD-2-Clause,Copyright 2014 Helder Eijs
 pycryptodomex,PyPI,Unlicense,Helder Eijs. pycryptodomex is dedicated to the public domain under Unlicense.
 pydantic,PyPI,MIT,Copyright (c) 2017 to present Pydantic Services Inc. and individual contributors.
