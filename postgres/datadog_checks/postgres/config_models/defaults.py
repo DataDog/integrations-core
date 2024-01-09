@@ -72,10 +72,6 @@ def instance_empty_default_hostname():
     return False
 
 
-def instance_host():
-    return 'localhost'
-
-
 def instance_idle_connection_timeout():
     return 60000
 
@@ -126,7 +122,3 @@ def instance_table_count_limit():
 
 def instance_tag_replication_role():
     return False
-
-
-def instance_username():
-    return 'datadog'
