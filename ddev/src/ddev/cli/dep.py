@@ -20,7 +20,6 @@ IGNORED_DEPS = {
     'pymysql',  # https://github.com/DataDog/integrations-core/pull/12612
     'foundationdb',  # Breaking datadog_checks_base tests
     'openstacksdk',  # Breaking openstack_controller tests
-    'pyasn1',  # Breaking snmp tests
     'pycryptodomex',  # Breaking snmp tests
     'pysnmp',  # Breaking snmp tests
     'pyodbc',  # Breaking sqlserver tests
