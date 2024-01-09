@@ -115,7 +115,7 @@ To configure this check for an Agent running on a host:
 
 2. To collect relation metrics, connect the Agent to every logical database. These databases can be discovered automatically, or each one can be listed explicitly in the configuration. 
    
-    To discover logical databases automatically on a given instance, enable autodiscovery on that instance:
+    - To discover logical databases automatically on a given instance, enable autodiscovery on that instance:
 
     ```yaml
     instances:
