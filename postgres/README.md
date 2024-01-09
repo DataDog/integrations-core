@@ -132,7 +132,7 @@ To configure this check for an Agent running on a host:
           - relation_regex: .*
     ```
 
-    Alternatively, you can list each logical database as an instance in the configuration:
+    - Alternatively, you can list each logical database as an instance in the configuration:
     
     ```yaml
     instances:
