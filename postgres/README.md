@@ -159,7 +159,7 @@ To configure this check for an Agent running on a host:
         relations:
           - relation_regex: .*
     ```
-2. [Restart the Agent][4].
+3. [Restart the Agent][4].
 
 ##### Trace collection
 
