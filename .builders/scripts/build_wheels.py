@@ -62,7 +62,7 @@ def main():
     else:
         abort(f'Invalid python version: {python_version}')
 
-    wheels_dir = MOUNT_DIR / f'wheels_py{python_version}'
+    wheels_dir = MOUNT_DIR / 'wheels'
 
     # Install build dependencies
     check_process([str(python_path), '-m', 'pip', 'install', '-r', str(MOUNT_DIR / 'build_dependencies.txt')])
@@ -97,7 +97,7 @@ def main():
         check_process(command_args, env=env_vars)
 
         # Repair wheels
-        # We use the 'system' python3 on purpose here because it's where we install the repair tools
+        # We use the base python3 where the necessary packages for repair are installed
         check_process([
             sys.executable, '-u', str(MOUNT_DIR / 'scripts' / 'repair_wheels.py'),
             '--source-dir', str(staged_wheel_dir),
@@ -112,21 +112,11 @@ def main():
         wheel_hash = sha256(entry.read_bytes()).hexdigest()
         dependencies[project_name] = (project_version, wheel_hash)
 
-    final_requirements = MOUNT_DIR / f'frozen_py{python_version}.txt'
+    final_requirements = MOUNT_DIR / 'frozen.txt'
     with final_requirements.open('w', encoding='utf-8') as f:
         for project_name, (project_version, wheel_hash) in sorted(dependencies.items()):
             f.write(f'{project_name}=={project_version} \\\n')
             f.write(f'  --hash=sha256:{wheel_hash}\n')
-
-
-def main():
-    parser = argparse.ArgumentParser(prog='wheel-builder', allow_abbrev=False)
-    parser.add_argument('--python')
-    args = parser.parse_args()
-
-    python_versions = [args.python] if args.python else ['3', '2']
-    for version in python_versions:
-        build_wheels_for_python_version(version)
 
 
 if __name__ == '__main__':

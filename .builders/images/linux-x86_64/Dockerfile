@@ -207,4 +207,4 @@ RUN touch "${PIP_CONSTRAINT_FILE}"
 COPY build_script.sh /build_script.sh
 ENV DD_BUILD_COMMAND="bash /build_script.sh"
 
-CMD ["python3", "/home/scripts/build_wheels.py"]
+ENTRYPOINT ["python3", "/home/scripts/build_wheels.py"]
