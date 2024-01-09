@@ -1,6 +1,6 @@
 ## Overview
 
-* [Zeek][6] is the world's leading platform for network security monitoring. It interprets what it sees and creates compact, high-fidelity transaction logs, and file content. It can create fully customized output, suitable for manual review on disk or in a more analyst-friendly tool like a security and information event management (SIEM) system.
+[Zeek][6] is the world's leading platform for network security monitoring. It interprets what it sees and creates compact, high-fidelity transaction logs, and file content. It can create fully customized output, suitable for manual review on disk or in a more analyst-friendly tool like a security and information event management (SIEM) system.
 
 This integration provides visualization and log enrichments for Connection Logs, DNS & DHCP Logs, Network Protocols, Files, Detections, and Miscellaneous event types.
 
@@ -47,10 +47,9 @@ Linux command
     logs_enabled: true
     ```
 
-2. Add this configuration block to your zeek.d/conf.yaml file to start collecting your Zeek logs.  
+2. Add this configuration block to your `zeek.d/conf.yaml` file to start collecting your Zeek logs.  
  **Note**: Include the log file's paths within the `exclude_paths` parameter to prevent the ingestion of unsupported or undesired log files during the monitoring process.
 
- eg.
    ```yaml
    # Example of excluded paths
   exclude_paths:
@@ -118,6 +117,7 @@ The Zeek integration collects following log-types.
 | ---------  | -------------- | 
 | Opensource Zeek - JSON Format | conn, dhcp, dns, ftp, http, ntp, rdp, smtp, snmp, socks, ssh, ssl, syslog, tunnel, files, pe, intel, notice, signatures, traceroute, known-certs, known-modbus, known-services, known-hosts, software, x509, dpd, weird, captureloss, reporter, ldap, ldap-search, smb-files, smb-mappings |
 | Corelight Zeek - Syslog RFC 3164 (Legacy) Format | conn, dhcp, dns, ftp, http, ntp, rdp, smtp, snmp, socks, ssh, ssl, syslog, tunnel, files, pe, intel, notice, signatures, traceroute, known-certs, known-modbus, known-services, known-hosts, software, x509, dpd, weird, captureloss, reporter, ldap, ldap-search, smb-files, smb-mappings, conn-long, conn-red, encrypted-dns, generic-dns-tunnels, smtp-links, suricata-corelight |
+
 ### Metrics
 
 The Zeek integration does not include any metrics.
@@ -136,7 +136,7 @@ The Zeek integration does not include any service checks.
 
 If you see a **Permission denied** error while monitoring the log files, give read permission to dd-agent user to monitor the log files.
 
-  ```sh
+  ```shell
   sudo chown -R dd-agent:dd-agent /opt/zeek/current/
   ```
 
