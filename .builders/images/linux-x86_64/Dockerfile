@@ -112,14 +112,6 @@ RUN \
  --without-debugger \
  --disable-static
 
-# librdkafka for confluent-kafka
-RUN \
- DOWNLOAD_URL="https://github.com/confluentinc/librdkafka/archive/refs/tags/v{{version}}.tar.gz" \
- VERSION="2.3.0" \
- SHA256="2d49c35c77eeb3d42fa61c43757fcbb6a206daa560247154e60642bcdcc14d12" \
- RELATIVE_PATH="librdkafka-{{version}}" \
- bash install-from-source.sh
-
 # libpq and pg_config as needed by psycopg2
 RUN \
  DOWNLOAD_URL="https://ftp.postgresql.org/pub/source/v{{version}}/postgresql-{{version}}.tar.bz2" \

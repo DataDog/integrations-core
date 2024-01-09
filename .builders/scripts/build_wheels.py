@@ -14,6 +14,7 @@ if sys.platform == 'win32':
     PY3_PATH = Path('C:\\py3\\Scripts\\python.exe')
     PY2_PATH = Path('C:\\py2\\Scripts\\python.exe')
     MOUNT_DIR = Path('C:\\mnt')
+    PACKAGES_FORCE_BUILD = []
 
     def join_command_args(args: list[str]) -> str:
         return subprocess.list2cmdline(args)
@@ -27,6 +28,7 @@ else:
     PY3_PATH = Path('/py3/bin/python')
     PY2_PATH = Path('/py2/bin/python')
     MOUNT_DIR = Path('/home')
+    PACKAGES_FORCE_BUILD = ['confluent-kafka']
 
     def join_command_args(args: list[str]) -> str:
         return shlex.join(args)
@@ -74,6 +76,7 @@ def main():
         env_vars['PIP_WHEEL_DIR'] = str(staged_wheel_dir)
         env_vars['DD_BUILD_PYTHON_VERSION'] = python_version
         env_vars['DD_MOUNT_DIR'] = str(MOUNT_DIR)
+        env_vars['PIP_NO_BINARY'] = ' '.join(PACKAGES_FORCE_BUILD)
 
         # Off is on, see: https://github.com/pypa/pip/issues/5735
         env_vars['PIP_NO_BUILD_ISOLATION'] = '0'
