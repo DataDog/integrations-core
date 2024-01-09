@@ -10,6 +10,7 @@ import pytest
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.dev.testing import requires_py3
 from datadog_checks.openstack.openstack import (
     IncompleteAuthScope,
     IncompleteConfig,
@@ -302,6 +303,7 @@ def test_cache_between_runs(self, *args):
     assert 'server_newly_added' in cached_servers
 
 
+@requires_py3
 @pytest.mark.parametrize(
     'init_config, instances, exception',
     [
