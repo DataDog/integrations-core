@@ -16,19 +16,46 @@ ENV RUSTC_SHA256="3dc5ef50861ee18657f9db2eeb7392f9c2a6c95c90ab41e45ab4ca71476b43
 ENV RUSTUP_VERSION="1.24.3"
 ENV RUSTUP_SHA256="3dc5ef50861ee18657f9db2eeb7392f9c2a6c95c90ab41e45ab4ca71476b4338"
 
+# Compile and install Python 2
+ENV PYTHON2_VERSION=2.7.18
+ENV PYTHON2_SHA256="da3080e3b488f648a3d7a4560ddee895284c3380b11d6de75edb986526b9a814"
+# For Python 2, we get openssl(1) via yum just to get the necessary headers,
+# and we remove the package after compilation to prevent it from interfering
+# with the use of openssl3 everywhere else
+RUN yum install -y openssl-devel \
+ && curl "https://python.org/ftp/python/${PYTHON2_VERSION}/Python-${PYTHON2_VERSION}.tgz" -Lo /tmp/python.tar.gz \
+ && echo "${PYTHON2_SHA256}  /tmp/python.tar.gz" | sha256sum --check \
+ && tar -C /tmp -xf /tmp/python.tar.gz \
+ && cd /tmp/Python-${PYTHON2_VERSION} \
+ && ./configure --prefix=/opt/python/${PYTHON2_VERSION} --with-ensurepip=yes --enable-shared --enable-ipv6 --enable-unicode=ucs4 \
+ && make \
+ && make install \
+ && rm -rf /tmp/Python-${PYTHON2_VERSION} \
+ && rm -rf /tmp/python.tar.gz \
+ && yum remove -y openssl-devel
+ENV LD_LIBRARY_PATH="/opt/python/${PYTHON2_VERSION}/lib:${LD_LIBRARY_PATH}"
+# Set up virtual environment for Python 2
+RUN /opt/python/${PYTHON2_VERSION}/bin/python -m pip install --no-warn-script-location virtualenv \
+ && /opt/python/${PYTHON2_VERSION}/bin/python -m virtualenv /py2
+
 # openssl
 RUN yum install -y perl-IPC-Cmd
 RUN curl "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" -o /tmp/openssl.tar.gz \
  && echo "${OPENSSL_SHA256}  /tmp/openssl.tar.gz" | sha256sum --check \
  && tar -C /tmp -xf /tmp/openssl.tar.gz \
  && cd /tmp/openssl-${OPENSSL_VERSION} \
- && ./config -Wl,-Bsymbolic-functions -fPIC shared no-ssl2 no-ssl3 \
+ && ./config -Wl,-Bsymbolic-functions \
+ -fPIC \
+ shared \
+ # This prevents the creation of dynamically loaded modules that would be problematic to bundle into Python wheels
+ no-module \
+ no-comp no-idea no-mdc2 no-rc5 no-ssl3 no-gost \
  && make \
  && make install \
  && rm -rf /tmp/openssl-${OPENSSL_VERSION} \
  && rm -rf /tmp/openssl.tar.gz
 
-# Compile and install Python
+# Compile and install Python 3
 ENV PYTHON_VERSION=3.11.5
 ENV PYTHON_SHA256="a12a0a013a30b846c786c010f2c19dd36b7298d888f7c4bd1581d90ce18b5e58"
 RUN yum install -y libffi-devel
@@ -41,10 +68,8 @@ RUN curl "https://python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSIO
  && make install \
  && rm -rf /tmp/Python-${PYTHON_VERSION} \
  && rm -rf /tmp/python.tar.gz
-
 ENV PATH="/opt/python/${PYTHON_VERSION}/bin:${PATH}"
 ENV LD_LIBRARY_PATH="/opt/python/${PYTHON_VERSION}/lib:${LD_LIBRARY_PATH}"
-
 # Set up virtual environment for Python 3
 RUN /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location --upgrade pip \
  && /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location virtualenv \
@@ -160,7 +185,6 @@ RUN curl "https://www.unixodbc.org/unixODBC-${ODBC_VERSION}.tar.gz" -Lo /tmp/uni
  && rm -rf /tmp/unixODBC-${ODBC_VERSION} \
  && rm -rf /tmp/unixobdc.tar.gz
 
-
 # Environment variables to help openssl crate find OpenSSL
 ENV OPENSSL_LIB_DIR="/usr/local/lib64"
 ENV OPENSSL_INCLUDE_DIR="/usr/local/include"
@@ -177,4 +201,4 @@ RUN touch "${PIP_CONSTRAINT_FILE}"
 COPY build_script.sh /build_script.sh
 ENV DD_BUILD_COMMAND="bash /build_script.sh"
 
-CMD ["python3", "/home/scripts/build_wheels.py"]
+ENTRYPOINT ["python3", "/home/scripts/build_wheels.py"]
