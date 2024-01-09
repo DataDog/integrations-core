@@ -3,8 +3,13 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=E0611,E0401
+from six import PY2
 
-from . import metrics_pb2
+# TODO: remove when we drop python2
+if PY2:
+    from . import metrics_pb2_py2 as metrics_pb2
+else:
+    from . import metrics_pb2_py3 as metrics_pb2
 
 
 # Deprecated, please use the PrometheusCheck class
