@@ -8,7 +8,6 @@ files:
   - template: instances
     options:
     - name: host
-      required: true
       description: |
         The hostname to connect to.
         NOTE: Even if the server name is `localhost`, the Agent connects to PostgreSQL using TCP/IP unless you also
@@ -22,7 +21,6 @@ files:
         type: integer
         example: 5432
     - name: username
-      required: true
       description: The Datadog username created to connect to PostgreSQL.
       value:
           type: string
