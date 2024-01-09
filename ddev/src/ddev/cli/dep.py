@@ -22,7 +22,6 @@ IGNORED_DEPS = {
     'openstacksdk',  # Breaking openstack_controller tests
     'pyasn1',  # Breaking snmp tests
     'pycryptodomex',  # Breaking snmp tests
-    'pysnmp',  # Breaking snmp tests
     'pyodbc',  # Breaking sqlserver tests
     'psutil',  # Breaking disk tests
     'aerospike',  # v8+ breaks agent build.
