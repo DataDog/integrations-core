@@ -34,7 +34,6 @@ RUN yum install -y openssl-devel \
  && rm -rf /tmp/python.tar.gz \
  && yum remove -y openssl-devel
 
-ENV PATH="/opt/python/${PYTHON2_VERSION}/bin:${PATH}"
 ENV LD_LIBRARY_PATH="/opt/python/${PYTHON2_VERSION}/lib:${LD_LIBRARY_PATH}"
 
 # openssl
