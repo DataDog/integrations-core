@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 16.1.0 / 2024-01-10
+
+***Added***:
+
+* When host auto discovery is enabled, do nothing and emit OK for check status ([#16540](https://github.com/DataDog/integrations-core/pull/16540))
+
+***Fixed***:
+
+* Fix vacuum age computation ([#16581](https://github.com/DataDog/integrations-core/pull/16581))
+
 ## 16.0.0 / 2024-01-05
 
 ***Changed***:
