@@ -1254,7 +1254,7 @@ def test_flavors_pagination(
             == expected_api_calls
         )
 
-    elif api_type == ApiType.SDK:
+    else:
         assert (
             connection_compute.flavors.call_args_list.count(mock.call(details=True, limit=paginated_limit))
             == expected_api_calls
