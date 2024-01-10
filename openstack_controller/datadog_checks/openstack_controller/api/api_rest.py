@@ -325,8 +325,6 @@ class ApiRest(Api):
             resources = response_json.get(resource_name, [])
             if len(resources) > 0:
                 last_item = resources[-1]
-
-                next = response_json.get('next')
                 item_list.extend(resources)
 
                 if next_signifier == '{}_links'.format(resource_name):
@@ -340,7 +338,7 @@ class ApiRest(Api):
                     if not has_next_link:
                         break
                 else:
-                    next_item = last_item.get(next_signifier)
+                    next_item = response_json.get(next_signifier)
                     if next_item is None:
                         break
 
