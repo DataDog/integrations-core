@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.2.1 / 2024-01-10
+
+***Fixed***:
+
+* Fix ironic nodes pagination logic ([#16566](https://github.com/DataDog/integrations-core/pull/16566))
+
 ## 6.2.0 / 2024-01-05
 
 ***Added***:
