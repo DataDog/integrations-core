@@ -3,6 +3,10 @@
 ARG BASE_IMAGE=mcr.microsoft.com/windows/servercore:ltsc2022
 FROM ${BASE_IMAGE}
 
+ARG DD_TARGET_ARCH=x64
+
+ENV DD_TARGET_ARCH=${DD_TARGET_ARCH}
+
 SHELL ["cmd", "/S", "/C"]
 
 # https://learn.microsoft.com/en-us/visualstudio/install/build-tools-container#create-and-build-the-dockerfile
@@ -115,4 +119,4 @@ RUN python -m pip install --no-warn-script-location -r C:\runner_dependencies.tx
 SHELL ["cmd", "/S", "/C"]
 
 # This entry point starts the developer command prompt and launches PowerShell.
-ENTRYPOINT ["C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvars64.bat", "&&", "python", "C:\\mnt\\scripts\\build_wheels.py"]
+ENTRYPOINT ["C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvarsall.bat", "%DD_TARGET_ARCH%", "&&", "python", "C:\\mnt\\scripts\\build_wheels.py"]
