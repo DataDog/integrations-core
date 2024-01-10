@@ -126,8 +126,15 @@ class ObfuscatorOptions(BaseModel):
     collect_comments: Optional[bool] = None
     collect_metadata: Optional[bool] = None
     collect_tables: Optional[bool] = None
+    keep_boolean: Optional[bool] = None
     keep_dollar_quoted_func: Optional[bool] = None
+    keep_identifier_quotation: Optional[bool] = None
+    keep_null: Optional[bool] = None
+    keep_positional_parameter: Optional[bool] = None
     keep_sql_alias: Optional[bool] = None
+    keep_trailing_semicolon: Optional[bool] = None
+    obfuscation_mode: Optional[str] = None
+    remove_space_between_parentheses: Optional[bool] = None
     replace_digits: Optional[bool] = None
 
 
@@ -207,7 +214,7 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     gcp: Optional[Gcp] = None
-    host: str
+    host: Optional[str] = None
     idle_connection_timeout: Optional[int] = None
     ignore_databases: Optional[tuple[str, ...]] = None
     log_unobfuscated_plans: Optional[bool] = None
@@ -236,7 +243,7 @@ class InstanceConfig(BaseModel):
     table_count_limit: Optional[int] = None
     tag_replication_role: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
-    username: str
+    username: Optional[str] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):

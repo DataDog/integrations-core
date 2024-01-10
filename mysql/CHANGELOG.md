@@ -2,7 +2,25 @@
 
 <!-- towncrier release notes start -->
 
-## 11.4.1 / 2023-12-04
+## 12.0.0 / 2024-01-05
+
+***Changed***:
+
+* Always use the database instance's resolved hostname for metrics regardless of how dbm and disable_generic_tags is set. For non-dbm customers or users of disable_generic_tags, this change will result in the host tag having a different value than before. It is possible that dashboards and monitors using the integration's metrics will need to be updated if they relied on the faulty host tagging. ([#16201](https://github.com/DataDog/integrations-core/pull/16201))
+* require python 3 for mysql integration ([#16368](https://github.com/DataDog/integrations-core/pull/16368))
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+* Update dependencies ([#16394](https://github.com/DataDog/integrations-core/pull/16394)), ([#16448](https://github.com/DataDog/integrations-core/pull/16448))
+* add new obfuscator options to customize SQL obfuscation and normaliza… ([#16429](https://github.com/DataDog/integrations-core/pull/16429))
+
+***Fixed***:
+
+* Revert "[DBMON-2989] report sql obfuscation error count (#15990)" ([#16439](https://github.com/DataDog/integrations-core/pull/16439))
+* use single quotes in activity query to fix char set issue ([#16454](https://github.com/DataDog/integrations-core/pull/16454))
+
+## 11.4.1 / 2023-12-04 / Agent 7.50.0
 
 ***Fixed***:
 

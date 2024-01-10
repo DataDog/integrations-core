@@ -2,11 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import difflib
+import os
 
 import click
 import yaml
 
-from ....fs import basepath, file_exists, path_join, read_file, write_file
+from ....fs import basepath, file_exists, path_exists, path_join, read_file, write_file
 from ...config_validator.validator import validate_config
 from ...config_validator.validator_errors import SEVERITY_ERROR, SEVERITY_WARNING
 from ...configuration import ConfigSpec
@@ -51,6 +52,8 @@ def config(ctx, check, sync, verbose):
     else:
         checks = process_checks_option(check, source='valid_checks', extend_changed=True)
 
+    is_core_check = ctx.obj['repo_choice'] == 'core'
+
     files_failed = {}
     files_warned = {}
     file_counter = []
@@ -66,8 +69,15 @@ def config(ctx, check, sync, verbose):
 
         spec_file_path = manifest.get_config_spec()
         if not file_exists(spec_file_path):
+            example_location = get_data_directory(check)
+
+            # If there's an example file in core and no spec file, we should fail
+            if is_core_check and path_exists(example_location) and len(os.listdir(example_location)) > 0:
+                file_counter.append(None)
+                files_failed[spec_file_path] = True
+
             check_display_queue.append(
-                lambda spec_file_path=spec_file_path, check=check: echo_warning(
+                lambda spec_file_path=spec_file_path, check=check: (echo_failure if is_core_check else echo_failure)(
                     f"Did not find spec file {spec_file_path} for check {check}"
                 )
             )

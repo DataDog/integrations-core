@@ -6,7 +6,7 @@
   "tags": [
     "integration:coredns"
   ],
-  "description": "Notify your team when the number of cache hits is lower than usual.",
+  "description": "Caching is a fundamental feature to improve query performance and the overall efficiency of the DNS resolution process. This monitor tracks the count of cache hits to identify anomalies based on the historical pattern of cache hits.",
   "definition": {
     "message": "The number of cache hits is lower than usual",
     "name": "[CoreDNS] Cache hits count is low",

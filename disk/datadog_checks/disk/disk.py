@@ -133,7 +133,7 @@ class Disk(AgentCheck):
                 )
                 continue
             except Exception as e:
-                self.log.warning(
+                self.log.debug(
                     u'Unable to get disk metrics for %s: %s. '
                     u'You can exclude this mountpoint in the settings if it is invalid.',
                     part.mountpoint,
@@ -299,7 +299,7 @@ class Disk(AgentCheck):
             )
             return metrics
         except Exception as e:
-            self.log.warning(
+            self.log.debug(
                 u'Unable to get disk metrics for %s: %s. '
                 u'You can exclude this mountpoint in the settings if it is invalid.',
                 mountpoint,

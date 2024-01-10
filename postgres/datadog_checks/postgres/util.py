@@ -36,6 +36,53 @@ class DatabaseConfigurationError(Enum):
     autodiscovered_metrics_exceeds_collection_interval = "autodiscovered-metrics-exceeds-collection-interval"
 
 
+class DBExplainError(Enum):
+    """
+    Denotes the various reasons a query may not have an explain statement.
+    """
+
+    # may be due to a misconfiguration of the database during setup or the Agent is
+    # not able to access the required function
+    database_error = 'database_error'
+
+    # datatype mismatch occurs when return type is not json, for instance when multiple queries are explained
+    datatype_mismatch = 'datatype_mismatch'
+
+    # this could be the result of a missing EXPLAIN function
+    invalid_schema = 'invalid_schema'
+
+    # a value retrieved from the EXPLAIN function could be invalid
+    invalid_result = 'invalid_result'
+
+    # some statements cannot be explained i.e AUTOVACUUM
+    no_plans_possible = 'no_plans_possible'
+
+    # there could be a problem with the EXPLAIN function (missing, invalid permissions, or an incorrect definition)
+    failed_function = 'failed_function'
+
+    # a truncated statement can't be explained
+    query_truncated = "query_truncated"
+
+    # connection error may be due to a misconfiguration during setup
+    connection_error = 'connection_error'
+
+    # clients using the extended query protocol or prepared statements can't be explained due to
+    # the separation of the parsed query and raw bind parameters
+    parameterized_query = 'parameterized_query'
+
+    # search path may be different when the client executed a query from where we executed it.
+    undefined_table = 'undefined_table'
+
+    # the statement was explained with the prepared statement workaround
+    explained_with_prepared_statement = 'explained_with_prepared_statement'
+
+    # the statement was tried to be explained with the prepared statement workaround but failedd
+    failed_to_explain_with_prepared_statement = 'failed_to_explain_with_prepared_statement'
+
+    # the statement was tried to be explained with the prepared statement workaround but no plan was returned
+    no_plan_returned_with_prepared_statement = 'no_plan_returned_with_prepared_statement'
+
+
 def warning_with_tags(warning_message, *args, **kwargs):
     if args:
         warning_message = warning_message % args
@@ -515,6 +562,37 @@ SELECT
     ],
 }
 
+# Requires PG12+
+INDEX_PROGRESS_METRICS = {
+    'name': 'index_progress_metrics',
+    'query': """
+SELECT
+       p.datname, c.relname, i.relname, p.command, p.phase,
+       lockers_total, lockers_done,
+       blocks_total, blocks_done,
+       tuples_total, tuples_done,
+       partitions_total, partitions_done
+  FROM pg_stat_progress_create_index as p
+  LEFT JOIN pg_class c on c.oid = p.relid
+  LEFT JOIN pg_class i on i.oid = p.index_relid
+""",
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'index', 'type': 'tag_not_null'},
+        {'name': 'command', 'type': 'tag'},
+        {'name': 'phase', 'type': 'tag'},
+        {'name': 'postgresql.create_index.lockers_total', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.lockers_done', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.blocks_total', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.blocks_done', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.tuples_total', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.tuples_done', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.partitions_total', 'type': 'gauge'},
+        {'name': 'postgresql.create_index.partitions_done', 'type': 'gauge'},
+    ],
+}
+
 WAL_FILE_METRICS = {
     'name': 'wal_metrics',
     'query': """
@@ -680,3 +758,64 @@ SELECT {aggregation_columns_select}
 FROM pg_stat_activity
 GROUP BY datid {aggregation_columns_group}
 """
+
+# Requires PG10+
+STAT_SUBSCRIPTION_METRICS = {
+    'name': 'stat_subscription_metrics',
+    'query': """
+SELECT  subname,
+        EXTRACT(EPOCH FROM (age(current_timestamp, last_msg_send_time))),
+        EXTRACT(EPOCH FROM (age(current_timestamp, last_msg_receipt_time))),
+        EXTRACT(EPOCH FROM (age(current_timestamp, latest_end_time)))
+FROM pg_stat_subscription
+""",
+    'columns': [
+        {'name': 'subscription_name', 'type': 'tag'},
+        {'name': 'postgresql.subscription.last_msg_send_age', 'type': 'gauge'},
+        {'name': 'postgresql.subscription.last_msg_receipt_age', 'type': 'gauge'},
+        {'name': 'postgresql.subscription.latest_end_age', 'type': 'gauge'},
+    ],
+}
+
+# Requires PG14+
+# While pg_subscription is available since PG10,
+# pg_subscription.oid is only publicly accessible starting PG14.
+SUBSCRIPTION_STATE_METRICS = {
+    'name': 'subscription_state_metrics',
+    'query': """
+select
+    pg_subscription.subname,
+    srrelid::regclass,
+    CASE srsubstate
+        WHEN 'i' THEN 'initialize'
+        WHEN 'd' THEN 'data_copy'
+        WHEN 'f' THEN 'finished_copy'
+        WHEN 's' THEN 'synchronized'
+        WHEN 'r' THEN 'ready'
+    END,
+    1
+from pg_subscription_rel
+join pg_subscription ON pg_subscription.oid = pg_subscription_rel.srsubid""".strip(),
+    'columns': [
+        {'name': 'subscription_name', 'type': 'tag'},
+        {'name': 'relation', 'type': 'tag'},
+        {'name': 'state', 'type': 'tag'},
+        {'name': 'postgresql.subscription.state', 'type': 'gauge'},
+    ],
+}
+
+# Requires PG15+
+STAT_SUBSCRIPTION_STATS_METRICS = {
+    'name': 'stat_subscription_stats_metrics',
+    'query': """
+SELECT subname,
+       apply_error_count,
+       sync_error_count
+FROM pg_stat_subscription_stats
+""",
+    'columns': [
+        {'name': 'subscription_name', 'type': 'tag'},
+        {'name': 'postgresql.subscription.apply_error', 'type': 'monotonic_count'},
+        {'name': 'postgresql.subscription.sync_error', 'type': 'monotonic_count'},
+    ],
+}

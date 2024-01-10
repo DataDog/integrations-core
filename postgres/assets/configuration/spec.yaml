@@ -8,13 +8,11 @@ files:
   - template: instances
     options:
     - name: host
-      required: true
       description: |
         The hostname to connect to.
         NOTE: Even if the server name is `localhost`, the Agent connects to PostgreSQL using TCP/IP unless you also
         provide a value for the sock key.
       value:
-        example: localhost
         type: string
     - name: port
       description: The port to use when connecting to PostgreSQL.
@@ -22,11 +20,9 @@ files:
         type: integer
         example: 5432
     - name: username
-      required: true
       description: The Datadog username created to connect to PostgreSQL.
       value:
           type: string
-          example: datadog
     - name: password
       description: The password associated with the Datadog user.
       value:
@@ -356,6 +352,7 @@ files:
               - "model"
               - "msdb"
               - "cloudsqladmin"
+              - "rdsadmin"
             display_default:
               - "cloudsqladmin"
         - name: refresh
@@ -715,6 +712,16 @@ files:
         Configure how the SQL obfuscator behaves.
         Note: This option only applies when `dbm` is enabled.
       options:
+        - name: obfuscation_mode
+          description: |
+            Set the obfuscation mode. The obfuscation mode determines how the SQL obfuscator will obfuscate your SQL
+            statements. The following modes are supported:
+            - `obfuscate_only`: Obfuscate the SQL statement without normalizing the statement.
+            - `obfuscate_and_normalize`: Obfuscate the SQL statement and normalize the statement.
+          value:
+            type: string
+            example: obfuscate_and_normalize
+            display_default: obfuscate_and_normalize
         - name: replace_digits
           description: |
             Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
@@ -770,6 +777,48 @@ files:
             type: boolean
             example: true
             display_default: true
+        - name: remove_space_between_parentheses
+          description: |
+            Set to `true` to remove spaces between parentheses in your normalized SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: keep_null
+          description: |
+            Set to `true` to keep the keyword `NULL` in your obfuscated SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: keep_boolean
+          description: |
+            Set to `true` to keep the keywords `TRUE` and `FALSE` in your obfuscated SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: keep_positional_parameter
+          description: |
+            Set to `true` to keep positional parameters (e.g. `$1`) in your obfuscated SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: keep_trailing_semicolon
+          description: |
+            Set to `true` to keep trailing semicolons in your normalized SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: keep_identifier_quotation
+          description: |
+            Set to `true` to keep identifier quotations (e.g. `"my_table"`) in your normalized SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
     - name: log_unobfuscated_queries
       hidden: true
       description: |

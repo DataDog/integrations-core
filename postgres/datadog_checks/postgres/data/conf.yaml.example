@@ -13,22 +13,23 @@ init_config:
 #
 instances:
 
-    ## @param host - string - required
+  -
+    ## @param host - string - optional
     ## The hostname to connect to.
     ## NOTE: Even if the server name is `localhost`, the Agent connects to PostgreSQL using TCP/IP unless you also
     ## provide a value for the sock key.
     #
-  - host: localhost
+    # host: <HOST>
 
     ## @param port - integer - optional - default: 5432
     ## The port to use when connecting to PostgreSQL.
     #
     # port: 5432
 
-    ## @param username - string - required
+    ## @param username - string - optional
     ## The Datadog username created to connect to PostgreSQL.
     #
-    username: datadog
+    # username: <USERNAME>
 
     ## @param password - string - optional
     ## The password associated with the Datadog user.
@@ -280,6 +281,7 @@ instances:
         #   - model
         #   - msdb
         #   - cloudsqladmin
+        #   - rdsadmin
 
         ## @param refresh - integer - optional - default: 600
         ## Frequency in seconds of scans for new databases. Defaults to 10 minutes.
@@ -582,6 +584,14 @@ instances:
     #
     # obfuscator_options:
 
+        ## @param obfuscation_mode - string - optional - default: obfuscate_and_normalize
+        ## Set the obfuscation mode. The obfuscation mode determines how the SQL obfuscator will obfuscate your SQL
+        ## statements. The following modes are supported:
+        ## - `obfuscate_only`: Obfuscate the SQL statement without normalizing the statement.
+        ## - `obfuscate_and_normalize`: Obfuscate the SQL statement and normalize the statement.
+        #
+        # obfuscation_mode: obfuscate_and_normalize
+
         ## @param replace_digits - boolean - optional - default: false
         ## Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
         ## Note: This option also applies to extracted tables using `collect_tables`.
@@ -627,6 +637,36 @@ instances:
         ## Only strings with the tag `$func$` are supported.
         #
         # keep_dollar_quoted_func: true
+
+        ## @param remove_space_between_parentheses - boolean - optional - default: false
+        ## Set to `true` to remove spaces between parentheses in your normalized SQL statements.
+        #
+        # remove_space_between_parentheses: false
+
+        ## @param keep_null - boolean - optional - default: false
+        ## Set to `true` to keep the keyword `NULL` in your obfuscated SQL statements.
+        #
+        # keep_null: false
+
+        ## @param keep_boolean - boolean - optional - default: false
+        ## Set to `true` to keep the keywords `TRUE` and `FALSE` in your obfuscated SQL statements.
+        #
+        # keep_boolean: false
+
+        ## @param keep_positional_parameter - boolean - optional - default: false
+        ## Set to `true` to keep positional parameters (e.g. `$1`) in your obfuscated SQL statements.
+        #
+        # keep_positional_parameter: false
+
+        ## @param keep_trailing_semicolon - boolean - optional - default: false
+        ## Set to `true` to keep trailing semicolons in your normalized SQL statements.
+        #
+        # keep_trailing_semicolon: false
+
+        ## @param keep_identifier_quotation - boolean - optional - default: false
+        ## Set to `true` to keep identifier quotations (e.g. `"my_table"`) in your normalized SQL statements.
+        #
+        # keep_identifier_quotation: false
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

@@ -6,7 +6,6 @@ import itertools
 import json
 import os
 
-import pymongo.errors
 from bson import Timestamp, json_util
 from mock import MagicMock
 
@@ -44,22 +43,10 @@ class MockedCollection(object):
 class MockedDB(object):
     def __init__(self, db_name, deployment):
         self._db_name = db_name
-        self.current_op = lambda: self.command("current_op")
         self.deployment = deployment
 
     def __getitem__(self, coll_name):
         return MockedCollection(self._db_name, coll_name)
-
-    def aggregate(self, pipeline, **kwargs):
-        assert pipeline == [{"$currentOp": {}}], "Unexpected input to mocked DB method"
-
-        if self._db_name != "admin":
-            raise pymongo.errors.OperationFailure(
-                "$currentOp must be run against the 'admin' database with {aggregate: 1}"
-            )
-
-        with open(os.path.join(HERE, "fixtures", "current_op"), 'r') as f:
-            return json.load(f, object_hook=json_util.object_hook)
 
     def command(self, command, *args, **_):
         filename = command

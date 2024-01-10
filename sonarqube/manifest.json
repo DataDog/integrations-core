@@ -43,7 +43,11 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "java org.sonar.server.app.WebServer",
+        "java org.sonar.ce.app.CeServer"
+      ]
     },
     "dashboards": {
       "Sonarqube Overview": "assets/dashboards/overview.json"

@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2022-04-21",
   "last_updated_at": "2022-04-21",
-  "title": "5xx Errors higher than usual",
+  "title": "5xx errors number is high",
   "tags": [
     "integration:traffic-server"
   ],
-  "description": "Notifies when Traffic Server 5xx errors are higher than usual",
+  "description": "The Apache Traffic Server can have issues that prevent it from fulfilling a client's request. This monitor tracks anomalies in the 5xx HTTP response codes from the Apache Traffic Server to provide insights into unusual server errors.",
   "definition": {
     "message": "Number of 5xx errors on Traffic Server is at {{value}} which is higher than usual.",
     "name": "[Traffic Server] 5xx Errors higher than usual",

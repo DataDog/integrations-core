@@ -51,7 +51,7 @@ def dd_environment():
         endpoint = 'http://{}:{}/metrics'.format(calico_host, calico_port)
 
         # We can't add this to `kind_run` because we don't know the URL at this moment
-        condition = CheckEndpoints(endpoint, wait=2)
+        condition = CheckEndpoints(endpoint, wait=2, attempts=100)
         condition()
 
         yield {

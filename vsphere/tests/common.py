@@ -182,6 +182,20 @@ PERF_COUNTER_INFO = [
         rollupType=vim.PerformanceManager.CounterInfo.RollupType.average,
         unitInfo=vim.ElementDescription(key='kibibyte'),
     ),
+    vim.PerformanceManager.CounterInfo(
+        key=105,
+        groupInfo=vim.ElementDescription(key='datastore'),
+        nameInfo=vim.ElementDescription(key='busResets'),
+        rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
+        unitInfo=vim.ElementDescription(key='operation'),
+    ),
+    vim.PerformanceManager.CounterInfo(
+        key=106,
+        groupInfo=vim.ElementDescription(key='datastore'),
+        nameInfo=vim.ElementDescription(key='commandsAborted'),
+        rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
+        unitInfo=vim.ElementDescription(key='operation'),
+    ),
 ]
 
 
@@ -784,7 +798,7 @@ VM_PROPERTIES_EX = mock.MagicMock(
                     ),
                     vmodl.DynamicProperty(
                         name='summary.runtime.inMaintenanceMode',
-                        val='False',
+                        val=False,
                     ),
                 ],
             ),
@@ -805,7 +819,7 @@ VM_PROPERTIES_EX = mock.MagicMock(
                     ),
                     vmodl.DynamicProperty(
                         name='summary.runtime.inMaintenanceMode',
-                        val='True',
+                        val=True,
                     ),
                 ],
             ),
@@ -831,6 +845,31 @@ VM_PROPERTIES_EX = mock.MagicMock(
                     vmodl.DynamicProperty(
                         name='configuration.drsConfig.vmotionRate',
                         val=2,
+                    ),
+                ],
+            ),
+            vim.ObjectContent(
+                obj=vim.ClusterComputeResource(moId="c2"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='c2',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='configuration.dasConfig.enabled',
+                        val=False,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='configuration.drsConfig.enabled',
+                        val=False,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='configuration.drsConfig.defaultVmBehavior',
+                        val='fullyAutomated',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='configuration.drsConfig.vmotionRate',
+                        val=1,
                     ),
                 ],
             ),

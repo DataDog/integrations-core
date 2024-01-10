@@ -52,6 +52,9 @@
     },
     "logs": {
       "source": "envoy"
+    },
+    "monitors": {
+      "Envoy - connected state": "assets/monitors/connected_state.json"
     }
   }
 }
