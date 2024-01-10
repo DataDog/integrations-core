@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.2.1 / 2024-01-10
+
+***Fixed***:
+
+* Properly drop support for Python 2 ([#16589](https://github.com/DataDog/integrations-core/pull/16589))
+
 ## 2.2.0 / 2024-01-05
 
 ***Added***:
