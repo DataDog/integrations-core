@@ -100,9 +100,8 @@ def build_image():
             build_command.extend(['--progress', 'plain'])
 
         if args.build_args is not None:
-            for arg in args.build_args:
-                key, value = arg.split('=', 1)
-                build_command.extend(['--build-arg', f'DD_{key.upper()}={value}'])
+            for build_arg in args.build_args:
+                build_command.extend(['--build-arg', build_arg])
 
         check_process(build_command)
 
