@@ -1,0 +1,33 @@
+name: Test Google Cloud Platform OIDC
+on:
+  pull_request:
+
+jobs:
+  job_id:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Get credentials
+      id: auth
+      uses: google-github-actions/auth@v2
+      with:
+        project_id: datadog-agent-int-build
+        workload_identity_provider: projects/574011472402/locations/global/workloadIdentityPools/github/providers/integrations-core
+
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Test
+      run: |-
+        gcloud storage cat gs://dd-agent-int-deps/foo.txt
+        text=$(openssl rand -hex 12)
+        echo $text
+        echo $text > $text.txt
+        gcloud storage cp $text.txt gs://dd-agent-int-deps
+        gcloud storage cat gs://dd-agent-int-deps/$text.txt
