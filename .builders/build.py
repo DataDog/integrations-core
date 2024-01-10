@@ -74,6 +74,7 @@ def build_image():
     parser.add_argument('output_dir')
     parser.add_argument('--python', default='3')
     parser.add_argument('--no-run', action='store_true')
+    parser.add_argument('-a', '--build-arg', dest='build_args', nargs='+')
     parser.add_argument('-v', '--verbose', action='store_true')
     args = parser.parse_args()
 
@@ -97,6 +98,10 @@ def build_image():
         # For some reason this is not supported for Windows images
         if args.verbose and not windows_image:
             build_command.extend(['--progress', 'plain'])
+
+        if args.build_args is not None:
+            for build_arg in args.build_args:
+                build_command.extend(['--build-arg', build_arg])
 
         check_process(build_command)
 
