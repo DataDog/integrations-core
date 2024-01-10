@@ -1,0 +1,140 @@
+{
+    "flavors": [
+        {
+            "id": "5",
+            "name": "m1.xlarge",
+            "ram": 16384,
+            "disk": 160,
+            "swap": 0,
+            "OS-FLV-EXT-DATA:ephemeral": 0,
+            "OS-FLV-DISABLED:disabled": false,
+            "vcpus": 8,
+            "os-flavor-access:is_public": true,
+            "rxtx_factor": 1,
+            "links": [
+              {
+                "rel": "self",
+                "href": "http://34.91.114.145/compute/v2.1/flavors/5"
+              },
+              {
+                "rel": "bookmark",
+                "href": "http://34.91.114.145/compute/flavors/5"
+              }
+            ],
+            "description": null,
+            "extra_specs": {
+              "hw_rng:allowed": "True"
+            }
+        },
+        {
+            "id": "84",
+            "name": "m1.micro",
+            "ram": 192,
+            "disk": 1,
+            "swap": 0,
+            "OS-FLV-EXT-DATA:ephemeral": 0,
+            "OS-FLV-DISABLED:disabled": false,
+            "vcpus": 1,
+            "os-flavor-access:is_public": true,
+            "rxtx_factor": 1,
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "http://34.91.114.145/compute/v2.1/flavors/84"
+                },
+                {
+                    "rel": "bookmark",
+                    "href": "http://34.91.114.145/compute/flavors/84"
+                }
+            ],
+            "description": null,
+            "extra_specs": {
+                "hw_rng:allowed": "True"
+            }
+        },
+        {
+            "id": "c1",
+            "name": "cirros256",
+            "ram": 256,
+            "disk": 1,
+            "swap": 0,
+            "OS-FLV-EXT-DATA:ephemeral": 0,
+            "OS-FLV-DISABLED:disabled": false,
+            "vcpus": 1,
+            "os-flavor-access:is_public": true,
+            "rxtx_factor": 1,
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "http://34.91.114.145/compute/v2.1/flavors/c1"
+                },
+                {
+                    "rel": "bookmark",
+                    "href": "http://34.91.114.145/compute/flavors/c1"
+                }
+            ],
+            "description": null,
+            "extra_specs": {
+                "hw_rng:allowed": "True"
+            }
+        },
+        {
+            "id": "d1",
+            "name": "ds512M",
+            "ram": 512,
+            "disk": 5,
+            "swap": 0,
+            "OS-FLV-EXT-DATA:ephemeral": 0,
+            "OS-FLV-DISABLED:disabled": false,
+            "vcpus": 1,
+            "os-flavor-access:is_public": true,
+            "rxtx_factor": 1,
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "http://34.91.114.145/compute/v2.1/flavors/d1"
+                },
+                {
+                    "rel": "bookmark",
+                    "href": "http://34.91.114.145/compute/flavors/d1"
+                }
+            ],
+            "description": null,
+            "extra_specs": {
+                "hw_rng:allowed": "True"
+            }
+        },
+        {
+            "id": "d2",
+            "name": "ds1G",
+            "ram": 1024,
+            "disk": 10,
+            "swap": 0,
+            "OS-FLV-EXT-DATA:ephemeral": 0,
+            "OS-FLV-DISABLED:disabled": false,
+            "vcpus": 1,
+            "os-flavor-access:is_public": true,
+            "rxtx_factor": 1,
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "http://34.91.114.145/compute/v2.1/flavors/d2"
+                },
+                {
+                    "rel": "bookmark",
+                    "href": "http://34.91.114.145/compute/flavors/d2"
+                }
+            ],
+            "description": null,
+            "extra_specs": {
+                "hw_rng:allowed": "True"
+            }
+        }
+    ],
+    "flavors_links": [
+        {
+            "rel": "next",
+            "href": "http://34.141.226.224/compute/v2.1/flavors/detail?limit=5&marker=d2"
+        }
+    ]
+}

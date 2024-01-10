@@ -1179,6 +1179,306 @@ def test_flavors_metrics(aggregator, check, dd_run_check):
 
 
 @pytest.mark.parametrize(
+    ('instance', 'paginated_limit', 'api_type', 'expected_api_calls'),
+    [
+        pytest.param(
+            configs.REST,
+            5,
+            ApiType.REST,
+            4,
+            id='api rest small limit',
+        ),
+        pytest.param(
+            configs.REST,
+            1000,
+            ApiType.REST,
+            1,
+            id='api rest high limit',
+        ),
+        pytest.param(
+            configs.REST_NOVA_MICROVERSION_2_93,
+            5,
+            ApiType.REST,
+            4,
+            id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.SDK,
+            5,
+            ApiType.SDK,
+            1,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            configs.SDK,
+            1000,
+            ApiType.SDK,
+            1,
+            id='api sdk high limit',
+        ),
+        pytest.param(
+            configs.SDK_NOVA_MICROVERSION_2_93,
+            5,
+            ApiType.SDK,
+            1,
+            id='api sdk microversion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_flavors_pagination(
+    aggregator,
+    instance,
+    openstack_controller_check,
+    paginated_limit,
+    expected_api_calls,
+    api_type,
+    dd_run_check,
+    mock_http_get,
+    connection_compute,
+):
+    paginated_instance = copy.deepcopy(instance)
+    paginated_instance['paginated_limit'] = paginated_limit
+    dd_run_check(openstack_controller_check(paginated_instance))
+
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, kwargs = call
+            args_list += list(args)
+            params = kwargs.get('params', {})
+            limit = params.get('limit')
+            args_list += [(args[0], limit)]
+        assert (
+            args_list.count(('http://127.0.0.1:8774/compute/v2.1/flavors/detail', paginated_limit))
+            == expected_api_calls
+        )
+
+    elif api_type == ApiType.SDK:
+        assert (
+            connection_compute.flavors.call_args_list.count(mock.call(details=True, limit=paginated_limit))
+            == expected_api_calls
+        )
+
+        aggregator.assert_metric(
+            'openstack.nova.flavor.vcpus',
+            value=1,
+            tags=[
+                'keystone_server:http://127.0.0.1:8080/identity',
+                'flavor_id:1',
+                'flavor_name:m1.tiny',
+            ],
+        )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=1,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:2',
+            'flavor_name:m1.small',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=2,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:3',
+            'flavor_name:m1.medium',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=4,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:4',
+            'flavor_name:m1.large',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=1,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:42',
+            'flavor_name:m1.nano',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=8,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:5',
+            'flavor_name:m1.xlarge',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=1,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:84',
+            'flavor_name:m1.micro',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=1,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:c1',
+            'flavor_name:cirros256',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=1,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:d1',
+            'flavor_name:ds512M',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=1,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:d2',
+            'flavor_name:ds1G',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=2,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:d3',
+            'flavor_name:ds2G',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.vcpus',
+        value=4,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:d4',
+            'flavor_name:ds4G',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:1',
+            'flavor_name:m1.tiny',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:2',
+            'flavor_name:m1.small',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:3',
+            'flavor_name:m1.medium',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:4',
+            'flavor_name:m1.large',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:42',
+            'flavor_name:m1.nano',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:5',
+            'flavor_name:m1.xlarge',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:84',
+            'flavor_name:m1.micro',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:c1',
+            'flavor_name:cirros256',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:d1',
+            'flavor_name:ds512M',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:d2',
+            'flavor_name:ds1G',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:d3',
+            'flavor_name:ds2G',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.nova.flavor.swap',
+        value=0,
+        tags=[
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'flavor_id:d4',
+            'flavor_name:ds4G',
+        ],
+    )
+
+
+@pytest.mark.parametrize(
     ('mock_http_get', 'connection_compute', 'instance', 'api_type'),
     [
         pytest.param(

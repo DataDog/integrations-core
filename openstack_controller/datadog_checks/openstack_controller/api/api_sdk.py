@@ -164,7 +164,12 @@ class ApiSdk(Api):
         return [service.to_dict(original_names=True) for service in self.connection.compute.services()]
 
     def get_compute_flavors(self):
-        return [flavor.to_dict(original_names=True) for flavor in self.connection.compute.flavors(details=True)]
+        return [
+            flavor.to_dict(original_names=True)
+            for flavor in self.call_paginated_api(
+                self.connection.compute.flavors, details=True, limit=self.config.paginated_limit
+            )
+        ]
 
     def get_compute_hypervisors(self):
         return [
