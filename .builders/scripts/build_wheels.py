@@ -76,10 +76,10 @@ def main():
         env_vars['PIP_WHEEL_DIR'] = str(staged_wheel_dir)
         env_vars['DD_BUILD_PYTHON_VERSION'] = python_version
         env_vars['DD_MOUNT_DIR'] = str(MOUNT_DIR)
-        env_vars['PIP_NO_BINARY'] = ' '.join(PACKAGES_FORCE_BUILD)
 
         # Off is on, see: https://github.com/pypa/pip/issues/5735
         env_vars['PIP_NO_BUILD_ISOLATION'] = '0'
+        env_vars['PIP_NO_BINARY'] = ' '.join(PACKAGES_FORCE_BUILD)
 
         # Spaces are used to separate multiple values which means paths themselves cannot contain spaces, see:
         # https://github.com/pypa/pip/issues/10114#issuecomment-1880125475

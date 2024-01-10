@@ -23,7 +23,7 @@ curl "${url}" -Lo "${workdir}/${archive_name}"
 echo "${SHA256}  ${workdir}/${archive_name}" | sha256sum --check
 tar -C "${workdir}" -xf "${workdir}/${archive_name}"
 pushd "${workdir}/${relative_path}"
-./${CONFIGURE_SCRIPT:-configure} "$@"
+${CONFIGURE_SCRIPT:-./configure} "$@"
 make -j $(nproc)
 make install
 popd

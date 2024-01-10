@@ -59,6 +59,10 @@ def repair_linux(source_dir: str, output_dir: str) -> None:
     exclusions = [
         # pymqi
         'libmqic_r.so',
+        # confluent_kafka
+        # We leave cyrus-sasl out of the wheel because of the complexity involved in bundling it portably.
+        # This means the confluent-kafka wheel will have a runtime dependency on this library
+        'libsasl2.so.3',
     ]
 
     # Hardcoded policy to the minimum we need to currently support

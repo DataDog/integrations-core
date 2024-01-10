@@ -29,7 +29,7 @@ RUN yum install -y perl-IPC-Cmd && \
  SHA256="f93c9e8edde5e9166119de31755fc87b4aa34863662f67ddfcba14d0b6b69b61" \
  RELATIVE_PATH="openssl-{{version}}" \
  # no-module prevents the creation of dynamically loaded modules that would be problematic to bundle into Python wheels
- CONFIGURE_SCRIPT="config" \
+ CONFIGURE_SCRIPT="./config" \
  CONFIGURE_ARGS="-Wl,-Bsymbolic-functions -fPIC shared no-module no-comp no-idea no-mdc2 no-rc5 no-ssl3 no-gost" \
  bash install-from-source.sh \
  -fPIC shared \
@@ -131,6 +131,31 @@ RUN \
  RELATIVE_PATH=unixODBC-{{version}} \
  bash install-from-source.sh --disable-readline --with-included-ltdl --enable-ltdl-install
 
+# Dependencies needed to build librdkafka (and thus, confluent-kafka) with kerberos support
+# Note that we don't ship these but rely on the Agent providing a working cyrus-sasl installation
+# with kerberos support, therefore we only need to watch out for the version of cyrus-sasl being
+# compatible with that in the Agent, the rest shouldn't matter much
+RUN \
+ DOWNLOAD_URL="https://github.com/LMDB/lmdb/archive/LMDB_{{version}}.tar.gz" \
+ VERSION="0.9.29" \
+ SHA256="22054926b426c66d8f2bc22071365df6e35f3aacf19ad943bc6167d4cae3bebb" \
+ RELATIVE_PATH="lmdb-LMDB_{{version}}/libraries/liblmdb" \
+ # No ./configure, use a NOOP
+ CONFIGURE_SCRIPT="true" \
+ bash install-from-source.sh
+RUN \
+ DOWNLOAD_URL="https://mirrors.edge.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v{{version}}/e2fsprogs-{{version}}.tar.gz" \
+ VERSION="1.47.0" \
+ SHA256="0b4fe723d779b0927fb83c9ae709bc7b40f66d7df36433bef143e41c54257084" \
+ RELATIVE_PATH="e2fsprogs-{{version}}" \
+ bash install-from-source.sh --enable-elf-shlibs
+RUN \
+ DOWNLOAD_URL="https://github.com/cyrusimap/cyrus-sasl/releases/download/cyrus-sasl-{{version}}/cyrus-sasl-{{version}}.tar.gz" \
+ VERSION="2.1.28" \
+ SHA256="7ccfc6abd01ed67c1a0924b353e526f1b766b21f42d4562ee635a8ebfc5bb38c" \
+ RELATIVE_PATH="cyrus-sasl-{{version}}" \
+ bash install-from-source.sh --with-dblib=lmdb --enable-gssapi=/usr/local
+
 # Environment variables to help openssl crate find OpenSSL
 ENV OPENSSL_LIB_DIR="/usr/local/lib64"
 ENV OPENSSL_INCLUDE_DIR="/usr/local/include"
@@ -148,3 +173,4 @@ COPY build_script.sh /build_script.sh
 ENV DD_BUILD_COMMAND="bash /build_script.sh"
 
 ENTRYPOINT ["python3", "/home/scripts/build_wheels.py"]
+
