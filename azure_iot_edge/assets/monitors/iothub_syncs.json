@@ -1,32 +1,39 @@
 {
-	"name": "[Azure IoT Edge] Rate of unsuccessful syncs with IoT Hub is higher than usual on device {{host}}",
-	"type": "query alert",
-	"query": "avg(last_1h):anomalies(per_minute(avg:azure.iot_edge.edge_agent.unsuccessful_iothub_syncs_total{*} by {host}), 'basic', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true') >= 1",
-	"message": "Number of unsuccessful syncs between Edge Agent and IoT Hub on device {{host}} is at {{value}} per minute, which is higher than usual.",
-	"tags": [
-		"integration:azure_iot_edge"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_host_delay": 300,
-		"require_full_window": false,
-		"notify_no_data": false,
-		"renotify_interval": 0,
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 1,
-			"critical_recovery": 0
-		},
-		"threshold_windows": {
-			"trigger_window": "last_15m",
-			"recovery_window": "last_15m"
-		}
-	},
-	"recommended_monitor_metadata": {
-		"description": "Notifies when unsuccessful syncs between Edge Agent and IoT Hub are higher than usual"
-	}
+  "version": 2,
+  "created_at": "2020-10-22",
+  "last_updated_at": "2020-10-22",
+  "title": "Unsuccessful syncs are high",
+  "tags": [
+    "integration:azure-iot-edge"
+  ],
+  "description": "Synchronization between the IoT Edge Agent and Azure IoT Hub can fail. This monitor detects anomalies in the rate of these failures on specific hosts, indicating problems with the network, authentication, or configuration issues.",
+  "definition": {
+    "message": "Number of unsuccessful syncs between Edge Agent and IoT Hub on device {{host}} is at {{value}} per minute, which is higher than usual.",
+    "name": "[Azure IoT Edge] Rate of unsuccessful syncs with IoT Hub is higher than usual on device {{host}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "timeout_h": 0
+    },
+    "query": "avg(last_1h):anomalies(per_minute(avg:azure.iot_edge.edge_agent.unsuccessful_iothub_syncs_total{*} by {host}), 'basic', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true') >= 1",
+    "tags": [
+      "integration:azure_iot_edge"
+    ],
+    "type": "query alert"
+  }
 }

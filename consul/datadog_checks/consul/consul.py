@@ -42,6 +42,8 @@ NodeStatus = namedtuple('NodeStatus', ['node_id', 'service_name', 'service_tags_
 
 
 class ConsulCheck(OpenMetricsBaseCheck):
+    DEFAULT_METRIC_LIMIT = 0
+
     def __init__(self, name, init_config, instances):
         instance = instances[0]
         self.url = instance.get('url')

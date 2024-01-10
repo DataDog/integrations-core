@@ -1,0 +1,52 @@
+{
+    debug
+    admin :2019
+}
+:80 {
+    root * /usr/share/caddy/
+    @get_load_balancer {
+        method GET
+        path /load-balancer
+    }
+    route @get_load_balancer {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+    @get_load_balancer_v2_load_balancers {
+        method GET
+        header X-Auth-Token "demo_test"
+        path /load-balancer/v2/lbaas/loadbalancers
+    }
+    route @get_load_balancer_v2_load_balancers {
+        rewrite * /GET{http.request.uri.path}/{query}/response.json
+        file_server
+    }
+    @get_load_balancer_v2_load_balancers_stats {
+        method GET
+        header X-Auth-Token "demo_test"
+        path /load-balancer/v2/lbaas/loadbalancers/*/stats
+    }
+    route @get_load_balancer_v2_load_balancers_stats {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+    @get_load_balancer_v2_load_listeners {
+        method GET
+        header X-Auth-Token "demo_test"
+        path /load-balancer/v2/lbaas/listeners
+    }
+    route @get_load_balancer_v2_load_listeners {
+        rewrite * /GET{http.request.uri.path}/{query}/response.json
+        file_server
+    }
+    @get_load_balancer_v2_load_listeners_stats {
+        method GET
+        header X-Auth-Token "demo_test"
+        path /load-balancer/v2/lbaas/listeners/*/stats
+    }
+    route @get_load_balancer_v2_load_listeners_stats {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+    file_server browse
+}

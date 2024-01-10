@@ -1,29 +1,38 @@
 {
-  "name": "[VoltDB] Node {{voltdb_host.name}} is running at very high CPU load",
-  "type": "query alert",
-  "query": "avg(last_5m):avg:voltdb.cpu.percent_used{*} by {voltdb_host}.rollup(max, 60) >= 90",
-  "message": "Please check node {{voltdb_host.name}}, as CPU usage has been over {{threshold}}% for the past 5min.",
-  "tags": ["integration:voltdb"],
-  "options": {
-    "notify_audit": false,
-    "locked": false,
-    "timeout_h": 0,
-    "silenced": {},
-    "include_tags": true,
-    "no_data_timeframe": null,
-    "require_full_window": true,
-    "new_host_delay": 300,
-    "notify_no_data": false,
-    "renotify_interval": 0,
-    "escalation_message": "",
-    "thresholds": {
-      "critical": 90,
-      "critical_recovery": 89,
-      "warning": 75,
-      "warning_recovery": 74
-    }
-  },
-  "recommended_monitor_metadata": {
-    "description": "Triggers an alert when a VoltDB node is reporting very high CPU usage"
+  "version": 2,
+  "created_at": "2021-01-08",
+  "last_updated_at": "2021-01-13",
+  "title": "Voltdb Node CPU is high",
+  "tags": [
+    "integration:voltdb"
+  ],
+  "description": "High VoltDB node CPU can lead to issues. It can signify heavy workloads, resource competition, inefficient queries, scaling needs, hardware limits, and software problems. This monitor tracks CPU to alert if it gets too high.",
+  "definition": {
+    "message": "Please check node {{voltdb_host.name}}, as CPU usage has been over {{threshold}}% for the past 5min.",
+    "name": "[VoltDB] Node {{voltdb_host.name}} is running at very high CPU load",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "silenced": {},
+      "thresholds": {
+        "critical": 90,
+        "critical_recovery": 89,
+        "warning": 75,
+        "warning_recovery": 74
+      },
+      "timeout_h": 0
+    },
+    "query": "avg(last_5m):avg:voltdb.cpu.percent_used{*} by {voltdb_host}.rollup(max, 60) >= 90",
+    "tags": [
+      "integration:voltdb"
+    ],
+    "type": "query alert"
   }
 }

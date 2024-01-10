@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "created_at": "2020-12-23",
+  "last_updated_at": "2020-12-23",
+  "title": "Cache is not large enough",
+  "tags": [
+    "integration:marklogic"
+  ],
+  "description": "The cache is used to store frequently accessed data in memory, improving data retrieval speed. This monitor tracks how efficiently the cache handles data retrieval for queries, detecting potential performance issues when the ratio is too high.",
+  "definition": {
+    "message": "{{#is_alert}} \nTo fix:\n1. Consider adding memory to the cache.\n{{/is_alert}}\n\n{{#is_recovery}}\nWhew, there's now enough cache to safely handle new requests!\n{{/is_recovery}}",
+    "name": "[MarkLogic] {{host.name}} cache is not large enough to handle new requests",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 0.006,
+        "warning": 0.005
+      },
+      "timeout_h": 0
+    },
+    "query": "change(avg(last_5m),last_5m):avg:marklogic.forests.query_read_rate{*} / avg:marklogic.forests.list_cache_hit_rate{*} > 0.006",
+    "tags": [
+      "integration:marklogic"
+    ],
+    "type": "query alert"
+  }
+}

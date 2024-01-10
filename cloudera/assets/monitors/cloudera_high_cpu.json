@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "created_at": "2023-01-30",
+  "last_updated_at": "2023-01-30",
+  "title": "Cloudera CPU usage is high",
+  "tags": [
+    "integration:cloudera"
+  ],
+  "description": "CPU usage measures how active a computer's processor is. This monitor tracks average CPU usage across all hosts in a Cloudera cluster and triggers an alert if it exceeds 50%, signaling potential performance issues.",
+  "definition": {
+    "message": "The CPU % usage across hosts for {{cluster.name}} is high. Please check to see what the issue is.",
+    "name": "[Cloudera] High CPU % usage across hosts for {{cluster.name}}",
+    "options": {
+      "include_tags": false,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 50,
+        "warning": 40
+      }
+    },
+    "query": "avg(last_5m):avg:cloudera.cluster.cpu_percent_across_hosts{*} > 50",
+    "tags": [
+      "integration:cloudera"
+    ],
+    "type": "query alert"
+  }
+}

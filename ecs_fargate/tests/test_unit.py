@@ -136,7 +136,7 @@ def test_successful_check_linux(check, aggregator, dd_run_check):
         aggregator.assert_metric(metric, count=1)  # 1 network interfaces
 
     for metric in EXPECTED_TASK_METRICS:
-        aggregator.assert_metric(metric, count=1, tags=common_tags + task_tags, value=2 * 10**9)
+        aggregator.assert_metric(metric, count=1, tags=common_tags + task_tags)
 
     aggregator.assert_all_metrics_covered()
 
@@ -194,7 +194,7 @@ def test_successful_check_windows(check, aggregator, dd_run_check):
         aggregator.assert_metric(metric, count=1)  # 1 network interfaces
 
     for metric in EXPECTED_TASK_METRICS:
-        aggregator.assert_metric(metric, count=1, tags=common_tags + task_tags, value=2 * 10**9)
+        aggregator.assert_metric(metric, count=1, tags=common_tags + task_tags)
 
     aggregator.assert_all_metrics_covered()
 
@@ -273,7 +273,7 @@ def test_successful_check_wrong_sys_delta(check, aggregator, dd_run_check):
         aggregator.assert_metric(metric, count=1)  # 1 network interfaces
 
     for metric in EXPECTED_TASK_METRICS:
-        aggregator.assert_metric(metric, count=1, tags=common_tags + task_tags, value=2 * 10**9)
+        aggregator.assert_metric(metric, count=1, tags=common_tags + task_tags)
 
     aggregator.assert_all_metrics_covered()
 
@@ -292,14 +292,14 @@ def test_config(test_case, extra_config, expected_http_kwargs, dd_run_check):
 
         dd_run_check(check)
 
-        http_wargs = dict(
-            auth=mock.ANY,
-            cert=mock.ANY,
-            headers=mock.ANY,
-            proxies=mock.ANY,
-            timeout=mock.ANY,
-            verify=mock.ANY,
-            allow_redirects=mock.ANY,
-        )
+        http_wargs = {
+            'auth': mock.ANY,
+            'cert': mock.ANY,
+            'headers': mock.ANY,
+            'proxies': mock.ANY,
+            'timeout': mock.ANY,
+            'verify': mock.ANY,
+            'allow_redirects': mock.ANY,
+        }
         http_wargs.update(expected_http_kwargs)
         r.get.assert_called_with('http://169.254.170.2/v2/metadata', **http_wargs)

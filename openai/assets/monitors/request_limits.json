@@ -1,0 +1,33 @@
+{
+  "version": 2,
+  "created_at": "2023-05-08",
+  "last_updated_at": "2023-05-08",
+  "title": "OpenAI API usage is approaching rate limit",
+  "tags": [
+    "integration:openai"
+  ],
+  "description": "OpenAI's API requests have a rate limit. Multiple requests sent in a short period of time can be in danger of reaching this limit. This monitor tracks your OpenAI requests and if you are getting close to the API’s rate limits.",
+  "definition": {
+    "message": "{{#is_alert}}\n\nALERT: Your OpenAI usage is getting close to the rate limits for your account. You have {{value}} remaining requests. \n\n{{/is_alert}}",
+    "name": "[OpenAI] Request Limits",
+    "options": {
+      "include_tags": false,
+      "new_host_delay": 300,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "silenced": {},
+      "thresholds": {
+        "critical": 1000
+      }
+    },
+    "priority": null,
+    "query": "avg(last_5m):avg:openai.ratelimit.remaining.requests{*} < 1000",
+    "restricted_roles": null,
+    "tags": [
+      "integration:openai"
+    ],
+    "type": "query alert"
+  }
+}

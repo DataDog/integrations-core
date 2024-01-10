@@ -4,7 +4,7 @@
 import logging
 import re
 from collections import OrderedDict
-from typing import Any
+from typing import Any  # noqa: F401
 
 import mock
 import pytest

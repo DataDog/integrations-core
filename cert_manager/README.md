@@ -41,14 +41,27 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+### Duplicate name tags
+
+Each certificate name is exposed within the `name` label in the Prometheus payload and is converted to a tag by the Datadog Agent. If your hosts also use the `name` tag (for instance, automatically collected by the [AWS integration][9]), metrics coming from this integration will present both values. To avoid duplicate `name` tags, you can use the [`rename_labels`configuration parameter][10] to map the Prometheus label `name` to the Datadog tag `cert_name`. This ensures you have a single value within the tag `cert_name` to identify your certificates :
+```yaml
+init_config:
+instances:
+- openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
+  rename_labels:
+    name: cert_name
+```
+
+Need further help? Contact [Datadog support][11].
 
 [1]: https://github.com/jetstack/cert-manager
 [2]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cert_manager/images/overview_dashboard.png
-[3]: https://app.datadoghq.com/account/settings#agent
+[3]: https://app.datadoghq.com/account/settings/agent/latest
 [4]: https://github.com/DataDog/integrations-core/blob/master/cert_manager/datadog_checks/cert_manager/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/cert_manager/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/cert_manager/assets/service_checks.json
-[9]: https://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/integrations/amazon_web_services/
+[10]: https://github.com/DataDog/integrations-core/blob/81b91a54328f174c5c1e92cb818640cba1ddfec3/cert_manager/datadog_checks/cert_manager/data/conf.yaml.example#L153-L155
+[11]: https://docs.datadoghq.com/help/

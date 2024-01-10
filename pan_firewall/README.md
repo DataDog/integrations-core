@@ -84,7 +84,7 @@ Additional helpful documentation, links, and articles:
 
 Need help? Contact [Datadog support][7].
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://www.youtube.com/watch?v=LOPXg0oCMPs
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6v7
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

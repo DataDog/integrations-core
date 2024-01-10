@@ -5,9 +5,11 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.const import DATABASE_INDEX_METRICS
 
 from .common import (
     CUSTOM_METRICS,
+    E2E_OPERATION_TIME_METRIC_NAME,
     EXPECTED_AO_METRICS_COMMON,
     EXPECTED_AO_METRICS_PRIMARY,
     EXPECTED_AO_METRICS_SECONDARY,
@@ -17,6 +19,7 @@ from .common import (
     EXPECTED_QUERY_EXECUTOR_AO_METRICS_SECONDARY,
     UNEXPECTED_FCI_METRICS,
     UNEXPECTED_QUERY_EXECUTOR_AO_METRICS,
+    inc_perf_counter_metrics,
 )
 from .utils import always_on, not_windows_ado, not_windows_ci
 
@@ -49,7 +52,9 @@ def test_ao_primary_replica(dd_agent_check, init_config, instance_ao_docker_prim
     for mname in EXPECTED_AO_METRICS_SECONDARY:
         aggregator.assert_metric(mname, count=0)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS)
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), exclude=CUSTOM_METRICS + E2E_OPERATION_TIME_METRIC_NAME
+    )
 
 
 @not_windows_ci
@@ -89,14 +94,19 @@ def test_ao_secondary_replica(dd_agent_check, init_config, instance_ao_docker_se
     for mname in EXPECTED_AO_METRICS_PRIMARY + EXPECTED_QUERY_EXECUTOR_AO_METRICS_PRIMARY:
         aggregator.assert_metric(mname, count=0)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS)
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), exclude=CUSTOM_METRICS + E2E_OPERATION_TIME_METRIC_NAME
+    )
 
 
 @not_windows_ado
 def test_check_docker(dd_agent_check, init_config, instance_e2e):
-    # run run sync to ensure only a single run of both
-    instance_e2e['query_activity'] = {'run_sync': True}
-    instance_e2e['query_metrics'] = {'run_sync': True}
+    # run sync to ensure only a single run of both
+    # set a very small collection interval so the tests go fast
+    instance_e2e['query_activity'] = {'run_sync': True, 'collection_interval': 0.1}
+    instance_e2e['query_metrics'] = {'run_sync': True, 'collection_interval': 0.1}
+    instance_e2e['procedure_metrics'] = {'run_sync': True, 'collection_interval': 0.1}
+    instance_e2e['collect_settings'] = {'run_sync': True, 'collection_interval': 0.1}
     aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_e2e]}, rate=True)
 
     aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
@@ -106,6 +116,18 @@ def test_check_docker(dd_agent_check, init_config, instance_e2e):
     dbm_debug_metrics = [m for m in aggregator._metrics.keys() if m.startswith('dd.sqlserver.')]
     for m in dbm_debug_metrics:
         del aggregator._metrics[m]
+    # remove inc perf counter metrics as they rely on diffs to be calculated/ emitted
+    # so have special test cases
+    inc_perf_counter_metrics_to_remove = [
+        m for m in aggregator._metrics.keys() if any(metric[0] in m for metric in inc_perf_counter_metrics)
+    ]
+    for m in inc_perf_counter_metrics_to_remove:
+        del aggregator._metrics[m]
+
+    # remove index usage metrics, which require extra setup & will be tested separately
+    for m in DATABASE_INDEX_METRICS:
+        if m[0] in aggregator._metrics:
+            del aggregator._metrics[m[0]]
 
     for mname in EXPECTED_METRICS_DBM_ENABLED:
         aggregator.assert_metric(mname)
@@ -116,4 +138,6 @@ def test_check_docker(dd_agent_check, init_config, instance_e2e):
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK)
     aggregator.assert_all_metrics_covered()
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS)
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), exclude=CUSTOM_METRICS + E2E_OPERATION_TIME_METRIC_NAME
+    )

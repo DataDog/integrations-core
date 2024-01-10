@@ -13,8 +13,10 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta
 
 from pyVim import connect
-from pyVmomi import vim  # pylint: disable=E0611
-from pyVmomi import vmodl  # pylint: disable=E0611
+from pyVmomi import (
+    vim,  # pylint: disable=E0611
+    vmodl,  # pylint: disable=E0611
+)
 from six import itervalues
 from six.moves import range
 
@@ -212,7 +214,7 @@ class VSphereLegacyCheck(AgentCheck):
             new_events = event_manager.QueryEvents(query_filter)
             self.log.debug("Got %s events from vCenter event manager", len(new_events))
             for event in new_events:
-                normalized_event = VSphereEvent(event, self.event_config[i_key], tags)
+                normalized_event = VSphereEvent(event, self.event_config[i_key], tags, list(REALTIME_RESOURCES))
                 # Can return None if the event if filtered out
                 event_payload = normalized_event.get_datadog_payload()
                 if event_payload is not None:

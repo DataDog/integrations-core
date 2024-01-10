@@ -1,34 +1,41 @@
 {
-	"name": "[Hudi] Anomalous commit duration for table {{table_name.name}}",
-	"type": "query alert",
-	"query": "avg(last_12h):anomalies(avg:hudi.action.duration{action:commit} by {table_name,host}, 'agile', 3, direction='above', alert_window='last_2h', interval=600, count_default_zero='true', seasonality='daily') >= 1",
-	"message": "There is an anomaly in the Hudi commit duration on host: {{host.host}} for the table {{table_name.name}} \n\n\n`hudi.action.duration` measures the amount of time it took to successfully perform a commit on a batch of records in milliseconds.",
-	"tags": [
-		"integration:hudi"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_group_delay": 60,
-		"require_full_window": false,
-		"notify_no_data": true,
-		"renotify_interval": "0",
-		"renotify_occurrences": null,
-		"renotify_statuses": null,
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 1,
-			"critical_recovery": 0
-		},
-		"threshold_windows": {
-			"trigger_window": "last_2h",
-			"recovery_window": "last_1h"
-		}
-	},
-	"recommended_monitor_metadata": {
-		"description": "Get notified when the commit duration is higher than normal."
-	}
+  "version": 2,
+  "created_at": "2021-12-14",
+  "last_updated_at": "2021-12-14",
+  "title": "Commit duration is high",
+  "tags": [
+    "integration:hudi"
+  ],
+  "description": "When you commit a set of data changes, it takes some time for the operation to complete. This monitor tracks anomalies in the average duration of Apache Hudi commit actions for different tables and hosts to detect unexpected behavior.",
+  "definition": {
+    "message": "There is an anomaly in the Hudi commit duration on host: {{host.host}} for the table {{table_name.name}} \n\n\n`hudi.action.duration` measures the amount of time it took to successfully perform a commit on a batch of records in milliseconds.",
+    "name": "[Hudi] Anomalous commit duration for table {{table_name.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_group_delay": 60,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": true,
+      "renotify_interval": "0",
+      "renotify_occurrences": null,
+      "renotify_statuses": null,
+      "require_full_window": false,
+      "threshold_windows": {
+        "recovery_window": "last_1h",
+        "trigger_window": "last_2h"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "timeout_h": 0
+    },
+    "query": "avg(last_12h):anomalies(avg:hudi.action.duration{action:commit} by {table_name,host}, 'agile', 3, direction='above', alert_window='last_2h', interval=600, count_default_zero='true', seasonality='daily') >= 1",
+    "tags": [
+      "integration:hudi"
+    ],
+    "type": "query alert"
+  }
 }

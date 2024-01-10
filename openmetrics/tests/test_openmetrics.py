@@ -9,15 +9,10 @@ from datadog_checks.openmetrics import OpenMetricsCheck
 
 from .common import CHECK_NAME
 
-pytestmark = pytest.mark.usefixtures("poll_mock")
+pytestmark = [
+    pytest.mark.skipif(PY2, reason='Test only available on Python 3'),
+]
 
-instance = {
-    'prometheus_url': 'http://localhost:10249/metrics',
-    'namespace': 'openmetrics',
-    'metrics': [{'metric1': 'renamed.metric1'}, 'metric2', 'counter1_total'],
-    'send_histograms_buckets': True,
-    'send_monotonic_counter': True,
-}
 instance_new = {
     'openmetrics_endpoint': 'http://localhost:10249/metrics',
     'namespace': 'openmetrics',
@@ -25,84 +20,27 @@ instance_new = {
     'collect_histogram_buckets': True,
 }
 
+instance_new_strict = {
+    'openmetrics_endpoint': 'http://localhost:10249/metrics',
+    'namespace': 'openmetrics',
+    'metrics': [{'metric1': 'renamed.metric1'}, 'metric2', 'counter1'],
+    'collect_histogram_buckets': True,
+    'use_latest_spec': True,
+}
 
-def test_openmetrics_check(dd_run_check, aggregator):
-    c = OpenMetricsCheck('openmetrics', {}, [instance])
-    dd_run_check(c)
-    aggregator.assert_metric(
-        CHECK_NAME + '.renamed.metric1',
-        tags=['node:host1', 'flavor:test', 'matched_label:foobar'],
-        metric_type=aggregator.GAUGE,
-    )
-    aggregator.assert_metric(
-        CHECK_NAME + '.metric2',
-        tags=['timestamp:123', 'node:host2', 'matched_label:foobar'],
-        metric_type=aggregator.GAUGE,
-    )
-    aggregator.assert_metric(
-        CHECK_NAME + '.counter1_total', tags=['node:host2'], metric_type=aggregator.MONOTONIC_COUNT
-    )
-    aggregator.assert_all_metrics_covered()
+instance_unavailable = {
+    'openmetrics_endpoint': 'http://127.0.0.1:4243/metrics',
+    'namespace': 'openmetrics',
+    'metrics': [{'metric1': 'renamed.metric1'}, 'metric2', 'counter1'],
+    'ignore_connection_errors': True,
+}
 
 
-def test_openmetrics_check_counter_gauge(dd_run_check, aggregator):
-    instance['send_monotonic_counter'] = False
-    c = OpenMetricsCheck('openmetrics', {}, [instance])
-    dd_run_check(c)
-    aggregator.assert_metric(
-        CHECK_NAME + '.renamed.metric1',
-        tags=['node:host1', 'flavor:test', 'matched_label:foobar'],
-        metric_type=aggregator.GAUGE,
-    )
-    aggregator.assert_metric(
-        CHECK_NAME + '.metric2',
-        tags=['timestamp:123', 'node:host2', 'matched_label:foobar'],
-        metric_type=aggregator.GAUGE,
-    )
-    aggregator.assert_metric(CHECK_NAME + '.counter1_total', tags=['node:host2'], metric_type=aggregator.GAUGE)
-    aggregator.assert_all_metrics_covered()
-
-
-def test_invalid_metric(dd_run_check, aggregator):
-    """
-    Testing that invalid values of metrics are discarded
-    """
-    bad_metric_instance = {
-        'prometheus_url': 'http://localhost:10249/metrics',
-        'namespace': 'openmetrics',
-        'metrics': [{'metric1': 'renamed.metric1'}, 'metric2', 'metric3'],
-        'send_histograms_buckets': True,
-    }
-    c = OpenMetricsCheck('openmetrics', {}, [bad_metric_instance])
-    dd_run_check(c)
-    assert aggregator.metrics('metric3') == []
-
-
-def test_openmetrics_wildcard(dd_run_check, aggregator):
-    instance_wildcard = {
-        'prometheus_url': 'http://localhost:10249/metrics',
-        'namespace': 'openmetrics',
-        'metrics': ['metric*'],
-    }
-
-    c = OpenMetricsCheck('openmetrics', {}, [instance_wildcard])
-    dd_run_check(c)
-    aggregator.assert_metric(
-        CHECK_NAME + '.metric1',
-        tags=['node:host1', 'flavor:test', 'matched_label:foobar'],
-        metric_type=aggregator.GAUGE,
-    )
-    aggregator.assert_metric(
-        CHECK_NAME + '.metric2',
-        tags=['timestamp:123', 'node:host2', 'matched_label:foobar'],
-        metric_type=aggregator.GAUGE,
-    )
-    aggregator.assert_all_metrics_covered()
-
-
-@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
-def test_linkerd_v2_new(aggregator, dd_run_check):
+@pytest.mark.parametrize('poll_mock_fixture', ['prometheus_poll_mock', 'openmetrics_poll_mock'])
+def test_openmetrics(aggregator, dd_run_check, request, poll_mock_fixture):
     from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
+
+    request.getfixturevalue(poll_mock_fixture)
 
     check = OpenMetricsCheck('openmetrics', {}, [instance_new])
     scraper = OpenMetricsScraper(check, instance_new)
@@ -132,3 +70,55 @@ def test_linkerd_v2_new(aggregator, dd_run_check):
 
     assert check.http.options['headers']['Accept'] == '*/*'
     assert scraper.http.options['headers']['Accept'] == 'text/plain'
+
+
+def test_openmetrics_use_latest_spec(aggregator, dd_run_check, mock_http_response, openmetrics_payload, caplog):
+    from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
+
+    # We want to make sure that when `use_latest_spec` is enabled, we use the OpenMetrics parser
+    # even when the response's `Content-Type` doesn't declare the appropriate media type.
+    mock_http_response(openmetrics_payload, normalize_content=False)
+
+    check = OpenMetricsCheck('openmetrics', {}, [instance_new_strict])
+    scraper = OpenMetricsScraper(check, instance_new_strict)
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        '{}.renamed.metric1'.format(CHECK_NAME),
+        tags=['endpoint:http://localhost:10249/metrics', 'node:host1', 'flavor:test', 'matched_label:foobar'],
+        metric_type=aggregator.GAUGE,
+    )
+    aggregator.assert_metric(
+        '{}.metric2'.format(CHECK_NAME),
+        tags=['endpoint:http://localhost:10249/metrics', 'timestamp:123', 'node:host2', 'matched_label:foobar'],
+        metric_type=aggregator.GAUGE,
+    )
+    aggregator.assert_metric(
+        '{}.counter1.count'.format(CHECK_NAME),
+        tags=['endpoint:http://localhost:10249/metrics', 'node:host2'],
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
+    aggregator.assert_all_metrics_covered()
+
+    assert check.http.options['headers']['Accept'] == '*/*'
+    assert caplog.text == ''
+    assert scraper.http.options['headers']['Accept'] == (
+        'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
+    )
+
+
+def test_openmetrics_empty_response(aggregator, dd_run_check, mock_http_response, openmetrics_payload, caplog):
+    mock_http_response("")
+
+    check = OpenMetricsCheck('openmetrics', {}, [instance_new])
+    dd_run_check(check)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_openmetrics_endpoint_unavailable(aggregator, dd_run_check):
+    check = OpenMetricsCheck('openmetrics', {}, [instance_unavailable])
+    dd_run_check(check)
+
+    # Collects no metrics without error.
+    aggregator.assert_all_metrics_covered()

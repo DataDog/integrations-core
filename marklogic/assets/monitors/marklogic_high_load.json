@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "created_at": "2020-12-23",
+  "last_updated_at": "2020-12-23",
+  "title": "Forest processing load is high",
+  "tags": [
+    "integration:marklogic"
+  ],
+  "description": "A \"forest\" in MarkLogic is a logical storage container that holds documents and data. This monitor tracks the load for each forest to detect a performance issue or a potential problem that requires attention or investigation.",
+  "definition": {
+    "message": "Average forest load has been higher than 2G during the past 5 minutes",
+    "name": "[MarkLogic] Forest Processing Load is High on {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 2000000000,
+        "warning": 1000000000
+      },
+      "timeout_h": 0
+    },
+    "query": "avg(last_5m):avg:marklogic.forests.total_rate{*} > 2000000000",
+    "tags": [
+      "integration:marklogic"
+    ],
+    "type": "query alert"
+  }
+}

@@ -203,9 +203,13 @@ class InnoDBMetrics(object):
                     results['Innodb_pending_aio_log_ios'] = 0
                     results['Innodb_pending_aio_sync_ios'] = 0
             elif line.find('Pending flushes (fsync)') == 0:
-                # Pending flushes (fsync) log: 0; buffer pool: 0
-                results['Innodb_pending_log_flushes'] = long(row[4])
-                results['Innodb_pending_buffer_pool_flushes'] = long(row[7])
+                if len(row) == 4:
+                    # Pending flushes (fsync): 0
+                    results['Innodb_pending_buffer_pool_flushes'] = long(row[3])
+                else:
+                    # Pending flushes (fsync) log: 0; buffer pool: 0
+                    results['Innodb_pending_log_flushes'] = long(row[4])
+                    results['Innodb_pending_buffer_pool_flushes'] = long(row[7])
 
             # INSERT BUFFER AND ADAPTIVE HASH INDEX
             elif line.find('Ibuf for space 0: size ') == 0:

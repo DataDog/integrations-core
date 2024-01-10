@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "created_at": "2022-06-01",
+  "last_updated_at": "2022-06-01",
+  "title": "ArangoDB's server Kernel mode usage is higher",
+  "tags": [
+    "integration:arangodb"
+  ],
+  "description": "The kernel mode of a CPU refers to the state in which the CPU is executing code at a system or kernel level. This monitor tracks anomalies in the kernel mode CPU usage percentage of ArangoDB servers.",
+  "definition": {
+    "message": "{{#is_warning}}Kernel mode usage on server is more than 70% on host {{arangodb_host.name}}{{/is_warning}} \\n\n{{#is_alert}}Kernel mode usage on server is more than 80% on host {{arangodb_host.name}}{{/is_alert}}\\n\\n\n{{#is_recovery}}Kernel mode usage on server is less than 70% on host {{arangodb_host.name}}{{/is_recovery}}",
+    "name": "[ArangoDB] High server Kernel mode percentage usage",
+    "options": {
+      "avalanche_window": 10,
+      "include_tags": true,
+      "new_host_delay": 300,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "silenced": {},
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 0.8,
+        "critical_recovery": 0,
+        "warning": 0.7
+      }
+    },
+    "query": "avg(last_4h):anomalies(avg:arangodb.server.kernel_mode.percent{*}, 'basic', 2, direction='both', interval=60, alert_window='last_15m', count_default_zero='true') >= 0.8",
+    "tags": [
+      "integration:arangodb"
+    ],
+    "type": "query alert"
+  }
+}

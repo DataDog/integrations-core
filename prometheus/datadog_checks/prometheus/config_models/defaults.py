@@ -7,64 +7,22 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-from datadog_checks.base.utils.models.fields import get_default_field_value
 
-
-def shared_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_exclude_labels(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_health_service_check(field, value):
+def instance_health_service_check():
     return True
 
 
-def instance_label_joins(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_label_to_hostname(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_labels_mapper(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_max_returned_metrics(field, value):
+def instance_max_returned_metrics():
     return 2000
 
 
-def instance_prometheus_metrics_prefix(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_prometheus_timeout(field, value):
+def instance_prometheus_timeout():
     return 10
 
 
-def instance_send_histograms_buckets(field, value):
+def instance_send_histograms_buckets():
     return True
 
 
-def instance_send_monotonic_counter(field, value):
+def instance_send_monotonic_counter():
     return True
-
-
-def instance_ssl_ca_cert(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_ssl_cert(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_ssl_private_key(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_type_overrides(field, value):
-    return get_default_field_value(field, value)

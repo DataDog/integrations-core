@@ -1,0 +1,80 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - api.github.com
+      user-agent:
+      - python-httpx/0.24.1
+      x-github-api-version:
+      - '2022-11-28'
+    method: GET
+    uri: https://api.github.com/search/issues?q=sha%3A382cbb0af210897599cbe5fd8d69a38d4017e425%20repo%3ADataDog/integrations-core
+  response:
+    content: '{"total_count":1,"incomplete_results":false,"items":[{"url":"https://api.github.com/repos/DataDog/integrations-core/issues/14849","repository_url":"https://api.github.com/repos/DataDog/integrations-core","labels_url":"https://api.github.com/repos/DataDog/integrations-core/issues/14849/labels{/name}","comments_url":"https://api.github.com/repos/DataDog/integrations-core/issues/14849/comments","events_url":"https://api.github.com/repos/DataDog/integrations-core/issues/14849/events","html_url":"https://github.com/DataDog/integrations-core/pull/14849","id":1770340827,"node_id":"PR_kwDOAtBC5c5TsQjl","number":14849,"title":"Update
+      formatting for changelogs","user":{"login":"swang392","id":24441980,"node_id":"MDQ6VXNlcjI0NDQxOTgw","avatar_url":"https://avatars.githubusercontent.com/u/24441980?v=4","gravatar_id":"","url":"https://api.github.com/users/swang392","html_url":"https://github.com/swang392","followers_url":"https://api.github.com/users/swang392/followers","following_url":"https://api.github.com/users/swang392/following{/other_user}","gists_url":"https://api.github.com/users/swang392/gists{/gist_id}","starred_url":"https://api.github.com/users/swang392/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/swang392/subscriptions","organizations_url":"https://api.github.com/users/swang392/orgs","repos_url":"https://api.github.com/users/swang392/repos","events_url":"https://api.github.com/users/swang392/events{/privacy}","received_events_url":"https://api.github.com/users/swang392/received_events","type":"User","site_admin":false},"labels":[{"id":581315931,"node_id":"MDU6TGFiZWw1ODEzMTU5MzE=","url":"https://api.github.com/repos/DataDog/integrations-core/labels/documentation","name":"documentation","color":"7e1df4","default":true,"description":""},{"id":932725515,"node_id":"MDU6TGFiZWw5MzI3MjU1MTU=","url":"https://api.github.com/repos/DataDog/integrations-core/labels/changelog/no-changelog","name":"changelog/no-changelog","color":"eeeeee","default":false,"description":""},{"id":936563014,"node_id":"MDU6TGFiZWw5MzY1NjMwMTQ=","url":"https://api.github.com/repos/DataDog/integrations-core/labels/integration/apache","name":"integration/apache","color":"bfdadc","default":false,"description":""}],"state":"closed","locked":false,"assignee":null,"assignees":[],"milestone":null,"comments":0,"created_at":"2023-06-22T20:21:09Z","updated_at":"2023-06-23T16:56:28Z","closed_at":"2023-06-23T16:56:27Z","author_association":"MEMBER","active_lock_reason":null,"draft":false,"pull_request":{"url":"https://api.github.com/repos/DataDog/integrations-core/pulls/14849","html_url":"https://github.com/DataDog/integrations-core/pull/14849","diff_url":"https://github.com/DataDog/integrations-core/pull/14849.diff","patch_url":"https://github.com/DataDog/integrations-core/pull/14849.patch","merged_at":"2023-06-23T16:56:27Z"},"body":"###
+      Motivation\n\nMake changelogs more readable","reactions":{"url":"https://api.github.com/repos/DataDog/integrations-core/issues/14849/reactions","total_count":0,"+1":0,"-1":0,"laugh":0,"hooray":0,"confused":0,"heart":0,"rocket":0,"eyes":0},"timeline_url":"https://api.github.com/repos/DataDog/integrations-core/issues/14849/timeline","performed_via_github_app":null,"state_reason":null,"score":1.0}]}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
+      Cache-Control:
+      - no-cache
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sun, 25 Jun 2023 04:18:08 GMT
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-OAuth-Scopes:
+      - ''
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-GitHub-Media-Type:
+      - github.v3; format=json
+      X-GitHub-Request-Id:
+      - D171:63D6:5C488:C16E7:6497C000
+      X-OAuth-Scopes:
+      - read:org, repo, workflow
+      X-RateLimit-Limit:
+      - '30'
+      X-RateLimit-Remaining:
+      - '29'
+      X-RateLimit-Reset:
+      - '1687666748'
+      X-RateLimit-Resource:
+      - search
+      X-RateLimit-Used:
+      - '1'
+      X-XSS-Protection:
+      - '0'
+      x-github-api-version-selected:
+      - '2022-11-28'
+    http_version: HTTP/1.1
+    status_code: 200
+version: 1

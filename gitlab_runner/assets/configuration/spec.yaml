@@ -75,6 +75,10 @@ files:
       - template: instances/openmetrics_legacy
         overrides:
           prometheus_url.hidden: true
+          health_service_check.value.example: false
+          health_service_check.value.default: false
+          send_monotonic_counter.value.example: false
+          send_monotonic_counter.value.default: false
   - template: logs
     example:
       - type: journald

@@ -1,28 +1,35 @@
 {
-	"name": "[CoreDNS] Request duration is high on {{host.name}}",
-	"type": "query alert",
-	"query": "sum(last_5m):avg:coredns.request_duration.seconds{*}.as_count() >= 0.02",
-	"message": "Request duration process is high on {{host.name}} ({{value}} s)",
-	"tags": [
-		"integration:coredns"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_host_delay": 300,
-		"require_full_window": false,
-		"notify_no_data": false,
-		"renotify_interval": "0",
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 0.02,
-			"warning": 0.01
-		}
-	},
-    "recommended_monitor_metadata": {
-        "description": "Notify your team when the request duration is too high."
-    }
+  "version": 2,
+  "created_at": "2021-02-26",
+  "last_updated_at": "2021-02-26",
+  "title": "Request duration is high",
+  "tags": [
+    "integration:coredns"
+  ],
+  "description": "Clients send requests to the DNS each time they need to resolve a domain name into an IP address. This monitor tracks the request duration time to indicate network congestion, server overload, or misconfigurations that need attention.",
+  "definition": {
+    "message": "Request duration process is high on {{host.name}} ({{value}} s)",
+    "name": "[CoreDNS] Request duration is high on {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 0.02,
+        "warning": 0.01
+      },
+      "timeout_h": 0
+    },
+    "query": "sum(last_5m):avg:coredns.request_duration.seconds{*}.as_count() >= 0.02",
+    "tags": [
+      "integration:coredns"
+    ],
+    "type": "query alert"
+  }
 }

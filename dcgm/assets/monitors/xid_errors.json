@@ -1,0 +1,37 @@
+{
+  "version": 2,
+  "created_at": "2023-07-06",
+  "last_updated_at": "2023-07-06",
+  "title": "XID errors detected",
+  "tags": [
+    "integration:dcgm"
+  ],
+  "description": "XID errors are related to the X Window System, which is responsible for managing graphical user interfaces on Unix-like operating systems. This monitor tracks the average count of XID errors within the DCGM to avoid graphical glitches and instability.",
+  "definition": {
+    "message": "{{#is_alert}}\nAn XID error occurred.\n{{/is_alert}}",
+    "name": "⛔️ DCGM: XID Errors Detected",
+    "options": {
+      "avalanche_window": 10,
+      "include_tags": false,
+      "new_host_delay": 300,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "silenced": {
+        "*": null
+      },
+      "thresholds": {
+        "critical": 5,
+        "warning": 0
+      }
+    },
+    "priority": null,
+    "query": "avg(last_5m):avg:dcgm.xid_errors{*} > 5",
+    "restricted_roles": null,
+    "tags": [
+      "integration:dcgm"
+    ],
+    "type": "query alert"
+  }
+}

@@ -81,7 +81,7 @@ Need help? Contact [Datadog support][11].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/go_expvar/images/go_graph.png
 [2]: https://github.com/DataDog/datadog-go
-[3]: https://app.datadoghq.com/account/settings#agent
+[3]: https://app.datadoghq.com/account/settings/agent/latest
 [4]: https://golang.org/pkg/expvar
 [5]: https://golang.org/pkg/net/http/#ListenAndServe
 [6]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

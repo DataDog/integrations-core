@@ -1,0 +1,10 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["3.11"]
+version = ["0.8"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "TORCHSERVE_VERSION", value = "0.8.1", if = ["0.8"] },
+]

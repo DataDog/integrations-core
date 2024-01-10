@@ -308,7 +308,7 @@ class MapReduceCheck(AgentCheck):
                             group_name = counter_group.get('counterGroupName')
 
                             if group_name:
-                                counter_metrics = set([])
+                                counter_metrics = set()
 
                                 # Add any counters in the job specific metrics
                                 if job_specific_metrics and group_name in job_specific_metrics:

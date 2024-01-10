@@ -1,30 +1,37 @@
 {
-	"name": "[Kafka] High produce latency: {{value}} reqs/s on broker {{instance.name}}",
-	"type": "query alert",
-	"query": "avg(last_5m):avg:kafka.request.produce.time.99percentile{*} by {instance} > 200",
-	"message": "{{#is_alert}}\n\nALERT: The p99 produce latency on broker {{instance.name}} reached: {{value}}.\n\n{{/is_alert}} \n\n{{#is_warning}}\n\nWARNING: The p99 produce latency on broker {{instance.name}} reached: {{value}}.\n\n{{/is_warning}} \n\n\n**Potential Impacts**\n\n  - Client timeouts\n  - Delays in the ability of clients to process their workload\n  - Could be a leading indicator that the broker is falling behind\n    due to lack of capacity or a performance-impacting incident.\n\n**Recommended Actions**\n\n  - Investigate the state of the broker\n  - Consider topic rebalancing if the traffic on a given topic has\n    outstripped the resources available to it\n  - Consider expanding capacity by adding additional brokers\n  - Broker restart or replacement can help in some situations.\n    If TCP memory is high, and increasing in correlation with the\n    load, this could mean that the disk is struggling to keep up.\n    Restarting kafka has shown some immediate benefits when it comes\n    to reducing the load.",
-	"tags": [
-		"integration:kafka"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": true,
-		"renotify_interval": 0,
-		"escalation_message": "",
-		"no_data_timeframe": 10,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 200,
-			"warning": 100
-		}
-	},
-	"priority": null,
-	"restricted_roles": null,
-	"recommended_monitor_metadata": {
-		"description": "Get notified when your Kafka brokers have high p99 produce latency."
-	}
+  "version": 2,
+  "created_at": "2022-01-19",
+  "last_updated_at": "2022-01-19",
+  "title": "Produce latency is high",
+  "tags": [
+    "integration:kafka"
+  ],
+  "description": "Produce time in Kafka refers to the time it takes for a producer to successfully send a message to a Kafka topic. This monitor tracks scenarios where Kafka producers are experiencing high delays in successfully producing messages to Kafka topics.",
+  "definition": {
+    "message": "{{#is_alert}}\n\nALERT: The p99 produce latency on broker {{instance.name}} reached: {{value}}.\n\n{{/is_alert}} \n\n{{#is_warning}}\n\nWARNING: The p99 produce latency on broker {{instance.name}} reached: {{value}}.\n\n{{/is_warning}} \n\n\n**Potential Impacts**\n\n  - Client timeouts\n  - Delays in the ability of clients to process their workload\n  - Could be a leading indicator that the broker is falling behind\n    due to lack of capacity or a performance-impacting incident.\n\n**Recommended Actions**\n\n  - Investigate the state of the broker\n  - Consider topic rebalancing if the traffic on a given topic has\n    outstripped the resources available to it\n  - Consider expanding capacity by adding additional brokers\n  - Broker restart or replacement can help in some situations.\n    If TCP memory is high, and increasing in correlation with the\n    load, this could mean that the disk is struggling to keep up.\n    Restarting kafka has shown some immediate benefits when it comes\n    to reducing the load.",
+    "name": "[Kafka] High produce latency: {{value}} reqs/s on broker {{instance.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": 10,
+      "notify_audit": false,
+      "notify_no_data": true,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 200,
+        "warning": 100
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_5m):avg:kafka.request.produce.time.99percentile{*} by {instance} > 200",
+    "restricted_roles": null,
+    "tags": [
+      "integration:kafka"
+    ],
+    "type": "query alert"
+  }
 }

@@ -302,8 +302,7 @@ class DockerInterface(object):
             'DD_API_KEY': self.api_key,
             # Set agent hostname for CI
             'DD_HOSTNAME': get_hostname(),
-            # Run expvar on a random port
-            'DD_EXPVAR_PORT': 0,
+            'DD_EXPVAR_PORT': 5000,
             # Run API on a random port
             'DD_CMD_PORT': find_free_port(get_ip()),
             # Disable trace agent
@@ -314,6 +313,7 @@ class DockerInterface(object):
             # More info: https://github.com/DataDog/integrations-core/pull/5454
             # TODO: Remove PYTHONDONTWRITEBYTECODE env var when Python 2 support is removed
             'PYTHONDONTWRITEBYTECODE': "1",
+            "DD_TELEMETRY_ENABLED": "1",
         }
         if self.dd_site:
             env_vars['DD_SITE'] = self.dd_site
@@ -357,8 +357,6 @@ class DockerInterface(object):
         command = [
             'docker',
             'run',
-            # Remove it when stopped
-            '--rm',
             # Keep it up
             '-d',
             # Ensure consistent naming
@@ -407,6 +405,7 @@ class DockerInterface(object):
     def stop_agent(self):
         # Only error for exit code if config actually exists
         run_command(['docker', 'stop', '-t', '0', self.container_name], capture=True, check=self.exists())
+        run_command(['docker', 'rm', self.container_name], capture=True, check=self.exists())
 
     def restart_agent(self):
         return run_command(['docker', 'restart', self.container_name], capture=True)

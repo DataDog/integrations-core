@@ -114,14 +114,37 @@ instances:
     ##              The number of columns must equal the number of columns returned in the query.
     ##              There are 2 required pieces of data:
     ##                a. name - The suffix to append to `<INTEGRATION>.` to form
-    ##                          the full metric name. If `type` is `tag`, this column is
+    ##                          the full metric name. If `type` is a `tag` type, this column is
     ##                          considered a tag and applied to every
     ##                          metric collected by this particular query.
     ##                b. type - The submission method (gauge, monotonic_count, etc.).
-    ##                          This can also be set to `tag` to tag each metric in the row
-    ##                          with the name and value of the item in this column. You can
-    ##                          use the `count` type to perform aggregation for queries that
-    ##                          return multiple rows with the same or no tags.
+    ##                          This can also be set to the following `tag` types to
+    ##                          tag each metric in the row with the name and value
+    ##                          of the item in this column:
+    ##                           i. tag           - This is the default tag type
+    ##                           ii. tag_list     - This allows multiple values to be attached
+    ##                                             to the tag name. For example: 
+    ##
+    ##                                             query = {
+    ##                                               "name": "example",
+    ##                                               "query": "...",
+    ##                                               "columns": [
+    ##                                                 {"name": "server_tag", "type": "tag_list"},
+    ##                                                 {"name": "foo", "type": "gauge"},
+    ##                                               ]
+    ##                                             }
+    ##
+    ##                                             May result in:
+    ##                                             gauge("foo", tags=[
+    ##                                                                 "server_tag:us",
+    ##                                                                 "server_tag:primary",
+    ##                                                                 "server_tag:default"
+    ##                                                               ])
+    ##                                             gauge("foo", tags=["server_tag:eu"])
+    ##                                             gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
+    ##                           iii. tag_not_null - This only sets tags in the metric if the value is not null
+    ##                          You can use the `count` type to perform aggregation
+    ##                          for queries that return multiple rows with the same or no tags.
     ##              Columns without a name are ignored. To skip a column, enter:
     ##                - {}
     ## 3. tags (optional) - A list of tags to apply to each metric.
@@ -311,6 +334,21 @@ instances:
     #
     # dbm: false
 
+    ## Configure collection of performance_schema.global_variables. This is an alpha feature.
+    #
+    # collect_settings:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of performance_schema.global_variables. Requires `dbm: true`.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the database settings collection interval (in seconds). Each collection involves a single query to
+        ## `performance_schema.global_variables`.
+        #
+        # collection_interval: 600
+
     ## Configure collection of query metrics
     #
     # query_metrics:
@@ -492,15 +530,25 @@ instances:
         #
         # deployment_type: flexible_server
 
-        ## @param name - string - optional - default: mysql-database
-        ## Equal to the name of the Azure MySQL database instance.
+        ## @param fully_qualified_domain_name - string - optional - default: mysql-database.database.windows.net
+        ## Equal to the full qualified domain name of the Azure MySQL database.
+        ##
+        ## This value is optional if the value of `host` is already configured to the fully qualified domain name.
         #
-        # name: mysql-database
+        # fully_qualified_domain_name: mysql-database.database.windows.net
 
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
     #
     # obfuscator_options:
+
+        ## @param obfuscation_mode - string - optional - default: obfuscate_and_normalize
+        ## Set the obfuscation mode. The obfuscation mode determines how the SQL obfuscator will obfuscate your SQL
+        ## statements. The following modes are supported:
+        ## - `obfuscate_only`: Obfuscate the SQL statement without normalizing the statement.
+        ## - `obfuscate_and_normalize`: Obfuscate the SQL statement and normalize the statement.
+        #
+        # obfuscation_mode: obfuscate_and_normalize
 
         ## @param replace_digits - boolean - optional - default: false
         ## Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
@@ -540,6 +588,36 @@ instances:
         ## When `true` these aliases will not be removed.
         #
         # keep_sql_alias: true
+
+        ## @param remove_space_between_parentheses - boolean - optional - default: false
+        ## Set to `true` to remove spaces between parentheses in your normalized SQL statements.
+        #
+        # remove_space_between_parentheses: false
+
+        ## @param keep_null - boolean - optional - default: false
+        ## Set to `true` to keep the keyword `NULL` in your obfuscated SQL statements.
+        #
+        # keep_null: false
+
+        ## @param keep_boolean - boolean - optional - default: false
+        ## Set to `true` to keep the keywords `TRUE` and `FALSE` in your obfuscated SQL statements.
+        #
+        # keep_boolean: false
+
+        ## @param keep_positional_parameter - boolean - optional - default: false
+        ## Set to `true` to keep positional parameters (e.g. `$1`) in your obfuscated SQL statements.
+        #
+        # keep_positional_parameter: false
+
+        ## @param keep_trailing_semicolon - boolean - optional - default: false
+        ## Set to `true` to keep trailing semicolons in your normalized SQL statements.
+        #
+        # keep_trailing_semicolon: false
+
+        ## @param keep_identifier_quotation - boolean - optional - default: false
+        ## Set to `true` to keep identifier quotations (e.g. `"my_table"`) in your normalized SQL statements.
+        #
+        # keep_identifier_quotation: false
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

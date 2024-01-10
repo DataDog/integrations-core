@@ -15,12 +15,13 @@ e2e-env = false
 DDEV_TESTING_PLUGIN = "true"
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
+python = ["2.7", "3.11"]
 
 [envs.default.overrides]
 matrix.python.features = [
-  { value = "cli", if = ["3.8"] },
+  { value = "cli", if = ["3.11"] },
 ]
-matrix.python.scripts = [
-  { key = "test", value = "_dd-test --ignore tests/tooling", if = ["2.7"] },
+# TODO: remove this when the old CLI is gone
+matrix.python.pre-install-commands = [
+  { value = "python -m pip install --no-deps --disable-pip-version-check {verbosity:flag:-1} -e ../ddev", if = ["3.11"] },
 ]

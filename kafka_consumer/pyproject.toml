@@ -1,8 +1,6 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools>=66; python_version > '3.0'",
-    "setuptools; python_version < '3.0'",
 ]
 build-backend = "hatchling.build"
 
@@ -24,27 +22,23 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 2.7",
-    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.11",
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=27.1.0",
+    "datadog-checks-base>=32.6.0",
 ]
 dynamic = [
     "version",
 ]
-
-[project.license]
-text = "BSD-3-Clause"
+license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "gssapi==1.6.1; python_version < '3.0' and (sys_platform != 'darwin' or platform_machine != 'arm64')",
-    "gssapi==1.8.2; python_version > '3.0'",
-    "kafka-python==2.0.2",
-    "kazoo==2.9.0",
+    # confluent-kafka is built in omnibus, so bumping it here will have no real effect
+    # if you bump this version, also bump the one in the `hatch.toml` file
+    "confluent-kafka==2.3.0; python_version > '3.0'",
 ]
 
 [project.urls]

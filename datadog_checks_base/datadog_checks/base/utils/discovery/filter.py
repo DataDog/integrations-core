@@ -10,6 +10,9 @@ class Filter:
         self._include = include
         self._exclude = re.compile('|'.join(exclude)) if exclude else None
         self._key = key
+        self._compiled_include_patterns = (
+            {pattern: re.compile(pattern) for pattern in include.keys()} if include is not None else None
+        )
 
     def get_items(self, items):
         if self._include is None:
@@ -26,7 +29,7 @@ class Filter:
                 if (
                     key(item) not in excluded_item_keys
                     and key(item) not in discovered_item_keys
-                    and re.search(pattern, key(item))
+                    and re.search(self._compiled_include_patterns[pattern], key(item))
                 ):
                     discovered_item_keys.add(key(item))
                     yield pattern, key(item), item, config

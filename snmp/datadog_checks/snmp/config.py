@@ -5,14 +5,14 @@ import ipaddress
 import time
 import weakref
 from collections import defaultdict
-from logging import Logger, getLogger
-from typing import Any, DefaultDict, Dict, Iterator, List, Optional, Set, Tuple
+from logging import Logger, getLogger  # noqa: F401
+from typing import Any, DefaultDict, Dict, Iterator, List, Optional, Set, Tuple  # noqa: F401
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
 from .mibs import MIBLoader
 from .models import OID, Device
-from .parsing import ParsedMetric, ParsedSymbolMetric, SymbolTag, parse_metrics, parse_symbol_metric_tags
+from .parsing import ParsedMetric, ParsedSymbolMetric, SymbolTag, parse_metrics, parse_symbol_metric_tags  # noqa: F401
 from .pysnmp_types import (
     CommunityData,
     ContextData,
@@ -23,7 +23,7 @@ from .pysnmp_types import (
     usmHMACMD5AuthProtocol,
 )
 from .resolver import OIDResolver
-from .types import OIDMatch
+from .types import OIDMatch  # noqa: F401
 from .utils import register_device_target
 
 local_logger = getLogger(__name__)

@@ -1,23 +1,22 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import os
 import threading
 import time
 
-from kafka import KafkaConsumer, KafkaProducer
-from kazoo.client import KazooClient
-from six import binary_type, iteritems
+from confluent_kafka import Consumer as KafkaConsumer
+from confluent_kafka import Producer as KafkaProducer
 
-from .common import KAFKA_CONNECT_STR, PARTITIONS, ZK_CONNECT_STR
+from .common import PARTITIONS, get_authentication_configuration
 
 DEFAULT_SLEEP = 5
 DEFAULT_TIMEOUT = 5
 
 
 class StoppableThread(threading.Thread):
-    def __init__(self, sleep=DEFAULT_SLEEP, timeout=DEFAULT_TIMEOUT):
+    def __init__(self, instance, sleep=DEFAULT_SLEEP, timeout=DEFAULT_TIMEOUT):
         super(StoppableThread, self).__init__()
+        self.instance = instance
         self._shutdown_event = threading.Event()
         self._sleep = sleep
         self._timeout = timeout
@@ -34,97 +33,61 @@ class StoppableThread(threading.Thread):
 
 class Producer(StoppableThread):
     def run(self):
-        producer = KafkaProducer(bootstrap_servers=KAFKA_CONNECT_STR)
+        producer = self.__get_producer_client()
 
-        iteration = 0
         while not self._shutdown_event.is_set():
             for partition in PARTITIONS:
                 try:
-                    producer.send('marvel', b"Peter Parker", partition=partition)
-                    producer.send('marvel', b"Bruce Banner", partition=partition)
-                    producer.send('marvel', b"Tony Stark", partition=partition)
-                    producer.send('marvel', b"Johhny Blaze", partition=partition)
-                    producer.send('marvel', b"\xc2BoomShakalaka", partition=partition)
-                    producer.send('dc', b"Diana Prince", partition=partition)
-                    producer.send('dc', b"Bruce Wayne", partition=partition)
-                    producer.send('dc', b"Clark Kent", partition=partition)
-                    producer.send('dc', b"Arthur Curry", partition=partition)
-                    producer.send('dc', b"\xc2ShakalakaBoom", partition=partition)
+                    producer.produce('marvel', b"Peter Parker", partition=partition)
+                    producer.produce('marvel', b"Bruce Banner", partition=partition)
+                    producer.produce('marvel', b"Tony Stark", partition=partition)
+                    producer.produce('marvel', b"Johhny Blaze", partition=partition)
+                    producer.produce('marvel', b"\xc2BoomShakalaka", partition=partition)
+                    producer.produce('dc', b"Diana Prince", partition=partition)
+                    producer.produce('dc', b"Bruce Wayne", partition=partition)
+                    producer.produce('dc', b"Clark Kent", partition=partition)
+                    producer.produce('dc', b"Arthur Curry", partition=partition)
+                    producer.produce('dc', b"\xc2ShakalakaBoom", partition=partition)
+
+                    # This topic is not consumed by `my_consumer`, and shouldn't show up in consumer.offset
+                    producer.produce('unconsumed_topic', b"extra message 1", partition=partition)
+                    producer.produce('unconsumed_topic', b"extra message 2", partition=partition)
+                    producer.produce('unconsumed_topic', b"extra message 3", partition=partition)
+                    producer.produce('unconsumed_topic', b"extra message 4", partition=partition)
+                    producer.produce('unconsumed_topic', b"extra message 5", partition=partition)
                 except Exception:
                     pass
 
-            iteration += 1
             time.sleep(1)
 
+    def __get_producer_client(self):
+        config = {
+            "bootstrap.servers": self.instance['kafka_connect_str'],
+            "socket.timeout.ms": 1000,
+        }
+        config.update(get_authentication_configuration(self.instance))
 
-class KConsumer(StoppableThread):
-    def __init__(self, topics, sleep=DEFAULT_SLEEP, timeout=DEFAULT_TIMEOUT):
-        super(KConsumer, self).__init__(sleep=sleep, timeout=timeout)
-        self.kafka_connect_str = KAFKA_CONNECT_STR
+        return KafkaProducer(config)
+
+
+class Consumer(StoppableThread):
+    def __init__(self, instance, topics, sleep=DEFAULT_SLEEP, timeout=DEFAULT_TIMEOUT):
+        super(Consumer, self).__init__(instance, sleep=sleep, timeout=timeout)
         self.topics = topics
 
     def run(self):
-        consumer = KafkaConsumer(
-            bootstrap_servers=self.kafka_connect_str, group_id="my_consumer", auto_offset_reset='earliest'
-        )
+        consumer = self.__get_consumer_client()
         consumer.subscribe(self.topics)
 
-        iteration = 0
         while not self._shutdown_event.is_set():
-            consumer.poll(timeout_ms=500, max_records=10)
-            iteration += 1
+            consumer.poll(timeout=1)
 
-
-class ZKConsumer(StoppableThread):
-    def __init__(self, topics, partitions, sleep=DEFAULT_SLEEP, timeout=DEFAULT_TIMEOUT):
-        super(ZKConsumer, self).__init__(sleep=sleep, timeout=timeout)
-        self.zk_connect_str = ZK_CONNECT_STR
-        self.kafka_connect_str = KAFKA_CONNECT_STR
-        self.topics = topics
-        self.partitions = partitions
-
-    def run(self):
-        zk_path_topic_tmpl = '/consumers/my_consumer/offsets/'
-        zk_path_partition_tmpl = zk_path_topic_tmpl + '{topic}/{partition}'
-
-        zk_conn = KazooClient(self.zk_connect_str, timeout=10)
-        zk_conn.start()
-
-        for topic in self.topics:
-            for partition in self.partitions:
-                node_path = zk_path_partition_tmpl.format(topic=topic, partition=partition)
-                node = zk_conn.exists(node_path)
-                if not node:
-                    zk_conn.ensure_path(node_path)
-                    zk_conn.set(node_path, b"0")
-
-        consumer = KafkaConsumer(
-            bootstrap_servers=[self.kafka_connect_str],
-            group_id="my_consumer",
-            auto_offset_reset='earliest',
-            enable_auto_commit=False,
-        )
-        consumer.subscribe(self.topics)
-
-        iteration = 0
-        while not self._shutdown_event.is_set():
-            response = consumer.poll(timeout_ms=500, max_records=10)
-            zk_trans = zk_conn.transaction()
-            for tp, records in iteritems(response):
-                topic = tp.topic
-                partition = tp.partition
-
-                offset = None
-                for record in records:
-                    if offset is None or record.offset > offset:
-                        offset = record.offset
-
-                if offset:
-                    zk_trans.set_data(
-                        os.path.join(zk_path_topic_tmpl.format(topic), str(partition)), binary_type(offset)
-                    )
-
-            zk_trans.commit()
-            iteration += 1
-
-        zk_conn.stop()
+    def __get_consumer_client(self):
+        config = {
+            "bootstrap.servers": self.instance['kafka_connect_str'],
+            "socket.timeout.ms": 1000,
+            'group.id': 'my_consumer',
+            'auto.offset.reset': 'earliest',
+        }
+        config.update(get_authentication_configuration(self.instance))
+        return KafkaConsumer(config)

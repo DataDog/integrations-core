@@ -94,6 +94,13 @@ def get_conn_failure_config():
     return conn_failure_config
 
 
+@pytest.fixture
+def get_multiple_expected_modes_config():
+    config = deepcopy(VALID_CONFIG)
+    config.update({'expected_mode': ['standalone', 'leader']})
+    return config
+
+
 def get_version():
     zk_version = os.environ.get("ZK_VERSION")
     version = [int(k) for k in zk_version.split(".")]

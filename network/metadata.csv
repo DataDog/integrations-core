@@ -1,6 +1,7 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 system.net.aws.ec2.bw_in_allowance_exceeded,gauge,,packet,,The number of packets shaped because the inbound aggregate bandwidth exceeded the maximum for the instance.,0,system,bw in allowance exceeded,
 system.net.aws.ec2.bw_out_allowance_exceeded,gauge,,packet,,The number of packets shaped because the outbound aggregate bandwidth exceeded the maximum for the instance.,0,system,bw out allowance exceeded,
+system.net.aws.ec2.conntrack_allowance_available,gauge,,connection,,The number of tracked connections that can be established before hitting the Connections Tracked allowance.,0,system,conntrack allowance available,
 system.net.aws.ec2.conntrack_allowance_exceeded,gauge,,packet,,The number of packets shaped because connection tracking exceeded the maximum for the instance and new connections could not be established.,0,system,conntrack allowance exceeded,
 system.net.aws.ec2.linklocal_allowance_exceeded,gauge,,packet,,The number of packets shaped because the PPS of the traffic to local proxy services exceeded the maximum for the network interface.,0,system,linklocal allowance exceeded,
 system.net.aws.ec2.pps_allowance_exceeded,gauge,,packet,,The number of packets shaped because the bidirectional PPS exceeded the maximum for the instance.,0,system,pps allowance exceeded,

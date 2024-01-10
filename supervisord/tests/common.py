@@ -20,7 +20,7 @@ SUPERVISOR_VERSION = os.getenv('SUPERVISOR_VERSION')
 # Supervisord should run 3 programs for 10, 20 and 30 seconds
 # respectively.
 # The following dictionnary shows the processes by state for each iteration.
-PROCESSES_BY_STATE_BY_ITERATION = [dict(up=PROCESSES[x:], down=PROCESSES[:x], unknown=[]) for x in range(4)]
+PROCESSES_BY_STATE_BY_ITERATION = [{"up": PROCESSES[x:], "down": PROCESSES[:x], "unknown": []} for x in range(4)]
 
 # Configs for Integration Tests
 SUPERVISORD_CONFIG = {'name': "travis", 'host': HOST, 'port': '19001'}
@@ -264,6 +264,121 @@ TEST_CASES = [
                 ),
             ]
         },
+        'expected_service_checks': {
+            'server0': [
+                {'status': ServiceCheck.OK, 'tags': ['supervisord_server:server0'], 'check': 'supervisord.can_connect'},
+                {
+                    'status': ServiceCheck.OK,
+                    'tags': ['supervisord_server:server0', 'supervisord_process:mysql'],
+                    'check': 'supervisord.process.status',
+                },
+            ]
+        },
+    },
+    {
+        'instances': [{'name': 'server0', 'host': 'localhost', 'port': 9001, 'proc_regex_exclude': ['^py.*$']}],
+        'expected_metrics': {
+            'server0': [
+                (
+                    'supervisord.process.count',
+                    1,
+                    {'type': 'gauge', 'tags': ['supervisord_server:server0', 'status:up']},
+                ),
+                (
+                    'supervisord.process.count',
+                    1,
+                    {'type': 'gauge', 'tags': ['supervisord_server:server0', 'status:down']},
+                ),
+                (
+                    'supervisord.process.count',
+                    0,
+                    {'type': 'gauge', 'tags': ['supervisord_server:server0', 'status:unknown']},
+                ),
+            ]
+        },
+        'expected_service_checks': {
+            'server0': [
+                {'status': ServiceCheck.OK, 'tags': ['supervisord_server:server0'], 'check': 'supervisord.can_connect'},
+                {
+                    'status': ServiceCheck.OK,
+                    'tags': ['supervisord_server:server0', 'supervisord_process:mysql'],
+                    'check': 'supervisord.process.status',
+                },
+            ]
+        },
+    },
+    {
+        'instances': [{'name': 'server0', 'host': 'localhost', 'port': 9001, 'proc_names_exclude': ['python']}],
+        'expected_metrics': {
+            'server0': [
+                (
+                    'supervisord.process.count',
+                    1,
+                    {'type': 'gauge', 'tags': ['supervisord_server:server0', 'status:up']},
+                ),
+                (
+                    'supervisord.process.count',
+                    1,
+                    {'type': 'gauge', 'tags': ['supervisord_server:server0', 'status:down']},
+                ),
+                (
+                    'supervisord.process.count',
+                    0,
+                    {'type': 'gauge', 'tags': ['supervisord_server:server0', 'status:unknown']},
+                ),
+            ]
+        },
+        'expected_service_checks': {
+            'server0': [
+                {'status': ServiceCheck.OK, 'tags': ['supervisord_server:server0'], 'check': 'supervisord.can_connect'},
+                {
+                    'status': ServiceCheck.OK,
+                    'tags': ['supervisord_server:server0', 'supervisord_process:mysql'],
+                    'check': 'supervisord.process.status',
+                },
+            ]
+        },
+    },
+    {
+        'instances': [
+            {'name': 'server0', 'host': 'localhost', 'port': 9001, 'status_mapping_override': {'STOPPED': 'up'}}
+        ],
+        'expected_metrics': {
+            'server0': [
+                (
+                    'supervisord.process.count',
+                    2,
+                    {'type': 'gauge', 'tags': ['supervisord_server:server0', 'status:up']},
+                ),
+                (
+                    'supervisord.process.count',
+                    0,
+                    {'type': 'gauge', 'tags': ['supervisord_server:server0', 'status:down']},
+                ),
+                (
+                    'supervisord.process.count',
+                    1,
+                    {'type': 'gauge', 'tags': ['supervisord_server:server0', 'status:unknown']},
+                ),
+            ]
+        },
+        'expected_service_checks': {
+            'server0': [
+                {'status': ServiceCheck.OK, 'tags': ['supervisord_server:server0'], 'check': 'supervisord.can_connect'},
+                {
+                    'status': ServiceCheck.OK,
+                    'tags': ['supervisord_server:server0', 'supervisord_process:mysql'],
+                    'check': 'supervisord.process.status',
+                },
+            ]
+        },
+    },
+    # Unknown ddstatus in the override, so we do not get any metrics but the server is up.
+    {
+        'instances': [
+            {'name': 'server0', 'host': 'localhost', 'port': 9001, 'status_mapping_override': {'STOPPED': 'unknown'}}
+        ],
+        'expected_metrics': {'server0': []},
         'expected_service_checks': {
             'server0': [
                 {'status': ServiceCheck.OK, 'tags': ['supervisord_server:server0'], 'check': 'supervisord.can_connect'},

@@ -18,10 +18,10 @@ No additional installation is needed on your server.
 
 1. Configure the [Datadog HTTP Reporter][2] in Flink.
 
-     Copy `<FLINK_HOME>/opt/flink-metrics-datadog-<DATADOG_REPORTER_VERSION>.jar` into your `<FLINK_HOME>/lib` folder. In your `<FLINK_HOME>/conf/flink-conf.yaml`, add these lines, replacing `<DATADOG_API_KEY>` with your Datadog [API key][5]:
+     In your `<FLINK_HOME>/conf/flink-conf.yaml`, add these lines, replacing `<DATADOG_API_KEY>` with your Datadog [API key][5]:
 
     ```yaml
-    metrics.reporter.dghttp.class: org.apache.flink.metrics.datadog.DatadogHttpReporter
+    metrics.reporter.dghttp.factory.class: org.apache.flink.metrics.datadog.DatadogHttpReporterFactory
     metrics.reporter.dghttp.apikey: <DATADOG_API_KEY>
     metrics.reporter.dghttp.dataCenter: {{< region-param key="dd_datacenter" >}}
     ```
@@ -42,7 +42,7 @@ No additional installation is needed on your server.
 3. Configure additional [tags][2] in `<FLINK_HOME>/conf/flink-conf.yaml`. Here is an example of custom tags:
 
     ```yaml
-    metrics.reporter.dghttp.tags: <KEY1>:<VALUE1>, <KEY1>:<VALUE2>
+    metrics.reporter.dghttp.scope.variables.additional: <KEY1>:<VALUE1>, <KEY1>:<VALUE2>
     ```
 
      **Note**: By default, any variables in metric names are sent as tags, so there is no need to add custom tags for `job_id`, `task_id`, etc.
@@ -53,17 +53,9 @@ No additional installation is needed on your server.
 
 _Available for Agent >6.0_
 
-1. Flink uses the `log4j` logger by default. To activate logging to a file and customize the format edit the `log4j.properties`, `log4j-cli.properties`, `log4j-yarn-session.properties`, or `log4j-console.properties` file. See [Flink's repository][6] for default configurations. For example `log4j.properties` contains this configuration by default:
+1. Flink uses the `log4j` logger by default. To enable logging to a file, customize the format by editing the `log4j*.properties` configuration files in the `conf/` directory of the Flink distribution. See the [Flink logging documentation][13] for information on which configuration file is relevant for your setup. See [Flink's repository][6] for default configurations.
 
-   ```conf
-   log4j.appender.file=org.apache.log4j.FileAppender
-   log4j.appender.file.file=${log.file}
-   log4j.appender.file.append=false
-   log4j.appender.file.layout=org.apache.log4j.PatternLayout
-   log4j.appender.file.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n
-   ```
-
-2. By default, the integration pipeline supports the following conversion pattern:
+2. By default, the integration pipeline supports the following layout pattern:
 
     ```text
     %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n
@@ -120,14 +112,15 @@ Need help? Contact [Datadog support][12].
 
 
 [1]: https://flink.apache.org/
-[2]: https://ci.apache.org/projects/flink/flink-docs-release-1.9/monitoring/metrics.html#datadog-orgapacheflinkmetricsdatadogdatadoghttpreporter
+[2]: https://nightlies.apache.org/flink/flink-docs-release-1.16/docs/deployment/metric_reporters/#datadog
 [3]: https://docs.datadoghq.com/api/?lang=bash#api-reference
-[4]: https://app.datadoghq.com/account/settings#agent
+[4]: https://app.datadoghq.com/account/settings/agent/latest
 [5]: https://app.datadoghq.com/organization-settings/api-keys
-[6]: https://github.com/apache/flink/tree/master/flink-dist/src/main/flink-bin/conf
+[6]: https://github.com/apache/flink/tree/release-1.16/flink-dist/src/main/flink-bin/conf
 [7]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
 [8]: https://github.com/DataDog/integrations-core/blob/master/flink/datadog_checks/flink/data/conf.yaml.example
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/flink/metadata.csv
 [12]: https://docs.datadoghq.com/help/
+[13]: https://nightlies.apache.org/flink/flink-docs-release-1.16/docs/deployment/advanced/logging/

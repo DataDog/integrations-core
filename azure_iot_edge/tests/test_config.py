@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.azure_iot_edge.config import Config
 from datadog_checks.azure_iot_edge.metrics import EDGE_AGENT_METRICS, EDGE_AGENT_TYPE_OVERRIDES, EDGE_HUB_METRICS
-from datadog_checks.azure_iot_edge.types import Instance
+from datadog_checks.azure_iot_edge.types import Instance  # noqa: F401
 from datadog_checks.base import ConfigurationError
 
 

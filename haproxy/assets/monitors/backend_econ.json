@@ -1,30 +1,39 @@
 {
-  "name": "[HAProxy] Number of backend connection failures for host: {{host.name}} is above normal.",
-  "type": "query alert",
-  "query": "avg(last_4h):anomalies(avg:haproxy.backend.errors.con_rate{*} by {host}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
-  "message": "There is a higher number of backend connection failures for host: {{host.name}}\n\nNote: This monitored metric doesn't only includes failed backend requests but additionally includes general backend errors, like a backend without an active frontend. Correlating this metric with `haproxy.backend.errors.resp_rate` and response codes from both your frontend and backend servers will give you a better idea of the causes of an increase in backend connection errors.",
-  "tags": ["integration:haproxy"],
-  "options": {
-    "notify_audit": false,
-    "locked": false,
-    "timeout_h": 0,
-    "new_host_delay": 300,
-    "require_full_window": true,
-    "notify_no_data": false,
-    "renotify_interval": 0,
-    "escalation_message": "",
-    "no_data_timeframe": null,
-    "include_tags": true,
-    "thresholds": {
-      "critical": 1,
-      "critical_recovery": 0
+  "version": 2,
+  "created_at": "2021-03-01",
+  "last_updated_at": "2021-03-01",
+  "title": "Number of backend connection failures is high",
+  "tags": [
+    "integration:haproxy"
+  ],
+  "description": "HAProxy needs to establish a connection with the backend server to route clients' requests. This monitor tracks anomalies in the connection error rate for different hosts to identify spikes in connection errors, allowing for prompt attention.",
+  "definition": {
+    "message": "There is a higher number of backend connection failures for host: {{host.name}}\n\nNote: This monitored metric doesn't only includes failed backend requests but additionally includes general backend errors, like a backend without an active frontend. Correlating this metric with `haproxy.backend.errors.resp_rate` and response codes from both your frontend and backend servers will give you a better idea of the causes of an increase in backend connection errors.",
+    "name": "[HAProxy] Number of backend connection failures for host: {{host.name}} is above normal.",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "timeout_h": 0
     },
-    "threshold_windows": {
-      "trigger_window": "last_15m",
-      "recovery_window": "last_15m"
-    }
-  },
-  "recommended_monitor_metadata": {
-    "description": "Notifies when HAProxy the number of backend connection errors is above normal for a specific host."
+    "query": "avg(last_4h):anomalies(avg:haproxy.backend.errors.con_rate{*} by {host}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
+    "tags": [
+      "integration:haproxy"
+    ],
+    "type": "query alert"
   }
 }

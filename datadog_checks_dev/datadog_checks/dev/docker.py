@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from contextlib import contextmanager
-from typing import Iterator
+from typing import Iterator  # noqa: F401
 
 from six import string_types
 from six.moves.urllib.parse import urlparse
@@ -127,27 +127,42 @@ def docker_run(
     """
     A convenient context manager for safely setting up and tearing down Docker environments.
 
-    - **compose_file** (_str_) - A path to a Docker compose file. A custom tear
-      down is not required when using this.
-    - **build** (_bool_) - Whether or not to build images for when `compose_file` is provided
-    - **service_name** (_str_) - Optional name for when ``compose_file`` is provided
-    - **up** (_callable_) - A custom setup callable
-    - **down** (_callable_) - A custom tear down callable. This is required when using a custom setup.
-    - **on_error** (_callable_) - A callable called in case of an unhandled exception
-    - **sleep** (_float_) - Number of seconds to wait before yielding. This occurs after all conditions are successful.
-    - **endpoints** (_List[str]_) - Endpoints to verify access for before yielding. Shorthand for adding
-      `CheckEndpoints(endpoints)` to the `conditions` argument.
-    - **log_patterns** (_List[str|re.Pattern]_) - Regular expression patterns to find in Docker logs before yielding.
-      This is only available when `compose_file` is provided. Shorthand for adding
-      `CheckDockerLogs(compose_file, log_patterns, 'all')` to the `conditions` argument.
-    - **mount_logs** (_bool_) - Whether or not to mount log files in Agent containers based on example logs
-      configuration
-    - **conditions** (_callable_) - A list of callable objects that will be executed before yielding to
-      check for errors
-    - **env_vars** (_dict_) - A dictionary to update `os.environ` with during execution
-    - **wrappers** (_List[callable]_) - A list of context managers to use during execution
-    - **attempts** (_int_) - Number of attempts to run `up` and the `conditions` successfully. Defaults to 2 in CI
-    - **attempts_wait** (_int_) - Time to wait between attempts
+    Parameters:
+
+        compose_file (str):
+            A path to a Docker compose file. A custom tear
+            down is not required when using this.
+        build (bool):
+            Whether or not to build images for when `compose_file` is provided
+        service_name (str):
+            Optional name for when ``compose_file`` is provided
+        up (callable):
+            A custom setup callable
+        down (callable):
+            A custom tear down callable. This is required when using a custom setup.
+        on_error (callable):
+            A callable called in case of an unhandled exception
+        sleep (float):
+            Number of seconds to wait before yielding. This occurs after all conditions are successful.
+        endpoints (list[str]):
+            Endpoints to verify access for before yielding. Shorthand for adding
+            `CheckEndpoints(endpoints)` to the `conditions` argument.
+        log_patterns (list[str | re.Pattern]):
+            Regular expression patterns to find in Docker logs before yielding.
+            This is only available when `compose_file` is provided. Shorthand for adding
+            `CheckDockerLogs(compose_file, log_patterns, 'all')` to the `conditions` argument.
+        mount_logs (bool):
+            Whether or not to mount log files in Agent containers based on example logs configuration
+        conditions (callable):
+            A list of callable objects that will be executed before yielding to check for errors
+        env_vars (dict[str, str]):
+            A dictionary to update `os.environ` with during execution
+        wrappers (list[callable]):
+            A list of context managers to use during execution
+        attempts (int):
+            Number of attempts to run `up` and the `conditions` successfully. Defaults to 2 in CI
+        attempts_wait (int):
+            Time to wait between attempts
     """
     if compose_file and up:
         raise TypeError('You must select either a compose file or a custom setup callable, not both.')

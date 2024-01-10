@@ -1,31 +1,38 @@
 {
-	"name": "[GlusterFS] Increased bricks are offline",
-	"type": "query alert",
-	"query": "avg(last_5m):avg:glusterfs.cluster.nodes.count{*} - avg:glusterfs.volume.online{*} > 1",
-	"message": "Get notified when bricks become offline.",
-	"tags": [
+  "version": 2,
+  "created_at": "2021-01-12",
+  "last_updated_at": "2021-01-12",
+  "title": "Number of offline bricks is high",
+  "tags": [
+    "integration:glusterfs"
+  ],
+  "description": "Increased offline GlusterFS bricks mean more storage nodes are inaccessible. This can signal issues with volume availability and cluster health. The monitor tracks the difference between available nodes and online volumes, triggering alerts if the gap exceeds 1.",
+  "definition": {
+    "message": "Get notified when bricks become offline.",
+    "name": "[GlusterFS] Increased bricks are offline",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0,
+        "warning": 0.5,
+        "warning_recovery": 0
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_5m):avg:glusterfs.cluster.nodes.count{*} - avg:glusterfs.volume.online{*} > 1",
+    "tags": [
       "integration:glusterfs"
     ],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": false,
-		"renotify_interval": "0",
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 1,
-			"warning": 0.5,
-			"critical_recovery": 0,
-			"warning_recovery": 0
-		}
-	},
-	"priority": null,
-	"recommended_monitor_metadata": {
-		"description": "Notify your team when more than one brick is down for your GlusterFS cluster."
-	}
+    "type": "query alert"
+  }
 }

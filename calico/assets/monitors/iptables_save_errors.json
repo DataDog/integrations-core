@@ -1,28 +1,37 @@
 {
-  "name": "[Calico] error with iptables save",
-  "type": "query alert",
-  "query": "sum(last_5m):avg:calico.felix.iptables.save_errors{*}.as_count() > 1",
-  "message": "Calico encountered a problem while saving iptables rules.",
-  "tags": ["integration:calico"],
-  "options": {
-    "notify_audit": false,
-    "locked": false,
-    "timeout_h": 0,
-    "new_host_delay": 300,
-    "require_full_window": false,
-    "notify_no_data": true,
-    "renotify_interval": "0",
-    "evaluation_delay": 10,
-    "escalation_message": "",
-    "no_data_timeframe": 10,
-    "include_tags": true,
-    "thresholds": {
-      "critical": 1,
-      "warning": 0
-    }
-  },
-  "priority": null,
-  "recommended_monitor_metadata": {
-    "description": "Get notified when Calico fails to save iptables rules."
+  "version": 2,
+  "created_at": "2022-03-18",
+  "last_updated_at": "2022-03-18",
+  "title": "IPtables save is failing",
+  "tags": [
+    "integration:calico"
+  ],
+  "description": "IPtables are used to implement network and security policies within a Kubernetes cluster. This monitor tracks the errors related to saving IPtable rules to indicate a potential issue that could affect network and security configurations.",
+  "definition": {
+    "message": "Calico encountered a problem while saving iptables rules.",
+    "name": "[Calico] error with iptables save",
+    "options": {
+      "escalation_message": "",
+      "evaluation_delay": 10,
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": 10,
+      "notify_audit": false,
+      "notify_no_data": true,
+      "renotify_interval": "0",
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 1,
+        "warning": 0
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "sum(last_5m):avg:calico.felix.iptables.save_errors{*}.as_count() > 1",
+    "tags": [
+      "integration:calico"
+    ],
+    "type": "query alert"
   }
 }

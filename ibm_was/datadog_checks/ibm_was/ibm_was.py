@@ -142,7 +142,7 @@ class IbmWasCheck(AgentCheck):
         for query in self.custom_queries:
             validation.validate_query(query)
             custom_metric_categories[query['stat']] = query['metric_prefix']
-            custom_recursion_tags[query['metric_prefix']] = [key for key in query.get('tag_keys', [])]
+            custom_recursion_tags[query['metric_prefix']] = list(query.get('tag_keys', []))
             self.collect_stats[query['stat']] = True
         return (
             dict(metrics.NESTED_TAGS, **custom_recursion_tags),

@@ -1,4 +1,4 @@
-# flake8: noqa
+# ruff: noqa
 # PySNMP MIB module DUMMY-MIB (http://pysnmp.sf.net)
 # ASN.1 source file:///Users/hippolytehenry/Datadog/integrations-core/snmp/tests/compose/data/DUMMY-MIB.txt
 # Produced by pysmi-0.2.2 at Thu Oct  4 16:55:02 2018

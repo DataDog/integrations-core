@@ -2,7 +2,7 @@
 This script is expected to run from a CLI, do not import it."""
 import sys
 import json
-from typing import List, Optional, Set
+from typing import List, Optional, Set  # noqa: F401
 import re
 import yaml
 import os
@@ -23,6 +23,9 @@ EXCEPTIONS = {
     'azure-active-directory': [
         ERR_MISSING_LOG_DOC,  # This is a tile only integration, the source is populated by azure directly.
         ERR_NOT_DEFINED_WEB_UI,  # The integration does not have any metrics.
+    ],
+    'aws-fargate': [
+        ERR_UNEXPECTED_LOG_DOC,  # Not collecting logs directly, but has example in its readme
     ],
     'cilium': [
         ERR_UNEXPECTED_LOG_COLLECTION_CAT,  # cilium does not need a pipeline to automatically parse the logs

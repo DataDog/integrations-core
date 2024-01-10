@@ -504,6 +504,5 @@
     ],
     "layout_type": "free",
     "is_read_only": true,
-    "notify_list": [],
-    "id": 75
+    "notify_list": []
 }

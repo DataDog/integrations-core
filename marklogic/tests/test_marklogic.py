@@ -1,13 +1,13 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any
+from typing import Any  # noqa: F401
 
 import mock
 import pytest
 from packaging import version
 
-from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.marklogic import MarklogicCheck
 
@@ -105,7 +105,14 @@ def test_metadata_integration(aggregator, datadog_agent):
     c.check_id = 'test:123'
     c.check(INSTANCE)
 
-    parsed_version = version.parse(MARKLOGIC_VERSION)
+    if MARKLOGIC_VERSION.startswith("10."):
+        expected_version = "10.0-10"
+    elif MARKLOGIC_VERSION.startswith("11."):
+        expected_version = "11.0-3"
+    else:
+        expected_version = MARKLOGIC_VERSION
+
+    parsed_version = version.parse(expected_version)
     version_metadata = {
         'version.scheme': 'marklogic',
         'version.major': str(parsed_version.major),

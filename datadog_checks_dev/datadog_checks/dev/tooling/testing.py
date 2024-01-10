@@ -67,7 +67,7 @@ def get_test_envs(
     checks_seen = set()
 
     env_filter = os.environ.get("SKIP_ENV_NAME")
-    env_filter_re = re.compile(env_filter) if env_filter is not None else None
+    env_filter_re = re.compile(env_filter) if env_filter else None
 
     for check in checks:
         check, _, envs_selected = check.partition(':')
@@ -553,9 +553,7 @@ def construct_pytest_options(
             # junit report file must contain the env name to handle multiple envs
             # $HATCH_ENV_ACTIVE is a Hatch injected variable
             # See https://hatch.pypa.io/latest/plugins/environment/reference/#hatch.env.plugin.interface.EnvironmentInterface.get_env_vars  # noqa
-            # $TOX_ENV_NAME is a tox injected variable
-            # See https://tox.readthedocs.io/en/latest/config.html#injected-environment-variables
-            f' --junit-xml=.junit/test-{test_group}-$HATCH_ENV_ACTIVE$TOX_ENV_NAME.xml'
+            f' --junit-xml=.junit/test-{test_group}-$HATCH_ENV_ACTIVE.xml'
             # Junit test results class prefix
             f' --junit-prefix={check}'
         )

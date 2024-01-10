@@ -13,8 +13,12 @@ files:
             overrides:
               min_collection_interval.display_default: 20
               min_collection_interval.value.example: 20
-              min_collection_interval.enabled: 20
+              min_collection_interval.enabled: true
   - name: default.yaml
+    # Note that this uses `conf.yaml.default` instead of `auto_conf.yaml`.
+    # The `conf.yaml.default` has an `ad_identifiers` which make it a configuration template.
+    # This means that this goes through normal Autodiscovery process, and will only be
+    # scheduled when an Autodiscovery listener produces a matching `ad_identifier`.
     example_name: conf.yaml.default
     options:
       - template: ad_identifiers
@@ -32,4 +36,4 @@ files:
             overrides:
               min_collection_interval.display_default: 20
               min_collection_interval.value.example: 20
-              min_collection_interval.enabled: 20
+              min_collection_interval.enabled: true

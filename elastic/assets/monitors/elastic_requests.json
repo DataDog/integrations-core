@@ -1,28 +1,35 @@
 {
-	"name": "[ElasticSearch] Unsuccessful requests rate is high",
-	"type": "query alert",
-	"query": "avg(last_5m):100 * monotonic_diff( sum:elasticsearch.get.missing.total{*} ) / monotonic_diff( sum:elasticsearch.get.total{*} ) > 15",
-	"message": "Unsuccessful requests rate is high: document is missing in {{value}}% of requests.",
-	"tags": [
-		"integration:elastic"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": false,
-		"renotify_interval": "0",
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 15,
-			"warning": 10
-		}
-	},
-	"recommended_monitor_metadata": {
-		"description": "Get notified when the unsuccessful requests rate is high."
-	}
+  "version": 2,
+  "created_at": "2021-03-05",
+  "last_updated_at": "2021-03-05",
+  "title": "Unsuccessful requests rate is high",
+  "tags": [
+    "integration:elasticsearch"
+  ],
+  "description": "Clients send requests to interact with the Elasticsearch cluster. This monitor tracks the percentage of unsuccessful GET requests in Elasticsearch to indicate the requested documents are missing and might require investigation.",
+  "definition": {
+    "message": "Unsuccessful requests rate is high: document is missing in {{value}}% of requests.",
+    "name": "[ElasticSearch] Unsuccessful requests rate is high",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 15,
+        "warning": 10
+      },
+      "timeout_h": 0
+    },
+    "query": "avg(last_5m):100 * monotonic_diff( sum:elasticsearch.get.missing.total{*} ) / monotonic_diff( sum:elasticsearch.get.total{*} ) > 15",
+    "tags": [
+      "integration:elastic"
+    ],
+    "type": "query alert"
+  }
 }

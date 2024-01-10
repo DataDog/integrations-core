@@ -1,8 +1,10 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
 
 import mock
+import pytest
 
 from datadog_checks.base.utils.discovery import Discovery
 
@@ -14,10 +16,23 @@ def test_include_empty():
     assert mock_get_items.call_count == 1
 
 
-def test_include_not_empty():
+@pytest.mark.parametrize(
+    'pattern',
+    [
+        pytest.param(
+            'a.*',
+            id='with string',
+        ),
+        pytest.param(
+            re.compile('a.*'),
+            id='with compiled pattern',
+        ),
+    ],
+)
+def test_include_not_empty(pattern):
     mock_get_items = mock.Mock(return_value=['a', 'b', 'c', 'd', 'e', 'f', 'g'])
-    d = Discovery(mock_get_items, include={'a.*': None})
-    assert list(d.get_items()) == [('a.*', 'a', 'a', None)]
+    d = Discovery(mock_get_items, include={pattern: None})
+    assert list(d.get_items()) == [(pattern, 'a', 'a', None)]
     assert mock_get_items.call_count == 1
 
 

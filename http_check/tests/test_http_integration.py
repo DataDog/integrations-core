@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import re
 import sys
 from collections import OrderedDict
 
@@ -75,7 +76,7 @@ def test_cert_expiration_no_cert(http_check):
 
         status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
         assert status == AgentCheck.UNKNOWN
-        expected_msg = 'Exception(\'Empty or no certificate found.\')'
+        expected_msg = 'Empty or no certificate found.'
         if PY2:
             expected_msg = (
                 'ValueError(\'empty or no certificate, match_hostname needs a SSL socket '
@@ -174,7 +175,7 @@ def test_check_cert_expiration_self_signed(http_check):
     if PY2:
         assert "certificate verify failed" in msg
     else:
-        assert "certificate verify failed: self signed certificate" in msg
+        assert re.search("certificate verify failed: self[- ]signed certificate", msg)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -218,6 +219,33 @@ def test_check_cert_expiration_self_signed_tls_verify_false_tls_retrieve_non_val
 def test_check_ssl(aggregator, http_check):
     # Run the check for all the instances in the config
     for instance in CONFIG_SSL_ONLY['instances']:
+        http_check.check(instance)
+
+    good_cert_tags = ['url:https://valid.mock:443', 'instance:good_cert']
+    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=good_cert_tags, count=1)
+    aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.OK, tags=good_cert_tags, count=1)
+
+    expiring_soon_cert_tags = ['url:https://valid.mock', 'instance:cert_exp_soon']
+    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=expiring_soon_cert_tags, count=1)
+    aggregator.assert_service_check(
+        HTTPCheck.SC_SSL_CERT, status=HTTPCheck.WARNING, tags=expiring_soon_cert_tags, count=1
+    )
+
+    critical_cert_tags = ['url:https://valid.mock', 'instance:cert_critical']
+    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=critical_cert_tags, count=1)
+    aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.CRITICAL, tags=critical_cert_tags, count=1)
+
+    connection_err_tags = ['url:https://thereisnosuchlink.com', 'instance:conn_error']
+    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.CRITICAL, tags=connection_err_tags, count=1)
+    aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.UNKNOWN, tags=connection_err_tags, count=1)
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_check_ssl_use_cert_from_response(aggregator, http_check):
+    # Run the check for all the instances in the config
+    for instance in CONFIG_SSL_ONLY['instances']:
+        instance = instance.copy()
+        instance['use_cert_from_response'] = True
         http_check.check(instance)
 
     good_cert_tags = ['url:https://valid.mock:443', 'instance:good_cert']
@@ -577,3 +605,15 @@ def test_case_insensitive_header_content_type(dd_run_check, headers):
         assert check.http.options["headers"] == default_headers
     else:
         assert check.http.options["headers"] == headers
+
+
+def test_http_response_status_code_accepts_int_value(aggregator, dd_run_check):
+    instance = {
+        'name': 'foobar',
+        'url': 'http://something.com',
+        'http_response_status_code': 404,
+    }
+    check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
+
+    dd_run_check(check)
+    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=AgentCheck.CRITICAL)

@@ -1,0 +1,25 @@
+{
+    debug
+    admin :2019
+}
+:80 {
+    root * /usr/share/caddy/
+    @get_image {
+        method GET
+        path /image
+    }
+    route @get_image {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+
+    @get_image_v2_images {
+        method GET
+        path /image/v2/images
+    }
+    route @get_image_v2_images {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+    file_server browse
+}

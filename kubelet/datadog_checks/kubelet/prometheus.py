@@ -5,20 +5,24 @@ from __future__ import division
 
 from copy import deepcopy
 
-from kubeutil import get_connection_info
 from six import iteritems
 
 from datadog_checks.base.checks.kubelet_base.base import urljoin
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.utils.tagging import tagger
 
-from .common import get_container_label, get_pod_by_uid, is_static_pending_pod, replace_container_rt_prefix
+from .common import (
+    get_container_label,
+    get_pod_by_uid,
+    is_static_pending_pod,
+    replace_container_rt_prefix,
+)
 
 METRIC_TYPES = ['counter', 'gauge', 'summary']
 
 # container-specific metrics should have all these labels
-PRE_1_16_CONTAINER_LABELS = set(['namespace', 'name', 'image', 'id', 'container_name', 'pod_name'])
-POST_1_16_CONTAINER_LABELS = set(['namespace', 'name', 'image', 'id', 'container', 'pod'])
+PRE_1_16_CONTAINER_LABELS = {'namespace', 'name', 'image', 'id', 'container_name', 'pod_name'}
+POST_1_16_CONTAINER_LABELS = {'namespace', 'name', 'image', 'id', 'container', 'pod'}
 
 # Value above which the figure can be discarded because it's an aberrant transient value
 MAX_MEMORY_RSS = 2**63
@@ -68,19 +72,16 @@ class CadvisorPrometheusScraperMixin(object):
             'container_spec_memory_swap_limit_bytes': self.container_spec_memory_swap_limit_bytes,
         }
 
-    def _create_cadvisor_prometheus_instance(self, instance):
+    def _create_cadvisor_prometheus_instance(self, instance, prom_url):
         """
         Create a copy of the instance and set default values.
         This is so the base class can create a scraper_config with the proper values.
         """
-        kubelet_conn_info = get_connection_info()
-        endpoint = kubelet_conn_info.get('url')
-
         cadvisor_instance = deepcopy(instance)
         cadvisor_instance.update(
             {
                 'namespace': self.NAMESPACE,
-                'prometheus_url': instance.get('cadvisor_metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH)),
+                'prometheus_url': instance.get('cadvisor_metrics_endpoint', urljoin(prom_url, CADVISOR_METRICS_PATH)),
                 'ignore_metrics': [
                     'container_fs_inodes_free',
                     'container_fs_inodes_total',

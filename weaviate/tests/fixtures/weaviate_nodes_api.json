@@ -1,0 +1,45 @@
+{
+  "nodes": [
+    {
+      "name": "weaviate-7",
+      "status": "HEALTHY",
+      "version": "1.16-alpha.0",
+      "gitHash": "8cd2efa",
+      "stats": {
+        "shardCount":2,
+        "objectCount": 23328
+      },
+      "shards": [
+        {
+          "name":"azuawSAd9312F",
+          "class": "Class_7",
+          "objectCount": 13328
+        }, {
+          "name":"cupazAaASdfPP",
+          "class": "Foo",
+          "objectCount": 10000
+        }
+      ]
+    }, {
+      "name": "weaviate-6",
+      "status": "HEALTHY",
+      "version": "1.16-alpha.0",
+      "gitHash": "8cd2efa",
+      "stats": {
+        "shardCount":2,
+        "objectCount": 12345
+      },
+      "shards": [
+        {
+          "name":"hh8gXiaNaO2K",
+          "class": "Bar",
+          "objectCount": 10000
+        }, {
+          "name":"zmb16QK4PYZ4",
+          "class": "Baz",
+          "objectCount": 2345
+        }
+      ]
+    }
+   ]
+}

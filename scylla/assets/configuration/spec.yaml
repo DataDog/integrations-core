@@ -8,7 +8,10 @@ files:
   - template: instances
     options:
     - name: metric_groups
-      description: List of additional scylla metric groups to collect in addition to the default
+      description: |
+        List of additional Scylla metric groups to collect in addition to the default. Certain metric groups are
+        only exposed in newer versions of Scylla. Refer to the documentation to see what metrics are available 
+        for the different Scylla versions.
       value:
         type: array
         items:
@@ -31,6 +34,13 @@ files:
         - scylla.sstables
         - scylla.thrift
         - scylla.tracing
+        - scylla.cdc
+        - scylla.forward_service
+        - scylla.raft
+        - scylla.repair
+        - scylla.schema_commitlog
+        - scylla.stall
+        - scylla.view
     - template: instances/openmetrics_legacy
       overrides:
         prometheus_url.value.example: http://localhost:9180/metrics

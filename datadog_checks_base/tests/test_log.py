@@ -4,6 +4,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+import sys
 import warnings
 
 import mock
@@ -27,15 +28,19 @@ def test_get_py_loglevel():
 
 def test_logging_capture_warnings():
     with mock.patch('logging.Logger.warning') as log_warning:
-        warnings.warn("hello-world")
+        warnings.warn("hello-world")  # noqa: B028
 
         log_warning.assert_not_called()  # warnings are NOT yet captured
 
         init_logging()  # from here warnings are captured as logs
 
-        warnings.warn("hello-world")
+        warnings.warn("hello-world")  # noqa: B028
         assert log_warning.call_count == 1
-        msg = log_warning.mock_calls[0].args[1]
+        # _showwarning provides only one parameter to Logger.warning on py3.11+ but two before
+        # See https://github.com/python/cpython/pull/30975
+        # TODO: remove when python 2 is dropped
+        warning_arg_index = 0 if sys.version_info >= (3, 11) else 1
+        msg = log_warning.mock_calls[0].args[warning_arg_index]
         assert "hello-world" in msg
 
 

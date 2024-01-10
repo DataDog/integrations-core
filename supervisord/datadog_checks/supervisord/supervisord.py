@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import itertools
 import re
 import socket
 import time
@@ -17,18 +16,8 @@ DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = '9001'
 DEFAULT_SOCKET_IP = 'http://127.0.0.1'
 
-DD_STATUS = {
-    'STOPPED': AgentCheck.CRITICAL,
-    'STARTING': AgentCheck.UNKNOWN,
-    'RUNNING': AgentCheck.OK,
-    'BACKOFF': AgentCheck.CRITICAL,
-    'STOPPING': AgentCheck.CRITICAL,
-    'EXITED': AgentCheck.CRITICAL,
-    'FATAL': AgentCheck.CRITICAL,
-    'UNKNOWN': AgentCheck.UNKNOWN,
-}
-
 PROCESS_STATUS = {AgentCheck.CRITICAL: 'down', AgentCheck.OK: 'up', AgentCheck.UNKNOWN: 'unknown'}
+REVERSED_PROCESS_STATUS = {v: k for k, v in PROCESS_STATUS.items()}
 
 SERVER_TAG = 'supervisord_server'
 
@@ -122,23 +111,61 @@ class SupervisordCheck(AgentCheck):
         if not isinstance(proc_regex, list):
             raise Exception("'proc_regex' should be a list of strings. e.g. %s" % [proc_regex])
 
+        proc_regex_exclude = instance.get('proc_regex_exclude', [])
+        if not isinstance(proc_regex_exclude, list):
+            raise Exception("'proc_regex_exclude' should be a list of strings. e.g. %s" % [proc_regex_exclude])
+
         proc_names = instance.get('proc_names', [])
         if not isinstance(proc_names, list):
             raise Exception("'proc_names' should be a list of strings. e.g. %s" % [proc_names])
 
+        proc_names_exclude = instance.get('proc_names_exclude', [])
+        if not isinstance(proc_names_exclude, list):
+            raise Exception("'proc_names_exclude' should be a list of strings. e.g. %s" % [proc_names_exclude])
+
+        # Compile status mapping
+        status_mapping = {
+            'STOPPED': AgentCheck.CRITICAL,
+            'STARTING': AgentCheck.UNKNOWN,
+            'RUNNING': AgentCheck.OK,
+            'BACKOFF': AgentCheck.CRITICAL,
+            'STOPPING': AgentCheck.CRITICAL,
+            'EXITED': AgentCheck.CRITICAL,
+            'FATAL': AgentCheck.CRITICAL,
+            'UNKNOWN': AgentCheck.UNKNOWN,
+        }
+
+        status_mapping_override = instance.get('status_mapping_override', {})
+        if not isinstance(status_mapping_override, dict):
+            raise Exception("'status_mapping_override' should be a dictionary")
+
+        if len(status_mapping_override) != 0:
+            for status, ddstatus in status_mapping_override.items():
+                if ddstatus in PROCESS_STATUS.values():
+                    status_mapping[status] = REVERSED_PROCESS_STATUS[ddstatus]
+                else:
+                    raise Exception(
+                        "'status_mapping_override' should be a status mapping e.g. %s => %s" % (status, ddstatus)
+                    )
+
         # Collect information on each monitored process
         monitored_processes = []
 
-        # monitor all processes if no filters were specified
-        if len(proc_regex) == 0 and len(proc_names) == 0:
-            monitored_processes = processes
-
-        for pattern, process in itertools.product(proc_regex, processes):
-            if re.match(pattern, process['name']) and process not in monitored_processes:
-                monitored_processes.append(process)
-
         for process in processes:
-            if process['name'] in proc_names and process not in monitored_processes:
+            name = process['name']
+
+            include = (
+                (not proc_regex and not proc_names)
+                or any(re.search(rgx, name) for rgx in proc_regex)
+                or name in proc_names
+            )
+
+            if not include:
+                continue  # No need to check exclusions if process doesn't match inclusions.
+
+            exclude = any(re.search(rgx, name) for rgx in proc_regex_exclude) or name in proc_names_exclude
+
+            if not exclude:
                 monitored_processes.append(process)
 
         # Report service checks and uptime for each process
@@ -147,10 +174,11 @@ class SupervisordCheck(AgentCheck):
             tags = instance_tags + ['{}:{}'.format(PROCESS_TAG, proc_name)]
 
             # Report Service Check
-            status = DD_STATUS[proc['statename']]
+            status = status_mapping[proc['statename']]
             msg = self._build_message(proc) if status is not AgentCheck.OK else None
             count_by_status[status] += 1
             self.service_check(PROCESS_SERVICE_CHECK, status, tags=tags, message=msg)
+
             # Report Uptime
             uptime = self._extract_uptime(proc)
             self.gauge('supervisord.process.uptime', uptime, tags=tags)

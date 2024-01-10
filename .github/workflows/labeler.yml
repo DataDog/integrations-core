@@ -2,7 +2,12 @@
 
 name: PR Labels
 on:
-- pull_request
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - review_requested
 
 jobs:
   labeler:

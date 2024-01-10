@@ -12,10 +12,11 @@
     "title": "vSphere",
     "media": [],
     "classifier_tags": [
+      "Category::Cloud",
+      "Category::Network",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Cloud"
+      "Supported OS::macOS"
     ]
   },
   "author": {
@@ -36,7 +37,10 @@
       },
       "metrics": {
         "prefix": "vsphere.",
-        "check": "vsphere.vm.count",
+        "check": [
+          "vsphere.cpu.usage.avg",
+          "vsphere.vm.count"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
@@ -45,7 +49,8 @@
     },
     "dashboards": {
       "vsphere-overview": "assets/dashboards/vsphere_overview.json",
-      "VMware vSphere TKG - Overview": "assets/dashboards/vmware_vsphere_tkg_-_overview.json"
+      "VMware vSphere TKG - Overview": "assets/dashboards/vmware_vsphere_tkg_-_overview.json",
+      "VMware vSphere - Property Metrics": "assets/dashboards/vmware_vsphere-_property_metrics.json"
     }
   }
 }

@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "created_at": "2021-01-08",
+  "last_updated_at": "2021-02-12",
+  "title": "Partition is offline",
+  "tags": [
+    "integration:kafka"
+  ],
+  "description": "Partitions represent divisions of a topic's data stream. This monitor counts the partitions that are not currently available or operational. This typically occurs when Kafka brokers hosting those partitions are not reachable or are experiencing issues.",
+  "definition": {
+    "message": "Partition without an active leader detected",
+    "name": "[Kafka] Offline partition on {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 1,
+        "warning": 0
+      },
+      "timeout_h": 0
+    },
+    "query": "avg(last_5m):avg:kafka.replication.offline_partitions_count{*} > 1",
+    "tags": [
+      "integration:kafka"
+    ],
+    "type": "query alert"
+  }
+}

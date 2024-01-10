@@ -36,15 +36,8 @@ Follow the steps below to configure the IoT Edge device, runtime modules, and th
         }
         ```
 
-    - Under "Environment Variables", enable experimental metrics by adding these environment variables (note the double underscores):
-        - `ExperimentalFeatures__Enabled`: `true`
-        - `ExperimentalFeatures__EnableMetrics`: `true`
-
 2. Configure the **Edge Hub** runtime module as follows:
     - Image version must be `1.0.10` or above.
-    - Under "Environment Variables", enable experimental metrics by adding these environment variables (note the double underscores):
-        - `ExperimentalFeatures__Enabled`: `true`
-        - `ExperimentalFeatures__EnableMetrics`: `true`
 
 3. Install and configure the Datadog Agent as a **custom module**:
     - Set the module name. For example: `datadog-agent`.
@@ -128,7 +121,7 @@ Need help? Contact [Datadog support][10].
 - [Monitor Azure IoT Edge with Datadog][11]
 
 [1]: https://azure.microsoft.com/en-us/services/iot-edge/
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.microsoft.com/en-us/azure/iot-edge/how-to-deploy-modules-portal
 [4]: https://github.com/DataDog/integrations-core/blob/master/azure_iot_edge/datadog_checks/azure_iot_edge/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/docker/integrations/

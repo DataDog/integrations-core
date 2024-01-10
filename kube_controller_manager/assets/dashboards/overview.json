@@ -104,12 +104,12 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes.cpu.requests{$cluster,$scope,image_name:k8s.gcr.io/kube-controller-manager} by {pod_name}",
+                                            "query": "sum:kubernetes.cpu.requests{$cluster,$scope,short_image:kube-controller-manager} by {pod_name}",
                                             "data_source": "metrics",
                                             "name": "query5"
                                         },
                                         {
-                                            "query": "sum:kubernetes.cpu.usage.total{$cluster,$scope,image_name:k8s.gcr.io/kube-controller-manager} by {pod_name}",
+                                            "query": "sum:kubernetes.cpu.usage.total{$cluster,$scope,short_image:kube-controller-manager} by {pod_name}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -191,12 +191,12 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes.memory.requests{$cluster,$scope,image_name:k8s.gcr.io/kube-controller-manager} by {pod_name}",
+                                            "query": "sum:kubernetes.memory.requests{$cluster,$scope,short_image::*kube-controller-manager} by {pod_name}",
                                             "data_source": "metrics",
                                             "name": "query5"
                                         },
                                         {
-                                            "query": "sum:kubernetes.memory.usage{$cluster,$scope,image_name:k8s.gcr.io/kube-controller-manager} by {pod_name}",
+                                            "query": "sum:kubernetes.memory.usage{$cluster,$scope,short_image::*kube-controller-manager} by {pod_name}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -922,6 +922,5 @@
     "layout_type": "ordered",
     "is_read_only": false,
     "notify_list": [],
-    "reflow_type": "fixed",
-    "id": "ri4-gcg-yp7"
+    "reflow_type": "fixed"
 }

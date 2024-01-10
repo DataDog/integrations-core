@@ -1,18 +1,29 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
-version = ["13.0", "15.3"]
+python = ["2.7", "3.11"]
+# https://about.gitlab.com/support/statement-of-support/#version-support
+version = ["13.12", "14.10", "15.10"]
 
 [envs.default.env-vars]
 DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
+# If you're running the tests on an M1, you can use `yrzr/gitlab-ce-arm64v8` instead.
+# The official image works but is way slower because it's an amd64 one.
+GITLAB_IMAGE = "gitlab/gitlab-ce"
 
 [envs.default.overrides]
 matrix.version.env-vars = [
-  { key = "GITLAB_VERSION", value = "13.0.6-ce.0", if = ["13.0"] },
-  { key = "GITLAB_VERSION", value = "15.3.3-ce.0", if = ["15.3"] },
+  { key = "GITLAB_VERSION", value = "13.12.15-ce.0", if = ["13.12"] },
+  { key = "GITLAB_VERSION", value = "14.10.5-ce.0", if = ["14.10"] },
+  { key = "GITLAB_VERSION", value = "15.10.0-ce.0", if = ["15.10"] },
 ]
 
 [envs.bench.env-vars]
 GITLAB_VERSION = "13.0.6-ce.0"
 DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
+GITLAB_IMAGE = "gitlab/gitlab-ce"
+
+[envs.latest.env-vars]
+GITLAB_VERSION = "latest"
+DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
+GITLAB_IMAGE = "gitlab/gitlab-ce"

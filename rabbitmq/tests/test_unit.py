@@ -7,7 +7,6 @@ import json
 import mock
 import pytest
 import requests
-from tests.common import EXCHANGE_MESSAGE_STATS
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
@@ -18,6 +17,7 @@ from datadog_checks.rabbitmq.rabbitmq import (
     RabbitMQException,
     RabbitMQManagement,
 )
+from tests.common import EXCHANGE_MESSAGE_STATS
 
 from . import common, metrics
 
@@ -143,15 +143,15 @@ def test_config(check, test_case, extra_config, expected_http_kwargs):
 
         check.check(config)
 
-        http_wargs = dict(
-            auth=mock.ANY,
-            cert=mock.ANY,
-            headers=mock.ANY,
-            proxies=mock.ANY,
-            timeout=mock.ANY,
-            verify=mock.ANY,
-            allow_redirects=mock.ANY,
-        )
+        http_wargs = {
+            'auth': mock.ANY,
+            'cert': mock.ANY,
+            'headers': mock.ANY,
+            'proxies': mock.ANY,
+            'timeout': mock.ANY,
+            'verify': mock.ANY,
+            'allow_redirects': mock.ANY,
+        }
         http_wargs.update(expected_http_kwargs)
 
         r.get.assert_called_with('http://localhost:15672/api/connections', **http_wargs)
@@ -204,8 +204,8 @@ def test_queues_regexes_exclude_with_negative_lookahead(aggregator, dd_run_check
             r"""(?x) # Enable verbose flag to split expression into commented parts.
         ^ # We have to anchor at beginning of string to enforce checking for the prefix.
         (?!
-        (?://)? # Match vhost part if it's present.
-        config/foo\.updated-configs\.) # Prefix we want to exclude.
+        (?:config/)? # Match vhost part if it's present.
+        foo\.updated-configs\.) # Prefix we want to exclude.
         .+ # Match everything else as long as it's NOT preceded by prefix.
         """
         ],

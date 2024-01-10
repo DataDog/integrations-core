@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
-from typing import Any, AnyStr, Sequence, Set, Tuple
+from typing import Any, AnyStr, Sequence, Set, Tuple  # noqa: F401
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.teradata.config_models.instance import Table
@@ -30,6 +30,9 @@ def create_tables_filter(tables):
 
     tables_to_collect = set()
     tables_to_exclude = set()
+
+    if tables is None:
+        return tables_to_collect, tables_to_exclude
 
     if isinstance(tables, tuple):
         tables_to_collect = set(tables)
@@ -109,7 +112,8 @@ def submit_version(check, row):
     try:
         teradata_version = row[0]
         version_parts = {
-            name: part for name, part in zip(('major', 'minor', 'maintenance', 'patch'), teradata_version.split('.'))
+            name: part
+            for name, part in zip(('major', 'minor', 'maintenance', 'patch'), teradata_version.split('.'), strict=False)
         }
         check.set_metadata('version', teradata_version, scheme='parts', final_scheme='semver', part_map=version_parts)
     except Exception as e:

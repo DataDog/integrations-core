@@ -1,29 +1,36 @@
 {
-	"name": "FoundationDB High Level of Rejected Transactions",
-	"type": "query alert",
-	"query": "avg(last_5m):100 * ( avg:foundationdb.workload.transactions.rejected_for_queued_too_long.hz{*} / avg:foundationdb.workload.transactions.started.hz{*} ) > 10",
-	"message": "A significant proportion of transactions started are being rejected having been queued for too long. This may indicate that the database cluster cannot keep up with the workload.",
-	"tags": [
-		"integration:fdb"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 24,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": false,
-		"renotify_interval": "0",
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 10,
-			"warning": 5
-		}
-	},
-	"priority": null,
-	"recommended_monitor_metadata": {
-		"description": "Get notified when a significant proportion of transactions started are being rejected."
-	}
+  "version": 2,
+  "created_at": "2022-03-14",
+  "last_updated_at": "2022-05-25",
+  "title": "Transactions are rejected",
+  "tags": [
+    "integration:foundationdb"
+  ],
+  "description": "Incoming transactions can be rejected when they have been waiting in a queue for an extended period. This monitor calculates the rate of transactions rejected due to queuing for too long, which helps spot performance issues or bottlenecks in the system.",
+  "definition": {
+    "message": "A significant proportion of transactions started are being rejected having been queued for too long. This may indicate that the database cluster cannot keep up with the workload.",
+    "name": "FoundationDB High Level of Rejected Transactions",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 10,
+        "warning": 5
+      },
+      "timeout_h": 24
+    },
+    "priority": null,
+    "query": "avg(last_5m):100 * ( avg:foundationdb.workload.transactions.rejected_for_queued_too_long.hz{*} / avg:foundationdb.workload.transactions.started.hz{*} ) > 10",
+    "tags": [
+      "integration:fdb"
+    ],
+    "type": "query alert"
+  }
 }

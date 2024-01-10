@@ -467,6 +467,7 @@ def test_collect_ena(is_linux, is_bsd, send_ethtool_ioctl, check):
         'aws.ec2.conntrack_allowance_exceeded': 0,
         'aws.ec2.linklocal_allowance_exceeded': 0,
         'aws.ec2.pps_allowance_exceeded': 0,
+        'aws.ec2.conntrack_allowance_available': 0,
     }
 
 
@@ -536,6 +537,7 @@ def test_submit_ena(is_linux, is_bsd, send_ethtool_ioctl, check, aggregator):
         'system.net.aws.ec2.conntrack_allowance_exceeded',
         'system.net.aws.ec2.linklocal_allowance_exceeded',
         'system.net.aws.ec2.pps_allowance_exceeded',
+        'system.net.aws.ec2.conntrack_allowance_available',
     ]
     for m in expected_metrics:
         aggregator.assert_metric(

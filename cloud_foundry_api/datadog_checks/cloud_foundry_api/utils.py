@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict  # noqa: F401
 
 from dateutil import parser, tz
 from six.moves.urllib_parse import urljoin

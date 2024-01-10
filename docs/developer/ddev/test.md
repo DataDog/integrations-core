@@ -156,9 +156,8 @@ We provide an easy way to utilize [log collection][integration-log-collection] w
 ## Reference
 
 ::: datadog_checks.dev.docker
-    rendering:
+    options:
       heading_level: 3
-    selection:
       members:
         - docker_run
         - get_docker_hostname
@@ -166,8 +165,7 @@ We provide an easy way to utilize [log collection][integration-log-collection] w
         - compose_file_active
 
 ::: datadog_checks.dev.terraform
-    rendering:
+    options:
       heading_level: 3
-    selection:
       members:
         - terraform_run

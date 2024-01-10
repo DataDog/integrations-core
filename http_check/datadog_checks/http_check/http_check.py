@@ -11,7 +11,7 @@ from datetime import datetime
 
 import requests
 from cryptography import x509
-from requests import Response
+from requests import Response  # noqa: F401
 from six import PY2, string_types
 from six.moves.urllib.parse import urlparse
 
@@ -68,6 +68,9 @@ class HTTPCheck(AgentCheck):
             headers.clear()
             headers.update(self.instance.get("extra_headers", {}))
 
+        if is_affirmative(self.instance.get('use_cert_from_response', False)):
+            self.HTTP_CONFIG_REMAPPER['disable_ssl_validation']['default'] = False
+
     def check(self, instance):
         (
             addr,
@@ -86,6 +89,7 @@ class HTTPCheck(AgentCheck):
             instance_ca_certs,
             check_hostname,
             stream,
+            use_cert_from_response,
         ) = from_instance(instance, self.ca_certs)
         timeout = self.http.options["timeout"][0]
         start = time.time()
@@ -109,6 +113,7 @@ class HTTPCheck(AgentCheck):
         service_checks = []
         service_checks_tags = self._get_service_checks_tags(instance)
         r = None  # type: Response
+        peer_cert = None  # type: bytes | None
         try:
             parsed_uri = urlparse(addr)
             self.log.debug("Connecting to %s", addr)
@@ -180,6 +185,9 @@ class HTTPCheck(AgentCheck):
             raise
 
         else:
+            if use_cert_from_response:
+                peer_cert = r.raw.connection.sock.getpeercert(binary_form=True)
+
             # Only add the URL tag if it's not already present
             if not any(filter(re.compile("^url:").match, tags_list)):
                 tags_list.append("url:{}".format(addr))
@@ -257,7 +265,11 @@ class HTTPCheck(AgentCheck):
             self.gauge("network.http.cant_connect", cant_status, tags=tags_list)
 
         if ssl_expire and parsed_uri.scheme == "https":
-            status, days_left, seconds_left, msg = self.check_cert_expiration(instance, timeout, instance_ca_certs)
+            if peer_cert is None:
+                status, days_left, seconds_left, msg = self.check_cert_expiration(instance, timeout, instance_ca_certs)
+            else:
+                status, days_left, seconds_left, msg = self._inspect_cert(peer_cert, instance)
+
             tags_list = list(tags)
             tags_list.append("url:{}".format(addr))
             tags_list.append("instance:{}".format(instance_name))
@@ -302,6 +314,34 @@ class HTTPCheck(AgentCheck):
         self.service_check(sc_name, status, tags=tags, message=msg)
 
     def check_cert_expiration(self, instance, timeout, instance_ca_certs):
+        try:
+            peer_cert = self._fetch_cert(instance, timeout, instance_ca_certs)
+        except Exception as e:
+            msg = repr(e)
+            if any(word in msg for word in ['expired', 'expiration']):
+                self.log.debug('error: %s. Cert might be expired.', e)
+                return AgentCheck.CRITICAL, 0, 0, msg
+            else:
+                if 'Hostname mismatch' in msg or "doesn't match" in msg:
+                    self.log.debug(
+                        'The hostname on the SSL certificate does not match the given host: %s',
+                        e,
+                    )
+                else:
+                    self.log.debug('Unable to connect to site to get cert expiration: %s', e)
+                return AgentCheck.UNKNOWN, None, None, msg
+
+        # To maintain backwards compatability, if we aren't validating tls/certs, do not process
+        # the returned binary cert unless specifically configured to with tls_retrieve_non_validated_cert
+        if (
+            not is_affirmative(instance.get('tls_verify', True))
+            and not is_affirmative(instance.get('tls_retrieve_non_validated_cert', False))
+        ) or not peer_cert:
+            return AgentCheck.UNKNOWN, None, None, 'Empty or no certificate found.'
+        else:
+            return self._inspect_cert(peer_cert, instance)
+
+    def _inspect_cert(self, binary_cert, instance):
         # thresholds expressed in seconds take precedence over those expressed in days
         seconds_warning = (
             int(instance.get("seconds_warning", 0))
@@ -313,46 +353,13 @@ class HTTPCheck(AgentCheck):
             or int(instance.get("days_critical", 0)) * 24 * 3600
             or DEFAULT_EXPIRE_CRITICAL
         )
-        url = instance.get("url")
-
-        o = urlparse(url)
-        host = o.hostname
-        server_name = instance.get("ssl_server_name", o.hostname)
-        port = o.port or 443
 
         try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(float(timeout))
-            sock.connect((host, port))
-
-            context = self.get_tls_context()
-            context.load_verify_locations(instance_ca_certs)
-
-            ssl_sock = context.wrap_socket(sock, server_hostname=server_name)
-            binary_cert = ssl_sock.getpeercert(binary_form=True)
-
-            # To maintain backwards compatability, if we aren't validating tls/certs, do not process
-            # the returned binary cert unless specifically configured to with tls_retrieve_non_validated_cert
-            if (
-                not is_affirmative(instance.get("tls_verify", True))
-                and not is_affirmative(instance.get("tls_retrieve_non_validated_cert", False))
-            ) or not binary_cert:
-                raise Exception("Empty or no certificate found.")
-
             cert = x509.load_der_x509_certificate(binary_cert)
             exp_date = cert.not_valid_after
         except Exception as e:
             msg = repr(e)
-            if any(word in msg for word in ["expired", "expiration"]):
-                self.log.debug("error: %s. Cert might be expired.", e)
-                return AgentCheck.CRITICAL, 0, 0, msg
-            elif "Hostname mismatch" in msg or "doesn't match" in msg:
-                self.log.debug(
-                    "The hostname on the SSL certificate does not match the given host: %s",
-                    e,
-                )
-            else:
-                self.log.debug("Unable to connect to site to get cert expiration: %s", e)
+            self.log.debug('Unable to parse the certificate to get expiration: %s', e)
             return AgentCheck.UNKNOWN, None, None, msg
 
         time_left = exp_date - datetime.utcnow()
@@ -385,6 +392,24 @@ class HTTPCheck(AgentCheck):
                 seconds_left,
                 "Days left: {}".format(days_left),
             )
+
+    def _fetch_cert(self, instance, timeout, instance_ca_certs):
+        url = instance.get('url')
+
+        o = urlparse(url)
+        host = o.hostname
+        server_name = instance.get('ssl_server_name', o.hostname)
+        port = o.port or 443
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(float(timeout))
+        sock.connect((host, port))
+
+        context = self.get_tls_context()
+        context.load_verify_locations(instance_ca_certs)
+
+        ssl_sock = context.wrap_socket(sock, server_hostname=server_name)
+        return ssl_sock.getpeercert(binary_form=True)
 
     @staticmethod
     def _include_content(include_content, message, content):

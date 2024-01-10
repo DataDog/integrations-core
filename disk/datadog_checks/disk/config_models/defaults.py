@@ -7,116 +7,50 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-from datadog_checks.base.utils.models.fields import get_default_field_value
 
-
-def shared_device_global_exclude(field, value):
-    return get_default_field_value(field, value)
-
-
-def shared_file_system_global_exclude(field, value):
-    return get_default_field_value(field, value)
-
-
-def shared_mount_point_global_exclude(field, value):
-    return get_default_field_value(field, value)
-
-
-def shared_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_all_partitions(field, value):
+def instance_all_partitions():
     return False
 
 
-def instance_blkid_cache_file(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_create_mounts(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_device_exclude(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_device_include(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_device_tag_re(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags():
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname():
     return False
 
 
-def instance_file_system_exclude(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_file_system_include(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_include_all_devices(field, value):
+def instance_include_all_devices():
     return True
 
 
-def instance_metric_patterns(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval():
     return 15
 
 
-def instance_min_disk_size(field, value):
+def instance_min_disk_size():
     return 0
 
 
-def instance_mount_point_exclude(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_mount_point_include(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_service_check_rw(field, value):
+def instance_service_check_rw():
     return False
 
 
-def instance_tag_by_filesystem(field, value):
+def instance_tag_by_filesystem():
     return False
 
 
-def instance_tag_by_label(field, value):
+def instance_tag_by_label():
     return True
 
 
-def instance_tags(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_timeout(field, value):
+def instance_timeout():
     return 5
 
 
-def instance_use_lsblk(field, value):
+def instance_use_lsblk():
     return False
 
 
-def instance_use_mount(field, value):
+def instance_use_mount():
     return False
