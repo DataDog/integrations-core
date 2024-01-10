@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.1.1 / 2024-01-10
+
+***Added***:
+
+* added new statistics for voltdb version 11 ([#16590](https://github.com/DataDog/integrations-core/pull/16590)) Thanks [gulshan08091988](https://github.com/gulshan08091988).
+
 ## 3.1.0 / 2024-01-05
 
 ***Added***:
