@@ -1,14 +1,14 @@
 ## Overview
 
-- Check Point Next Generation Firewall is a security gateway that includes application control and IPS protection, with integrated management of security events -- all in one appliance. Other Features include: Identity Awareness, URL Filtering, Anti-Bot, Anti-Virus, Anti-Spam etc.
+Check Point Next Generation Firewall is a security gateway that includes application control and IPS protection, with integrated management of security events. Additional features include Identity Awareness, URL Filtering, Anti-Bot, Anti-Virus, and Anti-Spam.
 
 ## Setup
 
 ### Installation
 
-To install the Checkpoint Quantum Firewall integration follow the steps below:
+To install the Checkpoint Quantum Firewall integration, follow the steps below:
 
-1. [Install][5] the 1.0 release (`checkpoint_quantum_firewall==1.0.0`)
+1. [Install][5] the 1.0 release (`checkpoint_quantum_firewall==1.0.0`).
 
 ### Configuration
 
@@ -16,13 +16,13 @@ To install the Checkpoint Quantum Firewall integration follow the steps below:
 
 **Checkpoint Quantum Firewall:**
 
-1. Collecting logs is disabled by default in the Datadog Agent. Enable it in datadog.yaml:
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in the `datadog.yaml` file:
 
    ```yaml
    logs_enabled: true
    ```
 
-2. Add this configuration block to your checkpoint_quantum_firewall.d/conf.yaml file to start collecting your Checkpoint Quantum Firewall logs.
+2. Add this configuration block to your `checkpoint_quantum_firewall.d/conf.yaml` file to start collecting your Checkpoint Quantum Firewall logs.
 
    ```yaml
    logs:
@@ -34,26 +34,25 @@ To install the Checkpoint Quantum Firewall integration follow the steps below:
 
 3. [Restart the Agent][1].
 
-4. Configuring Syslog Message Forwarding from Checkpoint Quantum Firewall
-   1. Connect to the command line on the Management Server / Log Server:
-   2. Log in to the Expert mode.
-      - Enter your administrative credentials (After entering credentials, expert mode is enabled).
-   3. In order to configure new target for the exported logs enter the below commands:
+4. Configure Syslog Message Forwarding from Checkpoint Quantum Firewall:
+   1. Connect to the command line on the Management Server / Log Server.
+   2. Login to the Expert mode. Enter your administrative credentials (after entering credentials, expert mode is enabled).
+   3. In order to configure a new target for the exported logs, enter the following commands:
       ```yaml
       cp_log_export add name <Name of Log Exporter Configuration> target-server <HostName or IP address of Target Server> target-port <Port on Target Server> protocol {tcp | udp} format json
       ```
-      - In above commands, specify Syslog Server Details:
-        Provide the following information:
-        - name: The Name of the syslog server. For instance: datadog_syslog
+      - In the commands above, specify the following Syslog Server Details:
+ 
+        - name: The Name of the syslog server. For example: `datadog_syslog`.
         - target-server: The destination where you want to send the Checkpoint Quantum Firewall logs.
         - target-port: The port on which the syslog server is listening (typically 514).
-        - protocol: Protocol name, which protocol will be used to send logs (tcp/udp).
+        - protocol: The protocol name, or which protocol will be used to send logs (TCP/UDP).
         - format: Format must be 'json'.
-   4. In order to save and add syslog server configuration hit below command:
+   4. In order to save and add the syslog server configuration, use the following command:
       ```yaml
       cp_log_export restart name <Name of Log Exporter Configuration>
       ```
-   5. For more details to configure syslog click [here][4]
+   5. For more information about configuring syslog, see the [official Checkpoint documentation][4].
 
 ### Validation
 
@@ -67,15 +66,15 @@ The checkpoint_quantum_firewall integration collects Firewall, URL Filtering, IP
 
 ### Metrics
 
-The checkpoint_quantum_firewall integration does not include any metrics.
+The Checkpoint Quantum Firewall integration does not include any metrics.
 
 ### Events
 
-The checkpoint_quantum_firewall integration does not include any events.
+The Checkpoint Quantum Firewall integration does not include any events.
 
 ### Service Checks
 
-The checkpoint_quantum_firewall integration does not include any service checks.
+The Checkpoint Quantum Firewall integration does not include any service checks.
 
 ## Troubleshooting
 
@@ -124,7 +123,7 @@ This error occurs because by default, Syslog listens on port 514. To resolve thi
 - Disable Syslog
 - Configure the Agent to listen on a different, available port
 
-For any further assistance, do contact [Datadog support][3].
+For further assistance, contact [Datadog support][3].
 
 [1]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
