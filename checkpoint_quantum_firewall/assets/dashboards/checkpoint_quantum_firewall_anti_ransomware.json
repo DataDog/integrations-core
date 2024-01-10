@@ -1,6 +1,6 @@
 {
     "title": "Checkpoint Quantum Firewall - Anti Ransomware",
-    "description": "- This dashboard gives insights about anti ransomware related logs.",
+    "description": "- This dashboard gives insights about anti-ransomware related logs.",
     "widgets": [
         {
             "id": 3268411434716506,
@@ -24,7 +24,7 @@
             "id": 977299553144344,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard gives insights about anti ransomware related logs.",
+                "content": "## Overview\n- This dashboard gives insights about anti-ransomware related logs.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

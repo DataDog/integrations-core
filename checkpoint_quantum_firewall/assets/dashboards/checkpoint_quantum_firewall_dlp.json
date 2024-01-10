@@ -1,6 +1,6 @@
 {
     "title": "Checkpoint Quantum Firewall - DLP",
-    "description": "- This dashboard gives insights about Data Loss Prevention(DLP) related logs.",
+    "description": "- This dashboard gives insights about Data Loss Prevention (DLP) related logs.",
     "widgets": [
         {
             "id": 2895580348533206,
@@ -25,7 +25,7 @@
             "id": 1205088476523760,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard gives insights about Data Loss Prevention(DLP) related logs.",
+                "content": "## Overview\n- This dashboard gives insights about Data Loss Prevention (DLP) related logs.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

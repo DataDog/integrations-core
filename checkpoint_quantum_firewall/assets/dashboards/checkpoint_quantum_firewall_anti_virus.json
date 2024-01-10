@@ -1,6 +1,6 @@
 {
     "title": "Checkpoint Quantum Firewall - Anti Virus",
-    "description": "- This dashboard gives insights about anti virus related logs.",
+    "description": "- This dashboard gives insights about anti-virus related logs.",
     "widgets": [
         {
             "id": 1019114084559326,
@@ -25,7 +25,7 @@
             "id": 2341357428032940,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard gives insights about anti virus related logs.",
+                "content": "## Overview\n- This dashboard gives insights about anti-virus related logs.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

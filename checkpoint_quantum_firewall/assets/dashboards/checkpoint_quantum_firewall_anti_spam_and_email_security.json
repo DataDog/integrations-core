@@ -1,6 +1,6 @@
 {
     "title": "Checkpoint Quantum Firewall - Anti Spam & Email Security",
-    "description": "- This dashboard gives insight about anti spam & email security related logs.",
+    "description": "- This dashboard gives insight about anti-spam and email security related logs.",
     "widgets": [
         {
             "id": 6341878164127886,
@@ -24,7 +24,7 @@
             "id": 2509837744493518,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard gives insight about anti spam & email security related logs.",
+                "content": "## Overview\n- This dashboard gives insight about anti-spam and email security related logs.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
