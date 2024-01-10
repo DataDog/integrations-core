@@ -82,6 +82,7 @@ def test_e2e_profile_silverpeak_edgeconnect(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.23867.1.2.1',
         'vendor': 'silverpeak',
+        'device_type': 'sd-wan',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

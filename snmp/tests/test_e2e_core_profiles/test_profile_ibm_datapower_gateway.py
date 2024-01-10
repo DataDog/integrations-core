@@ -189,6 +189,7 @@ def test_e2e_profile_ibm_datapower_gateway(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.14685.1.8',
         'vendor': 'ibm',
+        'device_type': 'other',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
