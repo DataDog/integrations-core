@@ -1,1 +1,0 @@
-Add connect state metric for OpenmetricsV2 and add way to collect shadow prefixes in legacy check for rbac metrics
