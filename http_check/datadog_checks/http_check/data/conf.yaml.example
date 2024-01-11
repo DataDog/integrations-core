@@ -194,6 +194,12 @@ instances:
     #
     # include_default_headers: true
 
+    ## @param use_truststore - boolean - optional - default: true
+    ## The (optional) use_truststore parameter instructs the check to use the truststore
+    ## to validate the certificate chain.
+    #
+    # use_truststore: true
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

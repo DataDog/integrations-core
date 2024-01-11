@@ -114,6 +114,7 @@ class InstanceConfig(BaseModel):
     url: str
     use_cert_from_response: Optional[bool] = None
     use_legacy_auth_encoding: Optional[bool] = None
+    use_truststore: Optional[bool] = None
     username: Optional[str] = None
 
     @model_validator(mode='before')

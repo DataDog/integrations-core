@@ -126,3 +126,7 @@ def instance_use_cert_from_response():
 
 def instance_use_legacy_auth_encoding():
     return True
+
+
+def instance_use_truststore():
+    return True
