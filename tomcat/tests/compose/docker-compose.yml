@@ -9,6 +9,7 @@ services:
       - 9012:9012 # JMX
     volumes:
       - ./${TOMCAT_VERSION}/sample.war:/opt/bitnami/tomcat/webapps/sample.war
+      - ${TOMCAT_LOG_FOLDER}:/opt/bitnami/tomcat/logs
     environment:
       # Use low `StringCache.trainThreshold` to make it easier to get StringCache metrics
       TOMCAT_EXTRA_JAVA_OPTS: >-
