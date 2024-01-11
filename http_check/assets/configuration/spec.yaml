@@ -176,6 +176,13 @@ files:
       value:
         type: boolean
         example: true
+    - name: use_truststore
+      description: |
+        The (optional) use_truststore parameter instructs the check to use the truststore
+        to validate the certificate chain.
+      value:
+        type: boolean
+        example: true
     - template: instances/default
     - template: instances/http
       overrides:

@@ -31,6 +31,7 @@ Config = namedtuple(
         'check_hostname',
         'stream',
         'use_cert_from_response',
+        'use_truststore',
     ],
 )
 
@@ -72,6 +73,7 @@ def from_instance(instance, default_ca_certs=None):
     use_cert_from_response = is_affirmative(instance.get('use_cert_from_response', False))
     if use_cert_from_response:
         stream = True
+    use_truststore = is_affirmative(instance.get('use_truststore', False))
 
     return Config(
         url,
@@ -91,4 +93,5 @@ def from_instance(instance, default_ca_certs=None):
         check_hostname,
         stream,
         use_cert_from_response,
+        use_truststore
     )

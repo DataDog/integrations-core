@@ -10,6 +10,7 @@ import time
 from datetime import datetime
 
 import requests
+import truststore
 from cryptography import x509
 from requests import Response  # noqa: F401
 from six import PY2, string_types
