@@ -257,11 +257,8 @@ class ApiRest(Api):
         return response.json().get('flavors', [])
 
     def get_compute_hypervisors(self):
-        response = self.http.get(
-            '{}/os-hypervisors/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value))
-        )
-        response.raise_for_status()
-        return response.json().get('hypervisors', [])
+        url = '{}/os-hypervisors/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value))
+        return self.make_paginated_request(url, 'hypervisors', 'id', next_signifier='hypervisors_links')
 
     def get_compute_hypervisor_uptime(self, hypervisor_id):
         response = self.http.get(

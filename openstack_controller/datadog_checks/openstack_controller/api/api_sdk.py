@@ -168,7 +168,10 @@ class ApiSdk(Api):
 
     def get_compute_hypervisors(self):
         return [
-            hypervisor.to_dict(original_names=True) for hypervisor in self.connection.compute.hypervisors(details=True)
+            hypervisor.to_dict(original_names=True)
+            for hypervisor in self.call_paginated_api(
+                self.connection.compute.hypervisors, details=True, limit=self.config.paginated_limit
+            )
         ]
 
     def get_compute_hypervisor_uptime(self, hypervisor_id):
