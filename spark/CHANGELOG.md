@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.2.0 / 2024-01-12
+
+***Added***:
+
+* Added the Databricks Spark Overview Dashboard
+
 ## 4.1.0 / 2024-01-05
 
 ***Added***:
