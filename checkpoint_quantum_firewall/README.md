@@ -1,6 +1,6 @@
 ## Overview
 
-Check Point Next Generation Firewall is a security gateway that includes application control and IPS protection, with integrated management of security events. Additional features include Identity Awareness, URL Filtering, Anti-Bot, Anti-Virus, and Anti-Spam.
+[Check Point Next Generation Firewall][7] is a security gateway that includes application control and IPS protection, with integrated management of security events. Additional features include Identity Awareness, URL Filtering, Anti-Bot, Anti-Virus, and Anti-Spam.
 
 ## Setup
 
@@ -23,6 +23,8 @@ To install the Checkpoint Quantum Firewall integration, follow the steps below:
    ```
 
 2. Add this configuration block to your `checkpoint_quantum_firewall.d/conf.yaml` file to start collecting your Checkpoint Quantum Firewall logs.
+
+   See the [sample checkpoint_quantum_firewall.d/conf.yaml][6] for available configuration options.
 
    ```yaml
    logs:
@@ -130,3 +132,5 @@ For further assistance, contact [Datadog support][3].
 [3]: https://docs.datadoghq.com/help/
 [4]: https://sc1.checkpoint.com/documents/R81.20/WebAdminGuides/EN/CP_R81.20_LoggingAndMonitoring_AdminGuide/Content/Topics-LMG/Log-Exporter-Configuration-in-CLI-Basic.htm?tocpath=Log%20Exporter%7CConfiguring%20Log%20Exporter%20in%20CLI%7C_____1
 [5]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install
+[6]: https://github.com/DataDog/integrations-core/blob/master/checkpoint_quantum_firewall/datadog_checks/checkpoint_quantum_firewall/data/conf.yaml.example
+[7]: https://www.checkpoint.com/quantum/next-generation-firewall/
