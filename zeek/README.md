@@ -10,6 +10,8 @@ This integration provides visualization and log enrichments for Connection Logs,
 
 To install the Zeek integration, use the `datadog-agent integration install` command and follow the steps below. For more information, see the [Integration Management][7] documentation.
 
+**Note**: This step is not necessary for Agent version >= 7.52.0.
+
 Linux command
   ```shell
   sudo -u dd-agent -- datadog-agent integration install datadog-zeek==1.0.0
