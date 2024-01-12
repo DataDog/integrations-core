@@ -116,9 +116,38 @@ def repair_windows(source_dir: str, built_dir: str, external_dir: str) -> None:
             sys.exit(process.returncode)
 
 
+def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
+    from delocate import delocate_wheel
+    from delocate.delocating import filter_system_libs
+
+    exclusions = [
+        # pymqi
+        'libmqic_r.dylib',
+    ]
+
+    def copy_filt_func(libname):
+        filter_system_libs(libname) or any(exclusion in libname for exclusion in exclusions)
+
+    for wheel in iter_wheels(source_dir):
+        print(f'--> {wheel.name}')
+        if not wheel_was_built(wheel):
+            print('Using existing wheel')
+            shutil.move(wheel, external_dir)
+            continue
+
+        delocate_wheel(
+            str(wheel),
+            os.path.join(built_dir, os.path.basename(wheel)),
+            lib_sdir='.libs',
+            copy_filt_func=copy_filt_func,
+        )
+        print('Repaired wheel')
+
+
 REPAIR_FUNCTIONS = {
     'linux': repair_linux,
     'win32': repair_windows,
+    'darwin': repair_darwin,
 }
 
 

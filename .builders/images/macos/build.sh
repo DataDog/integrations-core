@@ -16,6 +16,8 @@ export PREFIX_PATH="$(pwd)/prefix"
 export LDFLAGS="-Wl,-rpath,${PREFIX_PATH}/lib -L${PREFIX_PATH}/lib"
 export CFLAGS="-I${PREFIX_PATH}/include -O2"
 export PATH="${PREFIX_PATH}/bin:${PATH}"
+# Necessary for `delocate` to pick up the extra libraries we install
+export DYLD_LIBRARY_PATH="${PREFIX_PATH}/lib:${DYLD_LIBRARY_PATH:-}"
 
 "${PYTHON3}" -m pip install --no-warn-script-location -r "runner_dependencies.txt"
 

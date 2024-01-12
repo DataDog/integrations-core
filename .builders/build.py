@@ -83,6 +83,13 @@ def build_macos():
 
         mount_dir = temp_dir / 'mnt'
         mount_dir.mkdir()
+        # Folders required by the build_wheels script
+        wheels_dir = mount_dir / 'wheels'
+        wheels_dir.mkdir()
+        built_wheels_dir = wheels_dir / 'built'
+        built_wheels_dir.mkdir()
+        external_wheels_dir = wheels_dir / 'external'
+        external_wheels_dir.mkdir()
 
         dependency_file = mount_dir / 'requirements.in'
         dependency_file.write_text('\n'.join(chain.from_iterable(read_dependencies().values())))
