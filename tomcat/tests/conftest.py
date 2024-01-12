@@ -11,18 +11,20 @@ from datadog_checks.dev.docker import docker_run
 from datadog_checks.dev.env import get_state, save_state
 from datadog_checks.dev.utils import load_jmx_config
 
-from .common import E2E_METADATA, HELLO_URL, HERE
+from .common import E2E_METADATA, FLAVOR, HELLO_URL, HERE
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    compose_file = os.path.join(HERE, 'compose', 'docker-compose.yml')
+    compose_file = os.path.join(HERE, 'compose', FLAVOR, 'docker-compose.yml')
+
+    log_patterns = ['Server startup'] if FLAVOR == 'standalone' else ['Starting ProtocolHandler']
 
     with docker_run(
         compose_file,
         build=True,
         endpoints=HELLO_URL,
-        log_patterns=['Server startup'],
+        log_patterns=log_patterns,
         wrappers=[create_log_volumes()],
     ):
         yield load_jmx_config(), E2E_METADATA
