@@ -2,7 +2,7 @@
 
 ## Overview
 
-Cisco Umbrella is the leading platform for network DNS security monitoring. Umbrella's DNS-layer security offers a fast and easy way to enhance security, providing improved visibility and protection for users both on and off the network. By preventing threats over any port or protocol before they reach the network or endpoints, Umbrella DNS-layer security aims to deliver the most secure, reliable, and fastest internet experience to over 100 million users.
+[Cisco Umbrella][1] is the leading platform for network DNS security monitoring. Umbrella's DNS-layer security offers a fast and easy way to enhance security, providing improved visibility and protection for users both on and off the network. By preventing threats over any port or protocol before they reach the network or endpoints, Umbrella DNS-layer security aims to deliver the most secure, reliable, and fastest internet experience to over 100 million users.
 
 This integration offers visualizations and log enrichments for Cisco Umbrella DNS and Proxy logs.
 
@@ -12,7 +12,7 @@ This integration offers visualizations and log enrichments for Cisco Umbrella DN
 
 #### Cisco Umbrella DNS Configuration
 
-1. Login to [**Umbrella** > **Login**][1] with your credentials.
+1. Login to [**Umbrella** > **Login**][2] with your credentials.
 2. From the left panel, click on **Admin**.
 3. Then, click on **API Keys**.
 4. Create a new API Key using the **Add** button.
@@ -47,7 +47,8 @@ The Cisco Umbrella DNS integration does not include any events.
 
 ## Support
 
-For further assistance, contact [Datadog Support][2].
+For further assistance, contact [Datadog Support][3].
 
-[1]: https://login.umbrella.com/
-[2]: https://docs.datadoghq.com/help/
+[1]: https://umbrella.cisco.com/
+[2]: https://login.umbrella.com/
+[3]: https://docs.datadoghq.com/help/
