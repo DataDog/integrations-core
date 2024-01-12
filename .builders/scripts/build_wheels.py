@@ -26,9 +26,9 @@ if sys.platform == 'win32':
 else:
     import shlex
 
-    PY3_PATH = Path('/py3/bin/python')
-    PY2_PATH = Path('/py2/bin/python')
-    MOUNT_DIR = Path('/home')
+    PY3_PATH = Path(os.environ.get('PY3_BUILDENV_PATH', '/py3/bin/python'))
+    PY2_PATH = Path(os.environ.get('PY2_BUILDENV_PATH', '/py2/bin/python'))
+    MOUNT_DIR = Path(os.environ.get('MOUNT_HOME', '/home'))
     ENV_FILE = Path('/.env')
 
     def join_command_args(args: list[str]) -> str:

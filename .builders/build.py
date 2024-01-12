@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import subprocess
 import sys
@@ -65,7 +66,40 @@ def read_dependencies() -> dict[str, list[str]]:
 
 
 def build_macos():
-    sys.exit('macOS is not supported')
+    parser = argparse.ArgumentParser(prog='builder', allow_abbrev=False)
+    parser.add_argument('output_dir')
+    parser.add_argument('--python', default='3')
+    parser.add_argument('--cache-dir')
+    args = parser.parse_args()
+
+    context_path = HERE / 'images' / 'macos'
+
+    with temporary_directory() as temp_dir:
+        build_context_dir = shutil.copytree(context_path, temp_dir, dirs_exist_ok=True)
+        # Copy utilities shared by multiple images
+        for entry in context_path.parent.iterdir():
+            if entry.is_file():
+                shutil.copy2(entry, build_context_dir)
+
+        mount_dir = temp_dir / 'mnt'
+        mount_dir.mkdir()
+
+        dependency_file = mount_dir / 'requirements.in'
+        dependency_file.write_text('\n'.join(chain.from_iterable(read_dependencies().values())))
+        shutil.copy(HERE / 'deps' / 'build_dependencies.txt', mount_dir)
+        shutil.copytree(HERE / 'scripts', mount_dir / 'scripts')
+        shutil.copytree(HERE / 'patches', mount_dir / 'patches')
+
+        env = {
+            **os.environ,
+            'PREFIX_CACHE': args.cache_dir,
+            'MOUNT_HOME': mount_dir,
+        }
+        check_process(
+            ['bash', str(HERE / 'images' / 'macos' / 'build.sh'), '--python', args.python],
+            env=env,
+            cwd=build_context_dir,
+        )
 
 
 def build_image():
