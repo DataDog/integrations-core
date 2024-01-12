@@ -49,16 +49,9 @@ Linux command
     logs_enabled: true
     ```
 
-2. Add this configuration block to your `zeek.d/conf.yaml` file to start collecting your Zeek logs.  
- **Note**: Include the log file's paths within the `exclude_paths` parameter to prevent the ingestion of unsupported or undesired log files during the monitoring process.
+2. Add this configuration block to your `zeek.d/conf.yaml` file to start collecting your Zeek logs.
 
-   ```yaml
-   # Example of excluded paths
-  exclude_paths:
-    - /opt/zeek/logs/current/ntlm.log
-    - /opt/zeek/logs/current/radius.log
-    - /opt/zeek/logs/current/rfb.log
-   ```
+    See the [sample zeek.d/conf.yaml][6] for available configuration options.
 
    ```yaml
     logs:
@@ -68,6 +61,17 @@ Linux command
         - /opt/zeek/logs/current/*.*.log
       service: zeek
       source: zeek
+   ```
+
+    **Note**: Include the log file's paths within the `exclude_paths` parameter to prevent the ingestion of unsupported or undesired log files during the monitoring process.
+
+
+   ```yaml
+    # Example of excluded paths
+    exclude_paths:
+      - /opt/zeek/logs/current/ntlm.log
+      - /opt/zeek/logs/current/radius.log
+      - /opt/zeek/logs/current/rfb.log
    ```
 
 3. [Restart the Agent][1].
@@ -90,19 +94,19 @@ Linux command
 3. [Restart the Agent][1].
 
 4. Configuring Syslog Message Forwarding from corelight
-    1. Access the Corelight Sensor UI:  
+    1. Access the Corelight Sensor UI:
        - Open a web browser and navigate to the IP address or hostname of your Corelight sensor.
        - Log in with your administrative credentials.
-    2. Navigate to the Zeek Configuration Page. The exact path may vary depending on your sensor's firmware version. Look for options related to "Zeek" or "Logging". Common paths include:  
+    2. Navigate to the Zeek Configuration Page. The exact path may vary depending on your sensor's firmware version. Look for options related to "Zeek" or "Logging". Common paths include:
         - Settings > Logging
         - Configuration > Zeek > Logging
     3. Locate the option to enable syslog output for Zeek logs and select the checkbox or toggle to activate.
-    4. Specify Syslog Server Details. Provide the following information:  
+    4. Specify Syslog Server Details. Provide the following information:
        - **Syslog server IP address**: The destination where you want to send the Zeek logs.
        - **Syslog port**: The port on which the syslog server is listening (typically 514).
        - **Facility**: The syslog facility to use.
        - **Severity level**: The minimum severity of events to send.
-    5. Click the **Save** or **Apply** button to commit the configuration changes.  
+    5. Click the **Save** or **Apply** button to commit the configuration changes.
 
 
 ### Validation
@@ -115,8 +119,8 @@ Linux command
 
 The Zeek integration collects following log-types.
 
-| Format     | Event Types    | 
-| ---------  | -------------- | 
+| Format     | Event Types    |
+| ---------  | -------------- |
 | Opensource Zeek - JSON Format | conn, dhcp, dns, ftp, http, ntp, rdp, smtp, snmp, socks, ssh, ssl, syslog, tunnel, files, pe, intel, notice, signatures, traceroute, known-certs, known-modbus, known-services, known-hosts, software, x509, dpd, weird, captureloss, reporter, ldap, ldap-search, smb-files, smb-mappings |
 | Corelight Zeek - Syslog RFC 3164 (Legacy) Format | conn, dhcp, dns, ftp, http, ntp, rdp, smtp, snmp, socks, ssh, ssl, syslog, tunnel, files, pe, intel, notice, signatures, traceroute, known-certs, known-modbus, known-services, known-hosts, software, x509, dpd, weird, captureloss, reporter, ldap, ldap-search, smb-files, smb-mappings, conn-long, conn-red, encrypted-dns, generic-dns-tunnels, smtp-links, suricata-corelight |
 
