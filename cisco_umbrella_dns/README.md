@@ -6,11 +6,6 @@ Cisco Umbrella is the leading platform for network DNS security monitoring. Umbr
 
 This integration offers visualizations and log enrichments for Cisco Umbrella DNS and Proxy logs.
 
-### Supported Logs
-
-- Cisco Umbrella DNS Logs
-- Cisco Umbrella Proxy Logs
-
 ## Setup
 
 ### Configuration
@@ -33,7 +28,6 @@ Configure the Datadog endpoint to forward Cisco Umbrella DNS events as logs to D
 
 | Cisco Umbrella DNS Parameters | Description                                                                |
 | ----------------------------- | -------------------------------------------------------------------------- |
-| Host                          | The API server host of Cisco Umbrella. Default host is `api.umbrella.com`. |
 | API Key                       | The API Key from Cisco Umbrella.                                           |
 | Key Secret                    | The Key Secret from Cisco Umbrella.                                        |
 
