@@ -30,7 +30,6 @@ RUN yum install -y perl-IPC-Cmd && \
  RELATIVE_PATH="openssl-{{version}}" \
  # no-module prevents the creation of dynamically loaded modules that would be problematic to bundle into Python wheels
  CONFIGURE_SCRIPT="./config" \
- CONFIGURE_ARGS="-Wl,-Bsymbolic-functions -fPIC shared no-module no-comp no-idea no-mdc2 no-rc5 no-ssl3 no-gost" \
  bash install-from-source.sh \
  -fPIC shared \
  # This prevents the creation of dynamically loaded modules that would be problematic to bundle into Python wheels
