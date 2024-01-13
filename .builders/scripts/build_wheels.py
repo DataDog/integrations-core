@@ -8,13 +8,14 @@ from hashlib import sha256
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+from dotenv import dotenv_values
 from utils import extract_metadata, normalize_project_name
 
 if sys.platform == 'win32':
     PY3_PATH = Path('C:\\py3\\Scripts\\python.exe')
     PY2_PATH = Path('C:\\py2\\Scripts\\python.exe')
     MOUNT_DIR = Path('C:\\mnt')
-    PACKAGES_FORCE_BUILD = []
+    ENV_FILE = Path('C:\\.env')
 
     def join_command_args(args: list[str]) -> str:
         return subprocess.list2cmdline(args)
@@ -28,7 +29,7 @@ else:
     PY3_PATH = Path('/py3/bin/python')
     PY2_PATH = Path('/py2/bin/python')
     MOUNT_DIR = Path('/home')
-    PACKAGES_FORCE_BUILD = ['confluent-kafka']
+    ENV_FILE = Path('/.env')
 
     def join_command_args(args: list[str]) -> str:
         return shlex.join(args)
@@ -76,20 +77,29 @@ def main():
         env_vars['PIP_WHEEL_DIR'] = str(staged_wheel_dir)
         env_vars['DD_BUILD_PYTHON_VERSION'] = python_version
         env_vars['DD_MOUNT_DIR'] = str(MOUNT_DIR)
+        env_vars['DD_ENV_FILE'] = str(ENV_FILE)
 
         # Off is on, see: https://github.com/pypa/pip/issues/5735
         env_vars['PIP_NO_BUILD_ISOLATION'] = '0'
-        env_vars['PIP_NO_BINARY'] = ' '.join(PACKAGES_FORCE_BUILD)
 
         # Spaces are used to separate multiple values which means paths themselves cannot contain spaces, see:
         # https://github.com/pypa/pip/issues/10114#issuecomment-1880125475
         env_vars['PIP_FIND_LINKS'] = path_to_uri(staged_wheel_dir)
-        if constraints_file := env_vars.get('PIP_CONSTRAINT'):
-            env_vars['PIP_CONSTRAINT'] = path_to_uri(constraints_file)
 
         # Perform builder-specific logic if required
         if build_command := os.environ.get('DD_BUILD_COMMAND'):
             check_process(build_command, env=env_vars, shell=True)
+
+        # Load environment variables
+        if ENV_FILE.is_file():
+            for key, value in dotenv_values(str(ENV_FILE)).items():
+                if value is None:
+                    env_vars.pop(key, None)
+                else:
+                    env_vars[key] = value
+
+        if constraints_file := env_vars.get('PIP_CONSTRAINT'):
+            env_vars['PIP_CONSTRAINT'] = path_to_uri(constraints_file)
 
         # Fetch or build wheels
         command_args = [
