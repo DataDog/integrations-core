@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 16.1.1 / 2024-01-15
+
+***Fixed***:
+
+* Fix incompatibility issues with Python 3.9 and lower ([#16608](https://github.com/DataDog/integrations-core/pull/16608))
+* Fix autovacuum metrics for postgres >= 10 ([#16612](https://github.com/DataDog/integrations-core/pull/16612))
+
 ## 16.1.0 / 2024-01-10
 
 ***Added***:
