@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 29.0.2 / 2024-01-09
+
+***Fixed***:
+
+* * Extend messages from dependency validation.
+      1. Say which ddev command to run to fix particular type of error.
+      2. Report success at the end. ([#15558](https://github.com/DataDog/integrations-core/pull/15558))
+* Pin the `pytest-asyncio` version to 0.23.2 ([#16507](https://github.com/DataDog/integrations-core/pull/16507))
+* Remove setuptools depedency for jmx and logs integrations. Make them consistent with the `check` template. ([#16527](https://github.com/DataDog/integrations-core/pull/16527))
+* Update the template for logs integrations to not require a specific Python and base check version ([#16528](https://github.com/DataDog/integrations-core/pull/16528))
+
 ## 29.0.1 / 2024-01-02
 
 ***Fixed***:
