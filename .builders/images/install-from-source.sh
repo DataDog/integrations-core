@@ -10,8 +10,7 @@
 # Optional:
 # - CONFIGURE_SCRIPT: Alternative to the default ./configure
 
-
-set -exu
+set -euxo pipefail
 
 url=${DOWNLOAD_URL//'{{version}}'/${VERSION}}
 relative_path=${RELATIVE_PATH//'{{version}}'/${VERSION}}
