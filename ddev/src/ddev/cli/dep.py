@@ -19,7 +19,6 @@ from ddev.repo.constants import PYTHON_VERSION
 # Dependencies to ignore when update dependencies
 IGNORED_DEPS = {
     'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
-    'pymysql',  # https://github.com/DataDog/integrations-core/pull/12612
     'foundationdb',  # Breaking datadog_checks_base tests
     'pyasn1',  # https://github.com/pyasn1/pyasn1/issues/52
     'pycryptodomex',  # Breaking snmp tests
