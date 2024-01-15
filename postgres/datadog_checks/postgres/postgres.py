@@ -105,7 +105,7 @@ class PostgreSql(AgentCheck):
                 "DEPRECATION NOTICE: The managed_identity option is deprecated and will be removed in a future version."
                 " Please use the new azure.managed_authentication option instead."
             )
-        self._config = PostgresConfig(self.instance)
+        self._config = PostgresConfig(self.init_config, self.instance)
         self.cloud_metadata = self._config.cloud_metadata
         self.tags = self._config.tags
         # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
@@ -123,9 +123,14 @@ class PostgreSql(AgentCheck):
         self._clean_state()
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
         self.check_initializations.append(self.set_resolved_hostname_metadata)
-        self.check_initializations.append(self._connect)
-        self.check_initializations.append(self.load_version)
-        self.check_initializations.append(self.initialize_is_aurora)
+        # initialize connections if host autodiscovery is disabled or if host autodiscovery is enabled but the host
+        # is set in the config
+        if not self._config.host_autodiscovery_enabled or (
+            self._config.host_autodiscovery_enabled and self._config.host
+        ):
+            self.check_initializations.append(self._connect)
+            self.check_initializations.append(self.load_version)
+            self.check_initializations.append(self.initialize_is_aurora)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         self.autodiscovery = self._build_autodiscovery()
         self._dynamic_queries = []
@@ -954,6 +959,16 @@ class PostgreSql(AgentCheck):
         }
 
     def check(self, _):
+        if self._config.host_autodiscovery_enabled and not self._config.host:
+            # emit status check that we are waiting on remote-config to
+            # push instance configuration to us, skip this check
+            self.service_check(
+                self.SERVICE_CHECK_NAME,
+                AgentCheck.OK,
+                tags=self._get_service_check_tags(),
+            )
+            self.log.info("Waiting for remote configuration to push instance configuration")
+            return
         tags = copy.copy(self.tags)
         # Collect metrics
         try:
