@@ -22,7 +22,6 @@ IGNORED_DEPS = {
     'foundationdb',  # Breaking datadog_checks_base tests
     'pyasn1',  # https://github.com/pyasn1/pyasn1/issues/52
     'pysnmp',  # Breaking snmp tests
-    'pyodbc',  # Breaking sqlserver tests
     'aerospike',  # v8+ breaks agent build.
     'protobuf',  # 3.20.2->4.23.3 breaks kubernetes_state, kube_dns, gitlab and gitlab_runner tests.
     # We need pydantic 2.0.2 for the rpm x64 agent build (see https://github.com/DataDog/datadog-agent/pull/18303)
