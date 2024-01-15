@@ -14,6 +14,8 @@ from packaging.specifiers import InvalidSpecifier, SpecifierSet
 from packaging.utils import canonicalize_name
 from packaging.version import InvalidVersion, Version
 
+from ddev.repo.constants import PYTHON_VERSION
+
 # Dependencies to ignore when update dependencies
 IGNORED_DEPS = {
     'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
@@ -53,7 +55,7 @@ IGNORED_DEPS = {
 # Dependencies for the downloader that are security-related and should be updated separately from the others
 SECURITY_DEPS = {'in-toto', 'tuf', 'securesystemslib'}
 
-SUPPORTED_PYTHON_MINOR_VERSIONS = {'2': '2.7', '3': '3.9'}
+SUPPORTED_PYTHON_MINOR_VERSIONS = {'2': '2.7', '3': PYTHON_VERSION}
 
 
 @click.group(short_help='Manage dependencies')
