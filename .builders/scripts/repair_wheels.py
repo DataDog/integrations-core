@@ -123,6 +123,10 @@ def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
     exclusions = [
         # pymqi
         'pymqe.cpython-311-darwin.so',
+        # confluent_kafka
+        # We leave cyrus-sasl out of the wheel because of the complexity involved in bundling it portably.
+        # This means the confluent-kafka wheel will have a runtime dependency on this library
+        'libsasl2.3.dylib',
     ]
 
     def copy_filt_func(libname):
@@ -138,7 +142,6 @@ def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
         delocate_wheel(
             str(wheel),
             os.path.join(built_dir, os.path.basename(wheel)),
-            lib_sdir='.libs',
             copy_filt_func=copy_filt_func,
         )
         print('Repaired wheel')
