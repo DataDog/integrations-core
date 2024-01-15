@@ -26,7 +26,6 @@ IGNORED_DEPS = {
     'pyodbc',  # Breaking sqlserver tests
     'aerospike',  # v8+ breaks agent build.
     'protobuf',  # 3.20.2->4.23.3 breaks kubernetes_state, kube_dns, gitlab and gitlab_runner tests.
-    'service-identity',  # 21.1->23.1 breaks tls tests.
     # We need pydantic 2.0.2 for the rpm x64 agent build (see https://github.com/DataDog/datadog-agent/pull/18303)
     'pydantic',
     # https://github.com/DataDog/integrations-core/pull/16080
