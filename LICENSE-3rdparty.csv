@@ -68,7 +68,7 @@ pyasn1,PyPI,BSD-3-Clause,"Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.c
 pycryptodomex,PyPI,BSD-2-Clause,Copyright 2014 Helder Eijs
 pycryptodomex,PyPI,Unlicense,Helder Eijs. pycryptodomex is dedicated to the public domain under Unlicense.
 pydantic,PyPI,MIT,Copyright (c) 2017 to present Pydantic Services Inc. and individual contributors.
-pymongo,PyPI,Apache-2.0,Copyright 2009 The MongoDB Python Team
+pymongo,PyPI,Apache-2.0,Copyright The MongoDB Python Team
 pymqi,PyPI,PSF,Copyright (c) Zato Source s.r.o.
 pymysql,PyPI,MIT,"Copyright (c) 2010, 2013 PyMySQL contributors"
 pyodbc,PyPI,MIT,Copyright (c) 2008 Michael Kleehammer
