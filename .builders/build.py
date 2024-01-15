@@ -109,6 +109,18 @@ def build_macos():
             cwd=build_context_dir,
         )
 
+        output_dir = Path(args.output_dir)
+        if output_dir.is_dir():
+            shutil.rmtree(output_dir)
+
+        # Move wheels to the output directory
+        wheels_dir = mount_dir / 'wheels'
+        shutil.move(wheels_dir, output_dir / 'wheels')
+
+        # Move the final requirements file to the output directory
+        final_requirements = mount_dir / 'frozen.txt'
+        shutil.move(final_requirements, output_dir)
+
 
 def build_image():
     parser = argparse.ArgumentParser(prog='builder', allow_abbrev=False)
