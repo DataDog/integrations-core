@@ -38,7 +38,8 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
     popd
 fi
 
-# https://stackoverflow.com/a/61551944
+# Empty arrays are flagged as unset when using the `-u` flag. This is the safest way to work around that
+# (see https://stackoverflow.com/a/61551944)
 pip_no_binary=${always_build[@]+"${always_build[@]}"}
 if [[ "$pip_no_binary" ]]; then
     # If there are any packages that must always be built, inform pip

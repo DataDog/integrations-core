@@ -163,7 +163,6 @@ ENV OPENSSL_INCLUDE_DIR="/usr/local/include"
 COPY runner_dependencies.txt /runner_dependencies.txt
 RUN python3 -m pip install --no-warn-script-location -r /runner_dependencies.txt
 
-# Set up extra build information
 COPY build_script.sh /build_script.sh
 ENV DD_BUILD_COMMAND="bash /build_script.sh"
 
