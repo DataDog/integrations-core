@@ -161,7 +161,7 @@ jobs:
 
     - name: Validate dependencies
       if: inputs.dep
-      run: ddev validate dep $TARGET
+      run: ddev validate dep
 
     - name: Validate EULA files
       if: inputs.eula

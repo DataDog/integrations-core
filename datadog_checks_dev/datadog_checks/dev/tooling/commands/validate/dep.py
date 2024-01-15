@@ -224,7 +224,7 @@ def dep(check, require_base_check_version, min_base_check_version):
 
         # Check that this dependency defined on the agent requirements is actually used
         # This only makes sense when we take all check dependencies into account
-        if checks is None and name not in check_dependencies:
+        if check is None and name not in check_dependencies:
             failed = True
             message = f'Stale dependency needs to be removed by syncing: {name}'
             echo_failure(message)
