@@ -122,11 +122,11 @@ def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
 
     exclusions = [
         # pymqi
-        'libmqic_r.dylib',
+        'pymqe.cpython-311-darwin.so',
     ]
 
     def copy_filt_func(libname):
-        filter_system_libs(libname) or any(exclusion in libname for exclusion in exclusions)
+        return filter_system_libs(libname) and not any(os.path.basename(libname) == excl for excl in exclusions)
 
     for wheel in iter_wheels(source_dir):
         print(f'--> {wheel.name}')
