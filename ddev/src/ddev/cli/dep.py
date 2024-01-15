@@ -29,8 +29,6 @@ IGNORED_DEPS = {
     'protobuf',  # 3.20.2->4.23.3 breaks kubernetes_state, kube_dns, gitlab and gitlab_runner tests.
     'service-identity',  # 21.1->23.1 breaks tls tests.
     'pyvmomi',  # 7->8 breaks vsphere tests.
-    # 4.3->4.4 changes the license field in the package metadata to something our validations cannot handle.
-    'pymongo',
     # We need pydantic 2.0.2 for the rpm x64 agent build (see https://github.com/DataDog/datadog-agent/pull/18303)
     'pydantic',
     # https://github.com/DataDog/integrations-core/pull/16080
