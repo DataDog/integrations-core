@@ -69,7 +69,8 @@ def build_macos():
     parser = argparse.ArgumentParser(prog='builder', allow_abbrev=False)
     parser.add_argument('output_dir')
     parser.add_argument('--python', default='3')
-    parser.add_argument('--cache-dir')
+    parser.add_argument('--cache-dir',
+                        help='Path to directory to load or save a build cache.')
     args = parser.parse_args()
 
     context_path = HERE / 'images' / 'macos'
@@ -99,8 +100,8 @@ def build_macos():
 
         env = {
             **os.environ,
-            'PREFIX_CACHE': args.cache_dir,
-            'MOUNT_HOME': mount_dir,
+            'DD_PREFIX_CACHE': args.cache_dir,
+            'DD_MOUNT_DIR': mount_dir,
         }
         check_process(
             ['bash', str(HERE / 'images' / 'macos' / 'build.sh'), '--python', args.python],

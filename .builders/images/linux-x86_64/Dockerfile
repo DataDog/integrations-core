@@ -21,7 +21,7 @@ ENV LD_LIBRARY_PATH="/opt/python/${PYTHON2_VERSION}/lib:${LD_LIBRARY_PATH}"
 # Set up virtual environment for Python 2
 RUN /opt/python/${PYTHON2_VERSION}/bin/python -m pip install --no-warn-script-location virtualenv \
  && /opt/python/${PYTHON2_VERSION}/bin/python -m virtualenv /py2
-ENV PY2_BUILDENV_PATH=/py2/bin/python
+ENV DD_PY2_BUILDENV_PATH=/py2/bin/python
 
 # openssl
 RUN yum install -y perl-IPC-Cmd && \
@@ -51,7 +51,7 @@ ENV LD_LIBRARY_PATH="/opt/python/${PYTHON_VERSION}/lib:${LD_LIBRARY_PATH}"
 RUN /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location --upgrade pip \
  && /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location virtualenv \
  && /opt/python/${PYTHON_VERSION}/bin/python3 -m virtualenv /py3
-ENV PY3_BUILDENV_PATH=/py3/bin/python
+ENV DD_PY3_BUILDENV_PATH=/py3/bin/python
 
 # Rust toolchain
 ENV RUST_VERSION="nightly-2022-05-15"
@@ -167,6 +167,6 @@ RUN python3 -m pip install --no-warn-script-location -r /runner_dependencies.txt
 
 COPY build_script.sh /build_script.sh
 ENV DD_BUILD_COMMAND="bash /build_script.sh"
-ENV MOUNT_DIR="/home"
+ENV DD_MOUNT_DIR="/home"
 
 ENTRYPOINT ["python3", "/home/scripts/build_wheels.py"]
