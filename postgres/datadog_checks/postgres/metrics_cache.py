@@ -242,7 +242,7 @@ class PostgresMetricsCache:
                 if '{dd__user}' in q:
                     metrics_query[i] = q.format(dd__user=self.config.user)
 
-            metrics = dict(zip(metrics_query, ACTIVITY_DD_METRICS, strict=False))
+            metrics = dict(zip(metrics_query, ACTIVITY_DD_METRICS))
 
             self.activity_metrics = (metrics, query, descriptors)
         else:
