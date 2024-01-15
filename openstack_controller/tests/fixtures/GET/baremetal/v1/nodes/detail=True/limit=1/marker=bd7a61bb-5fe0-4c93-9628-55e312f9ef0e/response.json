@@ -52,9 +52,9 @@
             "href": "http://34.141.226.224/baremetal/nodes/54855e59-83ca-46f8-a78f-55d3370e0656/ports",
             "rel": "bookmark"
           }
-        ],
-        "next": "http://34.141.226.224/baremetal/v1/nodes/detail?sort_key=id&sort_dir=asc&limit=1&marker=54855e59-83ca-46f8-a78f-55d3370e0656"
+        ]
       }
-    ]
+    ],
+    "next": "http://34.141.226.224/baremetal/v1/nodes/detail?sort_key=id&sort_dir=asc&limit=1&marker=54855e59-83ca-46f8-a78f-55d3370e0656"
   }
   

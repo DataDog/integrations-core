@@ -2,6 +2,23 @@
 
 <!-- towncrier release notes start -->
 
+## 6.2.1 / 2024-01-10
+
+***Fixed***:
+
+* Fix ironic nodes pagination logic ([#16566](https://github.com/DataDog/integrations-core/pull/16566))
+
+## 6.2.0 / 2024-01-05
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+* Add pagination support for ironic nodes endpoint ([#16400](https://github.com/DataDog/integrations-core/pull/16400))
+
+***Fixed***:
+
+* Use params arg over manual url encoding for requests with query params ([#16200](https://github.com/DataDog/integrations-core/pull/16200))
+
 ## 6.1.0 / 2023-11-10 / Agent 7.50.0
 
 ***Added***:
