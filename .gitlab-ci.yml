@@ -262,12 +262,12 @@ validate-log-intgs-builder:
 validate-agent-build-builder:
   stage: build
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
-  only:
-    changes:
-      - .gitlab/validate-agent-build/**/*
-      - .gitlab-ci.yml
-    refs:
-      - master
+#  only:
+#    changes:
+#      - .gitlab/validate-agent-build/**/*
+#      - .gitlab-ci.yml
+#    refs:
+#      - master
   script:
     - cd .gitlab/validate-agent-build/
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/devtools.git --depth 1
