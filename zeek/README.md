@@ -2,7 +2,7 @@
 
 [Zeek][6] is the world's leading platform for network security monitoring. It interprets what it sees and creates compact, high-fidelity transaction logs, and file content. It can create fully customized output, suitable for manual review on disk or in a more analyst-friendly tool like a security and information event management (SIEM) system.
 
-This integration provides visualization and log enrichments for Connection Logs, DNS & DHCP Logs, Network Protocols, Files, Detections, and Miscellaneous event types.
+This integration ingests Connection logs, DNS and DHCP logs, Network Protocols, Files, Detections, and Miscellaneous event types with the integration log pipeline to enrich the logs and normalizes data to datadog standard attributes. This integration offers visualisations to gain detailed insights into network connections, DNS and DHCP activity, detailed network protocol analysis, file analysis and certificates, security detection and observation, compliance monitoring, etc. via dashboards.
 
 ## Setup
 
