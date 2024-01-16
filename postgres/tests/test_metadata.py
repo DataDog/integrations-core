@@ -73,7 +73,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
     tables_set = {'persons', "personsdup1", "personsdup2", "pgtable", "pg_newtable", "cities"}
     # if version isn't 9 or 10, check that partition master is in tables
     if float(POSTGRES_VERSION) >= 11:
-        tables_set.update({'test_part'})
+        tables_set.update({'test_part', 'test_part_no_children'})
     tables_not_reported_set = {'test_part1', 'test_part2'}
 
     tables_got = []
@@ -102,7 +102,12 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
         if float(POSTGRES_VERSION) >= 11:
             if table['name'] == 'test_part':
                 keys = list(table.keys())
-                assert_fields(keys, ["num_partitions", "partition_key"])
+                assert_fields(keys, ["indexes", "num_partitions", "partition_key"])
+                assert table['num_partitions'] == 2
+            elif table['name'] == 'test_part_no_children':
+                keys = list(table.keys())
+                assert_fields(keys, ["indexes", "num_partitions", "partition_key"])
+                assert table['num_partitions'] == 0
 
     assert_fields(tables_got, tables_set)
     assert_not_fields(tables_got, tables_not_reported_set)

@@ -36,6 +36,53 @@ class DatabaseConfigurationError(Enum):
     autodiscovered_metrics_exceeds_collection_interval = "autodiscovered-metrics-exceeds-collection-interval"
 
 
+class DBExplainError(Enum):
+    """
+    Denotes the various reasons a query may not have an explain statement.
+    """
+
+    # may be due to a misconfiguration of the database during setup or the Agent is
+    # not able to access the required function
+    database_error = 'database_error'
+
+    # datatype mismatch occurs when return type is not json, for instance when multiple queries are explained
+    datatype_mismatch = 'datatype_mismatch'
+
+    # this could be the result of a missing EXPLAIN function
+    invalid_schema = 'invalid_schema'
+
+    # a value retrieved from the EXPLAIN function could be invalid
+    invalid_result = 'invalid_result'
+
+    # some statements cannot be explained i.e AUTOVACUUM
+    no_plans_possible = 'no_plans_possible'
+
+    # there could be a problem with the EXPLAIN function (missing, invalid permissions, or an incorrect definition)
+    failed_function = 'failed_function'
+
+    # a truncated statement can't be explained
+    query_truncated = "query_truncated"
+
+    # connection error may be due to a misconfiguration during setup
+    connection_error = 'connection_error'
+
+    # clients using the extended query protocol or prepared statements can't be explained due to
+    # the separation of the parsed query and raw bind parameters
+    parameterized_query = 'parameterized_query'
+
+    # search path may be different when the client executed a query from where we executed it.
+    undefined_table = 'undefined_table'
+
+    # the statement was explained with the prepared statement workaround
+    explained_with_prepared_statement = 'explained_with_prepared_statement'
+
+    # the statement was tried to be explained with the prepared statement workaround but failedd
+    failed_to_explain_with_prepared_statement = 'failed_to_explain_with_prepared_statement'
+
+    # the statement was tried to be explained with the prepared statement workaround but no plan was returned
+    no_plan_returned_with_prepared_statement = 'no_plan_returned_with_prepared_statement'
+
+
 def warning_with_tags(warning_message, *args, **kwargs):
     if args:
         warning_message = warning_message % args

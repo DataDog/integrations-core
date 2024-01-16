@@ -2,7 +2,33 @@
 
 <!-- towncrier release notes start -->
 
-## 15.2.1 / 2023-12-28
+## 16.0.0 / 2024-01-05
+
+***Removed***:
+
+* remove pyro4 and serpent dependencies ([#16269](https://github.com/DataDog/integrations-core/pull/16269))
+
+***Changed***:
+
+* Always use the database instance's resolved hostname for metrics regardless of whether dbm is enabled or not. For non-dbm customers, this change
+   will result in the host tag having a different value than before. It is possible that dashboards and monitors using the integration's metrics will need to be updated if they relied on the faulty host tagging. ([#16207](https://github.com/DataDog/integrations-core/pull/16207))
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+* Add stolen memory performance counter ([#16220](https://github.com/DataDog/integrations-core/pull/16220))
+* Collect sqlserver.database.files.space_used, and sqlserver.database.is_read_only/is_in_standby metrics. ([#16419](https://github.com/DataDog/integrations-core/pull/16419))
+* add new obfuscator options to customize SQL obfuscation and normaliza… ([#16429](https://github.com/DataDog/integrations-core/pull/16429))
+* Add ODBC driver support for the SQL Server agent ([#16431](https://github.com/DataDog/integrations-core/pull/16431))
+* [DBMON-3197] add config option to set character limit of stored procedure text ([#16462](https://github.com/DataDog/integrations-core/pull/16462))
+* Adds whether a SPID is a user or system process to DBM activity events. ([#16465](https://github.com/DataDog/integrations-core/pull/16465))
+
+***Fixed***:
+
+* [DBMON-3197] ensure accurate collection of query activity with statement when stored procedure is failed to obfuscate ([#16455](https://github.com/DataDog/integrations-core/pull/16455))
+* [DBMON-3220] skip reporting SqlFractionMetric when base_name is None ([#16469](https://github.com/DataDog/integrations-core/pull/16469))
+
+## 15.2.1 / 2023-12-28 / Agent 7.50.2
 
 ***Fixed***:
 

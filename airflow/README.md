@@ -243,7 +243,7 @@ _Available for Agent versions >6.0_
       ```yaml
       logs:
         - type: file
-          path: "<PATH_TO_AIRFLOW>/logs/!(scheduler)/*/*.log"
+          path: "<PATH_TO_AIRFLOW>/logs/*/*/*/*.log"
           source: airflow
           log_processing_rules:
             - type: multi_line

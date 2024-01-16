@@ -17,6 +17,7 @@
       "Supported OS::macOS",
       "Category::Metrics",
       "Category::Kubernetes",
+      "Category::Log Collection",
       "Category::Provisioning",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs"
