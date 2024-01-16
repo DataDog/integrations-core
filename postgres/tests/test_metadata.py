@@ -34,7 +34,7 @@ def stop_orphaned_threads():
 
 
 def test_collect_metadata(integration_check, dbm_instance, aggregator):
-    dbm_instance["collect_settings"]['ignored_prefixes'] = ['max_wal']
+    dbm_instance["collect_settings"]['ignored_patterns'] = ['max_wal%']
     check = integration_check(dbm_instance)
     check.check(dbm_instance)
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")

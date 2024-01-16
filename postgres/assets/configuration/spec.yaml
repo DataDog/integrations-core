@@ -505,18 +505,18 @@ files:
           value:
             type: number
             example: 600
-        - name: ignored_prefixes
+        - name: ignored_setting_patterns
           description: |
-            A list of setting prefixes to ignore. Any setting key matching one of the value in this list will 
-            not be collected.
+            A list of setting patterns to ignore. Any setting key matching one of the value in this list will 
+            not be collected. This uses the traditional LIKE pattern-matching approach.
           value:
               type: array
               items:
                 type: string
               example:
-                - plpgsql
+                - plpgsql%
               default:
-                - plpgsql
+                - plpgsql%
     - name: collect_schemas
       description: |
         Enable collection of database schemas. In order to collect schemas from all user databases,

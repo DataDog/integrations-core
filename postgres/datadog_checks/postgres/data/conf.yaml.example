@@ -409,12 +409,12 @@ instances:
         #
         # collection_interval: 600
 
-        ## @param ignored_prefixes - list of strings - optional
-        ## A list of setting prefixes to ignore. Any setting key matching one of the value in this list will 
-        ## not be collected.
+        ## @param ignored_setting_patterns - list of strings - optional
+        ## A list of setting patterns to ignore. Any setting key matching one of the value in this list will 
+        ## not be collected. This uses the traditional LIKE pattern-matching approach.
         #
-        # ignored_prefixes:
-        #   - plpgsql
+        # ignored_setting_patterns:
+        #   - plpgsql%
 
     ## Enable collection of database schemas. In order to collect schemas from all user databases,
     ## enable `database_autodiscovery`. To collect from a single database, set `dbname` to collect

@@ -23,7 +23,7 @@ from .version_utils import VersionUtils
 DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
 DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 600
 DEFAULT_RESOURCES_COLLECTION_INTERVAL = 300
-DEFAULT_SETTINGS_IGNORED_PREFIXES = ('plpgsql',)
+DEFAULT_SETTINGS_IGNORED_PATTERNS = ['plpgsql%']
 
 PG_SETTINGS_QUERY = """
 SELECT name, setting FROM pg_settings
@@ -165,8 +165,8 @@ class PostgresMetadata(DBMAsyncJob):
         self.pg_settings_collection_interval = config.settings_metadata_config.get(
             'collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL
         )
-        self.pg_settings_ignored_prefixes = config.settings_metadata_config.get(
-            'ignored_prefixes', DEFAULT_SETTINGS_IGNORED_PREFIXES
+        self.pg_settings_ignored_patterns = config.settings_metadata_config.get(
+            'ignored_patterns', DEFAULT_SETTINGS_IGNORED_PATTERNS
         )
         self.schemas_collection_interval = config.schemas_metadata_config.get(
             'collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL
@@ -471,15 +471,15 @@ class PostgresMetadata(DBMAsyncJob):
     def _collect_postgres_settings(self):
         with self._check._get_main_db() as conn:
             with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
-                self._log.debug("Running query [%s]", PG_SETTINGS_QUERY)
+                if self.pg_settings_ignored_patterns:
+                    query = PG_SETTINGS_QUERY + " WHERE name NOT LIKE ANY(array{})".format(
+                        self.pg_settings_ignored_patterns
+                    )
+                else:
+                    query = PG_SETTINGS_QUERY
+                self._log.warning("Running query [%s]", query)
                 self._time_since_last_settings_query = time.time()
-                cursor.execute(PG_SETTINGS_QUERY)
+                cursor.execute(query)
                 rows = cursor.fetchall()
                 self._log.debug("Loaded %s rows from pg_settings", len(rows))
-                return [dict(row) for row in rows if not self._is_ignored_setting(row)]
-
-    def _is_ignored_setting(self, row):
-        for prefix in self.pg_settings_ignored_prefixes:
-            if row['name'].startswith(prefix):
-                return True
-        return False
+                return [dict(row) for row in rows]
