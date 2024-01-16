@@ -4,7 +4,7 @@
 
 [Cisco Umbrella][1] is the leading platform for network DNS security monitoring. Umbrella's DNS-layer security offers a fast and easy way to enhance security, providing improved visibility and protection for users both on and off the network. By preventing threats over any port or protocol before they reach the network or endpoints, Umbrella DNS-layer security aims to deliver the most secure, reliable, and fastest internet experience to over 100 million users.
 
-This integration offers visualizations and log enrichments for Cisco Umbrella DNS and Proxy logs.
+Cisco Umbrella DNS integration ingests DNS and Proxy logs to Datadog.  Datadog integration log pipeline enriches logs to include geo-graphical information of client and server hosts and normalizes data to datadog standard attributes. This integration offers visualizations and provides detailed insights into DNS traffic and proxied requests, including total DNS requests, allowed/blocked domains, top blocked categories, proxied traffic over time, and more via dashboards.
 
 ## Setup
 
