@@ -28,6 +28,7 @@ def trigger_pipeline():
             "BUCKET_BRANCH": "none",
             "INTEGRATIONS_CORE_VERSION": os.environ['CI_COMMIT_REF_NAME'],
             "RUN_KITCHEN_TESTS": "false",
+            "RUN_E2E_TESTS": "true",
         }
     }
 
