@@ -11,7 +11,9 @@
 	// To run docker in docker
 	"privileged": true,
 	"features": {
-		"ghcr.io/devcontainers/features/python:1": {}
+		"ghcr.io/devcontainers/features/python:1": {
+			"version": "3.11"
+		}
 	},
 
 	// Install the local ddev cli at creation time and set the location of the integrations-core folder
