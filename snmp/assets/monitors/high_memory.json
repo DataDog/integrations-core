@@ -8,7 +8,7 @@
 		"name": "[SNMP] High memory usage for device {{snmp_device.name}} in namespace {{device_namespace.name}}",
 		"type": "query alert",
 		"query": "avg(last_5m):avg:snmp.memory.usage{*} by {device_namespace,snmp_device} >= 90",
-		"message": "{{#is_alert}} \n{{snmp_device.name}} in namespace {{device_namespace.name}} is reporting high memory usage.\n{{/is_alert}} \n\n{{#is_recovery}} \nMemory usage for {{snmp_device.name}} in namespace {{device_namespace.name}} is back to normal.\n{{/is_recovery}}",
+		"message": "{{#is_alert}} \n{{snmp_device.name}} in namespace {{device_namespace.name}} is reporting high memory usage.\n{{/is_alert}} \n\n{{#is_warning}}\n{{snmp_device.name}} in namespace {{device_namespace.name}} is reporting higher memory usage (at or above 80%).\n{{/is_warning}} \n\n{{#is_recovery}} \nMemory usage for {{snmp_device.name}} in namespace {{device_namespace.name}} is back to normal.\n{{/is_recovery}}",
 		"tags": [
             "integration:snmp"
         ],

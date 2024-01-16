@@ -8,7 +8,7 @@
 		"name": "[SNMP] High interface bandwidth usage for incoming traffic for device {{snmp_device.name}} on interface {{interface.name}} in {{device_namespace.name}}",
 		"type": "query alert",
 		"query": "avg(last_5m):clamp_max(max:snmp.ifBandwidthInUsage.rate{*} by {device_namespace,snmp_device,interface}, 100) > 90",
-		"message": "Percentage of interface utilization to identify high traffic levels relative to the interface capacity.\n\n{{#is_alert}} \n{{snmp_device.name}} in namespace {{device_namespace.name}} is reporting high bandwidth utilization received on interface {{interface.name}}\n{{/is_alert}} \n\n{{#is_recovery}} \nDevice {{snmp_device.name}} in namespace {{device_namespace.name}} has interface {{interface.name}} with bandwidth usage for incoming traffic in normal range.\n{{/is_recovery}}",
+		"message": "Percentage of interface utilization to identify high traffic levels relative to the interface capacity.\n\n{{#is_alert}}\n{{snmp_device.name}} in namespace {{device_namespace.name}} is reporting high bandwidth utilization (at or over 90%) received on interface {{interface.name}}\n{{/is_alert}}\n\n{{#is_warning}}\n{{snmp_device.name}} in namespace {{device_namespace.name}} is reporting high bandwidth utilization (at or over 80%) received on interface {{interface.name}}\n{{/is_warning}} \n\n{{#is_recovery}}\nDevice {{snmp_device.name}} in namespace {{device_namespace.name}} has interface {{interface.name}} with bandwidth usage for incoming traffic in normal range.\n{{/is_recovery}}",
 		"tags": [
             "integration:snmp"
         ],
