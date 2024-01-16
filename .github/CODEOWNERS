@@ -219,4 +219,4 @@ docs/developer/process/integration-release.md                         @DataDog/s
 /.gitlab-ci.yml                                                       @DataDog/agent-integrations @trishankatdatadog
 
 # Dev container
-/.devcontainer                                                        @DataDog/agent-integrations @DataDog/container-integrations
+/.devcontainer/                                                        @DataDog/agent-integrations @DataDog/container-integrations
