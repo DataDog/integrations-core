@@ -23,6 +23,7 @@ from .version_utils import VersionUtils
 DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
 DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 600
 DEFAULT_RESOURCES_COLLECTION_INTERVAL = 300
+DEFAULT_SETTINGS_IGNORED_PREFIXES = ('plpgsql',)
 
 PG_SETTINGS_QUERY = """
 SELECT name, setting FROM pg_settings
@@ -163,6 +164,9 @@ class PostgresMetadata(DBMAsyncJob):
     def __init__(self, check, config, shutdown_callback):
         self.pg_settings_collection_interval = config.settings_metadata_config.get(
             'collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL
+        )
+        self.pg_settings_ignored_prefixes = config.settings_metadata_config.get(
+            'ignored_prefixes', DEFAULT_SETTINGS_IGNORED_PREFIXES
         )
         self.schemas_collection_interval = config.schemas_metadata_config.get(
             'collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL
@@ -472,4 +476,10 @@ class PostgresMetadata(DBMAsyncJob):
                 cursor.execute(PG_SETTINGS_QUERY)
                 rows = cursor.fetchall()
                 self._log.debug("Loaded %s rows from pg_settings", len(rows))
-                return [dict(row) for row in rows]
+                return [dict(row) for row in rows if not self._is_ignored_setting(row)]
+
+    def _is_ignored_setting(self, row):
+        for prefix in self.pg_settings_ignored_prefixes:
+            if row['name'].startswith(prefix):
+                return True
+        return False

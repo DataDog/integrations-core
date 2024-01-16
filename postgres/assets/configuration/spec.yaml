@@ -505,7 +505,7 @@ files:
           value:
             type: number
             example: 600
-        - name: ignore_prefixes
+        - name: ignored_prefixes
           description: |
             A list of setting prefixes to ignore. Any setting key matching one of the value in this list will 
             not be collected.

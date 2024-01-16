@@ -409,11 +409,11 @@ instances:
         #
         # collection_interval: 600
 
-        ## @param ignore_prefixes - list of strings - optional
+        ## @param ignored_prefixes - list of strings - optional
         ## A list of setting prefixes to ignore. Any setting key matching one of the value in this list will 
         ## not be collected.
         #
-        # ignore_prefixes:
+        # ignored_prefixes:
         #   - plpgsql
 
     ## Enable collection of database schemas. In order to collect schemas from all user databases,
