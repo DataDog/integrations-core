@@ -505,7 +505,7 @@ files:
           value:
             type: number
             example: 600
-        - name: ignored_setting_patterns
+        - name: ignored_settings_patterns
           description: |
             A list of setting patterns to ignore. Any setting key matching one of the value in this list will 
             not be collected. This uses the traditional LIKE pattern-matching approach.

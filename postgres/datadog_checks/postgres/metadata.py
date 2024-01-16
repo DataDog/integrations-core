@@ -166,7 +166,7 @@ class PostgresMetadata(DBMAsyncJob):
             'collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL
         )
         self.pg_settings_ignored_patterns = config.settings_metadata_config.get(
-            'ignored_patterns', DEFAULT_SETTINGS_IGNORED_PATTERNS
+            'ignored_settings_patterns', DEFAULT_SETTINGS_IGNORED_PATTERNS
         )
         self.schemas_collection_interval = config.schemas_metadata_config.get(
             'collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL

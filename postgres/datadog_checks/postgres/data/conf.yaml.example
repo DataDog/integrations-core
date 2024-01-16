@@ -409,11 +409,11 @@ instances:
         #
         # collection_interval: 600
 
-        ## @param ignored_setting_patterns - list of strings - optional
+        ## @param ignored_settings_patterns - list of strings - optional
         ## A list of setting patterns to ignore. Any setting key matching one of the value in this list will 
         ## not be collected. This uses the traditional LIKE pattern-matching approach.
         #
-        # ignored_setting_patterns:
+        # ignored_settings_patterns:
         #   - plpgsql%
 
     ## Enable collection of database schemas. In order to collect schemas from all user databases,
