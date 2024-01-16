@@ -1,10 +1,13 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from datadog_checks.dev import get_here
+from datadog_checks.dev import get_docker_hostname, get_here
 from datadog_checks.dev.jmx import JVM_E2E_METRICS_NEW
 
 CHECK_NAME = "tomcat"
+PORT = "8080"
+
+HELLO_URL = f"http://{get_docker_hostname()}:{PORT}/sample/hello.jsp"
 
 HERE = get_here()
 
@@ -30,3 +33,10 @@ TOMCAT_E2E_METRICS = [
     "tomcat.web.cache.hit_count",
     "tomcat.web.cache.lookup_count",
 ] + JVM_E2E_METRICS_NEW
+
+E2E_METADATA = {
+    'use_jmx': True,
+    'env_vars': {
+        'DD_LOGS_ENABLED': 'true',
+    },
+}
