@@ -33,3 +33,10 @@ TOMCAT_E2E_METRICS = [
     "tomcat.web.cache.hit_count",
     "tomcat.web.cache.lookup_count",
 ] + JVM_E2E_METRICS_NEW
+
+E2E_METADATA = {
+    'use_jmx': True,
+    'env_vars': {
+        'DD_LOGS_ENABLED': 'true',
+    },
+}
