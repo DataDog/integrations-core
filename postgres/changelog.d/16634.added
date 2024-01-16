@@ -1,1 +1,1 @@
-[Postgres] - Allow configuration of ignored_prefixes for settings.
+[Postgres] - Allow configuration of ignored patterns for settings collection.
