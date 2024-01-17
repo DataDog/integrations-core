@@ -107,5 +107,5 @@ def test_config_tags(aggregator, check, instance):
 def test_no_per_db_metrics(aggregator, check):
     check.instance = common.BASIC_CONFIG_NO_PER_DB_METRICS
     check.check({})
-    assert len(aggregator.metrics("couchdb.couchdb.database_reads")) > 0
+    assert len(aggregator.metrics("couchdb.couch_log.level.info")) > 0
     assert len(aggregator.metrics("couchdb.by_db.active_size")) == 0
