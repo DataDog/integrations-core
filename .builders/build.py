@@ -72,6 +72,7 @@ def build_image():
     parser = argparse.ArgumentParser(prog='builder', allow_abbrev=False)
     parser.add_argument('image')
     parser.add_argument('output_dir')
+    parser.add_argument('--digest')
     parser.add_argument('--python', default='3')
     parser.add_argument('--no-run', action='store_true')
     parser.add_argument('-a', '--build-arg', dest='build_args', nargs='+')
@@ -84,26 +85,30 @@ def build_image():
         abort(f'Image does not exist: {image_path}')
 
     windows_image = image.startswith('windows-')
-    image_name = f'datadog/agent-int-builder-{image}:latest'
-    with temporary_directory() as temp_dir:
-        build_context_dir = shutil.copytree(image_path, temp_dir, dirs_exist_ok=True)
+    if args.digest:
+        image_name = f'ghcr.io/datadog/agent-int-builder@{args.digest}'
+        check_process(['docker', 'pull', image_name])
+    else:
+        image_name = f'ghcr.io/datadog/agent-int-builder:{image}'
+        with temporary_directory() as temp_dir:
+            build_context_dir = shutil.copytree(image_path, temp_dir, dirs_exist_ok=True)
 
-        # Copy utilities shared by multiple images
-        for entry in image_path.parent.iterdir():
-            if entry.is_file():
-                shutil.copy2(entry, build_context_dir)
+            # Copy utilities shared by multiple images
+            for entry in image_path.parent.iterdir():
+                if entry.is_file():
+                    shutil.copy2(entry, build_context_dir)
 
-        build_command = ['docker', 'build', str(build_context_dir), '-t', image_name]
+            build_command = ['docker', 'build', str(build_context_dir), '-t', image_name]
 
-        # For some reason this is not supported for Windows images
-        if args.verbose and not windows_image:
-            build_command.extend(['--progress', 'plain'])
+            # For some reason this is not supported for Windows images
+            if args.verbose and not windows_image:
+                build_command.extend(['--progress', 'plain'])
 
-        if args.build_args is not None:
-            for build_arg in args.build_args:
-                build_command.extend(['--build-arg', build_arg])
+            if args.build_args is not None:
+                for build_arg in args.build_args:
+                    build_command.extend(['--build-arg', build_arg])
 
-        check_process(build_command)
+            check_process(build_command)
 
     if not args.no_run:
         with temporary_directory() as temp_dir:
@@ -113,13 +118,25 @@ def build_image():
 
             dependency_file = mount_dir / 'requirements.in'
             dependency_file.write_text('\n'.join(chain.from_iterable(read_dependencies().values())))
-            shutil.copy(HERE.parent / '.deps' / 'build_dependencies.txt', mount_dir)
+            shutil.copy(HERE / 'deps' / 'build_dependencies.txt', mount_dir)
             shutil.copytree(HERE / 'scripts', mount_dir / 'scripts')
             shutil.copytree(HERE / 'patches', mount_dir / 'patches')
+
+            # Create outputs on the host so they can be removed
+            wheels_dir = mount_dir / 'wheels'
+            wheels_dir.mkdir()
+            built_wheels_dir = wheels_dir / 'built'
+            built_wheels_dir.mkdir()
+            external_wheels_dir = wheels_dir / 'external'
+            external_wheels_dir.mkdir()
+            final_requirements = mount_dir / 'frozen.txt'
+            final_requirements.touch()
 
             check_process([
                 'docker', 'run', '--rm',
                 '-v', f'{mount_dir}:{internal_mount_dir}',
+                # Anything created within directories mounted to the container cannot be removed by the host
+                '-e', 'PYTHONDONTWRITEBYTECODE=1',
                 image_name, '--python', args.python,
             ])
 
@@ -128,11 +145,9 @@ def build_image():
                 shutil.rmtree(output_dir)
 
             # Move wheels to the output directory
-            wheels_dir = mount_dir / 'wheels'
             shutil.move(wheels_dir, output_dir / 'wheels')
 
             # Move the final requirements file to the output directory
-            final_requirements = mount_dir / 'frozen.txt'
             shutil.move(final_requirements, output_dir)
 
 

@@ -50,7 +50,7 @@ def wheel_was_built(wheel: Path) -> bool:
     return file_hash != wheel_hashes[wheel.name]
 
 
-def repair_linux(source_dir: str, output_dir: str) -> None:
+def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
     from auditwheel.patcher import Patchelf
     from auditwheel.policy import get_policy_by_name
     from auditwheel.repair import repair_wheel
@@ -73,7 +73,7 @@ def repair_linux(source_dir: str, output_dir: str) -> None:
         print(f'--> {wheel.name}')
         if not wheel_was_built(wheel):
             print('Using existing wheel')
-            shutil.move(wheel, output_dir)
+            shutil.move(wheel, external_dir)
             continue
 
         try:
@@ -81,20 +81,20 @@ def repair_linux(source_dir: str, output_dir: str) -> None:
                 str(wheel),
                 abis=abis,
                 lib_sdir='.libs',
-                out_dir=output_dir,
+                out_dir=built_dir,
                 update_tags=True,
                 patcher=Patchelf(),
                 exclude=exclusions,
             )
         except NonPlatformWheel:
             print('Using non-platform wheel without repair')
-            shutil.move(wheel, output_dir)
+            shutil.move(wheel, built_dir)
             continue
         else:
             print('Repaired wheel')
 
 
-def repair_windows(source_dir: str, output_dir: str) -> None:
+def repair_windows(source_dir: str, built_dir: str, external_dir: str) -> None:
     import subprocess
 
     exclusions = ['mqic.dll']
@@ -103,12 +103,12 @@ def repair_windows(source_dir: str, output_dir: str) -> None:
         print(f'--> {wheel.name}')
         if not wheel_was_built(wheel):
             print('Using existing wheel')
-            shutil.move(wheel, output_dir)
+            shutil.move(wheel, external_dir)
             continue
 
         process = subprocess.run([
             sys.executable, '-m', 'delvewheel', 'repair', wheel,
-            '--wheel-dir', output_dir,
+            '--wheel-dir', built_dir,
             '--no-dll', os.pathsep.join(exclusions),
         ])
         if process.returncode:
@@ -131,13 +131,14 @@ def main():
         description='Repair wheels found in a directory with the platform-specific tool'
     )
     argparser.add_argument('--source-dir', required=True)
-    argparser.add_argument('--output-dir', required=True)
+    argparser.add_argument('--built-dir', required=True)
+    argparser.add_argument('--external-dir', required=True)
     args = argparser.parse_args()
 
     print(f'Repairing wheels in: {args.source_dir}')
-    print(f'Outputting wheels to: {args.output_dir}')
-    os.makedirs(args.output_dir, exist_ok=True)
-    REPAIR_FUNCTIONS[sys.platform](args.source_dir, args.output_dir)
+    print(f'Outputting built wheels to: {args.built_dir}')
+    print(f'Outputting external wheels to: {args.external_dir}')
+    REPAIR_FUNCTIONS[sys.platform](args.source_dir, args.built_dir, args.external_dir)
 
 
 if __name__ == '__main__':
