@@ -867,7 +867,7 @@ class SQLServer(AgentCheck):
         now = time.time()
         if not self._index_usage_last_check_ts or now - self._index_usage_last_check_ts > interval:
             self._index_usage_last_check_ts = now
-            self.log.warning('Collecting index usage statistics')
+            self.log.debug('Collecting index usage statistics')
             db_names = [d.name for d in self.databases] or [
                 self.instance.get('database', self.connection.DEFAULT_DATABASE)
             ]
@@ -877,7 +877,7 @@ class SQLServer(AgentCheck):
                 )  # This can return None in some implementations, so it cannot be chained
                 data = cursor.fetchall()
                 current_db = data[0][0]
-                self.log.warning("current db is %s", current_db)
+                self.log.debug("current db is %s", current_db)
                 try:
                     for database in db_names:
                         try:
@@ -894,7 +894,7 @@ class SQLServer(AgentCheck):
                             self.log.error("failed to collect index usage statistics: %s", e)
                 finally:
                     if current_db:
-                        self.log.warning("reverting cursor context via use statement to %s", current_db)
+                        self.log.debug("reverting cursor context via use statement to %s", current_db)
                         cursor.execute(construct_use_statement(current_db))
         return
 
