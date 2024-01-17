@@ -19,6 +19,7 @@
   }},
   "assets": {{
     "integration": {{
+      "auto_install": true,
       "source_type_id": {source_type_id},
       "source_type_name": "{integration_name}",
       "configuration": {{
