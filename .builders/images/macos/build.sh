@@ -108,11 +108,6 @@ else
     RELATIVE_PATH="lmdb-LMDB_{{version}}/libraries/liblmdb" \
     CONFIGURE_SCRIPT="true" \
       install-from-source
-    DOWNLOAD_URL="https://mirrors.edge.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v{{version}}/e2fsprogs-{{version}}.tar.gz" \
-    VERSION="1.47.0" \
-    SHA256="0b4fe723d779b0927fb83c9ae709bc7b40f66d7df36433bef143e41c54257084" \
-    RELATIVE_PATH="e2fsprogs-{{version}}" \
-      install-from-source
     DOWNLOAD_URL="https://github.com/cyrusimap/cyrus-sasl/releases/download/cyrus-sasl-{{version}}/cyrus-sasl-{{version}}.tar.gz" \
     VERSION="2.1.28" \
     SHA256="7ccfc6abd01ed67c1a0924b353e526f1b766b21f42d4562ee635a8ebfc5bb38c" \
