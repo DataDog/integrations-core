@@ -1,1 +1,0 @@
-Fix a bug that prevents the `validate dep` command to fail if extra deps are found in the Agent file
