@@ -57,19 +57,18 @@ def test_service_checks_healthy_stable(
     instance = common.FULL_CONFIG['instances'][0]
     check = AirflowCheck('airflow', common.FULL_CONFIG, [instance])
 
-    json_resp = {
-        'metadatabase': {
-            'status': metadb_status,
-        },
-        'scheduler': {'status': scheduler_status},
-    }
+    with mock.patch('datadog_checks.airflow.airflow.AirflowCheck._get_version') as get_version:
+        get_version.return_value = '2.6.2'
 
-    with mock.patch('datadog_checks.base.utils.http.requests') as req:
-        mock_resp = mock.MagicMock(status_code=200)
-        mock_resp.json.return_value = json_resp
-        req.get.return_value = mock_resp
+        with mock.patch('datadog_checks.base.utils.http.requests') as req:
+            mock_resp = mock.MagicMock(status_code=200)
+            mock_resp.json.side_effect = [
+                {'metadatabase': {'status': metadb_status}, 'scheduler': {'status': scheduler_status}},
+                {'status': 'OK'},
+            ]
+            req.get.return_value = mock_resp
 
-        check.check(None)
+            check.check(None)
 
     tags = ['key:my-tag', 'url:http://localhost:8080']
 

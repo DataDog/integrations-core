@@ -27,21 +27,42 @@ class AirflowCheck(AgentCheck):
 
         url_stable = self._url + "/api/v1/health"
         url_experimental = self._url + "/api/experimental/test"
+        url_stable_version = self._url + "/api/v1/version"
         can_connect_status = AgentCheck.OK
 
-        # Query the stable API first
-        resp = self._get_json(url_stable)
-        if resp is None:
+        # Choose which version of the API to use
+        if self._get_version(url_stable_version) is None:
             resp = self._get_json(url_experimental)
             if resp is None:
                 can_connect_status = AgentCheck.CRITICAL
             else:
                 self._submit_healthy_metrics_experimental(resp, tags)
         else:
-            self._submit_healthy_metrics_stable(resp, tags)
+            resp = self._get_json(url_stable)
+            if resp is None:
+                can_connect_status = AgentCheck.CRITICAL
+            else:
+                self._submit_healthy_metrics_stable(resp, tags)
 
         self.service_check('airflow.can_connect', can_connect_status, tags=tags)
         self.gauge('airflow.can_connect', int(can_connect_status == AgentCheck.OK), tags=tags)
+
+    def _get_version(self, url):
+        """Get version from stable API `/api/v1/version`"""
+        try:
+            resp = self.http.get(url)
+            resp.raise_for_status()
+            resp = resp.json()
+        except Exception as e:
+            self.log.debug("Couldn't collect version from URL: %s with exception: %s", url, e)
+        else:
+            try:
+                version = resp.get('version')
+            except AttributeError:
+                self.log.debug("Couldn't collect version from response")
+            else:
+                self.log.info("Airflow version: %s", version)
+                return version
 
     def _submit_healthy_metrics_experimental(self, resp, tags):
         if resp.get('status') == AIRFLOW_STATUS_OK:
