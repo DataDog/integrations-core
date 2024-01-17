@@ -1,5 +1,6 @@
 id: redis
 metric_id: redis
+backend_only: false
 facets:
   - name: Redis PID
     source: log

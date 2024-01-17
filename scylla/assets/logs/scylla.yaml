@@ -1,5 +1,6 @@
 id: scylla
 metric_id: scylla
+backend_only: false
 facets:
   - name: Database
     source: log

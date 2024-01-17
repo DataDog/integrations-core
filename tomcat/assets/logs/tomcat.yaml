@@ -1,5 +1,6 @@
 id: tomcat
 metric_id: tomcat
+backend_only: false
 facets:
   - name: Duration
     source: log
@@ -66,13 +67,11 @@ facets:
     path: gc.action
     groups:
       - Garbage Collector
-
   - name: GC Phase
     source: log
     path: gc.phase
     groups:
       - Garbage Collector
-
   - name: Memory Freed
     source: log
     path: gc.memory_freed
@@ -83,7 +82,6 @@ facets:
       name: mebibyte
     groups:
       - Garbage Collector
-
 pipeline:
   type: pipeline
   name: Tomcat

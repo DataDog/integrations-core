@@ -1,5 +1,6 @@
 id: memcached
 metric_id: memcached
+backend_only: false
 facets:
   - name: Direction
     source: log

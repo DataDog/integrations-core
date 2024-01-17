@@ -1,5 +1,6 @@
 id: openldap
 metric_id: openldap
+backend_only: false
 facets:
   - name: Logger Name
     source: log

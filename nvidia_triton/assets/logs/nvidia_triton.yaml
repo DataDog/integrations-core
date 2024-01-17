@@ -1,5 +1,6 @@
 id: nvidia_triton
 metric_id: nvidia-triton
+backend_only: false
 facets:
 pipeline:
   type: pipeline
@@ -14,7 +15,7 @@ pipeline:
       source: message
       samples:
         - "I1011 13:21:57.174321 1 cache_manager.cc:174] Creating TritonCache with name: 'local', libpath: '/opt/tritonserver/caches/local/libtritoncache_local.so', cache_config: '{\"size\":\"1048576\"}'"
-        - "2023-10-11 13:21:57.768609: I tensorflow/core/util/port.cc:110] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`."
+        - '2023-10-11 13:21:57.768609: I tensorflow/core/util/port.cc:110] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.'
         - "2023-10-1113:21:57 I 1 cache_manager.cc:174] Creating TritonCache with name: 'local', libpath: '/opt/tritonserver/caches/local/libtritoncache_local.so', cache_config: '{\"size\":\"1048576\"}'"
       grok:
         matchRules: |

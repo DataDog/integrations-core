@@ -1,5 +1,6 @@
 id: temporal
 metric_id: temporal
+backend_only: false
 facets:
   - name: Namespace
     source: log

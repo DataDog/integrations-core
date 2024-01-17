@@ -1,5 +1,6 @@
 id: marathon
 metric_id: marathon
+backend_only: false
 facets:
   - name: Logger Name
     source: log

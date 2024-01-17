@@ -1,4 +1,5 @@
 id: ray
+backend_only: false
 facets:
   - name: Thread Name
     source: log

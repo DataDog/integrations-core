@@ -1,5 +1,6 @@
 id: postfix
 metric_id: postfix
+backend_only: false
 facets:
   - name: Client ID
     source: log
