@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## Unreleased
+
+***Added***:
+
+* Added the `enable_per_db_metrics` flag, to allow the gathering of these metrics to be disabled ([#16641](https://github.com/DataDog/integrations-core/pull/16641))
+
 ## 6.1.0 / 2024-01-05
 
 ***Added***:
