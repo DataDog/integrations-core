@@ -14,6 +14,7 @@ from datadog_checks.sqlserver.const import (
     AO_METRICS_PRIMARY,
     AO_METRICS_SECONDARY,
     DATABASE_FRAGMENTATION_METRICS,
+    DATABASE_INDEX_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DBM_MIGRATED_METRICS,
@@ -85,6 +86,7 @@ EXPECTED_DEFAULT_METRICS = (
             TEMPDB_FILE_SPACE_USAGE_METRICS,
         )
     ]
+    + DATABASE_INDEX_METRICS
     + SERVER_METRICS
     + EXPECTED_FILE_STATS_METRICS
 )
@@ -271,10 +273,14 @@ def assert_metrics(
         # when autodiscovery is enabled, we should not double emit metrics,
         # so we should assert for these separately with the proper tags
         expected_metrics = [m for m in expected_metrics if m not in DB_PERF_COUNT_METRICS_NAMES]
+
         for dbname in dbs:
             tags = check_tags + ['database:{}'.format(dbname)]
             for mname in DB_PERF_COUNT_METRICS_NAMES:
                 aggregator.assert_metric(mname, hostname=hostname, tags=tags)
+    else:
+        # master does not have indexes so none of these metrics will be emitted
+        expected_metrics = [m for m in expected_metrics if m not in DATABASE_INDEX_METRICS]
     for mname in expected_metrics:
         assert hostname is not None, "hostname must be explicitly specified for all metrics"
         aggregator.assert_metric(mname, hostname=hostname)

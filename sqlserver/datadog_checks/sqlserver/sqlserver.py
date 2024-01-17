@@ -4,6 +4,7 @@
 from __future__ import division
 
 import copy
+import functools
 import time
 from collections import defaultdict
 
@@ -46,7 +47,7 @@ from datadog_checks.sqlserver.const import (
     DBM_MIGRATED_METRICS,
     ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
     ENGINE_EDITION_SQL_DATABASE,
-    INDEX_USAGE_STATS_INTERVAL,
+    DEFAULT_INDEX_USAGE_STATS_INTERVAL,
     INSTANCE_METRICS,
     INSTANCE_METRICS_DATABASE,
     PERF_AVERAGE_BULK,
@@ -112,8 +113,8 @@ class SQLServer(AgentCheck):
 
         self.databases = set()
         self.autodiscovery_query = None
-        self.ad_last_check = 0
-        self.index_usage_last_check_ts = 0
+        self._ad_last_check = 0
+        self._index_usage_last_check_ts = 0
         self._sql_counter_types = {}
         self.proc_type_mapping = {'gauge': self.gauge, 'rate': self.rate, 'histogram': self.histogram}
 
@@ -374,7 +375,7 @@ class SQLServer(AgentCheck):
             return False
 
         now = time.time()
-        if now - self.ad_last_check > self._config.autodiscovery_interval:
+        if now - self._ad_last_check > self._config.autodiscovery_interval:
             self.log.info('Performing database autodiscovery')
             query = self._get_autodiscovery_query_cached(cursor)
             cursor.execute(query)
@@ -394,7 +395,7 @@ class SQLServer(AgentCheck):
             filtered_dbs = all_dbs.intersection(included_dbs) - excluded_dbs
 
             self.log.debug('Resulting filtered databases: %s', filtered_dbs)
-            self.ad_last_check = now
+            self._ad_last_check = now
             if filtered_dbs != self.databases:
                 self.log.debug('Databases updated from previous autodiscovery check.')
                 self.databases = filtered_dbs
@@ -847,49 +848,55 @@ class SQLServer(AgentCheck):
                 with self.connection.get_managed_cursor() as cursor:
                     cursor.execute("SET NOCOUNT OFF")
 
-    def execute_query_raw(self, query):
+    def execute_query_raw(self, query, db=None):
         with self.connection.get_managed_cursor() as cursor:
+            if db:
+                ctx = construct_use_statement(db)
+                self.log.debug("changing cursor context via use statement: %s", ctx)
+                cursor.execute(ctx)
             cursor.execute(query)
             return cursor.fetchall()
 
     # https://learn.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-index-usage-stats-transact-sql?view=sql-server-ver15
     def collect_index_usage_metrics(self):
         if not is_affirmative(self.instance.get('include_index_usage_metrics', True)):
-            return False
+            return
+
+        interval = max(int(self.instance.get('index_usage_stats_interval', DEFAULT_INDEX_USAGE_STATS_INTERVAL)), 10)
 
         now = time.time()
-        if now - self.index_usage_last_check_ts > INDEX_USAGE_STATS_INTERVAL:
+        if not self._index_usage_last_check_ts or now - self._index_usage_last_check_ts > interval:
+            self._index_usage_last_check_ts = now
             self.log.warning('Collecting index usage statistics')
             db_names = [d.name for d in self.databases] or [
                 self.instance.get('database', self.connection.DEFAULT_DATABASE)
             ]
             with self.connection.get_managed_cursor() as cursor:
+                cursor.execute(
+                    'select DB_NAME()'
+                )  # This can return None in some implementations, so it cannot be chained
+                data = cursor.fetchall()
+                current_db = data[0][0]
+                self.log.warning("current db is %s", current_db)
                 try:
                     for database in db_names:
-
-                        def query_executor(query, db=database):
-                            ctx = construct_use_statement(db)
-                            self.log.warning("changing cursor context via use statement: %s", ctx)
-                            cursor.execute(ctx)
-                            self.log.warning("fetching index usage statistics: %s", query)
-                            cursor.execute(query)
-                            return cursor.fetchall()
-
-                        executor = QueryExecutor(
-                            query_executor,
-                            self,
-                            queries=[INDEX_USAGE_STATS_QUERY],
-                            tags=self.tags,
-                            hostname=self.resolved_hostname,
-                        )
-                        executor.compile_queries()
-                        executor.execute()
-                except Exception as e:
-                    self.log.warning("failed to collect index usage statistics: %s", e)
-                    raise e
-
-            self.index_usage_last_check_ts = now
-        return False
+                        try:
+                            executor = QueryExecutor(
+                                functools.partial(self.execute_query_raw, db=database),
+                                self,
+                                queries=[INDEX_USAGE_STATS_QUERY],
+                                tags=self.tags,
+                                hostname=self.resolved_hostname,
+                            )
+                            executor.compile_queries()
+                            executor.execute()
+                        except Exception as e:
+                            self.log.error("failed to collect index usage statistics: %s", e)
+                finally:
+                    if current_db:
+                        self.log.warning("reverting cursor context via use statement to %s", current_db)
+                        cursor.execute(construct_use_statement(current_db))
+        return
 
     def do_stored_procedure_check(self):
         """
