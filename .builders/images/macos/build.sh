@@ -20,8 +20,6 @@ export DD_PREFIX_PATH="$(pwd)/prefix"
 export LDFLAGS="-Wl,-rpath,${DD_PREFIX_PATH}/lib -L${DD_PREFIX_PATH}/lib"
 export CFLAGS="-I${DD_PREFIX_PATH}/include -O2"
 export PATH="${DD_PREFIX_PATH}/bin:${PATH}"
-# Necessary for `delocate` to pick up the extra libraries we install
-export DYLD_LIBRARY_PATH="${DD_PREFIX_PATH}/lib:${DYLD_LIBRARY_PATH:-}"
 
 "${DD_PYTHON3}" -m pip install --no-warn-script-location -r "runner_dependencies.txt"
 
@@ -30,8 +28,15 @@ install-from-source() {
     bash install-from-source.sh --prefix="${DD_PREFIX_PATH}" "$@"
 }
 
+# mqi
+IBM_MQ_VERSION=9.2.4.0-IBM-MQ-DevToolkit
+curl --retry 5 --fail "https://s3.amazonaws.com/dd-agent-omnibus/ibm-mq-backup/${IBM_MQ_VERSION}-MacX64.pkg" -o /tmp/mq_client.pkg
+sudo installer -pkg /tmp/mq_client.pkg -target /
+rm -rf /tmp/mq_client.pkg
+
 # Restore cache if it exists
 if [[ -n ${DD_PREFIX_CACHE:-} && -d ${DD_PREFIX_CACHE:-} ]]; then
+    echo "Using provided cache for built libraries."
     cp -r "${DD_PREFIX_CACHE}" "${DD_PREFIX_PATH}"
 else
     # openssl
