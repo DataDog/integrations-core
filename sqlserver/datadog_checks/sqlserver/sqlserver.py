@@ -20,7 +20,7 @@ from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
-from datadog_checks.sqlserver.utils import Database, parse_sqlserver_major_version
+from datadog_checks.sqlserver.utils import Database, construct_use_statement, parse_sqlserver_major_version
 
 try:
     import datadog_agent
@@ -40,13 +40,13 @@ from datadog_checks.sqlserver.const import (
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
     DATABASE_FRAGMENTATION_METRICS,
-    DATABASE_INDEX_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DATABASE_SERVICE_CHECK_NAME,
     DBM_MIGRATED_METRICS,
     ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
     ENGINE_EDITION_SQL_DATABASE,
+    INDEX_USAGE_STATS_INTERVAL,
     INSTANCE_METRICS,
     INSTANCE_METRICS_DATABASE,
     PERF_AVERAGE_BULK,
@@ -65,6 +65,7 @@ from datadog_checks.sqlserver.const import (
 )
 from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
 from datadog_checks.sqlserver.queries import (
+    INDEX_USAGE_STATS_QUERY,
     QUERY_AO_FAILOVER_CLUSTER,
     QUERY_AO_FAILOVER_CLUSTER_MEMBER,
     QUERY_FAILOVER_CLUSTER_INSTANCE,
@@ -112,6 +113,7 @@ class SQLServer(AgentCheck):
         self.databases = set()
         self.autodiscovery_query = None
         self.ad_last_check = 0
+        self.index_usage_last_check_ts = 0
         self._sql_counter_types = {}
         self.proc_type_mapping = {'gauge': self.gauge, 'rate': self.rate, 'histogram': self.histogram}
 
@@ -451,8 +453,8 @@ class SQLServer(AgentCheck):
 
         # Load database statistics
         db_stats_to_collect = list(DATABASE_METRICS)
-        if is_affirmative(self.instance.get('include_index_usage_metrics', True)):
-            db_stats_to_collect.extend(DATABASE_INDEX_METRICS)
+        # if is_affirmative(self.instance.get('include_index_usage_metrics', True)):
+        #     db_stats_to_collect.extend(DATABASE_INDEX_METRICS)
         for name, table, column in db_stats_to_collect:
             # include database as a filter option
             db_names = [d.name for d in self.databases] or [
@@ -837,6 +839,8 @@ class SQLServer(AgentCheck):
                 if self.dynamic_queries:
                     self.dynamic_queries.execute()
 
+                self.collect_index_usage_metrics()
+
                 # reuse connection for any custom queries
                 self._query_manager.execute()
             finally:
@@ -847,6 +851,42 @@ class SQLServer(AgentCheck):
         with self.connection.get_managed_cursor() as cursor:
             cursor.execute(query)
             return cursor.fetchall()
+
+    # https://learn.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-index-usage-stats-transact-sql?view=sql-server-ver15
+    def collect_index_usage_metrics(self):
+        if not is_affirmative(self.instance.get('include_index_usage_metrics', True)):
+            return False
+
+        now = time.time()
+        if now - self.index_usage_last_check_ts > INDEX_USAGE_STATS_INTERVAL:
+            self.log.info('Collecting index usage statistics')
+            with self.connection.get_managed_cursor() as cursor:
+                try:
+                    for database in self.databases:
+
+                        def query_executor(query, db=database):
+                            ctx = construct_use_statement(db)
+                            self.log.debug("changing cursor context via use statement: %s", ctx)
+                            cursor.execute(ctx)
+                            self.log.debug("fetching index usage statistics: %s", query)
+                            cursor.execute(query)
+                            return cursor.fetchall()
+
+                        executor = QueryExecutor(
+                            query_executor,
+                            self,
+                            queries=[INDEX_USAGE_STATS_QUERY],
+                            tags=self.tags,
+                            hostname=self.resolved_hostname,
+                        )
+                        executor.compile_queries()
+                        executor.execute()
+                except Exception as e:
+                    self.log.warning("failed to collect index usage statistics: %s", e)
+                    raise e
+
+            self.index_usage_last_check_ts = now
+        return False
 
     def do_stored_procedure_check(self):
         """

@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 from copy import copy, deepcopy
+import time
 
 import pytest
 
@@ -13,6 +14,7 @@ from datadog_checks.sqlserver.const import (
     DATABASE_INDEX_METRICS,
     ENGINE_EDITION_SQL_DATABASE,
     ENGINE_EDITION_STANDARD,
+    INDEX_USAGE_STATS_INTERVAL,
     INSTANCE_METRICS_DATABASE,
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_MAJOR_VERSION,
@@ -782,6 +784,7 @@ def test_index_usage_statistics(aggregator, dd_run_check, instance_docker, datab
         execute_query(query, params)
 
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    check.index_usage_last_check_ts = time.time() - INDEX_USAGE_STATS_INTERVAL - 1
     dd_run_check(check)
     expected_tags = instance_docker.get('tags', []) + [
         'db:datadog_test',
@@ -789,4 +792,4 @@ def test_index_usage_statistics(aggregator, dd_run_check, instance_docker, datab
         'index_name:thingsindex',
     ]
     for m in DATABASE_INDEX_METRICS:
-        aggregator.assert_metric(m[0], tags=expected_tags, count=1)
+        aggregator.assert_metric(m, tags=expected_tags, count=1)
