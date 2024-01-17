@@ -237,7 +237,6 @@ OPERATION_TIME_METRICS = [
     'database_backup_metrics',
     'database_file_stats_metrics',
     'incr_fraction_metrics',
-    'db_index_usage_stats_metrics',
 ]
 
 OPERATION_TIME_METRIC_NAME = 'dd.sqlserver.operation.time'
