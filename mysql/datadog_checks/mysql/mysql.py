@@ -202,24 +202,21 @@ class MySql(AgentCheck):
         )
 
     def _check_database_configuration(self, db):
-        self._check_performance_schema_enabled(db)
         self._check_events_wait_current_enabled(db)
 
     def _check_performance_schema_enabled(self, db):
-        if self.performance_schema_enabled is None:
-            with closing(db.cursor()) as cursor:
-                cursor.execute("SHOW VARIABLES LIKE 'performance_schema'")
-                results = dict(cursor.fetchall())
-                self.performance_schema_enabled = self._get_variable_enabled(results, 'performance_schema')
+        with closing(db.cursor()) as cursor:
+            cursor.execute("SHOW VARIABLES LIKE 'performance_schema'")
+            results = dict(cursor.fetchall())
+            self.performance_schema_enabled = self._get_variable_enabled(results, 'performance_schema')
 
         return self.performance_schema_enabled
 
     def check_userstat_enabled(self, db):
-        if self.userstat_enabled is None:
-            with closing(db.cursor()) as cursor:
-                cursor.execute("SHOW VARIABLES LIKE 'userstat'")
-                results = dict(cursor.fetchall())
-                self.userstat_enabled = self._get_variable_enabled(results, 'userstat')
+        with closing(db.cursor()) as cursor:
+            cursor.execute("SHOW VARIABLES LIKE 'userstat'")
+            results = dict(cursor.fetchall())
+            self.userstat_enabled = self._get_variable_enabled(results, 'userstat')
 
         return self.userstat_enabled
 
@@ -230,22 +227,21 @@ class MySql(AgentCheck):
         if not self._check_performance_schema_enabled(db):
             self.log.debug('`performance_schema` is required to enable `events_waits_current`')
             return
-        if self.events_wait_current_enabled is None:
-            with closing(db.cursor()) as cursor:
-                cursor.execute(
-                    """\
-                    SELECT
-                        NAME,
-                        ENABLED
-                    FROM performance_schema.setup_consumers WHERE NAME = 'events_waits_current'
-                    """
-                )
-                results = dict(cursor.fetchall())
-                self.events_wait_current_enabled = self._get_variable_enabled(results, 'events_waits_current')
-                self.log.debug(
-                    '`events_wait_current_enabled` was false. Setting it to %s',
-                    self.events_wait_current_enabled or False,
-                )
+        with closing(db.cursor()) as cursor:
+            cursor.execute(
+                """\
+                SELECT
+                    NAME,
+                    ENABLED
+                FROM performance_schema.setup_consumers WHERE NAME = 'events_waits_current'
+                """
+            )
+            results = dict(cursor.fetchall())
+            self.events_wait_current_enabled = self._get_variable_enabled(results, 'events_waits_current')
+            self.log.debug(
+                '`events_wait_current_enabled` was false. Setting it to %s',
+                self.events_wait_current_enabled or False,
+            )
         return self.events_wait_current_enabled
 
     def resolve_db_host(self):
