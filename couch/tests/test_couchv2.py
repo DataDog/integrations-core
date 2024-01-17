@@ -12,9 +12,10 @@ from copy import deepcopy
 
 import pytest
 import requests
+from six import PY2
+
 from datadog_checks.couch import CouchDb
 from datadog_checks.dev.utils import get_metadata_metrics
-from six import PY2
 
 from . import common
 
@@ -366,13 +367,13 @@ def test_view_compaction_metrics(aggregator, gauges):
                 r = requests.get(url, auth=self._auth, timeout=1)
                 r.raise_for_status()
             except requests.exceptions.Timeout:
-                None
+                pass
             url = "{}/kennel/_design/dummy/_view/by_data".format(self._server)
             try:
                 r = requests.get(url, auth=self._auth, timeout=1)
                 r.raise_for_status()
             except requests.exceptions.Timeout:
-                None
+                pass
 
         def update_doc(self, doc):
             body = {"data": str(random.randint(0, 1000000000)), "_rev": doc["rev"]}
