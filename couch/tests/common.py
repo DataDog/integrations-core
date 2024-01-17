@@ -8,7 +8,7 @@ import re
 from datadog_checks.base.utils.common import get_docker_hostname
 
 CHECK_NAME = "couch"
-CHECK_ID = 'test:123'
+CHECK_ID = "test:123"
 
 PORT = "5984"
 HOST = get_docker_hostname()
@@ -18,8 +18,8 @@ PASSWORD = "pawprint"
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
-COUCH_RAW_VERSION = os.getenv('COUCH_VERSION')
-COUCH_MAJOR_VERSION = int(re.split(r'\D+', COUCH_RAW_VERSION)[0])
+COUCH_RAW_VERSION = os.getenv("COUCH_VERSION")
+COUCH_MAJOR_VERSION = int(re.split(r"\D+", COUCH_RAW_VERSION)[0])
 
 # Publicly readable databases
 DB_NAMES = ["_replicator", "_users", "kennel"]
@@ -44,9 +44,21 @@ CHECK_GAUGES = ["couchdb.by_db.disk_size", "couchdb.by_db.doc_count"]
 
 BASIC_CONFIG = {"server": URL}
 
+BASIC_CONFIG_NO_PER_DB_METRICS = {
+    "server": URL,
+    "enable_per_db_metrics": False,
+}
+
 BASIC_CONFIG_V2 = {"server": URL, "user": "dduser", "password": "pawprint"}
 
 BASIC_CONFIG_TAGS = ["instance:{}".format(URL)]
+
+BASIC_CONFIG_V2_NO_PER_DB_METRICS = {
+    "server": URL,
+    "user": "dduser",
+    "password": "pawprint",
+    "enable_per_db_metrics": False,
+}
 
 BAD_CONFIG = {"server": "http://localhost:11111"}
 

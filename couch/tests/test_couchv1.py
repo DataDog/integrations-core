@@ -2,15 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.couch import CouchDb
 
 from . import common
 
-pytestmark = pytest.mark.skipif(common.COUCH_MAJOR_VERSION != 1, reason='Test for version Couch v1')
+pytestmark = pytest.mark.skipif(common.COUCH_MAJOR_VERSION != 1, reason="Test for version Couch v1")
 
 
-@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.usefixtures("dd_environment")
 @pytest.mark.integration
 def test_couch(aggregator, check, dd_run_check):
     dd_run_check(check)
@@ -42,9 +41,9 @@ def _assert_check(aggregator, assert_device_tag):
     )
 
 
-@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.usefixtures("dd_environment")
 @pytest.mark.integration
-@pytest.mark.parametrize('param_name', ["db_whitelist", "db_include"])
+@pytest.mark.parametrize("param_name", ["db_whitelist", "db_include"])
 def test_couch_inclusion(aggregator, check, instance, param_name):
     DB_INCLUDE = ["_users"]
     instance[param_name] = DB_INCLUDE
@@ -60,9 +59,9 @@ def test_couch_inclusion(aggregator, check, instance, param_name):
                 aggregator.assert_metric(gauge, tags=expected_tags, count=0)
 
 
-@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.usefixtures("dd_environment")
 @pytest.mark.integration
-@pytest.mark.parametrize('param_name', ["db_blacklist", "db_exclude"])
+@pytest.mark.parametrize("param_name", ["db_blacklist", "db_exclude"])
 def test_couch_exclusion(aggregator, check, instance, param_name):
     DB_EXCLUDE = ["_replicator"]
     instance[param_name] = DB_EXCLUDE
@@ -78,7 +77,7 @@ def test_couch_exclusion(aggregator, check, instance, param_name):
                 aggregator.assert_metric(gauge, tags=expected_tags, count=1)
 
 
-@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.usefixtures("dd_environment")
 @pytest.mark.integration
 def test_only_max_nodes_are_scanned(aggregator, check, instance):
     instance["max_dbs_per_check"] = 1
@@ -88,7 +87,7 @@ def test_only_max_nodes_are_scanned(aggregator, check, instance):
         aggregator.assert_metric(gauge, count=1)
 
 
-@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.usefixtures("dd_environment")
 @pytest.mark.integration
 def test_config_tags(aggregator, check, instance):
     TEST_TAG = "test_tag"
@@ -100,3 +99,12 @@ def test_config_tags(aggregator, check, instance):
         aggregator.assert_metric_has_tag(gauge, TEST_TAG)
 
     aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, tags=common.BASIC_CONFIG_TAGS + [TEST_TAG])
+
+
+@pytest.mark.usefixtures("dd_environment")
+@pytest.mark.integration
+def test_no_per_db_metrics(aggregator, check):
+    check.instance = common.BASIC_CONFIG_NO_PER_DB_METRICS
+    check.check({})
+    assert len(aggregator.metrics("couchdb.couchdb.database_reads")) > 0
+    assert len(aggregator.metrics("couchdb.by_db.active_size")) == 0

@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.couch import CouchDb, errors
 
@@ -17,13 +16,13 @@ def test_collect_metadata_instance(aggregator, datadog_agent, instance):
     check.check(instance)
     version = common.COUCH_RAW_VERSION
 
-    major, minor, patch = version.split('.')
+    major, minor, patch = version.split(".")
     version_metadata = {
-        'version.raw': version,
-        'version.scheme': 'semver',
-        'version.major': major,
-        'version.minor': minor,
-        'version.patch': patch,
+        "version.raw": version,
+        "version.scheme": "semver",
+        "version.major": major,
+        "version.minor": minor,
+        "version.patch": patch,
     }
 
     datadog_agent.assert_metadata(common.CHECK_ID, version_metadata)
@@ -41,7 +40,7 @@ def test_empty_config(aggregator, check):
         check.check({})
 
 
-@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.usefixtures("dd_environment")
 @pytest.mark.integration
 def test_bad_server(aggregator, check):
     check.instance = common.BAD_CONFIG
@@ -56,7 +55,7 @@ def test_bad_server(aggregator, check):
 @pytest.mark.unit
 def test_bad_version(aggregator, check):
     check.instance = common.BAD_CONFIG
-    check.get = mock.MagicMock(return_value={'version': '0.1.0'})
+    check.get = mock.MagicMock(return_value={"version": "0.1.0"})
     with pytest.raises(errors.BadVersionError):
         # the server has an unsupported version
         check.check({})
