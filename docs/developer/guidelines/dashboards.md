@@ -106,7 +106,8 @@ A dashboard that follows best practices helps users consume data quickly. Best p
 
 
 1. [Template variables](https://docs.datadoghq.com/dashboards/template_variables/) allow you to dynamically filter one or more widgets in a dashboard. Template variables must be universal and accessible by any user or account using the monitored service. Make sure all relevant graphs are listening to the relevant template variable filters. Template variables should be customized based on the type of technology. 
- | Type of integration technology | Typical Template Variable |
+
+    | Type of integration technology | Typical Template Variable |
     | - | - |
     | Database | Shards |
     | Data Streaming | Consumer |

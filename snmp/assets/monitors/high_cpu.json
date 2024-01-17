@@ -1,0 +1,31 @@
+{
+	"version": 2,
+	"created_at": "2023-12-26",
+	"last_updated_at": "2023-12-26",
+	"title": "SNMP device CPU usage is high",
+	"description": "CPU usage measures the percentage of processing capacity that is in use and provides insights into the overall health and efficiency of the device. This monitor alerts if the CPU usage goes above 90%, suggesting potential performance issues",
+	"definition": {
+		"name": "[SNMP] CPU usage high for {{snmp_device.name}} in namespace {{device_namespace.name}}",
+		"type": "query alert",
+		"query": "avg(last_5m):avg:snmp.cpu.usage{*} by {snmp_device,device_namespace} >= 90",
+		"message": "{{#is_alert}} \n{{snmp_device.name}} in namespace {{device_namespace.name}} is reporting high CPU usage (at or above 90%).\n{{/is_alert}}\n\n{{#is_warning}}\n{{snmp_device.name}} in namespace {{device_namespace.name}} is reporting higher CPU usage (at or above 80%).\n{{/is_warning}} \n\n{{#is_recovery}}\nCPU usage for {{snmp_device.name}} in namespace {{device_namespace.name}} is back to normal.\n{{/is_recovery}}\n",
+		"tags": [
+            "integration:snmp"
+        ],
+		"options": {
+			"thresholds": {
+				"critical": 90,
+				"warning": 80
+			},
+			"notify_audit": false,
+			"notify_no_data": true,
+			"no_data_timeframe": 15,
+			"renotify_interval": 0,
+			"include_tags": true,
+			"new_group_delay": 60
+		}
+	},
+	"tags": [
+		"integration:snmp"
+	]
+}

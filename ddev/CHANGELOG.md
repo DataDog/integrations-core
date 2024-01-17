@@ -2,6 +2,26 @@
 
 <!-- towncrier release notes start -->
 
+## 6.3.0 / 2024-01-17
+
+***Added***:
+
+* Add the `minimum-base-package` to all integrations in marketplace's `test-all.yml` file ([#16587](https://github.com/DataDog/integrations-core/pull/16587))
+
+***Fixed***:
+
+* Take into account all the checks when bumping or freezing the dependencies ([#16537](https://github.com/DataDog/integrations-core/pull/16537))
+* Allow bumping the version of `psutil` ([#16548](https://github.com/DataDog/integrations-core/pull/16548))
+* Allow bumping the version of `openstacksdk` ([#16550](https://github.com/DataDog/integrations-core/pull/16550))
+* Allow bumping the version of `pyvmomi` ([#16553](https://github.com/DataDog/integrations-core/pull/16553))
+* Allow bumping the version of `pymongo` ([#16555](https://github.com/DataDog/integrations-core/pull/16555))
+* Allow bumping the version of `pymsql` ([#16556](https://github.com/DataDog/integrations-core/pull/16556))
+* Allow bumping the version of `service-identity` ([#16559](https://github.com/DataDog/integrations-core/pull/16559))
+* Use the correct version of Python in the `dep` command ([#16561](https://github.com/DataDog/integrations-core/pull/16561))
+* Allow bumping the version of `pycryptodomex` ([#16562](https://github.com/DataDog/integrations-core/pull/16562))
+* Allow bumping the version of `protobuf` ([#16575](https://github.com/DataDog/integrations-core/pull/16575))
+* Allow bumping the version of `pyodbc` ([#16578](https://github.com/DataDog/integrations-core/pull/16578))
+
 ## 6.2.0 / 2024-01-02
 
 ***Added***:
