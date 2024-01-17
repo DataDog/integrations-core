@@ -44,21 +44,9 @@ CHECK_GAUGES = ["couchdb.by_db.disk_size", "couchdb.by_db.doc_count"]
 
 BASIC_CONFIG = {"server": URL}
 
-BASIC_CONFIG_NO_PER_DB_METRICS = {
-    "server": URL,
-    "enable_per_db_metrics": False,
-}
-
 BASIC_CONFIG_V2 = {"server": URL, "user": "dduser", "password": "pawprint"}
 
 BASIC_CONFIG_TAGS = ["instance:{}".format(URL)]
-
-BASIC_CONFIG_V2_NO_PER_DB_METRICS = {
-    "server": URL,
-    "user": "dduser",
-    "password": "pawprint",
-    "enable_per_db_metrics": False,
-}
 
 BAD_CONFIG = {"server": "http://localhost:11111"}
 

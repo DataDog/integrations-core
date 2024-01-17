@@ -104,8 +104,15 @@ def test_config_tags(aggregator, check, instance):
 
 @pytest.mark.usefixtures("dd_environment")
 @pytest.mark.integration
-def test_no_per_db_metrics(aggregator, check):
-    check.instance = common.BASIC_CONFIG_NO_PER_DB_METRICS
+@pytest.mark.parametrize("enable_per_db_metrics", [True, False])
+def test_per_db_metrics(aggregator, check, enable_per_db_metrics):
+    config = common.BASIC_CONFIG.copy()
+    config["enable_per_db_metrics"] = enable_per_db_metrics
+
+    check.instance = config
     check.check({})
-    assert len(aggregator.metrics("couchdb.couch_log.level.info")) > 0
-    assert len(aggregator.metrics("couchdb.by_db.active_size")) == 0
+
+    if enable_per_db_metrics:
+        assert len(aggregator.metrics("couchdb.by_db.doc_count")) > 0
+    else:
+        assert len(aggregator.metrics("couchdb.by_db.doc_count")) == 0
