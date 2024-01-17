@@ -45,6 +45,7 @@ datadog.cluster_agent.external_metrics.api_requests,gauge,,,,Count of API Reques
 datadog.cluster_agent.external_metrics.datadog_metrics,gauge,,,,"The label valid is true if the DatadogMetric CR is valid, false otherwise",0,datadog_cluster_agent,external metrics datadog metrics,
 datadog.cluster_agent.external_metrics.delay_seconds,gauge,,second,,Freshness of the metric evaluated from querying Datadog,0,datadog_cluster_agent,external metrics delay,
 datadog.cluster_agent.external_metrics.processed_value,gauge,,,,Value processed from querying Datadog by metric,0,datadog_cluster_agent,external metrics processed,
+datadog.cluster_agent.external_metrics.updated,gauge,,,,Counter increased everytime a new value is received for a query,external metrics updated,
 datadog.cluster_agent.go.goroutines,gauge,,,,Number of goroutines that currently exist,0,datadog_cluster_agent,go goroutines,
 datadog.cluster_agent.go.memstats.alloc_bytes,gauge,,byte,,Number of bytes allocated and still in use,0,datadog_cluster_agent,go memstats alloc bytes,
 datadog.cluster_agent.go.threads,gauge,,thread,,Number of OS threads created,0,datadog_cluster_agent,go threads,

@@ -43,6 +43,7 @@ DEFAULT_METRICS = {
     'external_metrics_datadog_metrics': 'external_metrics.datadog_metrics',
     'external_metrics_delay_seconds': 'external_metrics.delay_seconds',
     'external_metrics_processed_value': 'external_metrics.processed_value',
+    'external_metrics_updated': 'external_metrics.updated',
     'go_goroutines': 'go.goroutines',
     'go_memstats_alloc_bytes': 'go.memstats.alloc_bytes',
     'go_threads': 'go.threads',
