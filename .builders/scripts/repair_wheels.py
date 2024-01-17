@@ -118,19 +118,40 @@ def repair_windows(source_dir: str, built_dir: str, external_dir: str) -> None:
 
 def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
     from delocate import delocate_wheel
-    from delocate.delocating import filter_system_libs
-
-    exclusions = [
+    exclusions = [re.compile(s) for s in [
         # pymqi
-        'pymqe.cpython-311-darwin.so',
+        r'pymqe\.cpython-\d+-darwin\.so',
         # confluent_kafka
         # We leave cyrus-sasl out of the wheel because of the complexity involved in bundling it portably.
         # This means the confluent-kafka wheel will have a runtime dependency on this library
-        'libsasl2.3.dylib',
-    ]
+        r'libsasl2.\d\.dylib',
+        # Whitelisted libraries based on the health check default whitelist that we have on omnibus:
+        # https://github.com/DataDog/omnibus-ruby/blob/044a81fa1b0f1c50fc7083cb45e7d8f90d96905b/lib/omnibus/health_check.rb#L133-L152
+        # We use that instead of the more relaxed policy that delocate_wheel defaults to.
+        r'libobjc\.A\.dylib',
+        r'libSystem\.B\.dylib',
+        # Symlink of the previous one
+        r'libgcc_s\.1\.dylib',
+        r'CoreFoundation',
+        r'CoreServices',
+        r'Tcl$',
+        r'Cocoa$',
+        r'Carbon$',
+        r'IOKit$',
+        r'Kerberos',
+        r'Tk$',
+        r'libutil\.dylib',
+        r'libffi\.dylib',
+        r'libncurses\.5\.4\.dylib',
+        r'libiconv',
+        r'libstdc\+\+\.6\.dylib',
+        r'libc\+\+\.1\.dylib',
+        r'^/System/Library/',
+        r'libz\.1\.dylib',
+    ]]
 
     def copy_filt_func(libname):
-        return filter_system_libs(libname) and not any(os.path.basename(libname) == excl for excl in exclusions)
+        return not any(excl.search(libname) for excl in exclusions)
 
     for wheel in iter_wheels(source_dir):
         print(f'--> {wheel.name}')

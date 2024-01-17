@@ -45,6 +45,59 @@ else
         no-module \
         no-comp no-idea no-mdc2 no-rc5 no-ssl3 no-gost
 
+    # libxml & libxslt for lxml
+    DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.10/libxml2-{{version}}.tar.xz" \
+    VERSION="2.10.3" \
+    SHA256="5d2cc3d78bec3dbe212a9d7fa629ada25a7da928af432c93060ff5c17ee28a9c" \
+    RELATIVE_PATH="libxml2-{{version}}" \
+      install-from-source \
+        --without-iconv \
+        --without-python \
+        --without-icu \
+        --without-debug \
+        --without-mem-debug \
+        --without-run-debug \
+        --without-legacy \
+        --without-catalog \
+        --without-docbook \
+        --disable-static
+
+    DOWNLOAD_URL="https://download.gnome.org/sources/libxslt/1.1/libxslt-{{version}}.tar.xz" \
+    VERSION="1.1.37" \
+    SHA256="3a4b27dc8027ccd6146725950336f1ec520928f320f144eb5fa7990ae6123ab4" \
+    RELATIVE_PATH="libxslt-{{version}}" \
+      install-from-source \
+        --with-libxml-prefix="${DD_PREFIX_PATH}" \
+        --without-python \
+        --without-crypto \
+        --without-profiler \
+        --without-debugger \
+        --disable-static
+
+    # curl
+    DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
+    VERSION="8.4.0" \
+    SHA256="816e41809c043ff285e8c0f06a75a1fa250211bbfb2dc0a037eeef39f1a9e427" \
+    RELATIVE_PATH="curl-{{version}}" \
+      install-from-source \
+        --disable-manual \
+        --disable-debug \
+        --enable-optimize \
+        --disable-static \
+        --disable-ldap \
+        --disable-ldaps \
+        --disable-rtsp \
+        --enable-proxy \
+        --disable-dependency-tracking \
+        --enable-ipv6 \
+        --without-libidn \
+        --without-gnutls \
+        --without-librtmp \
+        --without-libssh2 \
+        --with-ssl="${DD_PREFIX_PATH}"
+    # Remove the binary installed so that we consistenly use the same original `curl` binary
+    rm "${DD_PREFIX_PATH}/bin/curl"
+
     # Dependencies needed to build librdkafka (and thus, confluent-kafka) with kerberos support
     # Note that we don't ship these but rely on the Agent providing a working cyrus-sasl installation
     # with kerberos support, therefore we only need to watch out for the version of cyrus-sasl being
