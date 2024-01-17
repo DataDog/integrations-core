@@ -859,16 +859,19 @@ class SQLServer(AgentCheck):
 
         now = time.time()
         if now - self.index_usage_last_check_ts > INDEX_USAGE_STATS_INTERVAL:
-            self.log.info('Collecting index usage statistics')
+            self.log.warning('Collecting index usage statistics')
+            db_names = [d.name for d in self.databases] or [
+                self.instance.get('database', self.connection.DEFAULT_DATABASE)
+            ]
             with self.connection.get_managed_cursor() as cursor:
                 try:
-                    for database in self.databases:
+                    for database in db_names:
 
                         def query_executor(query, db=database):
                             ctx = construct_use_statement(db)
-                            self.log.debug("changing cursor context via use statement: %s", ctx)
+                            self.log.warning("changing cursor context via use statement: %s", ctx)
                             cursor.execute(ctx)
-                            self.log.debug("fetching index usage statistics: %s", query)
+                            self.log.warning("fetching index usage statistics: %s", query)
                             cursor.execute(query)
                             return cursor.fetchall()
 

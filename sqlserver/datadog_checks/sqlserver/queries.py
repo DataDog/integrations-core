@@ -144,7 +144,7 @@ QUERY_LOG_SHIPPING_SECONDARY = {
 }
 
 INDEX_USAGE_STATS_QUERY = {
-    "name:": "sys.dm_db_index_usage_stats",
+    "name": "sys.dm_db_index_usage_stats",
     "query": """
     SELECT
          DB_NAME(ixus.database_id) as db,
@@ -164,13 +164,13 @@ INDEX_USAGE_STATS_QUERY = {
     GROUP BY ixus.database_id, OBJECT_NAME(ind.object_id), ind.name, user_seeks, user_scans, user_lookups, user_updates
 """,
     "columns": [
+        {"name": "db", "type": "tag"},
+        {"name": "index_name", "type": "tag"},
+        {"name": "table", "type": "tag"},
         {"name": "index.user_seeks", "type": "gauge"},
         {"name": "index.user_scans", "type": "gauge"},
         {"name": "index.user_lookups", "type": "gauge"},
         {"name": "index.user_updates", "type": "gauge"},
-        {"name": "db", "type": "tag"},
-        {"name": "table_name", "type": "tag"},
-        {"name": "index_name", "type": "tag"},
     ]
 }
 
