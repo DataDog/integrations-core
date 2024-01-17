@@ -1,5 +1,6 @@
 id: tenable
 metric_id: tenable
+backend_only: false
 facets:
   - name: Event Name
     source: log

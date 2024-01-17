@@ -1,5 +1,6 @@
 id: mysql
 metric_id: mysql
+backend_only: false
 facets:
 
   - name: Operation Type

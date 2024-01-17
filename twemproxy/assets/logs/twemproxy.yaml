@@ -1,5 +1,6 @@
 id: twemproxy
 metric_id: twemproxy
+backend_only: false
 facets:
   - name: Host
     source: log
@@ -11,7 +12,6 @@ facets:
     path: port
     groups:
       - Twemproxy
-
 pipeline:
   type: pipeline
   name: Twemproxy

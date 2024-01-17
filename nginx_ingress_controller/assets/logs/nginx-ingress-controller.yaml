@@ -1,5 +1,6 @@
 id: nginx-ingress-controller
 metric_id: nginx-ingress-controller
+backend_only: false
 facets:
   - name: Duration
     source: log

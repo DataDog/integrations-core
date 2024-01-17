@@ -1,12 +1,12 @@
 id: voltdb
 metric_id: voltdb
+backend_only: false
 facets:
   - name: Logger Name
     source: log
     path: logger.name
     groups:
       - Source Code
-
 pipeline:
   type: pipeline
   name: VoltDB

@@ -1,5 +1,6 @@
 id: pgbouncer
 metric_id: pgbouncer
+backend_only: false
 facets:
   - name: Database
     source: log
