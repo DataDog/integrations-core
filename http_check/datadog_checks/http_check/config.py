@@ -93,5 +93,5 @@ def from_instance(instance, default_ca_certs=None):
         check_hostname,
         stream,
         use_cert_from_response,
-        use_truststore
+        use_truststore,
     )

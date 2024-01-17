@@ -91,6 +91,7 @@ class HTTPCheck(AgentCheck):
             check_hostname,
             stream,
             use_cert_from_response,
+            use_truststore,
         ) = from_instance(instance, self.ca_certs)
         timeout = self.http.options["timeout"][0]
         start = time.time()
@@ -395,22 +396,25 @@ class HTTPCheck(AgentCheck):
             )
 
     def _fetch_cert(self, instance, timeout, instance_ca_certs):
-        url = instance.get('url')
+        if is_affirmative(instance.get('use_truststore', False)):
+            truststore.inject_into_ssl()
+        else:
+            url = instance.get('url')
 
-        o = urlparse(url)
-        host = o.hostname
-        server_name = instance.get('ssl_server_name', o.hostname)
-        port = o.port or 443
+            o = urlparse(url)
+            host = o.hostname
+            server_name = instance.get('ssl_server_name', o.hostname)
+            port = o.port or 443
 
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(float(timeout))
-        sock.connect((host, port))
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(float(timeout))
+            sock.connect((host, port))
 
-        context = self.get_tls_context()
-        context.load_verify_locations(instance_ca_certs)
+            context = self.get_tls_context()
+            context.load_verify_locations(instance_ca_certs)
 
-        ssl_sock = context.wrap_socket(sock, server_hostname=server_name)
-        return ssl_sock.getpeercert(binary_form=True)
+            ssl_sock = context.wrap_socket(sock, server_hostname=server_name)
+            return ssl_sock.getpeercert(binary_form=True)
 
     @staticmethod
     def _include_content(include_content, message, content):
