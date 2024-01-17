@@ -45,14 +45,6 @@ else
         no-module \
         no-comp no-idea no-mdc2 no-rc5 no-ssl3 no-gost
 
-    # postgresql
-    DOWNLOAD_URL="https://ftp.postgresql.org/pub/source/v{{version}}/postgresql-{{version}}.tar.bz2" \
-    VERSION="16.0" \
-    SHA256="df9e823eb22330444e1d48e52cc65135a652a6fdb3ce325e3f08549339f51b99" \
-    RELATIVE_PATH="postgresql-{{version}}" \
-      install-from-source \
-        --with-openssl --without-readline  --without-icu
-
     # Dependencies needed to build librdkafka (and thus, confluent-kafka) with kerberos support
     # Note that we don't ship these but rely on the Agent providing a working cyrus-sasl installation
     # with kerberos support, therefore we only need to watch out for the version of cyrus-sasl being

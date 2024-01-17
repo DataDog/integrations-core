@@ -29,7 +29,7 @@ else:
     PY3_PATH = Path(os.environ.get('DD_PY3_BUILDENV_PATH', '/py3/bin/python'))
     PY2_PATH = Path(os.environ.get('DD_PY2_BUILDENV_PATH', '/py2/bin/python'))
     MOUNT_DIR = Path(os.environ.get('DD_MOUNT_DIR', '/home'))
-    ENV_FILE = Path('/.env')
+    ENV_FILE = MOUNT_DIR / '.env'
 
     def join_command_args(args: list[str]) -> str:
         return shlex.join(args)
