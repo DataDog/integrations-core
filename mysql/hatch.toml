@@ -33,6 +33,7 @@ version = [
   "10.5",  # EOL 24 June 2025
   "10.8",
   "10.9",
+  "10.10",
 ]
 
 [envs.default.overrides]
