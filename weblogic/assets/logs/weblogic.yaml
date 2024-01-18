@@ -1,5 +1,6 @@
 id: weblogic
 metric_id: weblogic
+backend_only: false
 facets:
   - name: Status Code
     source: log

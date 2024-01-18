@@ -1,5 +1,6 @@
 id: weave-kube
 metric_id: nginx-ingress-controller
+backend_only: false
 facets:
   - name: Client IP
     source: log
@@ -26,25 +27,21 @@ facets:
     path: network.client.mac
     groups:
       - Network
-
   - name: Client Name
     source: log
     path: network.client.name
     groups:
       - Network
-
   - name: Destination MAC
     source: log
     path: network.destination.mac
     groups:
       - Network
-
   - name: Destination Name
     source: log
     path: network.destination.name
     groups:
       - Web Access
-
 pipeline:
   type: pipeline
   name: Weave Kube

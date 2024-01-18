@@ -1,5 +1,6 @@
 id: sonarqube
 metric_id: sonarqube
+backend_only: false
 facets:
   - name: Method
     source: log

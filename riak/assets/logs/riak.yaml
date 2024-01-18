@@ -1,5 +1,6 @@
 id: riak
 metric_id: riak
+backend_only: false
 facets:
   - name: Thread Name
     source: log
