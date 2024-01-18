@@ -49,7 +49,7 @@ files:
         from being checked. If a database is listed both as included and excluded,
         the exclusion takes precedence.
 
-        This parameter only has an effect is `enable_per_db_metrics` is set to `true`.
+        This parameter only has an effect if `enable_per_db_metrics` is set to `true`.
       value:
         type: array
         items:
