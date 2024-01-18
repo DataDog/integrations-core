@@ -131,7 +131,7 @@ def test_local_rate_limit_metrics(aggregator, dd_run_check, check, mock_http_res
 
 
 def test_tags_in_ssl_metrics(aggregator, dd_run_check, check, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('./openmetrics/openmetrics.txt'))
+    mock_http_response(file_path=get_fixture_path('./openmetrics/openmetrics_ssl_metrics.txt'))
 
     c = check(DEFAULT_INSTANCE)
 
