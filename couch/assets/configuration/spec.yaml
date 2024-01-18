@@ -17,10 +17,11 @@ files:
         type: string
     - name: enable_per_db_metrics
       description: |
-        If `enable_per_db_metrics` is set to `true`, the check will collect metrics
-        for each database. If you have a large number of databases, you may find that
-        the collection of these metrics is slow and resource-intensive. In this case,
-        you may want to set `enable_per_db_metrics` to `false`.
+        If `enable_per_db_metrics` is set to `true`, the check collects metrics
+        for each database. If you have a large number of databases, 
+        the collection of these metrics could be slow and resource-intensive. If 
+        you're affected by performance issues, set `enable_per_db_metrics` to 
+        `false`.
       value:
         type: boolean
         example: true
