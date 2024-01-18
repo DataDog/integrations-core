@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from datadog_checks.sqlserver.const import DATABASE_INDEX_METRICS
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.const import DATABASE_INDEX_METRICS
 
 from .common import (
     CUSTOM_METRICS,
