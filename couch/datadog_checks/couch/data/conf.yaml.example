@@ -61,10 +61,11 @@ instances:
     # password: <PASSWORD>
 
     ## @param enable_per_db_metrics - boolean - optional - default: true
-    ## If `enable_per_db_metrics` is set to `true`, the check will collect metrics
-    ## for each database. If you have a large number of databases, you may find that
-    ## the collection of these metrics is slow and resource-intensive. In this case,
-    ## you may want to set `enable_per_db_metrics` to `false`.
+    ## If `enable_per_db_metrics` is set to `true`, the check collects metrics
+    ## for each database. If you have a large number of databases, 
+    ## the collection of these metrics could be slow and resource-intensive. If 
+    ## you're affected by performance issues, set `enable_per_db_metrics` to 
+    ## `false`.
     #
     # enable_per_db_metrics: true
 
@@ -76,7 +77,7 @@ instances:
     ## included more than 50 or if you have more than 50 databases update the `max_dbs_per_check`
     ## parameter accordingly.
     ##
-    ## This parameter only has an effect is `enable_per_db_metrics` is set to `true`.
+    ## This parameter only has an effect if `enable_per_db_metrics` is set to `true`.
     #
     # db_include:
     #   - <DATABASE_1>
@@ -87,7 +88,7 @@ instances:
     ## from being checked. If a database is listed both as included and excluded,
     ## the exclusion takes precedence.
     ##
-    ## This parameter only has an effect is `enable_per_db_metrics` is set to `true`.
+    ## This parameter only has an effect if `enable_per_db_metrics` is set to `true`.
     #
     # db_exclude:
     #   - <DATABASE_1>
