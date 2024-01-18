@@ -1,5 +1,6 @@
 id: ibm_db2
 metric_id: ibm-db2
+backend_only: false
 facets:
   - name: Database
     source: log
@@ -36,7 +37,7 @@ pipeline:
   name: IBM Db2
   enabled: true
   meta:
-    description: "[Documentation on AWS IBM Db2 logs](https://www.ibm.com/support/knowledgecenter/en/SSEPGG_9.7.0/com.ibm.db2.luw.admin.trb.doc/doc/c0020815.html)"
+    description: '[Documentation on AWS IBM Db2 logs](https://www.ibm.com/support/knowledgecenter/en/SSEPGG_9.7.0/com.ibm.db2.luw.admin.trb.doc/doc/c0020815.html)'
   filter:
     query: source:ibm_db2
   processors:

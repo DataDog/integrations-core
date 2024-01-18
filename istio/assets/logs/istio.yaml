@@ -1,5 +1,6 @@
 id: istio
 metric_id: istio
+backend_only: false
 facets:
   - name: Duration
     source: log

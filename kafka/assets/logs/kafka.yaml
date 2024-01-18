@@ -1,5 +1,6 @@
 id: kafka
 metric_id: kafka
+backend_only: false
 facets:
   - name: Logger Name
     source: log

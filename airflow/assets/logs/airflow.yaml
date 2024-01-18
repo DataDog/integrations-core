@@ -1,12 +1,12 @@
 id: airflow
 metric_id: airflow
+backend_only: false
 facets:
   - name: Filename
     source: log
     path: filename
     groups:
       - Source Code
-
 pipeline:
   type: pipeline
   name: Airflow

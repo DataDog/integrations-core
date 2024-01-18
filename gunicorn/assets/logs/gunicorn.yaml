@@ -1,5 +1,6 @@
 id: gunicorn
 metric_id: gunicorn
+backend_only: false
 facets:
   - name: Method
     source: log

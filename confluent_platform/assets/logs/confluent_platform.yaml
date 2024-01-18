@@ -1,5 +1,6 @@
 id: confluent_platform
 metric_id: confluent-platform
+backend_only: false
 facets:
   - name: Logger Name
     source: log

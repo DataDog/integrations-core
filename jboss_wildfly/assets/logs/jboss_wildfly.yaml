@@ -1,5 +1,6 @@
 id: jboss_wildfly
 metric_id: jboss-wildfly
+backend_only: false
 facets:
   - name: Method
     source: log

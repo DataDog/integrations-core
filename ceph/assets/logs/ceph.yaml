@@ -1,5 +1,6 @@
 id: ceph
 metric_id: ceph
+backend_only: false
 facets:
   - name: Thread Name
     source: log
