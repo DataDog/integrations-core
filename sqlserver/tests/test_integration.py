@@ -5,6 +5,7 @@ import logging
 from copy import copy, deepcopy
 
 import pytest
+
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.__about__ import __version__
 from datadog_checks.sqlserver.connection import SQLConnectionError
