@@ -472,14 +472,12 @@ class PostgresMetadata(DBMAsyncJob):
         with self._check._get_main_db() as conn:
             with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
                 if self.pg_settings_ignored_patterns:
-                    query = PG_SETTINGS_QUERY + " WHERE name NOT LIKE ANY(array{})".format(
-                        self.pg_settings_ignored_patterns
-                    )
+                    query = PG_SETTINGS_QUERY + " WHERE name NOT LIKE ANY(ARRAY%s)"
                 else:
                     query = PG_SETTINGS_QUERY
-                self._log.warning("Running query [%s]", query)
+                self._log.debug("Running query [%s]", query)
                 self._time_since_last_settings_query = time.time()
-                cursor.execute(query)
+                cursor.execute(query, (self.pg_settings_ignored_patterns,))
                 rows = cursor.fetchall()
                 self._log.debug("Loaded %s rows from pg_settings", len(rows))
                 return [dict(row) for row in rows]
