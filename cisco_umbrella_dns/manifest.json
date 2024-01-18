@@ -42,9 +42,6 @@
         "dashboards": {
             "Cisco Umbrella DNS - DNS Traffic": "assets/dashboards/cisco_umbrella_dns_dns_traffic.json",
             "Cisco Umbrella DNS - Proxied Traffic": "assets/dashboards/cisco_umbrella_dns_proxied_traffic.json"
-        },
-        "logs": {
-            "source": "cisco-umbrella-dns"
         }
     },
     "author": {
