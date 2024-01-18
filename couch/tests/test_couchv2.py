@@ -452,6 +452,7 @@ def test_config_tags(aggregator, gauges):
     expected_tags = ["instance:{0}".format(config["name"]), TEST_TAG]
     aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, tags=expected_tags)
 
+
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 @pytest.mark.parametrize('enable_per_db_metrics', [True, False])

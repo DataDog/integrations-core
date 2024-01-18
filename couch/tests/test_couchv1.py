@@ -101,6 +101,7 @@ def test_config_tags(aggregator, check, instance):
 
     aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, tags=common.BASIC_CONFIG_TAGS + [TEST_TAG])
 
+
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 @pytest.mark.parametrize('enable_per_db_metrics', [True, False])
