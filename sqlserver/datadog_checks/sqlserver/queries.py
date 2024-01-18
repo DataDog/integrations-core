@@ -171,7 +171,7 @@ INDEX_USAGE_STATS_QUERY = {
         {"name": "index.user_scans", "type": "gauge"},
         {"name": "index.user_lookups", "type": "gauge"},
         {"name": "index.user_updates", "type": "gauge"},
-    ]
+    ],
 }
 
 
