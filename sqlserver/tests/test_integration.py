@@ -3,10 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 from copy import copy, deepcopy
-import time
 
 import pytest
-
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.__about__ import __version__
 from datadog_checks.sqlserver.connection import SQLConnectionError
@@ -14,7 +12,6 @@ from datadog_checks.sqlserver.const import (
     DATABASE_INDEX_METRICS,
     ENGINE_EDITION_SQL_DATABASE,
     ENGINE_EDITION_STANDARD,
-    DEFAULT_INDEX_USAGE_STATS_INTERVAL,
     INSTANCE_METRICS_DATABASE,
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_MAJOR_VERSION,
@@ -459,7 +456,7 @@ def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, 
     dd_run_check(sqlserver_check)
     seen_databases = set()
     for m in aggregator.metrics("sqlserver.database.avg_fragmentation_in_percent"):
-        tags_by_key = {k: v for k, v in [t.split(':') for t in m.tags if not t.startswith('dd.internal')]}
+        tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
         seen_databases.add(tags_by_key['database_name'])
         assert tags_by_key['object_name'].lower() != 'none'
 
