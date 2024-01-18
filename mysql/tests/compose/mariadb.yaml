@@ -11,6 +11,7 @@ services:
       - MARIADB_USER=my_user
       - MARIADB_PASSWORD=my_password
       - MARIADB_DATABASE=my_database
+      - DB_REPLICATION_SLAVE_DUMP=false
     ports:
       - "${MYSQL_PORT}:3306"
     volumes:
@@ -29,6 +30,7 @@ services:
       - MARIADB_REPLICATION_PASSWORD=my_repl_password
       - MARIADB_MASTER_HOST=mysql-master
       - MARIADB_MASTER_PORT_NUMBER=3306
+      - DB_REPLICATION_SLAVE_DUMP=false
     ports:
       - "${MYSQL_SLAVE_PORT}:3306"
     depends_on:
