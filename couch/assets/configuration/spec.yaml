@@ -35,7 +35,7 @@ files:
         included more than 50 or if you have more than 50 databases update the `max_dbs_per_check`
         parameter accordingly.
 
-        This parameter only has an effect is `enable_per_db_metrics` is set to `true`.
+        This parameter only has an effect if `enable_per_db_metrics` is set to `true`.
       value:
         type: array
         items:
