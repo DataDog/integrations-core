@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
+from sqlserver.datadog_checks.sqlserver.const import DATABASE_INDEX_METRICS
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.sqlserver import SQLServer
@@ -122,6 +123,11 @@ def test_check_docker(dd_agent_check, init_config, instance_e2e):
     ]
     for m in inc_perf_counter_metrics_to_remove:
         del aggregator._metrics[m]
+
+    # remove index usage metrics, which require extra setup & will be tested separately
+    for m in DATABASE_INDEX_METRICS:
+        if m in aggregator._metrics:
+            del aggregator._metrics[m]
 
     for mname in EXPECTED_METRICS_DBM_ENABLED:
         aggregator.assert_metric(mname)
