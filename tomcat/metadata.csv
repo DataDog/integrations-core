@@ -13,8 +13,6 @@ tomcat.processing_time,gauge,10,,,The sum of request processing times across all
 tomcat.servlet.processing_time,gauge,10,,,The sum of request processing times across all requests to the servlet (in milliseconds) per second.,0,tomcat,servlet proc time,
 tomcat.servlet.error_count,gauge,10,error,second,The number of erroneous requests received by the servlet per second.,-1,tomcat,servlet err count,
 tomcat.servlet.request_count,gauge,10,request,second,The number of requests received by the servlet per second.,0,tomcat,servlet requests,
-tomcat.cache.access_count,gauge,10,get,second,The number of accesses to the cache per second.,0,tomcat,cache accesses,
-tomcat.cache.hits_count,gauge,10,hit,second,The number of cache hits per second.,0,tomcat,cache hits,
 tomcat.servlet.max_time,gauge,10,millisecond,,The maximum processing time of a request,0,tomcat,servlet max time,
 tomcat.servlet.min_time,gauge,10,millisecond,,The minimum processing time of a request,0,tomcat,servlet min time,
 tomcat.string_cache.access_count,gauge,10,get,second,The number of accesses to the string cache per second.,0,tomcat,string cache accesses,

@@ -1,5 +1,6 @@
 id: ibm_ace
 metric_id: ibm-ace
+backend_only: false
 facets:
   - name: Logger Name
     source: log

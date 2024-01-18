@@ -1,5 +1,6 @@
 id: activemq
 metric_id: activemq
+backend_only: false
 facets:
   - name: URL Host
     source: log

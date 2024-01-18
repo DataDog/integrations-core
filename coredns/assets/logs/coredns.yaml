@@ -1,5 +1,6 @@
 id: coredns
 metric_id: coredns
+backend_only: false
 facets:
   - name: Answer Size
     source: log
