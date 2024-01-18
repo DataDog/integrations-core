@@ -12,10 +12,9 @@ from copy import deepcopy
 
 import pytest
 import requests
-from six import PY2
-
 from datadog_checks.couch import CouchDb
 from datadog_checks.dev.utils import get_metadata_metrics
+from six import PY2
 
 from . import common
 
@@ -464,6 +463,6 @@ def test_per_db_metrics(aggregator, check, enable_per_db_metrics):
     check.check({})
 
     if enable_per_db_metrics:
-        assert len(aggregator.metrics("couchdb.by_db.doc_count")) > 0
+        aggregator.assert_metric("couchdb.by_db.doc_count", at_least=1)
     else:
-        assert len(aggregator.metrics("couchdb.by_db.doc_count")) == 0
+        aggregator.assert_metric("couchdb.by_db.doc_count", count=0)
