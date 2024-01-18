@@ -214,7 +214,7 @@ files:
         to use a consistent value throughout all SQL Server agent deployments. 
       value:
         type: integer
-        example: 600
+        example: 300
         display_default: 300
     - name: db_fragmentation_object_names
       description: |
