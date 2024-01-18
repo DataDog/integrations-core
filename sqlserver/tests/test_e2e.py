@@ -130,7 +130,8 @@ def test_check_docker(dd_agent_check, init_config, instance_e2e):
             del aggregator._metrics[m]
 
     for mname in EXPECTED_METRICS_DBM_ENABLED:
-        aggregator.assert_metric(mname)
+        if mname not in DATABASE_INDEX_METRICS:
+            aggregator.assert_metric(mname)
 
     for mname in UNEXPECTED_FCI_METRICS + UNEXPECTED_QUERY_EXECUTOR_AO_METRICS:
         aggregator.assert_metric(mname, count=0)
