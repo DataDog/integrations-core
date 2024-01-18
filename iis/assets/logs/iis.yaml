@@ -1,5 +1,6 @@
 id: iis
 metric_id: iis
+backend_only: false
 facets:
   - name: Duration
     source: log

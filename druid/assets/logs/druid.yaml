@@ -1,5 +1,6 @@
 id: druid
 metric_id: druid
+backend_only: false
 facets:
   - name: Logger Name
     source: log

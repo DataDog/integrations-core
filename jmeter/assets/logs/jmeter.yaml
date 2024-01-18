@@ -1,5 +1,6 @@
 id: jmeter
 metric_id: jmeter
+backend_only: false
 facets:
   - name: Method
     source: log

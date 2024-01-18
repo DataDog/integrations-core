@@ -1,5 +1,6 @@
 id: gitlab
 metric_id: gitlab
+backend_only: false
 facets:
   - name: Duration
     source: log
@@ -183,7 +184,7 @@ pipeline:
           sidekiq.start_format %{_gitlab_date} %{_sidekiq_date} %{_sidekiq_pid} TID-%{_sidekiq_thread_id} %{_sidekiq_class} JID-%{_sidekiq_jobid} %{_sidekiq_level}: start
           sidekiq.finish_format %{_gitlab_date} %{_sidekiq_date} %{_sidekiq_pid} TID-%{_sidekiq_thread_id} %{_sidekiq_class} JID-%{_sidekiq_jobid} %{_sidekiq_level}: done: %{_sidekiq_duration} sec
           sidekiq.fallback_format %{_gitlab_date} %{_sidekiq_date} %{_sidekiq_pid} TID-%{_sidekiq_thread_id} %{_sidekiq_level}:.*
-          
+
           sidekiq.format_2 %{_sidekiq_date} pid=%{_sidekiq_pid} (tid=%{_sidekiq_thread_id} class=%{_sidekiq_class} )?jid=%{_sidekiq_jobid} (elapsed=%{_sidekiq_duration} )?%{_sidekiq_level}:.*
 
           # Extra gitlab-rails/sidekiq.log samples:
