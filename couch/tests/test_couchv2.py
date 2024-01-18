@@ -19,7 +19,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
 
-pytestmark = pytest.mark.skipif(common.COUCH_MAJOR_VERSION == 1, reason="Test for version Couch v2+")
+pytestmark = pytest.mark.skipif(common.COUCH_MAJOR_VERSION == 1, reason='Test for version Couch v2+')
 
 INSTANCES = [common.NODE1, common.NODE2, common.NODE3]
 
@@ -39,7 +39,7 @@ def gauges():
                 # All remaining metrics are Couchv3 only
                 break
 
-            if row[0] == "metric_name":
+            if row[0] == 'metric_name':
                 # skip the header
                 continue
             elif row[0] in ["couchdb.couchdb.request_time", "couchdb.by_db.disk_size"]:
@@ -71,7 +71,7 @@ def gauges():
         yield res
 
 
-@pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_check(aggregator, gauges, dd_run_check):
     for config in deepcopy(INSTANCES):
@@ -82,7 +82,7 @@ def test_check(aggregator, gauges, dd_run_check):
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, gauges):
-    aggregator = dd_agent_check({"init_config": {}, "instances": deepcopy(INSTANCES)})
+    aggregator = dd_agent_check({'init_config': {}, 'instances': deepcopy(INSTANCES)})
     _assert_check(aggregator, gauges)
 
 
@@ -128,15 +128,15 @@ def _assert_check(aggregator, gauges):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-@pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-@pytest.mark.parametrize("param_name", ["db_whitelist", "db_include"])
+@pytest.mark.parametrize('param_name', ["db_whitelist", "db_include"])
 def test_db_inclusion(aggregator, gauges, param_name):
     configs = []
 
     for n in [common.NODE1, common.NODE2, common.NODE3]:
         node = deepcopy(n)
-        node[param_name] = ["db0"]
+        node[param_name] = ['db0']
         configs.append(node)
 
     for config in configs:
@@ -144,26 +144,26 @@ def test_db_inclusion(aggregator, gauges, param_name):
         check.check(config)
 
     for _ in configs:
-        for db in ["db0"]:
+        for db in ['db0']:
             expected_tags = ["db:{}".format(db)]
             for gauge in gauges["by_db_gauges"]:
                 aggregator.assert_metric(gauge, tags=expected_tags)
 
-        for db in ["db1"]:
+        for db in ['db1']:
             expected_tags = ["db:{}".format(db)]
             for gauge in gauges["by_db_gauges"]:
                 aggregator.assert_metric(gauge, tags=expected_tags, count=0)
 
 
-@pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-@pytest.mark.parametrize("param_name", ["db_blacklist", "db_exclude"])
+@pytest.mark.parametrize('param_name', ["db_blacklist", "db_exclude"])
 def test_db_exclusion(aggregator, gauges, param_name):
     configs = []
 
     for node in [common.NODE1, common.NODE2, common.NODE3]:
         config = deepcopy(node)
-        config[param_name] = ["db0"]
+        config[param_name] = ['db0']
         configs.append(config)
 
     for config in configs:
@@ -171,22 +171,22 @@ def test_db_exclusion(aggregator, gauges, param_name):
         check.check(config)
 
     for _ in configs:
-        for db in ["db1"]:
+        for db in ['db1']:
             expected_tags = ["db:{}".format(db)]
             for gauge in gauges["by_db_gauges"]:
                 aggregator.assert_metric(gauge, tags=expected_tags)
 
-        for db in ["db0"]:
+        for db in ['db0']:
             expected_tags = ["db:{}".format(db)]
             for gauge in gauges["by_db_gauges"]:
                 aggregator.assert_metric(gauge, tags=expected_tags, count=0)
 
 
-@pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_check_without_names(aggregator, gauges):
     config = deepcopy(common.NODE1)
-    config.pop("name")
+    config.pop('name')
     check = CouchDb(common.CHECK_NAME, {}, [config])
     check.check(config)
 
@@ -230,13 +230,13 @@ def test_check_without_names(aggregator, gauges):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-@pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-@pytest.mark.parametrize("number_nodes", [1, 2, 3])
+@pytest.mark.parametrize('number_nodes', [1, 2, 3])
 def test_only_max_nodes_are_scanned(aggregator, gauges, number_nodes):
     config = deepcopy(common.NODE1)
     config.pop("name")
-    config["max_nodes_per_check"] = number_nodes
+    config['max_nodes_per_check'] = number_nodes
 
     check = CouchDb(common.CHECK_NAME, {}, [config])
     check.check(config)
@@ -248,15 +248,15 @@ def test_only_max_nodes_are_scanned(aggregator, gauges, number_nodes):
     instance_tags = set()
     for m in metrics:
         for tag in m.tags:
-            if tag.startswith("instance:"):
+            if tag.startswith('instance:'):
                 instance_tags.add(tag)
 
     assert len(instance_tags) == number_nodes
 
 
-@pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-@pytest.mark.parametrize("number_db", [1, 2, 3])
+@pytest.mark.parametrize('number_db', [1, 2, 3])
 def test_only_max_dbs_are_scanned(aggregator, gauges, number_db):
     config = deepcopy(common.NODE1)
     config["max_dbs_per_check"] = number_db
@@ -271,13 +271,13 @@ def test_only_max_dbs_are_scanned(aggregator, gauges, number_db):
     db_tags = set()
     for m in metrics:
         for tag in m.tags:
-            if tag.startswith("db:"):
+            if tag.startswith('db:'):
                 db_tags.add(tag)
 
     assert len(db_tags) == number_db
 
 
-@pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_replication_metrics(aggregator, gauges):
     for config in [common.NODE1, common.NODE2, common.NODE3]:
@@ -288,7 +288,7 @@ def test_replication_metrics(aggregator, gauges):
         aggregator.assert_metric(gauge)
 
 
-@pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_compaction_metrics(aggregator, gauges, active_tasks):
     """
@@ -309,7 +309,7 @@ def test_compaction_metrics(aggregator, gauges, active_tasks):
         aggregator.assert_metric(gauge)
 
 
-@pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_indexing_metrics(aggregator, gauges, active_tasks):
     """
@@ -319,7 +319,7 @@ def test_indexing_metrics(aggregator, gauges, active_tasks):
     from datadog_checks.couch import couch
 
     def _get(url, tags, run_check=False):
-        if "_active_tasks" in url:
+        if '_active_tasks' in url:
             return active_tasks
         return {}
 
@@ -331,12 +331,12 @@ def test_indexing_metrics(aggregator, gauges, active_tasks):
         check.check(config)
 
     for node in [common.NODE1, common.NODE2, common.NODE3]:
-        expected_tags = ["database:kennel", "design_document:dummy", "instance:{}".format(node["name"])]
+        expected_tags = ['database:kennel', 'design_document:dummy', 'instance:{}'.format(node['name'])]
         for gauge in gauges["indexing_tasks_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags)
 
 
-@pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_view_compaction_metrics(aggregator, gauges):
     class LoadGenerator(threading.Thread):
@@ -356,43 +356,43 @@ def test_view_compaction_metrics(aggregator, gauges):
                 count += 1
                 if count % 5 == 0:
                     self.compact_views()
-                theid = "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
+                theid = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
                 docs.append(self.post_doc(theid))
                 docs = [self.update_doc(x) for x in docs]
                 self.generate_views()
 
         def generate_views(self):
-            url = "{}/kennel/_design/dummy/_view/all".format(self._server)
+            url = '{}/kennel/_design/dummy/_view/all'.format(self._server)
             try:
                 r = requests.get(url, auth=self._auth, timeout=1)
                 r.raise_for_status()
             except requests.exceptions.Timeout:
-                pass
-            url = "{}/kennel/_design/dummy/_view/by_data".format(self._server)
+                None
+            url = '{}/kennel/_design/dummy/_view/by_data'.format(self._server)
             try:
                 r = requests.get(url, auth=self._auth, timeout=1)
                 r.raise_for_status()
             except requests.exceptions.Timeout:
-                pass
+                None
 
         def update_doc(self, doc):
-            body = {"data": str(random.randint(0, 1000000000)), "_rev": doc["rev"]}
+            body = {'data': str(random.randint(0, 1000000000)), '_rev': doc['rev']}
 
-            url = "{}/kennel/{}".format(self._server, doc["id"])
-            r = requests.put(url, auth=self._auth, headers={"Content-Type": "application/json"}, json=body)
+            url = '{}/kennel/{}'.format(self._server, doc['id'])
+            r = requests.put(url, auth=self._auth, headers={'Content-Type': 'application/json'}, json=body)
             r.raise_for_status()
             return r.json()
 
         def post_doc(self, doc_id):
             body = {"_id": doc_id, "data": str(time.time())}
-            url = "{}/kennel".format(self._server)
-            r = requests.post(url, auth=self._auth, headers={"Content-Type": "application/json"}, json=body)
+            url = '{}/kennel'.format(self._server)
+            r = requests.post(url, auth=self._auth, headers={'Content-Type': 'application/json'}, json=body)
             r.raise_for_status()
             return r.json()
 
         def compact_views(self):
-            url = "{}/kennel/_compact/dummy".format(self._server)
-            r = requests.post(url, auth=self._auth, headers={"Content-Type": "application/json"})
+            url = '{}/kennel/_compact/dummy'.format(self._server)
+            r = requests.post(url, auth=self._auth, headers={'Content-Type': 'application/json'})
             r.raise_for_status()
 
         def stop(self):
@@ -400,7 +400,7 @@ def test_view_compaction_metrics(aggregator, gauges):
 
     threads = []
     for _ in range(40):
-        t = LoadGenerator(common.NODE1["server"], (common.NODE1["user"], common.NODE1["password"]))
+        t = LoadGenerator(common.NODE1['server'], (common.NODE1['user'], common.NODE1['password']))
         t.start()
         threads.append(t)
 
@@ -419,7 +419,7 @@ def test_view_compaction_metrics(aggregator, gauges):
                 continue
 
             for m_name in aggregator._metrics:
-                if re.search(r"view_compaction\.progress", str(m_name)) is not None:
+                if re.search(r'view_compaction\.progress', str(m_name)) is not None:
                     metric_found = True
                     for gauge in gauges["view_compaction_tasks_gauges"]:
                         aggregator.assert_metric(gauge)
@@ -432,15 +432,15 @@ def test_view_compaction_metrics(aggregator, gauges):
             t.join()
 
     if tries >= 20:
-        raise AssertionError("Could not find the view_compaction happening")
+        raise AssertionError('Could not find the view_compaction happening')
 
 
-@pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_config_tags(aggregator, gauges):
     TEST_TAG = "test_tag:test"
     config = deepcopy(common.NODE1)
-    config["tags"] = [TEST_TAG]
+    config['tags'] = [TEST_TAG]
 
     check = CouchDb(common.CHECK_NAME, {}, [config])
     check.check(config)
@@ -452,10 +452,9 @@ def test_config_tags(aggregator, gauges):
     expected_tags = ["instance:{0}".format(config["name"]), TEST_TAG]
     aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, tags=expected_tags)
 
-
-@pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-@pytest.mark.parametrize("enable_per_db_metrics", [True, False])
+@pytest.mark.parametrize('enable_per_db_metrics', [True, False])
 def test_per_db_metrics(aggregator, check, enable_per_db_metrics):
     config = common.BASIC_CONFIG_V2.copy()
     config["enable_per_db_metrics"] = enable_per_db_metrics
