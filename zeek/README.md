@@ -2,13 +2,21 @@
 
 [Zeek][6] is the world's leading platform for network security monitoring. It interprets what it sees and creates compact, high-fidelity transaction logs, and file content. It can create fully customized output, suitable for manual review on disk or in a more analyst-friendly tool like a security and information event management (SIEM) system.
 
-This integration ingests Connection logs, DNS and DHCP logs, Network Protocols, Files, Detections, and Miscellaneous event types with the integration log pipeline to enrich the logs and normalizes data to datadog standard attributes. This integration offers visualisations to gain detailed insights into network connections, DNS and DHCP activity, detailed network protocol analysis, file analysis and certificates, security detection and observation, compliance monitoring, etc. via dashboards.
+This integration ingests the following logs:
+- Connection logs
+- DNS and DHCP logs
+- Network Protocols
+- Files
+- Detections
+- Miscellaneous event types
+
+Visualize detailed insights into network connections, DNS and DHCP activity, detailed network protocol analysis, file analysis and certificates, security detection and observation, compliance monitoring through the out-of-the-box dashboards.
 
 ## Setup
 
 ### Installation
 
-To install the Zeek integration, use the `datadog-agent integration install` command and follow the steps below. For more information, see the [Integration Management][7] documentation.
+To install the Zeek integration, run the following agent installation command and the steps below. For more information, see the [Integration Management][7] documentation.
 
 **Note**: This step is not necessary for Agent version >= 7.52.0.
 
@@ -44,7 +52,7 @@ Linux command
 #### Log collection
 
 #### Opensource Zeek
-1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`.
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
     ```yaml
     logs_enabled: true
     ```
@@ -138,7 +146,7 @@ The Zeek integration does not include any service checks.
 
 ## Troubleshooting
 
-**Opensource Zeek:**
+### Opensource Zeek:
 
 If you see a **Permission denied** error while monitoring the log files, give read permission to dd-agent user to monitor the log files.
 
@@ -146,9 +154,9 @@ If you see a **Permission denied** error while monitoring the log files, give re
   sudo chown -R dd-agent:dd-agent /opt/zeek/current/
   ```
 
-**Corelight Zeek:**
+### Corelight Zeek:
 
-#### Permission denied while port binding:
+**Permission denied while port binding:**
 
 If you see a **Permission denied** error while port binding in the Agent logs, see the following instructions:
 
@@ -176,11 +184,11 @@ If you see a **Permission denied** error while port binding in the Agent logs, s
 
    2. [Restart the Agent][1].
 
-#### Data is not being collected:
+**Data is not being collected:**
 
 Make sure that traffic is bypassed from the configured port if the firewall is enabled.
 
-#### Port already in use:
+**Port already in use:**
 
 If you see the **Port <PORT-NO\> Already in Use** error, see the following instructions. The example below is for PORT-NO = 514:
 
