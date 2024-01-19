@@ -454,7 +454,9 @@ def test_events_wait_current_disabled(dbm_instance, dd_run_check, root_conn, agg
     # enable events_waits_current, expect events_wait_current_enabled to be set to True
     # we should expect no warnings and the query activity to run successfully
     with closing(root_conn.cursor()) as cursor:
-        cursor.execute("UPDATE performance_schema.setup_consumers SET enabled='YES' WHERE name = 'events_waits_current'")
+        cursor.execute(
+            "UPDATE performance_schema.setup_consumers SET enabled='YES' WHERE name = 'events_waits_current'"
+        )
     assert check.events_wait_current_enabled is not None
     dd_run_check(check)
     check.warnings.clear()
