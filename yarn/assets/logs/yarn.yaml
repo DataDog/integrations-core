@@ -2,26 +2,26 @@ id: yarn
 metric_id: yarn
 backend_only: false
 facets:
-  - name: Logger Name
-    source: log
-    path: logger.name
-    groups:
+  - groups:
       - Source Code
-  - name: MapReduce ApplicationID
+    name: Logger Name
+    path: logger.name
     source: log
+  - groups:
+      - MapReduce
+    name: MapReduce ApplicationID
     path: mapreduce.application.app_id
-    groups:
-      - MapReduce
-  - name: MapReduce Application State
     source: log
+  - groups:
+      - MapReduce
+    name: MapReduce Application State
     path: mapreduce.application.state
-    groups:
-      - MapReduce
-  - name: MapReduce ApplicationAttemptID
     source: log
-    path: mapreduce.attempt.attempt_id
-    groups:
+  - groups:
       - MapReduce
+    name: MapReduce ApplicationAttemptID
+    path: mapreduce.attempt.attempt_id
+    source: log
 pipeline:
   type: pipeline
   name: YARN
