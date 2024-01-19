@@ -202,6 +202,7 @@ class MySql(AgentCheck):
         )
 
     def _check_database_configuration(self, db):
+        self._check_performance_schema_enabled(db)
         self._check_events_wait_current_enabled(db)
 
     def _check_performance_schema_enabled(self, db):
@@ -225,8 +226,10 @@ class MySql(AgentCheck):
             self.log.debug("skipping _check_events_wait_current_enabled because dbm activity collection is not enabled")
             return
         if not self._check_performance_schema_enabled(db):
+            # set events_wait_current_enabled to False if performance_schema is not enabled
             self.log.debug('`performance_schema` is required to enable `events_waits_current`')
-            return
+            self.events_wait_current_enabled = False
+            return self.events_wait_current_enabled
         with closing(db.cursor()) as cursor:
             cursor.execute(
                 """\
@@ -237,11 +240,13 @@ class MySql(AgentCheck):
                 """
             )
             results = dict(cursor.fetchall())
-            self.events_wait_current_enabled = self._get_variable_enabled(results, 'events_waits_current')
+            events_wait_current_enabled = self._get_variable_enabled(results, 'events_waits_current')
             self.log.debug(
-                '`events_wait_current_enabled` was false. Setting it to %s',
-                self.events_wait_current_enabled or False,
+                '`events_wait_current_enabled` was %s. Setting it to %s',
+                self.events_wait_current_enabled,
+                events_wait_current_enabled,
             )
+            self.events_wait_current_enabled = events_wait_current_enabled
         return self.events_wait_current_enabled
 
     def resolve_db_host(self):

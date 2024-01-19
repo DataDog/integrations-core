@@ -7,6 +7,7 @@ import json
 import os
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
+from contextlib import closing
 from copy import copy
 from datetime import datetime
 from os import environ
@@ -420,6 +421,49 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
         "dd.mysql.async_job.cancel",
         tags=_expected_dbm_job_err_tags(dbm_instance),
     )
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_events_wait_current_disabled(dbm_instance, dd_run_check, root_conn, aggregator):
+    '''
+    This test verifies that the check will not collect any activity if the events_waits_current is disabled.
+    Once the events_waits_current is enabled at runtime, the check should collect activity.
+    '''
+    dbm_instance['options']['extra_performance_metrics'] = False
+    check = MySql(CHECK_NAME, {}, [dbm_instance])
+
+    # disable events_waits_current, expect events_wait_current_enabled to be set to False
+    with closing(root_conn.cursor()) as cursor:
+        cursor.execute("UPDATE performance_schema.setup_consumers SET enabled='NO' WHERE name = 'events_waits_current'")
+
+    dd_run_check(check)
+    # force query activity to run once, expect it to exist immediately with a warning
+    check._query_activity.run_job()
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    assert check.events_wait_current_enabled is False
+    assert check.warnings == [
+        'Query activity and wait event collection is disabled on this host. To enable it, the setup '
+        'consumer `performance-schema-consumer-events-waits-current` must be enabled on the MySQL server. '
+        'Please refer to the troubleshooting documentation: '
+        'https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting#events-waits-current-not-enabled\n'
+        'code=events-waits-current-not-enabled host=stubbed.hostname',
+    ]
+    assert not dbm_activity, "should not have collected any activity"
+
+    # enable events_waits_current, expect events_wait_current_enabled to be set to True
+    # we should expect no warnings and the query activity to run successfully
+    with closing(root_conn.cursor()) as cursor:
+        cursor.execute("CALL datadog.enable_events_statements_consumers()")
+    assert check.events_wait_current_enabled is not None
+    dd_run_check(check)
+    check.warnings.clear()
+    assert check.events_wait_current_enabled is True
+    check._query_activity.run_job()
+    check.cancel()
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    assert check.warnings == []
+    assert dbm_activity, "should have collected at least one activity"
 
 
 # the inactive job metrics are emitted from the main integrations
