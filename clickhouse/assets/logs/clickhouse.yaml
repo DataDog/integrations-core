@@ -2,16 +2,16 @@ id: clickhouse
 metric_id: clickhouse
 backend_only: false
 facets:
-  - name: ClickHouse Service Name
-    source: log
+  - groups:
+      - ClickHouse
+    name: ClickHouse Service Name
     path: clickhouse.service
-    groups:
-      - ClickHouse
-  - name: ClickHouse Application Name
     source: log
-    path: clickhouse.application.id
-    groups:
+  - groups:
       - ClickHouse
+    name: ClickHouse Application Name
+    path: clickhouse.application.id
+    source: log
 pipeline:
   type: pipeline
   name: ClickHouse
