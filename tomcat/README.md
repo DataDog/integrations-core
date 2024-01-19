@@ -89,28 +89,6 @@ The `attribute` filter can accept two types of values:
         - RecentHitRate
   ```
 
-#### Older versions
-
-List of filters is only supported in Datadog Agent > 5.3.0. If you are using an older version, use singletons and multiple `include` statements instead.
-
-```yaml
-# Datadog Agent > 5.3.0
-  conf:
-    - include:
-      domain: domain_name
-      bean:
-        - first_bean_name
-        - second_bean_name
-# Older Datadog Agent versions
-  conf:
-    - include:
-      domain: domain_name
-      bean: first_bean_name
-    - include:
-      domain: domain_name
-      bean: second_bean_name
-```
-
 #### Log collection
 
 
