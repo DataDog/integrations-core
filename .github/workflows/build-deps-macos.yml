@@ -37,3 +37,4 @@ jobs:
         run: |
           ${DD_PYTHON3} -m pip install packaging
           ${DD_PYTHON3} .builders/build.py --python 3 out_py3
+          ${DD_PYTHON3} .builders/build.py --python 2 out_py2
