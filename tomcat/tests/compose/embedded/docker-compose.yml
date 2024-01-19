@@ -16,7 +16,8 @@ services:
         -Dcom.sun.management.jmxremote.ssl=false
         -Dcom.sun.management.jmxremote.port=9012
         -Dcom.sun.management.jmxremote.rmi.port=9012
-        -Djava.rmi.server.hostname=0.0.0.0
+        -Dcom.sun.management.jmxremote.local.only=false
+        -Djava.rmi.server.hostname=localhost
         -Dtomcat.util.buf.StringCache.byte.enabled=true
         -Dtomcat.util.buf.StringCache.char.enabled=true
         -Dtomcat.util.buf.StringCache.trainThreshold=100
