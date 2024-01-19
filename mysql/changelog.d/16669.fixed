@@ -1,0 +1,1 @@
+[DBMON-3263] check performance_schema, userstat and events_wait_current status on every check run
