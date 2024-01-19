@@ -1,5 +1,5 @@
-id: cisco-umbrella-dns
-metric_id: cisco-umbrella-dns
+id: cisco_umbrella_dns
+metric_id: cisco_umbrella_dns
 backend_only: false
 facets:
   - name: Category
@@ -73,8 +73,7 @@ pipeline:
   processors:
     - type: date-remapper
       name:
-        Define `timestamp` attribute as the official ingestion timestamp of the
-        log
+        Define `timestamp` as the official date of the log
       enabled: true
       meta:
         last_update:

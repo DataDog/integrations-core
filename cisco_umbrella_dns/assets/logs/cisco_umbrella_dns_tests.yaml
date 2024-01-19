@@ -1,0 +1,1123 @@
+id: cisco_umbrella_dns
+tests:
+ -
+  sample: |-
+    {
+      "date" : "2023-12-11",
+      "returncode" : 0,
+      "type" : "dns",
+      "internalip" : "192.192.192.192",
+      "allapplications" : [ {
+        "id" : 989025,
+        "label" : "Some APIs",
+        "category" : {
+          "id" : 1,
+          "label" : "Application Development and Testing"
+        }
+      } ],
+      "identities" : [ {
+        "deleted" : false,
+        "id" : 617808138,
+        "label" : "DESKTOP-Example",
+        "type" : {
+          "id" : 9,
+          "label" : "Roaming Computers",
+          "type" : "roaming"
+        }
+      }, {
+        "deleted" : false,
+        "id" : 617804059,
+        "label" : "Test",
+        "type" : {
+          "id" : 1,
+          "label" : "Networks",
+          "type" : "network"
+        }
+      } ],
+      "verdict" : "blocked",
+      "domain" : "optimizationguide-pa.someapis.com",
+      "time" : "09:47:00",
+      "policycategories" : [ {
+        "deprecated" : false,
+        "integration" : false,
+        "id" : 190,
+        "label" : "Search Engines and Portals",
+        "type" : "content"
+      } ],
+      "categories" : [ {
+        "deprecated" : true,
+        "integration" : false,
+        "id" : 23,
+        "label" : "Search Engines",
+        "type" : "content"
+      }, {
+        "deprecated" : false,
+        "integration" : false,
+        "id" : 148,
+        "label" : "Application",
+        "type" : "application"
+      }, {
+        "deprecated" : false,
+        "integration" : false,
+        "id" : 190,
+        "label" : "Search Engines and Portals",
+        "type" : "content"
+      } ],
+      "externalip" : "0.0.0.0",
+      "querytype" : "A",
+      "timestamp" : 1702288020000
+    }
+  result:
+    custom:
+      allapplications:
+       -
+        id: 989025
+        label: "Some APIs"
+        category:
+          id: 1
+          label: "Application Development and Testing"
+      categories:
+       -
+        deprecated: true
+        integration: false
+        id: 23
+        label: "Search Engines"
+        type: "content"
+       -
+        deprecated: false
+        integration: false
+        id: 148
+        label: "Application"
+        type: "application"
+       -
+        deprecated: false
+        integration: false
+        id: 190
+        label: "Search Engines and Portals"
+        type: "content"
+      date: "2023-12-11"
+      domain: "optimizationguide-pa.someapis.com"
+      externalip: "0.0.0.0"
+      identities:
+       -
+        deleted: false
+        id: 617808138
+        label: "DESKTOP-Example"
+        type:
+          id: 9
+          label: "Roaming Computers"
+          type: "roaming"
+       -
+        deleted: false
+        id: 617804059
+        label: "Test"
+        type:
+          id: 1
+          label: "Networks"
+          type: "network"
+      internalip: "192.192.192.192"
+      policycategories:
+       -
+        deprecated: false
+        integration: false
+        id: 190
+        label: "Search Engines and Portals"
+        type: "content"
+      querytype: "A"
+      returncode: 0
+      time: "09:47:00"
+      timestamp: 1702288020000
+      type: "dns"
+      verdict: "blocked"
+    message: |-
+      {
+        "date" : "2023-12-11",
+        "returncode" : 0,
+        "type" : "dns",
+        "internalip" : "192.192.192.192",
+        "allapplications" : [ {
+          "id" : 989025,
+          "label" : "Some APIs",
+          "category" : {
+            "id" : 1,
+            "label" : "Application Development and Testing"
+          }
+        } ],
+        "identities" : [ {
+          "deleted" : false,
+          "id" : 617808138,
+          "label" : "DESKTOP-Example",
+          "type" : {
+            "id" : 9,
+            "label" : "Roaming Computers",
+            "type" : "roaming"
+          }
+        }, {
+          "deleted" : false,
+          "id" : 617804059,
+          "label" : "Test",
+          "type" : {
+            "id" : 1,
+            "label" : "Networks",
+            "type" : "network"
+          }
+        } ],
+        "verdict" : "blocked",
+        "domain" : "optimizationguide-pa.someapis.com",
+        "time" : "09:47:00",
+        "policycategories" : [ {
+          "deprecated" : false,
+          "integration" : false,
+          "id" : 190,
+          "label" : "Search Engines and Portals",
+          "type" : "content"
+        } ],
+        "categories" : [ {
+          "deprecated" : true,
+          "integration" : false,
+          "id" : 23,
+          "label" : "Search Engines",
+          "type" : "content"
+        }, {
+          "deprecated" : false,
+          "integration" : false,
+          "id" : 148,
+          "label" : "Application",
+          "type" : "application"
+        }, {
+          "deprecated" : false,
+          "integration" : false,
+          "id" : 190,
+          "label" : "Search Engines and Portals",
+          "type" : "content"
+        } ],
+        "externalip" : "0.0.0.0",
+        "querytype" : "A",
+        "timestamp" : 1702288020000
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: |-
+    {
+      "date" : "2023-12-19",
+      "returncode" : 0,
+      "type" : "dns",
+      "internalip" : "192.192.192.192",
+      "allapplications" : [ {
+        "id" : 992107,
+        "label" : "test.com",
+        "category" : {
+          "id" : 47,
+          "label" : "Media"
+        }
+      } ],
+      "identities" : [ {
+        "deleted" : false,
+        "id" : 618368586,
+        "label" : "DESKTOP-Name",
+        "type" : {
+          "id" : 9,
+          "label" : "Roaming Computers",
+          "type" : "roaming"
+        }
+      } ],
+      "verdict" : "allowed",
+      "domain" : "test.com",
+      "time" : "12:56:56",
+      "policycategories" : [ {
+        "deprecated" : false,
+        "integration" : false,
+        "id" : 194,
+        "label" : "Streaming Video",
+        "type" : "content"
+      } ],
+      "categories" : [ {
+        "deprecated" : true,
+        "integration" : false,
+        "id" : 17,
+        "label" : "Movies",
+        "type" : "content"
+      }, {
+        "deprecated" : true,
+        "integration" : false,
+        "id" : 26,
+        "label" : "Television",
+        "type" : "content"
+      }, {
+        "deprecated" : false,
+        "integration" : false,
+        "id" : 148,
+        "label" : "Application",
+        "type" : "application"
+      }, {
+        "deprecated" : false,
+        "integration" : false,
+        "id" : 194,
+        "label" : "Streaming Video",
+        "type" : "content"
+      } ],
+      "externalip" : "192.192.192.192",
+      "querytype" : "A",
+      "timestamp" : 1702990616000
+    }
+  result:
+    custom:
+      allapplications:
+       -
+        id: 992107
+        label: "test.com"
+        category:
+          id: 47
+          label: "Media"
+      categories:
+       -
+        deprecated: true
+        integration: false
+        id: 17
+        label: "Movies"
+        type: "content"
+       -
+        deprecated: true
+        integration: false
+        id: 26
+        label: "Television"
+        type: "content"
+       -
+        deprecated: false
+        integration: false
+        id: 148
+        label: "Application"
+        type: "application"
+       -
+        deprecated: false
+        integration: false
+        id: 194
+        label: "Streaming Video"
+        type: "content"
+      date: "2023-12-19"
+      domain: "test.com"
+      externalip: "192.192.192.192"
+      identities:
+       -
+        deleted: false
+        id: 618368586
+        label: "DESKTOP-Name"
+        type:
+          id: 9
+          label: "Roaming Computers"
+          type: "roaming"
+      internalip: "192.192.192.192"
+      policycategories:
+       -
+        deprecated: false
+        integration: false
+        id: 194
+        label: "Streaming Video"
+        type: "content"
+      querytype: "A"
+      returncode: 0
+      time: "12:56:56"
+      timestamp: 1702990616000
+      type: "dns"
+      verdict: "allowed"
+    message: |-
+      {
+        "date" : "2023-12-19",
+        "returncode" : 0,
+        "type" : "dns",
+        "internalip" : "192.192.192.192",
+        "allapplications" : [ {
+          "id" : 992107,
+          "label" : "test.com",
+          "category" : {
+            "id" : 47,
+            "label" : "Media"
+          }
+        } ],
+        "identities" : [ {
+          "deleted" : false,
+          "id" : 618368586,
+          "label" : "DESKTOP-Name",
+          "type" : {
+            "id" : 9,
+            "label" : "Roaming Computers",
+            "type" : "roaming"
+          }
+        } ],
+        "verdict" : "allowed",
+        "domain" : "test.com",
+        "time" : "12:56:56",
+        "policycategories" : [ {
+          "deprecated" : false,
+          "integration" : false,
+          "id" : 194,
+          "label" : "Streaming Video",
+          "type" : "content"
+        } ],
+        "categories" : [ {
+          "deprecated" : true,
+          "integration" : false,
+          "id" : 17,
+          "label" : "Movies",
+          "type" : "content"
+        }, {
+          "deprecated" : true,
+          "integration" : false,
+          "id" : 26,
+          "label" : "Television",
+          "type" : "content"
+        }, {
+          "deprecated" : false,
+          "integration" : false,
+          "id" : 148,
+          "label" : "Application",
+          "type" : "application"
+        }, {
+          "deprecated" : false,
+          "integration" : false,
+          "id" : 194,
+          "label" : "Streaming Video",
+          "type" : "content"
+        } ],
+        "externalip" : "192.192.192.192",
+        "querytype" : "A",
+        "timestamp" : 1702990616000
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: |-
+    {
+      "date" : "2023-12-19",
+      "returncode" : 0,
+      "type" : "dns",
+      "internalip" : "192.192.192.192",
+      "allapplications" : [ {
+        "id" : 987820,
+        "label" : "Social Media Platform",
+        "category" : {
+          "id" : 33,
+          "label" : "Social Networking"
+        }
+      } ],
+      "identities" : [ {
+        "deleted" : false,
+        "id" : 618368586,
+        "label" : "DESKTOP-Test",
+        "type" : {
+          "id" : 9,
+          "label" : "Roaming Computers",
+          "type" : "roaming"
+        }
+      } ],
+      "verdict" : "proxied",
+      "domain" : "instagram.com",
+      "time" : "12:56:56",
+      "policycategories" : [ {
+        "deprecated" : false,
+        "integration" : false,
+        "id" : 24,
+        "label" : "Social Networking",
+        "type" : "content"
+      } ],
+      "categories" : [ {
+        "deprecated" : true,
+        "integration" : false,
+        "id" : 20,
+        "label" : "Photo Sharing",
+        "type" : "content"
+      }, {
+        "deprecated" : false,
+        "integration" : false,
+        "id" : 24,
+        "label" : "Social Networking",
+        "type" : "content"
+      }, {
+        "deprecated" : false,
+        "integration" : false,
+        "id" : 148,
+        "label" : "Application",
+        "type" : "application"
+      } ],
+      "externalip" : "192.192.192.192",
+      "querytype" : "A",
+      "timestamp" : 1702990616000
+    }
+  result:
+    custom:
+      allapplications:
+       -
+        id: 987820
+        label: "Social Media Platform"
+        category:
+          id: 33
+          label: "Social Networking"
+      categories:
+       -
+        deprecated: true
+        integration: false
+        id: 20
+        label: "Photo Sharing"
+        type: "content"
+       -
+        deprecated: false
+        integration: false
+        id: 24
+        label: "Social Networking"
+        type: "content"
+       -
+        deprecated: false
+        integration: false
+        id: 148
+        label: "Application"
+        type: "application"
+      date: "2023-12-19"
+      domain: "instagram.com"
+      externalip: "192.192.192.192"
+      identities:
+       -
+        deleted: false
+        id: 618368586
+        label: "DESKTOP-Test"
+        type:
+          id: 9
+          label: "Roaming Computers"
+          type: "roaming"
+      internalip: "192.192.192.192"
+      policycategories:
+       -
+        deprecated: false
+        integration: false
+        id: 24
+        label: "Social Networking"
+        type: "content"
+      querytype: "A"
+      returncode: 0
+      time: "12:56:56"
+      timestamp: 1702990616000
+      type: "dns"
+      verdict: "proxied"
+    message: |-
+      {
+        "date" : "2023-12-19",
+        "returncode" : 0,
+        "type" : "dns",
+        "internalip" : "192.192.192.192",
+        "allapplications" : [ {
+          "id" : 987820,
+          "label" : "Social Media Platform",
+          "category" : {
+            "id" : 33,
+            "label" : "Social Networking"
+          }
+        } ],
+        "identities" : [ {
+          "deleted" : false,
+          "id" : 618368586,
+          "label" : "DESKTOP-Test",
+          "type" : {
+            "id" : 9,
+            "label" : "Roaming Computers",
+            "type" : "roaming"
+          }
+        } ],
+        "verdict" : "proxied",
+        "domain" : "instagram.com",
+        "time" : "12:56:56",
+        "policycategories" : [ {
+          "deprecated" : false,
+          "integration" : false,
+          "id" : 24,
+          "label" : "Social Networking",
+          "type" : "content"
+        } ],
+        "categories" : [ {
+          "deprecated" : true,
+          "integration" : false,
+          "id" : 20,
+          "label" : "Photo Sharing",
+          "type" : "content"
+        }, {
+          "deprecated" : false,
+          "integration" : false,
+          "id" : 24,
+          "label" : "Social Networking",
+          "type" : "content"
+        }, {
+          "deprecated" : false,
+          "integration" : false,
+          "id" : 148,
+          "label" : "Application",
+          "type" : "application"
+        } ],
+        "externalip" : "192.192.192.192",
+        "querytype" : "A",
+        "timestamp" : 1702990616000
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: |-
+    {
+      "date" : "2023-12-11",
+      "referer" : "",
+      "requestmethod" : "POST",
+      "sha256" : "",
+      "amp" : {
+        "score" : 0,
+        "disposition" : "",
+        "malware" : ""
+      },
+      "useragent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.81",
+      "isolated" : {
+        "fileaction" : "",
+        "state" : "not-isolated"
+      },
+      "bundleid" : 14367283,
+      "requestsize" : 517,
+      "type" : "proxy",
+      "internalip" : "192.192.192.192",
+      "egress" : {
+        "ip" : "0.0.0.0",
+        "type" : "shared"
+      },
+      "statuscode" : 303,
+      "datalossprevention" : {
+        "state" : ""
+      },
+      "tenantcontrols" : false,
+      "identities" : [ {
+        "deleted" : false,
+        "id" : 617808138,
+        "label" : "DESKTOP-Test",
+        "type" : {
+          "id" : 9,
+          "label" : "Roaming Computers",
+          "type" : "roaming"
+        }
+      }, {
+        "deleted" : false,
+        "id" : 617804059,
+        "label" : "Test",
+        "type" : {
+          "id" : 1,
+          "label" : "Networks",
+          "type" : "network"
+        }
+      } ],
+      "responsesize" : 746,
+      "policycategories" : [ {
+        "deprecated" : false,
+        "integration" : false,
+        "id" : 190,
+        "label" : "Search Engines and Portals",
+        "type" : "content"
+      } ],
+      "categories" : [ {
+        "deprecated" : true,
+        "integration" : false,
+        "id" : 23,
+        "label" : "Search Engines",
+        "type" : "content"
+      }, {
+        "deprecated" : false,
+        "integration" : false,
+        "id" : 148,
+        "label" : "Application",
+        "type" : "application"
+      }, {
+        "deprecated" : false,
+        "integration" : false,
+        "id" : 190,
+        "label" : "Search Engines and Portals",
+        "type" : "content"
+      } ],
+      "externalip" : "192.192.192.192",
+      "policy" : {
+        "timebasedrule" : false
+      },
+      "timestamp" : 1702288841000,
+      "securityoverridden" : false,
+      "forwardingmethod" : "",
+      "warnstatus" : "",
+      "datacenter" : {
+        "label" : "Singapore, SG",
+        "id" : "SIN"
+      },
+      "url" : "https://www.bing.com/api/shopping/v1/savings/user/readNotifications",
+      "contenttype" : "text/html",
+      "destinationip" : "",
+      "port" : 443,
+      "blockedfiletype" : "",
+      "verdict" : "blocked",
+      "time" : "10:00:41",
+      "responsefilename" : ""
+    }
+  result:
+    custom:
+      amp:
+        disposition: ""
+        malware: ""
+        score: 0
+      blockedfiletype: ""
+      bundleid: 14367283
+      categories:
+       -
+        deprecated: true
+        integration: false
+        id: 23
+        label: "Search Engines"
+        type: "content"
+       -
+        deprecated: false
+        integration: false
+        id: 148
+        label: "Application"
+        type: "application"
+       -
+        deprecated: false
+        integration: false
+        id: 190
+        label: "Search Engines and Portals"
+        type: "content"
+      contenttype: "text/html"
+      datacenter:
+        id: "SIN"
+        label: "Singapore, SG"
+      datalossprevention:
+        state: ""
+      date: "2023-12-11"
+      destinationip: ""
+      egress:
+        ip: "0.0.0.0"
+        type: "shared"
+      externalip: "192.192.192.192"
+      forwardingmethod: ""
+      identities:
+       -
+        deleted: false
+        id: 617808138
+        label: "DESKTOP-Test"
+        type:
+          id: 9
+          label: "Roaming Computers"
+          type: "roaming"
+       -
+        deleted: false
+        id: 617804059
+        label: "Test"
+        type:
+          id: 1
+          label: "Networks"
+          type: "network"
+      internalip: "192.192.192.192"
+      isolated:
+        fileaction: ""
+        state: "not-isolated"
+      policy:
+        timebasedrule: false
+      policycategories:
+       -
+        deprecated: false
+        integration: false
+        id: 190
+        label: "Search Engines and Portals"
+        type: "content"
+      port: 443
+      referer: ""
+      requestmethod: "POST"
+      requestsize: 517
+      responsefilename: ""
+      responsesize: 746
+      securityoverridden: false
+      sha256: ""
+      statuscode: 303
+      tenantcontrols: false
+      time: "10:00:41"
+      timestamp: 1702288841000
+      type: "proxy"
+      url: "https://www.bing.com/api/shopping/v1/savings/user/readNotifications"
+      useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.81"
+      verdict: "blocked"
+      warnstatus: ""
+    message: |-
+      {
+        "date" : "2023-12-11",
+        "referer" : "",
+        "requestmethod" : "POST",
+        "sha256" : "",
+        "amp" : {
+          "score" : 0,
+          "disposition" : "",
+          "malware" : ""
+        },
+        "useragent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.81",
+        "isolated" : {
+          "fileaction" : "",
+          "state" : "not-isolated"
+        },
+        "bundleid" : 14367283,
+        "requestsize" : 517,
+        "type" : "proxy",
+        "internalip" : "192.192.192.192",
+        "egress" : {
+          "ip" : "0.0.0.0",
+          "type" : "shared"
+        },
+        "statuscode" : 303,
+        "datalossprevention" : {
+          "state" : ""
+        },
+        "tenantcontrols" : false,
+        "identities" : [ {
+          "deleted" : false,
+          "id" : 617808138,
+          "label" : "DESKTOP-Test",
+          "type" : {
+            "id" : 9,
+            "label" : "Roaming Computers",
+            "type" : "roaming"
+          }
+        }, {
+          "deleted" : false,
+          "id" : 617804059,
+          "label" : "Test",
+          "type" : {
+            "id" : 1,
+            "label" : "Networks",
+            "type" : "network"
+          }
+        } ],
+        "responsesize" : 746,
+        "policycategories" : [ {
+          "deprecated" : false,
+          "integration" : false,
+          "id" : 190,
+          "label" : "Search Engines and Portals",
+          "type" : "content"
+        } ],
+        "categories" : [ {
+          "deprecated" : true,
+          "integration" : false,
+          "id" : 23,
+          "label" : "Search Engines",
+          "type" : "content"
+        }, {
+          "deprecated" : false,
+          "integration" : false,
+          "id" : 148,
+          "label" : "Application",
+          "type" : "application"
+        }, {
+          "deprecated" : false,
+          "integration" : false,
+          "id" : 190,
+          "label" : "Search Engines and Portals",
+          "type" : "content"
+        } ],
+        "externalip" : "192.192.192.192",
+        "policy" : {
+          "timebasedrule" : false
+        },
+        "timestamp" : 1702288841000,
+        "securityoverridden" : false,
+        "forwardingmethod" : "",
+        "warnstatus" : "",
+        "datacenter" : {
+          "label" : "Singapore, SG",
+          "id" : "SIN"
+        },
+        "url" : "https://www.bing.com/api/shopping/v1/savings/user/readNotifications",
+        "contenttype" : "text/html",
+        "destinationip" : "",
+        "port" : 443,
+        "blockedfiletype" : "",
+        "verdict" : "blocked",
+        "time" : "10:00:41",
+        "responsefilename" : ""
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: |-
+    {
+      "date" : "2023-12-07",
+      "referer" : "",
+      "requestmethod" : "POST",
+      "sha256" : "",
+      "amp" : {
+        "score" : 0,
+        "disposition" : "",
+        "malware" : ""
+      },
+      "useragent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.81",
+      "isolated" : {
+        "fileaction" : "",
+        "state" : "not-isolated"
+      },
+      "bundleid" : 14367283,
+      "requestsize" : 517,
+      "type" : "proxy",
+      "internalip" : "192.192.192.192",
+      "egress" : {
+        "ip" : "0.0.0.0",
+        "type" : "shared"
+      },
+      "statuscode" : 303,
+      "datalossprevention" : {
+        "state" : ""
+      },
+      "tenantcontrols" : false,
+      "identities" : [ {
+        "deleted" : false,
+        "id" : 617808138,
+        "label" : "DESKTOP-Test",
+        "type" : {
+          "id" : 9,
+          "label" : "Roaming Computers",
+          "type" : "roaming"
+        }
+      }, {
+        "deleted" : false,
+        "id" : 617804059,
+        "label" : "Test",
+        "type" : {
+          "id" : 1,
+          "label" : "Networks",
+          "type" : "network"
+        }
+      } ],
+      "responsesize" : 746,
+      "policycategories" : [ {
+        "deprecated" : false,
+        "integration" : false,
+        "id" : 190,
+        "label" : "Search Engines and Portals",
+        "type" : "content"
+      } ],
+      "categories" : [ {
+        "deprecated" : true,
+        "integration" : false,
+        "id" : 23,
+        "label" : "Search Engines",
+        "type" : "content"
+      }, {
+        "deprecated" : false,
+        "integration" : false,
+        "id" : 148,
+        "label" : "Application",
+        "type" : "application"
+      }, {
+        "deprecated" : false,
+        "integration" : false,
+        "id" : 190,
+        "label" : "Search Engines and Portals",
+        "type" : "content"
+      } ],
+      "externalip" : "192.192.192.192",
+      "policy" : {
+        "timebasedrule" : false
+      },
+      "timestamp" : 1701943235000,
+      "securityoverridden" : false,
+      "forwardingmethod" : "",
+      "warnstatus" : "",
+      "datacenter" : {
+        "label" : "Singapore, SG",
+        "id" : "SIN"
+      },
+      "url" : "https://www.bing.com/api/shopping/v1/savings/user/readNotifications",
+      "contenttype" : "text/html",
+      "destinationip" : "",
+      "port" : 443,
+      "blockedfiletype" : "",
+      "verdict" : "allowed",
+      "time" : "10:00:35",
+      "responsefilename" : ""
+    }
+  result:
+    custom:
+      amp:
+        disposition: ""
+        malware: ""
+        score: 0
+      blockedfiletype: ""
+      bundleid: 14367283
+      categories:
+       -
+        deprecated: true
+        integration: false
+        id: 23
+        label: "Search Engines"
+        type: "content"
+       -
+        deprecated: false
+        integration: false
+        id: 148
+        label: "Application"
+        type: "application"
+       -
+        deprecated: false
+        integration: false
+        id: 190
+        label: "Search Engines and Portals"
+        type: "content"
+      contenttype: "text/html"
+      datacenter:
+        id: "SIN"
+        label: "Singapore, SG"
+      datalossprevention:
+        state: ""
+      date: "2023-12-07"
+      destinationip: ""
+      egress:
+        ip: "0.0.0.0"
+        type: "shared"
+      externalip: "192.192.192.192"
+      forwardingmethod: ""
+      identities:
+       -
+        deleted: false
+        id: 617808138
+        label: "DESKTOP-Test"
+        type:
+          id: 9
+          label: "Roaming Computers"
+          type: "roaming"
+       -
+        deleted: false
+        id: 617804059
+        label: "Test"
+        type:
+          id: 1
+          label: "Networks"
+          type: "network"
+      internalip: "192.192.192.192"
+      isolated:
+        fileaction: ""
+        state: "not-isolated"
+      policy:
+        timebasedrule: false
+      policycategories:
+       -
+        deprecated: false
+        integration: false
+        id: 190
+        label: "Search Engines and Portals"
+        type: "content"
+      port: 443
+      referer: ""
+      requestmethod: "POST"
+      requestsize: 517
+      responsefilename: ""
+      responsesize: 746
+      securityoverridden: false
+      sha256: ""
+      statuscode: 303
+      tenantcontrols: false
+      time: "10:00:35"
+      timestamp: 1701943235000
+      type: "proxy"
+      url: "https://www.bing.com/api/shopping/v1/savings/user/readNotifications"
+      useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.81"
+      verdict: "allowed"
+      warnstatus: ""
+    message: |-
+      {
+        "date" : "2023-12-07",
+        "referer" : "",
+        "requestmethod" : "POST",
+        "sha256" : "",
+        "amp" : {
+          "score" : 0,
+          "disposition" : "",
+          "malware" : ""
+        },
+        "useragent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.81",
+        "isolated" : {
+          "fileaction" : "",
+          "state" : "not-isolated"
+        },
+        "bundleid" : 14367283,
+        "requestsize" : 517,
+        "type" : "proxy",
+        "internalip" : "192.192.192.192",
+        "egress" : {
+          "ip" : "0.0.0.0",
+          "type" : "shared"
+        },
+        "statuscode" : 303,
+        "datalossprevention" : {
+          "state" : ""
+        },
+        "tenantcontrols" : false,
+        "identities" : [ {
+          "deleted" : false,
+          "id" : 617808138,
+          "label" : "DESKTOP-Test",
+          "type" : {
+            "id" : 9,
+            "label" : "Roaming Computers",
+            "type" : "roaming"
+          }
+        }, {
+          "deleted" : false,
+          "id" : 617804059,
+          "label" : "Test",
+          "type" : {
+            "id" : 1,
+            "label" : "Networks",
+            "type" : "network"
+          }
+        } ],
+        "responsesize" : 746,
+        "policycategories" : [ {
+          "deprecated" : false,
+          "integration" : false,
+          "id" : 190,
+          "label" : "Search Engines and Portals",
+          "type" : "content"
+        } ],
+        "categories" : [ {
+          "deprecated" : true,
+          "integration" : false,
+          "id" : 23,
+          "label" : "Search Engines",
+          "type" : "content"
+        }, {
+          "deprecated" : false,
+          "integration" : false,
+          "id" : 148,
+          "label" : "Application",
+          "type" : "application"
+        }, {
+          "deprecated" : false,
+          "integration" : false,
+          "id" : 190,
+          "label" : "Search Engines and Portals",
+          "type" : "content"
+        } ],
+        "externalip" : "192.192.192.192",
+        "policy" : {
+          "timebasedrule" : false
+        },
+        "timestamp" : 1701943235000,
+        "securityoverridden" : false,
+        "forwardingmethod" : "",
+        "warnstatus" : "",
+        "datacenter" : {
+          "label" : "Singapore, SG",
+          "id" : "SIN"
+        },
+        "url" : "https://www.bing.com/api/shopping/v1/savings/user/readNotifications",
+        "contenttype" : "text/html",
+        "destinationip" : "",
+        "port" : 443,
+        "blockedfiletype" : "",
+        "verdict" : "allowed",
+        "time" : "10:00:35",
+        "responsefilename" : ""
+      }
+    tags:
+     - "source:LOGS_SOURCE"
