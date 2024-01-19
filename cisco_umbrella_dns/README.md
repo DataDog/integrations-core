@@ -4,7 +4,7 @@
 
 [Cisco Umbrella][1] is the leading platform for network DNS security monitoring. Umbrella's DNS-layer security offers a fast and easy way to enhance security, providing improved visibility and protection for users both on and off the network. By preventing threats over any port or protocol before they reach the network or endpoints, Umbrella DNS-layer security aims to deliver the most secure, reliable, and fastest internet experience to over 100 million users.
 
-Cisco Umbrella DNS integration ingests DNS and Proxy logs to Datadog.  Datadog integration log pipeline enriches logs to include geo-graphical information of client and server hosts and normalizes data to datadog standard attributes. This integration offers visualizations and provides detailed insights into DNS traffic and proxied requests, including total DNS requests, allowed/blocked domains, top blocked categories, proxied traffic over time, and more via dashboards.
+The Cisco Umbrella DNS integration collects DNS and Proxy logs and sends them to Datadog. Using the out-of-the-box logs pipeline, the logs are parsed and enriched for easy searching and analysis. This integration includes several dashboards visualizing total DNS requests, allowed/blocked domains, top blocked categories, proxied traffic over time, and more. If you have Datadog Cloud SIEM, Umbrella DNS logs will be analyzed by threat intelligence for matches against common attacker destinations. DNS logs are also useful for threat hunting and during investigations to compliment logs from other sources.
 
 ## Setup
 
@@ -12,19 +12,19 @@ Cisco Umbrella DNS integration ingests DNS and Proxy logs to Datadog.  Datadog i
 
 #### Cisco Umbrella DNS Configuration
 
-1. Login to [**Umbrella** > **Login**][2] with your credentials.
-2. From the left panel, click on **Admin**.
-3. Then, click on **API Keys**.
-4. Create a new API Key using the **Add** button.
-5. Apply `reports.aggregations:read` and `reports.granularEvents:read` key scopes to the API key.
-6. Copy the API Key and Key Secret.
+1. Login to [**Umbrella**][2] with your credentials.
+2. From the left panel, select **Admin**.
+3. Select **API Keys**.
+4. Create a new API Key.
+5. Apply the `reports.aggregations:read` and `reports.granularEvents:read` key scopes to the API key.
+6. Copy the API Key and Key Secret, which will be used during the next portion of configuration steps.
 
 #### Cisco Umbrella DNS DataDog Integration Configuration
 
 Configure the Datadog endpoint to forward Cisco Umbrella DNS events as logs to Datadog.
 
 1. Navigate to `Cisco Umbrella DNS`.
-2. Provide your Cisco Umbrella DNS credentials and click on `Add`.
+2. Add your Cisco Umbrella DNS credentials.
 
 | Cisco Umbrella DNS Parameters | Description                                                                |
 | ----------------------------- | -------------------------------------------------------------------------- |

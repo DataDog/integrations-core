@@ -8,7 +8,7 @@
         "configuration": "README.md#Setup",
         "support": "README.md#Support",
         "changelog": "CHANGELOG.md",
-        "description": "Visualize Cisco Umbrella DNS Proxied and DNS Traffic.",
+        "description": "Visualize Cisco Umbrella DNS Proxied and DNS Traffic. Connect to Cloud SIEM.",
         "title": "Cisco Umbrella DNS",
         "media": [
             {
@@ -25,6 +25,7 @@
         "classifier_tags": [
             "Category::Log Collection",
             "Category::Network",
+            "Category::Security",
             "Submitted Data Type::Logs"
         ]
     },
