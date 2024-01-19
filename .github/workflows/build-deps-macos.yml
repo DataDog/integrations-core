@@ -34,7 +34,11 @@ jobs:
         env:
           DD_PYTHON3: "/Library/Frameworks/Python.framework/Versions/3.11/bin/python3"
           DD_PYTHON2: "/Library/Frameworks/Python.framework/Versions/2.7/bin/python"
+          # This sets the minimum mac os version compatible for all built artifacts
+          MACOSX_DEPLOYMENT_TARGET: "10.12"
         run: |
           ${DD_PYTHON3} -m pip install packaging
-          ${DD_PYTHON3} .builders/build.py --python 3 out_py3
-          ${DD_PYTHON3} .builders/build.py --python 2 out_py2
+
+          mkdir builder_root
+          ${DD_PYTHON3} .builders/build.py --builder-root builder_root --python 3 out_py3
+          ${DD_PYTHON3} .builders/build.py --builder-root builder_root --skip-setup --python 2 out_py2
