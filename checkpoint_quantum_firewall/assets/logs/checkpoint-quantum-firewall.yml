@@ -404,8 +404,7 @@ pipeline:
       name: Remapper for Web Access Attributes
       enabled: true
       filter:
-        query:
-          '@product:("Application Control" OR "DLP" OR Firewall OR "Identity
+        query: '@product:("Application Control" OR "DLP" OR Firewall OR "Identity
           Awareness" OR "URL Filtering" OR "Threat Emulation" OR "Anti-Spam and
           Email Security" OR "IPS") '
       processors:
@@ -584,8 +583,7 @@ pipeline:
       name: String Building for Source and Destination IP Port
       enabled: true
       filter:
-        query:
-          '@product:("Firewall" OR "IPS" OR "Anti-Spam and Email Security" OR "URL
+        query: '@product:("Firewall" OR "IPS" OR "Anti-Spam and Email Security" OR "URL
           Filtering") '
       processors:
         - type: string-builder-processor
