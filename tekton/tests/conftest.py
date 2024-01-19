@@ -10,6 +10,7 @@ import pytest
 from datadog_checks.dev import get_here, run_command
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
+from datadog_checks.tekton import TektonCheck
 
 HERE = get_here()
 
@@ -98,5 +99,12 @@ def dd_environment(dd_save_state):
 
 
 @pytest.fixture
+def check():
+    return lambda instance: TektonCheck('tekton', {}, [instance])
+
+
+@pytest.fixture
 def instance():
-    return {}
+    return {
+        "openmetrics_endpoint": "http://tekton:8080",
+    }
