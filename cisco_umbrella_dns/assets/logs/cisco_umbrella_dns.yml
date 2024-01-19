@@ -1,5 +1,5 @@
 id: cisco_umbrella_dns
-metric_id: cisco_umbrella_dns
+metric_id: cisco-umbrella-dns
 backend_only: false
 facets:
   - name: Category
@@ -69,7 +69,7 @@ pipeline:
   name: Cisco Umbrella DNS
   enabled: true
   filter:
-    query: "source:cisco_umbrella_dns "
+    query: "source:cisco_umbrella_dns"
   processors:
     - type: date-remapper
       name:
