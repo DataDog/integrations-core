@@ -2,7 +2,3 @@
 
 [[envs.default.matrix]]
 python = ["3.11"]
-
-[envs.default]
-# TODO: Remove in follow up PRs
-e2e-env = false
