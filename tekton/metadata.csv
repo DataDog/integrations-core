@@ -1,1 +1,2 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+tekton.pipelines_controller.go_alloc,gauge,,bytes,,The number of bytes of allocated heap objects.,0,tekton,go_alloc,
