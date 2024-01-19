@@ -1,5 +1,6 @@
 id: elasticsearch
 metric_id: elasticsearch
+backend_only: false
 facets:
   - name: Duration
     source: log

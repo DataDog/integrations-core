@@ -1,5 +1,6 @@
 id: hivemq
 metric_id: hivemq
+backend_only: false
 facets:
   - name: HiveMQ Node Name
     source: log

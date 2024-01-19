@@ -1,5 +1,6 @@
 id: kong
 metric_id: kong
+backend_only: false
 facets:
   - name: Method
     source: log

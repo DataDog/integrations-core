@@ -1,5 +1,6 @@
 id: apache
 metric_id: apache
+backend_only: false
 facets:
   - name: Method
     source: log

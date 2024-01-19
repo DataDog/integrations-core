@@ -1,5 +1,6 @@
 id: ibm_mq
 metric_id: ibm-mq
+backend_only: false
 facets:
   - name: User
     source: log

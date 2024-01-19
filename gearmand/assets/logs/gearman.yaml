@@ -1,5 +1,6 @@
 id: gearman
 metric_id: gearman
+backend_only: false
 facets:
   - name: Thread Name
     source: log
