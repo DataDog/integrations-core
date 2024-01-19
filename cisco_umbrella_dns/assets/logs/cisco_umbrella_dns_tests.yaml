@@ -196,7 +196,7 @@ tests:
         "timestamp" : 1702288020000
       }
     tags:
-     - "source:cisco_umbrella_dns"
+     - "source:LOGS_SOURCE"
     timestamp: 1702288020000
  -
   sample: |-
@@ -386,7 +386,7 @@ tests:
         "timestamp" : 1702990616000
       }
     tags:
-     - "source:cisco_umbrella_dns"
+     - "source:LOGS_SOURCE"
     timestamp: 1702990616000
  -
   sample: |-
@@ -558,7 +558,7 @@ tests:
         "timestamp" : 1702990616000
       }
     tags:
-     - "source:cisco_umbrella_dns"
+     - "source:LOGS_SOURCE"
     timestamp: 1702990616000
  -
   sample: |-
@@ -841,7 +841,7 @@ tests:
         "responsefilename" : ""
       }
     tags:
-     - "source:cisco_umbrella_dns"
+     - "source:LOGS_SOURCE"
     timestamp: 1702288841000
  -
   sample: |-
@@ -1124,5 +1124,5 @@ tests:
         "responsefilename" : ""
       }
     tags:
-     - "source:cisco_umbrella_dns"
+     - "source:LOGS_SOURCE"
     timestamp: 1701943235000
