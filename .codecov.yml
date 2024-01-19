@@ -558,6 +558,10 @@ coverage:
         target: 75
         flags:
         - teamcity
+      Tekton:
+        target: 75
+        flags:
+        - tekton
       Temporal:
         target: 75
         flags:
@@ -1361,6 +1365,11 @@ flags:
     paths:
     - teamcity/datadog_checks/teamcity
     - teamcity/tests
+  tekton:
+    carryforward: true
+    paths:
+    - tekton/datadog_checks/tekton
+    - tekton/tests
   temporal:
     carryforward: true
     paths:
