@@ -225,10 +225,10 @@ See [service_checks.json][14] for a list of service checks provided by this inte
 
 ### Missing `tomcat.*` metrics
 
-The Datadog agent collects JMX metrics with either `Catalina` or `Tomcat` as bean domain names.
+The Datadog Agent collects JMX metrics with either `Catalina` or `Tomcat` as bean domain names with the Datadog Agent version **7.49.0** or later. Older versions only collect metrics with `Catalina` as the bean domain name.
 Standalone Tomcat deployments have metrics under domain `Catalina`, but embedded Tomcat deployments (such as with Spring Boot) have metrics under domain `Tomcat`.
 
-If the Datadog agent is older than **7.47.0**, and if the exposed Tomcat metrics are prefixed with a different bean domain name, such as `Tomcat`, copy the default metrics from the `metrics.yaml` file to the `conf` section of the `tomcat.d/conf.yaml` file and modify the `domain` filter to use the applicable bean domain name.
+If the Datadog Agent version is older than **7.49.0**, and if the exposed Tomcat metrics are prefixed with a different bean domain name such as `Tomcat`, copy the default metrics from the `metrics.yaml` file to the `conf` section of the `tomcat.d/conf.yaml` file and modify the `domain` filter to use the applicable bean domain name.
 
 ```yaml
 - include:
