@@ -520,7 +520,9 @@ class SQLServer(AgentCheck):
 
         # Load DB File Space Usage metrics
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
-        if is_affirmative(self.instance.get('include_tempdb_file_space_usage_metrics', True)) and not is_azure_database(engine_edition):
+        if is_affirmative(self.instance.get('include_tempdb_file_space_usage_metrics', True)) and not is_azure_database(
+            engine_edition
+        ):
             for name, table, column in TEMPDB_FILE_SPACE_USAGE_METRICS:
                 cfg = {'name': name, 'table': table, 'column': column, 'instance_name': 'tempdb', 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))

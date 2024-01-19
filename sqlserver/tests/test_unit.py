@@ -149,7 +149,11 @@ def test_azure_cross_database_queries_excluded(get_cursor, mock_connect, instanc
     check.initialize_connection()
     check.make_metric_list_to_collect()
 
-    cross_database_metrics = [metric for metric in check.instance_metrics if metric.__class__.TABLE not in ['msdb.dbo.backupset', 'sys.dm_db_file_space_usage']]
+    cross_database_metrics = [
+        metric
+        for metric in check.instance_metrics
+        if metric.__class__.TABLE not in ['msdb.dbo.backupset', 'sys.dm_db_file_space_usage']
+    ]
     assert len(cross_database_metrics) == 0
 
 
