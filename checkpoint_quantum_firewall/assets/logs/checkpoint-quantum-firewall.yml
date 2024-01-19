@@ -1,0 +1,664 @@
+id: checkpoint-quantum-firewall
+metric_id: checkpoint-quantum-firewall
+facets:
+  - name: Action
+    source: log
+    path: checkpoint_firewall_action
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Application Category
+    source: log
+    path: app_category
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Application Name
+    source: log
+    path: appi_name
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Application Risk
+    source: log
+    path: app_risk_str
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Authentication Method
+    source: log
+    path: auth_method
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Authentication Status
+    source: log
+    path: auth_status
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Client Inbound Bytes
+    source: log
+    path: client_inbound_bytes
+    type: integer
+    facetType: range
+    groups:
+      - Checkpoint Quantum Firewall
+    unit:
+      name: byte
+      family: bytes
+  - name: Client Inbound Packets
+    source: log
+    path: client_inbound_packets
+    type: integer
+    facetType: range
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Client Name
+    source: log
+    path: checkpoint_firewall_client_name
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Client Outbound Bytes
+    source: log
+    path: client_outbound_bytes
+    type: integer
+    facetType: range
+    groups:
+      - Checkpoint Quantum Firewall
+    unit:
+      name: byte
+      family: bytes
+  - name: Client Outbound Packets
+    source: log
+    path: client_outbound_packets
+    type: integer
+    facetType: range
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Confidence Level
+    source: log
+    path: confidence_level
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Connection Direction
+    source: log
+    path: conn_direction
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Destination
+    source: log
+    path: dst
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Event Type
+    source: log
+    path: event_type
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Host Type
+    source: log
+    path: host_type
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Identity Source
+    source: log
+    path: identity_src
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Identity Type
+    source: log
+    path: identity_type
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Layer Name
+    source: log
+    path: layer_name
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Malware Action
+    source: log
+    path: malware_action
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Malware Rule Name
+    source: log
+    path: malware_rule_name
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Matched Category
+    source: log
+    path: matched_category
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Operation
+    source: log
+    path: operation
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: OS Name
+    source: log
+    path: os_name
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Protection Name
+    source: log
+    path: protection_name
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Protection Type
+    source: log
+    path: protection_type
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Protocol
+    source: log
+    path: checkpoint_firewall_protocol
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Reject Category
+    source: log
+    path: reject_category
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Server Inbound Packets
+    source: log
+    path: server_inbound_packets
+    type: integer
+    facetType: range
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Server Outbound Packets
+    source: log
+    path: server_outbound_packets
+    type: integer
+    facetType: range
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Severity
+    source: log
+    path: checkpoint_firewall_severity
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: SmartDefense Profile
+    source: log
+    path: smartdefense_profile
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: "Source "
+    source: log
+    path: src
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Source Machine Name
+    source: log
+    path: src_machine_name
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Status
+    source: log
+    path: checkpoint_firewall_status
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Subject
+    source: log
+    path: checkpoint_firewall_subject
+    type: string
+    facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+  - name: Total Bytes
+    source: log
+    path: checkpoint_firewall_bytes
+    type: integer
+    facetType: range
+    groups:
+      - Checkpoint Quantum Firewall
+    unit:
+      name: byte
+      family: bytes
+pipeline:
+  type: pipeline
+  name: Checkpoint Quantum Firewall
+  enabled: true
+  filter:
+    query: "source:checkpoint_quantum_firewall "
+  processors:
+    - type: service-remapper
+      name: Map `product` as the official service of the log
+      enabled: true
+      meta:
+        last_update:
+          timestamp: 1703651709568
+          user_name: null
+          user_email: dev.patel@crestdatasys.com
+        tags: []
+      sources:
+        - product
+    - type: date-remapper
+      name: Define `time` as the official timestamp of the log
+      enabled: true
+      meta:
+        last_update:
+          timestamp: 1704358386753
+          user_name: null
+          user_email: smit.pancholi@crestdatasys.com
+        tags: []
+      sources:
+        - time
+    - name: Lookup for `severity` to `checkpoint_firewall_severity` field
+      enabled: true
+      meta:
+        last_update:
+          timestamp: 1704277532736
+          user_name: null
+          user_email: dev.patel@crestdatasys.com
+        tags: []
+      source: severity
+      target: checkpoint_firewall_severity
+      lookupTable: |-
+        0, Info
+        1, Low
+        2, Medium
+        3, High
+        4, Critical
+        Info, Info
+        Low, Low
+        Medium, Medium
+        High, High
+        Critical, Critical
+      type: lookup-processor
+    - type: attribute-remapper
+      name: Map `subject` to `checkpoint_firewall_subject`
+      enabled: true
+      meta:
+        last_update:
+          timestamp: 1704264725763
+          user_name: null
+          user_email: dev.patel@crestdatasys.com
+        tags: []
+      sources:
+        - subject
+      sourceType: attribute
+      target: checkpoint_firewall_subject
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `client_name` to `checkpoint_firewall_client_name`
+      enabled: true
+      meta:
+        last_update:
+          timestamp: 1704267865463
+          user_name: null
+          user_email: dev.patel@crestdatasys.com
+        tags: []
+      sources:
+        - client_name
+      sourceType: attribute
+      target: checkpoint_firewall_client_name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `action` to `checkpoint_firewall_action`
+      enabled: true
+      meta:
+        last_update:
+          timestamp: 1704267875932
+          user_name: null
+          user_email: dev.patel@crestdatasys.com
+        tags: []
+      sources:
+        - action
+      sourceType: attribute
+      target: checkpoint_firewall_action
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `protocol` to `checkpoint_firewall_protocol`
+      enabled: true
+      meta:
+        last_update:
+          timestamp: 1704267881691
+          user_name: null
+          user_email: dev.patel@crestdatasys.com
+        tags: []
+      sources:
+        - protocol
+      sourceType: attribute
+      target: checkpoint_firewall_protocol
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `bytes` to `checkpoint_firewall_bytes`
+      enabled: true
+      meta:
+        last_update:
+          timestamp: 1704279118956
+          user_name: null
+          user_email: dev.patel@crestdatasys.com
+        tags: []
+      sources:
+        - bytes
+      sourceType: attribute
+      target: checkpoint_firewall_bytes
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: pipeline
+      name: Remapper for Web Access Attributes
+      enabled: true
+      filter:
+        query:
+          '@product:("Application Control" OR "DLP" OR Firewall OR "Identity
+          Awareness" OR "URL Filtering" OR "Threat Emulation" OR "Anti-Spam and
+          Email Security" OR "IPS") '
+      processors:
+        - type: attribute-remapper
+          name: Map `src` to `network.client.ip`
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795819"
+              timestamp: 1704083245096
+            tags: []
+          sources:
+            - src
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `dst` to `network.destination.ip`
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795819"
+              timestamp: 1704083268444
+            tags: []
+          sources:
+            - dst
+          sourceType: attribute
+          target: network.destination.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `s_port` to `network.client.port`
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795819"
+              timestamp: 1704197224039
+            tags: []
+          sources:
+            - s_port
+          sourceType: attribute
+          target: network.client.port
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `src_country` to `network.client.geoip.country.iso_code`
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795819"
+              timestamp: 1704197268303
+            tags: []
+          sources:
+            - src_country
+          sourceType: attribute
+          target: network.client.geoip.country.iso_code
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `service` to `network.destination.port`
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795819"
+              timestamp: 1704197338098
+            tags: []
+          sources:
+            - service
+          sourceType: attribute
+          target: network.destination.port
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `server_inbound_bytes` to `network.bytes_read`
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795819"
+              timestamp: 1704197854427
+            tags: []
+          sources:
+            - server_inbound_bytes
+          sourceType: attribute
+          target: network.bytes_read
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `server_outbound_bytes` to `network.bytes_written`
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795819"
+              timestamp: 1704199593022
+            tags: []
+          sources:
+            - server_outbound_bytes
+          sourceType: attribute
+          target: network.bytes_written
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: geo-ip-parser
+          name: GeoIP Parser for `network.client.ip`
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795819"
+              timestamp: 1704083759665
+            tags: []
+          sources:
+            - network.client.ip
+          target: network.client.geoip
+          ip_processing_behavior: do-nothing
+        - type: geo-ip-parser
+          name: GeoIP Parser for `network.destination.ip`
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795819"
+              timestamp: 1704083781165
+            tags: []
+          sources:
+            - network.destination.ip
+          target: network.destination.geoip
+          ip_processing_behavior: do-nothing
+    - type: pipeline
+      name: Remapper for Username Attribute
+      enabled: true
+      filter:
+        query: '@product:("Anti-Exploit" OR "Anti-Ransomware" OR "Anti-Bot") '
+      processors:
+        - type: attribute-remapper
+          name: Map `src_user_name` to `usr.name`
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795819"
+              timestamp: 1704286395470
+            tags: []
+          sources:
+            - src_user_name
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Remapper for Username Attribute
+      enabled: true
+      filter:
+        query: "@product:DLP "
+      processors:
+        - type: attribute-remapper
+          name: Map `user` to `usr.name`
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795819"
+              timestamp: 1704367145639
+            tags: []
+          sources:
+            - user
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: String Building for Source and Destination IP Port
+      enabled: true
+      filter:
+        query:
+          '@product:("Firewall" OR "IPS" OR "Anti-Spam and Email Security" OR "URL
+          Filtering") '
+      processors:
+        - type: string-builder-processor
+          name: "Define `src_ip_port` equal to %{network.client.ip}:
+            %{network.client.port}"
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795819"
+              timestamp: 1703667959676
+            tags: []
+          template: "%{network.client.ip}:%{network.client.port}"
+          target: src_ip_port
+          replaceMissing: false
+        - type: string-builder-processor
+          name: "Define `dst_ip_port` equal to %{network.destination.ip}:
+            %{network.destination.port}"
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795819"
+              timestamp: 1703667966285
+            tags: []
+          template: "%{network.destination.ip}:%{network.destination.port}"
+          target: dst_ip_port
+          replaceMissing: false
+    - type: pipeline
+      name: Lookup for `app_risk` field
+      enabled: true
+      filter:
+        query: '@product:("Application Control" OR "URL Filtering") '
+      processors:
+        - name: Lookup for `app_risk` to `app_risk_str` field
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795819"
+              timestamp: 1704295525972
+            tags: []
+          source: app_risk
+          target: app_risk_str
+          lookupTable: |-
+            0, Unknown
+            1, Very low
+            2, Low
+            3, Medium
+            4, High
+            5, Critical
+            Unknown, Unknown
+            Very low, Very low
+            Low, Low
+            Medium, Medium
+            High, High
+            Critical, Critical
+          type: lookup-processor
+    - type: pipeline
+      name: Remapper for Status Attribute
+      enabled: true
+      filter:
+        query: '@product:"HTTPS Inspection" '
+      processors:
+        - type: attribute-remapper
+          name: Map `status` to `checkpoint_firewall_status`
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795819"
+              timestamp: 1704281014539
+            tags: []
+          sources:
+            - status
+          sourceType: attribute
+          target: checkpoint_firewall_status
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
