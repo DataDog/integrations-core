@@ -37,9 +37,6 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
-    "dashboards": {
-      "Databricks Spark Overview": "assets/dashboards/databricks_overview.json"
-    },
     "logs": {
       "source": "spark"
     }

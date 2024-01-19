@@ -1,8 +1,11 @@
-version: "2"
+version: "3.9"
 
 services:
   tomcat:
-    image: 'bitnami/tomcat:9.0.50'
+    build:
+      context: .
+      args:
+        TOMCAT_VERSION: ${TOMCAT_VERSION}
     ports:
       - 8080:8080
       - 9012:9012 # JMX
@@ -17,3 +20,7 @@ services:
         -Dtomcat.util.buf.StringCache.byte.enabled=true
         -Dtomcat.util.buf.StringCache.char.enabled=true
         -Dtomcat.util.buf.StringCache.trainThreshold=100
+  # Simulate traffic on the webserver
+  client:
+    build:
+      context: ../client

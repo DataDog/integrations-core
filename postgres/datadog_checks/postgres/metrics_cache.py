@@ -229,7 +229,7 @@ class PostgresMetricsCache:
 
             if version >= V10:
                 metrics_query = ACTIVITY_METRICS_10
-            if version >= V9_6:
+            elif version >= V9_6:
                 metrics_query = ACTIVITY_METRICS_9_6
             elif version >= V9_2:
                 metrics_query = ACTIVITY_METRICS_9_2
@@ -242,7 +242,7 @@ class PostgresMetricsCache:
                 if '{dd__user}' in q:
                     metrics_query[i] = q.format(dd__user=self.config.user)
 
-            metrics = dict(zip(metrics_query, ACTIVITY_DD_METRICS, strict=False))
+            metrics = dict(zip(metrics_query, ACTIVITY_DD_METRICS))
 
             self.activity_metrics = (metrics, query, descriptors)
         else:

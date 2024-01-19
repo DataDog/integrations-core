@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from datetime import datetime
 from uuid import uuid4
 
 from ..fs import (
@@ -125,6 +126,9 @@ To install the {integration_name} check on your host:
         'repo_name': REPO_CHOICES.get(repo_choice, ''),
         'support_type': support_type,
         'integration_links': integration_links,
+        # Source Type IDs are unique-per-integration integers
+        # Based on current timestamp with subtraction to start the IDs at around a few million, allowing room to grow.
+        "source_type_id": int(datetime.utcnow().timestamp()) - 1700000000,
     }
     config.update(kwargs)
 

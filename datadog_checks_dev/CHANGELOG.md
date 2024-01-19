@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 29.1.0 / 2024-01-17
+
+***Added***:
+
+* Autogenerate source_type_id in 'manifest.json' when running 'ddev create' ([#16544](https://github.com/DataDog/integrations-core/pull/16544))
+
+***Fixed***:
+
+* Fix a bug that prevents the `validate dep` command to fail if extra deps are found in the Agent file ([#16541](https://github.com/DataDog/integrations-core/pull/16541))
+
 ## 29.0.2 / 2024-01-09
 
 ***Fixed***:
