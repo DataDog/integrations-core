@@ -456,6 +456,7 @@ class SQLServer(AgentCheck):
 
         # Load database statistics
         db_stats_to_collect = list(DATABASE_METRICS)
+        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         if not is_azure_database(engine_edition):
             if self.ci_logs:
                 print('ci_logs - adding backup metrics')
@@ -528,7 +529,6 @@ class SQLServer(AgentCheck):
                     metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load DB File Space Usage metrics
-        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         if is_affirmative(self.instance.get('include_tempdb_file_space_usage_metrics', True)) and not is_azure_database(
             engine_edition
         ):
