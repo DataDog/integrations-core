@@ -534,7 +534,7 @@ class SQLServer(AgentCheck):
         # load DATABASE_BACKUP_METRICS
         if not is_azure_database(engine_edition):
             if self.ci_logs:
-                print(f'ci_logs - adding backup metrics')
+                print('ci_logs - adding backup metrics')
 
             for name, table, column in DATABASE_BACKUP_METRICS:
                 cfg = {'name': name, 'table': table, 'column': column, 'instance_name': 'master', 'tags': tags}
