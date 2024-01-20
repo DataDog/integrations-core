@@ -154,7 +154,7 @@ def test_check_database_metrics(
     if database_autodiscovery:
         instance_docker_metrics['autodiscovery_include'] = AUTODISCOVERY_DBS
 
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics], True)
     dd_run_check(sqlserver_check)
 
     tags = instance_docker_metrics.get('tags', [])

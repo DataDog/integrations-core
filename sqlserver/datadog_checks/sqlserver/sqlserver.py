@@ -98,7 +98,7 @@ set_default_driver_conf()
 class SQLServer(AgentCheck):
     __NAMESPACE__ = 'sqlserver'
 
-    def __init__(self, name, init_config, instances):
+    def __init__(self, name, init_config, instances, ci_logs=False):
         super(SQLServer, self).__init__(name, init_config, instances)
 
         self._resolved_hostname = None
@@ -149,6 +149,7 @@ class SQLServer(AgentCheck):
         self._dynamic_queries = None
         self.server_state_queries = None
         self.sqlserver_incr_fraction_metric_previous_values = {}
+        self.ci_logs = ci_logs
 
     def cancel(self):
         self.statement_metrics.cancel()
@@ -526,6 +527,9 @@ class SQLServer(AgentCheck):
             for name, table, column in TEMPDB_FILE_SPACE_USAGE_METRICS:
                 cfg = {'name': name, 'table': table, 'column': column, 'instance_name': 'tempdb', 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+
+        if self.ci_logs:
+            print(f'ci_logs - Engine edition: {engine_edition} | Azure: {is_azure_database(engine_edition)}')
 
         # load DATABASE_BACKUP_METRICS
         if not is_azure_database(engine_edition):
