@@ -456,6 +456,14 @@ class SQLServer(AgentCheck):
 
         # Load database statistics
         db_stats_to_collect = list(DATABASE_METRICS)
+        if not is_azure_database(engine_edition):
+            if self.ci_logs:
+                print('ci_logs - adding backup metrics')
+
+            for name, table, column in DATABASE_BACKUP_METRICS:
+                cfg = {'name': name, 'table': table, 'column': column, 'instance_name': 'master', 'tags': tags}
+                db_stats_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+
         for name, table, column in db_stats_to_collect:
             # include database as a filter option
             db_names = [d.name for d in self.databases] or [
@@ -526,18 +534,6 @@ class SQLServer(AgentCheck):
         ):
             for name, table, column in TEMPDB_FILE_SPACE_USAGE_METRICS:
                 cfg = {'name': name, 'table': table, 'column': column, 'instance_name': 'tempdb', 'tags': tags}
-                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
-        if self.ci_logs:
-            print(f'ci_logs - Engine edition: {engine_edition} | Azure: {is_azure_database(engine_edition)}')
-
-        # load DATABASE_BACKUP_METRICS
-        if not is_azure_database(engine_edition):
-            if self.ci_logs:
-                print('ci_logs - adding backup metrics')
-
-            for name, table, column in DATABASE_BACKUP_METRICS:
-                cfg = {'name': name, 'table': table, 'column': column, 'instance_name': 'master', 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load any custom metrics from conf.d/sqlserver.yaml
