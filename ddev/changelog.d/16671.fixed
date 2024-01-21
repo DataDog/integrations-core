@@ -1,0 +1,1 @@
+Fix a bug that prevents to run e2e tests in a non-default repository
