@@ -6,3 +6,4 @@ services:
     image: couchdb:${COUCH_VERSION}
     ports:
       - ${COUCH_PORT}:5984
+    platform: linux/x86_64
