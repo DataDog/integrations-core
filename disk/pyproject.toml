@@ -6,6 +6,7 @@ requires = [
 ]
 build-backend = "hatchling.build"
 
+
 [project]
 name = "datadog-disk"
 description = "The Disk check"
@@ -35,6 +36,7 @@ dependencies = [
 dynamic = [
     "version",
 ]
+
 license = "BSD-3-Clause"
 
 [project.optional-dependencies]
