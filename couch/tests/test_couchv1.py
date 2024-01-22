@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
+
 from datadog_checks.couch import CouchDb
 
 from . import common
@@ -110,7 +111,6 @@ def test_per_db_metrics(aggregator, check, enable_per_db_metrics):
 
     check.instance = config
     check.check({})
-
 
     if enable_per_db_metrics:
         aggregator.assert_metric("couchdb.by_db.doc_count", at_least=1)
