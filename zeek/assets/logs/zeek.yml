@@ -679,12 +679,12 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `orig_bytes` and `request_body_len` to `network.bytes_read`
+          name: Map `orig_bytes`, `request_body_len` to `network.bytes_read`
           enabled: true
           meta:
             last_update:
-              user_id: "5795826"
-              timestamp: 1701847098951
+              user_id: "5795822"
+              timestamp: 1705906756651
             tags: []
           sources:
             - orig_bytes
@@ -695,12 +695,12 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `resp_bytes` and `response_body_len` to `network.bytes_written`
+          name: Map `resp_bytes`, `response_body_len` to `network.bytes_written`
           enabled: true
           meta:
             last_update:
-              user_id: "5795826"
-              timestamp: 1701847110558
+              user_id: "5795822"
+              timestamp: 1705906775463
             tags: []
           sources:
             - resp_bytes
@@ -744,12 +744,12 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `query` and `domain` to `dns.question.name`
+          name: Map `domain`, `query` to `dns.question.name`
           enabled: true
           meta:
             last_update:
-              user_id: "5795826"
-              timestamp: 1703243048206
+              user_id: "5795822"
+              timestamp: 1705906916460
             tags: []
           sources:
             - domain
@@ -826,12 +826,12 @@ pipeline:
         query: "@_path:(ftp OR socks OR http) "
       processors:
         - type: attribute-remapper
-          name: Map `user` and `username` to `usr.name`
+          name: Map `user`, `username` to `usr.name`
           enabled: true
           meta:
             last_update:
-              user_id: "5795826"
-              timestamp: 1701847515662
+              user_id: "5795822"
+              timestamp: 1705906979360
             tags: []
           sources:
             - user
@@ -870,12 +870,12 @@ pipeline:
           OR weird OR ldap OR ldap_search) "
       processors:
         - type: attribute-remapper
-          name: Remap `id.orig_h` to `orig_h`
+          name: Map `id.orig_h` to `orig_h`
           enabled: true
           meta:
             last_update:
-              user_id: "5795826"
-              timestamp: 1703087514232
+              user_id: "5795822"
+              timestamp: 1705907023566
             tags: []
           sources:
             - id.orig_h
@@ -885,12 +885,12 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Remap `id.orig_p` to `orig_p`
+          name: Map `id.orig_p` to `orig_p`
           enabled: true
           meta:
             last_update:
-              user_id: "5795826"
-              timestamp: 1703087548792
+              user_id: "5795822"
+              timestamp: 1705907046240
             tags: []
           sources:
             - id.orig_p
@@ -900,12 +900,12 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Remap `id.resp_h` to `resp_h`
+          name: Map `id.resp_h` to `resp_h`
           enabled: true
           meta:
             last_update:
-              user_id: "5795826"
-              timestamp: 1703087589820
+              user_id: "5795822"
+              timestamp: 1705907060166
             tags: []
           sources:
             - id.resp_h
@@ -915,12 +915,12 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Remap `id.resp_p` to `resp_p`
+          name: Map `id.resp_p` to `resp_p`
           enabled: true
           meta:
             last_update:
-              user_id: "5795826"
-              timestamp: 1703087607722
+              user_id: "5795822"
+              timestamp: 1705907077240
             tags: []
           sources:
             - id.resp_p
@@ -936,12 +936,12 @@ pipeline:
         query: "@_path:(conn OR dhcp OR snmp) "
       processors:
         - type: attribute-remapper
-          name: Remap `duration` to `duration_sec`
+          name: Map `duration` to `duration_sec`
           enabled: true
           meta:
             last_update:
-              user_id: "5795826"
-              timestamp: 1703087746713
+              user_id: "5795822"
+              timestamp: 1705907098421
             tags: []
           sources:
             - duration
@@ -951,14 +951,13 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
     - type: status-remapper
-      name: Define ‘severity’ and 'syslog.severity' attributes as the official status
-        of the log
+      name: Define `severity`, `syslog.severity` as the official status of the log
       enabled: true
       meta:
         last_update:
-          timestamp: 1701847638188
-          user_name: null
-          user_email: tirthraj.chaudhari@crestdatasys.com
+          timestamp: 1705907127426
+          user_name: Mohit Tilala
+          user_email: mohit.tilala@crestdatasys.com
         tags: []
       sources:
         - severity
