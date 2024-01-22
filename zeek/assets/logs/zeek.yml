@@ -161,7 +161,7 @@ facets:
       family: bytes
   - name: Name
     source: log
-    path: name
+    path: zeek_name
     type: string
     facetType: list
     groups:
@@ -220,7 +220,7 @@ facets:
       - Zeek
   - name: Protocol
     source: log
-    path: proto
+    path: zeek_proto
     type: string
     facetType: list
     groups:
@@ -962,3 +962,35 @@ pipeline:
       sources:
         - severity
         - syslog.severity
+    - type: attribute-remapper
+      name: Map `name` to `zeek_name`
+      enabled: true
+      meta:
+        last_update:
+          timestamp: 1705913239983
+          user_name: Mohit Tilala
+          user_email: mohit.tilala@crestdatasys.com
+        tags: []
+      sources:
+        - name
+      sourceType: attribute
+      target: zeek_name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `proto` to `zeek_proto`
+      enabled: true
+      meta:
+        last_update:
+          timestamp: 1705913267746
+          user_name: Mohit Tilala
+          user_email: mohit.tilala@crestdatasys.com
+        tags: []
+      sources:
+        - proto
+      sourceType: attribute
+      target: zeek_proto
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false

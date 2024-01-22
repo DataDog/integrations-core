@@ -850,7 +850,7 @@
                                                     }
                                                 },
                                                 {
-                                                    "facet": "@name",
+                                                    "facet": "@zeek_name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -911,7 +911,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@name",
+                                                    "facet": "@zeek_name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -981,7 +981,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@name",
+                                                    "facet": "@zeek_name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -1050,7 +1050,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "name",
+                                            "field": "zeek_name",
                                             "width": "auto"
                                         },
                                         {

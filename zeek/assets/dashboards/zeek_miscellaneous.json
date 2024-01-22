@@ -99,7 +99,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@proto",
+                                                    "facet": "@zeek_proto",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -234,11 +234,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "proto",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "proto",
+                                            "field": "zeek_proto",
                                             "width": "auto"
                                         },
                                         {
@@ -343,7 +339,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@name",
+                                                    "facet": "@zeek_name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -491,7 +487,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "name",
+                                            "field": "zeek_name",
                                             "width": "auto"
                                         },
                                         {

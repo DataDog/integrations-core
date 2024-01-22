@@ -371,7 +371,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@proto",
+                                                    "facet": "@zeek_proto",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",

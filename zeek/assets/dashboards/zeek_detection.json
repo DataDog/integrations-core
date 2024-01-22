@@ -545,7 +545,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@proto",
+                                                    "facet": "@zeek_proto",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -554,7 +554,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:notice @proto:* $Host "
+                                                "query": "source:zeek service:notice @zeek_proto:* $Host "
                                             },
                                             "storage": "hot"
                                         }
@@ -929,7 +929,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "proto",
+                                            "field": "zeek_proto",
                                             "width": "auto"
                                         },
                                         {
@@ -1404,7 +1404,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@proto",
+                                                    "facet": "@zeek_proto",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -1482,7 +1482,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "proto",
+                                            "field": "zeek_proto",
                                             "width": "auto"
                                         }
                                     ]

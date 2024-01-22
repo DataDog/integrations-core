@@ -92,7 +92,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@proto",
+                                        "facet": "@zeek_proto",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -234,7 +234,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "proto",
+                                "field": "zeek_proto",
                                 "width": "auto"
                             },
                             {
@@ -273,7 +273,7 @@
         },
         {
             "name": "Protocol",
-            "prefix": "@proto",
+            "prefix": "@zeek_proto",
             "available_values": [],
             "default": "*"
         },
