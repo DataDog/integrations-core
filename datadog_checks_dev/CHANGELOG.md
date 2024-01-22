@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 29.2.0 / 2024-01-22
+
+***Added***:
+
+* Set auto_install in 'manifest.json' when running 'ddev create' ([#16647](https://github.com/DataDog/integrations-core/pull/16647))
+
 ## 29.1.0 / 2024-01-17
 
 ***Added***:
