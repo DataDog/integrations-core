@@ -86,7 +86,9 @@ cli = [
     "tomli-w>=1.0.0",
     "tox>=3.12.1, <4.0.0",
     # Move towncrier dependency to ddev once we migrate changelog-related commands.
-    "towncrier==23.10.0",
+    # We need at least v23.11.0, because it lets us release with empty changelogs:
+    # The issue that is fixed: https://github.com/twisted/towncrier/issues/538
+    "towncrier>=23.11.0",
     "twine>=1.11.0",
     "virtualenv<20.22.0",
     # TODO: Remove once every check has a pyproject.toml
