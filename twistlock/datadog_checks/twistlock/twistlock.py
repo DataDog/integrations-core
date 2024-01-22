@@ -142,6 +142,8 @@ class TwistlockCheck(AgentCheck):
                 continue
 
             instances = image.get('instances')
+            if len(instances) == 0:
+                continue
             instance = instances[0]
             image_name = instance.get('image')
             if not image_name:
