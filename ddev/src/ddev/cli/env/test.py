@@ -68,6 +68,7 @@ def test_command(
     from ddev.cli.env.start import start
     from ddev.cli.env.stop import stop
     from ddev.cli.test import test
+    from ddev.config.constants import AppEnvVars
     from ddev.e2e.config import EnvDataStorage
     from ddev.e2e.constants import E2EMetadata
     from ddev.utils.ci import running_in_ci
@@ -129,7 +130,10 @@ def test_command(
         env_data = storage.get(integration.name, env_name)
         metadata = env_data.read_metadata()
         try:
-            with EnvVars(metadata.get(E2EMetadata.ENV_VARS, {})):
+            env_vars = metadata.get(E2EMetadata.ENV_VARS, {})
+            env_vars[AppEnvVars.REPO] = app.repo.name
+
+            with EnvVars(env_vars):
                 ctx.invoke(
                     test, target_spec=f'{intg_name}:{env_name}', args=args, junit=junit, hide_header=True, e2e=True
                 )
