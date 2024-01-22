@@ -93,7 +93,7 @@
       "Checkpoint Quantum Firewall: Anti Malware": "assets/dashboards/checkpoint_quantum_firewall_anti_malware.json"
     },
     "logs": {
-      "source": "checkpoint-quantum-firewall"
+      "source": "checkpoint_quantum_firewall"
     }
   },
   "author": {

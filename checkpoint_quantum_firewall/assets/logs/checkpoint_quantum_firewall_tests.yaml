@@ -1,4 +1,4 @@
-id: checkpoint-quantum-firewall
+id: checkpoint_quantum_firewall
 tests:
   - sample: '{"__policy_id_tag": "product=VPN-1 &
       FireWall-1[db_tag={ABCD1234-5F67-B89B-AF12-3456B78B91A};mgmt=gw-81a3bc;date=1702026887;policy_name=Standard\\]","action":

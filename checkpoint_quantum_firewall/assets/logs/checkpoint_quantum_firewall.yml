@@ -1,4 +1,4 @@
-id: checkpoint-quantum-firewall
+id: checkpoint_quantum_firewall
 metric_id: checkpoint-quantum-firewall
 facets:
   - name: Action
