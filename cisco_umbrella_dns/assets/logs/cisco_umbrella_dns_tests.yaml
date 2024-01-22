@@ -65,7 +65,8 @@ tests:
       } ],
       "externalip" : "0.0.0.0",
       "querytype" : "A",
-      "timestamp" : 1702288020000
+      "timestamp" : 1702288020000,
+      "service": "dns"
     }
   result:
     custom:
@@ -260,7 +261,8 @@ tests:
       } ],
       "externalip" : "192.192.192.192",
       "querytype" : "A",
-      "timestamp" : 1702990616000
+      "timestamp" : 1702990616000,
+      "service": "dns"
     }
   result:
     custom:
@@ -444,7 +446,8 @@ tests:
       } ],
       "externalip" : "192.192.192.192",
       "querytype" : "A",
-      "timestamp" : 1702990616000
+      "timestamp" : 1702990616000,
+      "service": "dns"
     }
   result:
     custom:
@@ -655,7 +658,8 @@ tests:
       "blockedfiletype" : "",
       "verdict" : "blocked",
       "time" : "10:00:41",
-      "responsefilename" : ""
+      "responsefilename" : "",
+      "service": "proxy"
     }
   result:
     custom:
@@ -938,7 +942,8 @@ tests:
       "blockedfiletype" : "",
       "verdict" : "allowed",
       "time" : "10:00:35",
-      "responsefilename" : ""
+      "responsefilename" : "",
+      "service": "proxy"
     }
   result:
     custom:
