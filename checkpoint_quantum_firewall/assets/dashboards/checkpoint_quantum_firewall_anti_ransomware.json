@@ -315,7 +315,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@event_type",
+                                        "facet": "@checkpoint_event_type",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -746,7 +746,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "event_type",
+                                "field": "checkpoint_event_type",
                                 "width": "auto"
                             },
                             {

@@ -150,7 +150,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @operation:\"Install Policy\" $Checkpoint_Server $Action $Administrator"
+                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:\"Install Policy\" $Checkpoint_Server $Action $Administrator "
                                 },
                                 "storage": "hot"
                             }
@@ -194,7 +194,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @operation:Publish $Checkpoint_Server $Action $Administrator"
+                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:Publish $Checkpoint_Server $Action $Administrator "
                                 },
                                 "storage": "hot"
                             }
@@ -238,7 +238,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @operation:\"Create Object\" $Checkpoint_Server $Action $Administrator"
+                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:\"Create Object\" $Checkpoint_Server $Action $Administrator "
                                 },
                                 "storage": "hot"
                             }
@@ -282,7 +282,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @operation:\"Modify Object\" $Checkpoint_Server $Action $Administrator"
+                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:\"Modify Object\" $Checkpoint_Server $Action $Administrator "
                                 },
                                 "storage": "hot"
                             }
@@ -326,7 +326,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @operation:\"Delete Object\" $Checkpoint_Server $Action $Administrator"
+                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:\"Delete Object\" $Checkpoint_Server $Action $Administrator "
                                 },
                                 "storage": "hot"
                             }
@@ -370,7 +370,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @operation:\"Create Rule\" $Checkpoint_Server $Action $Administrator"
+                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:\"Create Rule\" $Checkpoint_Server $Action $Administrator "
                                 },
                                 "storage": "hot"
                             }
@@ -414,7 +414,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @operation:\"Modify Rule\" $Checkpoint_Server $Action $Administrator"
+                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:\"Modify Rule\" $Checkpoint_Server $Action $Administrator "
                                 },
                                 "storage": "hot"
                             }
@@ -458,7 +458,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @operation:\"Delete Rule\" $Checkpoint_Server $Action $Administrator"
+                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:\"Delete Rule\" $Checkpoint_Server $Action $Administrator "
                                 },
                                 "storage": "hot"
                             }
@@ -627,7 +627,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@operation",
+                                        "facet": "@checkpoint_operation",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -665,12 +665,13 @@
                 "title": "Installed Policies Log Details",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "requests": [
                     {
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:checkpoint_quantum_firewall @product:(SmartConsole OR SmartView) @operation:\"Install Policy\" $Checkpoint_Server $Action $Administrator",
+                            "query_string": "source:checkpoint_quantum_firewall @product:(SmartConsole OR SmartView) @checkpoint_operation:\"Install Policy\" $Checkpoint_Server $Action $Administrator ",
                             "indexes": [],
                             "storage": "hot"
                         },
@@ -704,7 +705,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "operation",
+                                "field": "checkpoint_operation",
                                 "width": "auto"
                             },
                             {
@@ -737,12 +738,13 @@
                 "title": "Published Sessions Log Details",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "requests": [
                     {
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole OR SmartView) @operation:Publish $Checkpoint_Server $Action $Administrator",
+                            "query_string": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole OR SmartView) @checkpoint_operation:Publish $Checkpoint_Server $Action $Administrator ",
                             "indexes": [],
                             "storage": "hot"
                         },
@@ -772,7 +774,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "operation",
+                                "field": "checkpoint_operation",
                                 "width": "auto"
                             },
                             {

@@ -107,7 +107,7 @@ facets:
       - Checkpoint Quantum Firewall
   - name: Event Type
     source: log
-    path: event_type
+    path: checkpoint_event_type
     type: string
     facetType: list
     groups:
@@ -163,7 +163,7 @@ facets:
       - Checkpoint Quantum Firewall
   - name: Operation
     source: log
-    path: operation
+    path: checkpoint_operation
     type: string
     facetType: list
     groups:
@@ -277,24 +277,24 @@ pipeline:
     query: "source:checkpoint_quantum_firewall "
   processors:
     - type: service-remapper
-      name: Map `product` as the official service of the log
+      name: Define `product` as the official service of the log
       enabled: true
       meta:
         last_update:
-          timestamp: 1703651709568
-          user_name: null
-          user_email: dev.patel@crestdatasys.com
+          timestamp: 1705906057304
+          user_name: Mohit Tilala
+          user_email: mohit.tilala@crestdatasys.com
         tags: []
       sources:
         - product
     - type: date-remapper
-      name: Define `time` as the official timestamp of the log
+      name: Define `time` as the official date of the log
       enabled: true
       meta:
         last_update:
-          timestamp: 1704358386753
-          user_name: null
-          user_email: smit.pancholi@crestdatasys.com
+          timestamp: 1705906095040
+          user_name: Mohit Tilala
+          user_email: mohit.tilala@crestdatasys.com
         tags: []
       sources:
         - time
@@ -397,6 +397,22 @@ pipeline:
         - bytes
       sourceType: attribute
       target: checkpoint_firewall_bytes
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `operation` to `checkpoint_operation`
+      enabled: true
+      meta:
+        last_update:
+          timestamp: 1705911703578
+          user_name: null
+          user_email: dev.patel@crestdatasys.com
+        tags: []
+      sources:
+        - operation
+      sourceType: attribute
+      target: checkpoint_operation
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
@@ -555,6 +571,21 @@ pipeline:
             - src_user_name
           sourceType: attribute
           target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `event_type` to `checkpoint_event_type`
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795819"
+              timestamp: 1705911649321
+            tags: []
+          sources:
+            - event_type
+          sourceType: attribute
+          target: checkpoint_event_type
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
