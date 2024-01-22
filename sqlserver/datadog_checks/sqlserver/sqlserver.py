@@ -77,7 +77,11 @@ from datadog_checks.sqlserver.queries import (
     get_query_ao_availability_groups,
     get_query_file_stats,
 )
-from datadog_checks.sqlserver.utils import is_azure_database, set_default_driver_conf, is_azure_sql_database
+from datadog_checks.sqlserver.utils import (
+    is_azure_database,
+    is_azure_sql_database,
+    set_default_driver_conf,
+)
 
 try:
     import adodbapi
@@ -525,9 +529,9 @@ class SQLServer(AgentCheck):
                     metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load DB File Space Usage metrics
-        if is_affirmative(self.instance.get('include_tempdb_file_space_usage_metrics', True)) and not is_azure_sql_database(
-            engine_edition
-        ):
+        if is_affirmative(
+            self.instance.get('include_tempdb_file_space_usage_metrics', True)
+        ) and not is_azure_sql_database(engine_edition):
             for name, table, column in TEMPDB_FILE_SPACE_USAGE_METRICS:
                 cfg = {'name': name, 'table': table, 'column': column, 'instance_name': 'tempdb', 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
