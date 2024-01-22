@@ -94,6 +94,21 @@ pipeline:
         tags: []
       sources:
         - type
+    - type: attribute-remapper
+      name: Map `type` to `log-type`
+      enabled: true
+      meta:
+        last_update:
+          user_id: "5795822"
+          timestamp: 1704088010451
+        tags: []
+      sources:
+        - type
+      sourceType: attribute
+      target: log-type
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
     - type: pipeline
       name: Cisco Umbrella DNS logs
       enabled: true
