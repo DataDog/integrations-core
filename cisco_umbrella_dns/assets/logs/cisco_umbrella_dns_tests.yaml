@@ -1,7 +1,7 @@
 id: cisco_umbrella_dns
 tests:
   - sample: >-
-      '{"returncode":0,"externalip":"0.0.0.0","allapplications":[{"id":989025,"label":"Some
+      {"returncode":0,"externalip":"0.0.0.0","allapplications":[{"id":989025,"label":"Some
             APIs","category":{"id":1,"label":"Application Development and
             Testing"}}],"date":"2023-12-11","internalip":"192.192.192.192","time":"09:47:00","querytype":"A","policycategories":[{"id":190,"type":"content","label":"Search
             Engines and
@@ -9,25 +9,25 @@ tests:
             Engines","integration":false,"deprecated":true},{"id":148,"type":"application","label":"Application","integration":false,"deprecated":false},{"id":190,"type":"content","label":"Search
             Engines and
             Portals","integration":false,"deprecated":false}],"verdict":"blocked","device":{"id":null},"domain":"optimizationguide-pa.someapis.com","timestamp":1702288020000,"blockedapplications":[],"allowedapplications":[],"identities":[{"id":617808138,"type":{"id":9,"type":"roaming","label":"Roaming
-            Computers"},"label":"DESKTOP-Example","deleted":false},{"id":617804059,"type":{"id":1,"type":"network","label":"Networks"},"label":"Test","deleted":false}],"threats":[]}'
+            Computers"},"label":"DESKTOP-Example","deleted":false},{"id":617804059,"type":{"id":1,"type":"network","label":"Networks"},"label":"Test","deleted":false}],"threats":[]}
     result: null
   - sample: >-
-      '{"returncode":0,"externalip":"192.192.192.192","allapplications":[{"id":992107,"label":"test.com","category":{"id":47,"label":"Media"}}],"date":"2023-12-19","internalip":"192.192.192.192","time":"12:56:56","querytype":"A","policycategories":[{"id":194,"type":"content","label":"Streaming
+      {"returncode":0,"externalip":"192.192.192.192","allapplications":[{"id":992107,"label":"test.com","category":{"id":47,"label":"Media"}}],"date":"2023-12-19","internalip":"192.192.192.192","time":"12:56:56","querytype":"A","policycategories":[{"id":194,"type":"content","label":"Streaming
             Video","integration":false,"deprecated":false}],"type":"dns","categories":[{"id":17,"type":"content","label":"Movies","integration":false,"deprecated":true},{"id":26,"type":"content","label":"Television","integration":false,"deprecated":true},{"id":148,"type":"application","label":"Application","integration":false,"deprecated":false},{"id":194,"type":"content","label":"Streaming
             Video","integration":false,"deprecated":false}],"verdict":"allowed","device":{"id":null},"domain":"test.com","timestamp":1702990616000,"blockedapplications":[],"allowedapplications":[],"identities":[{"id":618368586,"type":{"id":9,"type":"roaming","label":"Roaming
-            Computers"},"label":"DESKTOP-Name","deleted":false}],"threats":[]}'
+            Computers"},"label":"DESKTOP-Name","deleted":false}],"threats":[]}
     result: null
   - sample: >-
-      '{"returncode":0,"externalip":"192.192.192.192","allapplications":[{"id":987820,"label":"Social
+      {"returncode":0,"externalip":"192.192.192.192","allapplications":[{"id":987820,"label":"Social
             Media Platform","category":{"id":33,"label":"Social
             Networking"}}],"date":"2023-12-19","internalip":"192.192.192.192","time":"12:56:56","querytype":"A","policycategories":[{"id":24,"type":"content","label":"Social
             Networking","integration":false,"deprecated":false}],"type":"dns","categories":[{"id":20,"type":"content","label":"Photo
             Sharing","integration":false,"deprecated":true},{"id":24,"type":"content","label":"Social
             Networking","integration":false,"deprecated":false},{"id":148,"type":"application","label":"Application","integration":false,"deprecated":false}],"verdict":"proxied","device":{"id":null},"domain":"instagram.com","timestamp":1702990616000,"blockedapplications":[],"allowedapplications":[],"identities":[{"id":618368586,"type":{"id":9,"type":"roaming","label":"Roaming
-            Computers"},"label":"DESKTOP-Test","deleted":false}],"threats":[]}'
+            Computers"},"label":"DESKTOP-Test","deleted":false}],"threats":[]}
     result: null
   - sample: >-
-      '{"destinationip":"","externalip":"192.192.192.192","responsesize":746,"allapplications":[],"date":"2023-12-11","datalossprevention":{"state":""},"antivirusthreats":{"puas":[],"viruses":[],"others":[]},"internalip":"192.192.192.192","referer":"","contenttype":"text/html","tenantcontrols":false,"securityoverridden":false,"useragent":"Mozilla/5.0
+      {"destinationip":"","externalip":"192.192.192.192","responsesize":746,"allapplications":[],"date":"2023-12-11","datalossprevention":{"state":""},"antivirusthreats":{"puas":[],"viruses":[],"others":[]},"internalip":"192.192.192.192","referer":"","contenttype":"text/html","tenantcontrols":false,"securityoverridden":false,"useragent":"Mozilla/5.0
             (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)
             Chrome/116.0.0.0 Safari/537.36
             Edg/116.0.1938.81","time":"10:00:41","amp":{"disposition":"","score":0,"malware":""},"policycategories":[{"id":190,"type":"content","label":"Search
@@ -37,10 +37,10 @@ tests:
             Engines and
             Portals","integration":false,"deprecated":false}],"isolated":{"state":"not-isolated","fileaction":""},"statuscode":303,"egress":{"ip":"0.0.0.0","type":"shared"},"blockedfiletype":"","requestmethod":"POST","url":"https://www.bing.com/api/shopping/v1/savings/user/readNotifications","verdict":"blocked","responsefilename":"","warnstatus":"","sha256":"","timestamp":1702288841000,"blockedapplications":[],"allowedapplications":[],"identities":[{"id":617808138,"type":{"id":9,"type":"roaming","label":"Roaming
             Computers"},"label":"DESKTOP-Test","deleted":false},{"id":617804059,"type":{"id":1,"type":"network","label":"Networks"},"label":"Test","deleted":false}],"datacenter":{"label":"Singapore,
-            SG","id":"SIN"},"threats":[],"httperrors":[],"bundleid":14367283}'
+            SG","id":"SIN"},"threats":[],"httperrors":[],"bundleid":14367283}
     result: null
   - sample: >-
-      '{"destinationip":"","externalip":"192.192.192.192","responsesize":746,"allapplications":[],"date":"2023-12-07","datalossprevention":{"state":""},"antivirusthreats":{"puas":[],"viruses":[],"others":[]},"internalip":"192.192.192.192","referer":"","contenttype":"text/html","tenantcontrols":false,"securityoverridden":false,"useragent":"Mozilla/5.0
+      {"destinationip":"","externalip":"192.192.192.192","responsesize":746,"allapplications":[],"date":"2023-12-07","datalossprevention":{"state":""},"antivirusthreats":{"puas":[],"viruses":[],"others":[]},"internalip":"192.192.192.192","referer":"","contenttype":"text/html","tenantcontrols":false,"securityoverridden":false,"useragent":"Mozilla/5.0
             (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)
             Chrome/116.0.0.0 Safari/537.36
             Edg/116.0.1938.81","time":"10:00:35","amp":{"disposition":"","score":0,"malware":""},"policycategories":[{"id":190,"type":"content","label":"Search
@@ -50,5 +50,5 @@ tests:
             Engines and
             Portals","integration":false,"deprecated":false}],"isolated":{"state":"not-isolated","fileaction":""},"statuscode":303,"egress":{"ip":"0.0.0.0","type":"shared"},"blockedfiletype":"","requestmethod":"POST","url":"https://www.bing.com/api/shopping/v1/savings/user/readNotifications","verdict":"allowed","responsefilename":"","warnstatus":"","sha256":"","timestamp":1701943235000,"blockedapplications":[],"allowedapplications":[],"identities":[{"id":617808138,"type":{"id":9,"type":"roaming","label":"Roaming
             Computers"},"label":"DESKTOP-Test","deleted":false},{"id":617804059,"type":{"id":1,"type":"network","label":"Networks"},"label":"Test","deleted":false}],"datacenter":{"label":"Singapore,
-            SG","id":"SIN"},"threats":[],"httperrors":[],"bundleid":14367283}'
+            SG","id":"SIN"},"threats":[],"httperrors":[],"bundleid":14367283}
     result: null
