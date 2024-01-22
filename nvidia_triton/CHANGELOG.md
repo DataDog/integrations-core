@@ -2,6 +2,10 @@
 
 <!-- towncrier release notes start -->
 
+## 1.2.0-beta.1 / 2024-01-22
+
+No significant changes.
+
 ## 1.1.0 / 2024-01-05
 
 ***Added***:
