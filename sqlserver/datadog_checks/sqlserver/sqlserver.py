@@ -77,7 +77,7 @@ from datadog_checks.sqlserver.queries import (
     get_query_ao_availability_groups,
     get_query_file_stats,
 )
-from datadog_checks.sqlserver.utils import is_azure_database, set_default_driver_conf
+from datadog_checks.sqlserver.utils import is_azure_database, set_default_driver_conf, is_azure_sql_database
 
 try:
     import adodbapi
@@ -98,7 +98,7 @@ set_default_driver_conf()
 class SQLServer(AgentCheck):
     __NAMESPACE__ = 'sqlserver'
 
-    def __init__(self, name, init_config, instances, ci_logs=False):
+    def __init__(self, name, init_config, instances):
         super(SQLServer, self).__init__(name, init_config, instances)
 
         self._resolved_hostname = None
@@ -149,7 +149,6 @@ class SQLServer(AgentCheck):
         self._dynamic_queries = None
         self.server_state_queries = None
         self.sqlserver_incr_fraction_metric_previous_values = {}
-        self.ci_logs = ci_logs
 
     def cancel(self):
         self.statement_metrics.cancel()
@@ -457,10 +456,7 @@ class SQLServer(AgentCheck):
         # Load database statistics
         db_stats_to_collect = list(DATABASE_METRICS)
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
-        if not is_azure_database(engine_edition):
-            if self.ci_logs:
-                print('ci_logs - adding backup metrics')
-
+        if not is_azure_sql_database(engine_edition):
             for name, table, column in DATABASE_BACKUP_METRICS:
                 cfg = {'name': name, 'table': table, 'column': column, 'instance_name': 'master', 'tags': tags}
                 db_stats_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
@@ -529,7 +525,7 @@ class SQLServer(AgentCheck):
                     metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load DB File Space Usage metrics
-        if is_affirmative(self.instance.get('include_tempdb_file_space_usage_metrics', True)) and not is_azure_database(
+        if is_affirmative(self.instance.get('include_tempdb_file_space_usage_metrics', True)) and not is_azure_sql_database(
             engine_edition
         ):
             for name, table, column in TEMPDB_FILE_SPACE_USAGE_METRICS:
