@@ -14,6 +14,17 @@
 
 * remove pyro4 and serpent dependencies ([#16269](https://github.com/DataDog/integrations-core/pull/16269))
 
+***Removed***:
+
+* Disables SQL Server metrics on Azure SQL Database instances that rely on cross-database queries. The disabled metrics are:
+
+* sqlserver.tempdb.file_space_usage.free_space
+* sqlserver.tempdb.file_space_usage.version_store_space
+* sqlserver.tempdb.file_space_usage.internal_object_space
+* sqlserver.tempdb.file_space_usage.user_object_space
+* sqlserver.tempdb.file_space_usage.mixed_extent_space
+* sqlserver.database.backup_count ([#16658](https://github.com/DataDog/integrations-core/pull/16658))
+
 ***Changed***:
 
 * Always use the database instance's resolved hostname for metrics regardless of whether dbm is enabled or not. For non-dbm customers, this change
