@@ -35,12 +35,11 @@ dependencies = [
 dynamic = [
     "version",
 ]
-
 license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "psutil==5.9.7",
+    "psutil==5.9.8",
 ]
 
 [project.urls]
