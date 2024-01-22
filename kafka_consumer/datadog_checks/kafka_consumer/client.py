@@ -8,9 +8,6 @@ from confluent_kafka.admin import AdminClient
 
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS, OFFSET_INVALID
 
-# https://github.com/confluentinc/librdkafka/blob/e03d3bb91ed92a38f38d9806b8d8deffe78a1de5/src/rd.h#L78-L89
-LIBRDKAFKA_LOG_CRIT = 2
-
 
 class KafkaClient:
     def __init__(self, config, log) -> None:
@@ -26,7 +23,7 @@ class KafkaClient:
                 "bootstrap.servers": self.config._kafka_connect_str,
                 "socket.timeout.ms": self.config._request_timeout_ms,
                 "client.id": "dd-agent",
-                "log_level": LIBRDKAFKA_LOG_CRIT,
+                "log_level": self.config._librdkafka_log_level,
             }
             config.update(self.__get_authentication_config())
 
@@ -40,6 +37,7 @@ class KafkaClient:
             "group.id": consumer_group,
             "enable.auto.commit": False,  # To avoid offset commit to broker during close
             "queued.max.messages.kbytes": self.config._consumer_queued_max_messages_kbytes,
+            "log_level": self.config._librdkafka_log_level,
         }
         config.update(self.__get_authentication_config())
 
