@@ -1,5 +1,6 @@
 id: zeek
 metric_id: zeek
+backend_only: false
 facets:
   - name: Assigned Address
     source: log
@@ -316,7 +317,7 @@ pipeline:
   name: Zeek
   enabled: true
   filter:
-    query: "source:zeek "
+    query: "source:zeek"
   processors:
     - type: pipeline
       name: Processing for Corelight logs
