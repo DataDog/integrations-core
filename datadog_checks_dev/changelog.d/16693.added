@@ -1,0 +1,1 @@
+Different changelog template depending on release process. Marketplace and Extras changelogs are static, integrations-core changelogs have towncrier header.
