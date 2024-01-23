@@ -46,6 +46,10 @@ IGNORED_DEPS = {
     # cryptography>=42 requires rust>=1.63.0. We have rust 1.62 on centos 6
     # https://github.com/DataDog/datadog-agent/pull/22268
     'cryptography',
+    # Kubernetes client dropped upper bound on urllib3:
+    # https://github.com/kubernetes-client/python/pull/2131
+    # We have dependencies (at least botocore) which still require urllib3<2
+    'kubernetes',
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
