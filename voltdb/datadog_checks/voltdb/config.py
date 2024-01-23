@@ -1,14 +1,14 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional  # noqa: F401
 
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
 from . import queries
-from .types import Instance
+from .types import Instance  # noqa: F401
 
 DEFAULT_STATISTICS_COMPONENTS = [
     "COMMANDLOG",
@@ -40,6 +40,23 @@ STATISTICS_COMPONENTS_MAP = {
     "QUEUE": queries.QueueMetrics,
     "SNAPSHOTSTATUS": queries.SnapshotStatusMetrics,
     "TABLE": queries.TableMetrics,
+    "LIVECLIENTS": queries.LiveClientsMetrics,
+    "INITIATOR": queries.InitiatorMetrics,
+    "PARTITIONCOUNT": queries.PartitionCountMetrics,
+    "TTL": queries.TtlMetrics,
+    "COMPOUNDPROCCALLS": queries.CompoundProcCallsMetrics,
+    "COMPOUNDPROCSUMMARY": queries.CompoundProcSummaryMetrics,
+    "PROCEDUREDETAIL": queries.ProcedureDetailMetrics,
+    "PROCEDUREINPUT": queries.ProcedureInputMetrics,
+    "TASK": queries.TaskMetrics,
+    "TOPIC": queries.TopicMetrics,
+    "REBALANCE": queries.RebalanceMetrics,
+    "PLANNER": queries.PlannerMetrics,
+    "CLOCKSKEW": queries.ClockSkewMetrics,
+    "LIMITS": queries.LimitsMetrics,
+    "SNAPSHOTSUMMARY": queries.SnapshotsSummaryMetrics,
+    "COMPOUNDPROC": queries.CompoundProcMetrics,
+    "QUEUEPRIORITY": queries.QueuePriorityMetrics,
 }
 
 
