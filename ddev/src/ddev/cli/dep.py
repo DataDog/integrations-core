@@ -43,6 +43,9 @@ IGNORED_DEPS = {
     'orjson',
     # 2.4.10 is broken on py2 and they did not yank the version
     'rethinkdb',
+    # cryptography>=42 requires rust>=1.63.0. We have rust 1.62 on centos 6
+    # https://github.com/DataDog/datadog-agent/pull/22268
+    'cryptography',
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
