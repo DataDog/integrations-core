@@ -144,7 +144,7 @@ def test_command(
                 ctx.invoke(
                     test,
                     target_spec=f'{intg_name}:{env_name}',
-                    args=pytest_args,
+                    pytest_args=pytest_args,
                     junit=junit,
                     hide_header=True,
                     e2e=True,
