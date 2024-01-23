@@ -56,7 +56,6 @@ STATISTICS_COMPONENTS_MAP = {
     "LIMITS": queries.LimitsMetrics,
     "SNAPSHOTSUMMARY": queries.SnapshotsSummaryMetrics,
     "COMPOUNDPROC": queries.CompoundProcMetrics,
-    "QUEUEPRIORITY": queries.QueuePriorityMetrics,
 }
 
 
