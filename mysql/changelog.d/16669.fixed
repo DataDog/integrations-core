@@ -1,0 +1,1 @@
+[DBMON-3263] Check performance_schema, userstat and events_wait_current status on every check run. Fixes warning "Query Activity and Wait Event Collection not Enabled" on database restart.
