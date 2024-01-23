@@ -1,66 +1,67 @@
 id: squid
 metric_id: squid
+backend_only: false
 facets:
-  - name: Method
-    source: log
+  - groups:
+      - Web Access
+    name: Method
     path: http.method
-    groups:
-      - Web Access
-  - name: Status Code
     source: log
+  - groups:
+      - Web Access
+    name: Status Code
     path: http.status_code
-    groups:
-      - Web Access
-  - name: URL Host
     source: log
+  - groups:
+      - Web Access
+    name: URL Host
     path: http.url_details.host
-    groups:
-      - Web Access
-  - name: URL Path
     source: log
+  - groups:
+      - Web Access
+    name: URL Path
     path: http.url_details.path
-    groups:
-      - Web Access
-  - name: URL Port
     source: log
+  - groups:
+      - Web Access
+    name: URL Port
     path: http.url_details.port
-    groups:
-      - Web Access
-  - name: URL scheme
     source: log
+  - groups:
+      - Web Access
+    name: URL scheme
     path: http.url_details.scheme
-    groups:
-      - Web Access
-  - name: Client IP
     source: log
+  - groups:
+      - Web Access
+    name: Client IP
     path: network.client.ip
-    groups:
-      - Web Access
-  - name: Destination IP
     source: log
+  - groups:
+      - Web Access
+    name: Destination IP
     path: network.destination.ip
-    groups:
-      - Web Access
-  - name: Network Protocol
     source: log
-    path: network.protocol
-    groups:
+  - groups:
       - Network
-  - name: Status
+    name: Network Protocol
+    path: network.protocol
     source: log
+  - groups:
+      - Squid
+    name: Status
     path: squid.status
-    groups:
-      - Squid
-  - name: Peer Status
     source: log
+  - groups:
+      - Squid
+    name: Peer Status
     path: squid.peer_status
-    groups:
-      - Squid
-  - name: Instance Name
     source: log
-    path: squid.instance_name
-    groups:
+  - groups:
       - Squid
+    name: Instance Name
+    path: squid.instance_name
+    source: log
 pipeline:
   type: pipeline
   name: Squid

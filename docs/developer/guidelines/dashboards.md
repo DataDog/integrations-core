@@ -66,11 +66,12 @@ A dashboard that follows best practices helps users consume data quickly. Best p
 - [x] Adjacent graphs have aligned x-axes. If one graph is showing a legend and the other isn't, the x-axes won't align—make sure they either both show a legend or both do not.
    ![X axes alignment](../assets/images/x_axes_alignment.png)
 - [x] For timeseries, base the display type on the type of metric.
-    | Types of metric | Display type |
-    | - | - |
-    | Volume (e.g. number of connections) | `area` |
-    | Counts (e.g. number of errors) | `bars` |
-    | Multiple groups or default | `lines` |
+
+      | Types of metric | Display type |
+      | - | - |
+      | Volume (e.g. number of connections) | `area` |
+      | Counts (e.g. number of errors) | `bars` |
+      | Multiple groups or default | `lines` |
 
 ### Creating a New Dashboard
 
@@ -106,7 +107,8 @@ A dashboard that follows best practices helps users consume data quickly. Best p
 
 
 1. [Template variables](https://docs.datadoghq.com/dashboards/template_variables/) allow you to dynamically filter one or more widgets in a dashboard. Template variables must be universal and accessible by any user or account using the monitored service. Make sure all relevant graphs are listening to the relevant template variable filters. Template variables should be customized based on the type of technology. 
- | Type of integration technology | Typical Template Variable |
+
+    | Type of integration technology | Typical Template Variable |
     | - | - |
     | Database | Shards |
     | Data Streaming | Consumer |

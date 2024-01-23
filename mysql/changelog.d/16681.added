@@ -1,0 +1,1 @@
+[DBMON-3271] DBM integrations now defaulted to use new go-sqllexer pkg to obfuscate sql statements

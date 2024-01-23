@@ -184,9 +184,8 @@ class ApiSdk(Api):
     def get_compute_servers(self, project_id):
         return [
             server.to_dict(original_names=True)
-            for server in self.connection.compute.servers(
-                details=True,
-                project_id=project_id,
+            for server in self.call_paginated_api(
+                self.connection.compute.servers, details=True, project_id=project_id, limit=self.config.paginated_limit
             )
         ]
 
