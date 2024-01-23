@@ -700,6 +700,7 @@ CompoundProcMetrics = {
 }
 # https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php#sysprocstatqueueprio
 # One row per procedure, summarized across the cluster.
+
 QueuePriorityMetrics = {
     "name": "queuepriority",
     "query": "@Statistics:[QUEUEPRIORITY]",
