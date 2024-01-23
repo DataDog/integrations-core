@@ -100,9 +100,6 @@ cli = [
 [project.entry-points.pytest11]
 datadog_checks = "datadog_checks.dev.plugin.pytest"
 
-[project.entry-points.tox]
-datadog_checks = "datadog_checks.dev.plugin.tox"
-
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"
 
