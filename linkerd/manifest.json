@@ -48,7 +48,9 @@
       },
       "process_signatures": [
         "linkerd"
-      ]
+      ],
+      "source_type_id": 10019,
+      "auto_install": true
     },
     "dashboards": {
       "Linkerd - Overview": "assets/dashboards/overview.json"
