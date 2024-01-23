@@ -709,7 +709,7 @@ QueuePriorityMetrics = {
         {"name": "host_id", "type": "tag"},
         {"name": "voltdb_hostname", "type": "tag"},
         {"name": "site_id", "type": "tag"},
-        None,  # PRIORITY
+        {"name": "queuepriority.priority", "type": "gauge"},
         {"name": "queuepriority.current_depth", "type": "monotonic_gauge"},
         {"name": "queuepriority.poll_count", "type": "gauge"},
         {"name": "queuepriority.avg_wait", "type": "gauge"},
