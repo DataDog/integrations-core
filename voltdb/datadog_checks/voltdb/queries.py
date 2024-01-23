@@ -711,7 +711,7 @@ QueuePriorityMetrics = {
         {"name": "site_id", "type": "tag"},
         None,  # PRIORITY
         {"name": "queuepriority.current_depth", "type": "monotonic_gauge"},
-        {"name": "queuepriority.poll_count", "type": "monotonic_gauge"},
+        {"name": "queuepriority.poll_count", "type": "gauge"},
         {"name": "queuepriority.avg_wait", "type": "gauge"},
         {"name": "queuepriority.max_wait", "type": "gauge"},
     ],
