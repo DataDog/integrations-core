@@ -30,19 +30,21 @@ class AirflowCheck(AgentCheck):
         url_stable_version = self._url + "/api/v1/version"
         can_connect_status = AgentCheck.OK
 
-        # Choose which version of the API to use
+        # Choose which version of Airflow to use
         if self._get_version(url_stable_version) is None:
-            resp = self._get_json(url_experimental)
-            if resp is None:
-                can_connect_status = AgentCheck.CRITICAL
-            else:
-                self._submit_healthy_metrics_experimental(resp, tags)
+            # Airflow version 1
+            target_url = url_experimental
+            submit_metrics = self._submit_healthy_metrics_experimental
         else:
-            resp = self._get_json(url_stable)
-            if resp is None:
-                can_connect_status = AgentCheck.CRITICAL
-            else:
-                self._submit_healthy_metrics_stable(resp, tags)
+            # Airflow version 2
+            target_url = url_stable
+            submit_metrics = self._submit_healthy_metrics_stable
+
+        resp = self._get_json(target_url)
+        if resp is None:
+            can_connect_status = AgentCheck.CRITICAL
+        else:
+            submit_metrics(resp, tags)
 
         self.service_check('airflow.can_connect', can_connect_status, tags=tags)
         self.gauge('airflow.can_connect', int(can_connect_status == AgentCheck.OK), tags=tags)
@@ -50,19 +52,16 @@ class AirflowCheck(AgentCheck):
     def _get_version(self, url):
         """Get version from stable API `/api/v1/version`"""
         try:
-            resp = self.http.get(url)
-            resp.raise_for_status()
-            resp = resp.json()
+            resp_payload = self.http.get(url)
+            resp_payload.raise_for_status()
+            resp_payload = resp_payload.json()
         except Exception as e:
             self.log.debug("Couldn't collect version from URL: %s with exception: %s", url, e)
         else:
-            try:
-                version = resp.get('version')
-            except AttributeError:
-                self.log.debug("Couldn't collect version from response")
-            else:
+            version = resp_payload.get('version', None)
+            if version:
                 self.log.info("Airflow version: %s", version)
-                return version
+            return version
 
     def _submit_healthy_metrics_experimental(self, resp, tags):
         if resp.get('status') == AIRFLOW_STATUS_OK:
