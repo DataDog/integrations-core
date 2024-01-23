@@ -710,7 +710,7 @@ QueuePriorityMetrics = {
         {"name": "voltdb_hostname", "type": "tag"},
         {"name": "site_id", "type": "tag"},
         {"name": "queuepriority.priority", "type": "gauge"},
-        {"name": "queuepriority.current_depth", "type": "monotonic_gauge"},
+        {"name": "queuepriority.current_depth", "type": "gauge"},
         {"name": "queuepriority.poll_count", "type": "gauge"},
         {"name": "queuepriority.avg_wait", "type": "gauge"},
         {"name": "queuepriority.max_wait", "type": "gauge"},
