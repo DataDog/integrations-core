@@ -142,7 +142,12 @@ def test_command(
 
             with EnvVars(env_vars):
                 ctx.invoke(
-                    test, target_spec=f'{intg_name}:{env_name}', args=pytest_args, junit=junit, hide_header=True, e2e=True
+                    test,
+                    target_spec=f'{intg_name}:{env_name}',
+                    args=pytest_args,
+                    junit=junit,
+                    hide_header=True,
+                    e2e=True,
                 )
         finally:
             ctx.invoke(stop, intg_name=intg_name, environment=env_name, ignore_state=env_active)

@@ -22,6 +22,7 @@ def fix_coverage_report(report_file: Path):
 
     report_file.write_bytes(report)
 
+
 epilog = '''
 Examples
 
@@ -37,6 +38,7 @@ ddev test postgres:py3.11-9.6 -- -m unit
 Run specific test in multiple environments:
 ddev test postgres:py3.11-9.6,py3.11-16.0 -- -k test_my_special_test
 '''
+
 
 @click.command(epilog=epilog)
 @click.argument('target_spec', required=False)
