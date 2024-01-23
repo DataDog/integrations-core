@@ -692,7 +692,6 @@ CompoundProcMetrics = {
         {'name': 'compoundproc.failures', 'type': 'monotonic_count'},
     ],
 }
-
 # https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php#sysprocstatqueueprio
 # One row per procedure, summarized across the cluster.
 QueuePriorityMetrics = {
