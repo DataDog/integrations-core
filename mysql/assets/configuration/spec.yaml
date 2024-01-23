@@ -335,6 +335,22 @@ files:
               type: boolean
               example: false
               display_default: false
+          - name: collect_settings
+            description: Configure collection of performance_schema.global_variables. This is an alpha feature.
+            options:
+              - name: enabled
+                description: |
+                  Enable collection of performance_schema.global_variables. Requires `dbm: true`.
+                value:
+                  type: boolean
+                  example: false
+              - name: collection_interval
+                description: |
+                  Set the database settings collection interval (in seconds). Each collection involves a single query to
+                  `performance_schema.global_variables`.
+                value:
+                  type: number
+                  example: 600
           - name: query_metrics
             description: Configure collection of query metrics
             options:
@@ -536,18 +552,30 @@ files:
                 value:
                   type: string
                   example: flexible_server
-              - name: name
+              - name: fully_qualified_domain_name
                 description: |
-                  Equal to the name of the Azure MySQL database instance.
+                  Equal to the full qualified domain name of the Azure MySQL database.
+                  
+                  This value is optional if the value of `host` is already configured to the fully qualified domain name.
                 value:
                   type: string
-                  example: mysql-database
+                  example: mysql-database.database.windows.net
 
           - name: obfuscator_options
             description: |
               Configure how the SQL obfuscator behaves.
               Note: This option only applies when `dbm` is enabled.
             options:
+              - name: obfuscation_mode
+                description: |
+                  Set the obfuscation mode. The obfuscation mode determines how the SQL obfuscator will obfuscate your SQL
+                  statements. The following modes are supported:
+                  - `obfuscate_only`: Obfuscate the SQL statement without normalizing the statement.
+                  - `obfuscate_and_normalize`: Obfuscate the SQL statement and normalize the statement.
+                value:
+                  type: string
+                  example: obfuscate_and_normalize
+                  display_default: obfuscate_and_normalize
               - name: replace_digits
                 description: |
                   Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
@@ -594,6 +622,48 @@ files:
                   type: boolean
                   example: true
                   display_default: true
+              - name: remove_space_between_parentheses
+                description: |
+                  Set to `true` to remove spaces between parentheses in your normalized SQL statements.
+                value:
+                  type: boolean
+                  example: false
+                  display_default: false
+              - name: keep_null
+                description: |
+                  Set to `true` to keep the keyword `NULL` in your obfuscated SQL statements.
+                value:
+                  type: boolean
+                  example: false
+                  display_default: false
+              - name: keep_boolean
+                description: |
+                  Set to `true` to keep the keywords `TRUE` and `FALSE` in your obfuscated SQL statements.
+                value:
+                  type: boolean
+                  example: false
+                  display_default: false
+              - name: keep_positional_parameter
+                description: |
+                  Set to `true` to keep positional parameters (e.g. `$1`) in your obfuscated SQL statements.
+                value:
+                  type: boolean
+                  example: false
+                  display_default: false
+              - name: keep_trailing_semicolon
+                description: |
+                  Set to `true` to keep trailing semicolons in your normalized SQL statements.
+                value:
+                  type: boolean
+                  example: false
+                  display_default: false
+              - name: keep_identifier_quotation
+                description: |
+                  Set to `true` to keep identifier quotations (e.g. `"my_table"`) in your normalized SQL statements.
+                value:
+                  type: boolean
+                  example: false
+                  display_default: false
           - name: log_unobfuscated_queries
             hidden: true
             description: |
@@ -613,6 +683,16 @@ files:
             value:
               type: boolean
               example: false
+              display_default: false
+          - name: database_instance_collection_interval
+            hidden: true
+            description: |
+              Set the database instance collection interval (in seconds). The database instance collection sends
+              basic information about the database instance along with a signal that it still exists. 
+              This collection does not involve any additional queries to the database.
+            value:
+              type: number
+              example: 1800
               display_default: false
           - template: instances/default
             overrides:

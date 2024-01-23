@@ -1,0 +1,34 @@
+{
+    "conductors": [
+      {
+        "hostname": "compute1.localdomain",
+        "conductor_group": "",
+        "links": [
+          {
+            "href": "http://127.0.0.1:6385/v1/conductors/compute1.localdomain",
+            "rel": "self"
+          },
+          {
+            "href": "http://127.0.0.1:6385/conductors/compute1.localdomain",
+            "rel": "bookmark"
+          }
+        ],
+        "alive": false
+      },
+      {
+        "hostname": "compute2.localdomain",
+        "conductor_group": "",
+        "links": [
+          {
+            "href": "http://127.0.0.1:6385/v1/conductors/compute2.localdomain",
+            "rel": "self"
+          },
+          {
+            "href": "http://127.0.0.1:6385/conductors/compute2.localdomain",
+            "rel": "bookmark"
+          }
+        ],
+        "alive": true
+      }
+    ]
+  }

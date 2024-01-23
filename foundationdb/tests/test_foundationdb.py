@@ -3,16 +3,16 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
-from typing import Any, Dict
+from typing import Any, Dict  # noqa: F401
 
 import pytest
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.foundationdb import FoundationdbCheck
 
-from .common import ACTIVE_ENV, METRICS
+from .common import METRICS, PROTOCOL
 
 current_dir = dir_path = os.path.dirname(os.path.realpath(__file__)) + '/'
 
@@ -38,7 +38,7 @@ def test_full(aggregator, instance):
         aggregator.assert_service_check("foundationdb.can_connect", AgentCheck.OK)
 
 
-@pytest.mark.skipif(ACTIVE_ENV == 'py38-tls', reason="Non-TLS FoundationDB cluster only.")
+@pytest.mark.skipif(PROTOCOL == 'tls', reason="Non-TLS FoundationDB cluster only.")
 @pytest.mark.usefixtures("dd_environment")
 def test_integ(aggregator, instance):
     # type: (AggregatorStub, Dict[str, Any]) -> None
@@ -52,7 +52,7 @@ def test_integ(aggregator, instance):
     aggregator.assert_service_check("foundationdb.can_connect", AgentCheck.OK)
 
 
-@pytest.mark.skipif(ACTIVE_ENV == 'py38-tls', reason="Non-TLS FoundationDB cluster only.")
+@pytest.mark.skipif(PROTOCOL == 'tls', reason="Non-TLS FoundationDB cluster only.")
 @pytest.mark.usefixtures("dd_environment")
 def test_custom_metrics(aggregator, instance):
     # type: (AggregatorStub, Dict[str, Any]) -> None
@@ -77,7 +77,7 @@ def test_custom_metrics(aggregator, instance):
     del instance['custom_queries']
 
 
-@pytest.mark.skipif(ACTIVE_ENV != 'py38-tls', reason="TLS FoundationDB cluster only.")
+@pytest.mark.skipif(PROTOCOL != 'tls', reason="TLS FoundationDB cluster only.")
 @pytest.mark.usefixtures("dd_environment")
 def test_tls_integ(aggregator, tls_instance):
     # type: (AggregatorStub, Dict[str, Any]) -> None

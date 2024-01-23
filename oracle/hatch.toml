@@ -1,14 +1,14 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["3.8"]
+python = ["3.11"]
 version = ["12.2"]
-library = ["oracle", "jdbc"]
+library = ["oracle", "oracle-instant-client", "jdbc"]
 
 [[envs.default.matrix]]
-python = ["3.8"]
+python = ["3.11"]
 version = ["12.2"]
-library = ["oracle", "jdbc"]
+library = ["oracle", "oracle-instant-client", "jdbc"]
 protocol = ["tcps"]
 
 [envs.default.overrides]
@@ -21,6 +21,7 @@ matrix.protocol.env-vars = [
 matrix.library.set-features = [
   { value = "deps", if = ["jdbc"] },
   { value = "client-only", if = ["oracle"] },
+  { value = "client-only", if = ["oracle-instant-client"] },
 ]
 
 [envs.default.env-vars]

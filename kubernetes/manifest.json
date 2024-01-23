@@ -12,11 +12,13 @@
     "title": "Kubernetes",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Category::Orchestration",
       "Category::Containers",
-      "Category::Log Collection"
+      "Category::Kubernetes",
+      "Category::Log Collection",
+      "Category::Network",
+      "Category::Orchestration",
+      "Supported OS::Linux",
+      "Supported OS::macOS"
     ]
   },
   "author": {
@@ -52,7 +54,8 @@
       "Kubernetes DaemonSets Overview": "assets/dashboards/kubernetes_daemonsets.json",
       "Kubernetes Jobs & Cronjobs Overview": "assets/dashboards/kubernetes_jobs.json",
       "Kubernetes StatefulSets Overview": "assets/dashboards/kubernetes_statefulsets.json",
-      "Kubernetes Clusters Overview": "assets/dashboards/kubernetes_clusters.json"
+      "Kubernetes Clusters Overview": "assets/dashboards/kubernetes_clusters.json",
+      "Kubernetes CPU & Memory usage": "assets/dashboards/kubernetes_cpu_memory.json"
     },
     "monitors": {
       "[kubernetes] Monitor Kubernetes Deployments Replica Pods": "assets/monitors/monitor_deployments_replicas.json",

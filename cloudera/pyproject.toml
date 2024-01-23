@@ -10,7 +10,7 @@ build-backend = "hatchling.build"
 name = "datadog-cloudera"
 description = "The Cloudera check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
+license = "BSD-3-Clause"
 requires-python = ">=3.8"
 keywords = [
     "datadog",
@@ -27,11 +27,11 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
     "Private :: Do Not Upload",
-    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.11",
     "Topic :: System :: Monitoring",
 ]
 dependencies = [
-    "datadog-checks-base>=29.0.0",
+    "datadog-checks-base>=32.6.0",
 ]
 dynamic = [
     "version",

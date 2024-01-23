@@ -1,33 +1,40 @@
 {
-	"name": "[Postgres] Replication delay is abnormally high on {{host.name}}",
-	"type": "query alert",
-	"query": "avg(last_1h):anomalies(avg:postgresql.replication_delay{*}, 'basic', 2, direction='above', alert_window='last_15m', interval=20, count_default_zero='true') >= 1",
-	"message": "Please check host {{host.name}}, as replication delay has been abnormally high.",
-	"tags": [
-		"integration:postgres"
-	  ],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": false,
-		"renotify_interval": "0",
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 1,
-			"critical_recovery": 0
-		},
-		"threshold_windows": {
-			"trigger_window": "last_15m",
-			"recovery_window": "last_15m"
-		}
-	},
-	"priority": null,
-	"recommended_monitor_metadata": {
-		"description": "Notify your team when Postgres replication delay is unusually high."
-	}
+  "version": 2,
+  "created_at": "2021-02-16",
+  "last_updated_at": "2021-03-17",
+  "title": "Replication delay is high",
+  "tags": [
+    "integration:postgres"
+  ],
+  "description": "Replication lag is the delay between the time when data is written to the primary database and the time when it is replicated to the standby databases. This monitor tracks the replication lag of the postgres database.",
+  "definition": {
+    "message": "Please check host {{host.name}}, as replication delay has been abnormally high.",
+    "name": "[Postgres] Replication delay is abnormally high on {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_1h):anomalies(avg:postgresql.replication_delay{*}, 'basic', 2, direction='above', alert_window='last_15m', interval=20, count_default_zero='true') >= 1",
+    "tags": [
+      "integration:postgres"
+    ],
+    "type": "query alert"
+  }
 }

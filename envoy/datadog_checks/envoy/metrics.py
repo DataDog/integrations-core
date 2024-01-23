@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from .utils import make_metric_tree
+from .utils import make_metric_tree, modify_metrics_dict
 
 METRIC_PREFIX = 'envoy.'
 
@@ -351,6 +351,32 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_cluster_outlier_detection_ejections_detected_failure_percentage': 'cluster.outlier_detection.ejections_detected_failure_percentage',  # noqa: E501
     'envoy_cluster_outlier_detection_ejections_enforced_failure_percentage_local_origin': 'cluster.outlier_detection.ejections_enforced_failure_percentage_local_origin',  # noqa: E501
     'envoy_cluster_outlier_detection_ejections_detected_failure_percentage_local_origin': 'cluster.outlier_detection.ejections_detected_failure_percentage_local_origin',  # noqa: E501
+    'envoy_access_logs_grpc_access_log_logs_dropped': 'access_logs.grpc_access_log.logs_dropped',
+    'envoy_access_logs_grpc_access_log_logs_written': 'access_logs.grpc_access_log.logs_written',
+    'envoy_tcp_downstream_cx': 'tcp.downstream_cx',
+    'envoy_tcp_downstream_cx_no_route': 'tcp.downstream_cx_no_route',
+    'envoy_tcp_downstream_cx_tx_bytes': 'tcp.downstream_cx_tx_bytes',
+    'envoy_tcp_downstream_cx_tx_bytes_buffered': 'tcp.downstream_cx_tx_bytes_buffered',
+    'envoy_tcp_downstream_cx_rx_bytes': 'tcp.downstream_cx_rx_bytes',
+    'envoy_tcp_downstream_cx_rx_bytes_buffered': 'tcp.downstream_cx_rx_bytes_buffered',
+    'envoy_tcp_downstream_flow_control_paused_reading_': 'tcp.downstream_flow_control_paused_reading',
+    'envoy_tcp_downstream_flow_control_resumed_reading': 'tcp.downstream_flow_control_resumed_reading',
+    'envoy_tcp_idle_timeout': 'tcp.idle_timeout',
+    'envoy_tcp_on_demand_cluster_attempt': 'tcp.on_demand_cluster_attempt',
+    'envoy_tcp_on_demand_cluster_missing': 'tcp.on_demand_cluster_missing',
+    'envoy_tcp_on_demand_cluster_success': 'tcp.on_demand_cluster_success',
+    'envoy_tcp_on_demand_cluster_timeout': 'tcp.on_demand_cluster_timeout',
+    'envoy_tcp_upstream_flush': 'tcp.upstream_flush',
+    'envoy_tcp_upstream_flush_active': 'tcp.upstream_flush_active',
+    'envoy_http_rbac_allowed': 'http.rbac_allowed',
+    'envoy_http_rbac_denied': 'http.rbac_denied',
+    'envoy_http_rbac_shadow_allowed': 'http.rbac_shadow_allowed',
+    'envoy_http_rbac_shadow_denied': 'http.rbac_shadow_denied',
+    'envoy_http_local_rate_limit_enabled': 'http.local_rate_limit_enabled',
+    'envoy_http_local_rate_limit_enforced': 'http.local_rate_limit_enforced',
+    'envoy_http_local_rate_limit_rate_limited': 'http.local_rate_limit_rate_limited',
+    'envoy_http_local_rate_limit_ok': 'http.local_rate_limit_ok',
+    'envoy_control_plane_connected_state': 'control_plane.connected_state',
 }
 
 # fmt: off
@@ -3820,7 +3846,89 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'access_logs.grpc_access_log.logs_dropped': {
+        'tags': (
+            (),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'access_logs.grpc_access_log.logs_written': {
+        'tags': (
+            (),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.rbac.allowed': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.rbac.denied': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.rbac.shadow_allowed': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.rbac.shadow_denied': {
+        'tags': (
+            ('stat_prefix',),
+            ('shadow_rule_prefix',),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    # "*." to match at the beginning of raw metric if it doesn't have a standard name
+    '*.http_local_rate_limit.enabled': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    '*.http_local_rate_limit.enforced': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    '*.http_local_rate_limit.rate_limited': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    '*.http_local_rate_limit.ok': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
 }
 # fmt: on
 
+MOD_METRICS = modify_metrics_dict(METRICS)
 METRIC_TREE = make_metric_tree(METRICS)

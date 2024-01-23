@@ -1,29 +1,36 @@
 {
-	"name": "FoundationDB Read Latency Probe",
-	"type": "query alert",
-	"query": "avg(last_5m):avg:foundationdb.latency_probe.read_seconds{*} > 5",
-	"message": "{{#is_alert}}\nA read operation performed on the FoundationDB cluster to measure current latency took a long time.\n{{/is_alert}} \n{{#is_warning}}\nA read operation performed on the FoundationDB cluster to measure current latency took longer than would normally be expected.\n{{/is_warning}}\n{{#is_no_data}}\nNo FoundationDB latency probe data was received. This may indicate cluster unavailability.\n{{/is_no_data}} ",
-	"tags": [
-		"integration:fdb"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 1,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": true,
-		"renotify_interval": "0",
-		"escalation_message": "",
-		"no_data_timeframe": 15,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 5,
-			"warning": 2
-		}
-	},
-	"priority": null,
-	"recommended_monitor_metadata": {
-		"description": "Get notified when a read operation performed on the FoundationDB cluster to measure current latency took a long time."
-	}
+  "version": 2,
+  "created_at": "2022-03-14",
+  "last_updated_at": "2022-05-25",
+  "title": "Read operation took a long time",
+  "tags": [
+    "integration:foundationdb"
+  ],
+  "description": "Read latency refers to the time it takes for read operations to be completed within a database system. This monitor tracks the average read latency for various operations within FoundationDB to avoid issues related to data retrieval.",
+  "definition": {
+    "message": "{{#is_alert}}\nA read operation performed on the FoundationDB cluster to measure current latency took a long time.\n{{/is_alert}} \n{{#is_warning}}\nA read operation performed on the FoundationDB cluster to measure current latency took longer than would normally be expected.\n{{/is_warning}}\n{{#is_no_data}}\nNo FoundationDB latency probe data was received. This may indicate cluster unavailability.\n{{/is_no_data}} ",
+    "name": "FoundationDB Read Latency Probe",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": 15,
+      "notify_audit": false,
+      "notify_no_data": true,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 5,
+        "warning": 2
+      },
+      "timeout_h": 1
+    },
+    "priority": null,
+    "query": "avg(last_5m):avg:foundationdb.latency_probe.read_seconds{*} > 5",
+    "tags": [
+      "integration:fdb"
+    ],
+    "type": "query alert"
+  }
 }

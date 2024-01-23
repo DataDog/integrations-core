@@ -11,7 +11,7 @@ you intend to work on.
 
 ## Python
 
-To work on any integration you must install Python 3.8.
+To work on any integration you must install Python 3.11.
 
 After installation, restart your terminal and ensure that your newly installed Python comes first in your `PATH`.
 
@@ -25,7 +25,7 @@ After installation, restart your terminal and ensure that your newly installed P
     then install Python:
 
     ```
-    brew install python@3.8
+    brew install python@3.11
     ```
 
     After it completes, check the output to see if it asked you to run any extra commands and if so, execute them.
@@ -39,7 +39,7 @@ After installation, restart your terminal and ensure that your newly installed P
 === "Windows"
     Windows users have it the easiest.
 
-    Simply download the [Python 3.8 64-bit executable installer](https://www.python.org/downloads/release/python-3810/) and run it.
+    Download the [Python 3.11 64-bit executable installer](https://www.python.org/downloads/release/python-3115/) and run it.
     When prompted, be sure to select the option to add to your `PATH`. Also, it is recommended that you choose the per-user installation method.
 
     Verify successful `PATH` modification:
@@ -51,7 +51,7 @@ After installation, restart your terminal and ensure that your newly installed P
 === "Linux"
     Ah, you enjoy difficult things. Are you using Gentoo?
 
-    We recommend using either [Miniconda][miniconda-docs] or [pyenv][pyenv-github] to install Python 3.8. Whatever you do, never modify the system Python.
+    We recommend using either [Miniconda][miniconda-docs] or [pyenv][pyenv-github] to install Python 3.11. Whatever you do, never modify the system Python.
 
     Verify successful `PATH` modification:
 
@@ -108,26 +108,107 @@ To install certain command line tools, you'll need [pipx](https://github.com/pyp
 
 ### Installation
 
-You have 2 options to install the CLI.
+You have 4 options to install the CLI.
 
-!!! warning
-    For either option, if you are on macOS/Linux do not use `sudo`! Doing so will result in a broken installation.
+#### Installers
 
-#### Stable
+=== "macOS"
+    === "GUI installer"
+        1. In your browser, download the `.pkg` file: [ddev-<docs-insert-ddev-version>.pkg](https://github.com/DataDog/integrations-core/releases/download/ddev-v<docs-insert-ddev-version>/ddev-<docs-insert-ddev-version>.pkg)
+        2. Run your downloaded file and follow the on-screen instructions.
+        3. Restart your terminal.
+        4. To verify that the shell can find and run the `ddev` command in your `PATH`, use the following command.
 
-The latest released version may be installed from [PyPI][].
+            ```
+            $ ddev --version
+            <docs-insert-ddev-version>
+            ```
+    === "Command line installer"
+        1. Download the file using the `curl` command. The `-o` option specifies the file name that the downloaded package is written to. In this example, the file is written to `ddev-<docs-insert-ddev-version>.pkg` in the current directory.
+
+            ```
+            curl -o ddev-<docs-insert-ddev-version>.pkg https://github.com/DataDog/integrations-core/releases/download/ddev-v<docs-insert-ddev-version>/ddev-<docs-insert-ddev-version>.pkg
+            ```
+        2. Run the standard macOS [`installer`](https://ss64.com/osx/installer.html) program, specifying the downloaded `.pkg` file as the source. Use the `-pkg` parameter to specify the name of the package to install, and the `-target /` parameter for the drive in which to install the package. The files are installed to `/usr/local/ddev`, and an entry is created at `/etc/paths.d/ddev` that instructs shells to add the `/usr/local/ddev` directory to. You must include sudo on the command to grant write permissions to those folders.
+
+            ```
+            sudo installer -pkg ./ddev-<docs-insert-ddev-version>.pkg -target /
+            ```
+        3. Restart your terminal.
+        4. To verify that the shell can find and run the `ddev` command in your `PATH`, use the following command.
+
+            ```
+            $ ddev --version
+            <docs-insert-ddev-version>
+            ```
+
+=== "Windows"
+    === "GUI installer"
+        1. In your browser, download one the `.msi` files:
+              - [ddev-<docs-insert-ddev-version>-x64.msi](https://github.com/DataDog/integrations-core/releases/download/ddev-v<docs-insert-ddev-version>/ddev-<docs-insert-ddev-version>-x64.msi)
+              - [ddev-<docs-insert-ddev-version>-x86.msi](https://github.com/DataDog/integrations-core/releases/download/ddev-v<docs-insert-ddev-version>/ddev-<docs-insert-ddev-version>-x86.msi)
+        2. Run your downloaded file and follow the on-screen instructions.
+        3. Restart your terminal.
+        4. To verify that the shell can find and run the `ddev` command in your `PATH`, use the following command.
+
+            ```
+            $ ddev --version
+            <docs-insert-ddev-version>
+            ```
+    === "Command line installer"
+        1. Download and run the installer using the standard Windows [`msiexec`](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/msiexec) program, specifying one of the `.msi` files as the source. Use the `/passive` and `/i` parameters to request an unattended, normal installation.
+
+            === "x64"
+                ```
+                msiexec /passive /i https://github.com/DataDog/integrations-core/releases/download/ddev-v<docs-insert-ddev-version>/ddev-<docs-insert-ddev-version>-x64.msi
+                ```
+            === "x86"
+                ```
+                msiexec /passive /i https://github.com/DataDog/integrations-core/releases/download/ddev-v<docs-insert-ddev-version>/ddev-<docs-insert-ddev-version>-x86.msi
+                ```
+        2. Restart your terminal.
+        3. To verify that the shell can find and run the `ddev` command in your `PATH`, use the following command.
+
+            ```
+            $ ddev --version
+            <docs-insert-ddev-version>
+            ```
+
+#### Standalone binaries
+
+After downloading the archive corresponding to your platform and architecture, extract the binary to a directory that is on your PATH and rename to `ddev`.
+
+=== "macOS"
+    - [ddev-<docs-insert-ddev-version>-aarch64-apple-darwin.tar.gz](https://github.com/DataDog/integrations-core/releases/download/ddev-v<docs-insert-ddev-version>/ddev-<docs-insert-ddev-version>-aarch64-apple-darwin.tar.gz)
+    - [ddev-<docs-insert-ddev-version>-x86_64-apple-darwin.tar.gz](https://github.com/DataDog/integrations-core/releases/download/ddev-v<docs-insert-ddev-version>/ddev-<docs-insert-ddev-version>-x86_64-apple-darwin.tar.gz)
+
+=== "Windows"
+    - [ddev-<docs-insert-ddev-version>-x86_64-pc-windows-msvc.zip](https://github.com/DataDog/integrations-core/releases/download/ddev-v<docs-insert-ddev-version>/ddev-<docs-insert-ddev-version>-x86_64-pc-windows-msvc.zip)
+    - [ddev-<docs-insert-ddev-version>-i686-pc-windows-msvc.zip](https://github.com/DataDog/integrations-core/releases/download/ddev-v<docs-insert-ddev-version>/ddev-<docs-insert-ddev-version>-i686-pc-windows-msvc.zip)
+
+=== "Linux"
+    - [ddev-<docs-insert-ddev-version>-aarch64-unknown-linux-gnu.tar.gz](https://github.com/DataDog/integrations-core/releases/download/ddev-v<docs-insert-ddev-version>/ddev-<docs-insert-ddev-version>-aarch64-unknown-linux-gnu.tar.gz)
+    - [ddev-<docs-insert-ddev-version>-x86_64-unknown-linux-gnu.tar.gz](https://github.com/DataDog/integrations-core/releases/download/ddev-v<docs-insert-ddev-version>/ddev-<docs-insert-ddev-version>-x86_64-unknown-linux-gnu.tar.gz)
+    - [ddev-<docs-insert-ddev-version>-x86_64-unknown-linux-musl.tar.gz](https://github.com/DataDog/integrations-core/releases/download/ddev-v<docs-insert-ddev-version>/ddev-<docs-insert-ddev-version>-x86_64-unknown-linux-musl.tar.gz)
+    - [ddev-<docs-insert-ddev-version>-i686-unknown-linux-gnu.tar.gz](https://github.com/DataDog/integrations-core/releases/download/ddev-v<docs-insert-ddev-version>/ddev-<docs-insert-ddev-version>-i686-unknown-linux-gnu.tar.gz)
+    - [ddev-<docs-insert-ddev-version>-powerpc64le-unknown-linux-gnu.tar.gz](https://github.com/DataDog/integrations-core/releases/download/ddev-v<docs-insert-ddev-version>/ddev-<docs-insert-ddev-version>-powerpc64le-unknown-linux-gnu.tar.gz)
+
+#### PyPI
 
 === "macOS"
     Remove any executables shown in the output of `which -a ddev` and make sure that there is no active virtual environment, then run:
 
     === "ARM"
         ```
-        pipx install ddev --python /opt/homebrew/bin/python3.8
+        pipx install ddev --python /opt/homebrew/bin/python3.11
         ```
     === "Intel"
         ```
-        pipx install ddev --python /usr/local/bin/python3.8
+        pipx install ddev --python /usr/local/bin/python3.11
         ```
+
+    !!! warning
+        Do not use `sudo` as it may result in a broken installation!
 
 === "Windows"
     Run:
@@ -142,6 +223,15 @@ The latest released version may be installed from [PyPI][].
     ```
     pipx install ddev
     ```
+
+    !!! warning
+        Do not use `sudo` as it may result in a broken installation!
+
+Upgrade at any time by running:
+
+```
+pipx upgrade ddev
+```
 
 #### Development
 
@@ -150,9 +240,17 @@ This is if you cloned [integrations-core][] and want to always use the version b
 === "macOS"
     Remove any executables shown in the output of `which -a ddev` and make sure that there is no active virtual environment, then run:
 
-    ```
-    pipx install -e /path/to/integrations-core/ddev --python /usr/local/opt/python@3.8/bin/python3.8
-    ```
+    === "ARM"
+        ```
+        pipx install -e /path/to/integrations-core/ddev --python /opt/homebrew/opt/python@3.11/bin/python3.11
+        ```
+    === "Intel"
+        ```
+        pipx install -e /path/to/integrations-core/ddev --python /usr/local/opt/python@3.11/bin/python3.11
+        ```
+
+    !!! warning
+        Do not use `sudo` as it may result in a broken installation!
 
 === "Windows"
     Run:
@@ -168,16 +266,24 @@ This is if you cloned [integrations-core][] and want to always use the version b
     pipx install -e /path/to/integrations-core/ddev
     ```
 
-!!! note
-    Be aware that this method does not keep track of dependencies so you will need to re-run the command if/when the required dependencies are changed.
+    !!! warning
+        Do not use `sudo` as it may result in a broken installation!
 
-### Upgrade
-
-Upgrade (or re-sync dependencies for [development](#development) versions) at any time by running:
+Re-sync dependencies at any time by running:
 
 ```
 pipx upgrade ddev
 ```
+
+!!! note
+    Be aware that this method does not keep track of dependencies so you will need to re-run the command if/when the required dependencies are changed.
+
+!!! note
+    Also be aware that this method does not get any changes from `datadog_checks_dev`, so if you have unreleased changes from `datadog_checks_dev` that may affect `ddev`, you will need to run the following to get the most recent changes from `datadog_checks_dev` to your `ddev`:
+
+    ```
+    pipx inject ddev -e "/path/to/datadog_checks_dev"
+    ```
 
 ### Configuration
 

@@ -10,7 +10,7 @@
 # Author: monica.riccelli@oracle.com
 # ==============================================
 # jython for WLST (WebLogic Scripting Tool)
-# flake8: noqa
+# ruff: noqa
 
 import os
 

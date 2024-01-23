@@ -3,13 +3,13 @@
 init_config:
 
     ## @param workload_username - string - required
-    ## The Workload username. This value can be found in the `User Management` tab of the Management 
+    ## The Workload username. This value can be found in the `User Management` tab of the Management
     ## Console in the `Workload User Name`.
     #
     workload_username: <WORKLOAD_USERNAME>
 
     ## @param workload_password - string - required
-    ## The Workload password. This value can be found in the `User Management` tab of the Management 
+    ## The Workload password. This value can be found in the `User Management` tab of the Management
     ## Console in the `Workload Password`.
     #
     workload_password: <WORKLOAD_PASSWORD>
@@ -26,24 +26,24 @@ init_config:
 instances:
 
     ## @param api_url - string - required
-    ## The URL endpoint for the Cloudera Manager API. This can be found under the Endpoints tab for 
-    ## your Data Hub to monitor. 
+    ## The URL endpoint for the Cloudera Manager API. This can be found under the Endpoints tab for
+    ## your Data Hub to monitor.
     ##
-    ## Note: The version of the Cloudera Manager API needs to be appended at the end of the URL. 
-    ## For example, using v48 of the API for Data Hub `cluster_1` should result with a URL similar 
+    ## Note: The version of the Cloudera Manager API needs to be appended at the end of the URL.
+    ## For example, using v48 of the API for Data Hub `cluster_1` should result with a URL similar
     ## to the following:
     ## `https://cluster1.cloudera.site/cluster_1/cdp-proxy-api/cm-api/v48`
     #
   - api_url: <API_URL>
 
     ## @param clusters - mapping - optional
-    ## Optional configuration to indicate the clusters that we want to be processed. If not configured, 
+    ## Optional configuration to indicate the clusters that we want to be processed. If not configured,
     ## all clusters will be processed.
     ##
     ## The 'include' key will indicate the regular expressions of the clusters for which metrics are to be reported
     ## and the configuration to be applied to each of them. If no configuration associated with the key is indicated
     ## with the regular expression, they will be processed with the default configuration.
-    ## The clusters will be processed in the order indicated in the 'include'. 
+    ## The clusters will be processed in the order indicated in the 'include'.
     ## If a cluster is matched on an 'include' key, it will only be processed there and not in a later 'include'
     ## that it might match on.
     ##
@@ -59,14 +59,14 @@ instances:
     ## If 'interval' is not indicated, the list of clusters will be obtained each time the check is executed
     ## and will not be cached.
     ##
-    ## In the following example, all clusters will be processed except those whose name begins with 'tmp_' 
+    ## In the following example, all clusters will be processed except those whose name begins with 'tmp_'
     ## up to a maximum of 10 clusters.
     ## Furthermore, the cache will be valid for 1 minute.
     ##
     ##   clusters:
     ##     limit: 10
     ##     include:
-    ##       - '.*'             
+    ##       - '.*'
     ##     exclude:
     ##       - 'tmp_.*'
     ##     interval: 60
@@ -74,7 +74,7 @@ instances:
     # clusters: {}
 
     ## @param custom_queries - list of mappings - optional
-    ## Define custom queries to run using Cloudera Manager with tsquery. 
+    ## Define custom queries to run using Cloudera Manager with tsquery.
     ## More information on querying Cloudera Manager can be found here:
     ##
     ## https://docs.cloudera.com/documentation/enterprise/6/6.3/topics/cm_dg_tsquery.html
@@ -87,7 +87,7 @@ instances:
     ##
     ## custom_queries:
     ## - query: SELECT foo, bar
-    ##   tags: baz:1 
+    ##   tags: baz:1
     ##
     ## This configuration will collect cloudera.<CATEGORY>.foo and cloudera.<CATEGORY>.bar,
     ## both with custom tags of `baz:1`.

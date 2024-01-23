@@ -1,27 +1,33 @@
 {
-	"name": "[kubernetes] Pod {{pod_name.name}} is CrashloopBackOff on namespace {{kube_namespace.name}}",
-	"type": "query alert",
-	"query": "max(last_10m):max:kubernetes_state.container.status_report.count.waiting{reason:crashloopbackoff} by {kube_cluster_name,kube_namespace,pod_name} >= 1",
-	"message": "pod {{pod_name.name}} is in CrashloopBackOff on {{kube_namespace.name}} \n This alert could generate several alerts for a bad deployment. Adjust the thresholds of the query to suit your infrastructure.",
-	"tags": [
-		"integration:kubernetes"
-	],
-	"options": {
-		"notify_audit": true,
-		"locked": false,
-		"timeout_h": 0,
-		"include_tags": true,
-		"require_full_window": false,
-		"new_host_delay": 300,
-		"notify_no_data": false,
-		"renotify_interval": 0,
-		"escalation_message": "",
-		"thresholds": {
-			"critical": 1
-		}
-	},
-	"recommended_monitor_metadata": {
-		"description": "Get notified when a pod is in a CrashloopBackOff state for your Kubernetes integration."
-	}
+  "version": 2,
+  "created_at": "2020-07-28",
+  "last_updated_at": "2023-07-05",
+  "title": "Pod is in a CrashloopBackOff state",
+  "tags": [
+    "integration:kubernetes"
+  ],
+  "description": "The status CrashloopBackOff means that a container in the Pod is started, crashes, and is restarted, over and over again. This monitor tracks when a pod is in a CrashloopBackOff state for your Kubernetes integration.",
+  "definition": {
+    "message": "pod {{pod_name.name}} is in CrashloopBackOff on {{kube_namespace.name}} \n This alert could generate several alerts for a bad deployment. Adjust the thresholds of the query to suit your infrastructure.",
+    "name": "[kubernetes] Pod {{pod_name.name}} is CrashloopBackOff on namespace {{kube_namespace.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "notify_audit": true,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 1
+      },
+      "timeout_h": 0
+    },
+    "query": "max(last_10m):default_zero(max:kubernetes_state.container.status_report.count.waiting{reason:crashloopbackoff} by {kube_cluster_name,kube_namespace,pod_name}) >= 1",
+    "tags": [
+      "integration:kubernetes"
+    ],
+    "type": "query alert"
+  }
 }
-

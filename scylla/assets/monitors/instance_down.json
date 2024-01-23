@@ -1,27 +1,34 @@
 {
-	"name": "[Scylla] Server is shutting down",
-	"type": "query alert",
-	"query": "avg(last_1m):max:scylla.node.operation_mode{*} by {server} > 3",
-	"message": "{{server.name}} is shutting down. Current value of {{value}} \n\nThe operation mode of the current nodes can have values of UNKNOWN = 0; STARTING = 1; JOINING = 2; NORMAL = 3; LEAVING = 4; DECOMMISSIONED = 5; DRAINING = 6; DRAINED = 7; MOVING = 8",
-	"tags": [
-		"integration:scylla"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": false,
-		"renotify_interval": 0,
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 3
-		}
-	},
-	"recommended_monitor_metadata": {
-		"description": "Notify if Scylla node is in a state other than NORMAL."
-	}
+  "version": 2,
+  "created_at": "2020-08-05",
+  "last_updated_at": "2021-02-03",
+  "title": "Node State is abnormal",
+  "tags": [
+    "integration:scylla"
+  ],
+  "description": "A Scylla server \"shutting down\" typically indicates a planned maintenance, upgrade, or scaling operation. The monitor tracks if your Scylla node change states.",
+  "definition": {
+    "message": "{{server.name}} is shutting down. Current value of {{value}} \n\nThe operation mode of the current nodes can have values of UNKNOWN = 0; STARTING = 1; JOINING = 2; NORMAL = 3; LEAVING = 4; DECOMMISSIONED = 5; DRAINING = 6; DRAINED = 7; MOVING = 8",
+    "name": "[Scylla] Server is shutting down",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 3
+      },
+      "timeout_h": 0
+    },
+    "query": "avg(last_1m):max:scylla.node.operation_mode{*} by {server} > 3",
+    "tags": [
+      "integration:scylla"
+    ],
+    "type": "query alert"
+  }
 }

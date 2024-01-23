@@ -1,28 +1,35 @@
 {
-    "name": "[Boundary] High active connections",
-    "type": "query alert",
-    "query": "avg(last_5m):boundary.worker.proxy.websocket.active_connections{*} by {endpoint} > 90",
+  "version": 2,
+  "created_at": "2022-09-14",
+  "last_updated_at": "2022-09-14",
+  "title": "Number of active connections is too high",
+  "tags": [
+    "integration:boundary"
+  ],
+  "description": "Instead of exposing a private network to the public, or allowing users to have access to entire private networks, workers create a direct network tunnel between users and targets. This monitor tracks when the number of active connections for any given endpoint is too high.",
+  "definition": {
     "message": "There is a high number ({{value}}) of active connections.",
-    "tags": [
-        "integration:boundary"
-    ],
+    "name": "[Boundary] High active connections",
     "options": {
-        "notify_audit": false,
-        "locked": false,
-        "timeout_h": 0,
-        "new_host_delay": 300,
-        "require_full_window": true,
-        "notify_no_data": false,
-        "renotify_interval": "0",
-        "escalation_message": "",
-        "no_data_timeframe": null,
-        "include_tags": true,
-        "thresholds": {
-            "critical": 90,
-            "warning": 70
-        }
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 90,
+        "warning": 70
+      },
+      "timeout_h": 0
     },
-    "recommended_monitor_metadata": {
-        "description": "Notify your team when there is a high number of active connections."
-    }
+    "query": "avg(last_5m):boundary.worker.proxy.websocket.active_connections{*} by {endpoint} > 90",
+    "tags": [
+      "integration:boundary"
+    ],
+    "type": "query alert"
+  }
 }

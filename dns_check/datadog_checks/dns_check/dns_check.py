@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 
-from typing import List, Optional
+from typing import List, Optional  # noqa: F401
 
 import dns.resolver
 
@@ -78,7 +78,8 @@ class DNSCheck(AgentCheck):
                     raise AssertionError("Expected an NXDOMAIN, got a result.")
             else:
                 answer = resolver.query(self.hostname, rdtype=self.record_type)  # dns.resolver.Answer
-                assert answer.rrset.items[0].to_text()
+                assert any(it.to_text() for it in answer.rrset.items)
+
                 if self.resolves_as_ips:
                     self._check_answer(answer)
 

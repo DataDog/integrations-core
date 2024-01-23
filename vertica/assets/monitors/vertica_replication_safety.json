@@ -1,34 +1,38 @@
 {
-	"name": "[Vertica] Nodes down above K-safety level",
-	"type": "query alert",
-	"query": "max(last_5m):avg:vertica.node.down{*} - avg:vertica.ksafety.current{*} > 1",
-	"message": "Number of nodes down is above the K-safety, which may lead to data becoming unavailable.",
-	"tags": [
-		"integration:vertica"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": null,
-		"timeout_h": 0,
-		"new_host_delay": 300,
-		"require_full_window": false,
-		"notify_no_data": false,
-		"renotify_interval": "0",
-		"renotify_occurrences": null,
-		"renotify_statuses": null,
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 1,
-			"warning": 0,
-			"critical_recovery": 0,
-			"warning_recovery": 0
-		}
-	},
-	"priority": null,
-	"restricted_roles": null,
-	"recommended_monitor_metadata": {
-		"description": "Get notified when the database is at risk of becoming unsafe."
-	}
+  "version": 2,
+  "created_at": "2022-09-15",
+  "last_updated_at": "2023-07-24",
+  "title": "Vertica Nodes down above K-safety level",
+  "tags": [
+    "integration:vertica"
+  ],
+  "description": "This monitor takes the maximum number of nodes that are down in the last 5 minutes and subtracts the current k-safety value. This value is used to alert when the cluster cannot withstand the number of down nodes and is at risk of automatic shutdown.",
+  "definition": {
+    "message": "Number of nodes down is above the K-safety, which may lead to data becoming unavailable.",
+    "name": "[Vertica] Nodes down above K-safety level",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": null,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "renotify_occurrences": null,
+      "renotify_statuses": null,
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 1
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "max(last_5m):avg:vertica.node.down{*} - avg:vertica.ksafety.current{*} > 1",
+    "restricted_roles": null,
+    "tags": [
+      "integration:vertica"
+    ],
+    "type": "query alert"
+  }
 }

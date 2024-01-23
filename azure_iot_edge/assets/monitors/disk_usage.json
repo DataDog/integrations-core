@@ -1,31 +1,38 @@
 {
-	"name": "[Azure IoT Edge] IoT Edge device {{host}} is running out of available disk space",
-	"type": "query alert",
-	"query": "max(last_1h):avg:azure.iot_edge.edge_agent.available_disk_space_bytes{*} by {host} / avg:azure.iot_edge.edge_agent.total_disk_space_bytes{*} by {host}.rollup(max, 60) * 100 < 10",
-	"message": "Please check device {{host}}, as Edge Agent reports that available disk space has dropped below {{threshold}}%.",
-	"tags": [
-		"integration:azure_iot_edge"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"silenced": {},
-		"include_tags": true,
-		"no_data_timeframe": null,
-		"require_full_window": true,
-		"new_host_delay": 300,
-		"notify_no_data": false,
-		"renotify_interval": 0,
-		"escalation_message": "",
-		"thresholds": {
-			"critical": 10,
-			"warning": 25,
-			"critical_recovery": 11,
-			"warning_recovery": 26
-		}
-	},
-	"recommended_monitor_metadata": {
-		"description": "Triggers an alert when an IoT Edge device is running out of available disk space"
-	}
+  "version": 2,
+  "created_at": "2020-10-22",
+  "last_updated_at": "2020-10-22",
+  "title": "Device is running out of disk space",
+  "tags": [
+    "integration:azure-iot-edge"
+  ],
+  "description": "Disk space in an Azure IoT Edge device is the storage capacity for storing data. This monitor checks if the available disk space becomes critically low to ensure the IoT Edge device operates smoothly and retains data without interruptions.",
+  "definition": {
+    "message": "Please check device {{host}}, as Edge Agent reports that available disk space has dropped below {{threshold}}%.",
+    "name": "[Azure IoT Edge] IoT Edge device {{host}} is running out of available disk space",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "silenced": {},
+      "thresholds": {
+        "critical": 10,
+        "critical_recovery": 11,
+        "warning": 25,
+        "warning_recovery": 26
+      },
+      "timeout_h": 0
+    },
+    "query": "max(last_1h):avg:azure.iot_edge.edge_agent.available_disk_space_bytes{*} by {host} / avg:azure.iot_edge.edge_agent.total_disk_space_bytes{*} by {host}.rollup(max, 60) * 100 < 10",
+    "tags": [
+      "integration:azure_iot_edge"
+    ],
+    "type": "query alert"
+  }
 }

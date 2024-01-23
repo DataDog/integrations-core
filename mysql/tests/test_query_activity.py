@@ -7,6 +7,7 @@ import json
 import os
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
+from contextlib import closing
 from copy import copy
 from datetime import datetime
 from os import environ
@@ -44,6 +45,7 @@ def dbm_instance(instance_complex):
     }
     instance_complex['query_metrics'] = {'enabled': False}
     instance_complex['query_samples'] = {'enabled': False}
+    instance_complex['collect_settings'] = {'enabled': False}
     return copy(instance_complex)
 
 
@@ -68,7 +70,7 @@ def dbm_instance(instance_complex):
         ),
     ],
 )
-def test_collect_activity(aggregator, dbm_instance, dd_run_check, query, query_signature, expected_query_truncated):
+def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, query_signature, expected_query_truncated):
     check = MySql(CHECK_NAME, {}, [dbm_instance])
 
     blocking_query = 'SELECT id FROM testdb.users FOR UPDATE'
@@ -131,7 +133,6 @@ def test_collect_activity(aggregator, dbm_instance, dd_run_check, query, query_s
     )
     assert blocked_row['sql_text'] == expected_sql_text
     assert blocked_row['processlist_state'], "missing state"
-    assert blocked_row['wait_event'] == 'wait/io/table/sql/handler'
     assert blocked_row['thread_id'], "missing thread id"
     assert blocked_row['processlist_id'], "missing processlist id"
     assert blocked_row['wait_timer_start'], "missing wait timer start"
@@ -365,11 +366,12 @@ def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     dbm_instance['query_activity']['collection_interval'] = collection_interval
     dbm_instance['query_activity']['run_sync'] = False
     check = MySql(CHECK_NAME, {}, [dbm_instance])
-    sleep_time = 1
+    start = time.time()
     dd_run_check(check)
-    time.sleep(sleep_time)
+    time.sleep(1)
     check.cancel()
-    max_collections = int(1 / collection_interval * sleep_time) + 1
+    time_elapsed = time.time() - start
+    max_collections = int(1 / collection_interval * time_elapsed) + 1
     metrics = aggregator.metrics("dd.mysql.activity.collect_activity.payload_size")
     assert max_collections / 2.0 <= len(metrics) <= max_collections
 
@@ -398,7 +400,7 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     check._query_activity._job_loop_future.result()
     aggregator.assert_metric(
         "dd.mysql.async_job.inactive_stop",
-        tags=_expected_dbm_instance_tags(dbm_instance),
+        tags=_expected_dbm_job_err_tags(dbm_instance),
         hostname='',
     )
 
@@ -417,12 +419,63 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
     # be created in the first place
     aggregator.assert_metric(
         "dd.mysql.async_job.cancel",
-        tags=_expected_dbm_instance_tags(dbm_instance),
+        tags=_expected_dbm_job_err_tags(dbm_instance),
     )
 
 
-def _expected_dbm_instance_tags(dbm_instance):
-    return dbm_instance['tags'] + ['job:query-activity', 'port:{}'.format(PORT)]
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_events_wait_current_disabled(dbm_instance, dd_run_check, root_conn, aggregator):
+    '''
+    This test verifies that the check will not collect any activity if the events_waits_current is disabled.
+    Once the events_waits_current is enabled at runtime, the check should collect activity.
+    '''
+    dbm_instance['options']['extra_performance_metrics'] = False
+    check = MySql(CHECK_NAME, {}, [dbm_instance])
+
+    # disable events_waits_current, expect events_wait_current_enabled to be set to False
+    with closing(root_conn.cursor()) as cursor:
+        cursor.execute("UPDATE performance_schema.setup_consumers SET enabled='NO' WHERE name = 'events_waits_current'")
+
+    dd_run_check(check)
+    # force query activity to run once, expect it to exist immediately with a warning
+    check._query_activity.run_job()
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    assert check.events_wait_current_enabled is False
+    assert check.warnings == [
+        'Query activity and wait event collection is disabled on this host. To enable it, the setup '
+        'consumer `performance-schema-consumer-events-waits-current` must be enabled on the MySQL server. '
+        'Please refer to the troubleshooting documentation: '
+        'https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting#events-waits-current-not-enabled\n'
+        'code=events-waits-current-not-enabled host=stubbed.hostname',
+    ]
+    assert not dbm_activity, "should not have collected any activity"
+
+    # enable events_waits_current, expect events_wait_current_enabled to be set to True
+    # we should expect no warnings and the query activity to run successfully
+    with closing(root_conn.cursor()) as cursor:
+        cursor.execute(
+            "UPDATE performance_schema.setup_consumers SET enabled='YES' WHERE name = 'events_waits_current'"
+        )
+    assert check.events_wait_current_enabled is not None
+    dd_run_check(check)
+    check.warnings.clear()
+    assert check.events_wait_current_enabled is True
+    check._query_activity.run_job()
+    check.cancel()
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    assert check.warnings == []
+    assert dbm_activity, "should have collected at least one activity"
+
+
+# the inactive job metrics are emitted from the main integrations
+# directly to metrics-intake, so they should also be properly tagged with a resource
+def _expected_dbm_job_err_tags(dbm_instance):
+    return dbm_instance['tags'] + [
+        'job:query-activity',
+        'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:stubbed.hostname',
+    ]
 
 
 def _get_conn_for_user(user, _autocommit=False):

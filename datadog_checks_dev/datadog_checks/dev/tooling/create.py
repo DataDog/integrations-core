@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from datetime import datetime
 from uuid import uuid4
 
 from ..fs import (
@@ -43,7 +44,7 @@ To install the {integration_name} check on your host:
 
 
 1. Install the [developer toolkit]
-(https://docs.datadoghq.com/developers/integrations/new_check_howto/#developer-toolkit)
+(https://docs.datadoghq.com/developers/integrations/python/)
  on any machine.
 
 2. Run `ddev release build {normalized_integration_name}` to build the package.
@@ -110,6 +111,7 @@ To install the {integration_name} check on your host:
 
     config = {
         'author': author,
+        'auto_install': 'false' if repo_choice == 'marketplace' or integration_type == 'metrics_pull' else 'true',
         'check_class': f"{''.join(part.capitalize() for part in normalized_integration_name.split('_'))}Check",
         'check_name': check_name,
         'project_name': normalize_project_name(normalized_integration_name),
@@ -125,6 +127,9 @@ To install the {integration_name} check on your host:
         'repo_name': REPO_CHOICES.get(repo_choice, ''),
         'support_type': support_type,
         'integration_links': integration_links,
+        # Source Type IDs are unique-per-integration integers
+        # Based on current timestamp with subtraction to start the IDs at around a few million, allowing room to grow.
+        "source_type_id": int(datetime.utcnow().timestamp()) - 1700000000,
     }
     config.update(kwargs)
 

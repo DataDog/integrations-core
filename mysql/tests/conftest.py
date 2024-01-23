@@ -366,6 +366,7 @@ def _create_enable_consumers_procedure(conn):
             SQL SECURITY DEFINER
         BEGIN
             UPDATE performance_schema.setup_consumers SET enabled='YES' WHERE name LIKE 'events_statements_%';
+            UPDATE performance_schema.setup_consumers SET enabled='YES' WHERE name = 'events_waits_current';
         END;
     """
     )
@@ -404,14 +405,16 @@ def _add_dog_user(conn):
     cur.execute("GRANT PROCESS ON *.* TO 'dog'@'%'")
     cur.execute("GRANT REPLICATION CLIENT ON *.* TO 'dog'@'%'")
     cur.execute("GRANT SELECT ON performance_schema.* TO 'dog'@'%'")
-    if MYSQL_FLAVOR == 'mysql' and MYSQL_VERSION == '8.0':
-        cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 0")
-    elif MYSQL_FLAVOR == 'mariadb' and MYSQL_VERSION == '10.5':
-        cur.execute("GRANT SLAVE MONITOR ON *.* TO 'dog'@'%'")
-        cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 0")
-    else:
+
+    # refactor try older mysql.user table first. if this fails, go to newer ALTER USER
+    try:
         cur.execute("UPDATE mysql.user SET max_user_connections = 0 WHERE user='dog' AND host='%'")
         cur.execute("FLUSH PRIVILEGES")
+    # need to get better exception in order to raise errors in the future
+    except Exception:
+        if MYSQL_FLAVOR == 'mariadb':
+            cur.execute("GRANT SLAVE MONITOR ON *.* TO 'dog'@'%'")
+        cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 0")
 
 
 def _add_bob_user(conn):

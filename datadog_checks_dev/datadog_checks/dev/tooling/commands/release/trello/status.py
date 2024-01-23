@@ -6,7 +6,6 @@ import json
 from typing import List
 
 import click
-import pyperclip
 
 from ....trello import TrelloClient
 from ...console import CONTEXT_SETTINGS, echo_info, echo_success
@@ -38,7 +37,7 @@ def _verbose_status(counts: dict, as_json: bool) -> List[str]:
     if as_json:
         return [json.dumps(counts, indent=2)]
 
-    totals = dict(zip(headers, [0] * len(headers)))
+    totals = dict(zip(headers, [0] * len(headers), strict=False))
 
     output = []
     output.append(row_format.format('', '', '', 'In', 'Issues', 'Awaiting', ''))
@@ -113,9 +112,8 @@ def _summary_status(counts: dict, as_json: bool) -> List[str]:
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Gather statistics from the Trello release board')
 @click.option('--verbose', '-v', is_flag=True, help='Return the detailed results instead of the aggregates')
 @click.option('--json', '-j', 'as_json', is_flag=True, help='Return as raw JSON instead')
-@click.option('--clipboard', '-c', is_flag=True, help='Copy output to clipboard')
 @click.pass_context
-def status(ctx: click.Context, verbose: bool, as_json: bool, clipboard: bool) -> None:
+def status(ctx: click.Context, verbose: bool, as_json: bool) -> None:
     """Print tabular status of Agent Release based on Trello columns.
 
     See trello subcommand for details on how to setup access:
@@ -133,15 +131,5 @@ def status(ctx: click.Context, verbose: bool, as_json: bool, clipboard: bool) ->
     else:
         output = _verbose_status(counts, as_json)
 
-    out = '\n'.join(output)
-
-    msg = '\nTrello Status Report:\n'
-    if clipboard:
-        try:
-            pyperclip.copy(out)
-            msg = '\nTrello Status Report (copied to your clipboard):\n'
-        except Exception:
-            pass
-
-    echo_success(msg)
-    echo_info(out)
+    echo_success('\nTrello Status Report:\n')
+    echo_info('\n'.join(output))

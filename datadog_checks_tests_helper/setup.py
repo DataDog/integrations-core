@@ -27,7 +27,6 @@ def get_requirements(fpath):
 setup(
     # Version should always match one from an agent release
     version=ABOUT["__version__"],
-
     name='datadog_checks_tests_helper',
     description='The Datadog Check Tests Helpers',
     long_description=LONG_DESC,
@@ -37,7 +36,6 @@ setup(
     author='Datadog',
     author_email='packages@datadoghq.com',
     license='BSD',
-
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -47,10 +45,7 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
     ],
-
     packages=find_packages(),
-
     include_package_data=True,
     install_requires=get_requirements('requirements.in'),
-
 )

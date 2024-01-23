@@ -84,6 +84,26 @@
         rewrite /api/v2/system/state api/v2/system/state
         file_server
     }
+    @get_events_1 {
+        method GET
+        path /api/v2/events
+        expression {uri}.contains('?')
+        expression {uri}.contains('1326412800')
+    }
+    route @get_events_1 {
+        rewrite /api/v2/events api/v2/events_1
+        file_server
+    }
+    @get_events_2 {
+        method GET
+        path /api/v2/events
+        expression {uri}.contains('?')
+        expression {uri}.contains('1326499200')
+    }
+    route @get_events_2 {
+        rewrite /api/v2/events api/v2/events_2
+        file_server
+    }
     @get_events {
         method GET
         path /api/v2/events

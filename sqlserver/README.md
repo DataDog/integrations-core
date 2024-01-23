@@ -8,6 +8,8 @@ The SQL Server integration tracks the performance of your SQL Server instances. 
 
 Enable [Database Monitoring](https://docs.datadoghq.com/database_monitoring/) (DBM) for enhanced insight into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, query explain plans, and blocking query insights.
 
+All editions of SQL Server 2012 and above are supported.
+
 ## Setup
 
 <div class="alert alert-info">This page describes the SQL Server Agent standard integration. If you are looking for the Database Monitoring product for SQL Server, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
@@ -23,6 +25,8 @@ _Server Properties_ -> _Security_ -> _SQL Server and Windows Authentication mode
 ### Prerequisite
 
 **Note**: To install Database Monitoring for SQL Server, select your hosting solution on the [documentation site](https://docs.datadoghq.com/database_monitoring/#sqlserver) for instructions.
+
+Supported versions of SQL Server for the SQL Server check are the same as for Database Monitoring. Visit the [Setting up SQL Server page](https://docs.datadoghq.com/database_monitoring/setup_sql_server/) to see the currently supported versions under the **Self-hosted** heading.
 
 Proceed with the following steps in this guide only if you are installing the standard integration alone.
 
@@ -41,9 +45,7 @@ Proceed with the following steps in this guide only if you are installing the st
        GRANT CONNECT ANY DATABASE to datadog; 
    ```
 
-2. Make sure your SQL Server instance is listening on a specific fixed port. By default, named instances and SQL Server Express are configured for dynamic ports. See [Microsoft's documentation][4] for more details.
-
-3. (Required for AlwaysOn and `sys.master_files` metrics) To gather AlwaysOn and `sys.master_files` metrics, grant the following additional permission:
+2. (Required for AlwaysOn and `sys.master_files` metrics) To gather AlwaysOn and `sys.master_files` metrics, grant the following additional permission:
 
     ```SQL
         GRANT VIEW ANY DEFINITION to datadog;
@@ -71,14 +73,15 @@ To configure this check for an Agent running on a host:
        driver: SQL Server
    ```
 
-    See the [example check configuration][6] for a comprehensive description of all options, including how to use custom queries to create your own metrics.
+    If you use port autodiscovery, use `0` for `SQL_PORT`. See the [example check configuration][6] for a comprehensive description of all options, including how to use custom queries to create your own metrics.
 
-    **Note**: The (default) provider `SQLOLEDB` is being deprecated. To use the newer `MSOLEDBSQL` provider, set the `adoprovider` variable to `MSOLEDBSQL` in your `sqlserver.d/conf.yaml` file after having downloaded the new provider from [Microsoft][7]. It is also possible to use the Windows Authentication and not specify the username/password with:
+    **Note**: The (default) provider `SQLOLEDB` is being deprecated. To use the newer `MSOLEDBSQL` provider, set the `adoprovider` variable to `MSOLEDBSQL19` in your `sqlserver.d/conf.yaml` file after having downloaded the new provider from [Microsoft][7]. If you're using `MSOLEDBSQL` version 18 or lower, set the `adoprovider` variable to `MSOLEDBSQL` instead. It is also possible to use the Windows Authentication and not specify the username/password with:
 
       ```yaml
       connection_string: "Trusted_Connection=yes"
       ```
-
+    
+    
 2. [Restart the Agent][8].
 
 ##### Linux
@@ -168,6 +171,23 @@ See [service_checks.json][16] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][17].
 
+If you are running the Agent on an ARM aarch64 processor, there is a known issue starting in version 14.0.0 of this check, which is bundled with Agent version 7.48.0. A Python dependency fails to load, and you'll see the following message when running [the Agent's status subcommand][14]:
+
+```
+Loading Errors
+  ==============
+    sqlserver
+    ---------
+      Core Check Loader:
+        Check sqlserver not found in Catalog
+      JMX Check Loader:
+        check is not a jmx check, or unable to determine if it's so
+      Python Check Loader:
+        unable to import module 'sqlserver': No module named 'sqlserver'
+```
+
+A fix for this is currently being developed, and in the meantime Agent versions 7.47 and below will continue to function properly.
+
 ## Further Reading
 
 - [Monitor your Azure SQL Databases with Datadog][18]
@@ -175,9 +195,10 @@ Need help? Contact [Datadog support][17].
 - [SQL Server monitoring tools][20]
 - [Monitor SQL Server performance with Datadog][21]
 - [Custom SQL Server metrics for detailed monitoring][22]
+- [Strategize your Azure migration for SQL workloads with Datadog][23]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/sqlserver/images/sqlserver_dashboard.png
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.microsoft.com/en-us/sql/t-sql/statements/grant-server-permissions-transact-sql?view=sql-server-ver15
 [4]: https://docs.microsoft.com/en-us/sql/tools/configuration-manager/tcp-ip-properties-ip-addresses-tab
 [5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -198,3 +219,4 @@ Need help? Contact [Datadog support][17].
 [20]: https://www.datadoghq.com/blog/sql-server-monitoring-tools
 [21]: https://www.datadoghq.com/blog/sql-server-performance
 [22]: https://www.datadoghq.com/blog/sql-server-metrics
+[23]: https://www.datadoghq.com/blog/migrate-sql-workloads-to-azure-with-datadog/

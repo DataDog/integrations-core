@@ -94,7 +94,8 @@ class ApiV7(Api):
         cluster_tags.extend(
             [f"{cluster_tag['name']}:{cluster_tag['value']}" for cluster_tag in cluster.get('tags', [])]
         )
-        cluster_tags.extend(self._check.config.tags)
+        if self._check.config.tags is not None:
+            cluster_tags.extend(self._check.config.tags)
         return cluster_tags
 
     def _collect_cluster_service_check(self, cluster, tags):
@@ -151,7 +152,8 @@ class ApiV7(Api):
     def _collect_host_tags(self, host):
         host_tags = [f"cloudera_hostname:{host['name']}", f"cloudera_rack_id:{host['rack_id']}"]
         host_tags.extend([f"{host_tag['name']}:{host_tag['value']}" for host_tag in host['tags'] or []])
-        host_tags.extend(self._check.config.tags)
+        if self._check.config.tags is not None:
+            host_tags.extend(self._check.config.tags)
         return host_tags
 
     def _collect_host_service_check(self, host, tags):
@@ -204,6 +206,9 @@ class ApiV7(Api):
             self._check.gauge(metric, value, tags=[*item_tags])
 
     def _collect_custom_queries(self):
+        if self._check.config.custom_queries is None:
+            return
+
         for custom_query in self._check.config.custom_queries:
             try:
                 tags = custom_query.tags if custom_query.tags else []

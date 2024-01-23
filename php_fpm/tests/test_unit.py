@@ -108,14 +108,14 @@ def test_config(test_case, extra_config, expected_http_kwargs, dd_run_check):
 
         dd_run_check(check)
 
-        http_kwargs = dict(
-            auth=mock.ANY,
-            cert=mock.ANY,
-            headers=mock.ANY,
-            proxies=mock.ANY,
-            timeout=mock.ANY,
-            verify=mock.ANY,
-            allow_redirects=mock.ANY,
-        )
+        http_kwargs = {
+            'auth': mock.ANY,
+            'cert': mock.ANY,
+            'headers': mock.ANY,
+            'proxies': mock.ANY,
+            'timeout': mock.ANY,
+            'verify': mock.ANY,
+            'allow_redirects': mock.ANY,
+        }
         http_kwargs.update(expected_http_kwargs)
         r.get.assert_called_with('http://foo:9001/ping', **http_kwargs)

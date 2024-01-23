@@ -45,13 +45,6 @@ init_config:
 #
 instances:
 
-  -
-    ## @param use_preview - boolean - optional - default: true
-    ## Enable this option to run the Prometheus-based check of etcd.
-    ## Note: This requires etcd v3 or greater.
-    #
-    # use_preview: true
-
     ## @param prometheus_url - string - required
     ## The URL where your application metrics are exposed by Prometheus.
     #
@@ -542,12 +535,6 @@ instances:
     ## Enable to tag metrics with `is_leader:true` or `is_leader:false`.
     #
     # leader_tag: true
-
-    ## @param url - string - optional - default: https://server:port
-    ## Note: the following configuration option is only available when `use_preview` option is set to `false`.
-    ## The API endpoint of your etcd instance.
-    #
-    # url: https://server:port
 
 ## Log Section
 ##

@@ -12,11 +12,10 @@
     "title": "Spark",
     "media": [],
     "classifier_tags": [
+      "Category::Log Collection",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Processing",
-      "Category::Log Collection"
+      "Supported OS::macOS"
     ]
   },
   "author": {
@@ -42,10 +41,16 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "java org.apache.spark.deploy.SparkSubmit",
+        "java org.apache.spark.deploy.worker.Worker",
+        "java org.apache.spark.deploy.master.Master"
+      ]
     },
     "dashboards": {
-      "spark": "assets/dashboards/spark_dashboard.json"
+      "spark": "assets/dashboards/spark_dashboard.json",
+      "Databricks Spark Overview": "assets/dashboards/databricks_overview.json"
     },
     "logs": {
       "source": "spark"

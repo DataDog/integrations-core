@@ -1,28 +1,35 @@
 {
-	"name": "[Confluent Platform] Unclean leader election",
-	"type": "query alert",
-	"query": "avg(last_5m):avg:confluent.kafka.controller.unclean_leader_elections_per_sec.rate{*} by {instance} > 0",
-	"message": "An unclean leader election has occurred in your cluster. This is an indication of potential data loss. \n\nIf this unclean leader election was not intentional, consider disabling unclean leader election in your Broker settings.",
-	"tags": [
-		"integration:confluent_platform"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"silenced": {},
-		"include_tags": true,
-		"no_data_timeframe": null,
-		"require_full_window": true,
-		"new_host_delay": 300,
-		"notify_no_data": false,
-		"renotify_interval": 0,
-		"escalation_message": "",
-		"thresholds": {
-			"critical": 0
-		}
-	},
-	"recommended_monitor_metadata": {
-		"description": "Get notified if an unclean leader election has taken place."
-	}
+  "version": 2,
+  "created_at": "2021-10-28",
+  "last_updated_at": "2021-10-28",
+  "title": "Unclean leader election detected",
+  "tags": [
+    "integration:confluent-platform"
+  ],
+  "description": "The unclean leader election setting decides whether a replica might take over as the leader in case of failures. However, appointing an unsynchronized replica as leader risks message loss for any data it hasn't yet replicated. This monitor tracks unclean leader elects for each individual instance.",
+  "definition": {
+    "message": "An unclean leader election has occurred in your cluster. This is an indication of potential data loss. \n\nIf this unclean leader election was not intentional, consider disabling unclean leader election in your Broker settings.",
+    "name": "[Confluent Platform] Unclean leader election",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "silenced": {},
+      "thresholds": {
+        "critical": 0
+      },
+      "timeout_h": 0
+    },
+    "query": "avg(last_5m):avg:confluent.kafka.controller.unclean_leader_elections_per_sec.rate{*} by {instance} > 0",
+    "tags": [
+      "integration:confluent_platform"
+    ],
+    "type": "query alert"
+  }
 }

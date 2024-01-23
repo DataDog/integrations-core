@@ -1,0 +1,169 @@
+{
+    "servers": [
+      {
+        "id": "cca55639-448f-44cc-ae6a-150afe0fa6b3",
+        "name": "demo-4",
+        "status": "ACTIVE",
+        "tenant_id": "1e6e233e637d4d55a50a62b63398ad15",
+        "user_id": "78205c506b534738bc851d3e189a00c3",
+        "metadata": {},
+        "hostId": "1ef00efcf95709f5083a0604bdd4642524c02085d41fbfdd404a707f",
+        "image": "",
+        "flavor": {
+          "vcpus": 1,
+          "ram": 256,
+          "disk": 1,
+          "ephemeral": 0,
+          "swap": 0,
+          "original_name": "cirros256",
+          "extra_specs": {
+            "hw_rng:allowed": "True"
+          }
+        },
+        "created": "2023-04-08T11:15:18Z",
+        "updated": "2023-04-08T11:16:00Z",
+        "addresses": {
+          "shared": [
+            {
+              "version": 4,
+              "addr": "192.168.233.139",
+              "OS-EXT-IPS:type": "fixed",
+              "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:4e:8f:a5"
+            }
+          ]
+        },
+        "accessIPv4": "",
+        "accessIPv6": "",
+        "links": [
+          {
+            "rel": "self",
+            "href": "http://34.91.114.145/compute/v2.1/1e6e233e637d4d55a50a62b63398ad15/servers/cca55639-448f-44cc-ae6a-150afe0fa6b3"
+          },
+          {
+            "rel": "bookmark",
+            "href": "http://34.91.114.145/compute/1e6e233e637d4d55a50a62b63398ad15/servers/cca55639-448f-44cc-ae6a-150afe0fa6b3"
+          }
+        ],
+        "OS-DCF:diskConfig": "AUTO",
+        "progress": 0,
+        "OS-EXT-AZ:availability_zone": "availability-zone",
+        "config_drive": "",
+        "key_name": null,
+        "OS-SRV-USG:launched_at": "2023-04-08T11:15:59.000000",
+        "OS-SRV-USG:terminated_at": null,
+        "OS-EXT-SRV-ATTR:host": "agent-integrations-openstack-default",
+        "OS-EXT-SRV-ATTR:instance_name": "instance-0000004f",
+        "OS-EXT-SRV-ATTR:hypervisor_hostname": "agent-integrations-openstack-default",
+        "OS-EXT-SRV-ATTR:reservation_id": "r-7l9f6y1k",
+        "OS-EXT-SRV-ATTR:launch_index": 3,
+        "OS-EXT-SRV-ATTR:hostname": "demo-4",
+        "OS-EXT-SRV-ATTR:kernel_id": "",
+        "OS-EXT-SRV-ATTR:ramdisk_id": "",
+        "OS-EXT-SRV-ATTR:root_device_name": "/dev/vda",
+        "OS-EXT-SRV-ATTR:user_data": null,
+        "OS-EXT-STS:task_state": null,
+        "OS-EXT-STS:vm_state": "active",
+        "OS-EXT-STS:power_state": 1,
+        "os-extended-volumes:volumes_attached": [
+          {
+            "id": "9244a0bf-b741-4aef-9ce0-92823c03670d",
+            "delete_on_termination": false
+          }
+        ],
+        "locked": false,
+        "locked_reason": null,
+        "description": null,
+        "tags": [],
+        "trusted_image_certificates": null,
+        "host_status": "UP",
+        "security_groups": [
+          {
+            "name": "default"
+          }
+        ]
+      },
+      {
+        "id": "d34c4531-7cd1-4454-b39e-356463af7700",
+        "name": "demo-7",
+        "status": "ACTIVE",
+        "tenant_id": "1e6e233e637d4d55a50a62b63398ad15",
+        "user_id": "78205c506b534738bc851d3e189a00c3",
+        "metadata": {},
+        "hostId": "1ef00efcf95709f5083a0604bdd4642524c02085d41fbfdd404a707f",
+        "image": "",
+        "flavor": {
+          "vcpus": 1,
+          "ram": 256,
+          "disk": 1,
+          "ephemeral": 0,
+          "swap": 0,
+          "original_name": "cirros256",
+          "extra_specs": {
+            "hw_rng:allowed": "True"
+          }
+        },
+        "created": "2023-04-08T11:15:18Z",
+        "updated": "2023-04-08T11:16:35Z",
+        "addresses": {
+          "shared": [
+            {
+              "version": 4,
+              "addr": "192.168.233.63",
+              "OS-EXT-IPS:type": "fixed",
+              "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:f5:f8:f2"
+            }
+          ]
+        },
+        "accessIPv4": "",
+        "accessIPv6": "",
+        "links": [
+          {
+            "rel": "self",
+            "href": "http://34.91.114.145/compute/v2.1/1e6e233e637d4d55a50a62b63398ad15/servers/d34c4531-7cd1-4454-b39e-356463af7700"
+          },
+          {
+            "rel": "bookmark",
+            "href": "http://34.91.114.145/compute/1e6e233e637d4d55a50a62b63398ad15/servers/d34c4531-7cd1-4454-b39e-356463af7700"
+          }
+        ],
+        "OS-DCF:diskConfig": "AUTO",
+        "progress": 0,
+        "OS-EXT-AZ:availability_zone": "availability-zone",
+        "config_drive": "",
+        "key_name": null,
+        "OS-SRV-USG:launched_at": "2023-04-08T11:16:34.000000",
+        "OS-SRV-USG:terminated_at": null,
+        "OS-EXT-SRV-ATTR:host": "agent-integrations-openstack-default",
+        "OS-EXT-SRV-ATTR:instance_name": "instance-00000052",
+        "OS-EXT-SRV-ATTR:hypervisor_hostname": "agent-integrations-openstack-default",
+        "OS-EXT-SRV-ATTR:reservation_id": "r-7l9f6y1k",
+        "OS-EXT-SRV-ATTR:launch_index": 6,
+        "OS-EXT-SRV-ATTR:hostname": "demo-7",
+        "OS-EXT-SRV-ATTR:kernel_id": "",
+        "OS-EXT-SRV-ATTR:ramdisk_id": "",
+        "OS-EXT-SRV-ATTR:root_device_name": "/dev/vda",
+        "OS-EXT-SRV-ATTR:user_data": null,
+        "OS-EXT-STS:task_state": null,
+        "OS-EXT-STS:vm_state": "active",
+        "OS-EXT-STS:power_state": 1,
+        "os-extended-volumes:volumes_attached": [
+          {
+            "id": "10e550d3-70ff-448c-91e0-9e203312afbd",
+            "delete_on_termination": false
+          }
+        ],
+        "locked": false,
+        "locked_reason": null,
+        "description": null,
+        "tags": [],
+        "trusted_image_certificates": null,
+        "host_status": "UP",
+        "security_groups": [
+          {
+            "name": "default"
+          }
+        ]
+      }
+    ]
+  }
+  

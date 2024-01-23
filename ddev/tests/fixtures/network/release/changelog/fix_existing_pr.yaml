@@ -1,0 +1,343 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - api.github.com
+      user-agent:
+      - python-httpx/0.24.1
+      x-github-api-version:
+      - '2022-11-28'
+    method: GET
+    uri: https://api.github.com/search/issues?q=sha%3Acfd8020b628cc24eebadae2ab79a3a1be285885c%20repo%3ADataDog/integrations-core
+  response:
+    content: '{"total_count":1,"incomplete_results":false,"items":[{"url":"https://api.github.com/repos/DataDog/integrations-core/issues/15459","repository_url":"https://api.github.com/repos/DataDog/integrations-core","labels_url":"https://api.github.com/repos/DataDog/integrations-core/issues/15459/labels{/name}","comments_url":"https://api.github.com/repos/DataDog/integrations-core/issues/15459/comments","events_url":"https://api.github.com/repos/DataDog/integrations-core/issues/15459/events","html_url":"https://github.com/DataDog/integrations-core/pull/15459","id":1833090960,"node_id":"PR_kwDOAtBC5c5XAVK1","number":15459,"title":"Add
+      changelog enforcement","user":{"login":"ofek","id":9677399,"node_id":"MDQ6VXNlcjk2NzczOTk=","avatar_url":"https://avatars.githubusercontent.com/u/9677399?v=4","gravatar_id":"","url":"https://api.github.com/users/ofek","html_url":"https://github.com/ofek","followers_url":"https://api.github.com/users/ofek/followers","following_url":"https://api.github.com/users/ofek/following{/other_user}","gists_url":"https://api.github.com/users/ofek/gists{/gist_id}","starred_url":"https://api.github.com/users/ofek/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/ofek/subscriptions","organizations_url":"https://api.github.com/users/ofek/orgs","repos_url":"https://api.github.com/users/ofek/repos","events_url":"https://api.github.com/users/ofek/events{/privacy}","received_events_url":"https://api.github.com/users/ofek/received_events","type":"User","site_admin":false},"labels":[{"id":581315931,"node_id":"MDU6TGFiZWw1ODEzMTU5MzE=","url":"https://api.github.com/repos/DataDog/integrations-core/labels/documentation","name":"documentation","color":"7e1df4","default":true,"description":""},{"id":936341014,"node_id":"MDU6TGFiZWw5MzYzNDEwMTQ=","url":"https://api.github.com/repos/DataDog/integrations-core/labels/dev/testing","name":"dev/testing","color":"6ad86c","default":false,"description":""},{"id":936375010,"node_id":"MDU6TGFiZWw5MzYzNzUwMTA=","url":"https://api.github.com/repos/DataDog/integrations-core/labels/dev/tooling","name":"dev/tooling","color":"6ad86c","default":false,"description":""},{"id":4541502693,"node_id":"LA_kwDOAtBC5c8AAAABDrHU5Q","url":"https://api.github.com/repos/DataDog/integrations-core/labels/ddev","name":"ddev","color":"ededed","default":false,"description":null}],"state":"open","locked":false,"assignee":null,"assignees":[],"milestone":null,"comments":1,"created_at":"2023-08-02T12:28:48Z","updated_at":"2023-08-03T07:34:19Z","closed_at":null,"author_association":"MEMBER","active_lock_reason":null,"draft":false,"pull_request":{"url":"https://api.github.com/repos/DataDog/integrations-core/pulls/15459","html_url":"https://github.com/DataDog/integrations-core/pull/15459","diff_url":"https://github.com/DataDog/integrations-core/pull/15459.diff","patch_url":"https://github.com/DataDog/integrations-core/pull/15459.patch","merged_at":null},"body":"###
+      Motivation\r\n\r\nThis will become our new process\r\n\r\n### Annotations\r\n\r\n![Screenshot
+      2023-08-02 084034](https://github.com/DataDog/integrations-core/assets/9677399/49bae755-682f-4d04-a9ad-c47391dd26a7)\r\n\r\n![Screenshot
+      2023-08-02 085702](https://github.com/DataDog/integrations-core/assets/9677399/f6f26e12-a71f-4dfd-99ed-6245ac253f45)","reactions":{"url":"https://api.github.com/repos/DataDog/integrations-core/issues/15459/reactions","total_count":0,"+1":0,"-1":0,"laugh":0,"hooray":0,"confused":0,"heart":0,"rocket":0,"eyes":0},"timeline_url":"https://api.github.com/repos/DataDog/integrations-core/issues/15459/timeline","performed_via_github_app":null,"state_reason":null,"score":1.0}]}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
+      Cache-Control:
+      - no-cache
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Thu, 03 Aug 2023 22:08:35 GMT
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-OAuth-Scopes:
+      - ''
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-GitHub-Media-Type:
+      - github.v3; format=json
+      X-GitHub-Request-Id:
+      - EB87:6687:723462:E8E74B:64CC2563
+      X-OAuth-Scopes:
+      - read:org, repo, workflow
+      X-RateLimit-Limit:
+      - '30'
+      X-RateLimit-Remaining:
+      - '29'
+      X-RateLimit-Reset:
+      - '1691100575'
+      X-RateLimit-Resource:
+      - search
+      X-RateLimit-Used:
+      - '1'
+      X-XSS-Protection:
+      - '0'
+      x-github-api-version-selected:
+      - '2022-11-28'
+    http_version: HTTP/1.1
+    status_code: 200
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - github.com
+      user-agent:
+      - python-httpx/0.24.1
+      x-github-api-version:
+      - '2022-11-28'
+    method: GET
+    uri: https://github.com/DataDog/integrations-core/pull/15459.diff
+  response:
+    content: ''
+    headers:
+      Cache-Control:
+      - no-cache
+      Content-Security-Policy:
+      - 'default-src ''none''; base-uri ''self''; child-src github.com/assets-cdn/worker/
+        gist.github.com/assets-cdn/worker/; connect-src ''self'' uploads.github.com
+        objects-origin.githubusercontent.com www.githubstatus.com collector.github.com
+        raw.githubusercontent.com api.github.com github-cloud.s3.amazonaws.com github-production-repository-file-5c1aeb.s3.amazonaws.com
+        github-production-upload-manifest-file-7fdce7.s3.amazonaws.com github-production-user-asset-6210df.s3.amazonaws.com
+        cdn.optimizely.com logx.optimizely.com/v1/events *.actions.githubusercontent.com
+        productionresultssa0.blob.core.windows.net/ productionresultssa1.blob.core.windows.net/
+        productionresultssa2.blob.core.windows.net/ productionresultssa3.blob.core.windows.net/
+        productionresultssa4.blob.core.windows.net/ wss://*.actions.githubusercontent.com
+        github-production-repository-image-32fea6.s3.amazonaws.com github-production-release-asset-2e65be.s3.amazonaws.com
+        insights.github.com wss://alive.github.com; font-src github.githubassets.com;
+        form-action ''self'' github.com gist.github.com objects-origin.githubusercontent.com;
+        frame-ancestors ''none''; frame-src viewscreen.githubusercontent.com notebooks.githubusercontent.com;
+        img-src ''self'' data: github.githubassets.com media.githubusercontent.com
+        camo.githubusercontent.com identicons.github.com avatars.githubusercontent.com
+        github-cloud.s3.amazonaws.com objects.githubusercontent.com objects-origin.githubusercontent.com
+        secured-user-images.githubusercontent.com/ user-images.githubusercontent.com/
+        private-user-images.githubusercontent.com opengraph.githubassets.com github-production-user-asset-6210df.s3.amazonaws.com
+        customer-stories-feed.github.com spotlights-feed.github.com *.githubusercontent.com;
+        manifest-src ''self''; media-src github.com user-images.githubusercontent.com/
+        secured-user-images.githubusercontent.com/ private-user-images.githubusercontent.com;
+        script-src github.githubassets.com; style-src ''unsafe-inline'' github.githubassets.com;
+        upgrade-insecure-requests; worker-src github.com/assets-cdn/worker/ gist.github.com/assets-cdn/worker/'
+      Content-Type:
+      - text/html; charset=utf-8
+      Date:
+      - Thu, 03 Aug 2023 22:08:36 GMT
+      Location:
+      - https://patch-diff.githubusercontent.com/raw/DataDog/integrations-core/pull/15459.diff
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - GitHub.com
+      Set-Cookie:
+      - logged_in=no; domain=github.com; path=/; expires=Sat, 03 Aug 2024 22:08:36
+        GMT; secure; HttpOnly; SameSite=Lax
+      - _gh_sess=IzTN19nCLZ588uH55a%2BiIj%2Bxj%2B0xrCdRFmf%2FOX4S%2BZ33PNY%2BfWtYJPUZMHlIgqaS4bILySAgrNXq3jpIJt1jygskR1EHkD9adWJR5t4IoIPUXuPbIW0BI1vyoa39xoOxGzkE8I4YZ5Nl96zSqLyO%2FnHZHD9D--ZKPOCMAvO%2F%2BT3MNy--7Pr6ku5aEAglszoUdO4XVw%3D%3D;
+        path=/; secure; HttpOnly; SameSite=Lax
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-GitHub-Request-Id:
+      - EB88:46CB:2A2277:3A48A3:64CC2564
+      X-XSS-Protection:
+      - '0'
+    http_version: HTTP/1.1
+    status_code: 302
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - patch-diff.githubusercontent.com
+      user-agent:
+      - python-httpx/0.24.1
+      x-github-api-version:
+      - '2022-11-28'
+    method: GET
+    uri: https://patch-diff.githubusercontent.com/raw/DataDog/integrations-core/pull/15459.diff
+  response:
+    content: "diff --git a/.github/workflows/pr-check.yml b/.github/workflows/pr-check.yml\nnew
+      file mode 100644\nindex 000000000000..82fea5a1b61e\n--- /dev/null\n+++ b/.github/workflows/pr-check.yml\n@@
+      -0,0 +1,14 @@\n+name: Check PR\n+\n+on: pull_request\n+\n+concurrency:\n+  group:
+      ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}\n+
+      \ cancel-in-progress: true\n+\n+jobs:\n+  run:\n+    uses: ./.github/workflows/pr-quick-check.yml\n+
+      \   with:\n+      repo: core\n+    secrets: inherit\ndiff --git a/.github/workflows/pr-quick-check.yml
+      b/.github/workflows/pr-quick-check.yml\nnew file mode 100644\nindex 000000000000..821ded203f9d\n---
+      /dev/null\n+++ b/.github/workflows/pr-quick-check.yml\n@@ -0,0 +1,50 @@\n+name:
+      Quick check PR\n+\n+on:\n+  workflow_call:\n+    inputs:\n+      repo:\n+        required:
+      true\n+        type: string\n+\n+defaults:\n+  run:\n+    shell: bash\n+\n+env:\n+
+      \ PYTHON_VERSION: \"3.11\"\n+  CHECK_SCRIPT: \"ddev/src/ddev/utils/scripts/check_pr.py\"\n+\n+jobs:\n+
+      \ check:\n+    name: Check PR\n+    runs-on: ubuntu-22.04\n+\n+    steps:\n+
+      \   - uses: actions/checkout@v3\n+      if: inputs.repo == 'core'\n+      with:\n+
+      \       ref: \"${{ github.event.pull_request.head.sha }}\"\n+\n+    - name:
+      Set up Python ${{ env.PYTHON_VERSION }}\n+      uses: actions/setup-python@v4\n+
+      \     with:\n+        python-version: \"${{ env.PYTHON_VERSION }}\"\n+\n+    -
+      name: Fetch PR data\n+      env:\n+        GH_TOKEN: \"${{ secrets.GITHUB_TOKEN
+      }}\"\n+      run: |-\n+        diff_url=$(cat \"$GITHUB_EVENT_PATH\" | jq -r
+      '.pull_request.diff_url')\n+        curl --header \"Authorization: Bearer $GITHUB_TOKEN\"
+      -sLo /tmp/diff \"$diff_url\"\n+        cat \"$GITHUB_EVENT_PATH\" | jq -r '.pull_request.number'
+      > /tmp/number\n+\n+    - name: Fetch script\n+      if: inputs.repo != 'core'\n+
+      \     run: |-\n+        mkdir -p $(dirname ${{ env.CHECK_SCRIPT }})\n+        curl
+      -sLo ${{ env.CHECK_SCRIPT }} https://raw.githubusercontent.com/DataDog/integrations-core/master/${{
+      env.CHECK_SCRIPT }}\n+\n+    - name: Check\n+      run: |-\n+        python
+      ${{ env.CHECK_SCRIPT }} changelog --diff-file /tmp/diff --pr-number $(cat /tmp/number)\ndiff
+      --git a/ddev/CHANGELOG.md b/ddev/CHANGELOG.md\nindex 4bfffc346413..5603965b33ac
+      100644\n--- a/ddev/CHANGELOG.md\n+++ b/ddev/CHANGELOG.md\n@@ -2,6 +2,10 @@\n
+      \n ## Unreleased\n \n+***Added***:\n+\n+* Add changelog enforcement\n+\n ##
+      3.3.0 / 2023-07-20\n \n ***Added***:\ndiff --git a/ddev/src/ddev/utils/scripts/check_pr.py
+      b/ddev/src/ddev/utils/scripts/check_pr.py\nnew file mode 100644\nindex 000000000000..464a0064a4f5\n---
+      /dev/null\n+++ b/ddev/src/ddev/utils/scripts/check_pr.py\n@@ -0,0 +1,189 @@\n+\"\"\"\n+Running
+      this script by itself must not use any external dependencies.\n+\"\"\"\n+# (C)
+      Datadog, Inc. 2023-present\n+# All rights reserved\n+# Licensed under a 3-clause
+      BSD style license (see LICENSE)\n+from __future__ import annotations\n+\n+import
+      argparse\n+import os\n+import re\n+import subprocess\n+import sys\n+from typing
+      import Iterator\n+\n+\n+def requires_changelog(target: str, files: Iterator[str])
+      -> bool:\n+    if target == 'ddev':\n+        source = 'src/ddev/'\n+    else:\n+
+      \       if target == 'datadog_checks_base':\n+            directory = 'base'\n+
+      \       elif target == 'datadog_checks_dev':\n+            directory = 'dev'\n+
+      \       elif target == 'datadog_checks_downloader':\n+            directory
+      = 'downloader'\n+        else:\n+            directory = target.replace('-',
+      '_')\n+\n+        source = f'datadog_checks/{directory}/'\n+\n+    return any(f.startswith(source)
+      or f == 'pyproject.toml' for f in files)\n+\n+\n+def git(*args) -> str:\n+    try:\n+
+      \       process = subprocess.run(\n+            ['git', *args], stdout=subprocess.PIPE,
+      stderr=subprocess.STDOUT, encoding='utf-8', check=True\n+        )\n+    except
+      subprocess.CalledProcessError as e:\n+        raise OSError(f'{str(e)[:-1]}:\\n{e.output}')
+      from None\n+\n+    return process.stdout\n+\n+\n+def get_added_lines(git_diff:
+      str) -> list[str]:\n+    files: dict[str, dict[int, str]] = {}\n+    for modification
+      in re.split(r'^diff --git ', git_diff, flags=re.MULTILINE):\n+        if not
+      modification:\n+            continue\n+\n+        # a/file b/file\n+        #
+      new file mode 100644\n+        # index 0000000000..089fd64579\n+        # ---
+      a/file\n+        # +++ b/file\n+        metadata, *blocks = re.split(r'^@@ ',
+      modification, flags=re.MULTILINE)\n+        before, after = metadata.strip().splitlines()[-2:]\n+\n+
+      \       # Binary files /dev/null and b/foo/archive.tar.gz differ\n+        binary_indicator
+      = 'Binary files '\n+        if after.startswith(binary_indicator):\n+            line
+      = after[len(binary_indicator) :].rsplit(maxsplit=1)[0]\n+            if line.startswith('/dev/null
+      and '):\n+                filename = line.split(maxsplit=2)[-1][2:]\n+            elif
+      line.endswith(' and /dev/null'):\n+                filename = line.split(maxsplit=2)[0][2:]\n+
+      \           else:\n+                _, _, filename = line.partition(' and b/')\n+\n+
+      \           files[filename] = {}\n+            continue\n+\n+        # --- a/file\n+
+      \       # +++ /dev/null\n+        before = before.split(maxsplit=1)[1]\n+        after
+      = after.split(maxsplit=1)[1]\n+        filename = before[2:] if after == '/dev/null'
+      else after[2:]\n+        added = files[filename] = {}\n+\n+        for block
+      in blocks:\n+            # -13,3 +13,8 @@\n+            info, *lines = block.splitlines()\n+
+      \           # third number\n+            start = int(info.split()[1].split(',')[0][1:])\n+\n+
+      \           removed = 0\n+            for i, line in enumerate(lines, start):\n+
+      \               if line.startswith('+'):\n+                    added[i - removed]
+      = line[1:]\n+                elif line.startswith('-'):\n+                    removed
+      += 1\n+\n+    return files\n+\n+\n+def get_missing_changelogs(git_diff: str,
+      suffix: str) -> None:\n+    targets = {}\n+    for filename, lines in get_added_lines(git_diff).items():\n+
+      \       target, _, path = filename.partition('/')\n+        if not path:\n+
+      \           continue\n+\n+        targets.setdefault(target, {})[path] = lines\n+\n+
+      \   errors: tuple[str, int, str] = []\n+    for target, files in sorted(targets.items()):\n+
+      \       if not requires_changelog(target, files.keys()):\n+            continue\n+\n+
+      \       changelog_file = 'CHANGELOG.md'\n+        if changelog_file not in files:\n+
+      \           errors.append((f'{target}/{changelog_file}', 1, 'Missing changelog
+      entry'))\n+            continue\n+\n+        added_lines = files[changelog_file]\n+
+      \       line_numbers_missing_suffix = []\n+        lines_with_suffix = 0\n+
+      \       for line_number, line in added_lines.items():\n+            if not line.startswith('*
+      '):\n+                continue\n+            elif line.endswith(suffix):\n+
+      \               lines_with_suffix += 1\n+            else:\n+                line_numbers_missing_suffix.append(line_number)\n+\n+
+      \       if lines_with_suffix == len(line_numbers_missing_suffix) == 0:\n+            errors.append((f'{target}/{changelog_file}',
+      1, 'Missing changelog entry'))\n+        elif line_numbers_missing_suffix:\n+
+      \           for line_number in line_numbers_missing_suffix:\n+                errors.append(\n+
+      \                   (\n+                        f'{target}/{changelog_file}',\n+
+      \                       line_number,\n+                        f'The first line
+      of every new changelog entry must '\n+                        f'end with the
+      associated PR number `{suffix}`',\n+                    )\n+                )\n+\n+
+      \   return errors\n+\n+\n+def changelog_impl(*, ref: str, diff_file: str, pr_number:
+      int) -> None:\n+    on_ci = os.environ.get('GITHUB_ACTIONS') == 'true'\n+    if
+      on_ci:\n+        with open(diff_file, encoding='utf-8') as f:\n+            git_diff
+      = f.read()\n+    else:\n+        git_diff = git('diff', f'{ref}...')\n+\n+    errors
+      = get_missing_changelogs(git_diff, f' (#{pr_number})')\n+    if not errors:\n+
+      \       return\n+    elif os.environ.get('GITHUB_ACTIONS') == 'true':\n+        for
+      relative_path, line_number, message in errors:\n+            message = '%0A'.join(message.splitlines())\n+
+      \           print(f'::error file={relative_path},line={line_number}::{message}')\n+
+      \   else:\n+        for relative_path, line_number, message in errors:\n+            print(f'{relative_path},
+      line {line_number}: {message}')\n+\n+    sys.exit(1)\n+\n+\n+def changelog_command(subparsers)
+      -> None:\n+    parser = subparsers.add_parser('changelog')\n+    parser.add_argument('--ref',
+      default='origin/master')\n+    parser.add_argument('--diff-file')\n+    parser.add_argument('--pr-number',
+      type=int, default=1)\n+    parser.set_defaults(func=changelog_impl)\n+\n+\n+def
+      main():\n+    parser = argparse.ArgumentParser(prog=__name__, allow_abbrev=False)\n+
+      \   subparsers = parser.add_subparsers()\n+\n+    changelog_command(subparsers)\n+\n+
+      \   kwargs = vars(parser.parse_args())\n+    try:\n+        command = kwargs.pop('func')\n+
+      \   except KeyError:\n+        parser.print_help()\n+    else:\n+        command(**kwargs)\n+\n+\n+if
+      __name__ == '__main__':\n+    main()\n"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - 'default-src ''none''; base-uri ''self''; child-src github.com/assets-cdn/worker/
+        gist.github.com/assets-cdn/worker/; connect-src ''self'' uploads.github.com
+        objects-origin.githubusercontent.com www.githubstatus.com collector.github.com
+        raw.githubusercontent.com api.github.com github-cloud.s3.amazonaws.com github-production-repository-file-5c1aeb.s3.amazonaws.com
+        github-production-upload-manifest-file-7fdce7.s3.amazonaws.com github-production-user-asset-6210df.s3.amazonaws.com
+        cdn.optimizely.com logx.optimizely.com/v1/events *.actions.githubusercontent.com
+        productionresultssa0.blob.core.windows.net/ productionresultssa1.blob.core.windows.net/
+        productionresultssa2.blob.core.windows.net/ productionresultssa3.blob.core.windows.net/
+        productionresultssa4.blob.core.windows.net/ wss://*.actions.githubusercontent.com
+        github-production-repository-image-32fea6.s3.amazonaws.com github-production-release-asset-2e65be.s3.amazonaws.com
+        insights.github.com wss://alive.github.com; font-src github.githubassets.com;
+        form-action ''self'' github.com gist.github.com objects-origin.githubusercontent.com;
+        frame-ancestors ''none''; frame-src viewscreen.githubusercontent.com notebooks.githubusercontent.com;
+        img-src ''self'' data: github.githubassets.com media.githubusercontent.com
+        camo.githubusercontent.com identicons.github.com avatars.githubusercontent.com
+        github-cloud.s3.amazonaws.com objects.githubusercontent.com objects-origin.githubusercontent.com
+        secured-user-images.githubusercontent.com/ user-images.githubusercontent.com/
+        private-user-images.githubusercontent.com opengraph.githubassets.com github-production-user-asset-6210df.s3.amazonaws.com
+        customer-stories-feed.github.com spotlights-feed.github.com *.githubusercontent.com;
+        manifest-src ''self''; media-src github.com user-images.githubusercontent.com/
+        secured-user-images.githubusercontent.com/ private-user-images.githubusercontent.com;
+        script-src github.githubassets.com; style-src ''unsafe-inline'' github.githubassets.com;
+        upgrade-insecure-requests; worker-src github.com/assets-cdn/worker/ gist.github.com/assets-cdn/worker/'
+      Content-Type:
+      - text/plain; charset=utf-8
+      Date:
+      - Thu, 03 Aug 2023 22:08:36 GMT
+      ETag:
+      - W/"a4498e2b0a40022133d9345a4d54e7d3"
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Set-Cookie:
+      - logged_in=no; domain=github.com; path=/; expires=Sat, 03 Aug 2024 22:08:36
+        GMT; secure; HttpOnly; SameSite=Lax
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-GitHub-Request-Id:
+      - EB89:4147:ABD300:F40FF2:64CC2564
+      X-XSS-Protection:
+      - '0'
+    http_version: HTTP/1.1
+    status_code: 200
+version: 1

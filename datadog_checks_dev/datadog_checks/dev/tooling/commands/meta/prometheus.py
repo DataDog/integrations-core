@@ -6,7 +6,6 @@ from collections import defaultdict
 from itertools import product
 
 import click
-import pyperclip
 import requests
 
 from ....fs import dir_exists, path_join, write_file_lines
@@ -28,11 +27,10 @@ def sanitize_endpoint(endpoint):
     return endpoint
 
 
-def parse_metrics(endpoint):
+def parse_metrics(stream):
     metrics = defaultdict(dict)
-    response = requests.get(endpoint, stream=True)
 
-    for line in response.iter_lines(decode_unicode=True):
+    for line in stream:
         # Example:
         #
         # # HELP sql_insert_count Number of SQL INSERT statements
@@ -55,23 +53,33 @@ def get_options_text(options):
     return '\n{}\n' 'q - Quit'.format('\n'.join('{} - {}'.format(n, option) for n, option in enumerate(options, 1)))
 
 
+def set_up_stream(ctx, endpoint, filehandle):
+    if endpoint and filehandle:
+        ctx.fail("Please specify an endpoint or a file but not both.")
+    if endpoint:
+        return requests.get(sanitize_endpoint(endpoint), stream=True).iter_lines(decode_unicode=True)
+    if filehandle:
+        return filehandle
+    ctx.fail("Please specify an endpoint or a file.")
+
+
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Prometheus utilities')
 def prom():
     pass
 
 
 @prom.command(context_settings=CONTEXT_SETTINGS, short_help='Show metric info from a Prometheus endpoint')
-@click.argument('endpoint')
-def info(endpoint):
+@click.pass_context
+@click.option('-e', '--endpoint')
+@click.option('-f', '--file', 'fh', type=click.File())
+def info(ctx, endpoint, fh):
     """Show metric info from a Prometheus endpoint.
 
     \b
     Example:
-    `$ ddev meta prom info :8080/_status/vars`
+    `$ ddev meta prom info -e :8080/_status/vars`
     """
-    endpoint = sanitize_endpoint(endpoint)
-
-    metrics = parse_metrics(endpoint)
+    metrics = parse_metrics(set_up_stream(ctx, endpoint, fh))
     num_metrics = len(metrics)
     num_gauge = 0
     num_counter = 0
@@ -107,11 +115,12 @@ def info(endpoint):
     context_settings=CONTEXT_SETTINGS,
     short_help='Interactively parse metric info from a Prometheus endpoint and write to metadata.csv',
 )
-@click.argument('endpoint')
+@click.option('-e', '--endpoint')
+@click.option('-f', '--file', 'fh', type=click.File())
 @click.argument('check')
 @click.option('--here', '-x', is_flag=True, help='Output to the current location')
 @click.pass_context
-def parse(ctx, endpoint, check, here):
+def parse(ctx, endpoint, fh, check, here):
     """Interactively parse metric info from a Prometheus endpoint and write it to metadata.csv."""
     if here:
         output_dir = os.getcwd()
@@ -124,10 +133,7 @@ def parse(ctx, endpoint, check, here):
                 )
             )
 
-    endpoint = sanitize_endpoint(endpoint)
-
-    echo_waiting(f'Scraping `{endpoint}`...')
-    metrics = parse_metrics(endpoint)
+    metrics = parse_metrics(set_up_stream(ctx, endpoint, fh))
     num_metrics = len(metrics)
 
     echo_success('\nGlobally available options:')
@@ -243,5 +249,10 @@ def parse(ctx, endpoint, check, here):
         '}}'.format('\n'.join("    '{}': '{}',".format(metric, data['dd_name']) for metric, data in metric_items))
     )
 
-    pyperclip.copy(metric_map)
-    echo_success('\nThe metric map has been copied to your clipboard, paste it to any file you want!')
+    echo_info(metric_map)
+
+    metric_list = (
+        '\nMETRICS = [\n' '{}\n' ']'.format('\n'.join("    '{}',".format(data['dd_name']) for _, data in metric_items))
+    )
+
+    echo_info(metric_list)

@@ -12,10 +12,11 @@
     "title": "SAP HANA",
     "media": [],
     "classifier_tags": [
+      "Category::Data Stores",
+      "Category::SAP",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Store"
+      "Supported OS::macOS"
     ]
   },
   "author": {

@@ -9,10 +9,10 @@ files:
     options:
     - name: use_openmetrics
       description: |
-        Use the latest OpenMetrics V2 implementation for more features and better performance.
+        Use the latest OpenMetrics implementation for more features and better performance.
 
         Note: To see the configuration options for the legacy OpenMetrics implementation (Agent 7.33 or older),
-        https://github.com/DataDog/integrations-core/blob/7.33.x/cilium/datadog_checks/cilium/data/conf.yaml.example
+        see https://github.com/DataDog/integrations-core/blob/7.33.x/cilium/datadog_checks/cilium/data/conf.yaml.example
       enabled: true
       value:
         type: boolean
@@ -26,7 +26,7 @@ files:
       enabled: true
       value:
         type: string
-        example: http://localhost:9090/metrics
+        example: http://localhost:9962/metrics
         display_default: null
     - name: operator_endpoint
       description: |
@@ -63,7 +63,7 @@ files:
         By default, the Cilium integration collects `cilium-agent` metrics.
         One of agent_endpoint or operator_endpoint must be provided.
       value:
-        example: http://%%host%%:9090/metrics
+        example: http://%%host%%:9962/metrics
         type: string
     - name: tags
       description: |

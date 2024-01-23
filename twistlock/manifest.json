@@ -12,11 +12,14 @@
     "title": "Prisma Cloud Compute Edition",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
+      "Category::Compliance",
+      "Category::Containers",
+      "Category::Log Collection",
+      "Category::Network",
       "Category::Security",
-      "Category::Log Collection"
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {

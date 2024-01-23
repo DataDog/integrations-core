@@ -1,0 +1,78 @@
+name: PR test
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        required: true
+        type: string
+
+      setup-env-vars:
+        required: false
+        default: ""
+        type: string
+      python-version:
+        required: false
+        default: ""
+        type: string
+
+jobs:
+  compute-matrix:
+    uses: ./.github/workflows/compute-matrix.yml
+    with:
+      repo: "${{ inputs.repo }}"
+
+  test:
+    needs:
+    - compute-matrix
+    if: needs.compute-matrix.outputs.matrix != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.compute-matrix.outputs.matrix) }}
+
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: "${{ matrix.name }}"
+      target: "${{ matrix.target }}"
+      platform: "${{ matrix.platform }}"
+      runner: "${{ toJson(matrix.runner) }}"
+      repo: "${{ inputs.repo }}"
+
+      # Options
+      standard: true
+      test-py2: ${{ !matrix.python-support || contains(matrix.python-support, '2') }}
+      test-py3: ${{ !matrix.python-support || contains(matrix.python-support, '3') }}
+
+      # For other repositories
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
+      python-version: "${{ inputs.python-version }}"
+    secrets: inherit
+
+  save-event:
+    needs:
+    - test
+    if: success() || failure()
+
+    uses: ./.github/workflows/save-event.yml
+
+  submit-traces:
+    needs:
+    - test
+    if: inputs.repo == 'core' && (success() || failure()) && github.event.pull_request.head.repo.full_name == github.repository
+
+    uses: ./.github/workflows/submit-traces.yml
+    secrets: inherit
+
+  check:
+    needs:
+    - test
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check status of required jobs
+      uses: re-actors/alls-green@release/v1
+      with:
+        jobs: ${{ toJSON(needs) }}
+        allowed-skips: test

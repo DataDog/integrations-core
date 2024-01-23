@@ -5,15 +5,12 @@ python = ["2.7"]
 impl = ["legacy"]
 
 [[envs.default.matrix]]
-python = ["3.8"]
+python = ["3.11"]
 impl = ["legacy", "openmetrics"]
 
 [envs.default.overrides]
 matrix.impl.env-vars = [
   { key = "USE_OPENMETRICS", value = "true", if = ["openmetrics"] },
-]
-matrix.python.scripts = [
-  { key = "test", value = "_dd-test --ignore=tests/docker" },
 ]
 
 [envs.default.env-vars]

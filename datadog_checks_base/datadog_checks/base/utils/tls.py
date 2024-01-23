@@ -5,14 +5,14 @@ import logging
 import os
 import ssl
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, AnyStr, Dict
+from typing import TYPE_CHECKING, Any, AnyStr, Dict  # noqa: F401
 
 from six import iteritems
 
 from ..config import is_affirmative
 
 if TYPE_CHECKING:
-    from ..types import InstanceType
+    from ..types import InstanceType  # noqa: F401
 
 LOGGER = logging.getLogger(__file__)
 

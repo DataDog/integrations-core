@@ -20,7 +20,7 @@ instances:
     ## By default, the Cilium integration collects `cilium-agent` metrics.
     ## One of agent_endpoint or operator_endpoint must be provided.
     #
-  - agent_endpoint: http://%%host%%:9090/metrics
+  - agent_endpoint: http://%%host%%:9962/metrics
 
     ## @param tags - list of strings - optional
     ## List of tags to attach to every metrics, events and service checks emitted by this integration.

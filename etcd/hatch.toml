@@ -1,16 +1,13 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
-version = ["v3.3.8", "v3.3.9", "v3.3.10" , "v3.5.1"]
+python = ["2.7", "3.11"]
+version = ["v3.4.26" , "v3.5.9"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
     { key = "ETCD_VERSION" },
-    { key = "V3_PREVIEW", value = "false", if = ["v3.3.8", "v3.3.9"] },
-    { key = "DDEV_SKIP_GENERIC_TAGS_CHECK", value = "false", if = ["v3.3.8", "v3.3.9"] },
 ]
 
 [envs.default.env-vars]
 DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
-V3_PREVIEW = "true"

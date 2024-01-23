@@ -69,4 +69,4 @@ class TesterSelectorTeam:
 
     def __get_reviewers(self, pr_num: int) -> Set[str]:
         reviews = self.__github.get_reviews(pr_num)
-        return set([r["user"]["login"] for r in reviews])
+        return {r["user"]["login"] for r in reviews}

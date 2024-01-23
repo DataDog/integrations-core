@@ -117,7 +117,7 @@ See [service_checks.json][9] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][10].
 
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://github.com/DataDog/jmxfetch
 [3]: https://github.com/DataDog/integrations-core/blob/master/confluent_platform/datadog_checks/confluent_platform/data/conf.yaml.example
 [4]: https://github.com/DataDog/integrations-core/blob/master/confluent_platform/datadog_checks/confluent_platform/data/metrics.yaml

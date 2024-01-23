@@ -2,12 +2,12 @@
 base-package-features = ["deps", "http"]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
+python = ["2.7", "3.11"]
 flavor = ["elasticsearch"]
-version = ["7.2", "7.7", "7.9"]
+version = ["7.2", "7.7", "7.9", "7.10", "8.8"]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
+python = ["2.7", "3.11"]
 # Opensearch, compatible with elasticsearch
 flavor = ["opensearch"]
 version = ["1.1"]
@@ -24,10 +24,14 @@ matrix.version.env-vars = [
     { key = "ELASTIC_IMAGE", value = "7.7.0", if = ["7.7"] },
     # EOL 2021-12-09
     { key = "ELASTIC_IMAGE", value = "7.9.0", if = ["7.9"] },
+    { key = "ELASTIC_IMAGE", value = "7.10.2", if = ["7.10"] },
+    # EOL 2024-08-10
+    { key = "ELASTIC_IMAGE", value = "8.8.2", if = ["8.8"] },
 ]
 matrix.flavor.env-vars = [
     { key = "ELASTIC_REGISTRY", value = "docker.elastic.co/elasticsearch/elasticsearch", if = ["elasticsearch"] },
     { key = "ELASTIC_REGISTRY", value = "opensearchproject/opensearch", if = ["opensearch"] },
+    { key = "ELASTIC_FLAVOR" },
 ]
 
 [envs.bench.env-vars]

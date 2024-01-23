@@ -125,7 +125,7 @@ class SonarqubeCheck(AgentCheck):
                 key = metric['key']
                 category = CATEGORIES.get(domain)
                 if category is None:
-                    self.log.warning('Unknown metric category: %s', domain)
+                    self.log.debug('Unknown metric category: %s', domain)
                     continue
                 available_metrics[key] = '{}.{}'.format(category, key)
             page += 1

@@ -1,6 +1,6 @@
 name: Kubernetes Controller Manager
 files:
-- name: kube-controller-manager.yaml
+- name: kube_controller_manager.yaml
   options:
   - template: init_config
     options:

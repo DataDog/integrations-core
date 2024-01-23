@@ -149,7 +149,7 @@
           {
             "id": 7393572788857220,
             "definition": {
-              "title": "In/Out Octets & Max Speed",
+              "title": "In/Out Bytes & Max Speed",
               "title_size": "16",
               "title_align": "left",
               "type": "query_table",
@@ -158,7 +158,7 @@
                   "aggregator": "avg",
                   "cell_display_mode": ["bar"],
                   "q": "avg:snmp.ifHCInOctets.rate{$snmp_host,$interface,$snmp_device} by {snmp_host,interface}.as_count()",
-                  "alias": "Octets In",
+                  "alias": "Bytes In",
                   "limit": 50,
                   "order": "desc"
                 },
@@ -166,7 +166,7 @@
                   "q": "avg:snmp.ifHCOutOctets.rate{$snmp_host,$interface,$snmp_device} by {snmp_host,interface}",
                   "aggregator": "avg",
                   "cell_display_mode": ["bar"],
-                  "alias": "Octets Out"
+                  "alias": "Bytes Out"
                 },
                 {
                   "q": "avg:snmp.ifHighSpeed{$snmp_host,$interface,$snmp_device} by {snmp_host,interface}.as_count()",
@@ -624,6 +624,5 @@
   "layout_type": "ordered",
   "is_read_only": true,
   "notify_list": [],
-  "id": "3yi-2u7-939",
   "reflow_type": "fixed"
 }

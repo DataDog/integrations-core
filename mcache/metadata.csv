@@ -29,7 +29,7 @@ memcache.threads,gauge,,thread,,Number of threads used by the current Memcached 
 memcache.total_connections_rate,gauge,,connection,second,Rate at which connections to this server are opened.,0,memcached,tot conn rate,
 memcache.total_items,gauge,,item,,Total number of items stored by this server since it started.,0,memcached,tot items,
 memcache.uptime,gauge,,second,,Number of seconds this server has been running.,0,memcached,uptime,
-memcache.items.evicted_rate,gauge,,eviction,second,Rate st which items had to be evicted from the LRU before expiring,0,memcached,evict rate,
+memcache.items.evicted_rate,gauge,,eviction,second,Rate at which items had to be evicted from the LRU before expiring,0,memcached,evict rate,
 memcache.items.evicted_nonzero_rate,gauge,,eviction,second,Rate at which nonzero items which had an explicit expire time set had to be evicted from the LRU before expiring,0,memcached,evict nonz rate,
 memcache.items.expired_unfetched_rate,gauge,,eviction,second,Rate at which expired items reclaimed from the LRU which were never touched after being set,-1,memcached,exp unfecth rate,
 memcache.items.evicted_unfetched_rate,gauge,,eviction,second,Rate at which valid items evicted from the LRU which were never touched after being set,-1,memcached,evict unfetch rate,

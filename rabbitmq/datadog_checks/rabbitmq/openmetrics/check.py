@@ -9,6 +9,8 @@ from . import metrics
 class RabbitMQOpenMetrics(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = "rabbitmq"
 
+    DEFAULT_METRIC_LIMIT = 0
+
     def configure_scrapers(self):
         base_url = self.instance['prometheus_plugin']['url']
         self.scraper_configs.clear()

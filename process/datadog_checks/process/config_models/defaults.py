@@ -7,84 +7,46 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-from datadog_checks.base.utils.models.fields import get_default_field_value
 
-
-def shared_access_denied_cache_duration(field, value):
+def shared_access_denied_cache_duration():
     return 120
 
 
-def shared_pid_cache_duration(field, value):
+def shared_pid_cache_duration():
     return 120
 
 
-def shared_procfs_path(field, value):
-    return get_default_field_value(field, value)
-
-
-def shared_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def shared_shared_process_list_cache_duration(field, value):
+def shared_shared_process_list_cache_duration():
     return 120
 
 
-def instance_collect_children(field, value):
+def instance_collect_children():
     return False
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags():
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname():
     return False
 
 
-def instance_exact_match(field, value):
+def instance_exact_match():
     return True
 
 
-def instance_ignore_denied_access(field, value):
+def instance_ignore_denied_access():
     return True
 
 
-def instance_metric_patterns(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval():
     return 15
 
 
-def instance_pid(field, value):
-    return get_default_field_value(field, value)
+def instance_pid_cache_duration():
+    return 120
 
 
-def instance_pid_file(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_search_string(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tags(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_thresholds(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_try_sudo(field, value):
+def instance_try_sudo():
     return False
-
-
-def instance_user(field, value):
-    return get_default_field_value(field, value)

@@ -1,0 +1,41 @@
+{
+  "version": 2,
+  "created_at": "2021-02-23",
+  "last_updated_at": "2021-02-23",
+  "title": "CPU load is running high",
+  "tags": [
+    "integration:apache"
+  ],
+  "description": "An anomaly in CPU load occurs when the server's processor use deviates significantly from its usual pattern, potentially indicating issues. This monitor tracks CPU load in Apache servers to identify spikes.",
+  "definition": {
+    "message": "High number of keep-alive async connections, combined with high CPU. You may want to lower the maximum number of simultaneous connections to the server (MaxRequestWorkers), and/or decrease the KeepAliveTimeout to avoid holding connections open longer than necessary.\n\n",
+    "name": "[Apache] resource utilization",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0,
+        "warning": 0.8,
+        "warning_recovery": 0.6
+      },
+      "timeout_h": 0
+    },
+    "query": "avg(last_4h):anomalies(+ avg:apache.performance.cpu_load{*} by {host}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='hourly') >= 1",
+    "tags": [
+      "integration:apache"
+    ],
+    "type": "query alert"
+  }
+}

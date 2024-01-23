@@ -1,34 +1,41 @@
 {
-	"name": "[IIS] Anomalous amount of requests for site: {{site.name}}",
-	"type": "query alert",
-	"query": "avg(last_4h):anomalies(avg:iis.httpd_request_method.get{*} by {site} + avg:iis.httpd_request_method.put{*} by {site} + avg:iis.httpd_request_method.head{*} by {site} + avg:iis.httpd_request_method.delete{*} by {site} + avg:iis.httpd_request_method.options{*} by {site}, 'agile', 2, direction='both', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
-	"message": "An anomalous amount of requests for site: {{site.name}} has been detected over the last 15mins.",
-	"tags": [
-		"integration:iis"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": false,
-		"renotify_interval": 0,
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 1,
-			"critical_recovery": 0
-		},
-		"threshold_windows": {
-			"trigger_window": "last_15m",
-			"recovery_window": "last_15m"
-		}
-	},
-	"priority": null,
-	"restricted_roles": null,
-    "recommended_monitor_metadata": {
-        "description": "Notifies when IIS requests are higher or lower than usual for a specific site."
-      }
+  "version": 2,
+  "created_at": "2021-02-24",
+  "last_updated_at": "2021-02-24",
+  "title": "Request number is high",
+  "tags": [
+    "integration:iis"
+  ],
+  "description": "HTTP requests are sent to your web application hosted by IIS. This monitor tracks anomalies in the request count to detect unusual patterns or changes in traffic to identify potential issues in your web application's performance or behavior.",
+  "definition": {
+    "message": "An anomalous amount of requests for site: {{site.name}} has been detected over the last 15mins.",
+    "name": "[IIS] Anomalous amount of requests for site: {{site.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_4h):anomalies(avg:iis.httpd_request_method.get{*} by {site} + avg:iis.httpd_request_method.put{*} by {site} + avg:iis.httpd_request_method.head{*} by {site} + avg:iis.httpd_request_method.delete{*} by {site} + avg:iis.httpd_request_method.options{*} by {site}, 'agile', 2, direction='both', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
+    "restricted_roles": null,
+    "tags": [
+      "integration:iis"
+    ],
+    "type": "query alert"
+  }
 }

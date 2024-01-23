@@ -5,10 +5,10 @@ import logging
 from contextlib import nullcontext as does_not_raise
 
 import pytest
-from tests.common import METRICS
 
 from datadog_checks.base.types import ServiceCheck
 from datadog_checks.cloudera.metrics import TIMESERIES_METRICS
+from tests.common import METRICS
 
 
 @pytest.mark.usefixtures('dd_environment')

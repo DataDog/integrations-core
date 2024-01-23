@@ -11,9 +11,10 @@
         "name": "OpenStack Neutron API Up",
         "groups": [
             "host",
-            "keystone_server"
+            "keystone_server",
+            "region_id"
         ],
-        "description": "Returns `CRITICAL` if the Agent is unable to query the Neutron API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise."
+        "description": "Returns `CRITICAL` if the Agent is unable to query the Neutron API and `UNKNOWN` if endpoint is not found in the catalog. Returns `OK` otherwise."
     },
     {
         "agent_version": "5.6.0",
@@ -27,9 +28,10 @@
         "name": "OpenStack Nova API Up",
         "groups": [
             "host",
-            "keystone_server"
+            "keystone_server",
+            "region_id"
         ],
-        "description": "Returns `CRITICAL` if the Agent is unable to query the Nova API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise."
+        "description": "Returns `CRITICAL` if the Agent is unable to query the Nova API and `UNKNOWN` if endpoint is not found in the catalog Returns `OK` otherwise."
     },
     {
         "agent_version": "5.6.0",
@@ -42,9 +44,74 @@
         "name": "OpenStack Keystone API Up",
         "groups": [
             "host",
-            "keystone_server"
+            "keystone_server",
+            "region_id"
         ],
-        "description": "Returns `CRITICAL` if the Agent is unable to query the Keystone API. Returns `OK` otherwise."
+        "description": "Returns `CRITICAL` if the Agent is unable to query the Keystone API and `UNKNOWN` if endpoint is not found in the catalog. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.50.0",
+        "check": "openstack.ironic.api.up",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "integration": "OpenStack",
+        "name": "OpenStack Ironic API Up",
+        "groups": [
+            "host",
+            "keystone_server",
+            "region_id"
+        ],
+        "description": "Returns `CRITICAL` if the Agent is unable to query the Ironic API and `UNKNOWN` if endpoint is not found in the catalog. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.50.0",
+        "check": "openstack.cinder.api.up",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "integration": "OpenStack",
+        "name": "OpenStack Cinder API Up",
+        "groups": [
+            "host",
+            "keystone_server",
+            "region_id"
+        ],
+        "description": "Returns `CRITICAL` if the Agent is unable to query the Cinder API and `UNKNOWN` if endpoint is not found in the catalog. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.50.0",
+        "check": "openstack.octavia.api.up",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "integration": "OpenStack",
+        "name": "OpenStack Octavia API Up",
+        "groups": [
+            "host",
+            "keystone_server",
+            "region_id"
+        ],
+        "description": "Returns `CRITICAL` if the Agent is unable to query the Octavia API and `UNKNOWN` if endpoint is not found in the catalog. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.50.0",
+        "check": "openstack.glance.api.up",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "integration": "OpenStack",
+        "name": "OpenStack Glance API Up",
+        "groups": [
+            "host",
+            "keystone_server",
+            "region_id"
+        ],
+        "description": "Returns `CRITICAL` if the Agent is unable to query the Glance API and `UNKNOWN` if endpoint is not found in the catalog. Returns `OK` otherwise."
     },
     {
         "agent_version": "5.6.0",

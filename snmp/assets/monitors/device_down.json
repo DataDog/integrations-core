@@ -1,32 +1,39 @@
 {
-	"name": "[SNMP] Device down alert on {{snmp_device.name}} in namespace {{device_namespace.name}}",
-	"type": "service check",
-	"query": "\"snmp.can_check\".over(\"*\").by(\"device_namespace\",\"snmp_device\").last(2).count_by_status()",
-	"message": "{{#is_alert}} \nA network device with IP {{snmp_device.name}} in namespace {{device_namespace.name}} is reporting CRITICAL and can't be monitored anymore.\n{{/is_alert}}\n\n{{#is_alert_recovery}}\nA network device with IP {{snmp_device.name}} in namespace {{device_namespace.name}} is back online.\n{{/is_alert_recovery}}\n\nTo know more about the status of your device, you can have more information from the [NDM page for the device {{device_namespace.name}}:{{snmp_device.name}}](/infrastructure/devices/graph?inspectedDevice={{device_namespace.name}}%3A{{snmp_device.name}}).",
-	"tags": [
-		"integration:snmp"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"silenced": {},
-		"include_tags": false,
-		"thresholds": {
-			"warning": 1,
-			"ok": 1,
-			"critical": 1
-		},
-		"notify_no_data": false,
-		"renotify_interval": 0,
-		"avalanche_window": 10,
-		"escalation_message": "",
-		"new_group_delay": 60,
-		"no_data_timeframe": 2
-	},
-	"priority": null,
-	"restricted_roles": null,
-    "recommended_monitor_metadata": {
-        "description": "Notify your team when a SNMP devices is down. Requires Datadog Agent 7.32+ or 6.32+."
-    }
+  "version": 2,
+  "created_at": "2021-12-13",
+  "last_updated_at": "2022-01-04",
+  "title": "Device is down",
+  "tags": [
+    "integration:snmp"
+  ],
+  "description": "A device is a networked entity with an SNMP agent that can be monitored and managed using SNMP protocols. This monitor tracks the status of each device in each namespace to avoid availability problems. Requires Datadog Agent 7.32+ or 6.32+.",
+  "definition": {
+    "message": "{{#is_alert}} \nA network device with IP {{snmp_device.name}} in namespace {{device_namespace.name}} is reporting CRITICAL and can't be monitored anymore.\n{{/is_alert}}\n\n{{#is_alert_recovery}}\nA network device with IP {{snmp_device.name}} in namespace {{device_namespace.name}} is back online.\n{{/is_alert_recovery}}\n\nTo know more about the status of your device, you can have more information from the [NDM page for the device {{device_namespace.name}}:{{snmp_device.name}}](/infrastructure/devices/graph?inspectedDevice={{device_namespace.name}}%3A{{snmp_device.name}}).",
+    "name": "[SNMP] Device down alert on {{snmp_device.name}} in namespace {{device_namespace.name}}",
+    "options": {
+      "avalanche_window": 10,
+      "escalation_message": "",
+      "include_tags": false,
+      "locked": false,
+      "new_group_delay": 60,
+      "no_data_timeframe": 2,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "silenced": {},
+      "thresholds": {
+        "critical": 1,
+        "ok": 1,
+        "warning": 1
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "\"snmp.can_check\".over(\"*\").by(\"device_namespace\",\"snmp_device\").last(2).count_by_status()",
+    "restricted_roles": null,
+    "tags": [
+      "integration:snmp"
+    ],
+    "type": "service check"
+  }
 }

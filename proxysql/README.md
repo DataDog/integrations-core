@@ -119,7 +119,7 @@ Need help? Contact [Datadog support][11].
 
 [1]: https://proxysql.com/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://app.datadoghq.com/account/settings#agent
+[3]: https://app.datadoghq.com/account/settings/agent/latest
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/proxysql/datadog_checks/proxysql/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

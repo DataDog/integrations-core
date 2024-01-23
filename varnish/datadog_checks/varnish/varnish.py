@@ -330,7 +330,7 @@ class Varnish(AgentCheck):
             backend, status, message = None, None, None
             # split string and remove all empty fields
             tokens = filter(None, line.strip().split(' '))
-            tokens = [t for t in tokens]
+            tokens = list(tokens)
             if len(tokens):
                 if all(t in tokens for t in ['Backend', 'name', 'Admin', 'Probe']):
                     # skip the column headers that exist in new output format

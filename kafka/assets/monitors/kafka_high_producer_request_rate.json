@@ -1,0 +1,40 @@
+{
+  "version": 2,
+  "created_at": "2021-02-12",
+  "last_updated_at": "2021-02-12",
+  "title": "Produce request rate is high",
+  "tags": [
+    "integration:kafka"
+  ],
+  "description": "A producer can send requests to publish messages to Kafka topics at a different rate. This monitor tracks the request rate to identify a sudden and significant increase in the request rate above the norm.",
+  "definition": {
+    "message": "The request rate on a producer is abnormally high: {{value}} request/s.",
+    "name": "[Kafka] High request rate on producer {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "threshold_windows": {
+        "recovery_window": "last_5m",
+        "trigger_window": "last_5m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0.2,
+        "warning": 0.8
+      },
+      "timeout_h": 0
+    },
+    "query": "avg(last_1h):anomalies(avg:kafka.producer.request_rate{*}, 'basic', 2, direction='above', alert_window='last_5m', interval=20, count_default_zero='true') >= 1",
+    "tags": [
+      "integration:kafka"
+    ],
+    "type": "query alert"
+  }
+}

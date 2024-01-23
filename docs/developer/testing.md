@@ -2,44 +2,46 @@
 
 -----
 
-The entrypoint for testing any integration is the command `ddev test`, which accepts an arbitrary number of integrations as arguments.
+The entrypoint for testing any integration is the command [`test`](ddev/cli.md#ddev-test).
 
-Under the hood, we use [tox][tox-github] for environment management and [pytest][pytest-github] as our test framework.
+Under the hood, we use [hatch][hatch] for environment management and [pytest][pytest-github] as our test framework.
 
 ## Discovery
 
 Use the `--list`/`-l` flag to see what environments are available, for example:
 
 ```
-$ ddev test postgres envoy -l
-postgres:
-    py27-10
-    py27-11
-    py27-93
-    py27-94
-    py27-95
-    py27-96
-    py38-10
-    py38-11
-    py38-93
-    py38-94
-    py38-95
-    py38-96
-    format_style
-    style
-envoy:
-    py27
-    py38
-    bench
-    format_style
-    style
+$ ddev test postgres -l
+                                      Standalone
+┏━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┓
+┃ Name   ┃ Type    ┃ Features ┃ Dependencies    ┃ Environment variables   ┃ Scripts   ┃
+┡━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━┩
+│ lint   │ virtual │          │ black==22.12.0  │                         │ all       │
+│        │         │          │ pydantic==2.0.2 │                         │ fmt       │
+│        │         │          │ ruff==0.0.257   │                         │ style     │
+├────────┼─────────┼──────────┼─────────────────┼─────────────────────────┼───────────┤
+│ latest │ virtual │ deps     │                 │ POSTGRES_VERSION=latest │ benchmark │
+│        │         │          │                 │                         │ test      │
+│        │         │          │                 │                         │ test-cov  │
+└────────┴─────────┴──────────┴─────────────────┴─────────────────────────┴───────────┘
+                        Matrices
+┏━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━┓
+┃ Name    ┃ Type    ┃ Envs       ┃ Features ┃ Scripts   ┃
+┡━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━┩
+│ default │ virtual │ py3.9-9.6  │ deps     │ benchmark │
+│         │         │ py3.9-10.0 │          │ test      │
+│         │         │ py3.9-11.0 │          │ test-cov  │
+│         │         │ py3.9-12.1 │          │           │
+│         │         │ py3.9-13.0 │          │           │
+│         │         │ py3.9-14.0 │          │           │
+└─────────┴─────────┴────────────┴──────────┴───────────┘
 ```
 
-You'll notice that all environments for running tests are prefixed with `pyXY`, indicating the Python version to use.
+You'll notice that all environments for running tests are prefixed with `pyX.Y`, indicating the Python version to use.
 If you don't have a particular version installed (for example Python 2.7), such environments will be skipped.
 
-The second part of a test environment's name corresponds to the version of the product. For example, the `11` in `py38-11`
-implies tests will run against version 11.x of PostgreSQL.
+The second part of a test environment's name corresponds to the version of the product. For example, the `14.0` in `py3.9-14.0`
+implies tests will run against version 14.x of PostgreSQL.
 
 If there is no version suffix, it means that either:
 
@@ -50,18 +52,16 @@ If there is no version suffix, it means that either:
 
 ### Explicit
 
-Passing just the integration name will run every test environment e.g. executing `ddev test envoy`
-will run the environments `py27`, `py38`, and `style`.
-
-You may select a subset of environments to run by appending a `:` followed by a comma-separated list of environments.
+Passing just the integration name will run every test environment. You may select a subset of environments
+to run by appending a `:` followed by a comma-separated list of environments.
 
 For example, executing:
 
 ```
-ddev test postgres:py38-11,style envoy:py38
+ddev test postgres:py3.9-13.0,py3.9-11.0
 ```
 
-will run, in order, the environments `py38-11` and `style` for the PostgreSQL check and the environment `py38` for the Envoy check.
+will run tests for the environment `py3.9-13.0` followed by the environment `py3.9-11.0`.
 
 ### Detection
 
@@ -81,31 +81,7 @@ of integrations' tests.
 ```
 $ ddev test tls -c
 ...
----------- Coverage report ----------
-
-Name                              Stmts   Miss Branch BrPart  Cover
--------------------------------------------------------------------
-datadog_checks\tls\__about__.py       1      0      0      0   100%
-datadog_checks\tls\__init__.py        3      0      0      0   100%
-datadog_checks\tls\tls.py           185      4     50      2    97%
-datadog_checks\tls\utils.py          43      0     16      0   100%
-tests\__init__.py                     0      0      0      0   100%
-tests\conftest.py                   105      0      0      0   100%
-tests\test_config.py                 47      0      0      0   100%
-tests\test_local.py                 113      0      0      0   100%
-tests\test_remote.py                189      0      2      0   100%
-tests\test_utils.py                  15      0      0      0   100%
-tests\utils.py                       36      0      2      0   100%
--------------------------------------------------------------------
-TOTAL                               737      4     70      2    99%
-```
-
-To also show any line numbers that were not hit, use the `--cov-missing`/`-cm` flag instead.
-
-```
-$ ddev test tls -cm
-...
----------- Coverage report ----------
+─────────────────────────────── Coverage report ────────────────────────────────
 
 Name                              Stmts   Miss Branch BrPart  Cover   Missing
 -----------------------------------------------------------------------------
@@ -124,23 +100,18 @@ tests\utils.py                       36      0      2      0   100%
 TOTAL                               737      4     70      2    99%
 ```
 
-## Style
+## Linting
 
-To run only the style checking environments, use the `--style`/`-s` shortcut flag.
+To run only the lint checks, use the `--lint`/`-s` shortcut flag.
 
-You may also only run the formatter environment using the `--format-style`/`-fs` shortcut flag. The formatter will
-automatically resolve the most common errors caught by the style checker.
+You may also only run the formatter using the `--fmt`/`-fs` shortcut flag. The formatter will
+automatically resolve the most common errors caught by the lint checks.
 
-## Advanced
+## Argument forwarding
 
-There are a number of shortcut options available that correspond to [pytest options][pytest-usage].
+You may pass arbitrary [arguments](https://docs.pytest.org/en/stable/reference/reference.html#command-line-flags)
+directly to `pytest`, for example:
 
-- `--marker`/`-m` (`pytest`: `-m`) - Only run tests matching a given marker expression e.g. `ddev test elastic:py38-7.2 -m unit`
-- `--filter`/`-k` (`pytest`: `-k`) - Only run tests matching a given substring expression e.g.`ddev test redisdb -k replication`
-- `--debug`/`-d` (`pytest`: `--log-level=debug -s`) - Set the log level to debug
-- `--pdb` (`pytest`: `--pdb -x`) - Drop to PDB on first failure, then end test session
-- `--verbose`/`-v` (`pytest`: `-v --tb=auto`) - Increase verbosity (can be used additively) and disables shortened tracebacks
-- `--ddtrace` (`pytest`: `--ddtrace`) - Submit test traces to a local Datadog Agent using the [`ddtrace`][pytest-ddtrace] Python package. For example:`ddev test --ddtrace consul`. This does not work if you are testing a Python 2 Windows environment.
-
-You may also pass arguments directly to `pytest` using the `--pytest-args`/`-pa` option. For example, you could
-re-write `-d` as `-pa "--log-level=debug -s"`.
+```
+ddev test postgres -- -m unit --pdb -x
+```

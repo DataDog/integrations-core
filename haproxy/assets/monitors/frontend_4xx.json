@@ -1,30 +1,39 @@
 {
-  "name": "[HAProxy] Anomalous number of frontend 4xx HTTP responses for host: {{host.name}}",
-  "type": "query alert",
-  "query": "avg(last_4h):anomalies(avg:haproxy.frontend.response.4xx{*} by {host}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
-  "message": "An anomalous number of HAProxy frontend 4xx HTTP responses for host: {{host.name}}  has been detected over the last 15mins.",
-  "tags": ["integration:haproxy"],
-  "options": {
-    "notify_audit": false,
-    "locked": false,
-    "timeout_h": 0,
-    "new_host_delay": 300,
-    "require_full_window": false,
-    "notify_no_data": false,
-    "renotify_interval": 0,
-    "escalation_message": "",
-    "no_data_timeframe": null,
-    "include_tags": true,
-    "thresholds": {
-      "critical": 1,
-      "critical_recovery": 0
+  "version": 2,
+  "created_at": "2021-03-01",
+  "last_updated_at": "2021-03-01",
+  "title": "Number of frontend 4xx HTTP responses is high",
+  "tags": [
+    "integration:haproxy"
+  ],
+  "description": "When HAProxy receives invalid client requests, 4xx responses are sent back to the client. This monitor tracks anomalies in the 4xx frontend response rate for HAProxy, on different hosts, to identify and address issues related to client errors.",
+  "definition": {
+    "message": "An anomalous number of HAProxy frontend 4xx HTTP responses for host: {{host.name}}  has been detected over the last 15mins.",
+    "name": "[HAProxy] Anomalous number of frontend 4xx HTTP responses for host: {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "timeout_h": 0
     },
-    "threshold_windows": {
-      "trigger_window": "last_15m",
-      "recovery_window": "last_15m"
-    }
-  },
-  "recommended_monitor_metadata": {
-    "description": "Notifies when HAProxy frontend 4xx errors are higher than usual for a specific host."
+    "query": "avg(last_4h):anomalies(avg:haproxy.frontend.response.4xx{*} by {host}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
+    "tags": [
+      "integration:haproxy"
+    ],
+    "type": "query alert"
   }
 }

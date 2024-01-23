@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "created_at": "2023-05-02",
+  "last_updated_at": "2023-05-02",
+  "title": "Interface is down on SNMP device",
+  "tags": [
+    "integration:snmp"
+  ],
+  "description": "A device is a networked entity with an SNMP agent that can be monitored and managed using SNMP protocols. This monitor checks the operational status of network interfaces, alerting if one report as 'down' across devices. Requires Datadog Agent 7.43+ or 6.43+.",
+  "definition": {
+    "message": "{{#is_alert}}\nInterface {{interface.name}} of network device with IP {{snmp_device.name}} in namespace {{device_namespace.name}} is reporting DOWN.\n{{/is_alert}}\n\n{{#is_alert_recovery}}\nInterface {{interface.name}} of network device with IP {{snmp_device.name}} in namespace {{device_namespace.name}} is back online.\n{{/is_alert_recovery}}\n\nTo know more about the status of your device, you can have more information from the [NDM page for the device {{device_namespace.name}}:{{snmp_device.name}}](/infrastructure/devices/graph?inspectedDevice={{device_namespace.name}}%3A{{snmp_device.name}}\u0026detailsTab=interfaces).",
+    "name": "[SNMP] Interface {{interface.name}} down alert on device {{snmp_device.name}} in namespace {{device_namespace.name}}",
+    "options": {
+      "include_tags": false,
+      "new_group_delay": 60,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 0.8
+      }
+    },
+    "query": "avg(last_5m):default_zero(max:snmp.interface.status{status:down} by {snmp_device,device_namespace,interface_index,interface}) >= 0.8",
+    "tags": [
+      "integration:snmp"
+    ],
+    "type": "query alert"
+  }
+}

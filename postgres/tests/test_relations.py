@@ -5,9 +5,10 @@ import psycopg2
 import pytest
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.postgres.relationsmanager import RelationsManager
+from datadog_checks.postgres.relationsmanager import QUERY_PG_CLASS, RelationsManager
 
-from .common import DB_NAME, HOST, PORT
+from .common import DB_NAME, HOST, PORT, _get_expected_tags, _iterate_metric_name, assert_metric_at_least
+from .utils import _get_superconn, _wait_for_value, requires_over_11
 
 RELATION_METRICS = [
     'postgresql.seq_scans',
@@ -30,14 +31,13 @@ RELATION_METRICS = [
     'postgresql.autoanalyzed',
 ]
 
-RELATION_SIZE_METRICS = ['postgresql.table_size', 'postgresql.total_size', 'postgresql.index_size']
-
 RELATION_INDEX_METRICS = [
     'postgresql.index_scans',
     'postgresql.index_rows_fetched',  # deprecated
     'postgresql.index_rel_rows_fetched',
     'postgresql.index_blocks_read',
     'postgresql.index_blocks_hit',
+    'postgresql.individual_index_size',
 ]
 
 IDX_METRICS = ['postgresql.index_scans', 'postgresql.index_rows_read', 'postgresql.index_rows_fetched']
@@ -47,33 +47,54 @@ IDX_METRICS = ['postgresql.index_scans', 'postgresql.index_rows_read', 'postgres
 @pytest.mark.usefixtures('dd_environment')
 def test_relations_metrics(aggregator, integration_check, pg_instance):
     pg_instance['relations'] = ['persons']
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
 
-    posgres_check = integration_check(pg_instance)
-    posgres_check.check(pg_instance)
-
-    expected_tags = pg_instance['tags'] + [
-        'port:{}'.format(pg_instance['port']),
-        'db:%s' % pg_instance['dbname'],
-        'table:persons',
-        'schema:public',
-    ]
-
-    expected_size_tags = pg_instance['tags'] + [
-        'port:{}'.format(pg_instance['port']),
-        'db:%s' % pg_instance['dbname'],
-        'table:persons',
-        'schema:public',
-    ]
+    expected_tags = _get_expected_tags(check, pg_instance, db=pg_instance['dbname'], table='persons', schema='public')
 
     for name in RELATION_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags)
-
     # 'persons' db don't have any indexes
     for name in RELATION_INDEX_METRICS:
         aggregator.assert_metric(name, count=0, tags=expected_tags)
+    for name in _iterate_metric_name(QUERY_PG_CLASS):
+        aggregator.assert_metric(name, count=1, tags=expected_tags)
 
-    for name in RELATION_SIZE_METRICS:
-        aggregator.assert_metric(name, count=1, tags=expected_size_tags)
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@requires_over_11
+def test_partition_relation(aggregator, integration_check, pg_instance):
+    pg_instance['relations'] = [
+        {'relation_regex': 'test_.*'},
+    ]
+
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    part_1_tags = _get_expected_tags(
+        check, pg_instance, db=pg_instance['dbname'], table='test_part1', partition_of='test_part', schema='public'
+    )
+    aggregator.assert_metric('postgresql.relation.pages', value=3, count=1, tags=part_1_tags)
+    aggregator.assert_metric('postgresql.relation.tuples', value=499, count=1, tags=part_1_tags)
+    aggregator.assert_metric('postgresql.relation.all_visible', value=3, count=1, tags=part_1_tags)
+    aggregator.assert_metric('postgresql.table_size', value=24576, count=1, tags=part_1_tags)
+    aggregator.assert_metric('postgresql.relation_size', value=24576, count=1, tags=part_1_tags)
+    aggregator.assert_metric('postgresql.index_size', value=65536, count=1, tags=part_1_tags)
+    aggregator.assert_metric('postgresql.toast_size', value=0, count=1, tags=part_1_tags)
+    aggregator.assert_metric('postgresql.total_size', value=90112, count=1, tags=part_1_tags)
+
+    part_2_tags = _get_expected_tags(
+        check, pg_instance, db=pg_instance['dbname'], table='test_part2', partition_of='test_part', schema='public'
+    )
+    aggregator.assert_metric('postgresql.relation.pages', value=8, count=1, tags=part_2_tags)
+    aggregator.assert_metric('postgresql.relation.tuples', value=1502, count=1, tags=part_2_tags)
+    aggregator.assert_metric('postgresql.relation.all_visible', value=8, count=1, tags=part_2_tags)
+    aggregator.assert_metric('postgresql.table_size', value=73728, count=1, tags=part_2_tags)
+    aggregator.assert_metric('postgresql.relation_size', value=65536, count=1, tags=part_2_tags)
+    aggregator.assert_metric('postgresql.index_size', value=98304, count=1, tags=part_2_tags)
+    aggregator.assert_metric('postgresql.toast_size', value=8192, count=1, tags=part_2_tags)
+    aggregator.assert_metric('postgresql.total_size', value=172032, count=1, tags=part_2_tags)
 
 
 @pytest.mark.integration
@@ -89,16 +110,10 @@ def test_bloat_metrics(aggregator, collect_bloat_metrics, expected_count, integr
     pg_instance['relations'] = ['pg_index']
     pg_instance['collect_bloat_metrics'] = collect_bloat_metrics
 
-    posgres_check = integration_check(pg_instance)
-    posgres_check.check(pg_instance)
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
 
-    base_tags = pg_instance['tags'] + [
-        'port:{}'.format(pg_instance['port']),
-        'db:%s' % pg_instance['dbname'],
-        'table:pg_index',
-        'schema:pg_catalog',
-    ]
-
+    base_tags = _get_expected_tags(check, pg_instance, db=pg_instance['dbname'], table='pg_index', schema='pg_catalog')
     aggregator.assert_metric('postgresql.table_bloat', count=expected_count, tags=base_tags)
 
     indices = ['pg_index_indrelid_index', 'pg_index_indexrelid_index']
@@ -116,17 +131,14 @@ def test_relations_metrics_regex(aggregator, integration_check, pg_instance):
         {'relation_regex': r'[pP]ersons[-_]?(dup\d)?'},
     ]
     relations = ['persons', 'personsdup1', 'Personsdup2']
-    posgres_check = integration_check(pg_instance)
-    posgres_check.check(pg_instance)
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
 
     expected_tags = {}
     for relation in relations:
-        expected_tags[relation] = pg_instance['tags'] + [
-            'port:{}'.format(pg_instance['port']),
-            'db:%s' % pg_instance['dbname'],
-            'table:{}'.format(relation.lower()),
-            'schema:public',
-        ]
+        expected_tags[relation] = _get_expected_tags(
+            check, pg_instance, db=pg_instance['dbname'], table=relation.lower(), schema='public'
+        )
 
     for relation in relations:
         for name in RELATION_METRICS:
@@ -136,16 +148,16 @@ def test_relations_metrics_regex(aggregator, integration_check, pg_instance):
         for name in RELATION_INDEX_METRICS:
             aggregator.assert_metric(name, count=0, tags=expected_tags[relation])
 
-        for name in RELATION_SIZE_METRICS:
-            aggregator.assert_metric(name, count=1, tags=expected_tags[relation])
+    for name in _iterate_metric_name(QUERY_PG_CLASS):
+        aggregator.assert_metric(name, count=1, tags=expected_tags[relation])
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_max_relations(aggregator, integration_check, pg_instance):
     pg_instance.update({'relations': [{'relation_regex': '.*'}], 'max_relations': 1})
-    posgres_check = integration_check(pg_instance)
-    posgres_check.check(pg_instance)
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
 
     for name in RELATION_METRICS:
         relation_metrics = []
@@ -154,7 +166,7 @@ def test_max_relations(aggregator, integration_check, pg_instance):
                 relation_metrics.append(m)
         assert len(relation_metrics) == 1
 
-    for name in RELATION_SIZE_METRICS:
+    for name in _iterate_metric_name(QUERY_PG_CLASS):
         relation_metrics = []
         for m in aggregator._metrics[name]:
             if any(['table:' in tag for tag in m.tags]):
@@ -168,19 +180,47 @@ def test_index_metrics(aggregator, integration_check, pg_instance):
     pg_instance['relations'] = ['breed']
     pg_instance['dbname'] = 'dogs'
 
-    posgres_check = integration_check(pg_instance)
-    posgres_check.check(pg_instance)
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + [
-        'port:{}'.format(pg_instance['port']),
-        'db:dogs',
-        'table:breed',
-        'index:breed_names',
-        'schema:public',
-    ]
-
+    expected_tags = _get_expected_tags(
+        check, pg_instance, db='dogs', table='breed', index='breed_names', schema='public'
+    )
     for name in IDX_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_vacuum_age(aggregator, integration_check, pg_instance):
+    pg_instance['relations'] = ['persons']
+    pg_instance['dbname'] = 'datadog_test'
+
+    conn = _get_superconn(pg_instance)
+    with conn.cursor() as cur:
+        cur.execute('select pg_stat_reset()')
+        cur.execute('VACUUM ANALYZE persons')
+    conn.close()
+
+    _wait_for_value(
+        pg_instance,
+        lower_threshold=0,
+        query="select count(*) from pg_stat_user_tables where relname='persons' and vacuum_count > 0;",
+    )
+
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    expected_tags = _get_expected_tags(check, pg_instance, db='datadog_test', table='persons', schema='public')
+    for name in ['postgresql.last_vacuum_age', 'postgresql.last_analyze_age']:
+        assert_metric_at_least(
+            aggregator,
+            name,
+            lower_bound=0,
+            higher_bound=100,
+            tags=expected_tags,
+            count=1,
+        )
 
 
 @pytest.mark.integration
@@ -197,8 +237,10 @@ def test_index_metrics(aggregator, integration_check, pg_instance):
                 'db:datadog_test',
                 'lock_mode:AccessExclusiveLock',
                 'lock_type:relation',
+                'granted:True',
                 'table:persons',
                 'schema:public',
+                'dd.internal.resource:database_instance:stubbed.hostname',
             ],
             id="test with single table lock should return 1",
         ),

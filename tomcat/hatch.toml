@@ -1,4 +1,14 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["3.8"]
+python = ["3.11"]
+version = ["9.0", "10.0", "10.1"]
+flavor = ["standalone", "embedded"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "TOMCAT_VERSION", value = "9.0.84", if = ["9.0"] },
+  { key = "TOMCAT_VERSION", value = "10.0.27", if = ["10.0"] },
+  { key = "TOMCAT_VERSION", value = "10.1.17", if = ["10.1"] },
+]
+matrix.flavor.env-vars = "FLAVOR"

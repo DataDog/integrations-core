@@ -358,7 +358,7 @@ def test_view_compaction_metrics(aggregator, gauges):
                     self.compact_views()
                 theid = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
                 docs.append(self.post_doc(theid))
-                docs = list(map(lambda x: self.update_doc(x), docs))
+                docs = [self.update_doc(x) for x in docs]
                 self.generate_views()
 
         def generate_views(self):
@@ -451,3 +451,19 @@ def test_config_tags(aggregator, gauges):
         aggregator.assert_metric_has_tag(gauge, TEST_TAG)
     expected_tags = ["instance:{0}".format(config["name"]), TEST_TAG]
     aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, tags=expected_tags)
+
+
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+@pytest.mark.parametrize('enable_per_db_metrics', [True, False])
+def test_per_db_metrics(aggregator, check, enable_per_db_metrics):
+    config = common.BASIC_CONFIG_V2.copy()
+    config["enable_per_db_metrics"] = enable_per_db_metrics
+
+    check.instance = config
+    check.check({})
+
+    if enable_per_db_metrics:
+        aggregator.assert_metric("couchdb.by_db.doc_count", at_least=1)
+    else:
+        aggregator.assert_metric("couchdb.by_db.doc_count", count=0)

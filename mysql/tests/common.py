@@ -17,10 +17,13 @@ MYSQL_REPLICATION = os.getenv('MYSQL_REPLICATION')
 MYSQL_VERSION_IS_LATEST = os.getenv('MYSQL_VERSION', '').endswith('latest')
 
 if MYSQL_VERSION_IS_LATEST is False:
-    MYSQL_VERSION_PARSED = parse_version(os.getenv('MYSQL_VERSION', ''))
+    MYSQL_VERSION_PARSED = parse_version(os.getenv('MYSQL_VERSION', '').split('-')[0])
 else:
     MYSQL_VERSION_PARSED = parse_version(str(maxsize))
 CHECK_NAME = 'mysql'
+
+# adding flavor to differentiate mariadb from mysql
+MYSQL_FLAVOR = os.getenv('MYSQL_FLAVOR', '')
 
 HOST = get_docker_hostname()
 PORT = 13306

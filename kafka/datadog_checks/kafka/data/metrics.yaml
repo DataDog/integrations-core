@@ -286,6 +286,13 @@ jmx_metrics:
           topic: $2
     - include:
         domain: 'kafka.consumer'
+        bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?)'
+        attribute:
+          fetch-rate:
+            metric_type: gauge
+            alias: kafka.consumer.fetch_rate
+    - include:
+        domain: 'kafka.consumer'
         bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
         attribute:
           bytes-consumed-rate:

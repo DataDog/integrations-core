@@ -1,0 +1,33 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnect
+metadata:
+  name: my-connect
+  annotations:
+    strimzi.io/use-connector-resources: "true"
+spec:
+  version: 3.4.0
+  replicas: 3
+  bootstrapServers: my-cluster-kafka-bootstrap:9092
+  config:
+    group.id: connect-cluster
+    offset.storage.topic: connect-cluster-offsets
+    config.storage.topic: connect-cluster-configs
+    status.storage.topic: connect-cluster-status
+    config.storage.replication.factor: -1
+    offset.storage.replication.factor: -1
+    status.storage.replication.factor: -1
+  build:
+    output:
+      type: docker
+      image: ttl.sh/whats-new-in-strimzi-0.34.0:latest
+    plugins:
+      - name: echo-sink-connector
+        artifacts:
+          - type: jar
+            url: https://github.com/scholzj/echo-sink/releases/download/1.4.0/echo-sink-1.4.0.jar
+            sha512sum: 6d40b6334b9e6ff81a11176f23d082688ace58ff000570867dfabbd69a301c579c21f571985612c36cddd9d03454cea8cf0ace0d1f9335b5ef2e039f9781074a
+      - name: camel-timer-connector
+        artifacts:
+          - type: tgz
+            url: https://repo1.maven.org/maven2/org/apache/camel/kafkaconnector/camel-timer-kafka-connector/0.11.5/camel-timer-kafka-connector-0.11.5-package.tar.gz
+            sha512sum: f9563659255c9da04fcb3e9121618a1d73feb61bf6083213bca72337dd4337e19d208fda741c7058b170ec4a785fd79c524fc182227bd9e0224cd35c309b556b

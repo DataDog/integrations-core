@@ -16,9 +16,11 @@ class ReplicationOpLogCollector(MongoCollector):
     def compatible_with(self, deployment):
         # Can only be run on mongod node that is part of a replica set. Not possible on arbiters.
         if not isinstance(deployment, ReplicaSetDeployment):
+            self.log.debug("ReplicationOpLogCollector can only be run on mongod nodes, replicaset deployment detected.")
             return False
 
         if deployment.is_arbiter:
+            self.log.debug("ReplicationOpLogCollector can only be run on mongod nodes, arbitrer node detected.")
             return False
 
         return True

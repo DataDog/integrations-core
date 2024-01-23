@@ -1,8 +1,11 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
 
-from datadog_checks.envoy.utils import make_metric_tree
+from datadog_checks.envoy.utils import make_metric_tree, modify_metrics_dict
+
+pytestmark = [pytest.mark.unit]
 
 
 def test_make_metric_tree():
@@ -49,5 +52,39 @@ def test_make_metric_tree():
                 ('stat_prefix', ),
             ],
         },
+    }
+    # fmt: on
+
+
+def test_wildcard_removal_tree():
+    # fmt: off
+    metrics = {
+        "*.http_local_rate_limit.enabled": {
+            "tags": (
+                ("stat_prefix",),
+                (),
+                ()
+            ),
+            "method": "monotonic_count",
+        },
+        "*.http_local_rate_limit.enforced": {
+            "tags": (
+                ("stat_prefix",),
+                (),
+                ()
+            ),
+            "method": "monotonic_count",
+        }
+    }
+
+    assert modify_metrics_dict(metrics) == {
+        "http_local_rate_limit.enabled": {
+            "tags": (("stat_prefix",), (), ()),
+            "method": "monotonic_count",
+        },
+        "http_local_rate_limit.enforced": {
+            "tags": (("stat_prefix",), (), ()),
+            "method": "monotonic_count",
+        }
     }
     # fmt: on

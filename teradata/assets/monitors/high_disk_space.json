@@ -1,0 +1,36 @@
+{
+  "version": 2,
+  "created_at": "2022-07-18",
+  "last_updated_at": "2022-07-18",
+  "title": "Datadase disk space usage is high",
+  "tags": [
+    "integration:teradata"
+  ],
+  "description": "High disk usage for a database typically means that the database is writing to or reading from the disk at a high rate, which could eventually lead to data loss. This monitor tracks if any database has higher-than-usual disk space in use.",
+  "definition": {
+    "message": "{{#is_warning}}Total current disk space in use for database {{td_database.name}} on server {{teradata_server.name}} is more than 50%{{/is_warning}} \n{{#is_alert}}Total current disk space in use for database {{td_database.name}} on server {{teradata_server.name}} is more than 75%{{/is_alert}}\n{{#is_recovery}}Total current disk space in use for database {{td_database.name}} on server {{teradata_server.name}} is less than 50%{{/is_recovery}}\n",
+    "name": "[Teradata] High database disk space in use",
+    "options": {
+      "new_group_delay": 60,
+      "no_data_timeframe": 10,
+      "notify_audit": true,
+      "notify_no_data": true,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 0.75,
+        "critical_recovery": 0,
+        "warning": 0.5
+      }
+    },
+    "query": "avg(last_15m):anomalies(((avg:teradata.disk_space.curr_perm.total{*} by {host,teradata_server,td_database,td_amp} + avg:teradata.disk_space.curr_spool.total{*} by {host,teradata_server,td_database,td_amp} + avg:teradata.disk_space.curr_temp.total{*} by {host,teradata_server,td_database,td_amp}) / (avg:teradata.disk_space.max_perm.total{*} by {host,teradata_server,td_database,td_amp} + avg:teradata.disk_space.max_spool.total{*} by {host,teradata_server,td_database,td_amp} + avg:teradata.disk_space.max_temp.total{*} by {host,teradata_server,td_database,td_amp})) * 100, 'basic', 2, direction='both', interval=60, alert_window='last_15m', count_default_zero='true', seasonality='hourly') >= 0.75",
+    "tags": [
+      "integration:teradata"
+    ],
+    "type": "query alert"
+  }
+}

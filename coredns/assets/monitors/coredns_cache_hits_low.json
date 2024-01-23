@@ -1,32 +1,39 @@
 {
-	"name": "[CoreDNS] Cache hits count is low",
-	"type": "query alert",
-	"query": "avg(last_4h):anomalies(avg:coredns.cache_hits_count{*}.as_count(), 'basic', 2, direction='below', alert_window='last_15m', interval=60, count_default_zero='true') >= 1",
-	"message": "The number of cache hits is lower than usual",
-	"tags": [
-		"integration:coredns"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": false,
-		"renotify_interval": "0",
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 1,
-			"critical_recovery": 0
-		},
-		"threshold_windows": {
-			"trigger_window": "last_15m",
-			"recovery_window": "last_15m"
-		}
-	},
-    "recommended_monitor_metadata": {
-        "description": "Notify your team when the number of cache hits is lower than usual."
-    }
+  "version": 2,
+  "created_at": "2021-02-26",
+  "last_updated_at": "2021-02-26",
+  "title": "Cache hits count is low",
+  "tags": [
+    "integration:coredns"
+  ],
+  "description": "Caching is a fundamental feature to improve query performance and the overall efficiency of the DNS resolution process. This monitor tracks the count of cache hits to identify anomalies based on the historical pattern of cache hits.",
+  "definition": {
+    "message": "The number of cache hits is lower than usual",
+    "name": "[CoreDNS] Cache hits count is low",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "timeout_h": 0
+    },
+    "query": "avg(last_4h):anomalies(avg:coredns.cache_hits_count{*}.as_count(), 'basic', 2, direction='below', alert_window='last_15m', interval=60, count_default_zero='true') >= 1",
+    "tags": [
+      "integration:coredns"
+    ],
+    "type": "query alert"
+  }
 }

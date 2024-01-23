@@ -11,6 +11,9 @@ import re
 import shutil
 import sys
 import tempfile
+import urllib.error
+import urllib.parse
+import urllib.request
 
 from in_toto import verifylib
 from in_toto.exceptions import LinkNotFoundError
@@ -56,7 +59,11 @@ logger = logging.getLogger(__name__)
 
 class TUFDownloader:
     def __init__(
-        self, repository_url_prefix=REPOSITORY_URL_PREFIX, root_layout_type=DEFAULT_ROOT_LAYOUT_TYPE, verbose=0
+        self,
+        repository_url_prefix=REPOSITORY_URL_PREFIX,
+        root_layout_type=DEFAULT_ROOT_LAYOUT_TYPE,
+        verbose=0,
+        disable_verification=False,
     ):
         # 0 => 60 (effectively /dev/null)
         # 1 => 50 (CRITICAL)
@@ -71,6 +78,13 @@ class TUFDownloader:
 
         self.__root_layout_type = root_layout_type
         self.__root_layout = ROOT_LAYOUTS[self.__root_layout_type]
+
+        self.__disable_verification = disable_verification
+
+        if self.__disable_verification:
+            logger.warning(
+                'Running with TUF and in-toto verification disabled. Integrity is only protected with TLS (HTTPS).'
+            )
 
         # NOTE: The directory where the targets for *this* repository is
         # cached. We hard-code this keep this to a subdirectory dedicated to
@@ -100,18 +114,44 @@ class TUFDownloader:
         # we use the same consistent snapshot to download targets.
         self.__updater.refresh()
 
-    def __download_with_tuf(self, target_relpath):
+    def __compute_target_paths(self, target_relpath):
         # The path used to query TUF needs to be a path-relative-URL string
         # (https://url.spec.whatwg.org/#path-relative-url-string), which means the path
         # separator *must* be `/` and only `/`.
         # This is a defensive measure to make things work even if the provided `target_relpath`
         # is a platform-specific filesystem path.
         tuf_target_path = pathlib.PurePath(target_relpath).as_posix()
+        target_abspath = os.path.join(self.__targets_dir, tuf_target_path)
+
+        return tuf_target_path, target_abspath
+
+    def _download_without_tuf_in_toto(self, target_relpath):
+        assert isinstance(self.__updater._target_base_url, str), self.__updater._target_base_url
+
+        tuf_target_path, target_abspath = self.__compute_target_paths(target_relpath)
+
+        # reproducing how the "self.__updater.download_target" method computes the URL
+        target_base_url = self.__updater._target_base_url
+        full_url = target_base_url + ('/' if not target_base_url.endswith('/') else '') + tuf_target_path
+
+        try:
+            with urllib.request.urlopen(full_url) as resp:
+                os.makedirs(os.path.dirname(target_abspath), exist_ok=True)
+                with open(target_abspath, 'wb') as dest:
+                    dest.write(resp.read())
+        except urllib.error.HTTPError as err:
+            logger.error('GET %s: %s', full_url, err)
+            raise
+
+        return target_abspath
+
+    def _download_with_tuf(self, target_relpath):
+        tuf_target_path, target_abspath = self.__compute_target_paths(target_relpath)
+
         target = self.__updater.get_targetinfo(tuf_target_path)
         if target is None:
             raise TargetNotFoundError(f'Target at {tuf_target_path} not found')
 
-        target_abspath = os.path.join(self.__targets_dir, tuf_target_path)
         local_relpath = self.__updater.find_cached_target(target, target_abspath)
 
         # Either the target has not been updated...
@@ -133,7 +173,7 @@ class TUFDownloader:
         # can introduce new parameters w/o breaking old downloaders that don't
         # know how to substitute them.
         target_relpath = f'{IN_TOTO_METADATA_DIR}/{self.__root_layout}'
-        return self.__download_with_tuf(target_relpath)
+        return self._download_with_tuf(target_relpath)
 
     def __download_custom(self, target, extension):
         # A set to collect where in-toto pubkeys / links live.
@@ -157,7 +197,7 @@ class TUFDownloader:
             # for in-toto metadata themselves, and so on ad
             # infinitum.
             if target_relpath.endswith(extension):
-                target_abspath, _ = self.__download_with_tuf(target_relpath)
+                target_abspath, _ = self._download_with_tuf(target_relpath)
 
                 # Add this file to the growing collection of where
                 # in-toto pubkeys / links live.
@@ -248,8 +288,8 @@ class TUFDownloader:
         inspection_packet |= pubkey_abspaths | link_abspaths
         self.__in_toto_verify(inspection_packet, target_relpath)
 
-    def __download_with_tuf_in_toto(self, target_relpath):
-        target_abspath, target = self.__download_with_tuf(target_relpath)
+    def _download_with_tuf_in_toto(self, target_relpath):
+        target_abspath, target = self._download_with_tuf(target_relpath)
 
         # Next, we use in-toto to verify the supply chain of the target.
         # NOTE: We use a flag to avoid recursively downloading in-toto
@@ -270,7 +310,10 @@ class TUFDownloader:
             If download over TUF and in-toto is successful, this function will
             return the complete filepath to the desired target.
         """
-        target_abspath = self.__download_with_tuf_in_toto(target_relpath)
+        if self.__disable_verification:
+            target_abspath = self._download_without_tuf_in_toto(target_relpath)
+        else:
+            target_abspath = self._download_with_tuf_in_toto(target_relpath)
         # Always return the posix version of the path for consistency across platforms
         return pathlib.Path(target_abspath).as_posix()
 
@@ -282,11 +325,14 @@ class TUFDownloader:
         # version: {python_tag: href}
         wheels = collections.defaultdict(dict)
 
-        try:
-            # NOTE: We do not perform in-toto inspection for simple indices; only for wheels.
-            index_abspath, _ = self.__download_with_tuf(index_relpath)
-        except TargetNotFoundError:
-            raise NoSuchDatadogPackage(standard_distribution_name)
+        if self.__disable_verification:
+            index_abspath = self._download_without_tuf_in_toto(index_relpath)
+        else:
+            try:
+                # NOTE: We do not perform in-toto inspection for simple indices; only for wheels.
+                index_abspath, _ = self._download_with_tuf(index_relpath)
+            except TargetNotFoundError:
+                raise NoSuchDatadogPackage(standard_distribution_name)
 
         with open(index_abspath) as simple_index:
             for line in simple_index:

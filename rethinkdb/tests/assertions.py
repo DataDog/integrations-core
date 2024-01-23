@@ -1,13 +1,13 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Set
+from typing import Set  # noqa: F401
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.stubs.aggregator import AggregatorStub
-from datadog_checks.base.types import ServiceCheckStatus
+from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
+from datadog_checks.base.types import ServiceCheckStatus  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.rethinkdb.types import Instance
+from datadog_checks.rethinkdb.types import Instance  # noqa: F401
 
 from .common import (
     CLUSTER_STATISTICS_METRICS,
@@ -32,7 +32,7 @@ from .common import (
     TABLE_STATUS_SHARDS_METRICS,
     TAGS,
 )
-from .types import ServerName
+from .types import ServerName  # noqa: F401
 
 
 def assert_service_checks(aggregator, instance, connect_status=AgentCheck.OK, disconnected_servers=None):

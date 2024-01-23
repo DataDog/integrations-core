@@ -10,7 +10,7 @@ build-backend = "hatchling.build"
 name = "datadog-journald"
 description = "The journald check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
+license = "BSD-3-Clause"
 keywords = [
     "datadog",
     "datadog agent",
@@ -26,7 +26,7 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
     "Programming Language :: Python :: 2.7",
-    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.11",
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
 ]

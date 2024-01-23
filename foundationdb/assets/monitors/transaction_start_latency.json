@@ -1,29 +1,36 @@
 {
-	"name": "FoundationDB Transaction Start Latency Probe",
-	"type": "query alert",
-	"query": "avg(last_5m):avg:foundationdb.latency_probe.transaction_start_seconds{*} > 5",
-	"message": "{{#is_alert}}\nA transaction performed on the FoundationDB cluster to measure current latency took a long time to start.\n{{/is_alert}} \n{{#is_warning}}\nA transaction performed on the FoundationDB cluster to measure current latency took a longer time to start than would normally be expected.\n{{/is_warning}}\n",
-	"tags": [
-		"integration:fdb"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 4,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": false,
-		"renotify_interval": "0",
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 5,
-			"warning": 2
-		}
-	},
-	"priority": null,
-	"recommended_monitor_metadata": {
-		"description": "Get notified when a transaction performed on the FoundationDB cluster to measure current latency took a long time to start."
-	}
+  "version": 2,
+  "created_at": "2022-03-14",
+  "last_updated_at": "2022-05-25",
+  "title": "Transaction start latency is high",
+  "tags": [
+    "integration:foundationdb"
+  ],
+  "description": "A transaction in FoundationDB can have some delay between the time of initiation and execution. This monitor tracks the the average start latency of transactions to avoid performance issues.",
+  "definition": {
+    "message": "{{#is_alert}}\nA transaction performed on the FoundationDB cluster to measure current latency took a long time to start.\n{{/is_alert}} \n{{#is_warning}}\nA transaction performed on the FoundationDB cluster to measure current latency took a longer time to start than would normally be expected.\n{{/is_warning}}\n",
+    "name": "FoundationDB Transaction Start Latency Probe",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 5,
+        "warning": 2
+      },
+      "timeout_h": 4
+    },
+    "priority": null,
+    "query": "avg(last_5m):avg:foundationdb.latency_probe.transaction_start_seconds{*} > 5",
+    "tags": [
+      "integration:fdb"
+    ],
+    "type": "query alert"
+  }
 }

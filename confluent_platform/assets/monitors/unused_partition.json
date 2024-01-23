@@ -1,27 +1,34 @@
 {
-	"name": "[Confluent Platform] Unused topic partition",
-	"type": "query alert",
-	"query": "avg(last_5m):avg:confluent.kafka.server.topic.bytes_in_per_sec.rate{*} by {topic-partition} + avg:confluent.kafka.server.topic.bytes_out_per_sec.rate{*} by {topic-partition} <= 0",
-	"message": "The partition {{topic-partition.name}} appears to be unused. \n\nVerify that this is intentional and be aware that unused partitions increase Broker overhead, reducing efficiency. \n\nDeleting unused partitions is recommended.",
-	"tags": [
-		"integration:confluent_platform"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": false,
-		"renotify_interval": 0,
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 0
-		}
-	},
-  "recommended_monitor_metadata": {
-    "description": "Get notified if a partition has not seen bytes produced or consumed."
+  "version": 2,
+  "created_at": "2021-10-28",
+  "last_updated_at": "2021-10-28",
+  "title": "Topic partition is not used",
+  "tags": [
+    "integration:confluent-platform"
+  ],
+  "description": "A partition that is neither producing nor consuming data is a signal for potential issues with data flow. This monitor tracks each topic partition that hasn't sent or received any data for a given time frame.",
+  "definition": {
+    "message": "The partition {{topic-partition.name}} appears to be unused. \n\nVerify that this is intentional and be aware that unused partitions increase Broker overhead, reducing efficiency. \n\nDeleting unused partitions is recommended.",
+    "name": "[Confluent Platform] Unused topic partition",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 0
+      },
+      "timeout_h": 0
+    },
+    "query": "avg(last_5m):avg:confluent.kafka.server.topic.bytes_in_per_sec.rate{*} by {topic-partition} + avg:confluent.kafka.server.topic.bytes_out_per_sec.rate{*} by {topic-partition} <= 0",
+    "tags": [
+      "integration:confluent_platform"
+    ],
+    "type": "query alert"
   }
 }

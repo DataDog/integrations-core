@@ -3,18 +3,21 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime as dt
 import json
+import logging
 import os
 import time
 
 import mock
 import pytest
 from mock import MagicMock
-from tests.legacy.utils import mock_alarm_event
+from pyVmomi import vim, vmodl
 
 from datadog_checks.base import to_string
+from datadog_checks.base.utils.time import get_current_datetime
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.api import APIConnectionError
 from datadog_checks.vsphere.config import VSphereConfig
+from tests.legacy.utils import mock_alarm_event
 
 from .common import HERE, VSPHERE_VERSION, build_rest_api_client
 from .mocked_api import MockedAPI
@@ -339,7 +342,8 @@ def test_tags_filters_integration_tags(aggregator, dd_run_check, historical_inst
     aggregator.assert_metric_has_tag('vsphere.cpu.usage.avg', 'vsphere_datacenter:Datacenter2', count=1)
     aggregator.assert_metric_has_tag('vsphere.cpu.usage.avg', 'vsphere_datacenter:Dätacenter', count=0)
 
-    aggregator.assert_metric('vsphere.disk.used.latest', count=1)
+    aggregator.assert_metric('vsphere.disk.used.latest', count=2)
+    aggregator.assert_metric('vsphere.disk.used.latest', count=1, hostname='VM4-2')
     aggregator.assert_metric_has_tag('vsphere.disk.used.latest', 'vsphere_datastore:Datastore 1', count=1)
     aggregator.assert_metric_has_tag('vsphere.disk.used.latest', 'vsphere_datastore:Datastore 2', count=0)
 
@@ -460,3 +464,276 @@ def test_connection_refresh(aggregator, dd_run_check, realtime_instance, test_ti
         same_object = True
 
     assert same_object == expected_result
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_vm_hostname_suffix_tag(aggregator, dd_run_check, realtime_instance, caplog):
+    realtime_instance.update(
+        {
+            'collect_tags': True,
+            'vm_hostname_suffix_tag': 'my_cat_name_1',
+            'excluded_host_tags': ['my_cat_name_1', 'my_cat_name_2'],
+        }
+    )
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.avg',
+        tags=['my_cat_name_1:my_tag_name_1', 'my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
+        hostname='VM4-4-my_tag_name_1',
+    )
+    assert "Attached hostname suffix key my_cat_name_1, new hostname: VM4-4-my_tag_name_1" in caplog.text
+    assert "Could not attach hostname suffix key my_cat_name_1 for host: VM-on-fake-host" in caplog.text
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_vm_hostname_suffix_tag_bad_value(aggregator, dd_run_check, realtime_instance, caplog):
+    realtime_instance.update(
+        {
+            'collect_tags': True,
+            'vm_hostname_suffix_tag': 'my_cat_name_3',
+            'excluded_host_tags': ['my_cat_name_1', 'my_cat_name_2'],
+        }
+    )
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.avg',
+        tags=['my_cat_name_1:my_tag_name_1', 'my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
+        hostname='VM4-4',
+    )
+    assert "Could not attach hostname suffix key my_cat_name_3 for host: VM4-4" in caplog.text
+    assert "Could not attach hostname suffix key my_cat_name_3 for host: VM-on-fake-host" in caplog.text
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_vm_hostname_suffix_tag_integration(aggregator, dd_run_check, realtime_instance, caplog):
+    realtime_instance.update(
+        {
+            'collect_tags': True,
+            'vm_hostname_suffix_tag': 'vsphere_host',
+            'excluded_host_tags': ['my_cat_name_1', 'my_cat_name_2'],
+        }
+    )
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.avg',
+        tags=['my_cat_name_1:my_tag_name_1', 'my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
+        hostname='VM4-4-10.0.0.104',
+    )
+    assert "Attached hostname suffix key vsphere_host, new hostname: VM4-4-10.0.0.104" in caplog.text
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_vm_hostname_suffix_tag_custom(aggregator, dd_run_check, realtime_instance, caplog):
+    realtime_instance.update({'collect_tags': True, 'vm_hostname_suffix_tag': 'test', 'tags': ['test:tag_name']})
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.avg',
+        tags=['test:tag_name', 'vcenter_server:FAKE'],
+        hostname='VM4-4-tag_name',
+    )
+    assert "Attached hostname suffix key test, new hostname: VM4-4-tag_name" in caplog.text
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_vm_hostname_suffix_tag_same_key(aggregator, dd_run_check, realtime_instance, caplog):
+    realtime_instance.update(
+        {
+            'collect_tags': True,
+            'vm_hostname_suffix_tag': 'my_cat_name_1',
+            'excluded_host_tags': ['my_cat_name_1'],
+            'tags': ['my_cat_name_1:tag_name'],
+        }
+    )
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.avg',
+        tags=['my_cat_name_1:my_tag_name_1', 'my_cat_name_1:tag_name', 'vcenter_server:FAKE'],
+        hostname='VM4-4-my_tag_name_1',
+    )
+    assert "Attached hostname suffix key my_cat_name_1, new hostname: VM4-4-my_tag_name_1" in caplog.text
+
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.avg',
+        tags=['my_cat_name_1:my_tag_name_1', 'my_cat_name_1:tag_name', 'vcenter_server:FAKE'],
+        hostname='VM4-4-my_tag_name_1',
+    )
+    assert "Attached hostname suffix key my_cat_name_1, new hostname: VM4-4-my_tag_name_1" in caplog.text
+
+
+def test_no_infra_cache(aggregator, realtime_instance, dd_run_check, caplog):
+    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
+        'pyVmomi.vmodl.query.PropertyCollector'
+    ) as mock_property_collector:
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = []
+        mock_si.content.perfManager.QueryPerfCounterByLevel.return_value = [
+            vim.PerformanceManager.CounterInfo(
+                key=100,
+                groupInfo=vim.ElementDescription(key='cpu'),
+                nameInfo=vim.ElementDescription(key='costop'),
+                rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
+            )
+        ]
+        mock_si.content.perfManager.QueryPerf.return_value = [
+            vim.PerformanceManager.EntityMetric(
+                entity=vim.VirtualMachine(moId="vm1"),
+                value=[
+                    vim.PerformanceManager.IntSeries(
+                        value=[47, 52],
+                        id=vim.PerformanceManager.MetricId(counterId=100),
+                    )
+                ],
+            ),
+            vim.PerformanceManager.EntityMetric(
+                entity=vim.VirtualMachine(moId="vm2"),
+                value=[
+                    vim.PerformanceManager.IntSeries(
+                        value=[30, 11],
+                        id=vim.PerformanceManager.MetricId(counterId=100),
+                    )
+                ],
+            ),
+        ]
+        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
+        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
+        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = None
+
+        mock_connect.return_value = mock_si
+        caplog.set_level(logging.WARNING)
+        check = VSphereCheck('vsphere', {}, [realtime_instance])
+
+        dd_run_check(check)
+        assert "Did not retrieve any properties from the vCenter. "
+        "Metric collection cannot continue. Ensure your user has correct permissions." in caplog.text
+
+        aggregator.assert_metric('datadog.vsphere.collect_events.time')
+        aggregator.assert_metric('datadog.vsphere.refresh_metrics_metadata_cache.time')
+        aggregator.assert_metric('datadog.vsphere.refresh_infrastructure_cache.time')
+
+        aggregator.assert_all_metrics_covered()
+
+
+def test_no_infra_cache_events(aggregator, realtime_instance, dd_run_check, caplog):
+    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
+        'pyVmomi.vmodl.query.PropertyCollector'
+    ) as mock_property_collector:
+        event = vim.event.VmReconfiguredEvent()
+        event.userName = "datadog"
+        event.createdTime = get_current_datetime()
+        event.vm = vim.event.VmEventArgument()
+        event.vm.name = "vm1"
+        event.configSpec = vim.vm.ConfigSpec()
+
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = [event]
+        mock_si.content.perfManager.QueryPerfCounterByLevel.return_value = [
+            vim.PerformanceManager.CounterInfo(
+                key=100,
+                groupInfo=vim.ElementDescription(key='cpu'),
+                nameInfo=vim.ElementDescription(key='costop'),
+                rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
+            )
+        ]
+        mock_si.content.perfManager.QueryPerf.return_value = [
+            vim.PerformanceManager.EntityMetric(
+                entity=vim.VirtualMachine(moId="vm1"),
+                value=[
+                    vim.PerformanceManager.IntSeries(
+                        value=[47, 52],
+                        id=vim.PerformanceManager.MetricId(counterId=100),
+                    )
+                ],
+            ),
+            vim.PerformanceManager.EntityMetric(
+                entity=vim.VirtualMachine(moId="vm2"),
+                value=[
+                    vim.PerformanceManager.IntSeries(
+                        value=[30, 11],
+                        id=vim.PerformanceManager.MetricId(counterId=100),
+                    )
+                ],
+            ),
+        ]
+        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
+        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
+        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = None
+
+        mock_connect.return_value = mock_si
+        caplog.set_level(logging.WARNING)
+        check = VSphereCheck('vsphere', {}, [realtime_instance])
+
+        dd_run_check(check)
+        assert "Did not retrieve any properties from the vCenter. "
+        "Metric collection cannot continue. Ensure your user has correct permissions." in caplog.text
+
+        aggregator.assert_metric('datadog.vsphere.collect_events.time')
+        aggregator.assert_metric('datadog.vsphere.refresh_metrics_metadata_cache.time')
+        aggregator.assert_metric('datadog.vsphere.refresh_infrastructure_cache.time')
+
+        aggregator.assert_event(
+            """datadog saved the new configuration:\n@@@\n""",
+            exact_match=False,
+            msg_title="VM vm1 configuration has been changed",
+            host="vm1",
+        )
+
+        aggregator.assert_all_metrics_covered()
+
+
+def test_no_infra_cache_no_perf_values(aggregator, realtime_instance, dd_run_check, caplog):
+    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
+        'pyVmomi.vmodl.query.PropertyCollector'
+    ) as mock_property_collector:
+
+        event = vim.event.VmReconfiguredEvent()
+        event.userName = "datadog"
+        event.createdTime = get_current_datetime()
+        event.vm = vim.event.VmEventArgument()
+        event.vm.name = "vm1"
+        event.configSpec = vim.vm.ConfigSpec()
+
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = [event]
+        mock_si.content.perfManager.QueryPerfCounterByLevel.return_value = []
+        mock_si.content.perfManager.QueryPerf.return_value = []
+        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
+        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
+        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = None
+
+        mock_connect.return_value = mock_si
+        caplog.set_level(logging.WARNING)
+        check = VSphereCheck('vsphere', {}, [realtime_instance])
+
+        dd_run_check(check)
+        assert "Did not retrieve any properties from the vCenter. "
+        "Metric collection cannot continue. Ensure your user has correct permissions." in caplog.text
+
+        aggregator.assert_metric('datadog.vsphere.collect_events.time')
+        aggregator.assert_metric('datadog.vsphere.refresh_metrics_metadata_cache.time')
+        aggregator.assert_metric('datadog.vsphere.refresh_infrastructure_cache.time')
+
+        aggregator.assert_event(
+            """datadog saved the new configuration:\n@@@\n""",
+            exact_match=False,
+            msg_title="VM vm1 configuration has been changed",
+            host="vm1",
+        )
+
+        aggregator.assert_all_metrics_covered()

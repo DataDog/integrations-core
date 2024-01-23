@@ -1,11 +1,11 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import List, Optional
+from typing import List, Optional  # noqa: F401
 
 from datadog_checks.base import ConfigurationError
 
-from .types import Instance
+from .types import Instance  # noqa: F401
 
 
 class Config(object):

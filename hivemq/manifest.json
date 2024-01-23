@@ -12,12 +12,12 @@
     "title": "HiveMQ",
     "media": [],
     "classifier_tags": [
+      "Category::IoT",
+      "Category::Log Collection",
+      "Category::Message Queues",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Messaging",
-      "Category::Processing",
-      "Category::Log Collection"
+      "Supported OS::macOS"
     ]
   },
   "author": {

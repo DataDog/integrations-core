@@ -1,26 +1,33 @@
 {
-	"name": "[kubernetes] Pod {{pod_name.name}} is ImagePullBackOff on namespace {{kube_namespace.name}}",
-	"type": "query alert",
-	"query": "max(last_10m):max:kubernetes_state.container.status_report.count.waiting{reason:imagepullbackoff} by {kube_cluster_name,kube_namespace,pod_name} >= 1",
-	"message": "pod {{pod_name.name}} is in ImagePullBackOff on {{kube_namespace.name}} \n This could happen for several reasons, for example a bad image path or tag or if the credentials for pulling images are not configured properly.",
-	"tags": [
-		"integration:kubernetes"
-	],
-	"options": {
-		"notify_audit": true,
-		"locked": false,
-		"timeout_h": 0,
-		"include_tags": true,
-		"require_full_window": false,
-		"new_host_delay": 300,
-		"notify_no_data": false,
-		"renotify_interval": 0,
-		"escalation_message": "",
-		"thresholds": {
-			"critical": 1
-		}
-	},
-	"recommended_monitor_metadata": {
-		"description": "Get notified when a pod is in a ImagePullBackOff state for your Kubernetes integration."
-	}
+  "version": 2,
+  "created_at": "2020-09-15",
+  "last_updated_at": "2023-07-31",
+  "title": "Pod is in an ImagePullBackOff state",
+  "tags": [
+    "integration:kubernetes"
+  ],
+  "description": "The status ImagePullBackOff means that a container could not start because Kubernetes could not pull a container image. This monitor tracks when a pod is in an ImagePullBackOff state for your Kubernetes integration.",
+  "definition": {
+    "message": "pod {{pod_name.name}} is in ImagePullBackOff on {{kube_namespace.name}} \n This could happen for several reasons, for example a bad image path or tag or if the credentials for pulling images are not configured properly.",
+    "name": "[kubernetes] Pod {{pod_name.name}} is ImagePullBackOff on namespace {{kube_namespace.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "notify_audit": true,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 1
+      },
+      "timeout_h": 0
+    },
+    "query": "max(last_10m):default_zero(max:kubernetes_state.container.status_report.count.waiting{reason:imagepullbackoff} by {kube_cluster_name,kube_namespace,pod_name}) >= 1",
+    "tags": [
+      "integration:kubernetes"
+    ],
+    "type": "query alert"
+  }
 }

@@ -10,6 +10,7 @@ import pytest
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.dev.testing import requires_py3
 from datadog_checks.openstack.openstack import (
     IncompleteAuthScope,
     IncompleteConfig,
@@ -253,7 +254,7 @@ def test_network_exclusion(*args):
         'datadog_checks.openstack.OpenStackCheck.get_stats_for_single_network'
     ) as mock_get_stats_single_network:
 
-        openstack_check.exclude_network_id_rules = set([re.compile(rule) for rule in common.EXCLUDED_NETWORK_IDS])
+        openstack_check.exclude_network_id_rules = {re.compile(rule) for rule in common.EXCLUDED_NETWORK_IDS}
 
         # Retrieve network stats
         openstack_check.get_network_stats([])
@@ -264,7 +265,7 @@ def test_network_exclusion(*args):
         assert mock_get_stats_single_network.call_args[0][0] == common.FILTERED_NETWORK_ID
 
         # cleanup
-        openstack_check.exclude_network_id_rules = set([])
+        openstack_check.exclude_network_id_rules = set()
 
 
 @mock.patch(
@@ -300,3 +301,56 @@ def test_cache_between_runs(self, *args):
 
     assert 'server-1' not in cached_servers
     assert 'server_newly_added' in cached_servers
+
+
+@requires_py3
+@pytest.mark.parametrize(
+    'init_config, instances, exception',
+    [
+        pytest.param(
+            {
+                'keystone_server_url': 'http://10.0.2.15:5000',
+                'ssl_verify': False,
+            },
+            [{}],
+            r'datadog_checks.base.errors.ConfigurationError: Detected 2 errors',
+            id="empty instance",
+        ),
+        pytest.param(
+            {
+                'keystone_server_url': 'http://10.0.2.15:5000',
+                'ssl_verify': False,
+            },
+            [{'name': 'test'}],
+            r'datadog_checks.base.errors.ConfigurationError: Detected 1 error',
+            id="no user",
+        ),
+        pytest.param(
+            {
+                'keystone_server_url': 'http://10.0.2.15:5000',
+                'ssl_verify': False,
+            },
+            [{'user': {'name': 'test'}}],
+            r'datadog_checks.base.errors.ConfigurationError: Detected 1 error',
+            id="no name",
+        ),
+        pytest.param(
+            {
+                'keystone_server_url': 'http://10.0.2.15:5000',
+                'ssl_verify': False,
+            },
+            [{'user': {'name': 'test', 'password': 'pass', 'domain': {'id': 'test'}}, 'name': 'test'}],
+            None,
+            id="valid",
+        ),
+    ],
+)
+def test_config(dd_run_check, init_config, instances, exception, caplog):
+    check = OpenStackCheck("test", init_config, instances)
+
+    if exception is not None:
+        with pytest.raises(Exception, match=exception):
+            dd_run_check(check)
+    else:
+        dd_run_check(check)
+        assert "The agent could not contact the specified identity server" in caplog.text

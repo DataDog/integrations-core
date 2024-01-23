@@ -1,0 +1,36 @@
+{
+  "version": 2,
+  "created_at": "2022-07-18",
+  "last_updated_at": "2022-07-18",
+  "title": "Database ready thread count is too low",
+  "tags": [
+    "integration:teradata"
+  ],
+  "description": "The number of runnable or ready tasks, also called threads, able to execute on CPUs when a CPU becomes available, corresponds to the degree of parallelism and efficiency a database is able to provide. This monitor tracks if the number of available threads for any given database host is too low.",
+  "definition": {
+    "message": "{{#is_warning}}Number of runnable ready threads on server {{teradata_server.name}} is less than 60%{{/is_warning}} \n{{#is_alert}}Number of runnable ready threads on server {{teradata_server.name}} is more than 80%{{/is_alert}}\n{{#is_recovery}}Number of runnable ready threads on server {{teradata_server.name}} is less than 60%{{/is_recovery}}",
+    "name": "[Teradata] Low number of ready threads",
+    "options": {
+      "new_group_delay": 60,
+      "no_data_timeframe": 10,
+      "notify_audit": true,
+      "notify_no_data": true,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 0.8,
+        "critical_recovery": 0,
+        "warning": 0.6
+      }
+    },
+    "query": "avg(last_15m):anomalies((avg:teradata.process.ready{*} by {host,teradata_server} / avg:teradata.process.ready_max{*} by {host,teradata_server}) * 100, 'basic', 2, direction='below', interval=60, alert_window='last_15m', count_default_zero='true', seasonality='hourly') >= 0.8",
+    "tags": [
+      "integration:teradata"
+    ],
+    "type": "query alert"
+  }
+}

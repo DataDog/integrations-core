@@ -1,0 +1,10 @@
+name: My Check
+files:
+- name: tokumx.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - template: instances/default

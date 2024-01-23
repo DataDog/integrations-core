@@ -1,29 +1,36 @@
 {
-	"name": "FoundationDB Log Queue Reaching Spill Threshold",
-	"type": "query alert",
-	"query": "avg(last_5m):avg:foundationdb.process.role.queue_length{fdb_role:log} > 1600000000",
-	"message": "{{#is_warning}}\nThe FoundationDB log queue is approaching the spill threshold, implying that one or more storage server is struggling to keep up with the workload.\n{{/is_warning}}\n\n{{#is_alert}}\nThe FoundationDB log queue has reached the spill threshold, where logs have not been taken and persisted by storage servers soon enough. This may mean the database workload is more than the cluster can sustain.\n{{/is_alert}}",
-	"tags": [
-		"integration:fdb"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 1,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": false,
-		"renotify_interval": 0,
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 1600000000,
-			"warning": 1200000000
-		}
-	},
-	"priority": null,
-	"recommended_monitor_metadata": {
-		"description": "Get notified when the log queue is approaching the spill threshold."
-	}
+  "version": 2,
+  "created_at": "2022-03-14",
+  "last_updated_at": "2022-05-25",
+  "title": "Log queue is approaching the limit",
+  "tags": [
+    "integration:foundationdb"
+  ],
+  "description": "When transactions are committed, they are temporarily written as logs, and then added to a queue before being written durably to disk. This monitor tracks the queue length to make sure transactions are not waiting too long to be processed.",
+  "definition": {
+    "message": "{{#is_warning}}\nThe FoundationDB log queue is approaching the spill threshold, implying that one or more storage server is struggling to keep up with the workload.\n{{/is_warning}}\n\n{{#is_alert}}\nThe FoundationDB log queue has reached the spill threshold, where logs have not been taken and persisted by storage servers soon enough. This may mean the database workload is more than the cluster can sustain.\n{{/is_alert}}",
+    "name": "FoundationDB Log Queue Reaching Spill Threshold",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 1600000000,
+        "warning": 1200000000
+      },
+      "timeout_h": 1
+    },
+    "priority": null,
+    "query": "avg(last_5m):avg:foundationdb.process.role.queue_length{fdb_role:log} > 1600000000",
+    "tags": [
+      "integration:fdb"
+    ],
+    "type": "query alert"
+  }
 }

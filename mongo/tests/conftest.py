@@ -12,11 +12,11 @@ import pymongo
 import pytest
 from datadog_test_libs.utils.mock_dns import mock_local
 from dateutil.tz import tzutc
-from tests.mocked_api import MockedPyMongoClient
 
 from datadog_checks.dev import LazyFunction, WaitFor, docker_run, run_command
 from datadog_checks.dev.conditions import WaitForPortListening
 from datadog_checks.mongo import MongoDb
+from tests.mocked_api import MockedPyMongoClient
 
 from . import common
 

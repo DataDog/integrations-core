@@ -385,7 +385,7 @@
           {
             "q": "top(avg:vsphere.disk.used.latest{$vcenter_server,$vcenter_datacenter,vsphere_type:datastore} by {vsphere_datastore}/avg:vsphere.disk.capacity.latest{$vcenter_server,$vcenter_datacenter,vsphere_type:datastore} by {vsphere_datastore}*100,10,'mean','desc')",
             "conditional_formats": [
-              { "comparator": "<=", "value": 270, "palette": "white_on_green" },
+              { "comparator": "<=", "value": 70, "palette": "white_on_green" },
               { "comparator": "<=", "value": 90, "palette": "white_on_yellow" },
               { "comparator": ">", "value": 90, "palette": "white_on_red" }
             ]
@@ -475,6 +475,5 @@
   ],
   "layout_type": "free",
   "is_read_only": true,
-  "notify_list": [],
-  "id": 133
+  "notify_list": []
 }

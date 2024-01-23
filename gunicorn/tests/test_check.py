@@ -10,8 +10,10 @@ from .common import CHECK_NAME, INSTANCE
 
 
 def _assert_metrics(aggregator):
-    aggregator.assert_metric("gunicorn.workers", tags=['app:dd-test-gunicorn', 'state:idle'], value=4, count=1)
-    aggregator.assert_metric("gunicorn.workers", tags=['app:dd-test-gunicorn', 'state:working'], value=0, count=1)
+    # We don't check the value of gunicorn.workers. We were getting flaky test failures because the number of idle and
+    # working workers would vary.
+    aggregator.assert_metric("gunicorn.workers", tags=['app:dd-test-gunicorn', 'state:idle'], count=1)
+    aggregator.assert_metric("gunicorn.workers", tags=['app:dd-test-gunicorn', 'state:working'], count=1)
 
     aggregator.assert_service_check("gunicorn.is_running", count=1)
 

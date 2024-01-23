@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "created_at": "2023-01-20",
+  "last_updated_at": "2023-01-20",
+  "title": "Applications sync status",
+  "tags": [
+    "integration:argocd"
+  ],
+  "description": "A sync status in ArgoCD provides insight into the state of applications. This monitor tracks the state of those applications and alerts when there is at least one unsynchronized ArgoCD application.",
+  "definition": {
+    "message": "{{#is_alert}}\nApplication {{name.name}} has been reporting with a sync_status:{{sync_status.name}} for the last 30 minutes.\n{{/is_alert}}",
+    "name": "[ArgoCD] Application Sync Status",
+    "options": {
+      "include_tags": true,
+      "new_group_delay": 60,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 1
+      }
+    },
+    "priority": null,
+    "query": "max(last_30m):default_zero(avg:argocd.app_controller.app.info{!sync_status:synced} by {sync_status,name}) >= 1",
+    "restricted_roles": null,
+    "tags": [
+      "integration:argocd"
+    ],
+    "type": "query alert"
+  }
+}

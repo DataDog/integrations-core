@@ -1,29 +1,35 @@
 {
-	"name": "[kubernetes] Monitor Kubernetes Failed Pods in Namespaces",
-	"type": "query alert",
-	"query": "change(avg(last_5m),last_5m):sum:kubernetes_state.pod.status_phase{pod_phase:failed} by {kube_cluster_name,kube_namespace} > 10",
-	"message": "More than ten pods are failing in ({{kube_cluster_name.name}} cluster). \n The threshold of ten pods varies depending on your infrastructure. Change the threshold to suit your needs.",
-	"tags": [
-		"integration:kubernetes"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_host_delay": 300,
-		"require_full_window": false,
-		"notify_no_data": false,
-		"renotify_interval": 0,
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 10,
-			"warning": 5
-		}
-	},
-	"recommended_monitor_metadata": {
-		"description": "Get notified when more than 10 pods are failing for a given Kubernetes cluster."
-	}
-
+  "version": 2,
+  "created_at": "2020-07-28",
+  "last_updated_at": "2023-07-31",
+  "title": "Pods are failing",
+  "tags": [
+    "integration:kubernetes"
+  ],
+  "description": "When a pod is failing it means the container either exited with non-zero status or was terminated by the system. This monitor tracks when more than 10 pods are failing for a given Kubernetes cluster.",
+  "definition": {
+    "message": "More than ten pods are failing in ({{kube_cluster_name.name}} cluster). \n The threshold of ten pods varies depending on your infrastructure. Change the threshold to suit your needs.",
+    "name": "[kubernetes] Monitor Kubernetes Failed Pods in Namespaces",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 10,
+        "warning": 5
+      },
+      "timeout_h": 0
+    },
+    "query": "change(avg(last_5m),last_5m):default_zero(sum:kubernetes_state.pod.status_phase{pod_phase:failed} by {kube_cluster_name,kube_namespace}) > 10",
+    "tags": [
+      "integration:kubernetes"
+    ],
+    "type": "query alert"
+  }
 }

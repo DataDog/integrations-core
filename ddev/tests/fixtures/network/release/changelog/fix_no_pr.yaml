@@ -1,0 +1,172 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - api.github.com
+      user-agent:
+      - python-httpx/0.24.1
+      x-github-api-version:
+      - '2022-11-28'
+    method: GET
+    uri: https://api.github.com/search/issues?q=sha%3A0000000000000000000000000000000000000000%20repo%3ADataDog/integrations-core
+  response:
+    content: '{"total_count":0,"incomplete_results":false,"items":[]}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
+      Cache-Control:
+      - no-cache
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Thu, 03 Aug 2023 22:07:23 GMT
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-OAuth-Scopes:
+      - ''
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-GitHub-Media-Type:
+      - github.v3; format=json
+      X-GitHub-Request-Id:
+      - EA9F:7C17:707C73:E56B58:64CC251B
+      X-OAuth-Scopes:
+      - read:org, repo, workflow
+      X-RateLimit-Limit:
+      - '30'
+      X-RateLimit-Remaining:
+      - '29'
+      X-RateLimit-Reset:
+      - '1691100503'
+      X-RateLimit-Resource:
+      - search
+      X-RateLimit-Used:
+      - '1'
+      X-XSS-Protection:
+      - '0'
+      x-github-api-version-selected:
+      - '2022-11-28'
+    http_version: HTTP/1.1
+    status_code: 200
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - api.github.com
+      user-agent:
+      - python-httpx/0.24.1
+      x-github-api-version:
+      - '2022-11-28'
+    method: GET
+    uri: https://api.github.com/repos/DataDog/integrations-core/issues?state=all&sort=created&direction=desc&per_page=1
+  response:
+    content: '[{"url":"https://api.github.com/repos/DataDog/integrations-core/issues/15475","repository_url":"https://api.github.com/repos/DataDog/integrations-core","labels_url":"https://api.github.com/repos/DataDog/integrations-core/issues/15475/labels{/name}","comments_url":"https://api.github.com/repos/DataDog/integrations-core/issues/15475/comments","events_url":"https://api.github.com/repos/DataDog/integrations-core/issues/15475/events","html_url":"https://github.com/DataDog/integrations-core/pull/15475","id":1835750235,"node_id":"PR_kwDOAtBC5c5XJVR7","number":15475,"title":"Migrate
+      `ddev validate licenses` command to ddev","user":{"login":"swang392","id":24441980,"node_id":"MDQ6VXNlcjI0NDQxOTgw","avatar_url":"https://avatars.githubusercontent.com/u/24441980?v=4","gravatar_id":"","url":"https://api.github.com/users/swang392","html_url":"https://github.com/swang392","followers_url":"https://api.github.com/users/swang392/followers","following_url":"https://api.github.com/users/swang392/following{/other_user}","gists_url":"https://api.github.com/users/swang392/gists{/gist_id}","starred_url":"https://api.github.com/users/swang392/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/swang392/subscriptions","organizations_url":"https://api.github.com/users/swang392/orgs","repos_url":"https://api.github.com/users/swang392/repos","events_url":"https://api.github.com/users/swang392/events{/privacy}","received_events_url":"https://api.github.com/users/swang392/received_events","type":"User","site_admin":false},"labels":[{"id":4541502693,"node_id":"LA_kwDOAtBC5c8AAAABDrHU5Q","url":"https://api.github.com/repos/DataDog/integrations-core/labels/ddev","name":"ddev","color":"ededed","default":false,"description":null}],"state":"open","locked":false,"assignee":null,"assignees":[],"milestone":null,"comments":1,"created_at":"2023-08-03T21:19:58Z","updated_at":"2023-08-03T21:31:14Z","closed_at":null,"author_association":"MEMBER","active_lock_reason":null,"draft":false,"pull_request":{"url":"https://api.github.com/repos/DataDog/integrations-core/pulls/15475","html_url":"https://github.com/DataDog/integrations-core/pull/15475","diff_url":"https://github.com/DataDog/integrations-core/pull/15475.diff","patch_url":"https://github.com/DataDog/integrations-core/pull/15475.patch","merged_at":null},"body":"###
+      What does this PR do?\r\nMigrates `ddev validate licenses` command from datadog_checks_dev
+      to ddev.\r\n\r\n### Additional Notes\r\nI did not test parts of the code (ex:
+      checking for the correct format of the 3rd party extra license csv files) because
+      of an issue (https://github.com/kevin1024/vcrpy/issues/716) with multithreading
+      HTTPX requests. \r\n\r\n### Review checklist (to be filled by reviewers)\r\n\r\n-
+      [ ] Feature or bugfix MUST have appropriate tests (unit, integration, e2e)\r\n-
+      [ ] PR title must be written as a CHANGELOG entry [(see why)](https://github.com/DataDog/integrations-core/blob/master/CONTRIBUTING.md#pull-request-title)\r\n-
+      [ ] Files changes must correspond to the primary purpose of the PR as described
+      in the title (small unrelated changes should have their own PR)\r\n- [ ] PR
+      must have `changelog/` and `integration/` labels attached\r\n- [ ] If the PR
+      doesn''t need to be tested during QA, please add a `qa/skip-qa` label.","reactions":{"url":"https://api.github.com/repos/DataDog/integrations-core/issues/15475/reactions","total_count":0,"+1":0,"-1":0,"laugh":0,"hooray":0,"confused":0,"heart":0,"rocket":0,"eyes":0},"timeline_url":"https://api.github.com/repos/DataDog/integrations-core/issues/15475/timeline","performed_via_github_app":null,"state_reason":null}]'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
+      Cache-Control:
+      - private, max-age=60, s-maxage=60
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Thu, 03 Aug 2023 22:07:23 GMT
+      ETag:
+      - W/"596d12188d97a996b895cc63d248c6bfb95008b7e798932ef90dbddc6c9de9fd"
+      Link:
+      - <https://api.github.com/repositories/47203045/issues?state=all&sort=created&direction=desc&per_page=1&page=2>;
+        rel="next", <https://api.github.com/repositories/47203045/issues?state=all&sort=created&direction=desc&per_page=1&page=15415>;
+        rel="last"
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-OAuth-Scopes:
+      - repo
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-GitHub-Media-Type:
+      - github.v3; format=json
+      X-GitHub-Request-Id:
+      - EA9F:7C17:707C93:E56B95:64CC251B
+      X-OAuth-Scopes:
+      - read:org, repo, workflow
+      X-RateLimit-Limit:
+      - '5000'
+      X-RateLimit-Remaining:
+      - '4991'
+      X-RateLimit-Reset:
+      - '1691101239'
+      X-RateLimit-Resource:
+      - core
+      X-RateLimit-Used:
+      - '9'
+      X-XSS-Protection:
+      - '0'
+      x-github-api-version-selected:
+      - '2022-11-28'
+    http_version: HTTP/1.1
+    status_code: 200
+version: 1

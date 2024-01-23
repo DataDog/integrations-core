@@ -89,3 +89,9 @@ def test_dbnames_non_empty(instance):
     instance['dbnames'] = ['test']
     config = MongoConfig(instance, mock.Mock())
     assert config.db_names == ['test']
+
+
+def test_custom_replicaSet_is_not_allowed(instance):
+    instance['options'] = {'replicaSet': 'foo'}
+    with pytest.raises(ConfigurationError, match='replicaSet'):
+        MongoConfig(instance, mock.Mock())

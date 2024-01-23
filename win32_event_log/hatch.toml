@@ -1,15 +1,10 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
+python = ["2.7", "3.11"]
 
 [envs.default]
 e2e-env = false
 platforms = [
   "windows",
-]
-
-[envs.default.overrides]
-matrix.python.scripts = [
-  { key = "test", value = "pytest -v --benchmark-skip tests/legacy", if = ["2.7"] },
 ]

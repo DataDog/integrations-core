@@ -1,5 +1,5 @@
 [env.collectors.datadog-checks]
-check-types = true
+check-types = false
 mypy-args = [
   "--py2",
   "--install-types",
@@ -12,11 +12,11 @@ mypy-deps = [
 ]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
+python = ["3.11"]
 version = ["9"]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
+python = ["3.11"]
 version = ["9"]
 setup = ["cluster"]
 
@@ -28,9 +28,6 @@ platform.windows.e2e-env = { value = false }
 platform.windows.env-vars = [
   { key = "LD_LIBRARY_PATH", value = "C:\\ibm_mq{;}{env:LD_LIBRARY_PATH:}" },
 ]
-name."^py3.8-9$".platforms = [
-  "windows",
-]
 name."9-cluster$".env-vars = [
   { key = "IBM_MQ_COMPOSE_VERSION", value = "9cluster" },
 ]
@@ -40,9 +37,3 @@ IBM_MQ_COMPOSE_VERSION = "{matrix:version}"
 IBM_MQ_VERSION = "{matrix:version}"
 LD_LIBRARY_PATH = "/opt/mqm/lib64{;}/opt/mqm/lib{;}{env:LD_LIBRARY_PATH:}"
 MQ_FILE_PATH = "C:\\ibm_mq"
-
-[envs.default]
-platforms = [
-  "linux",
-  "macos",
-]

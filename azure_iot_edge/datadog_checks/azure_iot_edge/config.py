@@ -1,13 +1,13 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import List
+from typing import List  # noqa: F401
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.base.types import InstanceType
+from datadog_checks.base.types import InstanceType  # noqa: F401
 
 from .metrics import EDGE_AGENT_METRICS, EDGE_AGENT_TYPE_OVERRIDES, EDGE_HUB_METRICS
-from .types import Instance
+from .types import Instance  # noqa: F401
 
 
 class Config(object):

@@ -6,10 +6,10 @@ dependencies = [
 ]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
+python = ["2.7", "3.11"]
 version = ["2.0"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
-  { key = "SAP_HANA_VERSION", value = "2.00.061.00.20220519.1", if = ["2.0"] },
+  { key = "SAP_HANA_VERSION", value = "2.00.072.00.20231123.1", if = ["2.0"] },
 ]

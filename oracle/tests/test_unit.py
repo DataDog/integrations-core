@@ -34,7 +34,7 @@ def test_sys_metrics(aggregator, check):
     cur = mock.MagicMock()
     con.cursor.return_value = cur
     metrics = copy.deepcopy(queries.SystemMetrics['columns'][1]['items'])
-    cur.fetchall.return_value = zip([0] * len(metrics.keys()), metrics.keys())
+    cur.fetchall.return_value = zip([0] * len(metrics.keys()), metrics.keys(), strict=True)
 
     check._cached_connection = con
     check._query_manager.queries = [Query(queries.SystemMetrics)]
@@ -51,14 +51,14 @@ def test_process_metrics(aggregator, check):
     con = mock.MagicMock()
     cur = mock.MagicMock()
     con.cursor.return_value = cur
-    metrics = copy.deepcopy(queries.ProcessMetrics['columns'][1:])
+    metrics = copy.deepcopy(queries.ProcessMetrics['columns'][2:])
     programs = [
         "PSEUDO",
         "oracle@localhost.localdomain (PMON)",
         "oracle@localhost.localdomain (PSP0)",
         "oracle@localhost.localdomain (VKTM)",
     ]
-    cur.fetchall.return_value = [[program] + ([0] * len(metrics)) for program in programs]
+    cur.fetchall.return_value = [[i, program] + ([0] * len(metrics)) for (i, program) in enumerate(programs)]
 
     check._cached_connection = con
     check._query_manager.queries = [Query(queries.ProcessMetrics)]
@@ -72,7 +72,7 @@ def test_process_metrics(aggregator, check):
             'oracle.{}'.format(metric['name']),
             count=1,
             value=0,
-            tags=['custom_tag', 'program:{}'.format(expected_program)],
+            tags=['custom_tag', 'pid:{}'.format(i), 'program:{}'.format(expected_program)],
         )
 
 

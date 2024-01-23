@@ -1,34 +1,41 @@
 {
-	"name": "[IIS] Increase of 404 error per second for site: {{site.name}}",
-	"type": "query alert",
-	"query": "avg(last_4h):anomalies(avg:iis.errors.not_found{*} by {site}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
-	"message": "An increase of not found errors per second for site: {{site.name}}  has been detected over the last 15mins. Typically reported as an HTTP 404 response code.",
-	"tags": [
-		"integration:iis"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": false,
-		"renotify_interval": 0,
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 1,
-			"critical_recovery": 0
-		},
-		"threshold_windows": {
-			"trigger_window": "last_15m",
-			"recovery_window": "last_15m"
-		}
-	},
-	"priority": null,
-	"restricted_roles": null,
-    "recommended_monitor_metadata": {
-        "description": "Notifies when IIS not found error per second are higher than usual for a specific site."
-      }
+  "version": 2,
+  "created_at": "2021-02-24",
+  "last_updated_at": "2021-02-24",
+  "title": "404 errors is high",
+  "tags": [
+    "integration:iis"
+  ],
+  "description": "Not all the requests headed to your application will end correctly. This monitor tracks anomalies in the 4xx HTTP response codes from the IIS Server to provide insights into unusual client errors.",
+  "definition": {
+    "message": "An increase of not found errors per second for site: {{site.name}}  has been detected over the last 15mins. Typically reported as an HTTP 404 response code.",
+    "name": "[IIS] Increase of 404 error per second for site: {{site.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_4h):anomalies(avg:iis.errors.not_found{*} by {site}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
+    "restricted_roles": null,
+    "tags": [
+      "integration:iis"
+    ],
+    "type": "query alert"
+  }
 }

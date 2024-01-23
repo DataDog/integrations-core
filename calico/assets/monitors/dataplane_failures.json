@@ -1,28 +1,37 @@
 {
-  "name": "[Calico] dataplane failure",
-  "type": "query alert",
-  "query": "sum(last_5m):avg:calico.felix.int_dataplane_failures{*}.as_count() > 1",
-  "message": "Calico encountered a problem with dataplane.",
-  "tags": ["integration:calico"],
-  "options": {
-    "notify_audit": false,
-    "locked": false,
-    "timeout_h": 0,
-    "new_host_delay": 300,
-    "require_full_window": false,
-    "notify_no_data": true,
-    "renotify_interval": "0",
-    "evaluation_delay": 10,
-    "escalation_message": "",
-    "no_data_timeframe": 10,
-    "include_tags": true,
-    "thresholds": {
-      "critical": 1,
-      "warning": 0
-    }
-  },
-  "priority": null,
-  "recommended_monitor_metadata": {
-    "description": "Get notified when Calico encounters a dataplane failure."
+  "version": 2,
+  "created_at": "2022-03-18",
+  "last_updated_at": "2022-03-18",
+  "title": "Dataplane is failing",
+  "tags": [
+    "integration:calico"
+  ],
+  "description": "Dataplane is responsible for managing network traffic and enforcing network policies in cloud-native platforms. This monitor tracks the number of issues with dataplane to identify and address potential issues that could affect the network policies.",
+  "definition": {
+    "message": "Calico encountered a problem with dataplane.",
+    "name": "[Calico] dataplane failure",
+    "options": {
+      "escalation_message": "",
+      "evaluation_delay": 10,
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": 10,
+      "notify_audit": false,
+      "notify_no_data": true,
+      "renotify_interval": "0",
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 1,
+        "warning": 0
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "sum(last_5m):avg:calico.felix.int_dataplane_failures{*}.as_count() > 1",
+    "tags": [
+      "integration:calico"
+    ],
+    "type": "query alert"
   }
 }

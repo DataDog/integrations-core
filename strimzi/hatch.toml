@@ -1,0 +1,10 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["3.11"]
+version = ["0.34"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "STRIMZI_VERSION", value = "0.34.0", if = ["0.34"] },
+]

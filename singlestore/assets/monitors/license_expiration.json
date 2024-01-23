@@ -1,30 +1,37 @@
 {
-	"name": "[SingleStore] License will expire soon",
-	"type": "query alert",
-	"query": "avg(last_5m):cutoff_min(avg:singlestore.seconds_until_expiration{*} by {singlestore_node_name,singlestore_node_id}, -0.1) < 604800",
-	"message": "{{#is_alert}}\nSingleStore license will expire in 7 days on node {{singlestore_node_name.name}}\n{{/is_alert}} \n\n{{#is_warning}}\nSingleStore license will expire in 30 days on node {{singlestore_node_name.name}}\n{{/is_warning}} ",
-	"tags": [
-		"integration:singlestore"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_group_delay": 60,
-		"require_full_window": false,
-		"notify_no_data": false,
-		"renotify_interval": "0",
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 604800,
-			"warning": 2592000
-		}
-	},
-	"priority": null,
-	"restricted_roles": null,
-    "recommended_monitor_metadata": {
-        "description": "Notify your team before your SingleStore license expires."
-    }
+  "version": 2,
+  "created_at": "2021-09-29",
+  "last_updated_at": "2021-09-29",
+  "title": "License will expire soon",
+  "tags": [
+    "integration:singlestore"
+  ],
+  "description": "The license governs how long you are allowed to use the SingleStoreDB software and what features or capabilities you have access to. This monitor tracks the time left for your license to alert when you need to renew.",
+  "definition": {
+    "message": "{{#is_alert}}\nSingleStore license will expire in 7 days on node {{singlestore_node_name.name}}\n{{/is_alert}} \n\n{{#is_warning}}\nSingleStore license will expire in 30 days on node {{singlestore_node_name.name}}\n{{/is_warning}} ",
+    "name": "[SingleStore] License will expire soon",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_group_delay": 60,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 604800,
+        "warning": 2592000
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_5m):cutoff_min(avg:singlestore.seconds_until_expiration{*} by {singlestore_node_name,singlestore_node_id}, -0.1) < 604800",
+    "restricted_roles": null,
+    "tags": [
+      "integration:singlestore"
+    ],
+    "type": "query alert"
+  }
 }

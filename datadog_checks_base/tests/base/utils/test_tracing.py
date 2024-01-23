@@ -15,6 +15,11 @@ from datadog_checks.base.utils.tracing import (
     traced_class,
 )
 
+try:
+    from ddtrace.constants import ERROR_MSG, ERROR_TYPE
+except ImportError:
+    from ddtrace.ext.errors import ERROR_MSG, ERROR_TYPE
+
 
 class MockAgentCheck(object):
     def __init__(self, *args, **kwargs):
@@ -87,8 +92,8 @@ def test_traced_class(integration_tracing, integration_tracing_exhaustive, datad
             check.run()
 
         if integration_tracing:
-            called_services = set([c.kwargs['service'] for c in tracer.trace.mock_calls if 'service' in c.kwargs])
-            called_methods = set([c.args[0] for c in tracer.trace.mock_calls if c.args])
+            called_services = {c.kwargs['service'] for c in tracer.trace.mock_calls if 'service' in c.kwargs}
+            called_methods = {c.args[0] for c in tracer.trace.mock_calls if c.args}
 
             assert called_services == {INTEGRATION_TRACING_SERVICE_NAME}
             for m in AGENT_CHECK_DEFAULT_TRACED_METHODS:
@@ -96,8 +101,8 @@ def test_traced_class(integration_tracing, integration_tracing_exhaustive, datad
 
             warning_span_tag_calls = tracer.trace().__enter__().set_tag.call_args_list
             assert mock.call('_dd.origin', INTEGRATION_TRACING_SERVICE_NAME) in warning_span_tag_calls
-            assert mock.call('error.msg', 'whoops oh no') in warning_span_tag_calls
-            assert mock.call('error.type', 'AgentCheck.warning') in warning_span_tag_calls
+            assert mock.call(ERROR_MSG, 'whoops oh no') in warning_span_tag_calls
+            assert mock.call(ERROR_TYPE, 'AgentCheck.warning') in warning_span_tag_calls
 
             exhaustive_only_methods = {'__init__', 'dummy_method'}
             if integration_tracing_exhaustive:

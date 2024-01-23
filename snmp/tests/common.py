@@ -219,15 +219,17 @@ def generate_container_instance_config(metrics):
     }
 
 
-def generate_container_profile_config(profile):
+def generate_container_profile_config(community_string, profile=None):
     conf = copy.deepcopy(SNMP_CONF)
     conf['ip_address'] = get_container_ip(SNMP_CONTAINER_NAME)
 
     init_config = {}
 
     instance = generate_instance_config([], template=conf)
-    instance['community_string'] = profile
+    instance['community_string'] = community_string
     instance['enforce_mib_constraints'] = False
+    if profile is not None:
+        instance['profile'] = profile
     return {
         'init_config': init_config,
         'instances': [instance],

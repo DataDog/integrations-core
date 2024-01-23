@@ -9,9 +9,10 @@
         "check": "hive.can_connect",
         "statuses": [
             "ok",
-            "critical"
+            "critical",
+            "warning"
         ],
         "name": "Can Connect",
-        "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored HiveServer2/Hive Metastore instance, otherwise returns `OK`."
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored HiveServer2/Hive Metastore instance, `WARNING` if no metrics are collected, and `OK` otherwise."
     }
 ]

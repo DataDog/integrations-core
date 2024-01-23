@@ -363,3 +363,33 @@ ISTIO_AGENT_METRICS = [
     'istio.mesh.agent.go.memstats.mspan_sys_bytes',
     'istio.mesh.agent.pilot.conflict.outbound_listener.tcp_over_current_http',
 ]
+
+NON_CONFORMING_METRICS = [
+    'istio.galley.runtime_processor.snapshot_events_total.bucket',
+    'istio.galley.runtime_processor.snapshot_events_total.count',
+    'istio.galley.runtime_processor.snapshot_events_total.sum',
+    'istio.galley.runtime_state_type_instances_total',
+    'istio.mixer.handler.daemons_total',
+]
+
+MOCK_TEST_METRICS = [
+    'istio.galley.source.kube.event.error.count',
+    'istio.galley.source.kube.dynamic.converter.failure.count',
+    'istio.galley.validation.cert.key.update.errors.count',
+    'istio.galley.validation.http.error.count',
+    'istio.mcp.clients.count',
+    'istio.mcp.request.acks.count',
+    'istio.mcp.request.nacks.count',
+    'istio.mixer.config.rule.config.errors.count',
+    'istio.mixer.config.rule.config.match.errors.count',
+    'istio.mixer.config.unsatisfied.action.handlers.count',
+    'istio.mixer.config.adapter.info.configs.count',
+    'istio.mixer.config.adapter.info.config.errors.count',
+    'istio.mixer.config.handler.validation.errors.count',
+    'istio.mixer.config.instance.config.errors.count',
+    'istio.mixer.handler.handler.build.failures.count',
+    'istio.galley.istio.networking.virtualservices',
+    'istio.galley.istio.networking.destinationrules',
+    'istio.galley.istio.networking.gateways',
+    'istio.galley.istio.authentication.meshpolicies',
+]

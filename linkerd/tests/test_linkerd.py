@@ -17,6 +17,7 @@ from .common import (
     LINKERD_FIXTURE_VALUES,
     MOCK_INSTANCE,
     MOCK_INSTANCE_NEW,
+    OPTIONAL_METRICS_V2_E2E,
 )
 
 
@@ -96,7 +97,7 @@ def test_openmetrics_error(monkeypatch, dd_run_check):
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
     for metric_name, metric_type in EXPECTED_METRICS_V2_E2E.items():
-        if metric_name == 'linkerd.route.actual_request_total':
+        if metric_name in OPTIONAL_METRICS_V2_E2E:
             aggregator.assert_metric(metric_name, metric_type=metric_type, at_least=0)
         else:
             aggregator.assert_metric(metric_name, metric_type=metric_type)

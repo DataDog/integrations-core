@@ -708,6 +708,5 @@
   "layout_type": "ordered",
   "is_read_only": false,
   "notify_list": [],
-  "reflow_type": "fixed",
-  "id": "fzw-nvi-ut4"
+  "reflow_type": "fixed"
 }

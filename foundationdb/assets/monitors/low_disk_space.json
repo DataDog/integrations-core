@@ -1,29 +1,36 @@
 {
-	"name": "FoundationDB Low Disk Space",
-	"type": "query alert",
-	"query": "avg(last_5m):min:foundationdb.process.disk.free_bytes{*} by {fdb_process} < 200000000",
-	"message": "A FoundationDB process is running very low on disk space. This may soon impact its ability to process new transactions.",
-	"tags": [
-		"integration:fdb"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": false,
-		"renotify_interval": "0",
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 200000000,
-			"warning": 500000000
-		}
-	},
-	"priority": null,
-	"recommended_monitor_metadata": {
-		"description": "Get notified when the FoundationDB process is running very low on disk space."
-	}
+  "version": 2,
+  "created_at": "2022-03-14",
+  "last_updated_at": "2022-05-25",
+  "title": "Disk space is low",
+  "tags": [
+    "integration:foundationdb"
+  ],
+  "description": "The disk space is used to store transactions data durably. This monitor tracks the minimum amount of free disk space for different processes to avoid storage issues that may impact the functionality and performance of the database.",
+  "definition": {
+    "message": "A FoundationDB process is running very low on disk space. This may soon impact its ability to process new transactions.",
+    "name": "FoundationDB Low Disk Space",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 200000000,
+        "warning": 500000000
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_5m):min:foundationdb.process.disk.free_bytes{*} by {fdb_process} < 200000000",
+    "tags": [
+      "integration:fdb"
+    ],
+    "type": "query alert"
+  }
 }

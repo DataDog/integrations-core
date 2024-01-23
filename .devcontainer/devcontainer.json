@@ -1,0 +1,30 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-dockerfile
+{
+	"name": "integrations-core devcontainer",
+	"build": {
+		// Sets the run context to one level up instead of the .devcontainer folder.
+		"context": "..",
+		// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
+		"dockerfile": "./Dockerfile"
+	},
+	// To run docker in docker
+	"privileged": true,
+	"features": {
+		// We pin the Python version both in the base Dockerfile and in the devcontainer specification.
+		// If the version is not provided in the devcontainer.json, it will be overriden with `latest`.
+		// When updating it, modify both the base Dockerfile and the devcontainer.json reference.
+		// Ref: https://github.com/devcontainers/features/blob/562305d37b97d47331d96306ffc2a0a3cce55e64/src/python/install.sh#L10
+		"ghcr.io/devcontainers/features/python:1": {
+			"version": "3.11"
+		}
+	},
+
+	// Install the local ddev cli at creation time and set the location of the integrations-core folder
+	"postCreateCommand": "pip install -e /workspaces/integrations-core/datadog_checks_dev[cli] && pip install -e /workspaces/integrations-core/ddev && ddev config set repos.core /workspaces/integrations-core && ddev config set repo core",
+	// Start docker-in-docker service when the container is started
+	"postStartCommand": "service docker start",
+
+	// To access docker socket/service
+	"remoteUser": "root"
+}

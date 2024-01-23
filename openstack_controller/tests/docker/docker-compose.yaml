@@ -3,9 +3,10 @@ version: "3"
 services:
   openstack-keystone:
     image: caddy:2.6.2-alpine
+    build: .
     container_name: openstack-keystone
     volumes:
-      - ./fixtures/keystone:/usr/share/caddy
+      - ../fixtures:/usr/share/caddy
       - ./etc/caddy/keystone:/etc/caddy/
     ports:
       - "8080:80"
@@ -13,7 +14,7 @@ services:
     image: caddy:2.6.2-alpine
     container_name: openstack-nova
     volumes:
-      - ./fixtures/nova:/usr/share/caddy
+      - ../fixtures:/usr/share/caddy
       - ./etc/caddy/nova:/etc/caddy/
     ports:
       - "8774:80"
@@ -21,15 +22,39 @@ services:
     image: caddy:2.6.2-alpine
     container_name: openstack-neutron
     volumes:
-      - ./fixtures/neutron:/usr/share/caddy
+      - ../fixtures:/usr/share/caddy
       - ./etc/caddy/neutron:/etc/caddy/
     ports:
       - "9696:80"
+  openstack-cinder:
+    image: caddy:2.6.2-alpine
+    container_name: openstack-cinder
+    volumes:
+      - ../fixtures:/usr/share/caddy
+      - ./etc/caddy/cinder:/etc/caddy/
+    ports:
+      - "8776:80"
   openstack-ironic:
     image: caddy:2.6.2-alpine
     container_name: openstack-ironic
     volumes:
-      - ./fixtures/ironic:/usr/share/caddy
+      - ../fixtures:/usr/share/caddy
       - ./etc/caddy/ironic:/etc/caddy/
     ports:
       - "6385:80"
+  openstack-octavia:
+    image: caddy:2.6.2-alpine
+    container_name: openstack-octavia
+    volumes:
+      - ../fixtures:/usr/share/caddy
+      - ./etc/caddy/octavia:/etc/caddy/
+    ports:
+      - "9876:80"
+  openstack-glance:
+    image: caddy:2.6.2-alpine
+    container_name: openstack-glance
+    volumes:
+      - ../fixtures:/usr/share/caddy
+      - ./etc/caddy/glance:/etc/caddy/
+    ports:
+      - "9292:80"

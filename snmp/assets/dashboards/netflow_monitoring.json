@@ -1,0 +1,1933 @@
+{
+    "author_name": "Datadog",
+    "description": "This dashboard provides an overview of NetFlow Monitoring for the traffic between your network gear. \n\nFor more information on monitoring on-premise gear with Datadog, check out: \n\n- Our blog post on [Monitoring Datacenters and network devices with Datadog](https://www.datadoghq.com/blog/datacenter-monitoring-dashboards/)\n- Our blog post on [Monitoring network devices with SNMP](https://www.datadoghq.com/blog/monitor-snmp-with-datadog/)\n- Network Device Monitoring [docs](https://docs.datadoghq.com/network_performance_monitoring/devices)",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "device.name",
+            "prefix": "@device.name"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "device.ip",
+            "prefix": "@device.ip"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "exporter.ip",
+            "prefix": "@exporter.ip"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "source.ip",
+            "prefix": "@source.ip"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "destination.ip",
+            "prefix": "@destination.ip"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "egress.interface.name",
+            "prefix": "@egress.interface.name"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "ingress.interface.name",
+            "prefix": "@ingress.interface.name"
+        }
+    ],
+    "title": "NetFlow Monitoring",
+    "widgets": [
+        {
+            "definition": {
+                "background_color": "purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "This dashboard provides an overview of NetFlow Monitoring for the traffic between your network gear. \n\nFor more information on monitoring on-premise gear with Datadog, check out: \n\n- Our blog post on [Monitoring Datacenters and network devices with Datadog](https://www.datadoghq.com/blog/datacenter-monitoring-dashboards/)\n- Our blog post on [Monitoring network devices with SNMP](https://www.datadoghq.com/blog/monitor-snmp-with-datadog/)\n- Network Device Monitoring [docs](https://docs.datadoghq.com/network_performance_monitoring/devices) ",
+                            "font_size": "14",
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note"
+                        },
+                        "id": 7127857026373844,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@exporter.ip"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$device.ip $device.name $exporter.ip $device.ip $device.name $source.ip $destination.ip $egress.interface.name $ingress.interface.name"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "text_align": "center",
+                            "title": "# devices sending NetFlow data ",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 6652255485767128,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 6,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@exporter.ip"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$device.ip $device.name $exporter.ip $device.ip $device.name $source.ip $destination.ip $egress.interface.name $ingress.interface.name"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "# devices sending NetFlow data ",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5184071854652002,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 9,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "custom_unit": "Records",
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$exporter.ip $device.ip $device.name $source.ip $destination.ip $egress.interface.name $ingress.interface.name"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Total NetFlow Volume (# of Records)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 2653281815203992,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 0,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$exporter.ip $device.ip $device.name $source.ip $destination.ip $egress.interface.name $ingress.interface.name"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Total NetFlow Volume (# of Records)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 7958217041811788,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 3,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "custom_unit": "bytes",
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$exporter.ip $device.ip $device.name $source.ip $destination.ip $egress.interface.name $ingress.interface.name"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Total NetFlow Volume (Bytes)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 3864890137082580,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 6,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$exporter.ip $device.ip $device.name $source.ip $destination.ip $egress.interface.name $ingress.interface.name"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Total NetFlow Volume (Bytes)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5457095119768824,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 9,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 100,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@exporter.ip",
+                                                    "limit": 100,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$exporter.ip $device.ip $device.name $source.ip $destination.ip $egress.interface.name $ingress.interface.name"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {},
+                            "title": "NetFlow Volume (# of Records) by Exporter ",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 6820980913001244,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@exporter.ip",
+                                                    "limit": 100,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$exporter.ip $device.ip $device.name $source.ip $destination.ip $egress.interface.name $ingress.interface.name"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "NetFlow Volume (# of Records) by Exporter ",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2587619620190594,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [
+                                {
+                                    "display_type": "error dashed",
+                                    "value": "y = 0"
+                                }
+                            ],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 * 8"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@device.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@exporter.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$device.ip $device.name $ingress.interface.name $egress.interface.name $exporter.ip $device.ip $device.name $source.ip $destination.ip"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Total Traffic from Top 10 Devices (Bits)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8345924617061054,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 9
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query4 * 8 / dt(query2)"
+                                        },
+                                        {
+                                            "formula": "-query5 * 8 / dt(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@egress.interface.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query4",
+                                            "search": {
+                                                "query": "$device.ip $device.name $egress.interface.name $exporter.ip $device.ip $device.name $source.ip $destination.ip $ingress.interface.name"
+                                            }
+                                        },
+                                        {
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@egress.interface.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query2",
+                                            "search": {
+                                                "query": "$device.ip $device.name $egress.interface.name $exporter.ip $device.ip $device.name $source.ip $destination.ip $ingress.interface.name"
+                                            }
+                                        },
+                                        {
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@ingress.interface.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query5",
+                                            "search": {
+                                                "query": "$device.ip $device.name $ingress.interface.name $exporter.ip $device.ip $device.name $source.ip $destination.ip $egress.interface.name"
+                                            }
+                                        },
+                                        {
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@ingress.interface.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$device.ip $device.name $ingress.interface.name $exporter.ip $device.ip $device.name $source.ip $destination.ip $egress.interface.name"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Traffic by Interface (Bits)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3352784985914196,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 12
+                        }
+                    }
+                ]
+            },
+            "id": 8686722288675258,
+            "layout": {
+                "height": 16,
+                "width": 12,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Network Conversations",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "legend": {
+                                "type": "table"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@source.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@device.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@destination.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$device.ip $device.name $ingress.interface.name $egress.interface.name $exporter.ip $device.ip $device.name $source.ip $destination.ip"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "dogcat"
+                                    }
+                                }
+                            ],
+                            "title": "Top Conversations through Source \u2192 Device \u2192 Destination (Bytes)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 8740800319820694,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 1000,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@source.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@device.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@destination.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$device.ip $device.name $ingress.interface.name $egress.interface.name $exporter.ip $device.ip $device.name $source.ip $destination.ip"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Top Conversations through Source \u2192 Device \u2192 Destination (Bytes)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 1660964628360356,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 6,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@source.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@device.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@destination.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$device.ip $device.name $ingress.interface.name $egress.interface.name $exporter.ip $device.ip $device.name $source.ip $destination.ip"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "green"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Top Conversations through Source \u2192 Device \u2192 Destination (Bytes)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 665181245515600,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@exporter.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$device.ip $device.name $ingress.interface.name $egress.interface.name $exporter.ip $device.ip $device.name $source.ip $destination.ip"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Highest Volumes Passed by Device (Bytes)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3030338556705030,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 6,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "area",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@source.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@device.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$device.ip $device.name $ingress.interface.name $egress.interface.name $exporter.ip $device.ip $device.name $source.ip $destination.ip"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "purple"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Volume of Traffic Sent by Source, Device (Bytes)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5048458159212798,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 0,
+                            "y": 8
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@source.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@device.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$device.ip $device.name $ingress.interface.name $egress.interface.name $exporter.ip $device.ip $device.name $source.ip $destination.ip"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Top 10 Sources Sending the Most Traffic by Device (Bytes)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 7008796735963854,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 6,
+                            "y": 8
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "area",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@destination.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@device.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$device.ip $device.name $ingress.interface.name $egress.interface.name $exporter.ip $device.ip $device.name $source.ip $destination.ip"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "blue"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Volume of Traffic Received by Destination, Device (Bytes)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1516256628387466,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 0,
+                            "y": 12
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 100,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@destination.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@device.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$device.ip $device.name $ingress.interface.name $egress.interface.name $exporter.ip $device.ip $device.name $source.ip $destination.ip"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Top 10 Destinations Receiving the Most Traffic by Device (Bytes)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 3388273523703648,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 6,
+                            "y": 12
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@ip_protocol",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$device.ip $device.name $ingress.interface.name $egress.interface.name $exporter.ip $device.ip $device.name $source.ip $destination.ip"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Top Protocols Used by Conversation (Bytes)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 64354102688750,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 0,
+                            "y": 16
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@ip_protocol",
+                                                    "limit": 5,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$device.ip $device.name $ingress.interface.name $egress.interface.name $exporter.ip $device.ip $device.name $source.ip $destination.ip"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Top Protocols Used by Conversation (Bytes)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3454748008141490,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 6,
+                            "y": 16
+                        }
+                    }
+                ]
+            },
+            "id": 6598417582615058,
+            "layout": {
+                "height": 21,
+                "is_column_break": true,
+                "width": 12,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Source/Destination Ports",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "legend": {
+                                "type": "table"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "avg",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@source.application_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "avg",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@source.port",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "avg",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$exporter.ip $device.ip $device.name $source.ip $destination.ip $egress.interface.name $ingress.interface.name"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "title": "Top Applications by Source Port (Bytes)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 7684671657070084,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 125,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@source.port",
+                                                    "limit": 5,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@source.ip",
+                                                    "limit": 5,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@device.ip",
+                                                    "limit": 5,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$device.ip $device.name $ingress.interface.name $egress.interface.name $exporter.ip $device.ip $device.name $source.ip $destination.ip"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Top Source Ports (Bytes)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 8236393473691292,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 6,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@source.port",
+                                                    "limit": 5,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@source.ip",
+                                                    "limit": 5,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@device.ip",
+                                                    "limit": 5,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$device.ip $device.name $ingress.interface.name $egress.interface.name $exporter.ip $device.ip $device.name $source.ip $destination.ip"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Top Source Ports (Bytes)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 7272430680549890,
+                        "layout": {
+                            "height": 4,
+                            "width": 12,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend": {
+                                "type": "table"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "avg",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@destination.application_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "avg",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@destination.port",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "avg",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$exporter.ip $device.ip $device.name $source.ip $destination.ip $egress.interface.name $ingress.interface.name"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "title": "Top Applications by Destination Port (Bytes)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 1739322254098132,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 0,
+                            "y": 8
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 125,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@destination.port",
+                                                    "limit": 5,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@destination.ip",
+                                                    "limit": 5,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@device.ip",
+                                                    "limit": 5,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$device.ip $device.name $ingress.interface.name $egress.interface.name $exporter.ip $device.ip $device.name $source.ip $destination.ip"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Top Destination Ports (Bytes)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 1748866876630824,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 6,
+                            "y": 8
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@bytes"
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@destination.port",
+                                                    "limit": 5,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@destination.ip",
+                                                    "limit": 5,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@device.ip",
+                                                    "limit": 5,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "metric": "@bytes",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "$device.ip $device.name $ingress.interface.name $egress.interface.name $exporter.ip $device.ip $device.name $source.ip $destination.ip"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "semantic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Top Destination Ports (Bytes)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8176048779931908,
+                        "layout": {
+                            "height": 4,
+                            "width": 12,
+                            "x": 0,
+                            "y": 12
+                        }
+                    }
+                ]
+            },
+            "id": 4782270084501908,
+            "layout": {
+                "height": 17,
+                "width": 12,
+                "x": 0,
+                "y": 21
+            }
+        }
+    ]
+}

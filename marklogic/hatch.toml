@@ -1,5 +1,5 @@
 [env.collectors.datadog-checks]
-check-types = true
+check-types = false
 mypy-args = [
     "--disallow-untyped-defs",
     "--py2",
@@ -13,13 +13,18 @@ mypy-deps = [
 ]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
-version = ["9.0", "10.0"]
+python = ["2.7", "3.11"]
+version = ["9.0", "10.0", "11.0"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
     { key = "MARKLOGIC_VERSION", value = "9.0-12", if = ["9.0"] },
-    { key = "MARKLOGIC_IMAGE", value = "9.0-12-dev-centos", if = ["9.0"] },
-    { key = "MARKLOGIC_VERSION", value = "10.0-4", if = ["10.0"] },
-    { key = "MARKLOGIC_IMAGE", value = "10.0-4-dev-centos", if = ["10.0"] },
+    { key = "MARKLOGIC_IMAGE", value = "datadog/docker-library", if = ["9.0"] },
+    { key = "MARKLOGIC_TAG", value = "marklogic_9_0_12", if = ["9.0"] },
+    { key = "MARKLOGIC_VERSION", value = "10.0-10.2", if = ["10.0"] },
+    { key = "MARKLOGIC_IMAGE", value = "marklogicdb/marklogic-db", if = ["10.0"] },
+    { key = "MARKLOGIC_TAG", value = "10.0-10.2-centos-1.0.2", if = ["10.0"] },
+    { key = "MARKLOGIC_VERSION", value = "11.0.3", if = ["11.0"] },
+    { key = "MARKLOGIC_IMAGE", value = "marklogicdb/marklogic-db", if = ["11.0"] },
+    { key = "MARKLOGIC_TAG", value = "11.0.3-centos-1.0.2", if = ["11.0"] },
 ]

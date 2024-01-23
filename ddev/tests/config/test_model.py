@@ -5,7 +5,7 @@ import os
 
 import pytest
 
-from ddev.config.model import ConfigurationError, RootConfig
+from ddev.config.model import ConfigurationError, RootConfig, get_github_token, get_github_user
 
 
 def test_default():
@@ -36,8 +36,8 @@ def test_default():
             },
         },
         'github': {
-            'user': os.getenv('DD_GITHUB_USER', ''),
-            'token': os.getenv('DD_GITHUB_TOKEN', ''),
+            'user': get_github_user(),
+            'token': get_github_token(),
         },
         'pypi': {
             'user': '',
@@ -711,12 +711,12 @@ class TestGitHub:
     def test_default(self):
         config = RootConfig({})
 
-        assert config.github.user == config.github.user == os.getenv('DD_GITHUB_USER', '')
-        assert config.github.token == config.github.token == os.getenv('DD_GITHUB_TOKEN', '')
+        assert config.github.user == config.github.user == get_github_user()
+        assert config.github.token == config.github.token == get_github_token()
         assert config.raw_data == {
             'github': {
-                'user': os.getenv('DD_GITHUB_USER', ''),
-                'token': os.getenv('DD_GITHUB_TOKEN', ''),
+                'user': get_github_user(),
+                'token': get_github_token(),
             },
         }
 

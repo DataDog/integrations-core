@@ -157,7 +157,6 @@ METRIC_INSTANCES = {
     'exchange.network.outbound_errors': ['AWS PV Network Device', 'isatap.{C7BAFAFE-DBF4-4C76-B406-8A25283E4CF9}'],
     'exchange.network.tcpv6.connection_failures': None,
     'exchange.network.tcpv4.conns_reset': None,
-    'exchange.network.tcpv4.conns_reset': None,
     'exchange.netlogon.semaphore_waiters': ['_Total'],
     'exchange.netlogon.semaphore_holders': ['_Total'],
     'exchange.netlogon.semaphore_acquires': ['_Total'],

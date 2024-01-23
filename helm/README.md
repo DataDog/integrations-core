@@ -15,11 +15,74 @@ No additional installation is needed on your server.
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Helm" xxx -->
+
 This is a cluster check. You can enable this check by adding `datadog.helmCheck.enabled` to your Helm chart.
 
 **Note**: If no configuration is required, an empty `conf.d` can be passed.
 
 For more information, see the [Cluster Check documentation][2].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Operator" xxx -->
+
+This is a cluster check. You can enable this check by providing a configuration file `helm.yaml` to the cluster Agent in your `DatadogAgent` deployment configuration.
+
+```
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+metadata:
+  name: datadog
+spec:
+  [...]
+  override:
+    clusterAgent:
+      [...]
+      extraConfd:
+        configDataMap:
+          helm.yaml: |-
+            init_config:
+            instances:
+            - collect_events: false
+```
+
+This check requires additional permissions bound to the Kubernetes service account used by the cluster Agent pod to access the releases stored by Helm.
+
+```
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: datadog-helm-check
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: datadog-helm-check
+subjects:
+  - kind: ServiceAccount
+    name: datadog-cluster-agent
+    namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: datadog-helm-check
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+```
+
+**Note**: The `ServiceAccount` subject is an example with the installation in the `default` namespace. Adjust `name` and `namespace` in accordance with your deployment.
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

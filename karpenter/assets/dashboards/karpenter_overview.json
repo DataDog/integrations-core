@@ -1,0 +1,2088 @@
+{
+    "author_name": "Datadog",
+    "description": null,
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "cluster_name",
+            "prefix": "kube_cluster_name"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "zone",
+            "prefix": "zone"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "instance_type",
+            "prefix": "instance_type"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "namespace",
+            "prefix": "namespace"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "provisioner",
+            "prefix": "provisioner"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "host",
+            "prefix": "host"
+        }
+    ],
+    "title": "Karpenter Overview",
+    "widgets": [
+        {
+            "definition": {
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "has_background": true,
+                            "has_border": false,
+                            "horizontal_align": "center",
+                            "sizing": "cover",
+                            "type": "image",
+                            "url": "/static/images/logos/karpenter_large.svg",
+                            "url_dark_theme": "/static/images/logos/karpenter_reversed_large.svg",
+                            "vertical_align": "center"
+                        },
+                        "id": 4319178349597676,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "transparent",
+                            "content": "Karpenter is a Kubernetes-based compute resource manager designed to handle your cluster's applications. This dashboard is crafted to provide you with an overview and detailed information about your clusters and the performance of Karpenter",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 4727599253722014,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "transparent",
+                            "content": "**Further reading:**\n\n- [Datadog Karpenter Integration Documentation](https://docs.datadoghq.com/integrations/karpenter/)\n- [Karpenter Docs](https://karpenter.sh/docs/)",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 5976417285237858,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 7
+                        }
+                    }
+                ]
+            },
+            "id": 712156218796934,
+            "layout": {
+                "height": 10,
+                "width": 6,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Node Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "purple",
+                            "content": "Node Overview show a quick summary of all the Nodes that are provisioned or deprovisioned by Karpenter.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 7151067634184802,
+                        "layout": {
+                            "height": 1,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "color_preference": "text",
+                            "count": 50,
+                            "display_format": "countsAndList",
+                            "hide_zero_counts": true,
+                            "query": "karpenter",
+                            "show_last_triggered": false,
+                            "show_priority": false,
+                            "sort": "status,asc",
+                            "start": 0,
+                            "summary_type": "monitors",
+                            "title": "Karpenter Monitor Summary",
+                            "type": "manage_status"
+                        },
+                        "id": 740853343236376,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:karpenter.machines_created.count{$cluster_name,$provisioner,$namespace,$host,$zone} by {reason}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "legend": "automatic",
+                                    "type": "stacked"
+                                }
+                            },
+                            "title": "Nodes Created by Karpenter by Reason",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 8802607997043672,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:karpenter.machines_terminated.count{$cluster_name,$namespace,$host,$zone} by {reason}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "legend": "automatic",
+                                    "type": "stacked"
+                                }
+                            },
+                            "title": "Nodes Deleted by Karpenter by Reason",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 2566237451466142,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 3,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:karpenter.nodes.created.count{$cluster_name,$zone,$instance_type,$namespace,$host}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Nodes Created in Timeframe by Karpenter",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 7390480665287838,
+                        "layout": {
+                            "height": 1,
+                            "width": 3,
+                            "x": 0,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:karpenter.nodes.terminated.count{$cluster_name,$zone,$instance_type,$namespace,$host}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Nodes Deleted in Timeframe by Karpenter",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 4547618588377098,
+                        "layout": {
+                            "height": 1,
+                            "width": 3,
+                            "x": 3,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "check": "karpenter.openmetrics.health",
+                            "group_by": [],
+                            "grouping": "cluster",
+                            "tags": [],
+                            "title": "Karpenter Health Check",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "check_status"
+                        },
+                        "id": 921524497412284,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 7
+                        }
+                    }
+                ]
+            },
+            "id": 4655396510577926,
+            "layout": {
+                "height": 10,
+                "width": 6,
+                "x": 6,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Resource Requests Metrics",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "purple",
+                            "content": "Resource request metrics displays resource request by pods bound to nodes. This is useful to understand the resource demand on your nodes. ",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 5567777599056158,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Pod CPU",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Daemon CPU",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Total CPU",
+                                            "formula": "query1 + query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:karpenter.nodes.total.pod_requests{resource_type:cpu,$cluster_name,$zone,$instance_type,$namespace,$host} by {host}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:karpenter.nodes.total.daemon_requests{resource_type:cpu,$cluster_name,$zone,$instance_type,$namespace,$host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "CPU Requested",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6503193720030924,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "% of Allocatable CPU Requested",
+                                            "formula": "(query1 + query2) / query3 * 100"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:karpenter.nodes.total.pod_requests{resource_type:cpu,$cluster_name,$zone,$instance_type,$namespace,$host} by {host,instance_type}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:karpenter.nodes.total.daemon_requests{resource_type:cpu,$cluster_name,$zone,$instance_type,$namespace,$host} by {host,instance_type}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:karpenter.nodes.allocatable{resource_type:cpu,$cluster_name,$zone,$instance_type,$namespace,$host} by {host,instance_type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "% CPU Requested",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2978535507117084,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Allocatable CPU",
+                                            "cell_display_mode": "number",
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "max:karpenter.nodes.allocatable{resource_type:cpu,$cluster_name,$zone,$instance_type,$namespace,$host} by {instance_type,host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Allocatable CPU",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 2615563630119948,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Pod Memory",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Daemon Memory",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Total Memory",
+                                            "formula": "query1 + query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:karpenter.nodes.total.pod_requests{resource_type:memory,$cluster_name,$zone,$instance_type,$namespace,$host} by {host,instance_type}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:karpenter.nodes.total.daemon_requests{resource_type:memory,$cluster_name,$zone,$instance_type,$namespace,$host} by {host,instance_type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Memory Requested",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3964645218433236,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "% of Allocatable Memory Requested",
+                                            "formula": "(query1 + query2) / query3 * 100"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:karpenter.nodes.total.pod_requests{resource_type:memory,$cluster_name,$zone,$instance_type,$namespace,$host} by {host,instance_type}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:karpenter.nodes.total.daemon_requests{resource_type:memory,$cluster_name,$zone,$instance_type,$namespace,$host} by {host,instance_type}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:karpenter.nodes.allocatable{resource_type:memory,$cluster_name,$zone,$instance_type,$namespace,$host} by {host,instance_type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "% Memory Requested",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 863925181841930,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Allocatable Memory",
+                                            "cell_display_mode": "number",
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:karpenter.nodes.allocatable{resource_type:memory,$cluster_name,$zone,$instance_type,$namespace,$host} by {instance_type,host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Allocatable Memory",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 1576084077751584,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Pod",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Daemon Pod",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Total Pod",
+                                            "formula": "query1 + query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:karpenter.nodes.total.pod_requests{resource_type:pods,$cluster_name,$zone,$instance_type,$namespace,$host} by {host}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:karpenter.nodes.total.daemon_requests{resource_type:pods,$cluster_name,$zone,$instance_type,$namespace,$host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Pods Requested",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2158363193067002,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 7
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "% of Allocatable Pods Requested",
+                                            "formula": "(query1 + query2) / query3 * 100"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:karpenter.nodes.total.pod_requests{resource_type:pods,$cluster_name,$zone,$instance_type,$namespace,$host} by {host,instance_type}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:karpenter.nodes.total.daemon_requests{resource_type:pods,$cluster_name,$zone,$instance_type,$namespace,$host} by {host,instance_type}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:karpenter.nodes.allocatable{resource_type:pods,$cluster_name,$zone,$instance_type,$namespace,$host} by {host,instance_type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "% Pods Requested",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8243084516572954,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 7
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Allocatable Pods",
+                                            "cell_display_mode": "number",
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:karpenter.nodes.allocatable{resource_type:pods,$cluster_name,$zone,$instance_type,$namespace,$host} by {instance_type,host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Allocatable Pods",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 4382190886133468,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 7
+                        }
+                    }
+                ]
+            },
+            "id": 8813255835403510,
+            "layout": {
+                "height": 11,
+                "width": 12,
+                "x": 0,
+                "y": 10
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Pod Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "purple",
+                            "content": "The Pod Overview show a quick overview of all the pods that are running. This can be changed to view pods by Cluster, namespace, zone and instance type to help provide insights into specific group of pods.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 7129626663120174,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend": {
+                                "type": "automatic"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:karpenter.pods.state{$cluster_name,$zone,$instance_type,$namespace,$host} by {zone,instance_type,namespace,phase}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "title": "Count of Pods by Zone, Instance Type, Namespace and Phase",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 4717857239781920,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Startup Latency",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:karpenter.pods.startup.time_seconds.sum{$namespace,$host} by {host}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:karpenter.pods.startup.time_seconds.count{$namespace,$host} by {host}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Average pod Startup Time by Node",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2721398047356106,
+                        "layout": {
+                            "height": 4,
+                            "width": 3,
+                            "x": 6,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Cores",
+                                            "cell_display_mode": "number",
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "core"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "alias": "Memory",
+                                            "cell_display_mode": "number",
+                                            "formula": "query2",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "alias": "Estimate Hourly Billing",
+                                            "cell_display_mode": "number",
+                                            "formula": "query3",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            },
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "dollar"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:karpenter.cloudprovider.instance.type.cpu_cores{$cluster_name,$zone,$instance_type,$namespace,$host} by {instance_type}"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:karpenter.cloudprovider.instance.type.memory_bytes{$cluster_name,$zone,$instance_type,$namespace,$host} by {instance_type}"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:karpenter.cloudprovider.instance.type.price_estimate{$cluster_name,$zone,$instance_type,$namespace,$host} by {instance_type}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Instance Type Overview",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 4352381606849230,
+                        "layout": {
+                            "height": 4,
+                            "width": 3,
+                            "x": 9,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:karpenter.pods.state{$cluster_name,$zone,$instance_type,$namespace,$host} by {zone,instance_type,node,namespace,phase,name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "title": "Pod Overview by Zone, Instance Type, Node, Namespace and Phase",
+                            "type": "treemap"
+                        },
+                        "id": 779470295601126,
+                        "layout": {
+                            "height": 6,
+                            "width": 12,
+                            "x": 0,
+                            "y": 5
+                        }
+                    }
+                ]
+            },
+            "id": 5196434181162384,
+            "layout": {
+                "height": 12,
+                "is_column_break": true,
+                "width": 12,
+                "x": 0,
+                "y": 21
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Provisioner Metrics",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "purple",
+                            "content": "Karpenter Provisioner lets users define how the cluster should provision nodes to meet demand. It includes specifications for target capacity, instance type, launch template, and provisioning strategy. Provisioner Overview metrics provides insights into the operation and performance of the provisioner.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 3090766641118658,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:karpenter.provisioner.usage.pct{$namespace,$host} by {resource_type,provisioner}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Provisioner Usage Percentage by Type",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5220576888367140,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Average Scheduling Latency",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:karpenter.provisioner.scheduling.duration_seconds.sum{$namespace,$host} by {resource_type}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:karpenter.provisioner.scheduling.duration_seconds.count{$namespace,$host} by {resource_type}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Provisioner Scheduling Latency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8979999307223836,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Average Simulation Latency",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:karpenter.provisioner.scheduling.simulation.duration_seconds.sum{$namespace,$host} by {resource_type}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:karpenter.provisioner.scheduling.simulation.duration_seconds.count{$namespace,$host} by {resource_type}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Provisioner Simulation Latency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2996463446555444,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 5757435517346292,
+            "layout": {
+                "height": 5,
+                "width": 12,
+                "x": 0,
+                "y": 33
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Deprovisioning Metrics",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "purple",
+                            "content": "Karpenter dynamically removes and adds nodes based on resource utilization. The following metrics collectively offer insights into the frequency and efficiency of the de-provisioning process.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 7092919505065922,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Deprovisioning Actions",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:karpenter.deprovisioning.actions_performed.count{$namespace,$host} by {action,deprovisioner}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Deprovisioning Actions Performed by Action and Deprovisioner",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4460672494144284,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Average Evaluation Latency",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:karpenter.deprovisioning.evaluation.duration_seconds.sum{$namespace,$host} by {method}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:karpenter.deprovisioning.evaluation.duration_seconds.count{$namespace,$host} by {method}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Deprovisioning Evaluation Latency by Method",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5737522605496062,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Average Replacement Latency",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:karpenter.deprovisioning.replacement.machine.initialized_seconds.sum{$namespace,$host}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:karpenter.deprovisioning.replacement.machine.initialized_seconds.count{$namespace,$host}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Deprovisioning Replacement Latency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 7590042850476366,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 649626635889086,
+            "layout": {
+                "height": 5,
+                "width": 12,
+                "x": 0,
+                "y": 38
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Interruption Metrics",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "purple",
+                            "content": "If interruption handling is enabled in Karpenter, the tool monitors various involuntary interruption events. When an upcoming interruption event is detected, Karpenter automatically takes actions such as tainting, draining, and terminating nodes in advance, allowing sufficient time for workload cleanup. The below metrics will give an oversight on the performance of the interruption process.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 5823416092163740,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Actions Performed",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:karpenter.interruption.actions_performed.count{$namespace,$host} by {action_type}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Interrupt Actions Count by Action Type",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 809782202432694,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Received Messages",
+                                            "formula": "query1",
+                                            "style": {
+                                                "palette": "blue"
+                                            }
+                                        },
+                                        {
+                                            "alias": "Deleted Messages",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:karpenter.interruption.received_messages.count{$namespace,$host} by {message_type}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:karpenter.interruption.deleted_messages.count{$namespace,$host}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Count of Messages by Type",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 954627258660374,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Interruption Latency",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:karpenter.interruption.message.latency.time_seconds.sum{$namespace,$host}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:karpenter.interruption.message.latency.time_seconds.count{$namespace,$host}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Average Interruption Latency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1571135957913728,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 3574498674587712,
+            "layout": {
+                "height": 5,
+                "width": 12,
+                "x": 0,
+                "y": 43
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Controller Runtime Metrics",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "purple",
+                            "content": "The Karpenter Controller manages node lifecycle in a Kubernetes cluster, scaling EC2 instances based on demand and available resources by provisioning and de-provisioning as needed. The below metrics displays some runtime performance metrics of the Karpenter controller.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 2253238961409166,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Active Workers",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:karpenter.controller.runtime.active_workers{$namespace,$host} by {controller,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Runtime Active Workers",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4216777284184214,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Error Rate",
+                                            "formula": "query2 / query1 * 100"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:karpenter.controller.runtime.reconcile_errors.count{$namespace,$host} by {controller,host}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:karpenter.controller.runtime.reconcile.count{$namespace,$host} by {controller,host}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Reconciliation Error Rate",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6078574815807052,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Latency",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:karpenter.controller.runtime.reconcile.time_seconds.sum{$namespace,$host} by {controller,host}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:karpenter.controller.runtime.reconcile.time_seconds.count{$namespace,$host} by {controller,host}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Reconciliation Latency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3203721928042172,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 8816785455350732,
+            "layout": {
+                "height": 5,
+                "width": 12,
+                "x": 0,
+                "y": 48
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Go Runtime Metrics",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "purple",
+                            "content": "Karpenter is Golang based. The below metrics displays some Go runtime metrics that can help in troubleshooting performance or bottleneck issues.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 4543585364182848,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Go Routines",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:karpenter.go_goroutines{$cluster_name,$namespace,$host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Number of Go Routines",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1682960316025606,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Memory",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:karpenter.go.memstats.alloc_bytes{$cluster_name,$namespace,$host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Memory Allocated",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2007812230153076,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "CPU Seconds",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:karpenter.process.cpu_seconds.count{$cluster_name,$namespace,$host} by {host}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "CPU Time in Seconds",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 528880207975262,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 1113102601345660,
+            "layout": {
+                "height": 5,
+                "width": 12,
+                "x": 0,
+                "y": 53
+            }
+        }
+    ]
+}

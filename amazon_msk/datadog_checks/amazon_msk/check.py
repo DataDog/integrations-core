@@ -101,6 +101,7 @@ class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                             scrapers[url] = self.scrapers[url]
                             continue
 
+                        self.log.debug("OpenMetricsV2 prometheus endpoint: %s", url)
                         scraper = self.create_scraper(
                             {'openmetrics_endpoint': url, 'metrics': metrics, **self.instance}
                         )
@@ -151,7 +152,9 @@ class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
             self.log.info('No `region_name` was set, defaulting to `%s` based on the `cluster_arn`', self._region_name)
 
         self._static_tags = (f'cluster_arn:{self.config.cluster_arn}', f'region_name:{self._region_name}')
-        self._service_check_tags = self._static_tags + self.config.tags
+        self._service_check_tags = self._static_tags
+        if self.config.tags:
+            self._service_check_tags += self.config.tags
 
         self._endpoint_prefix = 'https' if self.config.tls_verify else 'http'
         self._exporter_data = (

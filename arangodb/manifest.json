@@ -12,11 +12,12 @@
     "title": "ArangoDB",
     "media": [],
     "classifier_tags": [
+      "Category::Caching",
+      "Category::Data Stores",
+      "Category::Log Collection",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Store",
-      "Category::Log Collection"
+      "Supported OS::macOS"
     ]
   },
   "author": {
@@ -48,8 +49,8 @@
       "ArangoDB Overview": "assets/dashboards/arangodb_overview.json"
     },
     "monitors": {
-      "[ArangoDB] High server Kernel mode percentage usage": "assets/recommended_monitors/high_server_kernel_mode.json",
-      "[ArangoDB] High server User mode percentage usage": "assets/recommended_monitors/high_server_user_mode.json"
+      "[ArangoDB] High server Kernel mode percentage usage": "assets/monitors/high_server_kernel_mode.json",
+      "[ArangoDB] High server User mode percentage usage": "assets/monitors/high_server_user_mode.json"
     },
     "logs": {
       "source": "arangodb"

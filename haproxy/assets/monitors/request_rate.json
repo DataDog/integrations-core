@@ -1,31 +1,39 @@
 {
-  "name": "[HAProxy] Anomalous frontend request rate for host {{host.name}}",
-  "type": "query alert",
-  "query": "avg(last_4h):anomalies(avg:haproxy.frontend.requests.rate{*} by {host}, 'agile', 2, direction='both', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
-  "message": "There is an anomaly in the amount of frontend requests handled by HAProxy on host: {{host.name}} ",
-  "tags": ["integration:haproxy"],
-  "options": {
-    "notify_audit": false,
-    "locked": false,
-    "timeout_h": 0,
-    "new_host_delay": 300,
-    "require_full_window": true,
-    "notify_no_data": false,
-    "renotify_interval": 0,
-    "escalation_message": "",
-    "no_data_timeframe": null,
-    "include_tags": true,
-    "thresholds": {
-      "critical": 1,
-      "critical_recovery": 0
+  "version": 2,
+  "created_at": "2021-03-01",
+  "last_updated_at": "2021-03-01",
+  "title": "Frontend request rate is anomalous",
+  "tags": [
+    "integration:haproxy"
+  ],
+  "description": "A frontend request is the initial network request received by the HAProxy load balancer at the frontend section. This monitor tracks the rate of incoming requests to HAProxy frontends to identify anomalies based on the historical pattern of request rates.",
+  "definition": {
+    "message": "There is an anomaly in the amount of frontend requests handled by HAProxy on host: {{host.name}} ",
+    "name": "[HAProxy] Anomalous frontend request rate for host {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "timeout_h": 0
     },
-    "threshold_windows": {
-      "trigger_window": "last_15m",
-      "recovery_window": "last_15m"
-    }
-  },
-
-  "recommended_monitor_metadata": {
-    "description": "Notifies when HAProxy experiences an anomalous number of frontend request rate for a specific host."
+    "query": "avg(last_4h):anomalies(avg:haproxy.frontend.requests.rate{*} by {host}, 'agile', 2, direction='both', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
+    "tags": [
+      "integration:haproxy"
+    ],
+    "type": "query alert"
   }
 }

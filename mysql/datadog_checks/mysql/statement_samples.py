@@ -7,6 +7,7 @@ import time
 from collections import namedtuple
 from contextlib import closing
 from enum import Enum
+from operator import attrgetter
 
 import pymysql
 from cachetools import TTLCache
@@ -29,11 +30,6 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
 from .util import DatabaseConfigurationError, StatementTruncationState, get_truncation_state, warning_with_tags
-
-
-def agent_check_getter(self):
-    return self.check
-
 
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
@@ -321,7 +317,7 @@ class MySQLStatementSamples(DBMAsyncJob):
             )
             raise
 
-    @tracked_method(agent_check_getter=agent_check_getter)
+    @tracked_method(agent_check_getter=attrgetter('_check'))
     def _get_new_events_statements_current(self):
         start = time.time()
         with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
@@ -432,6 +428,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         if self._seen_samples_ratelimiter.acquire(query_plan_cache_key):
             return {
                 "timestamp": row["timer_end_time_s"] * 1000,
+                "dbm_type": "plan",
                 "host": self._check.resolved_hostname,
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "mysql",
@@ -442,6 +439,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                         "ip": row.get('processlist_host', None),
                     }
                 },
+                "cloud_metadata": self._config.cloud_metadata,
                 "db": {
                     "instance": row['current_schema'],
                     "plan": {
@@ -462,7 +460,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                 'mysql': {k: v for k, v in row.items() if k not in EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS},
             }
 
-    @tracked_method(agent_check_getter=agent_check_getter)
+    @tracked_method(agent_check_getter=attrgetter('_check'))
     def _collect_plans_for_statements(self, rows):
         for row in rows:
             try:
@@ -480,7 +478,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         """
         with closing(self._get_db_connection().cursor()) as cursor:
             self._cursor_run(cursor, ENABLED_STATEMENTS_CONSUMERS_QUERY)
-            return set([r[0] for r in cursor.fetchall()])
+            return {r[0] for r in cursor.fetchall()}
 
     def _enable_events_statements_consumers(self):
         """

@@ -1,0 +1,24 @@
+name: Weekly latest product version tests
+
+on:
+  schedule:
+  # Weekly on Sunday night (America/New_York)
+  - cron: "0 5 * * 1"
+
+jobs:
+  test:
+    uses: ./.github/workflows/test-all.yml
+    with:
+      repo: core
+
+      # Options
+      latest: true
+    secrets: inherit
+
+  submit-traces:
+    needs:
+    - test
+    if: success() || failure()
+
+    uses: ./.github/workflows/submit-traces.yml
+    secrets: inherit

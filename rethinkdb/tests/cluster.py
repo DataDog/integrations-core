@@ -3,9 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 from contextlib import contextmanager
-from typing import Iterator, List
+from typing import Iterator, List  # noqa: F401
 
-import rethinkdb
+import rethinkdb  # noqa: F401
 from rethinkdb import r
 
 from datadog_checks.dev.conditions import WaitFor

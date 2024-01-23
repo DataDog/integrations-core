@@ -3,16 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import random
+import re
 import string
 from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
 from packaging.version import Version
-from tests.common import query_time_series
 
 from datadog_checks.base.types import ServiceCheck
 from datadog_checks.cloudera.metrics import NATIVE_METRICS, TIMESERIES_METRICS
+from tests.common import query_time_series
 
 pytestmark = [pytest.mark.unit]
 
@@ -21,11 +22,11 @@ pytestmark = [pytest.mark.unit]
     'instance, read_clusters, expected_exception, expected_can_connects, expected_cluster_healths, expected_metrics',
     [
         (
-            {'api_url': 'http://localhost:8080/api/v48/', 'clusters': {'include': {'^cluster.*'}}},
+            {'api_url': 'http://localhost:8080/api/v48/', 'clusters': {'include': 9000}},
             [],
             pytest.raises(
                 Exception,
-                match='Setting `include` must be an array',
+                match=re.escape('clusters -> include\n  Input should be a valid tuple'),
             ),
             [
                 {
@@ -39,11 +40,11 @@ pytestmark = [pytest.mark.unit]
             [{'count': 0}],
         ),
         (
-            {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['new_tag'], 'clusters': {'include': {'^cluster.*'}}},
+            {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['new_tag'], 'clusters': {'include': 9000}},
             [],
             pytest.raises(
                 Exception,
-                match='Setting `include` must be an array',
+                match=re.escape('clusters -> include\n  Input should be a valid tuple'),
             ),
             [
                 {
@@ -61,7 +62,12 @@ pytestmark = [pytest.mark.unit]
             [],
             pytest.raises(
                 Exception,
-                match='`include` entries must be a map or a string',
+                match=re.escape(
+                    'clusters -> include -> 1 -> str\n'
+                    '  Input should be a valid string\n'
+                    'clusters -> include -> 1 -> is-instance[mappingproxy]\n'
+                    '  Input should be an instance of mappingproxy'
+                ),
             ),
             [
                 {
@@ -79,7 +85,12 @@ pytestmark = [pytest.mark.unit]
             [],
             pytest.raises(
                 Exception,
-                match='`include` entries must be a map or a string',
+                match=re.escape(
+                    'clusters -> include -> 1 -> str\n'
+                    '  Input should be a valid string\n'
+                    'clusters -> include -> 1 -> is-instance[mappingproxy]\n'
+                    '  Input should be an instance of mappingproxy'
+                ),
             ),
             [
                 {

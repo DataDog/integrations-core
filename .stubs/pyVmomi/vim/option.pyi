@@ -1,6 +1,6 @@
-from typing import Any, List, Type
+from typing import Any, List, Type  # noqa: F401
 
-from pyVmomi.vim import ManagedEntity
+from pyVmomi.vim import ManagedEntity  # noqa: F401
 
 class OptionManager:
     def QueryOptions(self, name: str) -> List[OptionValue]: ...

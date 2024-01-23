@@ -1,0 +1,35 @@
+{
+    "version": 2,
+    "created_at": "2023-10-31",
+    "last_updated_at": "2023-10-31",
+    "title": "Current Indexing Load is High in {{node_name.name}}",
+    "tags": [
+        "integration:elasticsearch"
+    ],
+    "description": "Get notified when indexing load is high.",
+    "definition": {
+        "name": "Current Indexing Load is High in {{node_name.name}}",
+        "type": "query alert",
+        "query": "min(last_10m):100 * avg:elasticsearch.indexing_pressure.memory.current.all_in_bytes{*} by {node_name} / avg:elasticsearch.indexing_pressure.memory.limit_in_bytes{*} by {node_name} >= 80",
+        "message": "{{#is_alert}}\nThe indexing load has been {{value}}% on Node:{{node_name.name}} for the last 10 minutes. Alerting value >= {{threshold}}.\n{{/is_alert}}\n\n{{#is_warning}}\nThe indexing load has been {{value}}% on Node:{{node_name.name}} for the last 10 minutes. Warning value >=  {{warn_threshold}}  < {{threshold}}.\n{{/is_warning}} \n\n{{#is_recovery}}\nThe indexing load has recovered to {{value}}% on Node:{{node_name.name}} for the last 10 minutes. Recovery value < {{warn_threshold}} \n{{/is_recovery}}",
+        "tags": [
+            "integration:elastic"
+        ],
+        "options": {
+            "thresholds": {
+                "critical": 80,
+                "warning": 60
+            },
+            "notify_audit": false,
+            "include_tags": false,
+            "renotify_interval": 30,
+            "renotify_statuses": [
+                "alert"
+            ],
+            "escalation_message": "{{#is_alert}}\nThe indexing load has been {{value}}% on Node:{{node_name.name}} for the last 10 minutes. Alerting value >= {{threshold}}.\n{{/is_alert}}",
+            "avalanche_window": 10,
+            "new_group_delay": 0,
+            "silenced": {}
+        }
+    }
+}

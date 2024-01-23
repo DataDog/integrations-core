@@ -8,7 +8,7 @@ from contextlib import closing
 import oracledb
 from six import PY2
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 
 from . import queries
@@ -62,6 +62,7 @@ class Oracle(AgentCheck):
         self._password = self.instance.get('password')
         self._service = self.instance.get('service_name')
         self._protocol = self.instance.get("protocol", PROTOCOL_TCP)
+        self._use_instant_client = is_affirmative(self.init_config.get("use_instant_client"))
         self._jdbc_driver = self.instance.get('jdbc_driver_path')
         self._jdbc_truststore_path = self.instance.get('jdbc_truststore_path')
         self._jdbc_truststore_type = self.instance.get('jdbc_truststore_type')
@@ -150,14 +151,30 @@ class Oracle(AgentCheck):
     def _connection(self):
         if self._cached_connection is None:
             if self.can_use_jdbc():
+                self.log.debug('Detected that JDBC can be used to connect, will attempt first')
                 try:
                     self._cached_connection = self._jdbc_connect()
                 except Exception as e:
                     self.log.error("The JDBC connection failed with the following error: %s", str(e))
                     self._connection_errors += 1
             else:
+                if self._use_instant_client:
+                    self.log.debug('Connecting to Oracle using Oracle Instant Client')
+                    self.init_instant_client()
+                else:
+                    self.log.debug('Connecting to Oracle using the native client')
                 self._cached_connection = self._oracle_connect()
         return self._cached_connection
+
+    def init_instant_client(self):
+        try:
+            oracledb.init_oracle_client()
+        except oracledb.DatabaseError as e:
+            self.log.error('Oracle Instant Client is unavailable: %s', str(e))
+            self._connection_errors += 1
+            raise
+        else:
+            self.log.debug('Oracle Instant Client version %s', oracledb.clientversion())
 
     def can_use_jdbc(self):
         if self._jdbc_driver:
@@ -218,6 +235,7 @@ class Oracle(AgentCheck):
         try:
             with jdbc_lock:
                 if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
+                    self.log.debug("JVM started but thread not attached to JVM.")
                     jpype.attachThreadToJVM()
                     jpype.java.lang.Thread.currentThread().setContextClassLoader(
                         jpype.java.lang.ClassLoader.getSystemClassLoader()
@@ -225,9 +243,18 @@ class Oracle(AgentCheck):
                 connection = jdb.connect(
                     self.ORACLE_DRIVER_CLASS, connect_string, jdbc_connect_properties, self._jdbc_driver
                 )
+                if jpype.isJVMStarted() and jpype.isThreadAttachedToJVM():
+                    jpype.detachThreadFromJVM()
+                    self.log.debug("Detaching thread from JVM after connection")
+
             self.log.debug("Connected to Oracle DB using JDBC connector")
+
             return connection
         except Exception as e:
+            if jpype.isJVMStarted() and jpype.isThreadAttachedToJVM():
+                jpype.detachThreadFromJVM()
+                self.log.debug("Thread detached from JVM after JDBC connection failure")
+
             self._connection_errors += 1
             if "Class {} not found".format(self.ORACLE_DRIVER_CLASS) in str(e):
                 msg = """Cannot run the Oracle check until either the Oracle instant client or the JDBC Driver

@@ -1,26 +1,33 @@
 {
-  "name": "Helm release {{helm_namespace.name}}/{{helm_release.name}} failed on {{kube_cluster_name.name}}",
-  "type": "service check",
-  "query": "\"helm.release_state\".over(\"*\").by(\"helm_namespace\",\"helm_release\",\"helm_storage\",\"kube_cluster_name\").last(6).count_by_status()",
-  "message": "The Helm release deployment {{helm_namespace.name}}/{{helm_release.name}} (using storage {{helm_storage.name}}) has failed on {{kube_cluster_name.name}}.",
+  "version": 2,
+  "created_at": "2022-05-27",
+  "last_updated_at": "2022-05-27",
+  "title": "Release is failed",
   "tags": [
     "integration:helm"
   ],
-  "options": {
-    "renotify_interval": 0,
-    "timeout_h": 0,
-    "thresholds": {
-      "ok": 1,
-      "warning": 1,
-      "critical": 5
+  "description": "Helm simplifies the process of deploying, scaling, and managing applications in Kubernetes. This monitor checks the Helm releases to provide insights into the recent state and status of Helm releases in the specified Kubernetes cluster.",
+  "definition": {
+    "message": "The Helm release deployment {{helm_namespace.name}}/{{helm_release.name}} (using storage {{helm_storage.name}}) has failed on {{kube_cluster_name.name}}.",
+    "name": "Helm release {{helm_namespace.name}}/{{helm_release.name}} failed on {{kube_cluster_name.name}}",
+    "options": {
+      "escalation_message": "",
+      "new_group_delay": 60,
+      "no_data_timeframe": 2,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "thresholds": {
+        "critical": 5,
+        "ok": 1,
+        "warning": 1
+      },
+      "timeout_h": 0
     },
-    "notify_no_data": false,
-    "no_data_timeframe": 2,
-    "notify_audit": false,
-    "escalation_message": "",
-    "new_group_delay": 60
-  },
-  "recommended_monitor_metadata": {
-    "description": "Get notified when the latest revision of a Helm release is in \"failed\" state."
+    "query": "\"helm.release_state\".over(\"*\").by(\"helm_namespace\",\"helm_release\",\"helm_storage\",\"kube_cluster_name\").last(6).count_by_status()",
+    "tags": [
+      "integration:helm"
+    ],
+    "type": "service check"
   }
 }
