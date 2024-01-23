@@ -223,7 +223,7 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
 
             if target in display_overrides:
                 config['name'] = display_overrides[target]
-            elif manifest:
+            elif manifest and 'integration' in manifest.get('assets', {}):
                 config['name'] = manifest['assets']['integration']['source_type_name']
             else:
                 config['name'] = target
