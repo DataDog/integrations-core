@@ -702,7 +702,7 @@ CompoundProcMetrics = {
 # One row per procedure, summarized across the cluster.
 QueuePriorityMetrics = {
     "name": "queuepriority",
-    "query": "@Statistics:[QUEUEPRIORITY, 1]",
+    "query": "@Statistics:[QUEUEPRIORITY]",
     "columns": [
         None,  # TIMESTAMP
         {"name": "host_id", "type": "tag"},
