@@ -12,7 +12,6 @@ from .common import FLAKY_METRICS, INSTANCE_DEFAULT_METRICS_V2
 
 
 @pytest.mark.skipif(platform.python_version() < "3", reason='OpenMetrics V2 is only available with Python 3')
-@pytest.mark.e2e
 def test_check_ok_omv2(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
     for metric in INSTANCE_DEFAULT_METRICS_V2:

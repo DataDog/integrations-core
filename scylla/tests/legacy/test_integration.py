@@ -11,7 +11,6 @@ from tests.common import (
 )
 
 
-@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_instance_integration_check(aggregator, mock_db_data, dd_run_check, instance_legacy):
     check = ScyllaCheck('scylla', {}, [instance_legacy])

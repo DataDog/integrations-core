@@ -46,7 +46,7 @@ init_config:
 instances:
 
     ## @param openmetrics_endpoint - string - optional - default: http://localhost:9180/metrics
-    ## To enable Scylla metrics using OpenMetricsBaseCheckV2 you must specify the 
+    ## To enable Scylla metrics using OpenMetricsBaseCheckV2, you must specify the 
     ## `openmetrics_endpoint` option.
     ##
     ## Either `prometheus_url` or `openmetrics_endpoint` must be specified.

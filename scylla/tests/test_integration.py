@@ -14,7 +14,6 @@ from .common import (
 
 
 @pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
-@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_instance_integration_check_omv2(aggregator, mock_db_data, dd_run_check, instance):
     check = ScyllaCheck('scylla', {}, [instance])

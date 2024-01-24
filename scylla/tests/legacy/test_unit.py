@@ -18,7 +18,6 @@ from tests.common import (
 )
 
 
-@pytest.mark.unit
 def test_instance_default_check(aggregator, mock_db_data, dd_run_check, instance_legacy):
     check = ScyllaCheck('scylla', {}, [instance_legacy])
 
@@ -33,7 +32,6 @@ def test_instance_default_check(aggregator, mock_db_data, dd_run_check, instance
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.unit
 def test_instance_additional_check(aggregator, mock_db_data, dd_run_check, instance_legacy):
     # add additional metric groups for validation
     additional_metric_groups = ['scylla.alien', 'scylla.sstables']
@@ -57,7 +55,6 @@ def test_instance_additional_check(aggregator, mock_db_data, dd_run_check, insta
     aggregator.assert_service_check('scylla.prometheus.health', status=AgentCheck.OK)
 
 
-@pytest.mark.unit
 def test_instance_full_additional_check(aggregator, mock_db_data, dd_run_check, instance_legacy):
     inst = deepcopy(instance_legacy)
     inst['metric_groups'] = INSTANCE_ADDITIONAL_GROUPS
@@ -78,7 +75,6 @@ def test_instance_full_additional_check(aggregator, mock_db_data, dd_run_check, 
     aggregator.assert_service_check('scylla.prometheus.health', status=AgentCheck.OK)
 
 
-@pytest.mark.unit
 def test_instance_invalid_group_check(aggregator, mock_db_data, instance_legacy):
     additional_metric_groups = ['scylla.bogus', 'scylla.sstables']
 
@@ -91,7 +87,6 @@ def test_instance_invalid_group_check(aggregator, mock_db_data, instance_legacy)
     aggregator.assert_service_check('scylla.prometheus.health', count=0)
 
 
-@pytest.mark.unit
 def test_invalid_instance(aggregator, mock_db_data, instance_legacy):
     inst = deepcopy(instance_legacy)
     inst.pop('prometheus_url')

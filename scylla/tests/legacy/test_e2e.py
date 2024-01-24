@@ -1,13 +1,10 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
-
 from datadog_checks.scylla import ScyllaCheck
 from tests.common import FLAKY_METRICS, INSTANCE_DEFAULT_METRICS
 
 
-@pytest.mark.e2e
 def test_check_ok(dd_agent_check, instance_legacy):
     aggregator = dd_agent_check(instance_legacy, rate=True)
 

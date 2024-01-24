@@ -23,7 +23,6 @@ from .common import (
 
 
 @pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
-@pytest.mark.unit
 def test_instance_default_check_omv2(aggregator, mock_db_data, dd_run_check, instance):
     check = ScyllaCheck('scylla', {}, [instance])
 
@@ -38,7 +37,6 @@ def test_instance_default_check_omv2(aggregator, mock_db_data, dd_run_check, ins
 
 
 @pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
-@pytest.mark.unit
 def test_instance_additional_check_omv2(aggregator, mock_db_data, dd_run_check, instance):
     # add additional metric groups for validation
     additional_metric_groups = ['scylla.alien', 'scylla.sstables']
@@ -65,7 +63,6 @@ def test_instance_additional_check_omv2(aggregator, mock_db_data, dd_run_check, 
 
 
 @pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
-@pytest.mark.unit
 def test_instance_full_additional_check_omv2(aggregator, mock_db_data, dd_run_check, instance):
     inst = deepcopy(instance)
     inst['metric_groups'] = INSTANCE_ADDITIONAL_GROUPS
@@ -87,7 +84,6 @@ def test_instance_full_additional_check_omv2(aggregator, mock_db_data, dd_run_ch
 
 
 @pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
-@pytest.mark.unit
 def test_instance_invalid_group_check_omv2(aggregator, mock_db_data, dd_run_check, instance):
     additional_metric_groups = ['scylla.bogus', 'scylla.sstables']
 
@@ -102,7 +98,6 @@ def test_instance_invalid_group_check_omv2(aggregator, mock_db_data, dd_run_chec
 
 
 @pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
-@pytest.mark.unit
 def test_invalid_instance_omv2(aggregator, mock_db_data, instance):
     inst = deepcopy(instance)
     inst.pop('openmetrics_endpoint')
