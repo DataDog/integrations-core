@@ -167,10 +167,10 @@ INDEX_USAGE_STATS_QUERY = {
         {"name": "db", "type": "tag"},
         {"name": "index_name", "type": "tag"},
         {"name": "table", "type": "tag"},
-        {"name": "index.user_seeks", "type": "gauge"},
-        {"name": "index.user_scans", "type": "gauge"},
-        {"name": "index.user_lookups", "type": "gauge"},
-        {"name": "index.user_updates", "type": "gauge"},
+        {"name": "index.user_seeks", "type": "monotonic_count"},
+        {"name": "index.user_scans", "type": "monotonic_count"},
+        {"name": "index.user_lookups", "type": "monotonic_count"},
+        {"name": "index.user_updates", "type": "monotonic_count"},
     ],
 }
 
