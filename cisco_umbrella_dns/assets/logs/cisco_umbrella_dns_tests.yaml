@@ -6,7 +6,7 @@ tests:
       "date" : "2023-12-11",
       "returncode" : 0,
       "type" : "dns",
-      "internalip" : "192.192.192.192",
+      "internalip" : "185.64.148.0",
       "allapplications" : [ {
         "id" : 989025,
         "label" : "Some APIs",
@@ -63,7 +63,7 @@ tests:
         "label" : "Search Engines and Portals",
         "type" : "content"
       } ],
-      "externalip" : "0.0.0.0",
+      "externalip" : "185.64.148.0",
       "querytype" : "A",
       "timestamp" : 1702288020000
     }
@@ -211,7 +211,7 @@ tests:
       "date" : "2023-12-19",
       "returncode" : 0,
       "type" : "dns",
-      "internalip" : "192.192.192.192",
+      "internalip" : "185.64.148.0",
       "allapplications" : [ {
         "id" : 992107,
         "label" : "test.com",
@@ -265,7 +265,7 @@ tests:
         "label" : "Streaming Video",
         "type" : "content"
       } ],
-      "externalip" : "192.192.192.192",
+      "externalip" : "185.64.148.0",
       "querytype" : "A",
       "timestamp" : 1702990616000
     }
@@ -408,7 +408,7 @@ tests:
       "date" : "2023-12-19",
       "returncode" : 0,
       "type" : "dns",
-      "internalip" : "192.192.192.192",
+      "internalip" : "185.64.148.0",
       "allapplications" : [ {
         "id" : 987820,
         "label" : "Social Media Platform",
@@ -456,7 +456,7 @@ tests:
         "label" : "Application",
         "type" : "application"
       } ],
-      "externalip" : "192.192.192.192",
+      "externalip" : "185.64.148.0",
       "querytype" : "A",
       "timestamp" : 1702990616000
     }
@@ -601,9 +601,9 @@ tests:
       "bundleid" : 14367283,
       "requestsize" : 517,
       "type" : "proxy",
-      "internalip" : "192.192.192.192",
+      "internalip" : "185.64.148.0",
       "egress" : {
-        "ip" : "0.0.0.0",
+        "ip" : "185.64.148.0",
         "type" : "shared"
       },
       "statuscode" : 303,
@@ -657,7 +657,7 @@ tests:
         "label" : "Search Engines and Portals",
         "type" : "content"
       } ],
-      "externalip" : "192.192.192.192",
+      "externalip" : "185.64.148.0",
       "policy" : {
         "timebasedrule" : false
       },
@@ -908,9 +908,9 @@ tests:
       "bundleid" : 14367283,
       "requestsize" : 517,
       "type" : "proxy",
-      "internalip" : "192.192.192.192",
+      "internalip" : "185.64.148.0",
       "egress" : {
-        "ip" : "0.0.0.0",
+        "ip" : "185.64.148.0",
         "type" : "shared"
       },
       "statuscode" : 303,
@@ -964,7 +964,7 @@ tests:
         "label" : "Search Engines and Portals",
         "type" : "content"
       } ],
-      "externalip" : "192.192.192.192",
+      "externalip" : "185.64.148.0",
       "policy" : {
         "timebasedrule" : false
       },
