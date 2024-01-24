@@ -39,7 +39,9 @@
         "impalad",
         "catalogd",
         "statestored"
-      ]
+      ],
+      "source_type_id": 10301,
+      "auto_install": true
     },
     "logs": {
       "source": "impala"

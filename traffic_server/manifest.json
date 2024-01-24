@@ -48,7 +48,9 @@
         "traffic_manager",
         "traffic_server",
         "trafficserver start"
-      ]
+      ],
+      "source_type_id": 10259,
+      "auto_install": true
     },
     "dashboards": {
       "Traffic Server - Overview": "assets/dashboards/overview.json"

@@ -42,7 +42,11 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": ["pgbouncer"]
+      "process_signatures": [
+        "pgbouncer"
+      ],
+      "source_type_id": 118,
+      "auto_install": true
     },
     "dashboards": {
       "pgbouncer": "assets/dashboards/pgbouncer_dashboard.json"
