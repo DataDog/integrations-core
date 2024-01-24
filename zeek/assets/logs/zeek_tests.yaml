@@ -3,7 +3,7 @@ tests:
   - sample: <134>Dec 26 01:35:11 machine-name
       {"_path":"capture_loss","_write_ts":"2023-12-12T05:52:50.756358Z","ts":"2023-12-12T05:52:32.763303Z","ts_delta":15.235642194747925,"peer":"zeek","gaps":3,"acks":316,"percent_lost":0.9493670886075949}
     result: null
-  - sample: '{"_path":"conn","_write_ts":"2023-12-12T05:52:50.756358Z","ts":"2023-12-12T05:52:32.763303Z","uid":"CcdWSj20NUmxZowq93","id.orig_h":"10.50.4.227","id.orig_p":3,"id.resp_h":"10.50.6.121","id.resp_p":10,"proto":"icmp","duration":3.0111899375915527,"orig_bytes":234,"resp_bytes":0,"conn_state":"OTH","local_orig":true,"local_resp":true,"missed_bytes":0,"orig_pkts":3,"orig_ip_bytes":318,"resp_pkts":0,"resp_ip_bytes":0}'
+  - sample: '{"_path":"conn","_write_ts":"2023-12-12T05:52:50.756358Z","ts":"2023-12-12T05:52:32.763303Z","uid":"CcdWSj20NUmxZowq93","id.orig_h":"185.64.148.0","id.orig_p":3,"id.resp_h":"185.64.148.0","id.resp_p":10,"proto":"icmp","duration":3.0111899375915527,"orig_bytes":234,"resp_bytes":0,"conn_state":"OTH","local_orig":true,"local_resp":true,"missed_bytes":0,"orig_pkts":3,"orig_ip_bytes":318,"resp_pkts":0,"resp_ip_bytes":0}'
     result:
       custom:
         _path: "conn"
@@ -58,7 +58,7 @@ tests:
       tags:
       - "source:LOGS_SOURCE"
       timestamp: 1702360352763
-  - sample: '{"_path":"http","_write_ts":"2023-12-12T05:52:50.756358Z","ts":"2023-12-12T05:52:32.763303Z","uid":"CBQBvs1hob384mp2lb","id.orig_h":"10.50.5.135","id.orig_p":47210,"id.resp_h":"104.18.20.226","id.resp_p":80,"trans_depth":1,"method":"POST","host":"host.com","uri":"/rootr3","version":"1.1","user_agent":"LIBCURL","request_body_len":83,"response_body_len":1434,"status_code":200,"status_msg":"OK","tags":[],"orig_fuids":["FKhxp22QnZua8NWY2"],"orig_mime_types":["application/ocsp-request"],"resp_fuids":["F9Zqr71YzMZPVZ4dbe"],"resp_mime_types":["application/ocsp-response"]}'
+  - sample: '{"_path":"http","_write_ts":"2023-12-12T05:52:50.756358Z","ts":"2023-12-12T05:52:32.763303Z","uid":"CBQBvs1hob384mp2lb","id.orig_h":"185.64.148.0","id.orig_p":47210,"id.resp_h":"185.64.148.0","id.resp_p":80,"trans_depth":1,"method":"POST","host":"host.com","uri":"/rootr3","version":"1.1","user_agent":"LIBCURL","request_body_len":83,"response_body_len":1434,"status_code":200,"status_msg":"OK","tags":[],"orig_fuids":["FKhxp22QnZua8NWY2"],"orig_mime_types":["application/ocsp-request"],"resp_fuids":["F9Zqr71YzMZPVZ4dbe"],"resp_mime_types":["application/ocsp-response"]}'
     result:
       custom:
         _path: "http"
@@ -123,7 +123,7 @@ tests:
       tags:
       - "source:LOGS_SOURCE"
       timestamp: 1702360352763
-  - sample: '{"_path":"dns","_write_ts":"2023-12-12T05:52:50.756358Z","ts":"2023-12-12T05:52:32.763303Z","uid":"CsOSdHqRMu62rNs31","id.orig_h":"10.50.6.121","id.orig_p":58013,"id.resp_h":"10.50.1.159","id.resp_p":5355,"proto":"udp","trans_id":38706,"query":"win2k16-1-159","rcode":0,"rcode_name":"NOERROR","AA":false,"TC":false,"RD":false,"RA":false,"Z":0,"answers":["10.50.1.159"],"TTLs":[30.0],"rejected":false}'
+  - sample: '{"_path":"dns","_write_ts":"2023-12-12T05:52:50.756358Z","ts":"2023-12-12T05:52:32.763303Z","uid":"CsOSdHqRMu62rNs31","id.orig_h":"185.64.148.0","id.orig_p":58013,"id.resp_h":"185.64.148.0","id.resp_p":5355,"proto":"udp","trans_id":38706,"query":"win2k16-1-159","rcode":0,"rcode_name":"NOERROR","AA":false,"TC":false,"RD":false,"RA":false,"Z":0,"answers":["185.64.148.0"],"TTLs":[30.0],"rejected":false}'
     result:
       custom:
         AA: false
