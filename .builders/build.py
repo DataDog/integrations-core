@@ -113,7 +113,7 @@ def build_macos():
             # Path where we'll install libraries that we build
             'DD_PREFIX_PATH': prefix_path,
             # Common compilation flags
-            'LDFLAGS': f'-Wl,-rpath,{prefix_path}/lib -L{prefix_path}/lib',
+            'LDFLAGS': f'-L{prefix_path}/lib',
             'CFLAGS': f'-I{prefix_path}/include -O2',
             # Build command for extra platform-specific build steps
             'DD_BUILD_COMMAND': f'bash {build_context_dir}/extra_build.sh'
