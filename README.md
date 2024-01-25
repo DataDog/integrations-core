@@ -6,7 +6,7 @@
 | Docs | [![Docs - Release][19]][20] |
 | Meta | [![Hatch project][26]][27] [![Linting - Ruff][24]][25] [![Code style - black][21]][22] [![Typing - Mypy][28]][29] [![License - BSD-3-Clause][30]][31] |
 
-This repository contains the integrations that Datadog officially develops and supports.
+This repository contains integrations that Datadog officially develops and supports.
 To add a new integration, please see the [Integrations Extras][5] repository and the
 [accompanying documentation][6].
 
