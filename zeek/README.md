@@ -1,6 +1,6 @@
 ## Overview
 
-[Zeek][6] is the world's leading platform for network security monitoring. It interprets what it sees and creates compact, high-fidelity transaction logs, and file content. It can create fully customized output, suitable for manual review on disk or in a more analyst-friendly tool like a security and information event management (SIEM) system.
+[Zeek][6] is a platform for network security monitoring. It interprets what it sees and creates compact, high-fidelity transaction logs, and file content. It can create fully customized output, suitable for manual review on disk or in a more analyst-friendly tool like a security and information event management (SIEM) system.
 
 This integration ingests the following logs:
 - Connection logs
@@ -16,7 +16,7 @@ Visualize detailed insights into network connections, DNS and DHCP activity, det
 
 ### Installation
 
-To install the Zeek integration, run the following agent installation command and the steps below. For more information, see the [Integration Management][7] documentation.
+To install the Zeek integration, run the following Agent installation command and the steps below. For more information, see the [Integration Management][7] documentation.
 
 **Note**: This step is not necessary for Agent version >= 7.52.0.
 
@@ -36,7 +36,7 @@ Linux command
      ```
      echo -e "\n# Load ZKG packages\n@load packages" >> /opt/zeek/share/zeek/site/local.zeek
      ```
-   - Restart the zeek
+   - Restart Zeek
      ```
      /opt/zeek/bin/zeekctl install
      ```
@@ -48,8 +48,6 @@ Linux command
 * Have the [Datadog Agent][4] installed and running.
 
 ### Configuration
-
-#### Log collection
 
 #### Opensource Zeek
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
