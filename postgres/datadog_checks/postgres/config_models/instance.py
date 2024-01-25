@@ -76,6 +76,7 @@ class CollectSettings(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    ignored_settings_patterns: Optional[tuple[str, ...]] = None
 
 
 class DatabaseAutodiscovery(BaseModel):
