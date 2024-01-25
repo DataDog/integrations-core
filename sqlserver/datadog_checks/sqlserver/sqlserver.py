@@ -454,8 +454,6 @@ class SQLServer(AgentCheck):
 
         # Load database statistics
         db_stats_to_collect = list(DATABASE_METRICS)
-        # if is_affirmative(self.instance.get('include_index_usage_metrics', True)):
-        #     db_stats_to_collect.extend(DATABASE_INDEX_METRICS)
         for name, table, column in db_stats_to_collect:
             # include database as a filter option
             db_names = [d.name for d in self.databases] or [
