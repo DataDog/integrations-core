@@ -10,7 +10,7 @@ This repository contains integrations that Datadog officially develops and suppo
 To add a new integration, please see the [Integrations Extras][5] repository and the
 [accompanying documentation][6].
 
-The [Datadog Agent][7] packages are equipped with all the Agent Integrations from this
+The [Datadog Agent][7] packages are equipped with all the Agent integrations from this
 repository, so to get started using them, you can simply [install the Agent][8]
 for your operating system. The [AGENT_CHANGELOG](AGENT_CHANGELOG.md) file shows
 which Integrations have been updated in each Agent version.
