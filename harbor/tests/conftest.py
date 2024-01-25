@@ -8,8 +8,8 @@ import pytest
 import requests
 from mock import patch
 
-from datadog_checks.dev import LazyFunction, docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints, WaitFor
+from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.harbor import HarborCheck
 from datadog_checks.harbor.api import HarborAPI
