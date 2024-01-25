@@ -100,10 +100,6 @@ def instance_persist_connections():
     return False
 
 
-def instance_prometheus_url():
-    return 'http://localhost:9180/metrics'
-
-
 def instance_request_size():
     return 16
 
