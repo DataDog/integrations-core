@@ -9,7 +9,7 @@ import requests
 from mock import patch
 
 from datadog_checks.dev import LazyFunction, docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.harbor import HarborCheck
 from datadog_checks.harbor.api import HarborAPI
@@ -50,6 +50,7 @@ def dd_environment(e2e_instance):
     conditions = [
         CheckDockerLogs(compose_file, expected_log, wait=3),
         lambda: time.sleep(4),
+        CheckEndpoints(URL + USERS_URL),
         CreateSimpleUser(),
     ]
     with docker_run(compose_file, conditions=conditions, attempts=3):
