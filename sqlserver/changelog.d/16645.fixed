@@ -1,0 +1,1 @@
+Improve performance of index_usage_stats query, set default collection interval to 5 minutes and allow interval to be customized.
