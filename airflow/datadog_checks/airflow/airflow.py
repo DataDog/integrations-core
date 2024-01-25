@@ -31,7 +31,7 @@ class AirflowCheck(AgentCheck):
         can_connect_status = AgentCheck.OK
 
         # Choose which version of Airflow to use
-        if self._get_version(url_stable_version) is None:
+        if not self._get_version(url_stable_version):
             # Airflow version 1
             target_url = url_experimental
             submit_metrics = self._submit_healthy_metrics_experimental
@@ -58,9 +58,9 @@ class AirflowCheck(AgentCheck):
         except Exception as e:
             self.log.debug("Couldn't collect version from URL: %s with exception: %s", url, e)
         else:
-            version = resp_payload.get('version', None)
+            version = resp_payload.get('version')
             if version:
-                self.log.info("Airflow version: %s", version)
+                self.log.debug("Airflow version: %s", version)
             return version
 
     def _submit_healthy_metrics_experimental(self, resp, tags):
