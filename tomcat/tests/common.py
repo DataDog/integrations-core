@@ -37,7 +37,21 @@ TOMCAT_E2E_METRICS = [
     "tomcat.string_cache.max_size",
     "tomcat.web.cache.hit_count",
     "tomcat.web.cache.lookup_count",
-] + JVM_E2E_METRICS_NEW
+]
+
+TOMCAT_E2E_METRICS += JVM_E2E_METRICS_NEW
+
+JDBC_METRICS = [
+    "tomcat.jdbc.connection_pool.active",
+    "tomcat.jdbc.connection_pool.max_active",
+    "tomcat.jdbc.connection_pool.idle",
+    "tomcat.jdbc.connection_pool.max_idle",
+    "tomcat.jdbc.connection_pool.min_idle",
+    "tomcat.jdbc.connection_pool.size",
+]
+
+if FLAVOR == 'standalone':
+    TOMCAT_E2E_METRICS += JDBC_METRICS
 
 OPTIONAL_TOMCAT_E2E_METRICS = [
     "tomcat.min_time",
