@@ -76,6 +76,7 @@ class CollectSettings(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    ignored_settings_patterns: Optional[tuple[str, ...]] = None
 
 
 class DatabaseAutodiscovery(BaseModel):
@@ -214,7 +215,7 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     gcp: Optional[Gcp] = None
-    host: str
+    host: Optional[str] = None
     idle_connection_timeout: Optional[int] = None
     ignore_databases: Optional[tuple[str, ...]] = None
     log_unobfuscated_plans: Optional[bool] = None
@@ -243,7 +244,7 @@ class InstanceConfig(BaseModel):
     table_count_limit: Optional[int] = None
     tag_replication_role: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
-    username: str
+    username: Optional[str] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):

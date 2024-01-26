@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2020-08-05",
   "last_updated_at": "2021-01-11",
-  "title": "High incoming connections",
+  "title": "Connection pool is reaching saturation",
   "tags": [
     "integration:mongodb"
   ],
-  "description": "Notify your team when incoming connections are close to reaching the maximum available.",
+  "description": "A connection pool helps reduce application latency and the number of times new connections are created. This monitor tracks the number of incoming connections to alert when the connection pool is near the saturation point.",
   "definition": {
     "message": "The number of incoming connections is reaching the maximum. {{value}} % of the available connections have been used on {{replset_name.name}}",
     "name": "[MongoDB] High incoming connections",

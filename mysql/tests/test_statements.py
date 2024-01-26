@@ -545,6 +545,7 @@ def test_missing_explain_procedure(dbm_instance, dd_run_check, aggregator, state
 def test_performance_schema_disabled(dbm_instance, dd_run_check):
     # Disable query samples to avoid interference from queries from the db running explain plans
     # and isolate the fake row from it
+    dbm_instance['options']['extra_performance_metrics'] = False
     dbm_instance['query_samples']['enabled'] = False
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
@@ -564,6 +565,18 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
         'for more details\n'
         'code=performance-schema-not-enabled host=stubbed.hostname'
     ]
+
+    # as we faked the performance schema being disabled, running the check should restore the flag to True
+    # this is to "simulate" enabling performance schema without restarting the agent
+    # as the next check run will update the flag
+    assert mysql_check.performance_schema_enabled is True
+
+    # clear the warnings and rerun collect_per_statement_metrics
+    mysql_check.warnings.clear()
+    mysql_check._statement_metrics.collect_per_statement_metrics()
+    mysql_check._statement_metrics.collect_per_statement_metrics()
+    dd_run_check(mysql_check)
+    assert mysql_check.warnings == []
 
 
 @pytest.mark.integration

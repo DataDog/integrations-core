@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2022-07-18",
   "last_updated_at": "2022-07-18",
-  "title": "High database disk space in use",
+  "title": "Datadase disk space usage is high",
   "tags": [
     "integration:teradata"
   ],
-  "description": "Notifies when Teradata database disk space in use is higher than usual.",
+  "description": "High disk usage for a database typically means that the database is writing to or reading from the disk at a high rate, which could eventually lead to data loss. This monitor tracks if any database has higher-than-usual disk space in use.",
   "definition": {
     "message": "{{#is_warning}}Total current disk space in use for database {{td_database.name}} on server {{teradata_server.name}} is more than 50%{{/is_warning}} \n{{#is_alert}}Total current disk space in use for database {{td_database.name}} on server {{teradata_server.name}} is more than 75%{{/is_alert}}\n{{#is_recovery}}Total current disk space in use for database {{td_database.name}} on server {{teradata_server.name}} is less than 50%{{/is_recovery}}\n",
     "name": "[Teradata] High database disk space in use",

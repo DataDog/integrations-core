@@ -1,1 +1,0 @@
-Create `postgresql.create_index.*` metrics tracking progress of index creation

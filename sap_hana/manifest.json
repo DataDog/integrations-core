@@ -42,7 +42,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10076,
+      "auto_install": true
     },
     "dashboards": {
       "SAP HANA Overview": "assets/dashboards/overview.json"

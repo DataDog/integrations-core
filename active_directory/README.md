@@ -37,7 +37,7 @@ _Available for Agent versions >6.0_
    ```yaml
    logs:
      - type: file
-       path: /path/to/my/directory/file.log
+       path: C:\path\to\my\directory\file.log
        source: ruby
        service: "<MY_SERVICE>"
    ```

@@ -239,7 +239,7 @@ def test_check_index_usage_metrics(
 
     check_sqlserver_can_connect(aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags)
 
-    for metric_name, _, _ in DATABASE_INDEX_METRICS:
+    for metric_name in DATABASE_INDEX_METRICS:
         expected_tags = tags + [
             'db:{}'.format(instance_docker_metrics['database']),
             'index_name:thingsindex',

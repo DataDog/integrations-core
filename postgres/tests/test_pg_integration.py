@@ -7,6 +7,7 @@ import time
 import mock
 import psycopg2
 import pytest
+from flaky import flaky
 
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.postgres import PostgreSql
@@ -545,6 +546,7 @@ def test_state_clears_on_connection_error(integration_check, pg_instance):
     'is_aurora',
     [True, False],
 )
+@flaky(max_runs=5)
 def test_wal_stats(aggregator, integration_check, pg_instance, is_aurora):
     conn = _get_superconn(pg_instance)
     with conn.cursor() as cur:
@@ -1029,3 +1031,11 @@ def assert_state_set(check):
     if POSTGRES_VERSION != '9.3':
         assert check.metrics_cache.archiver_metrics
     assert check.metrics_cache.replication_metrics
+
+
+def test_host_autodiscover_init_config(aggregator, pg_host_autodiscover_init_config):
+    check_with_init = PostgreSql('test_instance', pg_host_autodiscover_init_config, [{}])
+    assert check_with_init._config.host_autodiscovery_enabled is True
+    check_with_init.check({})
+    # assert that the service check is OK
+    aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.OK)

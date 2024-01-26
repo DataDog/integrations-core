@@ -43,7 +43,11 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": ["ktserver"]
+      "process_signatures": [
+        "ktserver"
+      ],
+      "source_type_id": 62,
+      "auto_install": true
     },
     "dashboards": {
       "kyototycoon": "assets/dashboards/kyototycoon_dashboard.json"

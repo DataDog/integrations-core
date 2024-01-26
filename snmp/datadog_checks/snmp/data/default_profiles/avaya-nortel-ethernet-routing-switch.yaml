@@ -6,6 +6,12 @@ extends:
 sysobjectid:
   - 1.3.6.1.4.1.45.3.71.10 # 4526T
 
+metadata:
+  device:
+    fields:
+      type:
+        value: "switch"
+
 metrics:
   - MIB: S5-CHASSIS-MIB
     symbol:

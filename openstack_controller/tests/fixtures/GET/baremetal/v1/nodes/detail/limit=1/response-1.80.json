@@ -138,9 +138,9 @@
             "href": "http://34.141.226.224/baremetal/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0/volume",
             "rel": "bookmark"
           }
-        ],
-        "next": "http://34.141.226.224/baremetal/v1/nodes/detail?sort_key=id&sort_dir=asc&limit=1&marker=9d72cf53-19c8-4942-9314-005fa5d2a6a0"
+        ]
       }
-    ]
+    ],
+    "next": "http://34.141.226.224/baremetal/v1/nodes/detail?sort_key=id&sort_dir=asc&limit=1&marker=9d72cf53-19c8-4942-9314-005fa5d2a6a0"
   }
   
