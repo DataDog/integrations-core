@@ -46,7 +46,9 @@
       "process_signatures": [
         "python supervisord",
         "supervisord"
-      ]
+      ],
+      "source_type_id": 116,
+      "auto_install": true
     },
     "saved_views": {
       "supervisord_processes": "assets/saved_views/supervisord_processes.json"

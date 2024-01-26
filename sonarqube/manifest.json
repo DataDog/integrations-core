@@ -47,7 +47,9 @@
       "process_signatures": [
         "java org.sonar.server.app.WebServer",
         "java org.sonar.ce.app.CeServer"
-      ]
+      ],
+      "source_type_id": 10132,
+      "auto_install": true
     },
     "dashboards": {
       "Sonarqube Overview": "assets/dashboards/overview.json"

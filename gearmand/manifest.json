@@ -44,7 +44,9 @@
       "process_signatures": [
         "gearmand",
         "gearman"
-      ]
+      ],
+      "source_type_id": 52,
+      "auto_install": true
     },
     "dashboards": {
       "gearman": "assets/dashboards/gearman_dashboard.json"

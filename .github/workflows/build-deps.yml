@@ -1,0 +1,100 @@
+name: Build dependencies
+
+on:
+  pull_request:
+    branches:
+    - master
+    paths:
+    - .builders/**
+    - datadog_checks_dev/datadog_checks/base/data/agent_requirements.in
+  push:
+    branches:
+    - master
+    paths:
+    - .builders/**
+    - datadog_checks_dev/datadog_checks/base/data/agent_requirements.in
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.head_ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  build:
+    name: Target ${{ matrix.job.image }} on ${{ matrix.job.os }}
+    runs-on: ${{ matrix.job.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        job:
+        - os: ubuntu-22.04
+          image: linux-x86_64
+          digest: sha256:cb6bfadf3570f711a5bf1bfe1ce7f33efaab9500b10c7eb469d10c83546399b5
+        - os: windows-2022
+          image: windows-x86_64
+          digest: sha256:e35f185ddfa0aee3ecb68452137138f432879919132d7c29d2b1c25547f29fc2
+
+    permissions:
+      packages: write
+
+    steps:
+    # Ensure that changed files are determined before checking out the code so that we use
+    # the GitHub API, otherwise we would have to fetch the entire history (depth: 0)
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@v42
+      with:
+        files_yaml: |-
+          builders:
+          - .builders/**
+          dependencies:
+          - datadog_checks_dev/datadog_checks/base/data/agent_requirements.in
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install management dependencies
+      run: pip install -r .builders/deps/host_dependencies.txt
+
+    - name: Build image and wheels
+      if: steps.changed-files.outputs.builders_any_changed == 'true'
+      run: python .builders/build.py ${{ matrix.job.image }} output
+
+    - name: Pull image and build wheels
+      if: steps.changed-files.outputs.builders_any_changed != 'true'
+      run: python .builders/build.py ${{ matrix.job.image }} output --digest ${{ matrix.job.digest }}
+
+    - name: List wheels
+      run: |-
+        echo "Built:"
+        pushd output/wheels/built
+        for wheel in *.whl; do
+          echo "  $wheel"
+        done
+        popd
+
+        echo "--------------------------------------------------"
+        cat output/frozen.txt
+
+    - name: Log in to GitHub Packages
+      if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Publish image
+      if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
+      run: docker push ghcr.io/datadog/agent-int-builder:${{ matrix.job.image }}

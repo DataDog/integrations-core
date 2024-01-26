@@ -45,7 +45,9 @@
       },
       "process_signatures": [
         "airflow"
-      ]
+      ],
+      "source_type_id": 10083,
+      "auto_install": true
     },
     "dashboards": {
       "Airflow Overview": "assets/dashboards/overview.json"

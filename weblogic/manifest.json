@@ -45,7 +45,9 @@
       },
       "process_signatures": [
         "java weblogic.Server"
-      ]
+      ],
+      "source_type_id": 10245,
+      "auto_install": true
     },
     "dashboards": {
       "overview": "assets/dashboards/overview.json",

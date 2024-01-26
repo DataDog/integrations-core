@@ -11,7 +11,7 @@ HARBOR_COMPONENTS = ['chartmuseum', 'registry', 'redis', 'jobservice', 'registry
 
 HARBOR_VERSION = [int(i) for i in os.environ['HARBOR_VERSION'].split('.')]
 
-USERS_URL = '/api/users/' if HARBOR_VERSION < VERSION_2_2 else '/api/v2.0/users/'
+USERS_PATH = '/api/users/' if HARBOR_VERSION < VERSION_2_2 else '/api/v2.0/users/'
 
 HARBOR_METRICS = [
     # Metric_name, requires admin privileges

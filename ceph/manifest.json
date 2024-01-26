@@ -43,7 +43,13 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": ["ceph-mon", "ceph-mgr", "ceph-osd"]
+      "process_signatures": [
+        "ceph-mon",
+        "ceph-mgr",
+        "ceph-osd"
+      ],
+      "source_type_id": 138,
+      "auto_install": true
     },
     "dashboards": {
       "ceph": "assets/dashboards/overview.json"

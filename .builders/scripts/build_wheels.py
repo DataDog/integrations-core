@@ -66,6 +66,8 @@ def main():
         abort(f'Invalid python version: {python_version}')
 
     wheels_dir = MOUNT_DIR / 'wheels'
+    built_wheels_dir = wheels_dir / 'built'
+    external_wheels_dir = wheels_dir / 'external'
 
     # Install build dependencies
     check_process([str(python_path), '-m', 'pip', 'install', '-r', str(MOUNT_DIR / 'build_dependencies.txt')])
@@ -113,16 +115,18 @@ def main():
         check_process([
             sys.executable, '-u', str(MOUNT_DIR / 'scripts' / 'repair_wheels.py'),
             '--source-dir', str(staged_wheel_dir),
-            '--output-dir', str(wheels_dir),
+            '--built-dir', str(built_wheels_dir),
+            '--external-dir', str(external_wheels_dir),
         ])
 
     dependencies: dict[str, tuple[str, str]] = {}
-    for entry in wheels_dir.iterdir():
-        project_metadata = extract_metadata(entry)
-        project_name = normalize_project_name(project_metadata['Name'])
-        project_version = project_metadata['Version']
-        wheel_hash = sha256(entry.read_bytes()).hexdigest()
-        dependencies[project_name] = (project_version, wheel_hash)
+    for wheel_dir in wheels_dir.iterdir():
+        for entry in wheel_dir.iterdir():
+            project_metadata = extract_metadata(entry)
+            project_name = normalize_project_name(project_metadata['Name'])
+            project_version = project_metadata['Version']
+            wheel_hash = sha256(entry.read_bytes()).hexdigest()
+            dependencies[project_name] = (project_version, wheel_hash)
 
     final_requirements = MOUNT_DIR / 'frozen.txt'
     with final_requirements.open('w', encoding='utf-8') as f:
