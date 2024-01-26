@@ -36,17 +36,12 @@ def test_e2e_profile__cisco_ipsec_flow_monitor(dd_agent_check):
 
     tag_rows = [
         [
-            'peer_local_value:forward quaintly',
-            'peer_remote_value:oxen but acted Jaded driving',
-            'phase_1_tunnel_index:9',
+            'peer_local_value:but oxen but quaintly driving acted but their',
+            'peer_remote_value:but',
+            'phase_1_tunnel_index:7',
             'tunnel_status:active',
         ],
-        [
-            'peer_local_value:kept quaintly oxen acted but driving',
-            'peer_remote_value:kept Jaded their',
-            'phase_1_tunnel_index:3',
-            'tunnel_status:destroy',
-        ],
+        ['peer_local_value:driving', 'peer_remote_value:oxen', 'phase_1_tunnel_index:8', 'tunnel_status:active'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cikeTunInDropPkts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -60,18 +55,18 @@ def test_e2e_profile__cisco_ipsec_flow_monitor(dd_agent_check):
     tag_rows = [
         [
             'peer_local_address:oxen',
-            'peer_remote_address:oxen forward but',
-            'phase_1_tunnel_index:21',
-            'phase_2_tunnel_index:31',
+            'peer_remote_address:forward quaintly',
+            'phase_1_tunnel_index:9',
+            'phase_2_tunnel_index:13',
             'tunnel_alive:true',
-            'tunnel_status:destroy',
+            'tunnel_status:active',
         ],
         [
-            'peer_local_address:their Jaded kept',
-            'peer_remote_address:oxen',
-            'phase_1_tunnel_index:27',
-            'phase_2_tunnel_index:5',
-            'tunnel_alive:false',
+            'peer_local_address:oxen',
+            'peer_remote_address:kept',
+            'phase_1_tunnel_index:7',
+            'phase_2_tunnel_index:3',
+            'tunnel_alive:true',
             'tunnel_status:destroy',
         ],
     ]
@@ -102,7 +97,7 @@ def test_e2e_profile__cisco_ipsec_flow_monitor(dd_agent_check):
         'profile': 'cisco-ipsec-flow-monitor',
         'status': 1,
         'sys_object_id': '1.2.3.1008.123',
-        # 'vendor': '_cisco',
+        'device_type': 'other',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
