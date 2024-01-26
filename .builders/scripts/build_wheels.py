@@ -11,6 +11,7 @@ from tempfile import TemporaryDirectory
 from dotenv import dotenv_values
 from utils import extract_metadata, normalize_project_name
 
+
 if sys.platform == 'win32':
     PY3_PATH = Path('C:\\py3\\Scripts\\python.exe')
     PY2_PATH = Path('C:\\py2\\Scripts\\python.exe')
@@ -26,10 +27,10 @@ if sys.platform == 'win32':
 else:
     import shlex
 
-    PY3_PATH = Path('/py3/bin/python')
-    PY2_PATH = Path('/py2/bin/python')
-    MOUNT_DIR = Path('/home')
-    ENV_FILE = Path('/.env')
+    PY3_PATH = Path(os.environ.get('DD_PY3_BUILDENV_PATH', '/py3/bin/python'))
+    PY2_PATH = Path(os.environ.get('DD_PY2_BUILDENV_PATH', '/py2/bin/python'))
+    MOUNT_DIR = Path(os.environ.get('DD_MOUNT_DIR', '/home'))
+    ENV_FILE = Path(os.environ.get('DD_ENV_FILE', '/.env'))
 
     def join_command_args(args: list[str]) -> str:
         return shlex.join(args)

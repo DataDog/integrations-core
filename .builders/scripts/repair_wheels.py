@@ -116,9 +116,67 @@ def repair_windows(source_dir: str, built_dir: str, external_dir: str) -> None:
             sys.exit(process.returncode)
 
 
+def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
+    from delocate import delocate_wheel
+    exclusions = [re.compile(s) for s in [
+        # pymqi
+        r'pymqe\.cpython-\d+-darwin\.so',
+        # confluent_kafka
+        # We leave cyrus-sasl out of the wheel because of the complexity involved in bundling it portably.
+        # This means the confluent-kafka wheel will have a runtime dependency on this library
+        r'libsasl2.\d\.dylib',
+        # Whitelisted libraries based on the health check default whitelist that we have on omnibus:
+        # https://github.com/DataDog/omnibus-ruby/blob/044a81fa1b0f1c50fc7083cb45e7d8f90d96905b/lib/omnibus/health_check.rb#L133-L152
+        # We use that instead of the more relaxed policy that delocate_wheel defaults to.
+        r'libobjc\.A\.dylib',
+        r'libSystem\.B\.dylib',
+        # Symlink of the previous one
+        r'libgcc_s\.1\.dylib',
+        r'CoreFoundation',
+        r'CoreServices',
+        r'Tcl$',
+        r'Cocoa$',
+        r'Carbon$',
+        r'IOKit$',
+        r'Kerberos',
+        r'Tk$',
+        r'libutil\.dylib',
+        r'libffi\.dylib',
+        r'libncurses\.5\.4\.dylib',
+        r'libiconv',
+        r'libstdc\+\+\.6\.dylib',
+        r'libc\+\+\.1\.dylib',
+        r'^/System/Library/',
+        r'libz\.1\.dylib',
+    ]]
+
+    def copy_filt_func(libname):
+        return not any(excl.search(libname) for excl in exclusions)
+
+    for wheel in iter_wheels(source_dir):
+        print(f'--> {wheel.name}')
+        if not wheel_was_built(wheel):
+            print('Using existing wheel')
+            shutil.move(wheel, external_dir)
+            continue
+
+        copied_libs = delocate_wheel(
+            str(wheel),
+            os.path.join(built_dir, os.path.basename(wheel)),
+            copy_filt_func=copy_filt_func,
+        )
+        print('Repaired wheel')
+        if copied_libs:
+            print('Libraries copied into the wheel:')
+            print('\n'.join(copied_libs))
+        else:
+            print('No libraries were copied into the wheel.')
+
+
 REPAIR_FUNCTIONS = {
     'linux': repair_linux,
     'win32': repair_windows,
+    'darwin': repair_darwin,
 }
 
 

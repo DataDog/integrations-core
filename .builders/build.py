@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import subprocess
 import sys
@@ -65,7 +66,84 @@ def read_dependencies() -> dict[str, list[str]]:
 
 
 def build_macos():
-    sys.exit('macOS is not supported')
+    parser = argparse.ArgumentParser(prog='builder', allow_abbrev=False)
+    parser.add_argument('output_dir')
+    parser.add_argument('--python', default='3')
+    parser.add_argument('--builder-root', required=True,
+                        help='Path to a folder where things will be installed during builder setup.')
+    parser.add_argument('--skip-setup', default=False, action='store_true',
+                        help='Skip builder setup, assuming it has already been set up.')
+    args = parser.parse_args()
+
+    context_path = HERE / 'images' / 'macos'
+    builder_root = Path(args.builder_root).absolute()
+    builder_root.mkdir(exist_ok=True)
+
+    with temporary_directory() as temp_dir:
+        mount_dir = temp_dir / 'mnt'
+        mount_dir.mkdir()
+
+        build_context_dir = shutil.copytree(context_path, mount_dir / 'build_context', dirs_exist_ok=True)
+        # Copy utilities shared by multiple images
+        for entry in context_path.parent.iterdir():
+            if entry.is_file():
+                shutil.copy2(entry, build_context_dir)
+
+        # Folders required by the build_wheels script
+        wheels_dir = mount_dir / 'wheels'
+        wheels_dir.mkdir()
+        built_wheels_dir = wheels_dir / 'built'
+        built_wheels_dir.mkdir()
+        external_wheels_dir = wheels_dir / 'external'
+        external_wheels_dir.mkdir()
+
+        dependency_file = mount_dir / 'requirements.in'
+        dependency_file.write_text('\n'.join(chain.from_iterable(read_dependencies().values())))
+        shutil.copy(HERE / 'deps' / 'build_dependencies.txt', mount_dir)
+        shutil.copytree(HERE / 'scripts', mount_dir / 'scripts')
+        shutil.copytree(HERE / 'patches', mount_dir / 'patches')
+
+        prefix_path = builder_root / 'prefix'
+        env = {
+            **os.environ,
+            'DD_MOUNT_DIR': mount_dir,
+            'DD_ENV_FILE': mount_dir / '.env',
+            # Paths to pythons
+            'DD_PY3_BUILDENV_PATH': builder_root / 'py3' / 'bin' / 'python',
+            'DD_PY2_BUILDENV_PATH': builder_root / 'py2' / 'bin' / 'python',
+            # Path where we'll install libraries that we build
+            'DD_PREFIX_PATH': prefix_path,
+            # Common compilation flags
+            'LDFLAGS': f'-L{prefix_path}/lib',
+            'CFLAGS': f'-I{prefix_path}/include -O2',
+            # Build command for extra platform-specific build steps
+            'DD_BUILD_COMMAND': f'bash {build_context_dir}/extra_build.sh'
+        }
+
+        if not args.skip_setup:
+            check_process(
+                ['bash', str(HERE / 'images' / 'macos' / 'builder_setup.sh')],
+                env=env,
+                cwd=builder_root,
+            )
+
+        check_process(
+            [os.environ['DD_PYTHON3'], str(mount_dir / 'scripts' / 'build_wheels.py'), '--python', args.python],
+            env=env,
+            cwd=builder_root,
+        )
+
+        output_dir = Path(args.output_dir)
+        if output_dir.is_dir():
+            shutil.rmtree(output_dir)
+
+        # Move wheels to the output directory
+        wheels_dir = mount_dir / 'wheels'
+        shutil.move(wheels_dir, output_dir / 'wheels')
+
+        # Move the final requirements file to the output directory
+        final_requirements = mount_dir / 'frozen.txt'
+        shutil.move(final_requirements, output_dir)
 
 
 def build_image():
