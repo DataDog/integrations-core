@@ -107,6 +107,7 @@ def build_macos():
         env = {
             **os.environ,
             'DD_MOUNT_DIR': mount_dir,
+            'DD_ENV_FILE': mount_dir / '.env',
             # Paths to pythons
             'DD_PY3_BUILDENV_PATH': builder_root / 'py3' / 'bin' / 'python',
             'DD_PY2_BUILDENV_PATH': builder_root / 'py2' / 'bin' / 'python',
