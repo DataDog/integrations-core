@@ -4,6 +4,12 @@ sysobjectid:
 extends:
   - avtech.yaml
 
+metadata:
+  device:
+    fields:
+      type:
+        value: "sensor"
+
 metrics:
   - MIB: ROOMALERT3E-MIB
     symbol:
