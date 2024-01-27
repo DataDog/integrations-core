@@ -5,6 +5,7 @@ on:
     branches:
     - master
     paths:
+    - .github/workflows/build-deps.yml
     - .builders/**
     - datadog_checks_dev/datadog_checks/base/data/agent_requirements.in
   push:
@@ -44,8 +45,14 @@ jobs:
       packages: write
 
     steps:
-    # Ensure that changed files are determined before checking out the code so that we use
-    # the GitHub API, otherwise we would have to fetch the entire history (depth: 0)
+    - name: Checkout code
+      if: github.event_name != 'pull_request'
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
+
+    # On pull requests, ensure that changed files are determined before checking out the code so
+    # that we use the GitHub API, otherwise we would have to fetch the entire history (depth: 0)
     - name: Get changed files
       id: changed-files
       uses: tj-actions/changed-files@v42
@@ -57,6 +64,7 @@ jobs:
           - datadog_checks_dev/datadog_checks/base/data/agent_requirements.in
 
     - name: Checkout code
+      if: github.event_name == 'pull_request'
       uses: actions/checkout@v4
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
@@ -66,6 +74,13 @@ jobs:
 
     - name: Install management dependencies
       run: pip install -r .builders/deps/host_dependencies.txt
+
+    - name: Log in to GitHub Packages
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build image and wheels
       if: steps.changed-files.outputs.builders_any_changed == 'true'
@@ -86,14 +101,6 @@ jobs:
 
         echo "--------------------------------------------------"
         cat output/frozen.txt
-
-    - name: Log in to GitHub Packages
-      if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
-      uses: docker/login-action@v3
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Publish image
       if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
@@ -133,7 +140,7 @@ jobs:
           MACOSX_DEPLOYMENT_TARGET: "10.12"
         run: |
           ${DD_PYTHON3} -m pip install -r .builders/deps/host_dependencies.txt
-     
+
           mkdir builder_root
           ${DD_PYTHON3} .builders/build.py --builder-root builder_root --python 3 out_py3
           ${DD_PYTHON3} .builders/build.py --builder-root builder_root --skip-setup --python 2 out_py2
