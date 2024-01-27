@@ -12,6 +12,7 @@ from dotenv import dotenv_values
 from utils import extract_metadata, normalize_project_name
 
 
+
 if sys.platform == 'win32':
     PY3_PATH = Path('C:\\py3\\Scripts\\python.exe')
     PY2_PATH = Path('C:\\py2\\Scripts\\python.exe')
