@@ -1,4 +1,4 @@
-hatchling==1.21.0; python_version > '3.0'
+hatchling==1.21.1; python_version > '3.0'
 hatchling==0.25.1; python_version < '3.0'
 setuptools==66.1.1; python_version > '3.0'
 setuptools==40.9.0; python_version < '3.0'

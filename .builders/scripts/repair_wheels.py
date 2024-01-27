@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 import sys
+import time
 from functools import cache
 from hashlib import sha256
 from pathlib import Path
@@ -16,10 +17,17 @@ from utils import extract_metadata, normalize_project_name
 
 @cache
 def get_wheel_hashes(project) -> dict[str, str]:
-    response = urllib3.request('GET', f'https://pypi.org/simple/{project}')
-    if response.status != 200:
+    retry_wait = 2
+    while True:
+        response = urllib3.request('GET', f'https://pypi.org/simple/{project}')
+        if response.status == 200:
+            break
+
+        retry_wait *= 2
         print(f'Failed to fetch hashes for `{project}`, status code: {response.status}')
-        sys.exit(1)
+        print(f'Retrying in {retry_wait} seconds')
+        time.sleep(retry_wait)
+        continue
 
     html = response.data.decode('utf-8')
     hashes: dict[str, str] = {}
