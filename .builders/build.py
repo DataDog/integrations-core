@@ -37,6 +37,9 @@ def check_process(*args, **kwargs) -> subprocess.CompletedProcess:
     print(f'Running: {join_command_args(args[0])}', file=sys.stderr)
     process = subprocess.run(*args, **kwargs)
     if process.returncode:
+        if kwargs.get('capture_output', False):
+            print(process.stderr.decode('utf-8'), file=sys.stderr)
+
         sys.exit(process.returncode)
 
     return process
@@ -134,6 +137,7 @@ def build_macos():
         )
 
         output_dir = Path(args.output_dir)
+        output_dir.parent.mkdir(parents=True, exist_ok=True)
         if output_dir.is_dir():
             shutil.rmtree(output_dir)
 
@@ -157,7 +161,7 @@ def build_image():
     parser.add_argument('-v', '--verbose', action='store_true')
     args = parser.parse_args()
 
-    image = args.image
+    image: str = args.image
     image_path = HERE / 'images' / image
     if not image_path.is_dir():
         abort(f'Image does not exist: {image_path}')
@@ -219,6 +223,7 @@ def build_image():
             ])
 
             output_dir = Path(args.output_dir)
+            output_dir.parent.mkdir(parents=True, exist_ok=True)
             if output_dir.is_dir():
                 shutil.rmtree(output_dir)
 
