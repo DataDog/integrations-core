@@ -7,13 +7,13 @@ on:
     paths:
     - .github/workflows/build-deps.yml
     - .builders/**
-    - datadog_checks_dev/datadog_checks/base/data/agent_requirements.in
+    - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
   push:
     branches:
     - master
     paths:
     - .builders/**
-    - datadog_checks_dev/datadog_checks/base/data/agent_requirements.in
+    - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.head_ref }}
@@ -25,6 +25,7 @@ defaults:
 
 env:
   PYTHON_VERSION: "3.11"
+  DIRECT_DEPENDENCY_FILE: "datadog_checks_base/datadog_checks/base/data/agent_requirements.in"
 
 jobs:
   build:
@@ -44,6 +45,9 @@ jobs:
     permissions:
       packages: write
 
+    env:
+      OUT_DIR: output/${{ matrix.job.image }}
+
     steps:
     - name: Checkout code
       if: github.event_name != 'pull_request'
@@ -61,7 +65,7 @@ jobs:
           builders:
           - .builders/**
           dependencies:
-          - datadog_checks_dev/datadog_checks/base/data/agent_requirements.in
+          - ${{ env.DIRECT_DEPENDENCY_FILE }}
 
     - name: Checkout code
       if: github.event_name == 'pull_request'
@@ -84,29 +88,27 @@ jobs:
 
     - name: Build image and wheels
       if: steps.changed-files.outputs.builders_any_changed == 'true'
-      run: python .builders/build.py ${{ matrix.job.image }} output
+      run: |-
+        python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3
+        python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2
 
     - name: Pull image and build wheels
       if: steps.changed-files.outputs.builders_any_changed != 'true'
-      run: python .builders/build.py ${{ matrix.job.image }} output --digest ${{ matrix.job.digest }}
-
-    - name: List wheels
       run: |-
-        echo "Built:"
-        pushd output/wheels/built
-        for wheel in *.whl; do
-          echo "  $wheel"
-        done
-        popd
+        python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest ${{ matrix.job.digest }}
+        python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2 --digest ${{ matrix.job.digest }}
 
-        echo "--------------------------------------------------"
-        cat output/frozen.txt
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: target-${{ matrix.job.image }}
+        path: output
 
     - name: Publish image
       if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
       run: docker push ghcr.io/datadog/agent-int-builder:${{ matrix.job.image }}
 
-  build-deps-macos:
+  build-macos:
     name: Target macOS
     runs-on: macos-12
     steps:
@@ -144,3 +146,83 @@ jobs:
           mkdir builder_root
           ${DD_PYTHON3} .builders/build.py --builder-root builder_root --python 3 out_py3
           ${DD_PYTHON3} .builders/build.py --builder-root builder_root --skip-setup --python 2 out_py2
+
+  publish:
+    name: Publish artifacts
+    # if: github.event_name == 'push'
+    needs:
+    - build
+    - build-macos
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        ref: "${{ github.head_ref }}"
+
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Get credentials
+      uses: google-github-actions/auth@v2
+      with:
+        project_id: datadog-agent-int-build
+        workload_identity_provider: projects/574011472402/locations/global/workloadIdentityPools/github/providers/integrations-core
+
+    - name: Install management dependencies
+      run: pip install -r .builders/deps/host_dependencies.txt
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: targets
+        pattern: target-*
+        merge-multiple: true
+
+    - name: Upload dependencies and update lock files
+      run: |-
+        mkdir -p .deps/resolved
+        rm -rf .deps/resolved/*
+
+        cd targets
+        for target in *; do
+          cd $target
+
+          for pyver in *; do
+            python ${{ github.workspace }}/.builders/upload.py $pyver/wheels
+          done
+          mv $pyver/frozen.txt ${{ github.workspace }}/.deps/resolved/${target}_${pyver}.txt
+
+          cd ..
+        done
+        cd ..
+        rm -rf targets
+
+        hash=$(openssl dgst -sha256 "${{ env.DIRECT_DEPENDENCY_FILE }}" | awk '{ print $2 }')
+        echo "{\"sha256\": \"$hash\"}" > ".deps/metadata.json"
+
+    - name: Create pull request
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.DD_CHANGELOG_CHECK_TOKEN }}
+        title: Update dependency resolution
+        commit-message: Update dependency resolution
+        branch: bot/update-dependency-resolution
+        branch-suffix: timestamp
+        delete-branch: true
+        labels: bot,qa/skip-qa
+        body: |-
+          ### Motivation
+
+          Direct dependencies were updated in ${{ github.sha }}.
+
+          ### Additional Notes
+
+          This PR was automatically generated.

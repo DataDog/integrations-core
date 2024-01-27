@@ -134,6 +134,7 @@ def build_macos():
         )
 
         output_dir = Path(args.output_dir)
+        output_dir.parent.mkdir(parents=True, exist_ok=True)
         if output_dir.is_dir():
             shutil.rmtree(output_dir)
 
@@ -219,6 +220,7 @@ def build_image():
             ])
 
             output_dir = Path(args.output_dir)
+            output_dir.parent.mkdir(parents=True, exist_ok=True)
             if output_dir.is_dir():
                 shutil.rmtree(output_dir)
 
