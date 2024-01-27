@@ -2164,7 +2164,7 @@ jobs:
       job-name: MySQL
       target: mysql
       platform: linux
-      runner: '["ubuntu-20.04"]'
+      runner: '["ubuntu-agent-4core"]'
       repo: "${{ inputs.repo }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
@@ -2173,8 +2173,8 @@ jobs:
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
+      test-py2: false
+      test-py3: true
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
   j5df646e:
@@ -2905,7 +2905,7 @@ jobs:
       job-name: SQL Server on Windows
       target: sqlserver
       platform: windows
-      runner: '["windows-2019"]'
+      runner: '["windows-agent-8core"]'
       repo: "${{ inputs.repo }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
@@ -2914,8 +2914,8 @@ jobs:
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
+      test-py2: false
+      test-py3: true
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
   j3a8e004:
@@ -2933,8 +2933,8 @@ jobs:
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
+      test-py2: false
+      test-py3: true
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
   jaf4b616:
