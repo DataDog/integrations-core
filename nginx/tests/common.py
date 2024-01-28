@@ -83,6 +83,7 @@ ALL_PLUS_METRICS = (
 
 VTS_MOCKED_METRICS = {
     "nginx.timestamp",
+    "nginx.upstream.peers.response_time",
 }
 
 
