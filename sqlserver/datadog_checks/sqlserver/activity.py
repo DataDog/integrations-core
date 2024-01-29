@@ -293,7 +293,7 @@ class SqlserverActivity(DBMAsyncJob):
                     # if we fail to obfuscate the procedure text,
                     # we should not mark query statement as failed to obfuscate
                     if self._config.log_unobfuscated_queries:
-                        self.log.warning("Failed to obfuscate stored procedure=[%s] | err=[%s]", row['text'], e)
+                        self.log.warning("Failed to obfuscate stored procedure=[%s] | err=[%s]", repr(row['text']), e)
                     else:
                         self.log.debug("Failed to obfuscate stored procedure | err=[%s]", e)
             obfuscated_statement = statement['query']
@@ -306,7 +306,7 @@ class SqlserverActivity(DBMAsyncJob):
                 row['procedure_name'] = procedure_name
         except Exception as e:
             if self._config.log_unobfuscated_queries:
-                self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['statement_text'], e)
+                self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", repr(row['statement_text']), e)
             else:
                 self.log.debug("Failed to obfuscate query | err=[%s]", e)
             obfuscated_statement = "ERROR: failed to obfuscate"

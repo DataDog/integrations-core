@@ -192,6 +192,13 @@ def default_json_event_encoding(o):
     raise TypeError
 
 
+def sanitize_query_text(query):
+    if not query:
+        return query
+    # replace embedded null characters that can cause error
+    # with agent ValueError: embedded null characters
+    return query.replace('\x00', '')
+
 def obfuscate_sql_with_metadata(query, options=None):
     if not query:
         return {'query': '', 'metadata': {}}

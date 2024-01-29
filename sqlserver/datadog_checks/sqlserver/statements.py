@@ -320,7 +320,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             except Exception as e:
                 if self._config.log_unobfuscated_queries:
                     raw_query_text = row['text'] if row.get('is_proc', False) else row['statement_text']
-                    self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", raw_query_text, e)
+                    self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", repr(raw_query_text), e)
                 else:
                     self.log.debug("Failed to obfuscate query | err=[%s]", e)
                 self._check.count(
