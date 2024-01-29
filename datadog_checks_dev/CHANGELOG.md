@@ -2,6 +2,21 @@
 
 <!-- towncrier release notes start -->
 
+## 30.0.0 / 2024-01-29
+
+***Changed***:
+
+* Remove legacy tox plugin ([#16696](https://github.com/DataDog/integrations-core/pull/16696))
+
+***Added***:
+
+* Bump towncrier version to support releasing with empty changelogs ([#16676](https://github.com/DataDog/integrations-core/pull/16676))
+* Different changelog template depending on release process. Marketplace and Extras changelogs are static, integrations-core changelogs have towncrier header. ([#16693](https://github.com/DataDog/integrations-core/pull/16693))
+
+***Fixed***:
+
+* Pin black ([#16712](https://github.com/DataDog/integrations-core/pull/16712))
+
 ## 29.2.0 / 2024-01-22
 
 ***Added***:
