@@ -1,31 +1,32 @@
 id: druid
 metric_id: druid
+backend_only: false
 facets:
-  - name: Logger Name
-    source: log
-    path: logger.name
+  - facetType: range
     groups:
-      - Source Code
-  - name: Thread Name
-    source: log
-    path: logger.thread_name
-    groups:
-      - Source Code
-  - name: Error Type
-    source: log
-    path: error.kind
-    groups:
-      - Source Code
-  - name: Duration
-    source: log
+      - Measure
+    name: Duration
     path: duration
+    source: log
     type: double
-    facetType: range
     unit:
       family: time
       name: nanosecond
-    groups:
-      - Measure
+  - groups:
+      - Source Code
+    name: Error Type
+    path: error.kind
+    source: log
+  - groups:
+      - Source Code
+    name: Logger Name
+    path: logger.name
+    source: log
+  - groups:
+      - Source Code
+    name: Thread Name
+    path: logger.thread_name
+    source: log
 pipeline:
   type: pipeline
   name: Druid

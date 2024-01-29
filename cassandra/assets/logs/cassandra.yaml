@@ -1,46 +1,47 @@
 id: cassandra
 metric_id: cassandra
+backend_only: false
 facets:
-  - name: Operation Type
-    source: log
-    path: db.operation
-    groups:
+  - groups:
       - Database
-  - name: Duration
+    name: Operation Type
+    path: db.operation
     source: log
+  - facetType: range
+    groups:
+      - Measure
+    name: Duration
     path: duration
+    source: log
     type: double
-    facetType: range
     unit:
       family: time
       name: nanosecond
-    groups:
-      - Measure
-  - name: Logger Name
-    source: log
+  - groups:
+      - Source Code
+    name: Logger Name
     path: logger.name
-    groups:
-      - Source Code
-  - name: Thread Name
     source: log
+  - groups:
+      - Source Code
+    name: Thread Name
     path: logger.thread_name
-    groups:
-      - Source Code
-  - name: SStable
     source: log
+  - groups:
+      - Cassandra
+    name: SStable
     path: cassandra.sstable
-    groups:
-      - Cassandra
-  - name: Keyspace
     source: log
+  - groups:
+      - Cassandra
+    name: Keyspace
     path: cassandra.keyspace
-    groups:
-      - Cassandra
-  - name: Table
     source: log
-    path: db.table
-    groups:
+  - groups:
       - Database
+    name: Table
+    path: db.table
+    source: log
 pipeline:
   type: pipeline
   name: Cassandra

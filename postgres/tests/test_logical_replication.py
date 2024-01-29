@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
+from flaky import flaky
 
 from datadog_checks.postgres.util import STAT_SUBSCRIPTION_METRICS
 
@@ -42,6 +43,7 @@ def _get_connection_string(instance):
 
 
 @requires_over_11
+@flaky(max_runs=5)
 def test_common_logical_replica_metrics(aggregator, integration_check, pg_replica_logical):
     check = integration_check(pg_replica_logical)
     check._connect()

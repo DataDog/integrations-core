@@ -12,6 +12,8 @@ metadata:
     fields:
       vendor:
         value: "extreme-networks"
+      type:
+        value: "switch"
 
 metrics:
   - MIB: EXTREME-SOFTWARE-MONITOR-MIB

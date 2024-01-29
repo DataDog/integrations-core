@@ -65,6 +65,7 @@ def test_e2e_profile_juniper(dd_agent_check):
             "snmp_profile:juniper",
         ],
         "vendor": "juniper-networks",
+        "device_type": "other",
     }
     assert_device_metadata(aggregator, device)
 
@@ -110,6 +111,7 @@ def test_e2e_profile_juniper_variation(dd_agent_check):
             "snmp_profile:juniper",
         ],
         "vendor": "juniper-networks",
+        "device_type": "other",
     }
     assert_device_metadata(aggregator, device)
 

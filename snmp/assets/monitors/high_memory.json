@@ -1,0 +1,31 @@
+{
+	"version": 2,
+	"created_at": "2023-12-26",
+	"last_updated_at": "2023-12-26",
+	"title": "SNMP device memory usage is high",
+	"description": "Memory usage measures amount of RAM the device's processes and data consume. This monitor alerts if the memory usage goes above 90% to warn that the device is running out of memory which can lead to performance degradation.",
+	"definition": {
+		"name": "[SNMP] High memory usage for device {{snmp_device.name}} in namespace {{device_namespace.name}}",
+		"type": "query alert",
+		"query": "avg(last_5m):avg:snmp.memory.usage{*} by {device_namespace,snmp_device} >= 90",
+		"message": "{{#is_alert}} \n{{snmp_device.name}} in namespace {{device_namespace.name}} is reporting high memory usage.\n{{/is_alert}} \n\n{{#is_warning}}\n{{snmp_device.name}} in namespace {{device_namespace.name}} is reporting higher memory usage (at or above 80%).\n{{/is_warning}} \n\n{{#is_recovery}} \nMemory usage for {{snmp_device.name}} in namespace {{device_namespace.name}} is back to normal.\n{{/is_recovery}}",
+		"tags": [
+            "integration:snmp"
+        ],
+		"options": {
+			"thresholds": {
+				"critical": 90,
+				"warning": 80
+			},
+			"notify_audit": false,
+			"notify_no_data": true,
+			"no_data_timeframe": 15,
+			"renotify_interval": 0,
+			"include_tags": true,
+			"new_group_delay": 60
+		}
+	},
+	"tags": [
+		"integration:snmp"
+	]
+}

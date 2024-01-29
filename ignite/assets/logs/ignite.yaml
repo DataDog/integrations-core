@@ -1,16 +1,17 @@
 id: ignite
 metric_id: ignite
+backend_only: false
 facets:
-  - name: Logger Name
-    source: log
+  - groups:
+      - Source Code
+    name: Logger Name
     path: logger.name
-    groups:
-      - Source Code
-  - name: Thread Name
     source: log
-    path: logger.thread_name
-    groups:
+  - groups:
       - Source Code
+    name: Thread Name
+    path: logger.thread_name
+    source: log
 pipeline:
   type: pipeline
   name: Ignite

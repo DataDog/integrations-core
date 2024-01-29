@@ -21,6 +21,12 @@ extends:
 device:
   vendor: "juniper-networks"
 
+metadata:
+  device:
+    fields:
+      type:
+        value: "firewall"
+
 # Juniper Products are declared in JUNIPER-CHASSIS-DEFINES-MIB.
 # Products are defined under 1.3.6.1.4.1.2636.1.1.1.2 (jnxProductName).
 # Variations are defined under 1.3.6.1.4.1.2636.1.1.1.4 (jnxProductVariation).
@@ -72,5 +78,3 @@ sysobjectid:
   - 1.3.6.1.4.1.2636.1.1.1.4.143.*  # SRX4200 variations
   - 1.3.6.1.4.1.2636.1.1.1.2.164    # SRX380
   - 1.3.6.1.4.1.2636.1.1.1.4.164.*  # SRX380 variations
-
-

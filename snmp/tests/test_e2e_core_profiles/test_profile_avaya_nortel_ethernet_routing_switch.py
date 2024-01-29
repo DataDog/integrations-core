@@ -65,6 +65,7 @@ def test_e2e_profile_avaya_nortel_ethernet_routing_switch(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.45.3.71.10',
         'vendor': 'avaya',
+        'device_type': 'switch',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

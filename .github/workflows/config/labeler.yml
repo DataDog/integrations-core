@@ -161,6 +161,8 @@ integration/flink:
 - flink/**/*
 integration/fluentd:
 - fluentd/**/*
+integration/fluxcd:
+- fluxcd/**/*
 integration/foundationdb:
 - foundationdb/**/*
 integration/gearmand:
@@ -480,5 +482,4 @@ integration/yarn:
 integration/zk:
 - zk/**/*
 release:
-- requirements-agent-release.txt
 - '*/__about__.py'

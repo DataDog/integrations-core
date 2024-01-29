@@ -179,6 +179,7 @@ def test_e2e_profile_hp_ilo(dd_agent_check):
         ],
         'vendor': 'hp',
         'serial_number': 'dXPEdPBE5yKtjW9xx3',
+        'device_type': 'server',
     }
     assert_device_metadata(aggregator, device)
 
