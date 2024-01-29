@@ -182,7 +182,7 @@ def test_obfuscate_sql_with_metadata(obfuscator_return_value, expected_value):
             "SELECT * FROM randomtable where name = '123\x00'",
             False,
         ),
-    ]
+    ],
 )
 def test_obfuscate_sql_with_metadata_replace_null_character(input_query, expected_query, replace_null_character):
     def _mock_obfuscate_sql(query, options=None):

@@ -959,9 +959,7 @@ def test_statement_stored_procedure_characters_limit(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_statement_with_embedded_characters(
-    aggregator, datadog_agent, dd_run_check, dbm_instance, bob_conn
-):
+def test_statement_with_embedded_characters(aggregator, datadog_agent, dd_run_check, dbm_instance, bob_conn):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     query = "EXEC nullCharTest;"
 

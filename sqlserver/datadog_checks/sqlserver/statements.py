@@ -311,11 +311,15 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             try:
                 # Attempt to obfuscate SQL statement with metadata
                 procedure_statement = None
-                statement = obfuscate_sql_with_metadata(row['statement_text'], self._config.obfuscator_options, replace_null_character=True)
+                statement = obfuscate_sql_with_metadata(
+                    row['statement_text'], self._config.obfuscator_options, replace_null_character=True
+                )
                 comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
 
                 if row['is_proc']:
-                    procedure_statement = obfuscate_sql_with_metadata(row['text'], self._config.obfuscator_options, replace_null_character=True)
+                    procedure_statement = obfuscate_sql_with_metadata(
+                        row['text'], self._config.obfuscator_options, replace_null_character=True
+                    )
 
             except Exception as e:
                 if self._config.log_unobfuscated_queries:

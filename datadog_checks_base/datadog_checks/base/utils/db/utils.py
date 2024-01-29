@@ -195,7 +195,7 @@ def default_json_event_encoding(o):
 def obfuscate_sql_with_metadata(query, options=None, replace_null_character=False):
     if not query:
         return {'query': '', 'metadata': {}}
-    
+
     if replace_null_character:
         # replace embedded null characters \x00 before obfuscating
         # WHY NOT ALWAYS REPLACE?
@@ -222,6 +222,7 @@ def obfuscate_sql_with_metadata(query, options=None, replace_null_character=Fals
     tables = [table.strip() for table in tables.split(',') if table != ''] if tables else None
     statement_with_metadata['metadata']['tables'] = tables
     return statement_with_metadata
+
 
 class DBMAsyncJob(object):
     # Set an arbitrary high limit so that dbm async jobs (which aren't CPU bound) don't

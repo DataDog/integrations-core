@@ -280,12 +280,16 @@ class SqlserverActivity(DBMAsyncJob):
         if 'statement_text' not in row:
             return self._sanitize_row(row)
         try:
-            statement = obfuscate_sql_with_metadata(row['statement_text'], self._config.obfuscator_options, replace_null_character=True)
+            statement = obfuscate_sql_with_metadata(
+                row['statement_text'], self._config.obfuscator_options, replace_null_character=True
+            )
             # sqlserver doesn't have a boolean data type so convert integer to boolean
             comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
             if row['is_proc'] and 'text' in row:
                 try:
-                    procedure_statement = obfuscate_sql_with_metadata(row['text'], self._config.obfuscator_options, replace_null_character=True)
+                    procedure_statement = obfuscate_sql_with_metadata(
+                        row['text'], self._config.obfuscator_options, replace_null_character=True
+                    )
                     # procedure_signature is used to link this activity event with
                     # its related plan events
                     row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
