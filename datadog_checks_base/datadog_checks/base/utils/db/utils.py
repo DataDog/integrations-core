@@ -192,9 +192,16 @@ def default_json_event_encoding(o):
     raise TypeError
 
 
-def obfuscate_sql_with_metadata(query, options=None):
+def obfuscate_sql_with_metadata(query, options=None, replace_null_character=False):
     if not query:
         return {'query': '', 'metadata': {}}
+    
+    if replace_null_character:
+        # replace embedded null characters \x00 before obfuscating
+        # WHY NOT ALWAYS REPLACE?
+        # To avoid one extra string traversal and copy.
+        # DBMS like postgresql does not allow null characters in text fields
+        query = query.replace('\x00', '')
 
     statement = datadog_agent.obfuscate_sql(query, options)
     # The `obfuscate_sql` testing stub returns bytes, so we have to handle that here.
@@ -215,7 +222,6 @@ def obfuscate_sql_with_metadata(query, options=None):
     tables = [table.strip() for table in tables.split(',') if table != ''] if tables else None
     statement_with_metadata['metadata']['tables'] = tables
     return statement_with_metadata
-
 
 class DBMAsyncJob(object):
     # Set an arbitrary high limit so that dbm async jobs (which aren't CPU bound) don't
