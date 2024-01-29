@@ -28,7 +28,7 @@
   "oauth": {},
   "assets": {
     "integration": {
-      "auto_install": false,
+      "auto_install": true,
       "source_type_id": 73,
       "source_type_name": "Docker",
       "process_signatures": [
