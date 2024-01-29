@@ -116,11 +116,11 @@ GO
 CREATE PROCEDURE nullCharTest
 AS
 BEGIN
- SET NOCOUNT ON
- SELECT 'Test\0Test\0' as Test;
-END
+ SELECT * FROM ϑings WHERE name = 'foo\x00';
+END;
 GO
 GRANT EXECUTE on nullCharTest to bob;
+GRANT EXECUTE on nullCharTest to fred;
 GO
 
 -- Create test database for integration tests.

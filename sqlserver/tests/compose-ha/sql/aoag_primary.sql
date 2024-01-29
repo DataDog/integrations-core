@@ -90,7 +90,7 @@ GO
 CREATE PROCEDURE nullCharTest
 AS
 BEGIN
- SELECT * FROM ϑings WHERE name = 'foo\0';
+ SELECT * FROM ϑings WHERE name = 'foo\x00';
 END;
 GO
 GRANT EXECUTE on nullCharTest to bob;
