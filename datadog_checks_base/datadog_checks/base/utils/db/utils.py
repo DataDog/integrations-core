@@ -192,18 +192,18 @@ def default_json_event_encoding(o):
     raise TypeError
 
 
-def sanitize_query_text(query):
-    if not query:
-        return query
-    # replace embedded null characters that can cause error
-    # with agent ValueError: embedded null characters
-    return query.replace('\x00', '')
-
-def obfuscate_sql_with_metadata(query, options=None):
+def obfuscate_sql_with_metadata(query, options=None, replace_null_character=False):
     if not query:
         return {'query': '', 'metadata': {}}
+    
+    if replace_null_character:
+        # replace embedded null characters \x00 before obfuscating
+        # WHY NOT ALWAYS REPLACE?
+        # To avoid one extra string traversal and copy.
+        # DBMS like postgresql does not allow null characters in text fields
+        query = query.replace('\x00', '')
 
-    statement = datadog_agent.obfuscate_sql(sanitize_query_text(query), options)
+    statement = datadog_agent.obfuscate_sql(query, options)
     # The `obfuscate_sql` testing stub returns bytes, so we have to handle that here.
     # The actual `obfuscate_sql` method in the agent's Go code returns a JSON string.
     statement = to_native_string(statement.strip())
