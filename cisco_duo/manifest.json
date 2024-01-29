@@ -18,6 +18,7 @@
   "assets": {
     "integration": {
       "auto_install": false,
+      "source_type_id": 6576439,
       "source_type_name": "cisco-duo",
       "events": {
         "creates_events": false
