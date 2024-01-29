@@ -112,6 +112,17 @@ GRANT EXECUTE on procedureWithLargeCommment to bob;
 GRANT EXECUTE on procedureWithLargeCommment to fred;
 GO
 
+-- test procedure with embedded null characters
+CREATE PROCEDURE nullCharTest
+AS
+BEGIN
+ SET NOCOUNT ON
+ SELECT 'Test\0Test\0' as Test;
+END
+GO
+GRANT EXECUTE on nullCharTest to bob;
+GO
+
 -- Create test database for integration tests.
 -- Only bob and fred have read/write access to this database.
 CREATE DATABASE datadog_test;
