@@ -34,6 +34,7 @@ def stop_orphaned_threads():
 
 
 def test_collect_metadata(integration_check, dbm_instance, aggregator):
+    dbm_instance["collect_settings"]['ignored_settings_patterns'] = ['max_wal%']
     check = integration_check(dbm_instance)
     check.check(dbm_instance)
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
@@ -43,6 +44,7 @@ def test_collect_metadata(integration_check, dbm_instance, aggregator):
     assert event['dbms'] == "postgres"
     assert event['kind'] == "pg_settings"
     assert len(event["metadata"]) > 0
+    assert all(not k['name'].startswith('max_wal') for k in event['metadata'])
 
 
 def test_collect_schemas(integration_check, dbm_instance, aggregator):

@@ -1,31 +1,27 @@
 id: yarn
 metric_id: yarn
+backend_only: false
 facets:
-  - name: Logger Name
-    source: log
-    path: logger.name
-    groups:
+  - groups:
       - Source Code
-
-  - name: MapReduce ApplicationID
+    name: Logger Name
+    path: logger.name
     source: log
+  - groups:
+      - MapReduce
+    name: MapReduce ApplicationID
     path: mapreduce.application.app_id
-    groups:
-      - MapReduce
-
-  - name: MapReduce Application State
     source: log
+  - groups:
+      - MapReduce
+    name: MapReduce Application State
     path: mapreduce.application.state
-    groups:
-      - MapReduce
-
-  - name: MapReduce ApplicationAttemptID
     source: log
-    path: mapreduce.attempt.attempt_id
-    groups:
+  - groups:
       - MapReduce
-
-
+    name: MapReduce ApplicationAttemptID
+    path: mapreduce.attempt.attempt_id
+    source: log
 pipeline:
   type: pipeline
   name: YARN
@@ -68,8 +64,8 @@ pipeline:
         matchRules: |
           app_ids %{data}(%{_app_id}|%{_attempt_id})%{data}
       samples:
-        - 'application_1595271076848_0001 State change from KILLING to FINAL_SAVING'
-        - 'appattempt_1595271076848_0001_000001 State change from SCHEDULED to FINAL_SAVING'
+        - application_1595271076848_0001 State change from KILLING to FINAL_SAVING
+        - appattempt_1595271076848_0001_000001 State change from SCHEDULED to FINAL_SAVING
     - type: grok-parser
       name: Parse state per activity type
       enabled: true
@@ -86,8 +82,8 @@ pipeline:
           attempt_state_change %{_attempt_id} State change from %{word} to %{_attempt_state}
           final_state %{data} finalState=%{_app_state}
       samples:
-        - 'application_1595271076848_0001 State change from KILLING to FINAL_SAVING'
-        - 'appattempt_1595271076848_0001_000001 State change from SCHEDULED to FINAL_SAVING'
+        - application_1595271076848_0001 State change from KILLING to FINAL_SAVING
+        - appattempt_1595271076848_0001_000001 State change from SCHEDULED to FINAL_SAVING
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
       enabled: true

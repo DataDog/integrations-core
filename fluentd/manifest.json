@@ -47,7 +47,9 @@
         "td-agent",
         "fluentd",
         "ruby td-agent"
-      ]
+      ],
+      "source_type_id": 108,
+      "auto_install": true
     },
     "dashboards": {
       "fluentd": "assets/dashboards/fluentd_dashboard.json"

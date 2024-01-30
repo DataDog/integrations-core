@@ -8,7 +8,7 @@
   ],
   "description": "A Tomcat web server instance receives and handles HTTP requests from clients. This monitor tracks the average request count of each host and identify scenarios where Tomcat instances are experiencing an unusual request rate.",
   "definition": {
-    "message": "There is an anomaly in the amount of requests handled by Tomcat on host: {{host.name}} ",
+    "message": "There is an anomaly in the amount of requests handled by Tomcat on host: {{host.name}}",
     "name": "[Tomcat] Anomalous request rate for host {{host.name}}",
     "options": {
       "escalation_message": "",

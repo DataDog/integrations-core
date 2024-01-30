@@ -1,1 +1,0 @@
-[DBMON-3299] Improve edge case handling on partitioned table activity query  when a partitioned table has no children (partitioned sub-tables)

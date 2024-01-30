@@ -2,6 +2,40 @@
 
 <!-- towncrier release notes start -->
 
+## 36.0.0 / 2024-01-30
+
+***Removed***:
+
+* Drop scandir depedency for Python >= 3.5 ([#16702](https://github.com/DataDog/integrations-core/pull/16702))
+
+***Added***:
+
+* Update pyvmomi to 8.0.2.0.1 ([#16542](https://github.com/DataDog/integrations-core/pull/16542))
+* Bump `psutil` version to 5.9.7 ([#16547](https://github.com/DataDog/integrations-core/pull/16547))
+* Bump `openstacksdk` version to 2.0.0 ([#16549](https://github.com/DataDog/integrations-core/pull/16549))
+* Bump `pymongo` version to 4.6.1 ([#16554](https://github.com/DataDog/integrations-core/pull/16554))
+* Bump `service-identity` version to 23.1.0 ([#16558](https://github.com/DataDog/integrations-core/pull/16558))
+* Bump `pycryptodomex` version to 3.19.1 ([#16560](https://github.com/DataDog/integrations-core/pull/16560))
+* Bump `protobuf` version to 4.25.1 ([#16573](https://github.com/DataDog/integrations-core/pull/16573))
+
+***Fixed***:
+
+* Remove unused dependencies in the Agent file ([#16538](https://github.com/DataDog/integrations-core/pull/16538))
+* [DBMON-3495] Add `replace_null_character` option to replace embedded null characters with empty string in query text ([#16742](https://github.com/DataDog/integrations-core/pull/16742))
+
+## 35.0.0 / 2024-01-05
+
+***Removed***:
+
+* remove pyro4 and serpent dependencies ([#16269](https://github.com/DataDog/integrations-core/pull/16269))
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+* Bump the snowflake version to 3.5.0 ([#16324](https://github.com/DataDog/integrations-core/pull/16324))
+* Update dependencies ([#16394](https://github.com/DataDog/integrations-core/pull/16394)), ([#16448](https://github.com/DataDog/integrations-core/pull/16448)), ([#16502](https://github.com/DataDog/integrations-core/pull/16502))
+* conditionally enable memory profile for DBMAsyncJob ([#16479](https://github.com/DataDog/integrations-core/pull/16479))
+
 ## 34.3.1 / 2023-12-04 / Agent 7.50.0
 
 ***Fixed***:

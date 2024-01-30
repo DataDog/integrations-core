@@ -50,7 +50,9 @@
       },
       "process_signatures": [
         "etcd"
-      ]
+      ],
+      "source_type_id": 111,
+      "auto_install": true
     },
     "dashboards": {
       "Etcd Overview": "assets/dashboards/etcd_overview.json",

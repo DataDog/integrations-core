@@ -1,11 +1,12 @@
 id: memcached
 metric_id: memcached
+backend_only: false
 facets:
-  - name: Direction
-    source: log
-    path: direction_category
-    groups:
+  - groups:
       - Memcached
+    name: Direction
+    path: direction_category
+    source: log
 pipeline:
   type: pipeline
   name: Memcached
