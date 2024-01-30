@@ -96,7 +96,7 @@ def setup_tekton():
 def dd_environment(dd_save_state):
     # https://github.com/tektoncd/dashboard/blob/main/docs/walkthrough/walkthrough-kind.md
     with kind_run(
-        kind_config=os.path.join(HERE, 'kind', "cluster.yaml"), conditions=[setup_tekton], sleep=10
+        kind_config=os.path.join(HERE, 'kind', "cluster.yaml"), conditions=[setup_tekton], sleep=30
     ) as kubeconfig, ExitStack() as stack:
         instances = []
 
