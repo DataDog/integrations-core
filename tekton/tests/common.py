@@ -9,19 +9,19 @@ from datadog_checks.dev.http import MockResponse
 HERE = get_here()
 
 MOCKED_PIPELINES_METRICS = [
-    'pipelines_controller.go_alloc',
+    'go_alloc',
 ]
 
 MOCKED_TRIGGERS_METRICS = [
-    'triggers_controller.clusterinterceptor',
+    'clusterinterceptor',
 ]
 
 PIPELINES_METRICS = [
-    'pipelines_controller.go_alloc',
+    'go_alloc',
 ]
 
 TRIGGERS__METRICS = [
-    'triggers_controller.clusterinterceptor',
+    'clusterinterceptor',
 ]
 
 
