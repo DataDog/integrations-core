@@ -50,9 +50,9 @@ def dd_environment(e2e_instance):
     conditions = [
         CheckDockerLogs(compose_file, expected_log, wait=3),
         lambda: time.sleep(4),
-        WaitFor(create_simple_user, wait=2),
+        WaitFor(create_simple_user),
     ]
-    with docker_run(compose_file, conditions=conditions, attempts=3):
+    with docker_run(compose_file, conditions=conditions, attempts=5):
         yield e2e_instance
 
 
