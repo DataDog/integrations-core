@@ -1,0 +1,921 @@
+id: palo-alto-panorama
+metric_id: palo-alto-panorama
+backend_only: false
+facets:
+  - name: Action (Panorama)
+    source: log
+    path: panorama_action
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: App Risk
+    source: log
+    path: risk_of_app
+    type: integer
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Application Characteristic
+    source: log
+    path: appchar
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Application Container
+    source: log
+    path: appcont
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Application SaaS
+    source: log
+    path: appsaas
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Application Sanctioned State
+    source: log
+    path: appstate
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Application Subcategory
+    source: log
+    path: appsubcat
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Application Technology
+    source: log
+    path: apptech
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: apprisk
+    source: log
+    path: apprisk
+    type: integer
+    facetType: range
+    groups:
+      - Palo Alto Panorama
+  - name: Authentication Policy
+    source: log
+    path: authentication_policy
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Authentication Protocol
+    source: log
+    path: authproto
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Authentication Result
+    source: log
+    path: event
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Client Type
+    source: log
+    path: clienttype
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Destination Device Category
+    source: log
+    path: dcat
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Destination Device Mode
+    source: log
+    path: dmodel
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Destination Device OS Version
+    source: log
+    path: dosver
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Destination Device Profile
+    source: log
+    path: dprofile
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Destination Device Vendor
+    source: log
+    path: dven
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Destination Mac Address
+    source: log
+    path: dmac
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Destination Zone
+    source: log
+    path: dstzone
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Maximum Encapsulation
+    source: log
+    path: max_encap
+    type: double
+    facetType: range
+    groups:
+      - Palo Alto Panorama
+  - name: Normalized Username
+    source: log
+    path: normalize_user
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Packets
+    source: log
+    path: packets
+    type: integer
+    facetType: range
+    groups:
+      - Palo Alto Panorama
+  - name: Packets
+    source: log
+    path: pkt
+    type: integer
+    facetType: range
+    groups:
+      - Palo Alto Panorama
+  - name: Packets Received
+    source: log
+    path: pktrcvd
+    type: integer
+    facetType: range
+    groups:
+      - Palo Alto Panorama
+  - name: Packets Sent
+    source: log
+    path: pktsent
+    type: integer
+    facetType: range
+    groups:
+      - Palo Alto Panorama
+  - name: Session End Reason
+    source: log
+    path: sessionendreason
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Source Device Category
+    source: log
+    path: scat
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Source Device Model
+    source: log
+    path: smodel
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Source Device OS Version
+    source: log
+    path: sosver
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Source Device Profile
+    source: log
+    path: sprofile
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Source Device Vendor
+    source: log
+    path: sven
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Source Zone
+    source: log
+    path: srczone
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+  - name: Strict Checking
+    source: log
+    path: strict_check
+    type: double
+    facetType: range
+    groups:
+      - Palo Alto Panorama
+  - name: Tunnel Fragment
+    source: log
+    path: tunnel_fragment
+    type: integer
+    facetType: range
+    groups:
+      - Palo Alto Panorama
+  - name: Unknown Protocol
+    source: log
+    path: unknown_proto
+    type: integer
+    facetType: range
+    groups:
+      - Palo Alto Panorama
+  - name: Virtual System
+    source: log
+    path: vsys
+    type: string
+    facetType: list
+    groups:
+      - Palo Alto Panorama
+pipeline:
+  type: pipeline
+  name: Palo Alto Panorama
+  enabled: true
+  filter:
+    query: "source:palo-alto-panorama "
+  processors:
+    - type: grok-parser
+      name: Parsing Palo Alto Panorama logs
+      enabled: true
+      meta:
+        last_update:
+          timestamp: 1706599993698
+          user_name: null
+          user_email: mohit.tilala@crestdatasys.com
+        tags: []
+      source: message
+      samples:
+        - <190>Jan 18 12:47:19 PA-VM
+          serial=007051000206484|type=TRAFFIC|subtype=start|time_generated=Jan
+          25 2024 11:02:57
+          GMT|src=10.0.14.254|dst=10.50.1.209|natsrc=10.40.1.104|natdst=10.50.1.209|rule=LAN-WAN|suser=|duser=|app=syslog|vsys=vsys1|from=LAN|to=WAN|inboundif=ethernet1/1|outboundif=ethernet1/2|logset=POC-Dash-DD-204-9099|sessionid=15311|repeatcnt=1|sport=42071|dport=7011|natsport=2209|natdport=7011|flags=0x500000|proto=udp|act=allow|bytes=294|bytes_sent=294|bytes_received=0|pkt=1|start=2024/01/18
+          12:47:15|elapsed=0|cat=any|seq=7288183648727243242|actflag=0x0|sloc=10.0.0.0-10.255.255.255|dloc=10.0.0.0-10.255.255.255|pktsent=1|pktrcvd=0|sessionendreason=n/a|vsysname=|dvc=PA-VM|actsrc=from-policy|suuid=|duuid=|tunnelid=0|monitortag=|parentid=0|parentst=|tunnel=N/A|associd=0|chunk=0|chunksent=0|chunkrcvd=0|ruleuuid=9d526565-ba09-4e35-9c2e-6f54430132ec|http2conn=0|appflap=0|policyid=|link=|dynusrgrp=|xffip=|scat=|sprofile=|smodel=|sven=|sosfam=|sosver=|shost=|smac=|dcat=|dprofile=|dmodel=|dven=|dosfam=|dosver=|dhost=|dmac=|contid=|podnamespace=|podname=|sedl=|dedl=|hostid=|srnum=|sdag=|ddag=|sessionown=|subcatapp=management|appcat=business-systems|apptech=client-server|apprisk=2|appchar="has-known-vulnerability,pervasive-use"|appcont=|tunneledapp=syslog|appsaas=no|appstate=no|offloaded=0|flowtype=|cluster=
+        - <190>Jan 16 14:15:34 PA-VM
+          serial=7051000206484|type=THREAT|subtype=file|time_generated=Jan 25
+          2024 11:02:57
+          GMT|src=10.0.14.223|dst=8.241.133.126|natsrc=10.40.1.104|natdst=8.241.133.126|rule=LAN-WAN|suser=|duser=|app=ms-update|vsys=vsys1|from=LAN|to=WAN|inboundif=ethernet1/1|outboundif=ethernet1/2|logset=|sessionid=111760|repeatcnt=1|sport=50050|dport=80|natsport=11472|natdport=80|flags=0x402000|proto=tcp|act=alert|misc=concrt140_app.dll|threatid=Microsoft
+          PE
+          File(52060)|cat=any|severity=low|dir=server-to-client|seqno=7155835666016764071|actflags=0x0|sloc=10.0.0.0-10.255.255.255|dloc=United
+          States|contenttype=|pcapip=0|filedigest=|cloud=wildfire.paloaltonetworks.com|urlidx=2|useragent=|filetype=|xff=wildfire.paloaltonetworks.com|ref=wildfire.paloaltonetworks.com|sender=wildfire.paloaltonetworks.com|sub=wildfire.paloaltonetworks.com|recipient=wildfire.paloaltonetworks.com|reportid=0|vsysname=|dvc=PA-VM|suuid=|duuid=|http_method=|tunnelid=0|monitortag=|tunnel=N/A|thrcategory=N/A|contentver=AppThreat-8545-7303|ppid=4294967295|httpheaders=wildfire.paloaltonetworks.com|urlcategory=wildfire.paloaltonetworks.com|ruleuuid=9d526565-ba09-4e35-9c2e-6f54430132ec|http2conn=0|dynusrgrp=|xffip=|scat=|sprofile=|smodel=|sven=|sosfam=|sosver=|shost=|smac=|dcat=|dprofile=|dmodel=|dven=|dosfam=|dosver=|dhost=|dmac=|contid=|podnamespace=|podname=|hostid=|srnum=|reason=|justification=wildfire.paloaltonetworks.com|subcatApp=software-update|appcat=business-systems|apptech=client-server|apprisk=4|appchar=evasive-behavior,consume-big-bandwidth,able-to-transfer-file,has-known-vulnerability,tunnel-other-application,pervasive-use|appcont=|tunneledapp=ms-update|appsaas=no|appstate=no|cloudreportid=|cluster=|flowtype=
+        - <190>Jan 16 14:15:24 PA-VM receive_time=2024/01/16
+          11:27:30|serial=7051000206484|type=SYSTEM|subtype=wildfire|time_generated=Jan
+          25 2024 11:02:57
+          GMT|vsys=|eventid=wildfire-auth-failed|object=|module=general|severity=high|opaque=WildFire
+          registration failed.Authentication or Client Certificate
+          failure.|seqno=7288183790458945052|actionflags=0x0|dg_hier_level_1=0|dg_hier_level_2=0|dg_hier_level_3=0|dg_hier_level_4=0|vsys_name=|device_name=PA-VM|high_res_timestamp=2024-01-16T11:27:31.652+05:30
+        - <190>Jan 16 14:15:24 PA-VM receive_time=2024/01/16
+          11:00:07|serial=7051000206484|type=CONFIG|subtype=0|time_generated=Jan
+          25 2024 11:02:57
+          GMT|host=172.20.10.90|vsys=|cmd=commit|admin=admin|client=Web|result=Submitted|path=|before-change-detail=palo_edl_2  {
+          }|after-change-detail=palo_edl_2  {
+          }|seqno=7288183790457848011|actionflags=0x0|dg_hier_level_1=0|dg_hier_level_2=0|dg_hier_level_3=0|dg_hier_level_4=0|vsys_name=|device_name=PA-VM|dg_id=0|comment=N/A|high_res_timestamp=2024-01-16T14:15:34.518+05:30
+        - >
+          <190>Jan  9 12:55:58 PA-VM-DD receive_time=2024/01/09
+          12:55:58|serial=428088BFC23A7C9|type=SYSTEM|subtype=general|time_generated=Jan
+          09 2024 07:25:58
+          GMT|vsys=|eventid=general|object=|module=general|severity=informational|opaque="User
+          admin logged in via Web from 172.20.10.90 using
+          https"|seqno=7329772237957890343|actionflags=0x0|dg_hier_level_1=0|dg_hier_level_2=0|dg_hier_level_3=0|dg_hier_level_4=0|vsys_name=|device_name=PA-VM-DD|high_res_timestamp=2024-01-09T12:55:58.780+05:30
+      grok:
+        supportRules: ""
+        matchRules: >
+          rule_panorama (<%{integer}>)?((%{date("MMM  d HH:mm:ss")}|%{date("MMM
+          dd HH:mm:ss")}) (%{notSpace})?) %{data::keyvalue("="," \"/:,(){};+",
+          "", "|")}
+    - type: grok-parser
+      name: Parsing 'cef-formatted-time_generated' to 'timestamp' (epoch)
+      enabled: true
+      meta:
+        last_update:
+          timestamp: 1706185783827
+          user_name: null
+          user_email: mohit.tilala@crestdatasys.com
+        tags: []
+      source: time_generated
+      samples:
+        - Jan 24 2024 10:30:11 GMT
+      grok:
+        supportRules: ""
+        matchRules: date_rule %{date("MMM dd yyyy HH:mm:ss z"):timestamp}
+    - type: date-remapper
+      name: Define `timestamp` as the official timestamp of the log
+      enabled: false
+      meta:
+        last_update:
+          timestamp: 1706599469647
+          user_name: null
+          user_email: mohit.tilala@crestdatasys.com
+        tags: []
+      sources:
+        - timestamp
+    - type: service-remapper
+      name: Map `type` as the official service of the log
+      enabled: true
+      meta:
+        last_update:
+          timestamp: 1705389772049
+          user_name: null
+          user_email: mohit.tilala@crestdatasys.com
+        tags: []
+      sources:
+        - type
+    - type: pipeline
+      name: Map 'severity' to 'panorama_severity'
+      enabled: true
+      filter:
+        query: '@type:("THREAT" OR "START" OR "END" OR "SYSTEM" OR "CORRELATION") '
+      processors:
+        - type: attribute-remapper
+          name: Map 'severity' to 'panorama_severity'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705562837962
+            tags: []
+          sources:
+            - severity
+          sourceType: attribute
+          target: panorama_severity
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Map 'act' to 'panorama_action'
+      enabled: true
+      filter:
+        query: "@type:(START OR END OR DECRYPTION OR THREAT OR TRAFFIC) "
+      processors:
+        - type: attribute-remapper
+          name: Map 'action' to 'panorama_action'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1706598765999
+            tags: []
+          sources:
+            - act
+          sourceType: attribute
+          target: panorama_action
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Processors for "Decryption" OR "Traffic" OR "Threat" OR "Tunnel
+        Inspection" log types
+      enabled: true
+      filter:
+        query: '@type:("DECRYPTION" OR "TRAFFIC" OR "THREAT" OR "START" OR "END") '
+      processors:
+        - type: attribute-remapper
+          name: Map 'natsrc' to network.client.ip
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705397652287
+            tags: []
+          sources:
+            - natsrc
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map 'natdst' to 'network.destination.ip'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705397754813
+            tags: []
+          sources:
+            - natdst
+          sourceType: attribute
+          target: network.destination.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map 'natsport' to 'network.client.port'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705397821686
+            tags: []
+          sources:
+            - natsport
+          sourceType: attribute
+          target: network.client.port
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map 'natdport' to 'network.destination.port'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705397817358
+            tags: []
+          sources:
+            - natdport
+          sourceType: attribute
+          target: network.destination.port
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: geo-ip-parser
+          name: Map 'network.client.ip' to 'network.client.geoip'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705401890730
+            tags: []
+          sources:
+            - network.client.ip
+          target: network.client.geoip
+          ip_processing_behavior: do-nothing
+        - type: geo-ip-parser
+          name: Map 'network.destination.ip' to 'network.destination.geoip'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705402017968
+            tags: []
+          sources:
+            - network.destination.ip
+          target: network.destination.geoip
+          ip_processing_behavior: do-nothing
+        - type: attribute-remapper
+          name: Map 'from' to 'srczone'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705659768133
+            tags: []
+          sources:
+            - from
+          sourceType: attribute
+          target: srczone
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map 'to' to 'dstzone'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705659788779
+            tags: []
+          sources:
+            - to
+          sourceType: attribute
+          target: dstzone
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - name: Map 'flags' with 'flag_details'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1706612916946
+            tags: []
+          source: flags
+          target: flag_details
+          lookupTable: >-
+            0x80000000,session has a packet capture (PCAP)
+
+            0x02000000,IPv6 session
+
+            0x01000000,SSL session was decrypted (SSL Proxy)
+
+            0x00800000,session was denied via URL filtering
+
+            0x00400000,session has a NAT translation performed (NAT)
+
+            0x00200000,user information for the session was captured through Authentication Portal
+
+            0x00080000,X-Forwarded-For value from a proxy is in the source user field
+
+            0x00040000,log corresponds to a transaction within a http proxy session (Proxy Transaction)
+
+            0x00008000,session is a container page access (Container Page)
+
+            0x00002000,session has a temporary match on a rule for implicit application dependency handling. Available in PAN-OS 5.0.0 and above.
+
+            0x00000800,symmetric return was used to forward traffic for this session
+          type: lookup-processor
+    - type: pipeline
+      name: Processors for "User ID" log type
+      enabled: true
+      filter:
+        query: '@type:"USERID" '
+      processors:
+        - type: attribute-remapper
+          name: Map 'ip' to 'network.client.ip'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705398510589
+            tags: []
+          sources:
+            - ip
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map 'beginport' to 'network.client.port'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705398555320
+            tags: []
+          sources:
+            - beginport
+          sourceType: attribute
+          target: network.client.port
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map 'endport' to 'network.destination.port'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705398536392
+            tags: []
+          sources:
+            - endport
+          sourceType: attribute
+          target: network.destination.port
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Processors for "Global Protect" log type
+      enabled: true
+      filter:
+        query: '@type:"GLOBALPROTECT" '
+      processors:
+        - type: attribute-remapper
+          name: Map 'client_os' to 'http.useragent_details.os.family'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705398701693
+            tags: []
+          sources:
+            - client_os
+          sourceType: attribute
+          target: http.useragent_details.os.family
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map 'public_ip' to 'network.client.ip'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705398696094
+            tags: []
+          sources:
+            - public_ip
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: geo-ip-parser
+          name: Map 'network.client.ip' to 'network.client.geoip'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705402430436
+            tags: []
+          sources:
+            - network.client.ip
+          target: network.client.geoip
+          ip_processing_behavior: do-nothing
+    - type: pipeline
+      name: Processors for "Traffic" AND "Tunnel Inspection"
+      enabled: true
+      filter:
+        query: '@type:("TRAFFIC" OR "START" OR "END") '
+      processors:
+        - type: attribute-remapper
+          name: Map 'bytes_sent' with 'network.bytes_read'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705399195343
+            tags: []
+          sources:
+            - bytes_sent
+          sourceType: attribute
+          target: network.bytes_read
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map 'bytes_received' with 'network.bytes_written'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705399190481
+            tags: []
+          sources:
+            - bytes_received
+          sourceType: attribute
+          target: network.bytes_written
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Processors for "Authentication" log type
+      enabled: true
+      filter:
+        query: '@type:"AUTHENTICATION" '
+      processors:
+        - type: attribute-remapper
+          name: Map 'ip' with 'network.client.ip'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705400549463
+            tags: []
+          sources:
+            - ip
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map 'user_agent' with 'http.useragent'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705400545471
+            tags: []
+          sources:
+            - user_agent
+          sourceType: attribute
+          target: http.useragent
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: user-agent-parser
+          name: Parsing a User Agent
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705568885695
+            tags: []
+          sources:
+            - http.useragent
+          target: http.useragent_details
+          encoded: false
+          combineVersionDetails: false
+        - type: attribute-remapper
+          name: Map 'authpolicy' to ''authentication_policy'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705662450782
+            tags: []
+          sources:
+            - authpolicy
+          sourceType: attribute
+          target: authentication_policy
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Processors for 'Threat' log type
+      enabled: true
+      filter:
+        query: '@type:"THREAT" '
+      processors:
+        - type: attribute-remapper
+          name: Map 'http_method' to 'http.method'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705493009306
+            tags: []
+          sources:
+            - http_method
+          sourceType: attribute
+          target: http.method
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Processors for "Decryption" AND "Authentication"
+      enabled: true
+      filter:
+        query: '@type:("DECRYPTION" OR "AUTHENTICATION") '
+      processors:
+        - type: attribute-remapper
+          name: Map 'src_osfamily' to 'http.useragent_details.os.family'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705400697670
+            tags: []
+          sources:
+            - src_osfamily
+          sourceType: attribute
+          target: http.useragent_details.os.family
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Processors for "HIP Match" OR "Correlated Events"
+      enabled: true
+      filter:
+        query: '@type:("HIP-MATCH" OR "CORRELATION") '
+      processors:
+        - type: attribute-remapper
+          name: Map 'src' to 'network.client.ip'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705400796208
+            tags: []
+          sources:
+            - src
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Processors for "HIP Match" log type
+      enabled: true
+      filter:
+        query: '@type:"HIP-MATCH" '
+      processors:
+        - type: attribute-remapper
+          name: Map 'os' to 'http.useragent_details.os.family'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705401067085
+            tags: []
+          sources:
+            - os
+          sourceType: attribute
+          target: http.useragent_details.os.family
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: geo-ip-parser
+          name: Map 'network.client.ip' to 'network.client.geoip'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705402347668
+            tags: []
+          sources:
+            - network.client.ip
+          target: network.client.geoip
+          ip_processing_behavior: do-nothing
+    - type: pipeline
+      name: Processors for "Authentication" OR "User ID" log type
+      enabled: true
+      filter:
+        query: '@type:("AUTHENTICATION" OR "USERID") '
+      processors:
+        - type: attribute-remapper
+          name: Map 'user' to 'usr.name'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705401139980
+            tags: []
+          sources:
+            - user
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: geo-ip-parser
+          name: Map 'network.client.ip' to 'network.client.geoip'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705402081390
+            tags: []
+          sources:
+            - network.client.ip
+          target: network.client.geoip
+          ip_processing_behavior: do-nothing
+    - type: pipeline
+      name: Processors for "HIP Match" OR "Correlated Events" OR "Global Protect" log
+        types
+      enabled: true
+      filter:
+        query: '@type:("HIP-MATCH" OR "CORRELATION" OR "GLOBALPROTECT") '
+      processors:
+        - type: attribute-remapper
+          name: Map 'srcuser' to 'usr.name'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705401226233
+            tags: []
+          sources:
+            - srcuser
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Processors for "Config" log type
+      enabled: true
+      filter:
+        query: '@type:"CONFIG" '
+      processors:
+        - type: attribute-remapper
+          name: Map 'admin' to 'usr.name'
+          enabled: true
+          meta:
+            last_update:
+              user_id: "5795825"
+              timestamp: 1705401290817
+            tags: []
+          sources:
+            - admin
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
