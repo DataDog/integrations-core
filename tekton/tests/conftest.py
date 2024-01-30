@@ -87,7 +87,9 @@ def setup_tekton():
 
     run_command(["kubectl", "apply", "-f", os.path.join(HERE, 'kind', "tekton-triggers.yaml")])
     run_command(["kubectl", "apply", "-f", os.path.join(HERE, 'kind', "tekton-interceptors.yaml")])
-    run_command(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s", "-n", "tekton-pipelines"])
+    run_command(
+        ["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s", "-n", "tekton-pipelines"]
+    )
 
 
 @pytest.fixture(scope='session')
