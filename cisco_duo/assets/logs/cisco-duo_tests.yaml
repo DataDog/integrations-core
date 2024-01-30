@@ -1,0 +1,118 @@
+id: cisco-duo
+tests:
+  - sample: |-
+      {
+        "access_device": {
+            "epkey": "SOMEKEY",
+            "hostname": null,
+            "ip": "185.64.148.0",
+            "location": {
+                "city": "-",
+                "country": "-",
+                "state": "-"
+            }
+        },
+        "alias": "abc@example.com",
+        "application": {
+            "key": "SOMEKEY",
+            "name": "Google Workspace Login"
+        },
+        "auth_device": {
+            "ip": "185.64.148.0",
+            "key": "SOMEKEY",
+            "location": {
+                "city": "-",
+                "country": "-",
+                "state": "-"
+            },
+            "name": "+1 123 456 7890"
+        },
+        "email": "abc@example.com",
+        "event_type": "authentication",
+        "factor": "duo_push",
+        "isotimestamp": "2023-11-01T08:42:33.314482+00:00",
+        "ood_software": null,
+        "reason": "user_marked_fraud",
+        "result": "fraud",
+        "timestamp": 1698828153,
+        "trusted_endpoint_status": "not trusted",
+        "txid": "some-txid",
+        "user": {
+            "groups": [
+                "AllUsers (from AD sync)"
+            ],
+            "key": "SOMEKEY",
+            "name": "abc"
+        }
+      }
+    result: null
+  - sample: |-
+      {
+        "access_device": {
+            "browser": "Chrome",
+            "browser_version": "117.0.0.0",
+            "ip": {
+                "address": "185.64.148.0"
+            },
+            "location": {
+                "city": "-",
+                "country": "-",
+                "state": "-"
+            },
+            "os": "Windows",
+            "os_version": "10"
+        },
+        "action": {
+            "details": null,
+            "name": "phone_activation_code_regenerated"
+        },
+        "activity_id": "some-activity-id",
+        "actor": {
+            "details": "{\"created\": null, \"last_login\": \"2023-10-10T08:44:35.000000+00:00\", \"email\": \"abc@example.com\", \"status\": null, \"groups\": null}",
+            "key": "SOMEKEY",
+            "name": "abc",
+            "type": "admin"
+        },
+        "akey": "SOMEKEY",
+        "application": null,
+        "old_target": null,
+        "target": {
+            "details": "{\"manufacturer\": \"-\", \"number\": \"+11234567890\", \"extension\": \"\", \"os_version\": \"13\", \"biometrics_status\": \"Configured\", \"os\": \"Android\", \"model\": \"-\", \"tampered_status\": \"Not tampered\", \"passcode_status\": \"Locked\", \"country_code\": \"1\"}",
+            "key": "SOMEKEY",
+            "name": "+1 123 456 7890",
+            "type": "phone"
+        },
+        "ts": "2023-10-10T04:45:03.639784+00:00"
+      }
+    result: null
+  - sample: |-
+      {
+        "action": "ad_sync_by_user_begin",
+        "description": "{\"directory\": \"AD Sync\", \"Sync Ref. Code\": \"somecode\", \"users\": \"xyz\"}",
+        "isotimestamp": "2023-11-27T06:38:49+00:00",
+        "object": "xyz",
+        "timestamp": 1701067129,
+        "username": "abc"
+      }
+    result: null
+  - sample: |-
+      {
+        "context": "authentication",
+        "credits": 5,
+        "phone": "+11234567890",
+        "telephony_id": "some-telephony-id",
+        "ts": "2024-01-09T09:08:15.097338+00:00",
+        "txid": "some-txid",
+        "type": "sms"
+      }
+    result: null
+  - sample: |-
+      {
+        "action": "o2fa_user_provisioned",
+        "description": "{\"user_agent\": \"DuoCredProv/4.2.2.1755 (Windows NT 10.0.1809.17763.4851; x64; Server)\", \"hostname\": \"HOST02\", \"factor\": \"duo_otp\"}",
+        "isotimestamp": "2023-10-16T12:20:19+00:00",
+        "object": "RDP-2 Login",
+        "timestamp": 1697458819,
+        "username": "abc"
+      }
+    result: null

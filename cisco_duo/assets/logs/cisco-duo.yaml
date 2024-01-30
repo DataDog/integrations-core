@@ -1,0 +1,374 @@
+id: cisco-duo
+metric_id: cisco-duo
+backend_only: false
+facets:
+  - name: Auth Device Name
+    source: log
+    path: auth_device.name
+    type: string
+    facetType: list
+    groups:
+      - Cisco Duo
+  - name: Access Device Browser
+    source: log
+    path: access_device.browser
+    type: string
+    facetType: list
+    groups:
+      - Cisco Duo
+  - name: Access Device Browser Version
+    source: log
+    path: access_device.browser_version
+    type: string
+    facetType: list
+    groups:
+      - Cisco Duo
+  - name: Access Device City
+    source: log
+    path: access_device.geoip.city.name
+    type: string
+    facetType: list
+    groups:
+      - Cisco Duo
+  - name: Access Device IP
+    source: log
+    path: access_device.ip.address
+    type: string
+    facetType: list
+    groups:
+      - Cisco Duo
+  - name: Access Device OS
+    source: log
+    path: access_device.os
+    type: string
+    facetType: list
+    groups:
+      - Cisco Duo
+  - name: Access Device OS Version
+    source: log
+    path: access_device.os_version
+    type: string
+    facetType: list
+    groups:
+      - Cisco Duo
+  - name: Access Device Subdivision
+    source: log
+    path: access_device.geoip.subdivision.name
+    type: string
+    facetType: list
+    groups:
+      - Cisco Duo
+  - name: Action
+    source: log
+    path: duo_action
+    type: string
+    facetType: list
+    groups:
+      - Cisco Duo
+  - name: Action Name
+    source: log
+    path: duo_action_name
+    type: string
+    facetType: list
+    groups:
+      - Cisco Duo
+  - name: Actor Name
+    source: log
+    path: actor.name
+    type: string
+    facetType: list
+    groups:
+      - Cisco Duo
+  - name: Auth Device Country
+    source: log
+    path: auth_device.geoip.country.name
+    type: string
+    facetType: list
+    groups:
+      - Cisco Duo
+  - name: Auth Device IP
+    source: log
+    path: auth_device.ip
+    type: string
+    facetType: list
+    groups:
+      - Cisco Duo
+  - name: Context
+    source: log
+    path: context
+    type: string
+    facetType: list
+    groups:
+      - Cisco Duo
+  - name: Credits
+    source: log
+    path: credits
+    type: double
+    facetType: range
+    groups:
+      - Cisco Duo
+  - name: Event Type
+    source: log
+    path: event_type
+    type: string
+    facetType: list
+    groups:
+      - Cisco Duo
+  - name: Factor
+    source: log
+    path: factor
+    type: string
+    facetType: list
+    groups:
+      - Cisco Duo
+  - name: Object
+    source: log
+    path: object
+    type: string
+    facetType: list
+    groups:
+      - Cisco Duo
+  - name: Reason
+    source: log
+    path: duo_reason
+    type: string
+    facetType: list
+    groups:
+      - Cisco Duo
+  - name: Result
+    source: log
+    path: result
+    type: string
+    facetType: list
+    groups:
+      - Cisco Duo
+  - name: Target Details
+    source: log
+    path: target.details
+    type: string
+    facetType: list
+    groups:
+      - Cisco Duo
+  - name: Target Name
+    source: log
+    path: target.name
+    type: string
+    facetType: list
+    groups:
+      - Cisco Duo
+  - name: Target Type
+    source: log
+    path: target.type
+    type: string
+    facetType: list
+    groups:
+      - Cisco Duo
+  - name: User Email
+    source: log
+    path: usr.email
+    type: string
+    facetType: list
+    groups:
+      - User
+  - name: User Name
+    source: log
+    path: usr.name
+    type: string
+    facetType: list
+    groups:
+      - User
+  - name: Event Name
+    source: log
+    path: evt.name
+    type: string
+    facetType: list
+    groups:
+      - Event
+  - name: Event Outcome
+    source: log
+    path: evt.outcome
+    type: string
+    facetType: list
+    groups:
+      - Event
+pipeline:
+  type: pipeline
+  name: Cisco Duo
+  enabled: true
+  filter:
+    query: "source:cisco-duo"
+  processors:
+    - type: date-remapper
+      name: Define `timestamp` attribute as the official ingestion timestamp of the
+        log
+      enabled: true
+      meta:
+        tags: []
+      sources:
+        - timestamp
+    - type: service-remapper
+      name: Define `service` as the official service of the log
+      enabled: true
+      meta:
+        tags: []
+      sources:
+        - service
+    - type: pipeline
+      name: Cisco Duo Authentication
+      enabled: true
+      filter:
+        query: "service:authentication "
+      processors:
+        - type: geo-ip-parser
+          name: "GeoIP Parser : GeoIP Parser for `access_device.ip`"
+          enabled: true
+          meta:
+            tags: []
+          sources:
+            - access_device.ip
+          target: access_device.geoip
+          ip_processing_behavior: do-nothing
+        - type: geo-ip-parser
+          name: "GeoIP Parser : GeoIP Parser for `auth_device.ip`"
+          enabled: true
+          meta:
+            tags: []
+          sources:
+            - auth_device.ip
+          target: auth_device.geoip
+          ip_processing_behavior: do-nothing
+        - type: attribute-remapper
+          name: "Remapper : Map `result` to `evt.outcome`"
+          enabled: true
+          meta:
+            tags: []
+          sources:
+            - result
+          sourceType: attribute
+          target: evt.outcome
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: "Remapper : Map `email` to `usr.email`"
+          enabled: true
+          meta:
+            tags: []
+          sources:
+            - email
+          sourceType: attribute
+          target: usr.email
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: "Remapper : Remap `event_type` to `evt.name`"
+          enabled: true
+          meta:
+            tags: []
+          sources:
+            - event_type
+          sourceType: attribute
+          target: evt.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: " Remapper : Map `user.name` to `usr.name`"
+          enabled: true
+          meta:
+            tags: []
+          sources:
+            - user.name
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Cisco Duo Activity
+      enabled: true
+      filter:
+        query: "service:activity "
+      processors:
+        - type: geo-ip-parser
+          name: "GeoIP Parser : GeoIP Parser for `access_device.ip.address`"
+          enabled: true
+          meta:
+            tags: []
+          sources:
+            - access_device.ip.address
+          target: access_device.geoip
+          ip_processing_behavior: do-nothing
+    - type: pipeline
+      name: Cisco Duo Administrator
+      enabled: true
+      filter:
+        query: "service:administrator "
+      processors:
+        - type: attribute-remapper
+          name: " Remapper : Map `username` to `usr.name`"
+          enabled: true
+          meta:
+            tags: []
+          sources:
+            - username
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Cisco Duo Offline Enrollment
+      enabled: true
+      filter:
+        query: "service:offline_enrollment "
+      processors:
+        - type: attribute-remapper
+          name: " Remapper : Map `username` to `usr.name`"
+          enabled: true
+          meta:
+            tags: []
+          sources:
+            - username
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `reason` to `duo_reason`
+      enabled: true
+      meta:
+        tags: []
+      sources:
+        - reason
+      sourceType: attribute
+      target: duo_reason
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `action` to `duo_action`
+      enabled: true
+      meta:
+        tags: []
+      sources:
+        - action
+      sourceType: attribute
+      target: duo_action
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `duo_action.name` to `duo_action_name`
+      enabled: true
+      meta:
+        tags: []
+      sources:
+        - duo_action.name
+      sourceType: attribute
+      target: duo_action_name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
