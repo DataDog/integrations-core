@@ -8,18 +8,27 @@ from datadog_checks.dev.http import MockResponse
 
 HERE = get_here()
 
-MOCKED_METRICS = [
+MOCKED_PIPELINES_METRICS = [
     'pipelines_controller.go_alloc',
 ]
 
-METRICS = [
+MOCKED_TRIGGERS_METRICS = [
+    'triggers_controller.clusterinterceptor',
+]
+
+PIPELINES_METRICS = [
     'pipelines_controller.go_alloc',
+]
+
+TRIGGERS__METRICS = [
+    'triggers_controller.clusterinterceptor',
 ]
 
 
 def mock_http_responses(url, **_params):
     mapping = {
-        'http://tekton:8080': 'metrics.txt',
+        'http://tekton-pipelines:9090': 'pipelines.txt',
+        'http://tekton-triggers:9000': 'triggers.txt',
     }
 
     metrics_file = mapping.get(url)
