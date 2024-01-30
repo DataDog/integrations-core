@@ -371,6 +371,116 @@
       }
     },
     {
+      "id": 2600799677110580,
+      "definition": {
+        "title": "JDBC Connection Pool",
+        "background_color": "orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6944675951680114,
+            "definition": {
+              "title": "JDBC Connection Pool Size",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Active",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Max Active",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Idle",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Min Idle",
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "Max Idle",
+                      "formula": "query5"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "sum:tomcat.jdbc.connection_pool.active{*}.weighted()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:tomcat.jdbc.connection_pool.max_active{*}.weighted()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "sum:tomcat.jdbc.connection_pool.idle{*}.weighted()",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    },
+                    {
+                      "query": "sum:tomcat.jdbc.connection_pool.min_idle{*}.weighted()",
+                      "data_source": "metrics",
+                      "name": "query4"
+                    },
+                    {
+                      "query": "sum:tomcat.jdbc.connection_pool.max_idle{*}.weighted()",
+                      "data_source": "metrics",
+                      "name": "query5"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 12,
+        "width": 12,
+        "height": 3
+      }
+    },
+    {
       "id": 1394157946923980,
       "definition": {
         "title": "Errors",
@@ -460,7 +570,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 12,
+        "y": 15,
         "width": 12,
         "height": 3
       }
@@ -566,7 +676,7 @@
               "display_format": "countsAndList",
               "color_preference": "text",
               "hide_zero_counts": true,
-              "query": "",
+              "query": "tomcat",
               "sort": "status,asc",
               "count": 50,
               "start": 0,
