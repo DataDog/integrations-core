@@ -1,0 +1,469 @@
+# HELP controller_client_latency How long Kubernetes API requests take
+# TYPE controller_client_latency histogram
+controller_client_latency_bucket{name="",le="1e-05"} 0
+controller_client_latency_bucket{name="",le="0.0001"} 0
+controller_client_latency_bucket{name="",le="0.001"} 1
+controller_client_latency_bucket{name="",le="0.01"} 137
+controller_client_latency_bucket{name="",le="0.1"} 159
+controller_client_latency_bucket{name="",le="1"} 159
+controller_client_latency_bucket{name="",le="10"} 159
+controller_client_latency_bucket{name="",le="100"} 159
+controller_client_latency_bucket{name="",le="+Inf"} 159
+controller_client_latency_sum{name=""} 1.0966530049999998
+controller_client_latency_count{name=""} 159
+# HELP controller_client_results Total number of API requests (broken down by status code)
+# TYPE controller_client_results counter
+controller_client_results{name=""} 168
+# HELP controller_clusterinterceptor_count number of clusterinterceptor
+# TYPE controller_clusterinterceptor_count gauge
+controller_clusterinterceptor_count 5
+# HELP controller_clustertriggerbinding_count number of clustertriggerbinding
+# TYPE controller_clustertriggerbinding_count gauge
+controller_clustertriggerbinding_count 0
+# HELP controller_eventlistener_count number of eventlistener
+# TYPE controller_eventlistener_count gauge
+controller_eventlistener_count 0
+# HELP controller_go_alloc The number of bytes of allocated heap objects.
+# TYPE controller_go_alloc gauge
+controller_go_alloc{name=""} 1.3990168e+07
+# HELP controller_go_bucket_hash_sys The number of bytes of memory in profiling bucket hash tables.
+# TYPE controller_go_bucket_hash_sys gauge
+controller_go_bucket_hash_sys{name=""} 1.459162e+06
+# HELP controller_go_frees The cumulative count of heap objects freed.
+# TYPE controller_go_frees gauge
+controller_go_frees{name=""} 211041
+# HELP controller_go_gc_cpu_fraction The fraction of this program's available CPU time used by the GC since the program started.
+# TYPE controller_go_gc_cpu_fraction gauge
+controller_go_gc_cpu_fraction{name=""} 2.7258133941849574e-05
+# HELP controller_go_gc_sys The number of bytes of memory in garbage collection metadata.
+# TYPE controller_go_gc_sys gauge
+controller_go_gc_sys{name=""} 4.467088e+06
+# HELP controller_go_heap_alloc The number of bytes of allocated heap objects.
+# TYPE controller_go_heap_alloc gauge
+controller_go_heap_alloc{name=""} 1.3990168e+07
+# HELP controller_go_heap_idle The number of bytes in idle (unused) spans.
+# TYPE controller_go_heap_idle gauge
+controller_go_heap_idle{name=""} 3.514368e+06
+# HELP controller_go_heap_in_use The number of bytes in in-use spans.
+# TYPE controller_go_heap_in_use gauge
+controller_go_heap_in_use{name=""} 1.601536e+07
+# HELP controller_go_heap_objects The number of allocated heap objects.
+# TYPE controller_go_heap_objects gauge
+controller_go_heap_objects{name=""} 95685
+# HELP controller_go_heap_released The number of bytes of physical memory returned to the OS.
+# TYPE controller_go_heap_released gauge
+controller_go_heap_released{name=""} 2.318336e+06
+# HELP controller_go_heap_sys The number of bytes of heap memory obtained from the OS.
+# TYPE controller_go_heap_sys gauge
+controller_go_heap_sys{name=""} 1.9529728e+07
+# HELP controller_go_last_gc The time the last garbage collection finished, as nanoseconds since 1970 (the UNIX epoch).
+# TYPE controller_go_last_gc gauge
+controller_go_last_gc{name=""} 1.7066180901099264e+18
+# HELP controller_go_lookups The number of pointer lookups performed by the runtime.
+# TYPE controller_go_lookups gauge
+controller_go_lookups{name=""} 0
+# HELP controller_go_mallocs The cumulative count of heap objects allocated.
+# TYPE controller_go_mallocs gauge
+controller_go_mallocs{name=""} 306726
+# HELP controller_go_mcache_in_use The number of bytes of allocated mcache structures.
+# TYPE controller_go_mcache_in_use gauge
+controller_go_mcache_in_use{name=""} 8400
+# HELP controller_go_mcache_sys The number of bytes of memory obtained from the OS for mcache structures.
+# TYPE controller_go_mcache_sys gauge
+controller_go_mcache_sys{name=""} 15600
+# HELP controller_go_mspan_in_use The number of bytes of allocated mspan structures.
+# TYPE controller_go_mspan_in_use gauge
+controller_go_mspan_in_use{name=""} 244000
+# HELP controller_go_mspan_sys The number of bytes of memory obtained from the OS for mspan structures.
+# TYPE controller_go_mspan_sys gauge
+controller_go_mspan_sys{name=""} 244800
+# HELP controller_go_next_gc The target heap size of the next GC cycle.
+# TYPE controller_go_next_gc gauge
+controller_go_next_gc{name=""} 1.7180096e+07
+# HELP controller_go_num_forced_gc The number of GC cycles that were forced by the application calling the GC function.
+# TYPE controller_go_num_forced_gc gauge
+controller_go_num_forced_gc{name=""} 0
+# HELP controller_go_num_gc The number of completed GC cycles.
+# TYPE controller_go_num_gc gauge
+controller_go_num_gc{name=""} 7
+# HELP controller_go_other_sys The number of bytes of memory in miscellaneous off-heap runtime allocations.
+# TYPE controller_go_other_sys gauge
+controller_go_other_sys{name=""} 1.527406e+06
+# HELP controller_go_stack_in_use The number of bytes in stack spans.
+# TYPE controller_go_stack_in_use gauge
+controller_go_stack_in_use{name=""} 1.441792e+06
+# HELP controller_go_stack_sys The number of bytes of stack memory obtained from the OS.
+# TYPE controller_go_stack_sys gauge
+controller_go_stack_sys{name=""} 1.441792e+06
+# HELP controller_go_sys The total bytes of memory obtained from the OS.
+# TYPE controller_go_sys gauge
+controller_go_sys{name=""} 2.8685576e+07
+# HELP controller_go_total_alloc The cumulative bytes allocated for heap objects.
+# TYPE controller_go_total_alloc gauge
+controller_go_total_alloc{name=""} 2.9582264e+07
+# HELP controller_go_total_gc_pause_ns The cumulative nanoseconds in GC stop-the-world pauses since the program started.
+# TYPE controller_go_total_gc_pause_ns gauge
+controller_go_total_gc_pause_ns{name=""} 2.112627e+06
+# HELP controller_reconcile_count Number of reconcile operations
+# TYPE controller_reconcile_count counter
+controller_reconcile_count{namespace_name="",reconciler="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler",success="false"} 5
+controller_reconcile_count{namespace_name="",reconciler="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler",success="true"} 20
+# HELP controller_reconcile_latency Latency of reconcile operations
+# TYPE controller_reconcile_latency histogram
+controller_reconcile_latency_bucket{namespace_name="",reconciler="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler",success="false",le="10"} 5
+controller_reconcile_latency_bucket{namespace_name="",reconciler="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler",success="false",le="100"} 5
+controller_reconcile_latency_bucket{namespace_name="",reconciler="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler",success="false",le="1000"} 5
+controller_reconcile_latency_bucket{namespace_name="",reconciler="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler",success="false",le="10000"} 5
+controller_reconcile_latency_bucket{namespace_name="",reconciler="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler",success="false",le="30000"} 5
+controller_reconcile_latency_bucket{namespace_name="",reconciler="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler",success="false",le="60000"} 5
+controller_reconcile_latency_bucket{namespace_name="",reconciler="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler",success="false",le="+Inf"} 5
+controller_reconcile_latency_sum{namespace_name="",reconciler="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler",success="false"} 0
+controller_reconcile_latency_count{namespace_name="",reconciler="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler",success="false"} 5
+controller_reconcile_latency_bucket{namespace_name="",reconciler="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler",success="true",le="10"} 20
+controller_reconcile_latency_bucket{namespace_name="",reconciler="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler",success="true",le="100"} 20
+controller_reconcile_latency_bucket{namespace_name="",reconciler="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler",success="true",le="1000"} 20
+controller_reconcile_latency_bucket{namespace_name="",reconciler="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler",success="true",le="10000"} 20
+controller_reconcile_latency_bucket{namespace_name="",reconciler="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler",success="true",le="30000"} 20
+controller_reconcile_latency_bucket{namespace_name="",reconciler="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler",success="true",le="60000"} 20
+controller_reconcile_latency_bucket{namespace_name="",reconciler="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler",success="true",le="+Inf"} 20
+controller_reconcile_latency_sum{namespace_name="",reconciler="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler",success="true"} 33
+controller_reconcile_latency_count{namespace_name="",reconciler="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler",success="true"} 20
+# HELP controller_triggerbinding_count number of triggerbinding
+# TYPE controller_triggerbinding_count gauge
+controller_triggerbinding_count 0
+# HELP controller_triggertemplate_count number of triggertemplate
+# TYPE controller_triggertemplate_count gauge
+controller_triggertemplate_count 0
+# HELP controller_work_queue_depth Depth of the work queue
+# TYPE controller_work_queue_depth gauge
+controller_work_queue_depth{reconciler="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler"} 0
+# HELP controller_workqueue_adds_total Total number of adds handled by workqueue
+# TYPE controller_workqueue_adds_total counter
+controller_workqueue_adds_total{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer"} 25
+controller_workqueue_adds_total{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast"} 20
+controller_workqueue_adds_total{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow"} 5
+# HELP controller_workqueue_depth Current depth of workqueue
+# TYPE controller_workqueue_depth gauge
+controller_workqueue_depth{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer"} 0
+controller_workqueue_depth{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast"} 0
+controller_workqueue_depth{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow"} 0
+# HELP controller_workqueue_longest_running_processor_seconds How long in seconds the longest outstanding workqueue item has been in flight.
+# TYPE controller_workqueue_longest_running_processor_seconds histogram
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="1e-08"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="1e-07"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="1e-06"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="9.999999999999999e-06"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="9.999999999999999e-05"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="0.001"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="0.01"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="0.1"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="1"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="10"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="+Inf"} 429
+controller_workqueue_longest_running_processor_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer"} 0
+controller_workqueue_longest_running_processor_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="1e-08"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="1e-07"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="1e-06"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="9.999999999999999e-06"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="9.999999999999999e-05"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="0.001"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="0.01"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="0.1"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="1"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="10"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="+Inf"} 429
+controller_workqueue_longest_running_processor_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast"} 0
+controller_workqueue_longest_running_processor_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="1e-08"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="1e-07"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="1e-06"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="9.999999999999999e-06"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="9.999999999999999e-05"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="0.001"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="0.01"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="0.1"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="1"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="10"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="+Inf"} 429
+controller_workqueue_longest_running_processor_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow"} 0
+controller_workqueue_longest_running_processor_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer",le="1e-08"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer",le="1e-07"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer",le="1e-06"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer",le="9.999999999999999e-06"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer",le="9.999999999999999e-05"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer",le="0.001"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer",le="0.01"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer",le="0.1"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer",le="1"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer",le="10"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer",le="+Inf"} 429
+controller_workqueue_longest_running_processor_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer"} 0
+controller_workqueue_longest_running_processor_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast",le="1e-08"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast",le="1e-07"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast",le="1e-06"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast",le="9.999999999999999e-06"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast",le="9.999999999999999e-05"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast",le="0.001"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast",le="0.01"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast",le="0.1"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast",le="1"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast",le="10"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast",le="+Inf"} 429
+controller_workqueue_longest_running_processor_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast"} 0
+controller_workqueue_longest_running_processor_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow",le="1e-08"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow",le="1e-07"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow",le="1e-06"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow",le="9.999999999999999e-06"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow",le="9.999999999999999e-05"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow",le="0.001"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow",le="0.01"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow",le="0.1"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow",le="1"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow",le="10"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow",le="+Inf"} 429
+controller_workqueue_longest_running_processor_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow"} 0
+controller_workqueue_longest_running_processor_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer",le="1e-08"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer",le="1e-07"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer",le="1e-06"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer",le="9.999999999999999e-06"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer",le="9.999999999999999e-05"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer",le="0.001"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer",le="0.01"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer",le="0.1"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer",le="1"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer",le="10"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer",le="+Inf"} 429
+controller_workqueue_longest_running_processor_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer"} 0
+controller_workqueue_longest_running_processor_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast",le="1e-08"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast",le="1e-07"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast",le="1e-06"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast",le="9.999999999999999e-06"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast",le="9.999999999999999e-05"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast",le="0.001"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast",le="0.01"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast",le="0.1"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast",le="1"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast",le="10"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast",le="+Inf"} 429
+controller_workqueue_longest_running_processor_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast"} 0
+controller_workqueue_longest_running_processor_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow",le="1e-08"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow",le="1e-07"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow",le="1e-06"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow",le="9.999999999999999e-06"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow",le="9.999999999999999e-05"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow",le="0.001"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow",le="0.01"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow",le="0.1"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow",le="1"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow",le="10"} 429
+controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow",le="+Inf"} 429
+controller_workqueue_longest_running_processor_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow"} 0
+controller_workqueue_longest_running_processor_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow"} 429
+# HELP controller_workqueue_queue_latency_seconds How long in seconds an item stays in workqueue before being requested.
+# TYPE controller_workqueue_queue_latency_seconds histogram
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="1e-08"} 0
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="1e-07"} 0
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="1e-06"} 0
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="9.999999999999999e-06"} 7
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="9.999999999999999e-05"} 10
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="0.001"} 14
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="0.01"} 20
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="0.1"} 25
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="1"} 25
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="10"} 25
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="+Inf"} 25
+controller_workqueue_queue_latency_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer"} 0.505222374
+controller_workqueue_queue_latency_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer"} 25
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="1e-08"} 0
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="1e-07"} 0
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="1e-06"} 0
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="9.999999999999999e-06"} 13
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="9.999999999999999e-05"} 20
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="0.001"} 20
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="0.01"} 20
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="0.1"} 20
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="1"} 20
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="10"} 20
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="+Inf"} 20
+controller_workqueue_queue_latency_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast"} 0.00033291699999999996
+controller_workqueue_queue_latency_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast"} 20
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="1e-08"} 0
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="1e-07"} 0
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="1e-06"} 0
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="9.999999999999999e-06"} 0
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="9.999999999999999e-05"} 2
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="0.001"} 5
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="0.01"} 5
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="0.1"} 5
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="1"} 5
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="10"} 5
+controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="+Inf"} 5
+controller_workqueue_queue_latency_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow"} 0.001096749
+controller_workqueue_queue_latency_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow"} 5
+# HELP controller_workqueue_unfinished_work_seconds How long in seconds the outstanding workqueue items have been in flight (total).
+# TYPE controller_workqueue_unfinished_work_seconds histogram
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="1e-08"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="1e-07"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="1e-06"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="9.999999999999999e-06"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="9.999999999999999e-05"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="0.001"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="0.01"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="0.1"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="1"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="10"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="+Inf"} 429
+controller_workqueue_unfinished_work_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer"} 0
+controller_workqueue_unfinished_work_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="1e-08"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="1e-07"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="1e-06"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="9.999999999999999e-06"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="9.999999999999999e-05"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="0.001"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="0.01"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="0.1"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="1"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="10"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="+Inf"} 429
+controller_workqueue_unfinished_work_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast"} 0
+controller_workqueue_unfinished_work_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="1e-08"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="1e-07"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="1e-06"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="9.999999999999999e-06"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="9.999999999999999e-05"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="0.001"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="0.01"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="0.1"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="1"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="10"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="+Inf"} 429
+controller_workqueue_unfinished_work_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow"} 0
+controller_workqueue_unfinished_work_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer",le="1e-08"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer",le="1e-07"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer",le="1e-06"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer",le="9.999999999999999e-06"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer",le="9.999999999999999e-05"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer",le="0.001"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer",le="0.01"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer",le="0.1"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer",le="1"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer",le="10"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer",le="+Inf"} 429
+controller_workqueue_unfinished_work_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer"} 0
+controller_workqueue_unfinished_work_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-consumer"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast",le="1e-08"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast",le="1e-07"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast",le="1e-06"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast",le="9.999999999999999e-06"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast",le="9.999999999999999e-05"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast",le="0.001"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast",le="0.01"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast",le="0.1"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast",le="1"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast",le="10"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast",le="+Inf"} 429
+controller_workqueue_unfinished_work_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast"} 0
+controller_workqueue_unfinished_work_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-fast"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow",le="1e-08"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow",le="1e-07"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow",le="1e-06"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow",le="9.999999999999999e-06"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow",le="9.999999999999999e-05"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow",le="0.001"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow",le="0.01"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow",le="0.1"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow",le="1"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow",le="10"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow",le="+Inf"} 429
+controller_workqueue_unfinished_work_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow"} 0
+controller_workqueue_unfinished_work_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.eventlistener.Reconciler-slow"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer",le="1e-08"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer",le="1e-07"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer",le="1e-06"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer",le="9.999999999999999e-06"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer",le="9.999999999999999e-05"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer",le="0.001"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer",le="0.01"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer",le="0.1"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer",le="1"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer",le="10"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer",le="+Inf"} 429
+controller_workqueue_unfinished_work_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer"} 0
+controller_workqueue_unfinished_work_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-consumer"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast",le="1e-08"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast",le="1e-07"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast",le="1e-06"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast",le="9.999999999999999e-06"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast",le="9.999999999999999e-05"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast",le="0.001"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast",le="0.01"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast",le="0.1"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast",le="1"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast",le="10"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast",le="+Inf"} 429
+controller_workqueue_unfinished_work_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast"} 0
+controller_workqueue_unfinished_work_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-fast"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow",le="1e-08"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow",le="1e-07"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow",le="1e-06"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow",le="9.999999999999999e-06"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow",le="9.999999999999999e-05"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow",le="0.001"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow",le="0.01"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow",le="0.1"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow",le="1"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow",le="10"} 429
+controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow",le="+Inf"} 429
+controller_workqueue_unfinished_work_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow"} 0
+controller_workqueue_unfinished_work_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.interceptor.Reconciler-slow"} 429
+# HELP controller_workqueue_work_duration_seconds How long in seconds processing an item from workqueue takes.
+# TYPE controller_workqueue_work_duration_seconds histogram
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="1e-08"} 0
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="1e-07"} 0
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="1e-06"} 0
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="9.999999999999999e-06"} 4
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="9.999999999999999e-05"} 14
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="0.001"} 15
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="0.01"} 25
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="0.1"} 25
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="1"} 25
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="10"} 25
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer",le="+Inf"} 25
+controller_workqueue_work_duration_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer"} 0.039031124
+controller_workqueue_work_duration_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-consumer"} 25
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="1e-08"} 0
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="1e-07"} 0
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="1e-06"} 0
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="9.999999999999999e-06"} 20
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="9.999999999999999e-05"} 20
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="0.001"} 20
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="0.01"} 20
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="0.1"} 20
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="1"} 20
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="10"} 20
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast",le="+Inf"} 20
+controller_workqueue_work_duration_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast"} 5.696100000000001e-05
+controller_workqueue_work_duration_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-fast"} 20
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="1e-08"} 0
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="1e-07"} 0
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="1e-06"} 0
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="9.999999999999999e-06"} 5
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="9.999999999999999e-05"} 5
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="0.001"} 5
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="0.01"} 5
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="0.1"} 5
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="1"} 5
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="10"} 5
+controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow",le="+Inf"} 5
+controller_workqueue_work_duration_seconds_sum{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow"} 1.9166e-05
+controller_workqueue_work_duration_seconds_count{name="github.com.tektoncd.triggers.pkg.reconciler.clusterinterceptor.Reconciler-slow"} 5
