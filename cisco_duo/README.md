@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [cisco_duo][1].
+This check monitors [Cisco Duo][1].
 
 ## Setup
 
