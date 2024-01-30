@@ -8,7 +8,7 @@ This check monitors [Cisco Duo][1].
 
 ### Installation
 
-The cisco_duo check is included in the [Datadog Agent][2] package.
+The Cisco Duo check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
