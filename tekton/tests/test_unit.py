@@ -10,23 +10,23 @@ from .common import MOCKED_PIPELINES_METRICS, MOCKED_TRIGGERS_METRICS, mock_http
 
 
 @pytest.mark.parametrize(
-    'instance, metrics',
+    'instance, metrics, namespace',
     [
-        pytest.param('pipelines_instance', MOCKED_PIPELINES_METRICS, id='pipelines'),
-        pytest.param('triggers_instance', MOCKED_TRIGGERS_METRICS, id='triggers'),
+        pytest.param('pipelines_instance', MOCKED_PIPELINES_METRICS, 'pipelines_controller', id='pipelines'),
+        pytest.param('triggers_instance', MOCKED_TRIGGERS_METRICS, 'triggers_controller', id='triggers'),
     ],
 )
-def test_check(dd_run_check, aggregator, mocker, check, instance, metrics, request):
+def test_check(dd_run_check, aggregator, mocker, check, instance, metrics, request, namespace):
     mocker.patch("requests.get", wraps=mock_http_responses)
     dd_run_check(check(request.getfixturevalue(instance)))
 
     for expected_metric in metrics:
-        aggregator.assert_metric(f"tekton.{expected_metric}")
+        aggregator.assert_metric(f"tekton.{namespace}.{expected_metric}")
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
-    aggregator.assert_service_check("tekton.openmetrics.health", status=AgentCheck.OK, count=1)
+    aggregator.assert_service_check(f"tekton.{namespace}.openmetrics.health", status=AgentCheck.OK, count=1)
     assert len(aggregator.service_check_names) == 1
 
 
@@ -38,4 +38,6 @@ def test_invalid_url(dd_run_check, aggregator, check, pipelines_instance, mocker
         dd_run_check(check(pipelines_instance))
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_service_check("tekton.openmetrics.health", status=AgentCheck.CRITICAL, count=1)
+    aggregator.assert_service_check(
+        "tekton.pipelines_controller.openmetrics.health", status=AgentCheck.CRITICAL, count=1
+    )

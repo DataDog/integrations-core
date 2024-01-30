@@ -86,14 +86,17 @@ def setup_tekton():
 @pytest.fixture(scope='session')
 def dd_environment(dd_save_state):
     with kind_run(conditions=[setup_tekton], sleep=30) as kubeconfig, ExitStack() as stack:
+        instances = {}
+
         pipeline_host, pipeline_port = stack.enter_context(
             port_forward(kubeconfig, 'tekton-pipelines', 9090, 'service', 'tekton-pipelines-controller')
         )
-        instances = [{'openmetrics_endpoint': f'http://{pipeline_host}:{pipeline_port}/metrics'}]
+        instances['pipelines_controller_endpoint'] = f'http://{pipeline_host}:{pipeline_port}/metrics'
+
         trigger_host, trigger_port = stack.enter_context(
             port_forward(kubeconfig, 'tekton-pipelines', 9000, 'service', 'tekton-triggers-controller')
         )
-        instances.append({'openmetrics_endpoint': f'http://{trigger_host}:{trigger_port}/metrics'})
+        instances['triggers_controller_endpoint'] = f'http://{trigger_host}:{trigger_port}/metrics'
 
         yield {'instances': instances}
 
@@ -106,12 +109,12 @@ def check():
 @pytest.fixture
 def pipelines_instance():
     return {
-        "openmetrics_endpoint": "http://tekton-pipelines:9090",
+        "pipelines_controller_endpoint": "http://tekton-pipelines:9090",
     }
 
 
 @pytest.fixture
 def triggers_instance():
     return {
-        "openmetrics_endpoint": "http://tekton-triggers:9000",
+        "triggers_controller_endpoint": "http://tekton-triggers:9000",
     }
