@@ -1,0 +1,10 @@
+name: cisco-secure-firewall
+files:
+  - name: cisco_secure_firewall.yaml
+    options:
+      - template: logs
+        example:
+          - type: tcp/udp
+            port: <PORT>
+            service: cisco-secure-firewall
+            source: cisco-secure-firewall

@@ -1,0 +1,58 @@
+[build-system]
+requires = [
+    "hatchling>=0.13.0",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "datadog-cisco-secure-firewall"
+description = "The cisco-secure-firewall check"
+readme = "README.md"
+license = "BSD-3-Clause"
+keywords = [
+    "datadog",
+    "datadog agent",
+    "datadog check",
+    "cisco_secure_firewall",
+]
+authors = [
+    { name = "Datadog", email = "packages@datadoghq.com" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Private :: Do Not Upload",
+    "Topic :: System :: Monitoring",
+]
+dependencies = [
+    "datadog-checks-base>=4.2.0",
+]
+dynamic = [
+    "version",
+]
+
+[project.optional-dependencies]
+deps = []
+
+[project.urls]
+Source = "https://github.com/DataDog/integrations-core"
+
+[tool.hatch.version]
+path = "datadog_checks/cisco_secure_firewall/__about__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/datadog_checks",
+    "/tests",
+    "/manifest.json",
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "/datadog_checks/cisco_secure_firewall",
+]
+dev-mode-dirs = [
+    ".",
+]
