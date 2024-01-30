@@ -27,7 +27,7 @@ cisco_duo does not include any metrics.
 
 ### Service Checks
 
-cisco_duo does not include any service checks.
+The Cisco Duo integration does not include any service checks.
 
 ### Events
 
