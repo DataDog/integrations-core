@@ -107,6 +107,7 @@ def test_check_docker(dd_agent_check, init_config, instance_e2e):
     instance_e2e['query_metrics'] = {'run_sync': True, 'collection_interval': 0.1}
     instance_e2e['procedure_metrics'] = {'run_sync': True, 'collection_interval': 0.1}
     instance_e2e['collect_settings'] = {'run_sync': True, 'collection_interval': 0.1}
+    print(instance_e2e)
     aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_e2e]}, rate=True)
 
     aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')

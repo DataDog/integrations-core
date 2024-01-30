@@ -37,7 +37,7 @@ def get_local_driver():
     elif ON_WINDOWS:
         return '{ODBC Driver 18 for SQL Server}'
     else:
-        return 'FreeTDS'
+        return '{ODBC Driver 18 for SQL Server}'
 
 
 HOST = get_docker_hostname()

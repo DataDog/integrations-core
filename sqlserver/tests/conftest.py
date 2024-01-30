@@ -59,6 +59,10 @@ def instance_session_default():
     }
     windows_sqlserver_driver = os.environ.get('WINDOWS_SQLSERVER_DRIVER', None)
     if not windows_sqlserver_driver or windows_sqlserver_driver == 'odbc':
+        if 'ODBC Driver 18' in instance['driver']:
+            # ODBC Driver 18 enables TLS by default
+            # make sure we trust the self-signed server cert
+            instance['connection_string'] = 'TrustServerCertificate=yes'
         return instance
     instance['adoprovider'] = windows_sqlserver_driver
     instance['connector'] = 'adodbapi'
@@ -133,7 +137,7 @@ def _common_pyodbc_connect(conn_str):
 @pytest.fixture
 def datadog_conn_docker(instance_docker):
     # Make DB connection
-    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
+    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
         instance_docker['driver'], instance_docker['host'], instance_docker['username'], instance_docker['password']
     )
     conn = _common_pyodbc_connect(conn_str)
@@ -143,7 +147,7 @@ def datadog_conn_docker(instance_docker):
 
 @pytest.fixture
 def bob_conn_str(instance_docker):
-    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
+    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
         instance_docker['driver'], instance_docker['host'], "bob", "Password12!"
     )
     return conn_str
@@ -214,7 +218,7 @@ class SelfHealingConnection:
 @pytest.fixture
 def sa_conn(instance_docker):
     # system administrator connection
-    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
+    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
         instance_docker['driver'], instance_docker['host'], "sa", "Password123"
     )
     conn = _common_pyodbc_connect(conn_str)
@@ -224,7 +228,7 @@ def sa_conn(instance_docker):
 
 @pytest.fixture
 def instance_e2e(instance_docker):
-    instance_docker['driver'] = 'FreeTDS'
+    instance_docker['driver'] = '{ODBC Driver 18 for SQL Server}'
     instance_docker['dbm'] = True
     return instance_docker
 
@@ -301,7 +305,7 @@ def dd_environment(full_e2e_config):
         raise Exception("pyodbc is not installed!")
 
     def sqlserver_can_connect():
-        conn_str = 'DRIVER={};Server={};Database=master;UID=sa;PWD=Password123;'.format(
+        conn_str = 'DRIVER={};Server={};Database=master;UID=sa;PWD=Password123;TrustServerCertificate=yes;'.format(
             get_local_driver(), DOCKER_SERVER
         )
         pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=True)
