@@ -45,7 +45,9 @@
       },
       "process_signatures": [
         "memcached"
-      ]
+      ],
+      "source_type_id": 32,
+      "auto_install": true
     },
     "dashboards": {
       "memcached": "assets/dashboards/memcached_dashboard.json",

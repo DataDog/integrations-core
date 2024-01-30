@@ -277,7 +277,10 @@ class DockerAgent(AgentInterface):
             )
 
     def invoke(self, args: list[str]) -> None:
-        self._run_command(self._format_command(['agent', *args]), check=True)
+        self.run_command(['agent', *args])
+
+    def run_command(self, args: list[str]) -> None:
+        self._run_command(self._format_command([*args]), check=True)
 
     def enter_shell(self) -> None:
         self._run_command(self._format_command(['cmd' if self._is_windows_container else 'bash']), check=True)

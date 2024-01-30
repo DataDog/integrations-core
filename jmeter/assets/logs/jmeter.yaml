@@ -1,31 +1,32 @@
 id: jmeter
 metric_id: jmeter
+backend_only: false
 facets:
-  - name: Method
-    source: log
-    path: http.method
-    groups:
+  - groups:
       - Web Access
-  - name: Sampler name
+    name: Method
+    path: http.method
     source: log
+  - groups:
+      - JMeter
+    name: Sampler name
     path: sampler.sample_label
-    groups:
-      - JMeter
-  - name: Response code
     source: log
+  - groups:
+      - JMeter
+    name: Response code
     path: sampler.response_code
-    groups:
-      - JMeter
-  - name: URL Path
     source: log
+  - groups:
+      - JMeter
+    name: URL Path
     path: sampler.url_details.path
-    groups:
-      - JMeter
-  - name: Host
     source: log
-    path: sampler.url_details.host
-    groups:
+  - groups:
       - JMeter
+    name: Host
+    path: sampler.url_details.host
+    source: log
 pipeline:
   type: pipeline
   name: JMeter

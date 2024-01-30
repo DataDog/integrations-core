@@ -46,7 +46,9 @@
         "java org.apache.spark.deploy.SparkSubmit",
         "java org.apache.spark.deploy.worker.Worker",
         "java org.apache.spark.deploy.master.Master"
-      ]
+      ],
+      "source_type_id": 142,
+      "auto_install": true
     },
     "dashboards": {
       "spark": "assets/dashboards/spark_dashboard.json",

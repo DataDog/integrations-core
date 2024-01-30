@@ -1,5 +1,6 @@
 id: citrix_hypervisor
 metric_id: citrix-hypervisor
+backend_only: false
 pipeline:
   type: pipeline
   name: Citrix Hypervisor
