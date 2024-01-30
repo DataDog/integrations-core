@@ -31,7 +31,7 @@ cisco_duo does not include any service checks.
 
 ### Events
 
-cisco_duo does not include any events.
+The Cisco Duo integration does not include any events.
 
 ## Troubleshooting
 
