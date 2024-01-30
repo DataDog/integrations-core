@@ -23,7 +23,7 @@ No additional installation is needed on your server.
 
 ### Metrics
 
-cisco_duo does not include any metrics.
+The Cisco Duo integration does not include any metrics.
 
 ### Service Checks
 
