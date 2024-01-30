@@ -123,9 +123,10 @@ class InstanceConfig(BaseModel):
     namespace: Optional[str] = Field(None, pattern='\\w*')
     non_cumulative_histogram_buckets: Optional[bool] = None
     ntlm_domain: Optional[str] = None
-    openmetrics_endpoint: str
+    openmetrics_endpoint: Optional[str] = None
     password: Optional[str] = None
     persist_connections: Optional[bool] = None
+    pipelines_controller_endpoint: Optional[str] = None
     proxy: Optional[Proxy] = None
     raw_line_filters: Optional[tuple[str, ...]] = None
     raw_metric_prefix: Optional[str] = None
@@ -146,6 +147,7 @@ class InstanceConfig(BaseModel):
     tls_protocols_allowed: Optional[tuple[str, ...]] = None
     tls_use_host_header: Optional[bool] = None
     tls_verify: Optional[bool] = None
+    triggers_controller_endpoint: Optional[str] = None
     use_latest_spec: Optional[bool] = None
     use_legacy_auth_encoding: Optional[bool] = None
     use_process_start_time: Optional[bool] = None
