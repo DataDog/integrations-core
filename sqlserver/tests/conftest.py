@@ -59,10 +59,7 @@ def instance_session_default():
     }
     windows_sqlserver_driver = os.environ.get('WINDOWS_SQLSERVER_DRIVER', None)
     if not windows_sqlserver_driver or windows_sqlserver_driver == 'odbc':
-        if 'ODBC Driver 18' in instance['driver']:
-            # ODBC Driver 18 enables TLS by default
-            # make sure we trust the self-signed server cert
-            instance['connection_string'] = 'TrustServerCertificate=yes'
+        instance['connection_string'] = 'TrustServerCertificate=yes'
         return instance
     instance['adoprovider'] = windows_sqlserver_driver
     instance['connector'] = 'adodbapi'
