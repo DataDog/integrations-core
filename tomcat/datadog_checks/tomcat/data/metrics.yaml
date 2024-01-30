@@ -98,3 +98,25 @@ jmx_metrics:
           jspReloadCount:
             alias: tomcat.jsp.reload_count
             metric_type: counter
+    - include:
+        domain_regex: Catalina|Tomcat
+        type: DataSource
+        attribute:
+          active:
+            alias: tomcat.jdbc.connection_pool.active
+            metric_type: gauge
+          maxActive:
+            alias: tomcat.jdbc.connection_pool.max_active
+            metric_type: gauge
+          idle:
+            alias: tomcat.jdbc.connection_pool.idle
+            metric_type: gauge
+          maxIdle:
+            alias: tomcat.jdbc.connection_pool.max_idle
+            metric_type: gauge
+          minIdle:
+            alias: tomcat.jdbc.connection_pool.min_idle
+            metric_type: gauge
+          size:
+            alias: tomcat.jdbc.connection_pool.size
+            metric_type: gauge

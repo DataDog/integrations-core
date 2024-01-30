@@ -2,36 +2,36 @@ id: twistlock
 metric_id: twistlock
 backend_only: false
 facets:
-  - name: Package
-    source: log
+  - groups:
+      - Vulnerability
+    name: Package
     path: vulnerability.package.name
-    groups:
-      - Vulnerability
-  - name: CVE
     source: log
+  - groups:
+      - Vulnerability
+    name: CVE
     path: vulnerability.cve
-    groups:
-      - Vulnerability
-  - name: Affected Image Name
     source: log
+  - groups:
+      - Vulnerability
+    name: Affected Image Name
     path: vulnerability.image_name
-    groups:
-      - Vulnerability
-  - name: Vulnerability Status
     source: log
+  - groups:
+      - Vulnerability
+    name: Vulnerability Status
     path: vulnerability.status
-    groups:
-      - Vulnerability
-  - name: Package Version
     source: log
+  - groups:
+      - Vulnerability
+    name: Package Version
     path: vulnerability.package.version
-    groups:
-      - Vulnerability
-  - name: Vulnerability Severity
     source: log
-    path: vulnerability.severity
-    groups:
+  - groups:
       - Vulnerability
+    name: Vulnerability Severity
+    path: vulnerability.severity
+    source: log
 pipeline:
   type: pipeline
   name: Twistlock logs

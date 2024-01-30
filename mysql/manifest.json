@@ -43,7 +43,11 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": ["mysqld"]
+      "process_signatures": [
+        "mysqld"
+      ],
+      "source_type_id": 18,
+      "auto_install": true
     },
     "dashboards": {
       "mysql": "assets/dashboards/overview.json",

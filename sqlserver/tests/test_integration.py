@@ -433,7 +433,10 @@ def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_
     aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
 
     for mname in EXPECTED_DEFAULT_METRICS + CUSTOM_METRICS:
-        aggregator.assert_metric(mname)
+
+        # These require extra setup to test
+        if mname not in DATABASE_INDEX_METRICS:
+            aggregator.assert_metric(mname)
 
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK)
 
@@ -457,7 +460,7 @@ def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, 
     dd_run_check(sqlserver_check)
     seen_databases = set()
     for m in aggregator.metrics("sqlserver.database.avg_fragmentation_in_percent"):
-        tags_by_key = {k: v for k, v in [t.split(':') for t in m.tags if not t.startswith('dd.internal')]}
+        tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
         seen_databases.add(tags_by_key['database_name'])
         assert tags_by_key['object_name'].lower() != 'none'
 
@@ -789,4 +792,4 @@ def test_index_usage_statistics(aggregator, dd_run_check, instance_docker, datab
         'index_name:thingsindex',
     ]
     for m in DATABASE_INDEX_METRICS:
-        aggregator.assert_metric(m[0], tags=expected_tags, count=1)
+        aggregator.assert_metric(m, tags=expected_tags, count=1)

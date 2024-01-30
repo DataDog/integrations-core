@@ -48,7 +48,9 @@
         "sftp",
         "sshd",
         "sshd:"
-      ]
+      ],
+      "source_type_id": 90,
+      "auto_install": true
     }
   }
 }

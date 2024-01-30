@@ -53,7 +53,9 @@
         "gitlab-kas",
         "gitlab-workhorse",
         "gitlab-ctl"
-      ]
+      ],
+      "source_type_id": 10026,
+      "auto_install": true
     },
     "dashboards": {
       "Gitlab Overview": "assets/dashboards/overview.json"

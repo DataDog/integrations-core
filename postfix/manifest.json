@@ -44,7 +44,9 @@
       "process_signatures": [
         "postfix start",
         "sendmail -bd"
-      ]
+      ],
+      "source_type_id": 66,
+      "auto_install": true
     },
     "dashboards": {
       "postfix": "assets/dashboards/postfix_dashboard.json"
