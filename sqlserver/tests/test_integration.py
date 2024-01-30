@@ -766,7 +766,7 @@ def test_index_usage_statistics(aggregator, dd_run_check, instance_docker, datab
     # currently the `thingsindex` index on the `name` column in the ϑings table
     # in order to generate user seeks, scans, updates and lookups we can run a variety
     # of queries against this table
-    conn_str = 'DRIVER={};Server={};Database=datadog_test;UID={};PWD={};'.format(
+    conn_str = 'DRIVER={};Server={};Database=datadog_test;UID={};PWD={};TrustServerCertificate=yes;'.format(
         instance_docker['driver'], instance_docker['host'], "bob", "Password12!"
     )
     conn = pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=True)

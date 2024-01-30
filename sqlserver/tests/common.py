@@ -35,9 +35,9 @@ def get_local_driver():
     if ON_MACOS:
         return '/usr/local/lib/libtdsodbc.so'
     elif ON_WINDOWS:
-        return '{ODBC Driver 17 for SQL Server}'
+        return '{ODBC Driver 18 for SQL Server}'
     else:
-        return 'FreeTDS'
+        return '{ODBC Driver 18 for SQL Server}'
 
 
 HOST = get_docker_hostname()
@@ -160,7 +160,7 @@ INSTANCE_SQL = INSTANCE_SQL_DEFAULTS.copy()
 INSTANCE_SQL.update(
     {
         'connector': 'odbc',
-        'driver': '{ODBC Driver 17 for SQL Server}',
+        'driver': '{ODBC Driver 18 for SQL Server}',
         'include_task_scheduler_metrics': True,
         'include_db_fragmentation_metrics': True,
         'include_fci_metrics': True,
