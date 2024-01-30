@@ -104,7 +104,14 @@ def check():
 
 
 @pytest.fixture
-def instance():
+def pipelines_instance():
     return {
-        "openmetrics_endpoint": "http://tekton:8080",
+        "openmetrics_endpoint": "http://tekton-pipelines:9090",
+    }
+
+
+@pytest.fixture
+def triggers_instance():
+    return {
+        "openmetrics_endpoint": "http://tekton-triggers:9000",
     }
