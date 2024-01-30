@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import time
+from contextlib import ExitStack
 
 import pytest
 
@@ -82,26 +83,37 @@ def setup_tekton():
     run_command(["kubectl", "create", "ns", "test"])
     run_command(["kubectl", "apply", "-f", os.path.join(HERE, 'kind', "service-account.yaml")])
 
+    time.sleep(5)
+
+    run_command(["kubectl", "apply", "-f", os.path.join(HERE, 'kind', "tekton-triggers.yaml")])
+    run_command(["kubectl", "apply", "-f", os.path.join(HERE, 'kind', "tekton-interceptors.yaml")])
+    run_command(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s", "-n", "tekton-pipelines"])
+
 
 @pytest.fixture(scope='session')
 def dd_environment(dd_save_state):
     # https://github.com/tektoncd/dashboard/blob/main/docs/walkthrough/walkthrough-kind.md
-    with kind_run(kind_config=os.path.join(HERE, 'kind', "cluster.yaml"), conditions=[setup_tekton]) as kubeconfig:
-        with port_forward(kubeconfig, 'tekton-pipelines', 9090, 'service', 'tekton-pipelines-controller') as (
-            controller_host,
-            controller_port,
-        ):
-            endpoint = f'http://{controller_host}:{controller_port}/metrics'
-            instance = {'openmetrics_endpoint': endpoint}
+    with kind_run(
+        kind_config=os.path.join(HERE, 'kind', "cluster.yaml"), conditions=[setup_tekton], sleep=10
+    ) as kubeconfig, ExitStack() as stack:
+        instances = []
 
-            # We can't add this to `kind_run` because we don't know the URL at this moment
-            condition = CheckEndpoints(endpoint)
+        pipeline_host, pipeline_port = stack.enter_context(
+            port_forward(kubeconfig, 'tekton-pipelines', 9090, 'service', 'tekton-pipelines-controller')
+        )
+        instances.append({'openmetrics_endpoint': f'http://{pipeline_host}:{pipeline_port}/metrics'})
+
+        trigger_host, trigger_port = stack.enter_context(
+            port_forward(kubeconfig, 'tekton-pipelines', 9000, 'service', 'tekton-triggers-controller')
+        )
+        instances.append({'openmetrics_endpoint': f'http://{trigger_host}:{trigger_port}/metrics'})
+
+        # We can't add this to `kind_run` because we don't know the URL at this moment
+        for instance in instances:
+            condition = CheckEndpoints(instance['openmetrics_endpoint'])
             condition()
 
-            # save this instance to use for openmetrics_v2 instance, since the endpoint is different each run
-            dd_save_state("tekton_instance", instance)
-
-            yield instance
+        yield {'instances': instances}
 
 
 @pytest.fixture
