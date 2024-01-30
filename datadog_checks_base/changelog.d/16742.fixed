@@ -1,0 +1,1 @@
+[DBMON-3495] Add `replace_null_character` option to replace embedded null characters with empty string in query text
