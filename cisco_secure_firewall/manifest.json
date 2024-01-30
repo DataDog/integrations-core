@@ -40,11 +40,9 @@
     "dashboards": {
       "Cisco Secure Firewall - Overview": "assets/dashboards/cisco_secure_firewall_snmp.json"
     },
-    "monitors": {},
     "logs": {
       "source": "cisco-secure-firewall"
-    },
-    "saved_views": {}
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
