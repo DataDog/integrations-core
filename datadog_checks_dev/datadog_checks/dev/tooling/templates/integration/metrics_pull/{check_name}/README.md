@@ -16,7 +16,7 @@ This check monitors [{integration_name}][1].
 
 ### Validation
 
-!!! TBD !!!
+!!! Add steps to validate integration is functioning as expected !!!
 
 ## Data Collected
 
