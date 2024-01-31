@@ -48,7 +48,9 @@
       },
       "process_signatures": [
         "nginx: master process"
-      ]
+      ],
+      "source_type_id": 31,
+      "auto_install": true
     },
     "dashboards": {
       "NGINX Plus base overview": "assets/dashboards/plus_overview.json",

@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 7.0.0 / 2024-01-29
+
+***Changed***:
+
+* Bump the datadog_checks_dev version to 30.x ([#16728](https://github.com/DataDog/integrations-core/pull/16728))
+
+***Fixed***:
+
+* Clarify how to pass arguments to the testing commands ([#16691](https://github.com/DataDog/integrations-core/pull/16691))
+
 ## 6.4.0 / 2024-01-23
 
 ***Added***:

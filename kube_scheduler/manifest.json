@@ -44,7 +44,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10056,
+      "auto_install": true
     },
     "dashboards": {
       "kube_scheduler": "assets/dashboards/overview.json"

@@ -44,7 +44,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10125,
+      "auto_install": true
     },
     "dashboards": {
       "azure_iot_edge": "assets/dashboards/overview.json"

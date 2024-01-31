@@ -11,3 +11,5 @@ metadata:
     fields:
       vendor:
         value: "watchguard"
+      type:
+        value: "firewall"

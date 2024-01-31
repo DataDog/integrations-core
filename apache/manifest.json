@@ -46,7 +46,9 @@
         "httpd",
         "apache",
         "apache2"
-      ]
+      ],
+      "source_type_id": 30,
+      "auto_install": true
     },
     "dashboards": {
       "apache": "assets/dashboards/apache_dashboard.json"

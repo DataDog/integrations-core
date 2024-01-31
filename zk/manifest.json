@@ -46,7 +46,9 @@
       "process_signatures": [
         "zkServer.sh start",
         "java zoo.cfg"
-      ]
+      ],
+      "source_type_id": 48,
+      "auto_install": true
     },
     "dashboards": {
       "zookeeper": "assets/dashboards/zookeeper_dashboard.json"

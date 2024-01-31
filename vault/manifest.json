@@ -45,7 +45,9 @@
       },
       "process_signatures": [
         "vault server"
-      ]
+      ],
+      "source_type_id": 10059,
+      "auto_install": true
     },
     "dashboards": {
       "Vault - Overview": "assets/dashboards/vault_overview_legacy.json",

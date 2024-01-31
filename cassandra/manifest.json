@@ -46,7 +46,9 @@
       },
       "process_signatures": [
         "java org.apache.cassandra.service.CassandraDaemon"
-      ]
+      ],
+      "source_type_id": 33,
+      "auto_install": true
     },
     "dashboards": {
       "cassandra-overview": "assets/dashboards/cassandra_overview.json",

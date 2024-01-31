@@ -183,7 +183,11 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 }
 ```
 
-<!-- xxz tabs xxx -->
+[8]: https://datadoghq.dev/dd-trace-js/interfaces/plugins.openai.html
+[9]: https://github.com/DataDog/dd-trace-js
+[3]: https://ddtrace.readthedocs.io/en/stable/integrations.html#openai
+
+<!-- xxz tab xxx -->
 <!-- xxx tab "API Key" xxx -->
 
 **Note**: This setup method only collects `openai.api.usage.*` metrics. To collect all metrics provided by this integration, also follow the APM setup instructions.
@@ -239,8 +243,6 @@ Additional helpful documentation, links, and articles:
 [5]: https://docs.datadoghq.com/help/
 [6]: https://www.datadoghq.com/blog/monitor-openai-with-datadog/
 [7]: https://www.datadoghq.com/blog/monitor-azure-openai-with-datadog/
-[8]: https://datadoghq.dev/dd-trace-js/interfaces/plugins.openai.html
-[9]: https://github.com/DataDog/dd-trace-js
 [10]: https://platform.openai.com/
 [11]: https://app.datadoghq.com/integrations/openai
 [12]: https://app.datadoghq.com/monitors/recommended?q=integration%3AOpenAI&only_installed=false&p=1

@@ -46,7 +46,9 @@
       ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10236,
+      "auto_install": true
     },
     "dashboards": {
       "[calico] dashboard overview": "./assets/dashboards/calico_overview.json"
