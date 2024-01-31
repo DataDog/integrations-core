@@ -1,6 +1,6 @@
 id: cisco-duo
 tests:
-  - message: |-
+  - sample: |-
       {
         "access_device": {
             "epkey": "SOMEKEY",
@@ -47,7 +47,7 @@ tests:
       }
     ddtags: ["service:authentication"]
     result: null
-  - message: |-
+  - sample: |-
       {
         "access_device": {
             "browser": "Chrome",
@@ -87,7 +87,7 @@ tests:
       }
     ddtags: ["service:activity"]
     result: null
-  - message: |-
+  - sample: |-
       {
         "action": "ad_sync_by_user_begin",
         "description": "{\"directory\": \"AD Sync\", \"Sync Ref. Code\": \"somecode\", \"users\": \"xyz\"}",
@@ -98,7 +98,7 @@ tests:
       }
     ddtags: ["service:administrator"]
     result: null
-  - message: |-
+  - sample: |-
       {
         "context": "authentication",
         "credits": 5,
@@ -110,7 +110,7 @@ tests:
       }
     ddtags: ["service:telephony"]
     result: null
-  - message: |-
+  - sample: |-
       {
         "action": "o2fa_user_provisioned",
         "description": "{\"user_agent\": \"DuoCredProv/4.2.2.1755 (Windows NT 10.0.1809.17763.4851; x64; Server)\", \"hostname\": \"HOST02\", \"factor\": \"duo_otp\"}",
