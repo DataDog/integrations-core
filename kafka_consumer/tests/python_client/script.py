@@ -67,9 +67,7 @@ def create_client():
     config.update(__get_authentication_config())
 
     for key, value in config.items():
-        new_value = value
-        if "password" in key:
-            new_value = "*****"
+        new_value = "*****" if "password" in key else value
         print(f"{key}={new_value}")
 
     return AdminClient(config)
