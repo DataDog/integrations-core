@@ -272,10 +272,6 @@ pipeline:
       name: Parsing Palo Alto Panorama logs
       enabled: true
       meta:
-        last_update:
-          timestamp: 1706599993698
-          user_name: null
-          user_email: mohit.tilala@crestdatasys.com
         tags: []
       source: message
       samples:
@@ -320,10 +316,6 @@ pipeline:
       name: Parsing 'cef-formatted-time_generated' to 'timestamp' (epoch)
       enabled: true
       meta:
-        last_update:
-          timestamp: 1706185783827
-          user_name: null
-          user_email: mohit.tilala@crestdatasys.com
         tags: []
       source: time_generated
       samples:
@@ -335,10 +327,6 @@ pipeline:
       name: Define `timestamp` as the official timestamp of the log
       enabled: false
       meta:
-        last_update:
-          timestamp: 1706599469647
-          user_name: null
-          user_email: mohit.tilala@crestdatasys.com
         tags: []
       sources:
         - timestamp
@@ -346,10 +334,6 @@ pipeline:
       name: Map `type` as the official service of the log
       enabled: true
       meta:
-        last_update:
-          timestamp: 1705389772049
-          user_name: null
-          user_email: mohit.tilala@crestdatasys.com
         tags: []
       sources:
         - type
@@ -363,9 +347,6 @@ pipeline:
           name: Map 'severity' to 'panorama_severity'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705562837962
             tags: []
           sources:
             - severity
@@ -384,9 +365,6 @@ pipeline:
           name: Map 'action' to 'panorama_action'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1706598765999
             tags: []
           sources:
             - act
@@ -406,9 +384,6 @@ pipeline:
           name: Map 'natsrc' to network.client.ip
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705397652287
             tags: []
           sources:
             - natsrc
@@ -421,9 +396,6 @@ pipeline:
           name: Map 'natdst' to 'network.destination.ip'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705397754813
             tags: []
           sources:
             - natdst
@@ -436,9 +408,6 @@ pipeline:
           name: Map 'natsport' to 'network.client.port'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705397821686
             tags: []
           sources:
             - natsport
@@ -451,9 +420,6 @@ pipeline:
           name: Map 'natdport' to 'network.destination.port'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705397817358
             tags: []
           sources:
             - natdport
@@ -466,9 +432,6 @@ pipeline:
           name: Map 'network.client.ip' to 'network.client.geoip'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705401890730
             tags: []
           sources:
             - network.client.ip
@@ -478,9 +441,6 @@ pipeline:
           name: Map 'network.destination.ip' to 'network.destination.geoip'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705402017968
             tags: []
           sources:
             - network.destination.ip
@@ -490,9 +450,6 @@ pipeline:
           name: Map 'from' to 'srczone'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705659768133
             tags: []
           sources:
             - from
@@ -505,9 +462,6 @@ pipeline:
           name: Map 'to' to 'dstzone'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705659788779
             tags: []
           sources:
             - to
@@ -519,9 +473,6 @@ pipeline:
         - name: Map 'flags' with 'flag_details'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1706612916946
             tags: []
           source: flags
           target: flag_details
@@ -558,9 +509,6 @@ pipeline:
           name: Map 'ip' to 'network.client.ip'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705398510589
             tags: []
           sources:
             - ip
@@ -573,9 +521,6 @@ pipeline:
           name: Map 'beginport' to 'network.client.port'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705398555320
             tags: []
           sources:
             - beginport
@@ -588,9 +533,6 @@ pipeline:
           name: Map 'endport' to 'network.destination.port'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705398536392
             tags: []
           sources:
             - endport
@@ -609,9 +551,6 @@ pipeline:
           name: Map 'client_os' to 'http.useragent_details.os.family'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705398701693
             tags: []
           sources:
             - client_os
@@ -624,9 +563,6 @@ pipeline:
           name: Map 'public_ip' to 'network.client.ip'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705398696094
             tags: []
           sources:
             - public_ip
@@ -639,9 +575,6 @@ pipeline:
           name: Map 'network.client.ip' to 'network.client.geoip'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705402430436
             tags: []
           sources:
             - network.client.ip
@@ -657,9 +590,6 @@ pipeline:
           name: Map 'bytes_sent' with 'network.bytes_read'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705399195343
             tags: []
           sources:
             - bytes_sent
@@ -672,9 +602,6 @@ pipeline:
           name: Map 'bytes_received' with 'network.bytes_written'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705399190481
             tags: []
           sources:
             - bytes_received
@@ -693,9 +620,6 @@ pipeline:
           name: Map 'ip' with 'network.client.ip'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705400549463
             tags: []
           sources:
             - ip
@@ -708,9 +632,6 @@ pipeline:
           name: Map 'user_agent' with 'http.useragent'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705400545471
             tags: []
           sources:
             - user_agent
@@ -723,9 +644,6 @@ pipeline:
           name: Parsing a User Agent
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705568885695
             tags: []
           sources:
             - http.useragent
@@ -736,9 +654,6 @@ pipeline:
           name: Map 'authpolicy' to ''authentication_policy'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705662450782
             tags: []
           sources:
             - authpolicy
@@ -757,9 +672,6 @@ pipeline:
           name: Map 'http_method' to 'http.method'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705493009306
             tags: []
           sources:
             - http_method
@@ -778,9 +690,6 @@ pipeline:
           name: Map 'src_osfamily' to 'http.useragent_details.os.family'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705400697670
             tags: []
           sources:
             - src_osfamily
@@ -799,9 +708,6 @@ pipeline:
           name: Map 'src' to 'network.client.ip'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705400796208
             tags: []
           sources:
             - src
@@ -820,9 +726,6 @@ pipeline:
           name: Map 'os' to 'http.useragent_details.os.family'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705401067085
             tags: []
           sources:
             - os
@@ -835,9 +738,6 @@ pipeline:
           name: Map 'network.client.ip' to 'network.client.geoip'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705402347668
             tags: []
           sources:
             - network.client.ip
@@ -853,9 +753,6 @@ pipeline:
           name: Map 'user' to 'usr.name'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705401139980
             tags: []
           sources:
             - user
@@ -868,9 +765,6 @@ pipeline:
           name: Map 'network.client.ip' to 'network.client.geoip'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705402081390
             tags: []
           sources:
             - network.client.ip
@@ -887,9 +781,6 @@ pipeline:
           name: Map 'srcuser' to 'usr.name'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705401226233
             tags: []
           sources:
             - srcuser
@@ -908,9 +799,6 @@ pipeline:
           name: Map 'admin' to 'usr.name'
           enabled: true
           meta:
-            last_update:
-              user_id: "5795825"
-              timestamp: 1705401290817
             tags: []
           sources:
             - admin

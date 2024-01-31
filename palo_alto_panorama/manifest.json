@@ -64,6 +64,8 @@
   },
   "assets": {
     "integration": {
+      "auto_install": true,
+      "source_type_id": 6661801,
       "source_type_name": "palo-alto-panorama",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
@@ -83,7 +85,7 @@
       "Palo Alto Panorama: Decryption": "assets/dashboards/palo_alto_panorama_decryption.json",
       "Palo Alto Panorama: Global Protect": "assets/dashboards/palo_alto_panorama_globalprotect.json",
       "Palo Alto Panorama: Tunnel Inspection": "assets/dashboards/palo_alto_panorama_tunnel_inspection.json",
-      "Palo Alto Panorama: Authentication": "assets/dashboards/palo_alto_panorama_tunnel_authentication.json",
+      "Palo Alto Panorama: Authentication": "assets/dashboards/palo_alto_panorama_authentication.json",
       "Palo Alto Panorama: Correlated Events": "assets/dashboards/palo_alto_panorama_correlated_events.json",
       "Palo Alto Panorama: HIP Match": "assets/dashboards/palo_alto_panorama_hip_match.json",
       "Palo Alto Panorama: User ID": "assets/dashboards/palo_alto_panorama_user_id.json"
