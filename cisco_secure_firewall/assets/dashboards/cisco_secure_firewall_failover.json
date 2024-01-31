@@ -46,7 +46,7 @@
             "id": 301866354383030,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n1. Failover Events by Severity \n2. Failover Events Over Time \n3. Top Reasons for Firewall Failure \n4. Top Causes for Failover Pair to Switching to Standby \n5. Top Reason Codes for No Response From Other Firewall \n\n",
+                "content": "## Widgets\n\n1. Failover Events by Severity \n2. Failover Events Over Time \n3. Top Reasons for Firewall Failure \n4. Causes For Switching to STANDBY \n5. Top Reasons For No Response From Firewall ",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -185,6 +185,7 @@
             "id": 8622567745004426,
             "definition": {
                 "title": "Top Reasons for Firewall Failure",
+                "time": {},
                 "type": "toplist",
                 "requests": [
                     {
@@ -229,7 +230,7 @@
                 "style": {
                     "display": {
                         "type": "stacked",
-                        "legend": "automatic"
+                        "legend": "none"
                     },
                     "scaling": "relative"
                 }
@@ -244,7 +245,8 @@
         {
             "id": 7307920815223586,
             "definition": {
-                "title": "Top Causes for Failover Pair to Switching to Standby",
+                "title": "Causes For Switching to STANDBY",
+                "time": {},
                 "type": "toplist",
                 "requests": [
                     {
@@ -278,7 +280,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:104001 $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:104002 $Device-ID $Host"
                                 },
                                 "storage": "hot"
                             }
@@ -289,7 +291,7 @@
                 "style": {
                     "display": {
                         "type": "stacked",
-                        "legend": "automatic"
+                        "legend": "none"
                     },
                     "scaling": "relative"
                 }
@@ -304,17 +306,14 @@
         {
             "id": 1770539975289938,
             "definition": {
-                "title": "Top Reason Codes for No Response From Other Firewall",
-                "type": "toplist",
+                "time": {},
+                "title": "Top Reasons For No Response From  Firewall",
+                "type": "treemap",
                 "requests": [
                     {
                         "formulas": [
                             {
-                                "formula": "query1",
-                                "limit": {
-                                    "count": 10,
-                                    "order": "desc"
-                                }
+                                "formula": "query1"
                             }
                         ],
                         "queries": [
@@ -343,15 +342,12 @@
                                 "storage": "hot"
                             }
                         ],
-                        "response_format": "scalar"
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
                     }
-                ],
-                "style": {
-                    "display": {
-                        "type": "stacked",
-                        "legend": "automatic"
-                    }
-                }
+                ]
             },
             "layout": {
                 "x": 0,

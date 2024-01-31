@@ -46,7 +46,7 @@
             "id": 3651733438722226,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n\n",
+                "content": "## Widgets\n\n1. Number of Times System CPU Utilization Reached \n2. Number of Times System Memory Usage Reached \n3. Resource Manager Events by Severity \n4. Usage Rate Limit Reached Resources \n",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -66,7 +66,7 @@
         {
             "id": 955864287748890,
             "definition": {
-                "title": "No of times System CPU Utilization Reached the Threshold",
+                "title": "Number of Times System CPU Utilization Reached",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "query_value",
@@ -110,7 +110,7 @@
         {
             "id": 1541775528542034,
             "definition": {
-                "title": "No of times System Memory Usage Reached the Threshold",
+                "title": "Number of Times System Memory Usage Reached",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "query_value",
@@ -215,7 +215,7 @@
         {
             "id": 5173794689604746,
             "definition": {
-                "title": "Top 10 Resources for Which Usage or Rate Limit Has Been Reached",
+                "title": "Usage Rate Limit Reached Resources",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "toplist",

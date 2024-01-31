@@ -46,7 +46,7 @@
             "id": 3108979642528690,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n\n",
+                "content": "## Widgets\n\n1. Total Events \n2. Events Over Time \n3. Log Details \n4. Total Events \n5. Events Over Time \n6. Log Details \n7. Total Events \n8. Events Over Time \n9. Log Details \n10. Total Events \n11. Events Over Time \n12. Log Details \n13. Total Events \n14. Events Over Time \n15. Log Details \n16. Total Events \n17. Events Over Time \n18. Log Details \n19. Total Events \n20. Events Over Time \n21. Log Details \n22. Total Events \n23. Events Over Time \n24. Log Details \n25. Total Events \n26. Events Over Time \n27. Log Details \n28. Total Events \n29. Events Over Time \n30. Log Details \n31. Total Events \n32. Events Over Time \n33. Log Details \n34. Total Events \n35. Events Over Time \n36. Log Details \n37. Total Events \n38. Events Over Time \n39. Log Details \n40. Total Events \n41. Events Over Time \n42. Log Details \n43. Total Events \n44. Events Over Time \n45. Log Details \n46. Total Events \n47. Events Over Time \n48. Log Details \n49. Total Events \n50. Events Over Time \n51. Log Details \n52. Total Events \n53. Events Over Time \n54. Log Details ",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -716,7 +716,7 @@
                 "x": 0,
                 "y": 26,
                 "width": 12,
-                "height": 1
+                "height": 8
             }
         },
         {
@@ -878,7 +878,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 27,
+                "y": 34,
                 "width": 12,
                 "height": 8
             }
@@ -1042,7 +1042,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 35,
+                "y": 42,
                 "width": 12,
                 "height": 8
             }
@@ -1206,7 +1206,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 43,
+                "y": 50,
                 "width": 12,
                 "height": 8
             }
@@ -1370,7 +1370,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 51,
+                "y": 58,
                 "width": 12,
                 "height": 8
             }
@@ -1534,7 +1534,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 59,
+                "y": 66,
                 "width": 12,
                 "height": 8
             }
@@ -1698,7 +1698,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 67,
+                "y": 74,
                 "width": 12,
                 "height": 8
             }
@@ -1862,7 +1862,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 75,
+                "y": 82,
                 "width": 12,
                 "height": 8
             }
@@ -2026,7 +2026,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 83,
+                "y": 90,
                 "width": 12,
                 "height": 8
             }
@@ -2190,7 +2190,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 91,
+                "y": 98,
                 "width": 12,
                 "height": 8
             }
@@ -2354,7 +2354,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 99,
+                "y": 106,
                 "width": 12,
                 "height": 8
             }
@@ -2518,7 +2518,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 107,
+                "y": 114,
                 "width": 12,
                 "height": 8
             }
@@ -2682,7 +2682,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 115,
+                "y": 122,
                 "width": 12,
                 "height": 8
             }
@@ -2846,7 +2846,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 123,
+                "y": 130,
                 "width": 12,
                 "height": 8
             }
@@ -3010,7 +3010,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 131,
+                "y": 138,
                 "width": 12,
                 "height": 8
             }

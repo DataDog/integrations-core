@@ -46,7 +46,7 @@
             "id": 6168024787257412,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n\n",
+                "content": "## Widgets\n\n1. Command Interface Events by Severity \n2. Top 10 Executed Commands \n3. Command Executed by User \n4. Top 10 System Or Infrastructure Errors ",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -130,6 +130,7 @@
                 "title": "Top 10 Executed Commands",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "type": "toplist",
                 "requests": [
                     {
@@ -174,7 +175,7 @@
                 "style": {
                     "display": {
                         "type": "stacked",
-                        "legend": "automatic"
+                        "legend": "none"
                     },
                     "scaling": "relative"
                 }
@@ -252,6 +253,7 @@
                 "title": "Top 10 System Or Infrastructure Errors",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "type": "toplist",
                 "requests": [
                     {
@@ -285,7 +287,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:111111 $Device-ID $Username $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:111111 $Device-ID $Host"
                                 },
                                 "storage": "hot"
                             }
@@ -297,7 +299,8 @@
                     "display": {
                         "type": "stacked",
                         "legend": "automatic"
-                    }
+                    },
+                    "scaling": "relative"
                 }
             },
             "layout": {

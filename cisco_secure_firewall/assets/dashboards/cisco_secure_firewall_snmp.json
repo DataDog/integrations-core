@@ -46,7 +46,7 @@
             "id": 3453352347169644,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n1. SNMP Events by Severity \n2. SNMP Channel Errors by Interface Number \n3. SNMP Trap Channel Errors by Interface Number \n4. SNMP Request Failure by Interface \n5. SNMP Request Failure by Interface \n6. Failed SNMP Response Over Time \n7. Failed SNMP Response by IP Address, Port \n8. Discarded Incoming SNMP Request Over Time \n9. Top Discarded Incoming SNMP Request by Interface \n10. SNMP Group Configuration Failures \n11. Top Reason for Dropped SNMP Request \n12. SNMP Config Failure by Host, Reason \n13. Top Failure Reason for SNMP Group Configuration \n14. SNMP Config Failure Reason by User \n\n",
+                "content": "## Widgets\n\n1. Events by Severity \n2. SNMP Channel Errors by Interface Number \n3. SNMP Trap Channel Errors by Interface Number \n4. SNMP Request Failure by Interface \n5. SNMP Response Failure by Interface \n6. Failed SNMP Response Over Time \n7. Failed SNMP Response by IP Address, Port \n8. Discarded Incoming SNMP Request Over Time \n9. Top Discarded Incoming SNMP Request by Interface \n10. SNMP Group Configuration Failures \n11. Top Reason for Dropped SNMP Request \n12. SNMP Config Failure by Host, Reason \n13. Top Failure Reason for SNMP Group Configuration \n14. SNMP Config Failure Reason by User ",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -66,7 +66,7 @@
         {
             "id": 1078667475694688,
             "definition": {
-                "title": "SNMP Events by Severity",
+                "title": "Events by Severity",
                 "title_size": "16",
                 "title_align": "left",
                 "requests": [
@@ -75,6 +75,7 @@
                             {
                                 "formula": "query1",
                                 "limit": {
+                                    "count": 500,
                                     "order": "desc"
                                 }
                             }
@@ -129,6 +130,7 @@
                 "title": "SNMP Channel Errors by Interface Number",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "type": "toplist",
                 "requests": [
                     {
@@ -199,6 +201,7 @@
                 "title": "SNMP Trap Channel Errors by Interface Number",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "type": "toplist",
                 "requests": [
                     {
@@ -269,6 +272,7 @@
                 "title": "SNMP Request Failure by Interface",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "type": "toplist",
                 "requests": [
                     {
@@ -336,9 +340,10 @@
         {
             "id": 8951999225081930,
             "definition": {
-                "title": "SNMP Request Failure by Interface",
+                "title": "SNMP Response Failure by Interface",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "type": "toplist",
                 "requests": [
                     {
@@ -594,6 +599,7 @@
                 "title": "Top Discarded Incoming SNMP Request by Interface",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "type": "toplist",
                 "requests": [
                     {
@@ -638,7 +644,7 @@
                 "style": {
                     "display": {
                         "type": "stacked",
-                        "legend": "automatic"
+                        "legend": "none"
                     },
                     "scaling": "relative"
                 }
@@ -730,6 +736,7 @@
                 "title": "Top Reason for Dropped SNMP Request",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "type": "toplist",
                 "requests": [
                     {
@@ -774,7 +781,7 @@
                 "style": {
                     "display": {
                         "type": "stacked",
-                        "legend": "automatic"
+                        "legend": "none"
                     },
                     "scaling": "relative"
                 }
@@ -861,6 +868,7 @@
                 "title": "Top Failure Reason for SNMP Group Configuration ",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "type": "toplist",
                 "requests": [
                     {
@@ -905,7 +913,7 @@
                 "style": {
                     "display": {
                         "type": "stacked",
-                        "legend": "automatic"
+                        "legend": "none"
                     },
                     "scaling": "relative"
                 }

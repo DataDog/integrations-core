@@ -46,7 +46,7 @@
             "id": 159849289346650,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n1. Total Application Firewall Events \n2. Application Firewall Events Over Time \n3. No. Of Times Non ASCII Character Found \n4. Non ASCII Character by Source IP, Destination IP \n5. DNS Lookup Failed \n6. Top 10 DNS Lookup Failure Reasons \n\n",
+                "content": "## Widgets\n\n1. Total Application Firewall Events \n2. Application Firewall Events Over Time \n3. Number of Times Non-ASCII Character Found \n4. Non ASCII Character Found by Source IP, Destination IP \n5. DNS Lookup Failed \n6. Top 10 DNS Lookup Failure Reasons \n\n",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -94,7 +94,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco-secure-firewall @message_id:415020 $Device-ID $Host"
+                                                "query": "source:cisco-secure-firewall @message_id:415* $Device-ID $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -152,7 +152,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco-secure-firewall @message_id:415020 $Device-ID $Host"
+                                                "query": "source:cisco-secure-firewall @message_id:415* $Device-ID $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -177,7 +177,7 @@
                     {
                         "id": 510579858216566,
                         "definition": {
-                            "title": "No. Of Times Non ASCII Character Found",
+                            "title": "Number of Times Non-ASCII Character Found",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -221,7 +221,7 @@
                     {
                         "id": 4404621746135236,
                         "definition": {
-                            "title": "Non ASCII Character by Source IP, Destination IP",
+                            "title": "Non ASCII Character Found by Source IP, Destination IP",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -355,6 +355,7 @@
                             "title": "Top 10 DNS Lookup Failure Reasons",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -399,7 +400,7 @@
                             "style": {
                                 "display": {
                                     "type": "stacked",
-                                    "legend": "automatic"
+                                    "legend": "none"
                                 },
                                 "scaling": "relative"
                             }

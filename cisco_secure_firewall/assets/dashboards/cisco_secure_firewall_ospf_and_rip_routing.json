@@ -46,7 +46,7 @@
             "id": 5757865950536734,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n\n",
+                "content": "## Widgets\n\n1. OSPF Routing Events by Severity \n2. Internal Software Error Reasons \n3. Invalid Packet Received IPs \n4. RIP Auth Failed IPs \n5. RIP Auth Failed Interfaces ",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -142,9 +142,11 @@
                     {
                         "id": 4043098633572532,
                         "definition": {
-                            "title": "Internal Software Errors by Reason",
+                            "title": "Internal Software Error Reasons",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
+                            "type": "toplist",
                             "requests": [
                                 {
                                     "formulas": [
@@ -182,15 +184,15 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "semantic"
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "table"
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "scaling": "relative"
                             }
                         },
                         "layout": {
@@ -203,9 +205,11 @@
                     {
                         "id": 1610870829937120,
                         "definition": {
-                            "title": "Top 10 IPs from which Invalid Packet Received",
+                            "title": "Top 10 IPs from Invalid Packet Received",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
+                            "type": "toplist",
                             "requests": [
                                 {
                                     "formulas": [
@@ -243,15 +247,15 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "semantic"
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "table"
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "scaling": "relative"
                             }
                         },
                         "layout": {
@@ -282,9 +286,10 @@
                     {
                         "id": 3520799612073190,
                         "definition": {
-                            "title": "Top 10 IPs From Which RIP Auth Failed",
+                            "title": "RIP Auth Failed IPs",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -329,7 +334,7 @@
                             "style": {
                                 "display": {
                                     "type": "stacked",
-                                    "legend": "automatic"
+                                    "legend": "none"
                                 },
                                 "scaling": "relative"
                             }
@@ -344,9 +349,10 @@
                     {
                         "id": 1794819953348616,
                         "definition": {
-                            "title": "Top 10 Interface Where RIP Auth Failed",
+                            "title": "RIP Auth Failed Interfaces",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -391,7 +397,7 @@
                             "style": {
                                 "display": {
                                     "type": "stacked",
-                                    "legend": "automatic"
+                                    "legend": "none"
                                 },
                                 "scaling": "relative"
                             }

@@ -46,7 +46,7 @@
             "id": 1396360919264920,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n\n",
+                "content": "## Widgets\n\n1. VPN Failover Events by Severity \n2. Top IPs and Port Failed to Update cTCP Database Record \n3. Top IPs and Port Failed to Add New cTCP Record ",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -108,7 +108,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:720* $Device_Id $Peer-IP-Address"
+                                    "query": "source:cisco-secure-firewall @message_id:720* $Device-ID $IP-Address $Host"
                                 },
                                 "storage": "hot"
                             }
@@ -133,7 +133,7 @@
         {
             "id": 7638411284854470,
             "definition": {
-                "title": "Top IP Address by Port for Which Failure Occurred To Update cTCP Record During Bulk Synchronization",
+                "title": "Top IPs and Port Failed to Update cTCP Database Record",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "toplist",
@@ -177,7 +177,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:720064 $Device_Id $Peer-IP-Address"
+                                    "query": "source:cisco-secure-firewall @message_id:720064 $Device-ID $IP-Address $Host"
                                 },
                                 "storage": "hot"
                             }
@@ -197,13 +197,13 @@
                 "x": 0,
                 "y": 5,
                 "width": 12,
-                "height": 3
+                "height": 4
             }
         },
         {
             "id": 3108874547348078,
             "definition": {
-                "title": "Top IP Address by Port for Which Failure Occurred to Add New cTCP Record",
+                "title": "Top IPs and Port Failed to Add New cTCP Record",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "toplist",
@@ -247,7 +247,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:720054 $Device_Id $Peer-IP-Address"
+                                    "query": "source:cisco-secure-firewall @message_id:720054 $Device-ID $IP-Address $Host"
                                 },
                                 "storage": "hot"
                             }
@@ -265,22 +265,28 @@
             },
             "layout": {
                 "x": 0,
-                "y": 8,
+                "y": 9,
                 "width": 12,
-                "height": 3
+                "height": 4
             }
         }
     ],
     "template_variables": [
         {
-            "name": "Peer-IP-Address",
-            "prefix": "@peer_ip_address",
+            "name": "Host",
+            "prefix": "host",
             "available_values": [],
             "default": "*"
         },
         {
-            "name": "Device_Id",
+            "name": "Device-ID",
             "prefix": "@device_id",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "IP-Address",
+            "prefix": "@peer_ip_address",
             "available_values": [],
             "default": "*"
         }

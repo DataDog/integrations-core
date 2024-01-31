@@ -46,7 +46,7 @@
             "id": 154603843849682,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n\n",
+                "content": "## Widgets\n1. Threat Detection Events Over Time \n2. Top 10 Source of Drop Rate Count \n3. Top 10 Shunned Host \n4. Removed Host From Shun List \n5. Top 10 Targeted IPs \n6. Top 10 Attacking IPs \n\n",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -64,11 +64,70 @@
             }
         },
         {
+            "id": 679694263886908,
+            "definition": {
+                "title": "Threat Detection Events Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Threat Detection Event Count",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:733* $Host $Device-ID $Object-IP-Address"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
             "id": 5856991256503130,
             "definition": {
                 "title": "Top 10 Source of Drop Rate Count",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "type": "toplist",
                 "requests": [
                     {
@@ -102,7 +161,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:733100 $Device-ID $Object-IP-Address $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:733100 $Device-ID $Host"
                                 },
                                 "storage": "hot"
                             }
@@ -113,16 +172,16 @@
                 "style": {
                     "display": {
                         "type": "stacked",
-                        "legend": "automatic"
+                        "legend": "none"
                     },
                     "scaling": "relative"
                 }
             },
             "layout": {
                 "x": 0,
-                "y": 2,
+                "y": 6,
                 "width": 4,
-                "height": 3
+                "height": 4
             }
         },
         {
@@ -131,6 +190,7 @@
                 "title": "Top 10 Shunned Host",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "type": "toplist",
                 "requests": [
                     {
@@ -164,7 +224,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:733102 $Device-ID $Object-IP-Address $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:733102 $Device-ID $Host"
                                 },
                                 "storage": "hot"
                             }
@@ -175,24 +235,25 @@
                 "style": {
                     "display": {
                         "type": "stacked",
-                        "legend": "automatic"
+                        "legend": "none"
                     },
                     "scaling": "relative"
                 }
             },
             "layout": {
                 "x": 4,
-                "y": 2,
+                "y": 6,
                 "width": 4,
-                "height": 3
+                "height": 4
             }
         },
         {
             "id": 6784686233519288,
             "definition": {
-                "title": "Top 10 Host Which Removed From Shun List",
+                "title": "Removed Host From Shun List",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "type": "toplist",
                 "requests": [
                     {
@@ -226,7 +287,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:733103 $Device-ID $Object-IP-Address $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:733103 $Device-ID $Host"
                                 },
                                 "storage": "hot"
                             }
@@ -237,16 +298,16 @@
                 "style": {
                     "display": {
                         "type": "stacked",
-                        "legend": "automatic"
+                        "legend": "none"
                     },
                     "scaling": "relative"
                 }
             },
             "layout": {
                 "x": 8,
-                "y": 2,
+                "y": 6,
                 "width": 4,
-                "height": 3
+                "height": 4
             }
         },
         {
@@ -255,6 +316,7 @@
                 "title": "Top 10 Targeted IPs",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "type": "toplist",
                 "requests": [
                     {
@@ -299,24 +361,25 @@
                 "style": {
                     "display": {
                         "type": "stacked",
-                        "legend": "automatic"
+                        "legend": "none"
                     },
                     "scaling": "relative"
                 }
             },
             "layout": {
                 "x": 0,
-                "y": 5,
+                "y": 10,
                 "width": 6,
-                "height": 3
+                "height": 4
             }
         },
         {
             "id": 4569137021826506,
             "definition": {
-                "title": "Top 10 Attacker IPs",
+                "title": "Top 10 Attacking IPs",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "type": "toplist",
                 "requests": [
                     {
@@ -361,16 +424,16 @@
                 "style": {
                     "display": {
                         "type": "stacked",
-                        "legend": "automatic"
+                        "legend": "none"
                     },
                     "scaling": "relative"
                 }
             },
             "layout": {
                 "x": 6,
-                "y": 5,
+                "y": 10,
                 "width": 6,
-                "height": 3
+                "height": 4
             }
         }
     ],

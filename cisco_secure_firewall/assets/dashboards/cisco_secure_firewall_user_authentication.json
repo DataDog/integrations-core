@@ -367,6 +367,7 @@
                 "title": "Top 10 Users Without Admin Privileges",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "type": "toplist",
                 "requests": [
                     {
@@ -429,6 +430,7 @@
                 "title": "Top 10 Locked Out Users",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "type": "toplist",
                 "requests": [
                     {
@@ -473,7 +475,7 @@
                 "style": {
                     "display": {
                         "type": "stacked",
-                        "legend": "automatic"
+                        "legend": "none"
                     },
                     "scaling": "relative"
                 }
@@ -491,6 +493,7 @@
                 "title": "Top 10 Rejected Authentication by Source IP",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "type": "toplist",
                 "requests": [
                     {
@@ -535,7 +538,7 @@
                 "style": {
                     "display": {
                         "type": "stacked",
-                        "legend": "automatic"
+                        "legend": "none"
                     },
                     "scaling": "relative"
                 }
@@ -553,6 +556,7 @@
                 "title": "Top 10 Auth Session Started Users",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "type": "toplist",
                 "requests": [
                     {
@@ -597,7 +601,7 @@
                 "style": {
                     "display": {
                         "type": "stacked",
-                        "legend": "automatic"
+                        "legend": "none"
                     },
                     "scaling": "relative"
                 }

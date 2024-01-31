@@ -46,7 +46,7 @@
             "id": 3979223334086134,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n1. Transparent Firewall Events Over Time \n2. No. Of Times Failure Occurred to Locate Ingress Interface \n3. Top 10 Failed Egress Interface \n4. Top 10 Source IPs of the Packet \n5. Top 10 Destination IPs of the Packet \n6. Log Details \n7. No. Of Times Routing Failed to Locate Next-Hop \n8. Protocol Types \n9. Top 10 Source IP \n10. Top 10 Destination IP \n11. Top 10 Source Interface \n12. Log Details \n13. Log Details \n",
+                "content": "## Widgets\n\n1. Transparent Firewall Events Over Time \n2. Number Of Times Failure Occured \n3. Top 10 Source Interface \n4. Top 10 Source IPs of the Packet \n5. Top 10 Destination IPs of the Packet \n6. Log Details \n7. Number of Times Routing Failed \n8. Events by Protocol \n9. Top 10 Source IP \n10. Top 10 Destination IP \n11. Top 10 Source Interface \n12. Log Details \n13. Log Details ",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -99,7 +99,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:(110* OR 220*) $Device-ID $Client-IP $Destination-IP $Src-Interface $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:(110* OR 220*) $Device-ID $Source-IP $Destination-IP $Source-Interface $Host"
                                 },
                                 "storage": "hot"
                             }
@@ -133,7 +133,7 @@
                     {
                         "id": 8203742635925598,
                         "definition": {
-                            "title": "No. Of Times Failure Occurred to Locate Ingress Interface",
+                            "title": "Number Of Times Failure Occured",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -156,7 +156,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco-secure-firewall @message_id:110002 $Device-ID $Client-IP $Destination-IP $Src-Interface $Host"
+                                                "query": "source:cisco-secure-firewall @message_id:110002 $Device-ID $Source-IP $Destination-IP $Source-Interface $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -177,7 +177,7 @@
                     {
                         "id": 6000253700997654,
                         "definition": {
-                            "title": "Top 10 Failed Egress Interface",
+                            "title": "Top 10 Source Interface",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -213,7 +213,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-firewall @message_id:110002 $Device-ID $Client-IP $Destination-IP $Src-Interface $Host"
+                                                "query": "source:cisco-secure-firewall @message_id:110002 $Device-ID $Source-IP $Destination-IP $Source-Interface $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -242,6 +242,7 @@
                             "title": "Top 10 Source IPs of the Packet",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -275,7 +276,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-firewall @message_id:110002 $Device-ID $Client-IP $Destination-IP $Src-Interface $Host"
+                                                "query": "source:cisco-secure-firewall @message_id:110002 $Device-ID $Source-IP $Destination-IP $Source-Interface $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -286,7 +287,7 @@
                             "style": {
                                 "display": {
                                     "type": "stacked",
-                                    "legend": "automatic"
+                                    "legend": "none"
                                 },
                                 "scaling": "relative"
                             }
@@ -304,6 +305,7 @@
                             "title": "Top 10 Destination IPs of the Packet",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -337,7 +339,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-firewall @message_id:110002 $Device-ID $Client-IP $Destination-IP $Src-Interface $Host"
+                                                "query": "source:cisco-secure-firewall @message_id:110002 $Device-ID $Source-IP $Destination-IP $Source-Interface $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -348,7 +350,7 @@
                             "style": {
                                 "display": {
                                     "type": "stacked",
-                                    "legend": "automatic"
+                                    "legend": "none"
                                 },
                                 "scaling": "relative"
                             }
@@ -371,7 +373,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:cisco-secure-firewall @message_id:110002 $Device-ID $Client-IP $Destination-IP $Src-Interface $Host",
+                                        "query_string": "source:cisco-secure-firewall @message_id:110002 $Device-ID $Source-IP $Destination-IP $Source-Interface $Host",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -449,7 +451,7 @@
                     {
                         "id": 7761743108842832,
                         "definition": {
-                            "title": "No. Of Times Routing Failed to Locate Next-Hop",
+                            "title": "Number of Times Routing Failed",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -472,7 +474,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco-secure-firewall @message_id:110003 $Device-ID $Client-IP $Destination-IP $Src-Interface $Host"
+                                                "query": "source:cisco-secure-firewall @message_id:110003 $Device-ID $Source-IP $Destination-IP $Source-Interface $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -486,14 +488,14 @@
                         "layout": {
                             "x": 0,
                             "y": 0,
-                            "width": 3,
+                            "width": 4,
                             "height": 4
                         }
                     },
                     {
                         "id": 4944752249968176,
                         "definition": {
-                            "title": "Protocol Types",
+                            "title": "Events by Protocol",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -528,7 +530,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-firewall @message_id:110003 $Device-ID $Client-IP $Destination-IP $Src-Interface $Host"
+                                                "query": "source:cisco-secure-firewall @message_id:110003 $Device-ID $Source-IP $Destination-IP $Source-Interface $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -545,9 +547,9 @@
                             }
                         },
                         "layout": {
-                            "x": 3,
+                            "x": 4,
                             "y": 0,
-                            "width": 9,
+                            "width": 8,
                             "height": 4
                         }
                     },
@@ -557,6 +559,7 @@
                             "title": "Top 10 Source IP",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -590,7 +593,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-firewall @message_id:110003 $Device-ID $Client-IP $Destination-IP $Src-Interface $Host"
+                                                "query": "source:cisco-secure-firewall @message_id:110003 $Device-ID $Source-IP $Destination-IP $Source-Interface $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -601,7 +604,7 @@
                             "style": {
                                 "display": {
                                     "type": "stacked",
-                                    "legend": "automatic"
+                                    "legend": "none"
                                 },
                                 "scaling": "relative"
                             }
@@ -619,6 +622,7 @@
                             "title": "Top 10 Destination IP",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -652,7 +656,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-firewall @message_id:110003 $Device-ID $Client-IP $Destination-IP $Src-Interface $Host"
+                                                "query": "source:cisco-secure-firewall @message_id:110003 $Device-ID $Source-IP $Destination-IP $Source-Interface $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -663,7 +667,7 @@
                             "style": {
                                 "display": {
                                     "type": "stacked",
-                                    "legend": "automatic"
+                                    "legend": "none"
                                 },
                                 "scaling": "relative"
                             }
@@ -681,6 +685,7 @@
                             "title": "Top 10 Source Interface",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -714,7 +719,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-firewall @message_id:110003 $Device-ID $Client-IP $Destination-IP $Src-Interface $Host"
+                                                "query": "source:cisco-secure-firewall @message_id:110003 $Device-ID $Source-IP $Destination-IP $Source-Interface $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -725,7 +730,7 @@
                             "style": {
                                 "display": {
                                     "type": "stacked",
-                                    "legend": "automatic"
+                                    "legend": "none"
                                 },
                                 "scaling": "relative"
                             }
@@ -748,7 +753,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:cisco-secure-firewall @message_id:110003 $Device-ID $Client-IP $Destination-IP $Src-Interface $Host",
+                                        "query_string": "source:cisco-secure-firewall @message_id:110003 $Device-ID $Source-IP $Destination-IP $Source-Interface $Host",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -811,8 +816,7 @@
                 "x": 0,
                 "y": 16,
                 "width": 12,
-                "height": 12,
-                "is_column_break": true
+                "height": 12
             }
         },
         {
@@ -932,7 +936,7 @@
             "default": "*"
         },
         {
-            "name": "Client-IP",
+            "name": "Source-IP",
             "prefix": "@network.client.ip",
             "available_values": [],
             "default": "*"
@@ -944,7 +948,7 @@
             "default": "*"
         },
         {
-            "name": "Src-Interface",
+            "name": "Source-Interface",
             "prefix": "@src_interface",
             "available_values": [],
             "default": "*"

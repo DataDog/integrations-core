@@ -46,7 +46,7 @@
             "id": 808417330624756,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n\n",
+                "content": "## Widgets\n\n1. Security Events Over Time \n2. Security Events by Severity \n3. Security Events by Types \n4. Total Intrusions \n5. Total Connections \n6. Total Malware Detected File Count \n7. Total Intrude Source IPs \n8. Total Intrude Destination IPs \n9. Distribution of Intrude Source \n10. Top Protocols Associated with Intrusion \n11. Intrusion by Classification \n12. Top Intruded Policies \n13. Security Events by Clients Apps \n14. Top Application Protocols \n15. Events by ACPolicy \n16. Events by NAPPolicy \n17. Event Distribution by Access Control Rule Action \n18. Top Connecting Source IP \n19. Top Connecting Destination IP ",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -99,7 +99,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:430* $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:430* $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -158,7 +158,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:430* $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:430* $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -219,7 +219,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:430* $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:430* $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -268,7 +268,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:430001 $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:430001 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -312,7 +312,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:430002 $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:430002 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -333,7 +333,7 @@
         {
             "id": 6409266514938054,
             "definition": {
-                "title": "Total File Malware Detected",
+                "title": "Total Malware Detected File Count",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "query_value",
@@ -356,7 +356,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:430005 $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:430005 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -413,7 +413,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:430001 $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:430001 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -475,7 +475,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:430001 $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:430001 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -538,7 +538,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:430001 $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:430001 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -599,7 +599,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:430001 $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:430001 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -659,7 +659,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:430001 $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:430001 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -721,7 +721,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:430001 $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:430001 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -782,7 +782,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:430* $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:430* $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -843,7 +843,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:430* $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:430* $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -904,7 +904,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:430* $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:430* $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -965,7 +965,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:430* $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:430* $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -1026,7 +1026,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -1088,7 +1088,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:430002 $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:430002 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -1150,7 +1150,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:430002 $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:430002 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -1213,7 +1213,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:430002 $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:430002 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -1274,7 +1274,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -1336,7 +1336,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -1398,7 +1398,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -1460,7 +1460,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -1524,7 +1524,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             },
@@ -1540,7 +1540,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
@@ -1603,7 +1603,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             },
@@ -1619,7 +1619,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host"
+                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host $Src-IP $Dest-IP $Protocol"
                                 },
                                 "storage": "hot"
                             }
