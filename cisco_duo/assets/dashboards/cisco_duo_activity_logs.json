@@ -281,7 +281,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@target.type",
+                                        "facet": "@duo_target.type",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -289,7 +289,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@target.name",
+                                        "facet": "@duo_target.name",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -297,7 +297,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@target.details",
+                                        "facet": "@duo_target.details",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",

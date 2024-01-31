@@ -2,195 +2,173 @@ id: cisco-duo
 metric_id: cisco-duo
 backend_only: false
 facets:
-  - name: Auth Device Name
-    source: log
-    path: auth_device.name
-    type: string
-    facetType: list
-    groups:
-      - Cisco Duo
-  - name: Access Device Browser
-    source: log
-    path: access_device.browser
-    type: string
-    facetType: list
-    groups:
-      - Cisco Duo
-  - name: Access Device Browser Version
-    source: log
-    path: access_device.browser_version
-    type: string
-    facetType: list
-    groups:
-      - Cisco Duo
-  - name: Access Device City
-    source: log
-    path: access_device.geoip.city.name
-    type: string
-    facetType: list
-    groups:
-      - Cisco Duo
-  - name: Access Device IP
-    source: log
-    path: access_device.ip.address
-    type: string
-    facetType: list
-    groups:
-      - Cisco Duo
-  - name: Access Device OS
-    source: log
-    path: access_device.os
-    type: string
-    facetType: list
-    groups:
-      - Cisco Duo
-  - name: Access Device OS Version
-    source: log
-    path: access_device.os_version
-    type: string
-    facetType: list
-    groups:
-      - Cisco Duo
-  - name: Access Device Subdivision
-    source: log
-    path: access_device.geoip.subdivision.name
-    type: string
-    facetType: list
-    groups:
-      - Cisco Duo
-  - name: Action
-    source: log
-    path: duo_action
-    type: string
-    facetType: list
-    groups:
-      - Cisco Duo
-  - name: Action Name
-    source: log
-    path: duo_action_name
-    type: string
-    facetType: list
-    groups:
-      - Cisco Duo
-  - name: Actor Name
-    source: log
-    path: actor.name
-    type: string
-    facetType: list
-    groups:
-      - Cisco Duo
-  - name: Auth Device Country
-    source: log
-    path: auth_device.geoip.country.name
-    type: string
-    facetType: list
-    groups:
-      - Cisco Duo
-  - name: Auth Device IP
-    source: log
-    path: auth_device.ip
-    type: string
-    facetType: list
-    groups:
-      - Cisco Duo
-  - name: Context
-    source: log
-    path: context
-    type: string
-    facetType: list
-    groups:
-      - Cisco Duo
-  - name: Credits
-    source: log
-    path: credits
-    type: double
-    facetType: range
-    groups:
-      - Cisco Duo
-  - name: Event Type
-    source: log
-    path: event_type
-    type: string
-    facetType: list
-    groups:
-      - Cisco Duo
-  - name: Factor
-    source: log
-    path: factor
-    type: string
-    facetType: list
-    groups:
-      - Cisco Duo
-  - name: Object
-    source: log
-    path: object
-    type: string
-    facetType: list
-    groups:
-      - Cisco Duo
-  - name: Reason
-    source: log
-    path: duo_reason
-    type: string
-    facetType: list
-    groups:
-      - Cisco Duo
-  - name: Result
-    source: log
-    path: result
-    type: string
-    facetType: list
-    groups:
-      - Cisco Duo
-  - name: Target Details
-    source: log
-    path: target.details
-    type: string
-    facetType: list
-    groups:
-      - Cisco Duo
-  - name: Target Name
-    source: log
-    path: target.name
-    type: string
-    facetType: list
-    groups:
-      - Cisco Duo
-  - name: Target Type
-    source: log
-    path: target.type
-    type: string
-    facetType: list
-    groups:
-      - Cisco Duo
-  - name: User Email
-    source: log
-    path: usr.email
-    type: string
-    facetType: list
-    groups:
-      - User
-  - name: User Name
-    source: log
-    path: usr.name
-    type: string
-    facetType: list
-    groups:
-      - User
-  - name: Event Name
-    source: log
-    path: evt.name
-    type: string
-    facetType: list
-    groups:
-      - Event
-  - name: Event Outcome
-    source: log
-    path: evt.outcome
-    type: string
-    facetType: list
-    groups:
-      - Event
+- facetType: list
+  groups:
+  - Cisco Duo
+  name: Auth Device Name
+  path: auth_device.name
+  source: log
+  type: string
+- facetType: list
+  groups:
+  - Cisco Duo
+  name: Access Device Browser
+  path: access_device.browser
+  source: log
+  type: string
+- facetType: list
+  groups:
+  - Cisco Duo
+  name: Access Device Browser Version
+  path: access_device.browser_version
+  source: log
+  type: string
+- facetType: list
+  groups:
+  - Cisco Duo
+  name: Access Device City
+  path: access_device.geoip.city.name
+  source: log
+  type: string
+- facetType: list
+  groups:
+  - Cisco Duo
+  name: Access Device IP
+  path: access_device.ip.address
+  source: log
+  type: string
+- facetType: list
+  groups:
+  - Cisco Duo
+  name: Access Device OS
+  path: access_device.os
+  source: log
+  type: string
+- facetType: list
+  groups:
+  - Cisco Duo
+  name: Access Device OS Version
+  path: access_device.os_version
+  source: log
+  type: string
+- facetType: list
+  groups:
+  - Cisco Duo
+  name: Access Device Subdivision
+  path: access_device.geoip.subdivision.name
+  source: log
+  type: string
+- facetType: list
+  groups:
+  - Cisco Duo
+  name: Action
+  path: duo_action
+  source: log
+  type: string
+- facetType: list
+  groups:
+  - Cisco Duo
+  name: Action Name
+  path: duo_action_name
+  source: log
+  type: string
+- facetType: list
+  groups:
+  - Cisco Duo
+  name: Actor Name
+  path: actor.name
+  source: log
+  type: string
+- facetType: list
+  groups:
+  - Cisco Duo
+  name: Auth Device Country
+  path: auth_device.geoip.country.name
+  source: log
+  type: string
+- facetType: list
+  groups:
+  - Cisco Duo
+  name: Auth Device IP
+  path: auth_device.ip
+  source: log
+  type: string
+- facetType: list
+  groups:
+  - Cisco Duo
+  name: Context
+  path: context
+  source: log
+  type: string
+- facetType: range
+  groups:
+  - Cisco Duo
+  name: Credits
+  path: credits
+  source: log
+  type: double
+- facetType: list
+  groups:
+  - Cisco Duo
+  name: Factor
+  path: factor
+  source: log
+  type: string
+- facetType: list
+  groups:
+  - Cisco Duo
+  name: Object
+  path: object
+  source: log
+  type: string
+- facetType: list
+  groups:
+  - Cisco Duo
+  name: Reason
+  path: duo_reason
+  source: log
+  type: string
+- facetType: list
+  groups:
+  - Cisco Duo
+  name: Target Details
+  path: duo_target.details
+  source: log
+  type: string
+- facetType: list
+  groups:
+  - Cisco Duo
+  name: Target Name
+  path: duo_target.name
+  source: log
+  type: string
+- facetType: list
+  groups:
+  - Cisco Duo
+  name: Target Type
+  path: duo_target.type
+  source: log
+  type: string
+- groups:
+  - User
+  name: User Email
+  path: usr.email
+  source: log
+- groups:
+  - User
+  name: User Name
+  path: usr.name
+  source: log
+- groups:
+  - Event
+  name: Event Name
+  path: evt.name
+  source: log
+- groups:
+  - Event
+  name: Event Outcome
+  path: evt.outcome
+  source: log
 pipeline:
   type: pipeline
   name: Cisco Duo
@@ -199,8 +177,7 @@ pipeline:
     query: "source:cisco-duo"
   processors:
     - type: date-remapper
-      name: Define `timestamp` attribute as the official ingestion timestamp of the
-        log
+      name: Define `timestamp` as the official date of the log
       enabled: true
       meta:
         tags: []
@@ -220,7 +197,7 @@ pipeline:
         query: "service:authentication "
       processors:
         - type: geo-ip-parser
-          name: "GeoIP Parser : GeoIP Parser for `access_device.ip`"
+          name: GeoIP Parser for `access_device.ip`
           enabled: true
           meta:
             tags: []
@@ -229,7 +206,7 @@ pipeline:
           target: access_device.geoip
           ip_processing_behavior: do-nothing
         - type: geo-ip-parser
-          name: "GeoIP Parser : GeoIP Parser for `auth_device.ip`"
+          name: GeoIP Parser for `auth_device.ip`
           enabled: true
           meta:
             tags: []
@@ -238,7 +215,7 @@ pipeline:
           target: auth_device.geoip
           ip_processing_behavior: do-nothing
         - type: attribute-remapper
-          name: "Remapper : Map `result` to `evt.outcome`"
+          name: Map `result` to `evt.outcome`
           enabled: true
           meta:
             tags: []
@@ -250,7 +227,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: "Remapper : Map `email` to `usr.email`"
+          name: Map `email` to `usr.email`
           enabled: true
           meta:
             tags: []
@@ -262,7 +239,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: "Remapper : Remap `event_type` to `evt.name`"
+          name: Map `event_type` to `evt.name`
           enabled: true
           meta:
             tags: []
@@ -274,7 +251,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: " Remapper : Map `user.name` to `usr.name`"
+          name: Map `user.name` to `usr.name`
           enabled: true
           meta:
             tags: []
@@ -292,7 +269,7 @@ pipeline:
         query: "service:activity "
       processors:
         - type: geo-ip-parser
-          name: "GeoIP Parser : GeoIP Parser for `access_device.ip.address`"
+          name: GeoIP Parser for `access_device.ip.address`
           enabled: true
           meta:
             tags: []
@@ -300,6 +277,18 @@ pipeline:
             - access_device.ip.address
           target: access_device.geoip
           ip_processing_behavior: do-nothing
+        - type: attribute-remapper
+          name: Map `target` to `duo_target`
+          enabled: true
+          meta:
+            tags: []
+          sources:
+            - target
+          sourceType: attribute
+          target: duo_target
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
     - type: pipeline
       name: Cisco Duo Administrator
       enabled: true
@@ -307,7 +296,7 @@ pipeline:
         query: "service:administrator "
       processors:
         - type: attribute-remapper
-          name: " Remapper : Map `username` to `usr.name`"
+          name: Map `username` to `usr.name`
           enabled: true
           meta:
             tags: []
@@ -325,7 +314,7 @@ pipeline:
         query: "service:offline_enrollment "
       processors:
         - type: attribute-remapper
-          name: " Remapper : Map `username` to `usr.name`"
+          name: Map `username` to `usr.name`
           enabled: true
           meta:
             tags: []
