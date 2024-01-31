@@ -16,7 +16,7 @@ This integration monitors [{integration_name}][4].
 
 ### Validation
 
-!!! TBD !!!
+!!! Add steps to validate integration is functioning as expected !!!
 
 ## Data Collected
 
