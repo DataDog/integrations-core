@@ -22,7 +22,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name
+from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name, replace_null_character
 
 try:
     import datadog_agent
@@ -193,7 +193,7 @@ def obfuscate_xml_plan(raw_plan, obfuscator_options=None):
         for k in XML_PLAN_OBFUSCATION_ATTRS:
             val = e.attrib.get(k, None)
             if val:
-                statement = obfuscate_sql_with_metadata(val, obfuscator_options)
+                statement = obfuscate_sql_with_metadata(replace_null_character(val), obfuscator_options)
                 e.attrib[k] = ensure_unicode(statement['query'])
     return to_native_string(ET.tostring(tree, encoding="UTF-8"))
 
@@ -311,11 +311,15 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             try:
                 # Attempt to obfuscate SQL statement with metadata
                 procedure_statement = None
-                statement = obfuscate_sql_with_metadata(row['statement_text'], self._config.obfuscator_options)
+                statement = obfuscate_sql_with_metadata(
+                    replace_null_character(row['statement_text']), self._config.obfuscator_options
+                )
                 comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
 
                 if row['is_proc']:
-                    procedure_statement = obfuscate_sql_with_metadata(row['text'], self._config.obfuscator_options)
+                    procedure_statement = obfuscate_sql_with_metadata(
+                        replace_null_character(row['text']), self._config.obfuscator_options
+                    )
 
             except Exception as e:
                 if self._config.log_unobfuscated_queries:

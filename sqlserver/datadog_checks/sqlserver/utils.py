@@ -128,3 +128,13 @@ def is_azure_database(engine_edition):
     :return: bool
     """
     return engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE or engine_edition == ENGINE_EDITION_SQL_DATABASE
+
+
+def replace_null_character(val):
+    """
+    Replace embedded null character with empty string
+    """
+    if not val:
+        return val
+
+    return val.replace('\x00', '')

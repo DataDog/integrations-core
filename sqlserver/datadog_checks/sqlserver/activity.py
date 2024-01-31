@@ -14,7 +14,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name
+from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name, replace_null_character
 
 try:
     import datadog_agent
@@ -280,12 +280,16 @@ class SqlserverActivity(DBMAsyncJob):
         if 'statement_text' not in row:
             return self._sanitize_row(row)
         try:
-            statement = obfuscate_sql_with_metadata(row['statement_text'], self._config.obfuscator_options)
+            statement = obfuscate_sql_with_metadata(
+                replace_null_character(row['statement_text']), self._config.obfuscator_options
+            )
             # sqlserver doesn't have a boolean data type so convert integer to boolean
             comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
             if row['is_proc'] and 'text' in row:
                 try:
-                    procedure_statement = obfuscate_sql_with_metadata(row['text'], self._config.obfuscator_options)
+                    procedure_statement = obfuscate_sql_with_metadata(
+                        replace_null_character(row['text']), self._config.obfuscator_options
+                    )
                     # procedure_signature is used to link this activity event with
                     # its related plan events
                     row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
