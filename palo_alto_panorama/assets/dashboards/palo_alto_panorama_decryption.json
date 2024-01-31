@@ -46,7 +46,7 @@
             "id": 8599185040282124,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n1. Total Decryption Events\n2. Decryption Events Overtime\n3. Source Zone Distribution\n4. Destination Zone Distribution\n5. Top Sources\n6. Top Destinations\n7. Top Source Users\n8. Top Destination Users\n9. Top Inbound Interfaces\n10. Top Outbound Interfaces\n11. Top Source Ports\n12. Top Destination Ports\n13. Top Rules\n14. Top Flags\n15. Source Geolocations\n16. Destination Geolocations\n17. Top Applications\n18. Application Technologies\n19. Appplication Categories\n20. Application Subcategories\n21. SAAS Applications\n22. Sanctioned Applications\n23. Distribution by Application Risk\n24. Top Application Characteristics\n25. Action Distribution\n26. Top Decryption Proxy Types\n27. Top IP Protocols\n28. Top Decryption Policies\n29. Top Chain Statuses\n30. Decryption Source Device Details\n31. Decryption Destination Device Details\n32. Application Configuration Details\n33. Log Details",
+                "content": "## Widgets\n1. Total Decryption Events\n2. Decryption Events Overtime\n3. Source Zone Distribution\n4. Destination Zone Distribution\n5. Top Sources\n6. Top Destinations\n7. Top Source Users\n8. Top Destination Users\n9. Top Inbound Interfaces\n10. Top Outbound Interfaces\n11. Top Source Ports\n12. Top Destination Ports\n13. Top Rules\n14. Top Flags\n15. Source Geolocations\n16. Destination Geolocations\n17. Top Applications\n18. Application Technologies\n19. Application Categories\n20. Application Subcategories\n21. SAAS Applications\n22. Sanctioned Applications\n23. Distribution by Application Risk\n24. Top Application Characteristics\n25. Action Distribution\n26. Top Decryption Proxy Types\n27. Top IP Protocols\n28. Top Decryption Policies\n29. Top Chain Statuses\n30. Decryption Source Device Details\n31. Decryption Destination Device Details\n32. Application Configuration Details\n33. Log Details",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -1154,7 +1154,7 @@
         {
             "id": 3409924901657536,
             "definition": {
-                "title": "Appplication Categories",
+                "title": "Application Categories",
                 "title_size": "16",
                 "title_align": "left",
                 "requests": [
@@ -1521,7 +1521,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@parorama_action",
+                                        "facet": "@panorama_action",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",

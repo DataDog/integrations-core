@@ -1,5 +1,5 @@
 {
-    "title": "Palo Alto Panorama: Config",
+    "title": "Palo Alto Panorama: System",
     "description": "",
     "widgets": [
         {
@@ -25,7 +25,7 @@
             "id": 4688297178923336,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard gives insights about config logs.\n- Config logs displays the administrator username, the type of client (Web, CLI, or Panorama), the type of command executed, the command status (succeeded or failed), etc.\n",
+                "content": "## Overview\n- This dashboard gives insights about system related logs.\n- System logs display entries for each system event on the firewall. ",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -46,7 +46,7 @@
             "id": 8599185040282124,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n1. Total Config Events\n2. Config Events Overtime\n3. Top Administrators\n4. Clients Distribution\n5. Configuration Results\n6. Top Firewall Hosts\n7. Top Commands Performed\n8. Log Details",
+                "content": "## Widgets\n1. Total System Events\n2. System Events Overtime\n3. Subtype Distribution\n4. Distribution by Virtual System\n5. Top Modules\n6. Events by Severity\n7. Log Details",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -66,7 +66,7 @@
         {
             "id": 345407825527640,
             "definition": {
-                "title": "Total Config Events",
+                "title": "Total System Events",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "query_value",
@@ -89,7 +89,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:CONFIG $Config_Result $Client $User_Name $Device_Serial_Number"
+                                    "query": "source:palo-alto-panorama @type:SYSTEM $Device_Serial_Number $Subtype $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -110,7 +110,7 @@
         {
             "id": 6804421863386286,
             "definition": {
-                "title": "Config Events Overtime",
+                "title": "System Events Overtime",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": true,
@@ -127,7 +127,7 @@
                     {
                         "formulas": [
                             {
-                                "alias": "Config",
+                                "alias": "System",
                                 "formula": "query1"
                             }
                         ],
@@ -143,7 +143,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@type",
+                                        "facet": "@subtype",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -152,7 +152,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:CONFIG $Config_Result $Client $User_Name $Device_Serial_Number"
+                                    "query": "source:palo-alto-panorama @type:SYSTEM $Device_Serial_Number $Subtype $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -177,68 +177,7 @@
         {
             "id": 5074642991254010,
             "definition": {
-                "title": "Top Administrators",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "toplist",
-                "requests": [
-                    {
-                        "formulas": [
-                            {
-                                "formula": "query1",
-                                "limit": {
-                                    "count": 10,
-                                    "order": "desc"
-                                }
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "data_source": "logs",
-                                "name": "query1",
-                                "indexes": [
-                                    "*"
-                                ],
-                                "compute": {
-                                    "aggregation": "count"
-                                },
-                                "group_by": [
-                                    {
-                                        "facet": "@usr.name",
-                                        "limit": 10,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "count"
-                                        }
-                                    }
-                                ],
-                                "search": {
-                                    "query": "source:palo-alto-panorama @type:CONFIG $Config_Result $Client $User_Name $Device_Serial_Number"
-                                },
-                                "storage": "hot"
-                            }
-                        ],
-                        "response_format": "scalar"
-                    }
-                ],
-                "style": {
-                    "display": {
-                        "type": "stacked",
-                        "legend": "automatic"
-                    }
-                }
-            },
-            "layout": {
-                "x": 0,
-                "y": 5,
-                "width": 3,
-                "height": 4
-            }
-        },
-        {
-            "id": 8681469698339168,
-            "definition": {
-                "title": "Clients Distribution",
+                "title": "Subtype Distribution",
                 "title_size": "16",
                 "title_align": "left",
                 "requests": [
@@ -263,7 +202,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@client",
+                                        "facet": "@subtype",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -272,7 +211,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:CONFIG $Config_Result $Client $User_Name $Device_Serial_Number"
+                                    "query": "source:palo-alto-panorama @type:SYSTEM $Device_Serial_Number $Subtype $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -289,26 +228,25 @@
                 }
             },
             "layout": {
-                "x": 3,
+                "x": 0,
                 "y": 5,
-                "width": 9,
+                "width": 12,
                 "height": 4
             }
         },
         {
-            "id": 1561976797598968,
+            "id": 8681469698339168,
             "definition": {
-                "title": "Configuration Results",
+                "title": "Distribution by Virtual System",
                 "title_size": "16",
                 "title_align": "left",
-                "type": "toplist",
                 "requests": [
                     {
                         "formulas": [
                             {
                                 "formula": "query1",
                                 "limit": {
-                                    "count": 10,
+                                    "count": 500,
                                     "order": "desc"
                                 }
                             }
@@ -325,7 +263,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@result",
+                                        "facet": "@vsys",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -334,19 +272,20 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:CONFIG $Config_Result $Client $User_Name $Device_Serial_Number"
+                                    "query": "source:palo-alto-panorama @type:SYSTEM $Device_Serial_Number $Subtype $Severity"
                                 },
                                 "storage": "hot"
                             }
                         ],
-                        "response_format": "scalar"
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
                     }
                 ],
-                "style": {
-                    "display": {
-                        "type": "stacked",
-                        "legend": "automatic"
-                    }
+                "type": "sunburst",
+                "legend": {
+                    "type": "automatic"
                 }
             },
             "layout": {
@@ -357,9 +296,9 @@
             }
         },
         {
-            "id": 995832136782352,
+            "id": 1561976797598968,
             "definition": {
-                "title": "Top Firewall Hosts",
+                "title": "Top Modules",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "toplist",
@@ -386,7 +325,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@device_name",
+                                        "facet": "@module",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -395,7 +334,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:CONFIG $Config_Result $Client $User_Name $Device_Serial_Number"
+                                    "query": "source:palo-alto-panorama @type:SYSTEM $Device_Serial_Number $Subtype $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -420,7 +359,7 @@
         {
             "id": 6205045309047866,
             "definition": {
-                "title": "Top Commands Performed",
+                "title": "Events by Severity",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "toplist",
@@ -430,7 +369,7 @@
                             {
                                 "formula": "query1",
                                 "limit": {
-                                    "count": 500,
+                                    "count": 10,
                                     "order": "desc"
                                 }
                             }
@@ -447,7 +386,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cmd",
+                                        "facet": "@panorama_severity",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -456,7 +395,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:CONFIG $Config_Result $Client $User_Name $Device_Serial_Number"
+                                    "query": "source:palo-alto-panorama @type:SYSTEM $Device_Serial_Number $Subtype $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -489,41 +428,41 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:palo-alto-panorama @type:CONFIG $Config_Result $Client $User_Name $Device_Serial_Number",
+                            "query_string": "source:palo-alto-panorama @type:SYSTEM $Device_Serial_Number $Subtype $Severity",
                             "indexes": [],
                             "storage": "hot"
                         },
                         "columns": [
                             {
-                                "field": "type",
+                                "field": "time_generated",
                                 "width": "auto"
                             },
                             {
-                                "field": "usr.name",
+                                "field": "subtype",
                                 "width": "auto"
                             },
                             {
-                                "field": "result",
+                                "field": "module",
                                 "width": "auto"
                             },
                             {
-                                "field": "client",
+                                "field": "panorama_severity",
                                 "width": "auto"
                             },
                             {
-                                "field": "cmd",
+                                "field": "vsys",
                                 "width": "auto"
                             },
                             {
-                                "field": "before-change-detail",
+                                "field": "device_name",
                                 "width": "auto"
                             },
                             {
-                                "field": "after-change-detail",
+                                "field": "eventid",
                                 "width": "auto"
                             },
                             {
-                                "field": "comment",
+                                "field": "opaque",
                                 "width": "auto"
                             }
                         ]
@@ -535,7 +474,7 @@
                 "x": 0,
                 "y": 13,
                 "width": 12,
-                "height": 3
+                "height": 4
             }
         }
     ],
@@ -547,20 +486,14 @@
             "default": "*"
         },
         {
-            "name": "Config_Result",
-            "prefix": "@result",
+            "name": "Subtype",
+            "prefix": "@subtype",
             "available_values": [],
             "default": "*"
         },
         {
-            "name": "Client",
-            "prefix": "@client",
-            "available_values": [],
-            "default": "*"
-        },
-        {
-            "name": "User_Name",
-            "prefix": "@usr.name",
+            "name": "Severity",
+            "prefix": "@panorama_severity",
             "available_values": [],
             "default": "*"
         }

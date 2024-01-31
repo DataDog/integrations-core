@@ -25,7 +25,7 @@
             "id": 4688297178923336,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard gives insights about anti bot related logs.",
+                "content": "## Overview\n- This dashboard gives insights about config logs.\n- Config logs displays the administrator username, the type of client (Web, CLI, or Panorama), the type of command executed, the command status (succeeded or failed), etc.\n",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -46,7 +46,7 @@
             "id": 8599185040282124,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n1. Total Events\n2. Events Over Time\n3. Events by Severity\n4. Events by Action\n5. Top Events by File Name\n6. Top Events by File Type\n7. Events by Protection Type\n8. OS Distribution\n9. Source Details\n10. Malware Action Distribution\n11. Top Clients\n12. Top Destinations\n13. Log Details",
+                "content": "## Widgets\n1. Total Config Events\n2. Config Events Overtime\n3. Top Administrators\n4. Clients Distribution\n5. Configuration Results\n6. Top Firewall Hosts\n7. Top Commands Performed\n8. Log Details",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
