@@ -12,7 +12,7 @@ This check monitors [{integration_name}][1].
 
 ### Configuration
 
-!!! TBD !!!
+!!! Add list of steps to set up this integration !!!
 
 ### Validation
 
