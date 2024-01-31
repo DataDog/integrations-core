@@ -12,7 +12,7 @@ This integration monitors [{integration_name}][4].
 
 ### Configuration
 
-!!! TBD !!!
+!!! Add list of steps to set up this integration !!!
 
 ### Validation
 
