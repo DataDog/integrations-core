@@ -194,7 +194,7 @@ pipeline:
       name: Cisco Duo Authentication
       enabled: true
       filter:
-        query: "service:authentication "
+        query: "service:authentication"
       processors:
         - type: geo-ip-parser
           name: GeoIP Parser for `access_device.ip`
@@ -266,7 +266,7 @@ pipeline:
       name: Cisco Duo Activity
       enabled: true
       filter:
-        query: "service:activity "
+        query: "service:activity"
       processors:
         - type: geo-ip-parser
           name: GeoIP Parser for `access_device.ip.address`
@@ -293,7 +293,7 @@ pipeline:
       name: Cisco Duo Administrator
       enabled: true
       filter:
-        query: "service:administrator "
+        query: "service:administrator"
       processors:
         - type: attribute-remapper
           name: Map `username` to `usr.name`
@@ -311,7 +311,7 @@ pipeline:
       name: Cisco Duo Offline Enrollment
       enabled: true
       filter:
-        query: "service:offline_enrollment "
+        query: "service:offline_enrollment"
       processors:
         - type: attribute-remapper
           name: Map `username` to `usr.name`
