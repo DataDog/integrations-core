@@ -127,7 +127,11 @@ class VSphereAPI(object):
             # Object returned by SmartConnect is a ServerInstance
             # https://www.vmware.com/support/developer/vc-sdk/visdk2xpubs/ReferenceGuide/vim.ServiceInstance.html
             conn = connect.SmartConnect(
-                host=self.config.hostname, user=self.config.username, pwd=self.config.password, sslContext=context
+                host=self.config.hostname,
+                user=self.config.username,
+                pwd=self.config.password,
+                sslContext=context,
+                httpConnectionTimeout=15,
             )
             # Next line tries a simple API call to check the health of the connection.
             version_info = VersionInfo(conn.content.about)
