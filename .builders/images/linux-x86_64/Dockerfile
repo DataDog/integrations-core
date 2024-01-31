@@ -4,6 +4,8 @@ FROM ${BASE_IMAGE}
 # Script for the common task of fetching a source tarball, compiling and installing it
 COPY install-from-source.sh /
 
+ENV CFLAGS="-O2"
+
 # For Python 2, we get openssl(1) via yum just to get the necessary headers,
 # and we remove the package after compilation to prevent it from interfering
 # with the use of openssl3 everywhere else
