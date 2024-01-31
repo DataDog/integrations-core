@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 36.0.1-beta.1 / 2024-01-31
+
+***Added***:
+
+* Update pyvmomi to 8.0.2.0.1 ([#16542](https://github.com/DataDog/integrations-core/pull/16542))
+
 ## 34.3.1 / 2023-12-04
 
 ***Fixed***:
