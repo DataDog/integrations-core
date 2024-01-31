@@ -25,7 +25,7 @@
             "id": 4688297178923336,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard gives insights about anti bot related logs.",
+                "content": "## Overview\n- This dashboard gives insights about tunnel inspection logs.\n- Tunnel inspection logs are like traffic logs for tunnel sessions; they display entries of non-encrypted tunnel sessions.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -46,7 +46,7 @@
             "id": 8599185040282124,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n1. Total Events\n2. Events Over Time\n3. Events by Severity\n4. Events by Action\n5. Top Events by File Name\n6. Top Events by File Type\n7. Events by Protection Type\n8. OS Distribution\n9. Source Details\n10. Malware Action Distribution\n11. Top Clients\n12. Top Destinations\n13. Log Details",
+                "content": "## Widgets\n1. Total Tunnel Inspection Events\n2. Tunnel Inspection Events Overtime\n3. Bytes Activity Overtime\n4. Packets Activity Overtime\n5. Action Distribution\n6. Top Rules\n7. Top Flags\n8. Tunnel Type Distribution \n9. Severity Distribution\n10. Top Inbound Interfaces\n11. Top Outbound Interfaces\n12. Top Source Users\n13. Top Destination Users\n14. Top Sources\n15. Top Destinations\n16. Source Zone Distribution\n17. Destination Zone Distribution\n18. Top Source Locations\n19. Top Destination Locations\n20. Source Geolocations\n21. Destination Geolocations\n22. Top Applications\n23. Application Technologies\n24. Appplication Categories\n25. Application Subcategories\n26. SAAS Applications\n27. Sanctioned Applications\n28. Distribution by Application Risk\n29. Top Application Characteristics\n30. Session End Reasons\n31. Virtual Systems\n32. Top Application Container\n33. Top IP Protocols\n34. Total Packets Transferred\n35. Packets Dropped (Max Encapulation)\n36. Packets Dropped (Unknown Protocol)\n37. Packets Dropped (Tunnel Fragment)\n38. Packets Dropped (Strict Checking)\n39. Log Details",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -89,7 +89,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -110,7 +110,7 @@
         {
             "id": 6804421863386286,
             "definition": {
-                "title": "Tunnel Inspection Events Over Time",
+                "title": "Tunnel Inspection Events Overtime",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": true,
@@ -152,7 +152,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -219,7 +219,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             },
@@ -235,7 +235,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             },
@@ -251,7 +251,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -318,7 +318,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             },
@@ -334,7 +334,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             },
@@ -350,7 +350,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -418,7 +418,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -480,7 +480,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -541,7 +541,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -601,7 +601,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -662,7 +662,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -724,7 +724,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -785,7 +785,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -846,7 +846,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -907,7 +907,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -968,7 +968,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -1029,7 +1029,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -1089,7 +1089,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -1150,7 +1150,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -1212,7 +1212,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -1273,7 +1273,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -1335,7 +1335,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -1397,7 +1397,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -1458,7 +1458,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -1517,7 +1517,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -1577,7 +1577,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -1637,7 +1637,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -1686,7 +1686,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) @is_saas_of_app:1 $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) @is_saas_of_app:1 $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -1733,7 +1733,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) @sanctioned_state_of_app:1 $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) @sanctioned_state_of_app:1 $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -1792,7 +1792,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -1859,7 +1859,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -1919,7 +1919,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -1980,7 +1980,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -2042,7 +2042,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -2103,7 +2103,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -2152,7 +2152,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -2200,7 +2200,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -2248,7 +2248,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -2296,7 +2296,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -2344,7 +2344,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule"
+                                    "query": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -2376,7 +2376,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity $Rule",
+                            "query_string": "source:palo-alto-panorama @type:(START OR END) $Device_Serial_Number $Subtype $Action $Severity",
                             "indexes": [],
                             "storage": "hot"
                         },
@@ -2512,12 +2512,6 @@
         {
             "name": "Severity",
             "prefix": "@panorama_severity",
-            "available_values": [],
-            "default": "*"
-        },
-        {
-            "name": "Rule",
-            "prefix": "@rule",
             "available_values": [],
             "default": "*"
         }

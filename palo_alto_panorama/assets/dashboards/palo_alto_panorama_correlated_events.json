@@ -25,7 +25,7 @@
             "id": 4688297178923336,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard gives insights about anti bot related logs.",
+                "content": "## Overview\n- This dashboard gives insights about correlation logs.\n- A Correlated event is generated when the patterns and thresholds defined in a Correlation Object match the traffic patterns on your network. ",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -46,7 +46,7 @@
             "id": 8599185040282124,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n1. Total Events\n2. Events Over Time\n3. Events by Severity\n4. Events by Action\n5. Top Events by File Name\n6. Top Events by File Type\n7. Events by Protection Type\n8. OS Distribution\n9. Source Details\n10. Malware Action Distribution\n11. Top Clients\n12. Top Destinations\n13. Log Details",
+                "content": "## Widgets\n1. Total Correlation Events\n2. Correlation Events Overtime\n3. Category Distribution\n4. Top Correlation Objects\n5. Top Source Users\n6. Events by Severity\n7. Top User Source Address\n8. Geo Distribution by Source Address\n9. Distribution by Virtual System\n10. Log Details",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -110,7 +110,7 @@
         {
             "id": 6804421863386286,
             "definition": {
-                "title": "Correlation Events Over Time",
+                "title": "Correlation Events Overtime",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": true,
@@ -299,7 +299,7 @@
         {
             "id": 1561976797598968,
             "definition": {
-                "title": "Top Source User",
+                "title": "Top Source Users",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "toplist",

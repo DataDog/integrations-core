@@ -25,7 +25,7 @@
             "id": 4688297178923336,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard gives insights about anti bot related logs.",
+                "content": "## Overview\n- This dashboard gives insights about traffic related logs.\n- Traffic logs display an entry for the start and end of each session.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -46,7 +46,7 @@
             "id": 8599185040282124,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n1. Total Events\n2. Events Over Time\n3. Events by Severity\n4. Events by Action\n5. Top Events by File Name\n6. Top Events by File Type\n7. Events by Protection Type\n8. OS Distribution\n9. Source Details\n10. Malware Action Distribution\n11. Top Clients\n12. Top Destinations\n13. Log Details",
+                "content": "## Widgets\n2. Total Traffic Events\n3. Traffic Events Overtime\n5. Bytes Activity Overtime\n6. Packets Activity Overtime\n7. Top Source Users\n8. Top Destination Users\n9. Top Sources\n10. Top Destinations\n11. Application vs Technology Breakdown\n12. Traffic by Application\n13. Source Zone Distribution\n14. Destination Zone Distribution\n15. Action Distribution\n16. Top Reasons for Session End\n17. Top Rules\n18. Top Flags\n19. Top Policies\n20. Tunnel Type Distribution \n21. Protocol Distribution\n22. App details with Risk\n23. Log Details\n",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -89,7 +89,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -110,7 +110,7 @@
         {
             "id": 6804421863386286,
             "definition": {
-                "title": "Traffic Events Over Time",
+                "title": "Traffic Events Overtime",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": true,
@@ -152,7 +152,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -219,7 +219,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             },
@@ -235,7 +235,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             },
@@ -251,7 +251,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -318,7 +318,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             },
@@ -334,7 +334,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             },
@@ -350,7 +350,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -411,7 +411,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -472,7 +472,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -533,7 +533,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -594,7 +594,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -662,7 +662,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -718,7 +718,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             },
@@ -744,7 +744,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -814,7 +814,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -875,7 +875,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -936,7 +936,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -998,7 +998,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -1023,7 +1023,7 @@
         {
             "id": 7727127522985056,
             "definition": {
-                "title": "Top Rule",
+                "title": "Top Rules",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "toplist",
@@ -1059,7 +1059,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -1120,7 +1120,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -1181,7 +1181,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -1241,7 +1241,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -1302,7 +1302,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -1393,7 +1393,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule"
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -1444,7 +1444,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action $Rule",
+                            "query_string": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action",
                             "indexes": [],
                             "storage": "hot"
                         },
@@ -1462,7 +1462,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "act",
+                                "field": "panorama_action",
                                 "width": "auto"
                             },
                             {
@@ -1528,10 +1528,6 @@
                             {
                                 "field": "apprisk",
                                 "width": "auto"
-                            },
-                            {
-                                "field": "bytes",
-                                "width": "auto"
                             }
                         ]
                     }
@@ -1562,12 +1558,6 @@
         {
             "name": "Action",
             "prefix": "@panorama_action",
-            "available_values": [],
-            "default": "*"
-        },
-        {
-            "name": "Rule",
-            "prefix": "@rule",
             "available_values": [],
             "default": "*"
         }

@@ -1,5 +1,5 @@
 {
-    "title": "Palo Alto Panorama: Global Protect",
+    "title": "Palo Alto Panorama: GlobalProtect",
     "description": "",
     "widgets": [
         {
@@ -25,7 +25,7 @@
             "id": 4688297178923336,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard gives insights about anti bot related logs.",
+                "content": "## Overview\n- This dashboard gives insights about GlobalProtect logs.\n- GlobalProtect displays the logs related to GlobalProtect system, GlobalProtect portal as well as the gateway logs.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -46,7 +46,7 @@
             "id": 8599185040282124,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n1. Total Events\n2. Events Over Time\n3. Events by Severity\n4. Events by Action\n5. Top Events by File Name\n6. Top Events by File Type\n7. Events by Protection Type\n8. OS Distribution\n9. Source Details\n10. Malware Action Distribution\n11. Top Clients\n12. Top Destinations\n13. Log Details",
+                "content": "## Widgets\n1. Total GlobalProtect Events\n2. GlobalProtect Events Overtime\n3. Connection Stages\n4. Authentication Methods\n5. Connection Statuses\n6. Top Client OSs\n7. Top Source Users\n8. Top Source Regions\n9. Geo Distribution by User Public IP\n10. Top Used Gateway Priorities\n11. Connection Methods\n12. GlobalProtect Client Versions\n13. Top Gateways Used\n14. Top Tunnel Types\n15. Top User Public IPs\n16. Top Errors\n17. Gateway Selection Method\n18. Log Details",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -110,7 +110,7 @@
         {
             "id": 6804421863386286,
             "definition": {
-                "title": "GlobalProtect Events Over Time",
+                "title": "GlobalProtect Events Overtime",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": true,
@@ -725,7 +725,7 @@
         {
             "id": 528357851839282,
             "definition": {
-                "title": "Global Protect Client Versions",
+                "title": "GlobalProtect Client Versions",
                 "title_size": "16",
                 "title_align": "left",
                 "requests": [
@@ -846,7 +846,7 @@
         {
             "id": 4842646254107800,
             "definition": {
-                "title": "Top Tunnel types",
+                "title": "Top Tunnel Types",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "toplist",
@@ -907,7 +907,7 @@
         {
             "id": 1125426737335600,
             "definition": {
-                "title": "Top User’s Public IPs",
+                "title": "Top User Public IPs",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "toplist",

@@ -110,7 +110,7 @@
         {
             "id": 6804421863386286,
             "definition": {
-                "title": "Config Events Over Time",
+                "title": "Config Events Overtime",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": true,
@@ -420,7 +420,7 @@
         {
             "id": 6205045309047866,
             "definition": {
-                "title": "Top commands performed ",
+                "title": "Top Commands Performed",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "toplist",

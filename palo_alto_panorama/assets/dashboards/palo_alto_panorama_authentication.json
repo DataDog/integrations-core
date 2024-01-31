@@ -25,7 +25,7 @@
             "id": 4688297178923336,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard gives insights about anti bot related logs.",
+                "content": "## Overview\n- This dashboard gives insights about Authentication logs.\n- Authentication logs display information about authentication events that occur when end users try to access network resources for which access is controlled by Authentication Policy rules.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -46,7 +46,7 @@
             "id": 8599185040282124,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n1. Total Events\n2. Events Over Time\n3. Events by Severity\n4. Events by Action\n5. Top Events by File Name\n6. Top Events by File Type\n7. Events by Protection Type\n8. OS Distribution\n9. Source Details\n10. Malware Action Distribution\n11. Top Clients\n12. Top Destinations\n13. Log Details",
+                "content": "## Widgets\n1. Total Authentication Events\n2. Authentication Events Overtime\n3. Top Client Types\n4. Top Users\n5. Authentication Event Distribution\n6. Authentication Results\n7. Top Authentication Protocols\n8. Top Virtual Systems\n9. Top Invoked Auth Policies\n10. Top Sources\n11. Sources Geo Locations\n12. Log Details",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -110,7 +110,7 @@
         {
             "id": 6804421863386286,
             "definition": {
-                "title": "Authentication Events Over Time",
+                "title": "Authentication Events Overtime",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": true,
@@ -177,7 +177,7 @@
         {
             "id": 4555792593992804,
             "definition": {
-                "title": "Top Client Type",
+                "title": "Top Client Types",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "toplist",

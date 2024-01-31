@@ -25,7 +25,7 @@
             "id": 4688297178923336,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard gives insights about anti bot related logs.",
+                "content": "## Overview\n- This dashboard gives insights about User ID logs.\n- User-ID logs display information about IP address-to-username mappings and Authentication.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -46,7 +46,7 @@
             "id": 8599185040282124,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n1. Total Events\n2. Events Over Time\n3. Events by Severity\n4. Events by Action\n5. Top Events by File Name\n6. Top Events by File Type\n7. Events by Protection Type\n8. OS Distribution\n9. Source Details\n10. Malware Action Distribution\n11. Top Clients\n12. Top Destinations\n13. Log Details",
+                "content": "## Widgets\n1. Total User-ID Events\n2. User-ID Events Overtime\n3. Top Users\n4. Top Data Source Names\n5. Distribution by Virtual System\n6. Top Source IPs\n7. Source IP Geo Distribution\n8. Log Details",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -110,7 +110,7 @@
         {
             "id": 6804421863386286,
             "definition": {
-                "title": "User-ID Events Over Time",
+                "title": "User-ID Events Overtime",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": true,

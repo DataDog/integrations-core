@@ -25,7 +25,7 @@
             "id": 4688297178923336,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard gives insights about anti bot related logs.",
+                "content": "## Overview\n- This dashboard gives insights about threat related logs.\n- Threat logs display entries when traffic matches one of the Security Profiles attached to a security rule on the firewall.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -46,7 +46,7 @@
             "id": 8599185040282124,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n1. Total Events\n2. Events Over Time\n3. Events by Severity\n4. Events by Action\n5. Top Events by File Name\n6. Top Events by File Type\n7. Events by Protection Type\n8. OS Distribution\n9. Source Details\n10. Malware Action Distribution\n11. Top Clients\n12. Top Destinations\n13. Log Details",
+                "content": "## Widgets\n1. Total Threat Events\n2. Threat Events Overtime\n3. Action Distribution\n4. Severity Distribution\n5. Attacks Direction\n6. Threat Categories Distribution\n7. Top Source Users\n8. Top Destination Users\n9. Top Sources\n10. Top Destinations\n11. Top Senders\n12. Top Recipients\n13. Source Zone Distribution\n14. Destination Zone Distribution\n15. Top URL/Files\n16. Top File Types\n17. Tunnel Type Distribution \n18. Top Flags\n19. Protocol Distribution\n20. Top App Categories\n21. Top Threat IDs\n22. Top Rules\n23. Top HTTP methods\n24. Top Subtype Categories\n25. Top URL Categories\n26. App Details with Risk\n27. Proxy Types\n28. Log Details",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -110,7 +110,7 @@
         {
             "id": 6804421863386286,
             "definition": {
-                "title": "Threat Events Over Time",
+                "title": "Threat Events Overtime",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": true,
@@ -448,7 +448,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@srcuser",
+                                        "facet": "@suser",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -509,7 +509,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@dstuser",
+                                        "facet": "@duser",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -1336,7 +1336,7 @@
         {
             "id": 7727127522985056,
             "definition": {
-                "title": "Top Rule",
+                "title": "Top Rules",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "toplist",
@@ -1779,11 +1779,11 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "srcuser",
+                                "field": "suser",
                                 "width": "auto"
                             },
                             {
-                                "field": "dstuser",
+                                "field": "duser",
                                 "width": "auto"
                             },
                             {
