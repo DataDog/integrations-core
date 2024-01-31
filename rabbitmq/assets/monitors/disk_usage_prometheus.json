@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2023-03-22",
   "last_updated_at": "2023-03-22",
-  "title": "Disk Space is Low",
+  "title": "Disk space is low",
   "tags": [
     "integration:rabbitmq"
   ],
-  "description": "Notify your team when a host's disk usage reaches critical levels.",
+  "description": "Disk usage refers to the amount of storage space on a disk that is currently being used or occupied by data. This monitor tracks the free disk space within RabbitMQ to prevent running out of storage and potentially losing messages or data.",
   "definition": {
     "message": "{{#is_alert}}\nDisk space is extremely low. \nThis can be caused by an overload of messages or persistent messages that are being mismanaged. \nPlease resolve.\n{{/is_alert}}",
     "name": "[RabbitMQ - OMV2] Disk Space is Low",

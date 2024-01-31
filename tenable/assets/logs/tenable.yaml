@@ -1,46 +1,47 @@
 id: tenable
 metric_id: tenable
+backend_only: false
 facets:
-  - name: Event Name
-    source: log
+  - groups:
+      - Event
+    name: Event Name
     path: evt.name
-    groups:
-      - Event
-  - name: Event Outcome
     source: log
+  - groups:
+      - Event
+    name: Event Outcome
     path: evt.outcome
-    groups:
-      - Event
-  - name: User Name
     source: log
-    path: usr.name
-    groups:
-      - User
-  - name: Client IP
-    source: log
+  - groups:
+      - Web Access
+    name: Client IP
     path: network.client.ip
-    groups:
-      - Web Access
-  - name: Destination IP
     source: log
+  - groups:
+      - Web Access
+    name: Destination IP
     path: network.destination.ip
-    groups:
-      - Web Access
-  - name: Destination Hostname
     source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+  - groups:
+      - Web Access
+    name: Destination Hostname
     path: network.destination.hostname
-    groups:
-      - Web Access
-  - name: Nessus Function
     source: log
+  - groups:
+      - Tenable
+    name: Nessus Function
     path: function
-    groups:
-      - Tenable
-  - name: Nessus Scan Name
     source: log
-    path: scan_name
-    groups:
+  - groups:
       - Tenable
+    name: Nessus Scan Name
+    path: scan_name
+    source: log
 pipeline:
   type: pipeline
   name: Tenable

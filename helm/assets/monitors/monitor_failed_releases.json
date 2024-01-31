@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2022-05-27",
   "last_updated_at": "2022-05-27",
-  "title": "Helm release {{helm_namespace.name}}/{{helm_release.name}} failed on {{kube_cluster_name.name}}",
+  "title": "Release is failed",
   "tags": [
     "integration:helm"
   ],
-  "description": "Get notified when the latest revision of a Helm release is in \"failed\" state.",
+  "description": "Helm simplifies the process of deploying, scaling, and managing applications in Kubernetes. This monitor checks the Helm releases to provide insights into the recent state and status of Helm releases in the specified Kubernetes cluster.",
   "definition": {
     "message": "The Helm release deployment {{helm_namespace.name}}/{{helm_release.name}} (using storage {{helm_storage.name}}) has failed on {{kube_cluster_name.name}}.",
     "name": "Helm release {{helm_namespace.name}}/{{helm_release.name}} failed on {{kube_cluster_name.name}}",

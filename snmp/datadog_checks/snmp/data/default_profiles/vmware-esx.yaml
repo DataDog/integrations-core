@@ -8,6 +8,8 @@ metadata:
     fields:
       vendor:
         value: "vmware"
+      type:
+        value: "server"
 
 sysobjectid:
   - 1.3.6.1.4.1.6876.4.1

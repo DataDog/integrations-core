@@ -1,26 +1,27 @@
 id: weave-npc
 metric_id: nginx-ingress-controller
+backend_only: false
 facets:
-  - name: Client IP
-    source: log
-    path: network.client.ip
-    groups:
+  - groups:
       - Web Access
-  - name: User
+    name: Client IP
+    path: network.client.ip
     source: log
+  - groups:
+      - System
+    name: User
     path: system.user
-    groups:
-      - System
-  - name: Action
     source: log
+  - groups:
+      - System
+    name: Action
     path: system.action
-    groups:
-      - System
-  - name: Ipset
     source: log
-    path: network.ipset
-    groups:
+  - groups:
       - Weave
+    name: Ipset
+    path: network.ipset
+    source: log
 pipeline:
   type: pipeline
   name: Weave NPC

@@ -35,10 +35,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
-    },
-    "dashboards": {
-      "Databricks Spark Overview": "assets/dashboards/databricks_overview.json"
+      },
+      "source_type_id": 10152,
+      "auto_install": true
     },
     "logs": {
       "source": "spark"

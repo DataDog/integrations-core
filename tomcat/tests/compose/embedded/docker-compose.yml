@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  tomcat:
+    build:
+      context: .
+      args:
+        TOMCAT_VERSION: ${TOMCAT_VERSION}
+    ports:
+      - 8080:8080
+      - 9012:9012 # JMX
+    environment:
+      # Use low `StringCache.trainThreshold` to make it easier to get StringCache metrics
+      JAVA_OPTS: >-
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Dcom.sun.management.jmxremote.port=9012
+        -Dcom.sun.management.jmxremote.rmi.port=9012
+        -Dcom.sun.management.jmxremote.local.only=false
+        -Djava.rmi.server.hostname=localhost
+        -Dtomcat.util.buf.StringCache.byte.enabled=true
+        -Dtomcat.util.buf.StringCache.char.enabled=true
+        -Dtomcat.util.buf.StringCache.trainThreshold=100
+  # Simulate traffic on the webserver
+  client:
+    build:
+      context: ../client

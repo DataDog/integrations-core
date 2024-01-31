@@ -2,6 +2,11 @@ extends:
   - huawei.yaml
 sysobjectid:
   - 1.3.6.1.4.1.2011.2.224.279
+metadata:
+  device:
+    fields:
+      type:
+        value: "router"
 metrics:
   - MIB: HUAWEI-BGP-VPN-MIB
     table:

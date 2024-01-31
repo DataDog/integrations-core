@@ -50,7 +50,9 @@
         "haproxy",
         "haproxy-master",
         "haproxy-controller"
-      ]
+      ],
+      "source_type_id": 38,
+      "auto_install": true
     },
     "dashboards": {
       "haproxy": "assets/dashboards/overview.json",

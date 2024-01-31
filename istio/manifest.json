@@ -51,7 +51,9 @@
       "process_signatures": [
         "pilot-agent proxy router",
         "envoy envoy-rev0.json"
-      ]
+      ],
+      "source_type_id": 10017,
+      "auto_install": true
     },
     "dashboards": {
       "Istio base dashboard": "assets/dashboards/istio_overview.json",

@@ -66,6 +66,8 @@ metadata:
           match_value: '$1'
           # Examples:
           #  - device-name-3 263829375 Isilon OneFS v8.2.0.0
+      type:
+        value: "storage"
 
 metrics:
   # fan hardware

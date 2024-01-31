@@ -1,16 +1,17 @@
 id: vertica
 metric_id: vertica
+backend_only: false
 facets:
-  - name: Logger Name
-    source: log
+  - groups:
+      - Source Code
+    name: Logger Name
     path: logger.name
-    groups:
-      - Source Code
-  - name: Component Name
     source: log
-    path: application.id
-    groups:
+  - groups:
       - Source Code
+    name: Component Name
+    path: application.id
+    source: log
 pipeline:
   type: pipeline
   name: Vertica

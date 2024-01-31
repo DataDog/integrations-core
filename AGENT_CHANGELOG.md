@@ -1,3 +1,8 @@
+## Datadog Agent version [7.50.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7502)
+
+* Postgres [15.3.1](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
+* SQL Server [15.2.1](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+
 ## Datadog Agent version [7.50.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7501)
 
 * There were no integration updates for this version of the Agent.

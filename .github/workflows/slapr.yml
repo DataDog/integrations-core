@@ -14,7 +14,7 @@ jobs:
       matrix:
         slack_channel_variable:
           - SLACK_CHANNEL_ID
-          - SLACK_CHANNEL_ID_AGENT_INTEGRATIONS_TOOLS_SQUAD
+          - SLACK_CHANNEL_ID_AGENT_INTEGRATIONS_REVIEWS
           - SLACK_CHANNEL_ID_INFRA_INTEGRATIONS
     steps:
     - uses: DataDog/slapr@master

@@ -193,7 +193,7 @@ def obfuscate_xml_plan(raw_plan, obfuscator_options=None):
         for k in XML_PLAN_OBFUSCATION_ATTRS:
             val = e.attrib.get(k, None)
             if val:
-                statement = obfuscate_sql_with_metadata(val, obfuscator_options)
+                statement = obfuscate_sql_with_metadata(val, obfuscator_options, replace_null_character=True)
                 e.attrib[k] = ensure_unicode(statement['query'])
     return to_native_string(ET.tostring(tree, encoding="UTF-8"))
 
@@ -311,16 +311,20 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             try:
                 # Attempt to obfuscate SQL statement with metadata
                 procedure_statement = None
-                statement = obfuscate_sql_with_metadata(row['statement_text'], self._config.obfuscator_options)
+                statement = obfuscate_sql_with_metadata(
+                    row['statement_text'], self._config.obfuscator_options, replace_null_character=True
+                )
                 comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
 
                 if row['is_proc']:
-                    procedure_statement = obfuscate_sql_with_metadata(row['text'], self._config.obfuscator_options)
+                    procedure_statement = obfuscate_sql_with_metadata(
+                        row['text'], self._config.obfuscator_options, replace_null_character=True
+                    )
 
             except Exception as e:
                 if self._config.log_unobfuscated_queries:
                     raw_query_text = row['text'] if row.get('is_proc', False) else row['statement_text']
-                    self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", raw_query_text, e)
+                    self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", repr(raw_query_text), e)
                 else:
                     self.log.debug("Failed to obfuscate query | err=[%s]", e)
                 self._check.count(
