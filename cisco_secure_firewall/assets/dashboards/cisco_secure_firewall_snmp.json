@@ -46,7 +46,7 @@
             "id": 3453352347169644,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n\n",
+                "content": "## Widgets\n1. SNMP Events by Severity \n2. SNMP Channel Errors by Interface Number \n3. SNMP Trap Channel Errors by Interface Number \n4. SNMP Request Failure by Interface \n5. SNMP Request Failure by Interface \n6. Failed SNMP Response Over Time \n7. Failed SNMP Response by IP Address, Port \n8. Discarded Incoming SNMP Request Over Time \n9. Top Discarded Incoming SNMP Request by Interface \n10. SNMP Group Configuration Failures \n11. Top Reason for Dropped SNMP Request \n12. SNMP Config Failure by Host, Reason \n13. Top Failure Reason for SNMP Group Configuration \n14. SNMP Config Failure Reason by User \n\n",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
