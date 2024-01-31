@@ -12,11 +12,11 @@ This check monitors [{integration_name}][1].
 
 ### Configuration
 
-1. <List of steps to configure this integration>
+Replace with steps to configure this integration
 
 ### Validation
 
-<Steps to validate integration is functioning as expected>
+Replace with steps to validate integration is functioning as expected
 
 ## Data Collected
 
