@@ -27,7 +27,7 @@ sasl_plain_password = ""
 sasl_kerberos_keytab = ""
 sasl_kerberos_principal = ""
 sasl_kerberos_service_name = ""
-security_protocol = "PLAINTEXT"
+security_protocol = ""
 
 
 def __get_authentication_config():
