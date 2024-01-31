@@ -13,7 +13,7 @@ The client will attempt to connect and then query for consumer groups.
 
 # EDITME
 kafka_connect_str = ""
-request_timeout_ms = 30000
+request_timeout_ms = 5000
 tls_ca_cert = ""
 tls_cert = ""
 tls_private_key = ""
@@ -27,7 +27,7 @@ sasl_plain_password = ""
 sasl_kerberos_keytab = ""
 sasl_kerberos_principal = ""
 sasl_kerberos_service_name = ""
-security_protocol = ""
+security_protocol = "PLAINTEXT"
 
 
 def __get_authentication_config():
@@ -66,6 +66,12 @@ def create_client():
     }
     config.update(__get_authentication_config())
 
+    for key, value in config.items():
+        new_value = value
+        if "password" in key:
+            new_value = "*****"
+        print(f"{key}={new_value}")
+
     return AdminClient(config)
 
 
@@ -76,6 +82,7 @@ def main():
     results = future.result()
     for valid_consumer_group in results.valid:
         print("Found consumer group: %s" % valid_consumer_group.group_id)
+    print("Done")
 
 
 if __name__ == "__main__":
