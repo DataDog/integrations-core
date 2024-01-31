@@ -63,17 +63,17 @@ Linux command
 
     1. Select **Devices > Platform Settings** and create or edit an FTD policy.
     2. Select **Syslog > Logging Setup**.
-       - **Enable Logging** — Turns on data plane system logging for the Firepower Threat Defense device.
-       - **Enable Logging on the failover standby unit** — Turns on logging for the standby for the Firepower Threat Defense device, if available.
+       - **Enable Logging** - Turns on data plane system logging for the Firepower Threat Defense device.
+       - **Enable Logging on the failover standby unit** - Turns on logging for the standby for the Firepower Threat Defense device, if available.
        - Click **Save**.
     3. Select **Syslog > Syslog Settings**.
        - Select **LOCAL7(20)** from Facility drop-down list.
        - Check the checkbox named **Enable Timestamp on Syslog Messages** to include the date and time a message was generated in the syslog message.
        - Select **RFC 5424 (yyyy-MM-ddTHH:mm:ssZ)** from the Timestamp Format dropdown list.
        - If you want to add a device identifier to syslog messages (which is placed at the beginning of the message), check the Enable Syslog Device ID check box and then select the type of ID.
-          - **Interface** — To use the IP address of the selected interface, regardless of the interface through which the appliance sends the message. Select the security zone that identifies the interface. The zone must map to a single interface.
-          - **User Defined ID** — To use a text string (up to 16 characters) of your choice.
-          - **Host Name** — To use the hostname of the device.
+          - **Interface** - To use the IP address of the selected interface, regardless of the interface through which the appliance sends the message. Select the security zone that identifies the interface. The zone must map to a single interface.
+          - **User Defined ID** - To use a text string (up to 16 characters) of your choice.
+          - **Host Name** - To use the hostname of the device.
        - Click **Save**.
     4. Select **Syslog > Syslog Server**.
        - Check the Allow user traffic to pass when TCP syslog server is down check box, to allow traffic if any syslog server that is using the TCP protocol is down.

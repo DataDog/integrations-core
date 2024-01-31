@@ -1,5 +1,6 @@
 id: cisco-secure-firewall
 metric_id: cisco-secure-firewall
+backend_only: false
 facets:
   - name: AC Policy
     source: log
@@ -212,16 +213,12 @@ pipeline:
   name: Cisco Secure Firewall
   enabled: true
   filter:
-    query: "source:cisco-secure-firewall "
+    query: "source:cisco-secure-firewall"
   processors:
     - type: grok-parser
       name: Parsing Cisco Secure Firewall Logs
       enabled: true
       meta:
-        last_update:
-          timestamp: 1706607404388
-          user_name: null
-          user_email: dev.patel@crestdatasys.com
         tags: []
       source: message
       samples:
@@ -262,7 +259,7 @@ pipeline:
           (%{pri})?%{timeFormat}%{_space}(%{deviceID})?(:)?
           %FTD-%{integer:severity}-%{word:message_id}%{_space}(:)?%{_space}%{data:message_text}
     - type: date-remapper
-      name: Define `timestamp` as the official timestamp of the log
+      name: Define `timestamp` as the official date of the log
       enabled: true
       meta:
         tags: []
@@ -1006,7 +1003,7 @@ pipeline:
 
               ip_stack_313004 Denied ICMP type=%{regex("[^,]*"):type}%{_space},%{_space}from (%{word} )?%{ip:source_address} on interface %{notSpace:interface_name} to %{ip:destination_address}%{_space}:%{_space}no matching session
     - type: message-remapper
-      name: Define `message_text` as the official message attribute of the log
+      name: Define `message_text` as the official message of the log
       enabled: true
       meta:
         tags: []
