@@ -13,11 +13,11 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. <List of steps to configure this integration>
+TBD
 
 ### Validation
 
-<Steps to validate integration is functioning as expected>
+TBD
 
 ## Data Collected
 
