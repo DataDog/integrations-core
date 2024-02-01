@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import time
+
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 
@@ -149,3 +151,39 @@ class TestQueryExecutor:
 
         for i in range(num_queries):
             aggregator.assert_metric('test.metric.{}'.format(i), i, metric_type=aggregator.GAUGE, tags=tags)
+
+    def test_query_with_collection_interval(self, aggregator):
+        """Test running a query with a custom collection interval"""
+        collection_interval = 1
+        queries = [
+            {
+                'name': 'query1',
+                'query': 'select 1',
+                'columns': [{'name': 'test.metric_with_interval', 'type': 'gauge'}],
+                'collection_interval': collection_interval,
+            }
+        ]
+        rows = [[1]]
+
+        check = AgentCheck('test', {}, [{}])
+        qe = QueryExecutor(mock_executor(rows), check, queries)
+        qe.compile_queries()
+
+        qe.execute()  # First run, should emit a metric
+        time.sleep(0.5 * collection_interval)  # Sleep for less than the collection interval
+        qe.execute()  # Second run, should not emit a metric because the interval hasn't passed
+        time.sleep(0.5 * collection_interval)
+        qe.execute()  # Third run, should emit a metric
+
+        aggregator.assert_metric('test.metric_with_interval', 1, metric_type=aggregator.GAUGE)
+        assert len(aggregator.metrics('test.metric_with_interval')) == 2
+
+        # Reset the aggregator and re-compile query executor
+        aggregator.reset()
+        qe.compile_queries()
+        qe.execute()  # Forth run, re-compile should not reset the last execution time
+        aggregator.assert_metric('test.metric_with_interval', count=0)
+        time.sleep(collection_interval)
+        qe.execute()  # Fifth run, should emit a metric
+        aggregator.assert_metric('test.metric_with_interval', 1, metric_type=aggregator.GAUGE)
+        assert len(aggregator.metrics('test.metric_with_interval')) == 1

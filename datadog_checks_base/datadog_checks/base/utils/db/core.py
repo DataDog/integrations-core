@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+import time
 from itertools import chain
 from typing import Any, Callable, Dict, List, Tuple  # noqa: F401
 
@@ -68,6 +69,20 @@ class QueryExecutor(object):
             global_tags.extend(list(extra_tags))
 
         for query in self.queries:
+            now = time.time()
+            # If the query has collection interval set, we check if it's time to execute it
+            if query.collection_interval is not None:
+                # if the query has been executed less than the collection interval ago, we skip it
+                if query.last_execution_timestamp and now - query.last_execution_timestamp < query.collection_interval:
+                    self.logger.debug(
+                        'Query %s was executed less than %s seconds ago, skipping',
+                        query.name,
+                        query.collection_interval,
+                    )
+                    continue
+                # update the last execution timestamp
+                query.last_execution_timestamp = now
+
             query_name = query.name
             query_columns = query.column_transformers
             extra_transformers = query.extra_transformers

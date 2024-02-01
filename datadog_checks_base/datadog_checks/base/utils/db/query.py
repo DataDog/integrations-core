@@ -34,6 +34,11 @@ class Query(object):
         self.extra_transformers = None  # type: List[Tuple[str, Transformer]]
         # Contains the tags defined in query_data, more tags can be added later from the query result
         self.base_tags = None  # type: List[str]
+        # The collecton interval (in seconds) of the query. If None, the query will be run every check run.
+        self.collection_interval = None  # type: int
+        # The last time the query was executed. If None, the query has never been executed.
+        # This is only used when the collection_interval is not None.
+        self.last_execution_timestamp = None  # type: float
 
     def compile(
         self,
@@ -195,6 +200,15 @@ class Query(object):
                     transformer = create_extra_transformer(transformer, extra_source)
 
                 extra_data.append((extra_name, transformer))
+
+        collection_interval = self.query_data.get('collection_interval')
+        if collection_interval is not None:
+            if not isinstance(collection_interval, (int, float)):
+                raise ValueError('field `collection_interval` for {} must be a number'.format(query_name))
+            elif collection_interval <= 0:
+                raise ValueError('field `collection_interval` for {} must be a positive number'.format(query_name))
+            self.collection_interval = int(collection_interval)
+            self.last_execution_timestamp = None
 
         self.name = query_name
         self.query = query
