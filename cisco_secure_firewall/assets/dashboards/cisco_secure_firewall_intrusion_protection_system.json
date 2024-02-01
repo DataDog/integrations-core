@@ -323,15 +323,22 @@
                 "title": "Failed Shun Over Time",
                 "title_size": "16",
                 "title_align": "left",
+                "show_legend": false,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "time": {},
+                "type": "timeseries",
                 "requests": [
                     {
                         "formulas": [
                             {
-                                "formula": "query1",
-                                "limit": {
-                                    "count": 500,
-                                    "order": "desc"
-                                }
+                                "formula": "query1"
                             }
                         ],
                         "queries": [
@@ -344,40 +351,22 @@
                                 "compute": {
                                     "aggregation": "count"
                                 },
-                                "group_by": [
-                                    {
-                                        "facet": "@shun_ip_address",
-                                        "limit": 10,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "count"
-                                        }
-                                    },
-                                    {
-                                        "facet": "@shun_port",
-                                        "limit": 10,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "count"
-                                        }
-                                    }
-                                ],
+                                "group_by": [],
                                 "search": {
                                     "query": "source:cisco-secure-firewall @message_id:401005 $Device-ID $Host $Shun-IP-Address"
                                 },
                                 "storage": "hot"
                             }
                         ],
-                        "response_format": "scalar",
+                        "response_format": "timeseries",
                         "style": {
-                            "palette": "datadog16"
-                        }
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
                     }
-                ],
-                "type": "sunburst",
-                "legend": {
-                    "type": "automatic"
-                }
+                ]
             },
             "layout": {
                 "x": 0,
