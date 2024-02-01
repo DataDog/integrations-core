@@ -219,6 +219,8 @@ def build_image():
                 '-v', f'{mount_dir}:{internal_mount_dir}',
                 # Anything created within directories mounted to the container cannot be removed by the host
                 '-e', 'PYTHONDONTWRITEBYTECODE=1',
+                # For reproducibility
+                '-e', 'SOURCE_DATE_EPOCH',
                 image_name, '--python', args.python,
             ])
 

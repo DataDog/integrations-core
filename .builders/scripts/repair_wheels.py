@@ -118,6 +118,7 @@ def repair_windows(source_dir: str, built_dir: str, external_dir: str) -> None:
             sys.executable, '-m', 'delvewheel', 'repair', wheel,
             '--wheel-dir', built_dir,
             '--no-dll', os.pathsep.join(exclusions),
+            '--no-diagnostic',
         ])
         if process.returncode:
             print('Repairing failed')
