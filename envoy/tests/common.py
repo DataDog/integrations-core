@@ -381,6 +381,15 @@ LOCAL_RATE_LIMIT_METRICS = [
     "http.local_rate_limit_ok.count",
 ]
 
+CLUSTER_AND_LISTENER_SSL_METRICS = [
+    "cluster.client_ssl_socket_factory.downstream_context_secrets_not_ready.count",
+    "cluster.client_ssl_socket_factory.ssl_context_update_by_sds.count",
+    "cluster.client_ssl_socket_factory.upstream_context_secrets_not_ready.count",
+    "listener.server_ssl_socket_factory.downstream_context_secrets_not_ready.count",
+    "listener.server_ssl_socket_factory.ssl_context_update_by_sds.count",
+    "listener.server_ssl_socket_factory.upstream_context_secrets_not_ready.count",
+]
+
 CONNECT_STATE_METRIC = ['control_plane.connected_state']
 
 RATE_LIMIT_STAT_PREFIX_TAG = 'stat_prefix:http_local_rate_limiter'
