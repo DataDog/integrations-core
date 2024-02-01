@@ -317,7 +317,7 @@ pipeline:
   name: Zeek
   enabled: true
   filter:
-    query: "source:zeek "
+    query: "source:zeek"
   processors:
     - type: pipeline
       name: Processing for Corelight logs
