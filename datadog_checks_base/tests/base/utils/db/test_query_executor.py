@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
 
+import pytest
+
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 
@@ -152,9 +154,18 @@ class TestQueryExecutor:
         for i in range(num_queries):
             aggregator.assert_metric('test.metric.{}'.format(i), i, metric_type=aggregator.GAUGE, tags=tags)
 
-    def test_query_with_collection_interval(self, aggregator):
+    @pytest.mark.parametrize(
+        'collection_interval, expected_exception',
+        [
+            pytest.param(1, None, id='valid interval 1s'),
+            pytest.param(0.5, ValueError, id='invalid interval 0.5s'),  # 0.5s is invalid because it rounds to 0
+            pytest.param(0, ValueError, id='invalid interval 0s'),
+            pytest.param(-1, ValueError, id='invalid interval -1s'),
+            pytest.param('test', ValueError, id='invalid interval not a number'),
+        ],
+    )
+    def test_query_with_collection_interval(self, aggregator, collection_interval, expected_exception):
         """Test running a query with a custom collection interval"""
-        collection_interval = 1
         queries = [
             {
                 'name': 'query1',
@@ -163,10 +174,15 @@ class TestQueryExecutor:
                 'collection_interval': collection_interval,
             }
         ]
-        rows = [[1]]
 
         check = AgentCheck('test', {}, [{}])
-        qe = QueryExecutor(mock_executor(rows), check, queries)
+        qe = QueryExecutor(mock_executor([[1]]), check, queries)
+
+        if expected_exception:
+            with pytest.raises(expected_exception):
+                qe.compile_queries()
+            return
+
         qe.compile_queries()
 
         qe.execute()  # First run, should emit a metric

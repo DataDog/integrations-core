@@ -205,14 +205,17 @@ class Query(object):
         if collection_interval is not None:
             if not isinstance(collection_interval, (int, float)):
                 raise ValueError('field `collection_interval` for {} must be a number'.format(query_name))
-            elif collection_interval <= 0:
-                raise ValueError('field `collection_interval` for {} must be a positive number'.format(query_name))
-            self.collection_interval = int(collection_interval)
-            self.last_execution_timestamp = None
+            elif int(collection_interval) <= 0:
+                raise ValueError(
+                    'field `collection_interval` for {} must be a positive number after rounding'.format(query_name)
+                )
+            collection_interval = int(collection_interval)
 
         self.name = query_name
         self.query = query
         self.column_transformers = tuple(column_data)
         self.extra_transformers = tuple(extra_data)
         self.base_tags = tags
+        self.collection_interval = collection_interval
+        self.last_execution_timestamp = None
         del self.query_data
