@@ -38,7 +38,7 @@ class Query(object):
         self.collection_interval = None  # type: int
         # The last time the query was executed. If None, the query has never been executed.
         # This is only used when the collection_interval is not None.
-        self.last_execution_timestamp = None  # type: float
+        self.last_execution_time = None  # type: float
 
     def compile(
         self,
@@ -217,5 +217,5 @@ class Query(object):
         self.extra_transformers = tuple(extra_data)
         self.base_tags = tags
         self.collection_interval = collection_interval
-        self.last_execution_timestamp = None
+        self.last_execution_time = None
         del self.query_data

@@ -2,12 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-import time
 from itertools import chain
 from typing import Any, Callable, Dict, List, Tuple  # noqa: F401
 
 from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.base.utils.db.types import QueriesExecutor, QueriesSubmitter, Transformer  # noqa: F401
+from datadog_checks.base.utils.time import get_timestamp
 
 from ...config import is_affirmative
 from ..containers import iter_unique
@@ -69,11 +69,11 @@ class QueryExecutor(object):
             global_tags.extend(list(extra_tags))
 
         for query in self.queries:
-            now = time.time()
+            now = get_timestamp()
             # If the query has collection interval set, we check if it's time to execute it
             if query.collection_interval is not None:
                 # if the query has been executed less than the collection interval ago, we skip it
-                if query.last_execution_timestamp and now - query.last_execution_timestamp < query.collection_interval:
+                if query.last_execution_time and now - query.last_execution_time < query.collection_interval:
                     self.logger.debug(
                         'Query %s was executed less than %s seconds ago, skipping',
                         query.name,
@@ -81,7 +81,7 @@ class QueryExecutor(object):
                     )
                     continue
                 # update the last execution timestamp
-                query.last_execution_timestamp = now
+                query.last_execution_time = now
 
             query_name = query.name
             query_columns = query.column_transformers
