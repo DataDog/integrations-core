@@ -234,8 +234,8 @@ tagger-image-builder:
       - .gitlab/tagger/**/*
       - ddev/**/*
       - .gitlab-ci.yml
-#    refs:
-#      - master
+    refs:
+      - master
   script:
     - docker buildx build --tag $TAGGER_IMAGE -f .gitlab/tagger/Dockerfile . --push
   except: [ tags, schedules ]
@@ -248,8 +248,8 @@ validate-log-intgs-builder:
     changes:
       - .gitlab/validate-logs-intgs/**/*
       - .gitlab-ci.yml
-#    refs:
-#      - master
+    refs:
+      - master
   script:
     - cd .gitlab/validate-logs-intgs/
     - docker buildx build --tag $VALIDATE_LOG_INTGS . --push
@@ -263,8 +263,8 @@ validate-agent-build-builder:
     changes:
       - .gitlab/validate-agent-build/**/*
       - .gitlab-ci.yml
-#    refs:
-#      - master
+    refs:
+      - master
   script:
     - cd .gitlab/validate-agent-build/
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/devtools.git --depth 1
