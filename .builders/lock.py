@@ -39,7 +39,7 @@ def main():
         if (image_digest_file := target / 'image_digest').is_file():
             image_digests[target.name] = image_digest_file.read_text(encoding='utf-8').strip()
 
-    with BUILDER_DIR.joinpath('image_digests.json').open('w', encoding='utf-8') as f:
+    with RESOLUTION_DIR.joinpath('image_digests.json').open('w', encoding='utf-8') as f:
         contents = json.dumps(image_digests, indent=2, sort_keys=True)
         f.write(f'{contents}\n')
 
