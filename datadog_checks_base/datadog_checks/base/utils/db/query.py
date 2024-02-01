@@ -220,9 +220,11 @@ class Query(object):
         self.collection_interval = collection_interval
         del self.query_data
 
-    def should_execute(self) -> bool:
+    def should_execute(self):
         '''
         Check if the query should be executed based on the collection interval.
+
+        :return: True if the query should be executed, False otherwise.
         '''
         if self.collection_interval is None:
             # if the collection interval is None, the query should always be executed.
