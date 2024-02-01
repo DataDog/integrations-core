@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Tuple  # noqa: F401
 from six import raise_from
 
 from datadog_checks.base.utils.db.types import Transformer, TransformerFactory  # noqa: F401
+from datadog_checks.base.utils.time import get_timestamp
 
 from .utils import create_extra_transformer
 
@@ -38,7 +39,7 @@ class Query(object):
         self.collection_interval = None  # type: int
         # The last time the query was executed. If None, the query has never been executed.
         # This is only used when the collection_interval is not None.
-        self.last_execution_time = None  # type: float
+        self.__last_execution_time = None  # type: float
 
     def compile(
         self,
@@ -217,5 +218,22 @@ class Query(object):
         self.extra_transformers = tuple(extra_data)
         self.base_tags = tags
         self.collection_interval = collection_interval
-        self.last_execution_time = None
         del self.query_data
+
+    def should_execute(self) -> bool:
+        '''
+        Check if the query should be executed based on the collection interval.
+        '''
+        if self.collection_interval is None:
+            # if the collection interval is None, the query should always be executed.
+            return True
+
+        now = get_timestamp()
+        if self.__last_execution_time is None or now - self.__last_execution_time >= self.collection_interval:
+            # if the last execution time is None (the query has never been executed),
+            # if the time since the last execution is greater than or equal to the collection interval,
+            # the query should be executed.
+            self.__last_execution_time = now
+            return True
+
+        return False
