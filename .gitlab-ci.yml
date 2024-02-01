@@ -212,7 +212,7 @@ release-manual:
 
 reminder-image-builder:
   stage: build
-  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
+  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:24.0.4-gbi-focal
   only:
     changes:
       - .gitlab/reminder/**/*
@@ -220,11 +220,9 @@ reminder-image-builder:
     refs:
       - master
   script:
-    - docker build --tag $REMINDER_IMAGE ./.gitlab/reminder/
-    - docker images $REMINDER_IMAGE
-    - docker push $REMINDER_IMAGE
+    - docker buildx build --tag $REMINDER_IMAGE ./.gitlab/reminder/ --push
   except: [ tags, schedules ]
-  tags: [ "runner:docker" ]
+  tags: [ "arch:amd64" ]
 
 tagger-image-builder:
   stage: build
@@ -253,7 +251,7 @@ validate-log-intgs-builder:
   script:
     - cd .gitlab/validate-logs-intgs/
     - docker buildx build --tag $VALIDATE_LOG_INTGS . --push
-  tags: [ "runner:docker" ]
+  tags: [ "arch:amd64" ]
 
 validate-agent-build-builder:
   stage: build
