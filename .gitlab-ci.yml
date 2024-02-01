@@ -228,7 +228,7 @@ reminder-image-builder:
 
 tagger-image-builder:
   stage: build
-  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
+  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:24.0.4-gbi-focal
   only:
     changes:
       - .gitlab/tagger/**/*
