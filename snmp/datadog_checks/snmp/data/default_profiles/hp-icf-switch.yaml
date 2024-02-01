@@ -5,6 +5,12 @@ extends:
 sysobjectid:
   - 1.3.6.1.4.1.11.2.3.7.11.*
 
+metadata:
+  device:
+    fields:
+      type:
+        value: "switch"
+
 metrics:
   - MIB: STATISTICS-MIB
     symbol:

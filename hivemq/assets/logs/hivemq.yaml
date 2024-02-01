@@ -1,11 +1,12 @@
 id: hivemq
 metric_id: hivemq
+backend_only: false
 facets:
-  - name: HiveMQ Node Name
-    source: log
-    path: hivemq.node
-    groups:
+  - groups:
       - HiveMQ
+    name: HiveMQ Node Name
+    path: hivemq.node
+    source: log
 pipeline:
   type: pipeline
   name: HiveMQ

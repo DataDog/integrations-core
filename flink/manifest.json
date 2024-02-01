@@ -56,7 +56,9 @@
         "java org.apache.flink.table.gateway.SqlGateway",
         "java org.apache.flink.table.client.SqlClient",
         "java org.apache.flink.yarn.cli.FlinkYarnSessionCli"
-      ]
+      ],
+      "source_type_id": 10088,
+      "auto_install": true
     },
     "dashboards": {
       "Flink Overview": "assets/dashboards/overview.json"

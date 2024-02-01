@@ -8,6 +8,8 @@ metadata:
     fields:
       vendor:
         value: "western-digital"
+      type:
+        value: "storage"
 
 sysobjectid:
   - 1.3.6.1.4.1.5127.1.1.1.8

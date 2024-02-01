@@ -24,6 +24,11 @@ github_team = "agent-integrations"
 # Our team stopped doing QA so stop assigning QA tasks to us directly
 # Leaving the team in the config so we can manually assign our team if needed
 # github_labels = ["team/agent-integrations"]
+exclude_members = [
+  "ofek",
+  "alopezz",
+  "hithwen",
+]
 
 [teams."Platform Integrations"]
 jira_project = "PLINT"

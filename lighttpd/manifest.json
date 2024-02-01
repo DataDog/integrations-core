@@ -44,7 +44,9 @@
       },
       "process_signatures": [
         "lighttpd"
-      ]
+      ],
+      "source_type_id": 58,
+      "auto_install": true
     },
     "dashboards": {
       "lighttpd": "assets/dashboards/lighttpd_dashboard.json"

@@ -1,7 +1,7 @@
 id: arangodb
 metric_id: arangodb
+backend_only: false
 facets:
-
 pipeline:
   type: pipeline
   name: ArangoDB

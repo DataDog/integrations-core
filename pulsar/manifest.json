@@ -45,7 +45,9 @@
       },
       "process_signatures": [
         "java org.apache.pulsar.PulsarStandaloneStarter"
-      ]
+      ],
+      "source_type_id": 10143,
+      "auto_install": true
     },
     "logs": {
       "source": "pulsar"

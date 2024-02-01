@@ -1,0 +1,1 @@
+Added the `enable_per_db_metrics` flag, to allow the gathering of these metrics to be disabled
