@@ -234,14 +234,13 @@ tagger-image-builder:
       - .gitlab/tagger/**/*
       - ddev/**/*
       - .gitlab-ci.yml
-    refs:
-      - master
+#    refs:
+#      - master
   script:
     - docker build --tag $TAGGER_IMAGE -f .gitlab/tagger/Dockerfile .
-    - docker images $TAGGER_IMAGE
     - docker push $TAGGER_IMAGE
   except: [ tags, schedules ]
-  tags: [ "runner:docker" ]
+  tags: [ "arch:amd64" ]
 
 validate-log-intgs-builder:
   stage: build
