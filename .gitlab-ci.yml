@@ -253,7 +253,6 @@ validate-log-intgs-builder:
   script:
     - cd .gitlab/validate-logs-intgs/
     - docker buildx build --tag $VALIDATE_LOG_INTGS . --push
-    - docker push $VALIDATE_LOG_INTGS
   tags: [ "runner:docker" ]
 
 validate-agent-build-builder:
