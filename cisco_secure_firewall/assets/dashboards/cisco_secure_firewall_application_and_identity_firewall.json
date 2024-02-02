@@ -1,6 +1,6 @@
 {
     "title": "Cisco Secure Firewall - Application and Identity-based Firewall",
-    "description": "- This dashboard provides insights into application firewall and Identity-based firewall logs.",
+    "description": "- This dashboard provides insights into application firewall and identity-based firewall logs.",
     "widgets": [
         {
             "id": 2459676795793406,
@@ -25,7 +25,7 @@
             "id": 2827167542736984,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard provides insights into application firewall and Identity-based firewall logs.",
+                "content": "## Overview\n- This dashboard provides insights into application firewall and identity-based firewall logs.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

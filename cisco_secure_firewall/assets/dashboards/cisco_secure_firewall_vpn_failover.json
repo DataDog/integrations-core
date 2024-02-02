@@ -1,6 +1,6 @@
 {
     "title": "Cisco Secure Firewall - VPN Failover",
-    "description": "- This dashboard provides insights into vpn failover logs.",
+    "description": "- This dashboard provides insights into VPN failover logs.",
     "widgets": [
         {
             "id": 91381263076730,

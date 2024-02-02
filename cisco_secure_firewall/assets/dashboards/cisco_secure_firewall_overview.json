@@ -1,6 +1,6 @@
 {
     "title": "Cisco Secure Firewall - Overview",
-    "description": "- This dashboard provides overview of all cisco secure firewall logs.",
+    "description": "- This dashboard provides overview of all Cisco Secure Firewall logs.",
     "widgets": [
         {
             "id": 8934227469600214,
@@ -230,7 +230,7 @@
         {
             "id": 7481848208208680,
             "definition": {
-                "title": "Identity Based Firewall",
+                "title": "Identity-based Firewall",
                 "background_color": "gray",
                 "show_title": true,
                 "type": "group",

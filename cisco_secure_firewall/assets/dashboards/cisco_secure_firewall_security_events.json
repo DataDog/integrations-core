@@ -1,6 +1,6 @@
 {
     "title": "Cisco Secure Firewall - Security Events",
-    "description": "- This dashboard provides insights into seurity events logs.",
+    "description": "- This dashboard provides insights into security events logs.",
     "widgets": [
         {
             "id": 5128228901661168,

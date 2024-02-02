@@ -1,8 +1,8 @@
 ## Overview
 
-[Cisco Secure Firewall Threat Defense (FTD)][5] is a threat-focused, next-gen firewall (NGFW) with unified management. It provides advanced threat protection before, during, and after attacks.The [Cisco Secure Firewall Management Center (FMC)][7] is the centralized event and policy manager for Cisco Secure Firewall Threat Defense (FTD), both on-premises and virtual
+[Cisco Secure Firewall Threat Defense (FTD)][5] is a threat-focused, next-gen firewall (NGFW) with unified management. It provides advanced threat protection before, during, and after attacks.The [Cisco Secure Firewall Management Center (FMC)][7] is the centralized event and policy manager for Cisco Secure Firewall Threat Defense (FTD), both on-premises and virtual.
 
-This integration enrich and ingests the following logs from Cisco Secure FTD via Cisco Secure FMC:
+This integration enrich and ingests the following logs from Cisco Secure FTD using Cisco Secure FMC:
 - User Authentication Logs
 - SNMP Logs
 - Failover Logs
@@ -21,17 +21,17 @@ This integration enrich and ingests the following logs from Cisco Secure FTD via
 - Dynamic Access Policies
 - IP Address Assignment
 
-Visualize detailed insights into snmp requests, identity based firewall logs, real time threat analysis, security detection and observation, compliance monitoring through the out-of-the-box dashboards.
+Visualize detailed insights into SNMP requests, identity-based firewall logs, real time threat analysis, security detection and observation, and compliance monitoring with the out-of-the-box dashboards.
 
 ## Setup
 
 ### Installation
 
-To install the Cisco Secure Firewall integration, run the following Agent installation command and the steps below. For more information, see the [Integration Management][6] documentation.
+To install the Cisco Secure Firewall integration, run the following Agent installation command and the steps below. For more information, see the [Integration Management documentation][6].
 
 **Note**: This step is not necessary for Agent version >= 7.52.0.
 
-Linux command
+Linux command:
   ```shell
   sudo -u dd-agent -- datadog-agent integration install datadog-cisco_secure_firewall==1.0.0
   ```
@@ -49,42 +49,42 @@ Linux command
 
     See the [sample cisco_secure_firewall.d/conf.yaml][6] for available configuration options.
 
-   ```yaml
-    logs:
-      - type: tcp/udp
-        port: <PORT>
-        service: cisco-secure-firewall
-        source: cisco-secure-firewall
-   ```
+      ```yaml
+      logs:
+       - type: tcp/udp
+         port: <PORT>
+         service: cisco-secure-firewall
+         source: cisco-secure-firewall
+      ```
 
 3. [Restart the Agent][1].
 
-4. Configuring Syslog Message Forwarding from Cisco Secure Firewall Management Center
+4. Configure Syslog Message Forwarding from Cisco Secure Firewall Management Center:
 
     1. Select **Devices > Platform Settings** and create or edit an FTD policy.
     2. Select **Syslog > Logging Setup**.
-       - **Enable Logging** - Turns on data plane system logging for the Firepower Threat Defense device.
-       - **Enable Logging on the failover standby unit** - Turns on logging for the standby for the Firepower Threat Defense device, if available.
+       - **Enable Logging**: Turns on data plane system logging for the Firepower Threat Defense device.
+       - **Enable Logging on the failover standby unit**: Turns on logging for the standby for the Firepower Threat Defense device, if available.
        - Click **Save**.
     3. Select **Syslog > Syslog Settings**.
        - Select **LOCAL7(20)** from Facility drop-down list.
        - Check the checkbox named **Enable Timestamp on Syslog Messages** to include the date and time a message was generated in the syslog message.
        - Select **RFC 5424 (yyyy-MM-ddTHH:mm:ssZ)** from the Timestamp Format dropdown list.
        - If you want to add a device identifier to syslog messages (which is placed at the beginning of the message), check the Enable Syslog Device ID check box and then select the type of ID.
-          - **Interface** - To use the IP address of the selected interface, regardless of the interface through which the appliance sends the message. Select the security zone that identifies the interface. The zone must map to a single interface.
-          - **User Defined ID** - To use a text string (up to 16 characters) of your choice.
-          - **Host Name** - To use the hostname of the device.
+          - **Interface**: To use the IP address of the selected interface, regardless of the interface through which the appliance sends the message. Select the security zone that identifies the interface. The zone must map to a single interface.
+          - **User Defined ID**: To use a text string (up to 16 characters) of your choice.
+          - **Host Name**: To use the hostname of the device.
        - Click **Save**.
     4. Select **Syslog > Syslog Server**.
-       - Check the Allow user traffic to pass when TCP syslog server is down check box, to allow traffic if any syslog server that is using the TCP protocol is down.
+       - Check the **Allow user traffic to pass when TCP syslog server is down** checkbox, to allow traffic if any syslog server that is using the TCP protocol is down.
        - Click **Add** to add a new syslog server.
-          - In the **IP Address** drop-down list, select a network host object that contains the IP address of the syslog server.
+          - In the **IP Address** dropdown menu, select a network host object that contains the IP address of the syslog server.
           - Choose the protocol (either TCP or UDP) and enter the port number for communications between the Firepower Threat Defense device and the syslog server.
           - Select Device Management Interface or Security Zones or Named Interfaces to communicate with the syslog server.
             - Security Zones or Named Interfaces: Select the interfaces from the list of Available Zones and click Add.
           - Click **OK**.
        - Click **Save**.
-    5. You can now go to **Deploy > Deployment** and deploy the policy to assigned devices. The changes are not active until you deploy them.
+    5. Go to **Deploy > Deployment** and deploy the policy to assigned devices. The changes are not active until you deploy them.
 
 
 ### Validation
@@ -95,7 +95,7 @@ Linux command
 
 ### Logs
 
-The cisco_secure_firewall integration collects user authentication, snmp, failover, transparent firewall, ip stack, application firewall, identity based firewall, threat detection, command interface, security events, ospf rotuing, rip routing, resource manager, vpn failover, intrusion protection system logs.
+The Cisco Secure Firewall integration collects user authentication, SNMP, failover, transparent firewall, IP stack, application firewall, identity based firewall, threat detection, command interface, security events, OSPF routing, RIP routing, resource manager, VPN failover, and intrusion protection system logs.
 
 ### Metrics
 
@@ -152,8 +152,8 @@ If you see the **Port <PORT-NO\> Already in Use** error, see the following instr
 On systems using Syslog, if the Agent listens for Cisco Secure Firewall logs on port 514, the following error can appear in the Agent logs: `Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use`.
 
 This error occurs because by default, Syslog listens on port 514. To resolve this error, take **one** of the following steps:
-- Disable Syslog
-- Configure the Agent to listen on a different, available port
+- Disable Syslog.
+- Configure the Agent to listen on a different, available port.
 
 For any further assistance, contact [Datadog support][3].
 
