@@ -1,6 +1,6 @@
 ## Overview
 
-[Cisco Duo][1] is a multi-factor authentication (MFA) and secure access solution. It adds an additional layer of security by requiring users to verify their identity through a second factor, such as a mobile app, before gaining access to applications or systems. Duo is often used to enhance the security of remote access and helps protect against unauthorized access even if passwords are compromised.
+[Cisco Duo][1] is a multi-factor authentication (MFA) and secure access solution. It adds an additional layer of security by requiring users to verify their identity through a second factor, such as a mobile app, before gaining access to applications or systems. Duo is often used to enhance the security of remote access and helps protect against unauthorized access, even if passwords are compromised.
 
 This integration ingests the following logs:
 - Authentication
