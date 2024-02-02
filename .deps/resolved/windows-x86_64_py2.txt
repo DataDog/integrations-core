@@ -27,9 +27,9 @@ chardet==4.0.0 \
 clickhouse-cityhash==1.0.2.3 \
   --hash=sha256:786fa8c579c45e74bdf360c936f91cc75916454db66e6ce18301da16f0e5a9f7
 clickhouse-driver==0.2.0 \
-  --hash=sha256:0972e4d73b51afe8214f200be04c3142689683be1c8f1fb5dc23707952137c27
+  --hash=sha256:928b16d7cdbd50fc613c86645e95a73f8fe1520c53597897f93357b9136282fc
 cm-client==45.0.4 \
-  --hash=sha256:6268a597ad5aa4d6bfda23c89ed6deb16b43676b7c178540ae7e86d7787c0196
+  --hash=sha256:752a3bf2e11e4880c0570c06964766dc7cfa288007c16eaac56fef31f9ba122e
 configparser==4.0.2 \
   --hash=sha256:254c1d9c79f60c45dfde850850883d5aaa7f19a23f13561243a050d5a7c3fe4c
 contextlib2==0.6.0.post1 \
@@ -37,7 +37,7 @@ contextlib2==0.6.0.post1 \
 cryptography==3.3.2 \
   --hash=sha256:1bd0ccb0a1ed775cd7e2144fe46df9dc03eefd722bbcf587b3e0616ea4a81eff
 ddtrace==0.32.2 \
-  --hash=sha256:c31d3d1f7e3621f865dff06bd58c3f541ea9a3fb6b1d3edeee82033788dfa808
+  --hash=sha256:a969116fadf87a0fc5b682be0f6083bf024b23609c4f5a1d26a1ab5a25057222
 dnspython==1.16.0 \
   --hash=sha256:f69c21288a962f4da86e56c4905b49d11aba7938d3d740e80d9e366ee4f1632d
 enum34==1.1.10 \
@@ -45,7 +45,7 @@ enum34==1.1.10 \
 funcsigs==1.0.2 \
   --hash=sha256:330cc27ccbf7f1e992e69fef78261dc7c6569012cf397db8d3de0234e6c937ca
 future==0.18.3 \
-  --hash=sha256:847f3ea75f5a00283805e29b2e92d36b7ef3da468422b5c42af397d1324c64d0
+  --hash=sha256:881f9afadac4636356844f328f0e5206e0dbdda45137cba70536eb17328b1edf
 futures==3.4.0 \
   --hash=sha256:5ec20fa8bdccf96ac9bf9fb2473f51b14c117db638aa8a4a6c27b43532a0efe9
 google-auth==2.18.1 \
@@ -67,7 +67,7 @@ lxml==4.9.2 \
 lz4==2.2.1 \
   --hash=sha256:ffb272017186dec10e05a85a08932915bae59368c903f55d04a4637f48fdbd8c
 mmh3==2.5.1 \
-  --hash=sha256:4a151d65193b233cdd0dbae13dcc41cbe9629d98f76f3a23dccc2fffbf88ebfc
+  --hash=sha256:9f65ebebed510d99ab06ad0c79df2c966c01d75ddbed8637fcf945f5540fa837
 ntlm-auth==1.5.0 \
   --hash=sha256:f1527c581dbf149349134fc2d789d50af2a400e193206956fa0ab456ccc5a8ba
 oauthlib==3.1.0 \
@@ -108,10 +108,10 @@ pysocks==1.7.1 \
   --hash=sha256:08e69f092cc6dbe92a0fdd16eeb9b9ffbc13cadfe5ca4c7bd92ffb078b293299
 python-dateutil==2.8.2 \
   --hash=sha256:961d03dc3453ebbc59dbdea9e4e11c5651520a876d0f4db161e8674aae935da9
-pytz==2023.4 \
-  --hash=sha256:f90ef520d95e7c46951105338d918664ebfd6f1d995bd7d153127ce90efafa6a
+pytz==2024.1 \
+  --hash=sha256:328171f4e3623139da4983451950b28e95ac706e13f3f2630a879749e7a8b319
 pyvmomi==8.0.2.0.1 \
-  --hash=sha256:be1c173a34760e6b7712f82ebd8abf3e730421226e0c9931aa97e3a94211d182
+  --hash=sha256:f302a4c20ebf84183ad5048fa29259ae641b15a950c662e8c58bef92ff2b1281
 pywin32==228 \
   --hash=sha256:11cb6610efc2f078c9e6d8f5d0f957620c333f4b23466931a247fb945ed35e89
 pyyaml==5.4.1 \
@@ -145,7 +145,7 @@ service-identity==21.1.0 \
 setuptools==44.1.1 \
   --hash=sha256:27a714c09253134e60a6fa68130f78c7037e5562c4f21f8f318f2ae900d152d5
 simplejson==3.19.2 \
-  --hash=sha256:7e672d77cc5cce3078d8b0cfd3500c3c374fcd24ee8fe370b4b3687f8c96289b
+  --hash=sha256:49bcacbc971d4c804ba19b238ee35e1445bc3d2c7b22add12e5e75ea435a0571
 six==1.16.0 \
   --hash=sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254
 soupsieve==1.9.6 \
@@ -157,7 +157,7 @@ typing==3.10.0.0 \
 tzlocal==2.1 \
   --hash=sha256:e2cb6c6b5b604af38597403e9852872d7f534962ae2954c7f35efcb1ccacf4a4
 uptime==3.0.1 \
-  --hash=sha256:67232705055834fe1dd64ef06f3c825980d386019a4d2d7dc1dc109fab21c85c
+  --hash=sha256:d6a15ef08f486db57685c9fbcd7275a9b20dcd4a7783084d9b70a8b532cdfece
 urllib3==1.26.18 \
   --hash=sha256:34b97092d7e0a3a8cf7cd10e386f401b3737364026c45e622aa02903dffe0f07
 vertica-python==1.2.0 \
@@ -169,6 +169,6 @@ win-inet-pton==1.1.0 \
 winkerberos==0.9.1 \
   --hash=sha256:53c5109e95b9cf0a80198ee6953d6263b0c8d254cc3815e9091cff4544ab4697
 wrapt==1.15.0 \
-  --hash=sha256:cf6deb9c2fcae45de1e69e29089e0385413a924436e0130fdb1a08dbefb71bc4
+  --hash=sha256:0b9a1011597dc301ac5356287a26e863b9c0c6ea1194da17721b15ef4addce32
 zipp==1.2.0 \
   --hash=sha256:e0d9e63797e483a30d27e09fffd308c59a700d365ec34e93cc100844168bf921
