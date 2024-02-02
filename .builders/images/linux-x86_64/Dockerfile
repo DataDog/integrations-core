@@ -4,6 +4,8 @@ FROM ${BASE_IMAGE}
 # Script for the common task of fetching a source tarball, compiling and installing it
 COPY install-from-source.sh /
 
+ENV CFLAGS="-O2"
+
 # For Python 2, we get openssl(1) via yum just to get the necessary headers,
 # and we remove the package after compilation to prevent it from interfering
 # with the use of openssl3 everywhere else
@@ -154,6 +156,29 @@ RUN \
  SHA256="7ccfc6abd01ed67c1a0924b353e526f1b766b21f42d4562ee635a8ebfc5bb38c" \
  RELATIVE_PATH="cyrus-sasl-{{version}}" \
  bash install-from-source.sh --with-dblib=lmdb --enable-gssapi=/usr/local
+# curl
+RUN \
+ DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
+ VERSION="8.4.0" \
+ SHA256="816e41809c043ff285e8c0f06a75a1fa250211bbfb2dc0a037eeef39f1a9e427" \
+ RELATIVE_PATH="curl-{{version}}" \
+  bash install-from-source.sh \
+    --disable-manual \
+    --disable-debug \
+    --enable-optimize \
+    --disable-static \
+    --disable-ldap \
+    --disable-ldaps \
+    --disable-rtsp \
+    --enable-proxy \
+    --disable-dependency-tracking \
+    --enable-ipv6 \
+    --without-libidn \
+    --without-gnutls \
+    --without-librtmp \
+    --without-libssh2 \
+    --with-ssl=/usr/local \
+ && rm /usr/local/bin/curl
 
 # Environment variables to help openssl crate find OpenSSL
 ENV OPENSSL_LIB_DIR="/usr/local/lib64"
