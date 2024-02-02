@@ -25,7 +25,7 @@
             "id": 4688297178923336,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard gives insights about correlation logs.\n- A Correlated event is generated when the patterns and thresholds defined in a Correlation Object match the traffic patterns on your network. ",
+                "content": "## Overview\n- This dashboard gives insights about correlation logs.\n- A correlated event is generated when the patterns and thresholds defined in a Correlation Object match the traffic patterns on your network.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

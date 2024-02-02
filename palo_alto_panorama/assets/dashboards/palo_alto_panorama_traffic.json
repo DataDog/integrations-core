@@ -25,7 +25,7 @@
             "id": 4688297178923336,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard gives insights about traffic related logs.\n- Traffic logs displays source and destination zones, addresses and ports; security rule applied to the traffic flow; rule action (allow, deny, or drop); number of bytes; session end reason etc.",
+                "content": "## Overview\n- This dashboard gives insights about traffic related logs.\n- Traffic logs displays source and destination zones, addresses, and ports; security rule applied to the traffic flow; rule action (allow, deny, or drop); number of bytes; session end reason; etc.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

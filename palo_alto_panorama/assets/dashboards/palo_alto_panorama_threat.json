@@ -813,7 +813,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@from",
+                                        "facet": "@srczone",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -874,7 +874,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@to",
+                                        "facet": "@dstzone",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",

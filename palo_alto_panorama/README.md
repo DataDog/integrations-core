@@ -10,11 +10,11 @@ This integration offers dashboard visualizations with detailed insights into inb
 
 ### Installation
 
-To install the Palo Alto Panorama integration, run the following Agent installation command and the steps below. For more information, see the [Integration Management][2] documentation.
+To install the Palo Alto Panorama integration, run the following Agent installation command and the steps below. For more information, see the [Integration Management documentation][2].
 
 **Note**: This step is not necessary for Agent version >= 7.52.0.
 
-Linux command
+Linux command:
   ```shell
   sudo -u dd-agent -- datadog-agent integration install datadog-palo_alto_panorama==1.0.0
   ```
@@ -48,8 +48,8 @@ Linux command
 4. Configure Panorama to send data to Datadog:
    1. Login into the Panorama System
    2. Follow the [Syslog log forwarding][5] configuration steps.
-      1. For Step 1.4, please use `TCP/UDP` for `Transport` type and `BSD` format for the `syslog messages`
-      2. For Step 1.5, Use the below provided custom logs format
+      1. For Step 1.4, use `TCP/UDP` for `Transport` type and `BSD` format for the `syslog messages`.
+      2. For Step 1.5, use the provided custom logs format below:
          - **Traffic**
             ```sh
             serial=$serial|type=$type|subtype=$subtype|time_generated=$cef-formatted-time_generated|src=$src|dst=$dst|natsrc=$natsrc|natdst=$natdst|rule=$rule|suser=$srcuser|duser=$dstuser|app=$app|vsys=$vsys|from=$from|to=$to|inboundif=$inbound_if|outboundif=$outbound_if|logset=$logset|sessionid=$sessionid|repeatcnt=$repeatcnt|sport=$sport|dport=$dport|natsport=$natsport|natdport=$natdport|flags=$flags|proto=$proto|act=$action|bytes=$bytes|bytes_sent=$bytes_sent|bytes_received=$bytes_received|pkt=$packets|start=$start|elapsed=$elapsed|cat=$category|seq=$seqno|actflag=$actionflags|sloc=$srcloc|dloc=$dstloc|pktsent=$pkts_sent|pktrcvd=$pkts_received|sessionendreason=$session_end_reason|vsysname=$vsys_name|dvc=$device_name|actsrc=$action_source|suuid=$src_uuid|duuid=$dst_uuid|tunnelid=$tunnelid|monitortag=$monitortag|parentid=$parent_session_id|parentst=$parent_start_time|tunnel=$tunnel|associd=$assoc_id|chunk=$chunks|chunksent=$chunks_sent|chunkrcvd=$chunks_received|ruleuuid=$rule_uuid|http2conn=$http2_connection|appflap=$link_change_count|policyid=$policy_id|dynusrgrp=$dynusergroup_name|xffip=$xff_ip|scat=$src_category|sprofile=$src_profile|smodel=$src_model|sven=$src_vendor|sosfam=$src_osfamily|sosver=$src_osversion|shost=$src_host|smac=$src_mac|dcat=$dst_category|dprofile=$dst_profile|dmodel=$dst_model|dven=$dst_vendor|dosfam=$dst_osfamily|dosver=$dst_osversion|dhost=$dst_host|dmac=$dst_mac|contid=$container_id|podnamespace=$pod_namespace|podname=$pod_name|sedl=$src_edl|dedl=$dst_edl|hostid=$hostid|srnum=$serialnumber|sessionown=$session_owner|subcatapp=$subcategory_of_app|appcat=$category_of_app|apptech=$technology_of_app|apprisk=$risk_of_app|appchar=$characteristic_of_app|appcont=$container_of_app|tunneledapp=$tunneled_app|appsaas=$is_saas_of_app|appstate=$sanctioned_state_of_app|offloaded=$offloaded|flowtype=$flow_type|cluster=$cluster_name|link=$link_switches|sdag=$src_dag|ddag=$dst_dag
@@ -104,7 +104,7 @@ Linux command
 
 ### Logs
 
-The palo_alto_panorama integration collects Traffic, Threat, Authentication, HIP Match, User ID, Tunnel Inspection, Config, System, Correleated Events, URL Filtering, Data Filtering, GlobalProtect, Decryption logs.
+The Palo Alto Panorama integration collects Traffic, Threat, Authentication, HIP Match, User ID, Tunnel Inspection, Config, System, Correlated Events, URL Filtering, Data Filtering, GlobalProtect, and Decryption logs.
 
 ### Metrics
 
