@@ -279,16 +279,26 @@ facets:
     name: OS
     path: http.useragent_details.os.family
     source: log
-  - groups:
+  - facetType: range
+    groups:
       - Web Access
-    name: Received Byte
+    name: Network Bytes Read
     path: network.bytes_read
     source: log
-  - groups:
+    type: double
+    unit:
+      family: bytes
+      name: byte
+  - facetType: range
+    groups:
       - Web Access
-    name: Sent Byte
+    name: Bytes Written
     path: network.bytes_written
     source: log
+    type: double
+    unit:
+      family: bytes
+      name: byte
   - groups:
       - Web Access
     name: Method
