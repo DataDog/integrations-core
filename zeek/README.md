@@ -27,22 +27,21 @@ Linux command
 
 #### Opensource Zeek
 1. [Install the Agent][4] on your Zeek machine.
-2. Setup json-streaming-logs package
-   - Install [Corelight Zeek plugin][5] for JSON logging
-     ```
-     /opt/zeek/bin/zkg install corelight/json-streaming-logs
-     ```
-   - Load ZKG packages
-     ```
-     echo -e "\n# Load ZKG packages\n@load packages" >> /opt/zeek/share/zeek/site/local.zeek
-     ```
-   - Restart Zeek
-     ```
-     /opt/zeek/bin/zeekctl install
-     ```
-     ```
-     /opt/zeek/bin/zeekctl restart
-     ```
+2. Install [Corelight Zeek plugin][5] for JSON logging.
+    ```
+    /opt/zeek/bin/zkg install corelight/json-streaming-logs
+    ```
+3. Load ZKG packages.
+    ```
+    echo -e "\n# Load ZKG packages\n@load packages" >> /opt/zeek/share/zeek/site/local.zeek
+    ```
+4. Restart Zeek.
+    ```
+    /opt/zeek/bin/zeekctl install
+    ```
+    ```
+    /opt/zeek/bin/zeekctl restart
+    ```
 
 #### Corelight Zeek
 * Have the [Datadog Agent][4] installed and running.
@@ -57,7 +56,7 @@ Linux command
 
 2. Add this configuration block to your `zeek.d/conf.yaml` file to start collecting your Zeek logs.
 
-    See the [sample zeek.d/conf.yaml][6] for available configuration options.
+    See the [sample zeek.d/conf.yaml][8] for available configuration options.
 
    ```yaml
     logs:
@@ -100,19 +99,19 @@ Linux command
 3. [Restart the Agent][1].
 
 4. Configuring Syslog Message Forwarding from corelight
-    1. Access the Corelight Sensor UI:
-       - Open a web browser and navigate to the IP address or hostname of your Corelight sensor.
-       - Log in with your administrative credentials.
-    2. Navigate to the Zeek Configuration Page. The exact path may vary depending on your sensor's firmware version. Look for options related to "Zeek" or "Logging". Common paths include:
-        - Settings > Logging
-        - Configuration > Zeek > Logging
-    3. Locate the option to enable syslog output for Zeek logs and select the checkbox or toggle to activate.
-    4. Specify Syslog Server Details. Provide the following information:
+    1. Open a web browser and navigate to the IP address or hostname of your Corelight sensor.
+    2. Log in with your administrative credentials.
+    3. Navigate to the Zeek Configuration Page. The exact path may vary depending on your sensor's firmware version.
+    4. Look for options related to "Zeek" or "Logging". Common paths includes:
+      - Settings > Logging
+      - Configuration > Zeek > Logging
+    5. Locate the option to enable syslog output for Zeek logs and select the checkbox or toggle to activate.
+    6. Specify Syslog Server Details. Provide the following information:
        - **Syslog server IP address**: The destination where you want to send the Zeek logs.
        - **Syslog port**: The port on which the syslog server is listening (typically 514).
        - **Facility**: The syslog facility to use.
        - **Severity level**: The minimum severity of events to send.
-    5. Click the **Save** or **Apply** button to commit the configuration changes.
+    7. Click the **Save** or **Apply** button to commit the configuration changes.
 
 
 ### Validation
@@ -146,7 +145,7 @@ The Zeek integration does not include any service checks.
 
 ### Opensource Zeek:
 
-If you see a **Permission denied** error while monitoring the log files, give read permission to dd-agent user to monitor the log files.
+If you see a **Permission denied** error while monitoring the log files, give the `dd-agent` user read permission on them.
 
   ```shell
   sudo chown -R dd-agent:dd-agent /opt/zeek/current/
@@ -158,29 +157,26 @@ If you see a **Permission denied** error while monitoring the log files, give re
 
 If you see a **Permission denied** error while port binding in the Agent logs, see the following instructions:
 
-   1. Binding to a port number under 1024 requires elevated permissions. Grant access to the port using the `setcap` command:
+1. Binding to a port number under 1024 requires elevated permissions. Grant access to the port using the `setcap` command:
+    ```shell
+    sudo setcap CAP_NET_BIND_SERVICE=+ep /opt/datadog-agent/bin/agent/agent
+    ```
 
-      - Grant access to the port using the `setcap` command:
+2. Verify the setup is correct by running the `getcap` command:
 
-         ```shell
-         sudo setcap CAP_NET_BIND_SERVICE=+ep /opt/datadog-agent/bin/agent/agent
-         ```
+    ```shell
+    sudo getcap /opt/datadog-agent/bin/agent/agent
+    ```
 
-      - Verify the setup is correct by running the `getcap` command:
+    With the expected output:
 
-         ```shell
-         sudo getcap /opt/datadog-agent/bin/agent/agent
-         ```
+    ```shell
+    /opt/datadog-agent/bin/agent/agent = cap_net_bind_service+ep
+    ```
 
-         With the expected output:
+    **Note**: Re-run this `setcap` command every time you upgrade the Agent.
 
-         ```shell
-         /opt/datadog-agent/bin/agent/agent = cap_net_bind_service+ep
-         ```
-
-         **Note**: Re-run this `setcap` command every time you upgrade the Agent.
-
-   2. [Restart the Agent][1].
+3. [Restart the Agent][1].
 
 **Data is not being collected:**
 
@@ -205,3 +201,4 @@ For any further assistance, contact [Datadog support][3].
 [5]: https://github.com/corelight/json-streaming-logs
 [6]: https://zeek.org/
 [7]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install
+[8]: https://github.com/DataDog/integrations-core/blob/master/cisco_secure_firewall/datadog_checks/cisco_secure_firewall/data/conf.yaml.example
