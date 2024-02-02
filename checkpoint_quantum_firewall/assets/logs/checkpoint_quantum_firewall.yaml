@@ -346,10 +346,6 @@ pipeline:
       name: Define `product` as the official service of the log
       enabled: true
       meta:
-        last_update:
-          timestamp: 1705906057304
-          user_name: Mohit Tilala
-          user_email: mohit.tilala@crestdatasys.com
         tags: []
       sources:
         - product
@@ -357,20 +353,12 @@ pipeline:
       name: Define `time` as the official date of the log
       enabled: true
       meta:
-        last_update:
-          timestamp: 1705906095040
-          user_name: Mohit Tilala
-          user_email: mohit.tilala@crestdatasys.com
         tags: []
       sources:
         - time
     - name: Lookup for `severity` to `checkpoint_firewall_severity` field
       enabled: true
       meta:
-        last_update:
-          timestamp: 1704277532736
-          user_name: null
-          user_email: dev.patel@crestdatasys.com
         tags: []
       source: severity
       target: checkpoint_firewall_severity
@@ -390,10 +378,6 @@ pipeline:
       name: Map `subject` to `checkpoint_firewall_subject`
       enabled: true
       meta:
-        last_update:
-          timestamp: 1704264725763
-          user_name: null
-          user_email: dev.patel@crestdatasys.com
         tags: []
       sources:
         - subject
@@ -406,10 +390,6 @@ pipeline:
       name: Map `client_name` to `checkpoint_firewall_client_name`
       enabled: true
       meta:
-        last_update:
-          timestamp: 1704267865463
-          user_name: null
-          user_email: dev.patel@crestdatasys.com
         tags: []
       sources:
         - client_name
@@ -422,10 +402,6 @@ pipeline:
       name: Map `action` to `checkpoint_firewall_action`
       enabled: true
       meta:
-        last_update:
-          timestamp: 1704267875932
-          user_name: null
-          user_email: dev.patel@crestdatasys.com
         tags: []
       sources:
         - action
@@ -438,10 +414,6 @@ pipeline:
       name: Map `protocol` to `checkpoint_firewall_protocol`
       enabled: true
       meta:
-        last_update:
-          timestamp: 1704267881691
-          user_name: null
-          user_email: dev.patel@crestdatasys.com
         tags: []
       sources:
         - protocol
@@ -454,10 +426,6 @@ pipeline:
       name: Map `bytes` to `checkpoint_firewall_bytes`
       enabled: true
       meta:
-        last_update:
-          timestamp: 1704279118956
-          user_name: null
-          user_email: dev.patel@crestdatasys.com
         tags: []
       sources:
         - bytes
@@ -470,10 +438,6 @@ pipeline:
       name: Map `operation` to `checkpoint_operation`
       enabled: true
       meta:
-        last_update:
-          timestamp: 1705911703578
-          user_name: null
-          user_email: dev.patel@crestdatasys.com
         tags: []
       sources:
         - operation
@@ -494,9 +458,6 @@ pipeline:
           name: Map `src` to `network.client.ip`
           enabled: true
           meta:
-            last_update:
-              user_id: "5795819"
-              timestamp: 1704083245096
             tags: []
           sources:
             - src
@@ -509,9 +470,6 @@ pipeline:
           name: Map `dst` to `network.destination.ip`
           enabled: true
           meta:
-            last_update:
-              user_id: "5795819"
-              timestamp: 1704083268444
             tags: []
           sources:
             - dst
@@ -524,9 +482,6 @@ pipeline:
           name: Map `s_port` to `network.client.port`
           enabled: true
           meta:
-            last_update:
-              user_id: "5795819"
-              timestamp: 1704197224039
             tags: []
           sources:
             - s_port
@@ -539,9 +494,6 @@ pipeline:
           name: Map `src_country` to `network.client.geoip.country.iso_code`
           enabled: true
           meta:
-            last_update:
-              user_id: "5795819"
-              timestamp: 1704197268303
             tags: []
           sources:
             - src_country
@@ -554,9 +506,6 @@ pipeline:
           name: Map `service` to `network.destination.port`
           enabled: true
           meta:
-            last_update:
-              user_id: "5795819"
-              timestamp: 1704197338098
             tags: []
           sources:
             - service
@@ -569,9 +518,6 @@ pipeline:
           name: Map `server_inbound_bytes` to `network.bytes_read`
           enabled: true
           meta:
-            last_update:
-              user_id: "5795819"
-              timestamp: 1704197854427
             tags: []
           sources:
             - server_inbound_bytes
@@ -584,9 +530,6 @@ pipeline:
           name: Map `server_outbound_bytes` to `network.bytes_written`
           enabled: true
           meta:
-            last_update:
-              user_id: "5795819"
-              timestamp: 1704199593022
             tags: []
           sources:
             - server_outbound_bytes
@@ -599,9 +542,6 @@ pipeline:
           name: GeoIP Parser for `network.client.ip`
           enabled: true
           meta:
-            last_update:
-              user_id: "5795819"
-              timestamp: 1704083759665
             tags: []
           sources:
             - network.client.ip
@@ -611,9 +551,6 @@ pipeline:
           name: GeoIP Parser for `network.destination.ip`
           enabled: true
           meta:
-            last_update:
-              user_id: "5795819"
-              timestamp: 1704083781165
             tags: []
           sources:
             - network.destination.ip
@@ -629,9 +566,6 @@ pipeline:
           name: Map `src_user_name` to `usr.name`
           enabled: true
           meta:
-            last_update:
-              user_id: "5795819"
-              timestamp: 1704286395470
             tags: []
           sources:
             - src_user_name
@@ -644,9 +578,6 @@ pipeline:
           name: Map `event_type` to `checkpoint_event_type`
           enabled: true
           meta:
-            last_update:
-              user_id: "5795819"
-              timestamp: 1705911649321
             tags: []
           sources:
             - event_type
@@ -665,9 +596,6 @@ pipeline:
           name: Map `user` to `usr.name`
           enabled: true
           meta:
-            last_update:
-              user_id: "5795819"
-              timestamp: 1704367145639
             tags: []
           sources:
             - user
@@ -688,9 +616,6 @@ pipeline:
             %{network.client.port}"
           enabled: true
           meta:
-            last_update:
-              user_id: "5795819"
-              timestamp: 1703667959676
             tags: []
           template: "%{network.client.ip}:%{network.client.port}"
           target: src_ip_port
@@ -700,9 +625,6 @@ pipeline:
             %{network.destination.port}"
           enabled: true
           meta:
-            last_update:
-              user_id: "5795819"
-              timestamp: 1703667966285
             tags: []
           template: "%{network.destination.ip}:%{network.destination.port}"
           target: dst_ip_port
@@ -716,9 +638,6 @@ pipeline:
         - name: Lookup for `app_risk` to `app_risk_str` field
           enabled: true
           meta:
-            last_update:
-              user_id: "5795819"
-              timestamp: 1704295525972
             tags: []
           source: app_risk
           target: app_risk_str
@@ -746,9 +665,6 @@ pipeline:
           name: Map `status` to `checkpoint_firewall_status`
           enabled: true
           meta:
-            last_update:
-              user_id: "5795819"
-              timestamp: 1704281014539
             tags: []
           sources:
             - status
