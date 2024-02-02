@@ -275,8 +275,8 @@ facets:
     path: network.destination.port
     source: log
   - groups:
-      - HTTP Requests
-    name: Client OS
+      - Web Access
+    name: OS
     path: http.useragent_details.os.family
     source: log
   - groups:
@@ -291,7 +291,7 @@ facets:
     source: log
   - groups:
       - Web Access
-    name: HTTP Method
+    name: Method
     path: http.method
     source: log
   - groups:
@@ -335,13 +335,13 @@ facets:
     path: network.client.geoip.subdivision.name
     source: log
   - groups:
-      - HTTP Requests
-    name: User Agent
+      - Web Access
+    name: User-Agent
     path: http.useragent
     source: log
   - groups:
-      - HTTP Requests
-    name: Client Browser
+      - Web Access
+    name: Browser
     path: http.useragent_details.browser.family
     source: log
 pipeline:
