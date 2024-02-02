@@ -2,321 +2,321 @@ id: zeek
 metric_id: zeek
 backend_only: false
 facets:
-- facetType: list
-  groups:
-  - Zeek
-  name: Assigned Address
-  path: assigned_addr
-  source: log
-  type: string
-- facetType: range
-  groups:
-  - Zeek
-  name: Auth Attempts
-  path: auth_attempts
-  source: log
-  type: integer
-- facetType: range
-  groups:
-  - Zeek
-  name: Bytes
-  path: bytes
-  source: log
-  type: integer
-  unit:
-    family: bytes
-    name: byte
-- facetType: list
-  groups:
-  - Zeek
-  name: Certificate Key Algorithm
-  path: certificate.key_alg
-  source: log
-  type: string
-- facetType: list
-  groups:
-  - Zeek
-  name: Certificate Key Type
-  path: certificate.key_type
-  source: log
-  type: string
-- facetType: list
-  groups:
-  - Zeek
-  name: Certificate Signature Algorithm
-  path: certificate.sig_alg
-  source: log
-  type: string
-- facetType: list
-  groups:
-  - Zeek
-  name: Certificate Version
-  path: certificate.version
-  source: log
-  type: string
-- facetType: list
-  groups:
-  - Zeek
-  name: Client Message
-  path: client_message
-  source: log
-  type: string
-- facetType: list
-  groups:
-  - Zeek
-  name: Client Requested Address
-  path: request
-  source: log
-  type: string
-- facetType: list
-  groups:
-  - Zeek
-  name: Client Requested Port
-  path: request_p
-  source: log
-  type: string
-- facetType: list
-  groups:
-  - Zeek
-  name: Direction
-  path: direction
-  source: log
-  type: string
-- facetType: list
-  groups:
-  - Zeek
-  name: DNS Client
-  path: dns_client
-  source: log
-  type: string
-- facetType: range
-  groups:
-  - Zeek
-  name: Duration Seconds
-  path: duration_sec
-  source: log
-  type: double
-  unit:
-    family: time
-    name: second
-- facetType: range
-  groups:
-  - Zeek
-  name: File Size
-  path: file_size
-  source: log
-  type: double
-  unit:
-    family: bytes
-    name: byte
-- facetType: list
-  groups:
-  - Zeek
-  name: Host Port
-  path: host_p
-  source: log
-  type: string
-- facetType: range
-  groups:
-  - Zeek
-  name: Lease Time
-  path: lease_time
-  source: log
-  type: double
-  unit:
-    family: time
-    name: second
-- facetType: list
-  groups:
-  - Zeek
-  name: Mac Address
-  path: mac
-  source: log
-  type: string
-- facetType: list
-  groups:
-  - Zeek
-  name: Message Types
-  path: msg_types
-  source: log
-  type: string
-- facetType: range
-  groups:
-  - Zeek
-  name: Missed Bytes
-  path: missed_bytes
-  source: log
-  type: double
-  unit:
-    family: bytes
-    name: byte
-- facetType: range
-  groups:
-  - Zeek
-  name: Missing Bytes
-  path: missing_bytes
-  source: log
-  type: double
-  unit:
-    family: bytes
-    name: byte
-- facetType: list
-  groups:
-  - Zeek
-  name: Name
-  path: zeek_name
-  source: log
-  type: string
-- facetType: list
-  groups:
-  - Zeek
-  name: Notice Type
-  path: note
-  source: log
-  type: string
-- facetType: list
-  groups:
-  - Zeek
-  name: NTP Mode
-  path: ntp_mode
-  source: log
-  type: string
-- facetType: list
-  groups:
-  - Zeek
-  name: Operation Codes
-  path: opcodes
-  source: log
-  type: string
-- facetType: list
-  groups:
-  - Zeek
-  name: Originator IP
-  path: orig_h
-  source: log
-  type: string
-- facetType: list
-  groups:
-  - Zeek
-  name: Originator Port
-  path: orig_p
-  source: log
-  type: string
-- facetType: range
-  groups:
-  - Zeek
-  name: Overflow Bytes
-  path: overflow_bytes
-  source: log
-  type: integer
-  unit:
-    family: bytes
-    name: byte
-- facetType: range
-  groups:
-  - Zeek
-  name: Percent Lost
-  path: percent_lost
-  source: log
-  type: double
-- facetType: list
-  groups:
-  - Zeek
-  name: Protocol
-  path: zeek_proto
-  source: log
-  type: string
-- facetType: list
-  groups:
-  - Zeek
-  name: Requested Address
-  path: requested_addr
-  source: log
-  type: string
-- facetType: list
-  groups:
-  - Zeek
-  name: Responder IP
-  path: resp_h
-  source: log
-  type: string
-- facetType: list
-  groups:
-  - Zeek
-  name: Responder Port
-  path: resp_p
-  source: log
-  type: string
-- facetType: range
-  groups:
-  - Zeek
-  name: Seen Bytes
-  path: seen_bytes
-  source: log
-  type: integer
-  unit:
-    family: bytes
-    name: byte
-- facetType: list
-  groups:
-  - Zeek
-  name: Server Bound Address
-  path: bound
-  source: log
-  type: string
-- facetType: list
-  groups:
-  - Zeek
-  name: Server Bound Port
-  path: bound_p
-  source: log
-  type: string
-- facetType: list
-  groups:
-  - Zeek
-  name: Server Message
-  path: server_message
-  source: log
-  type: string
-- facetType: range
-  groups:
-  - Zeek
-  name: Size
-  path: size
-  source: log
-  type: double
-  unit:
-    family: bytes
-    name: byte
-- facetType: list
-  groups:
-  - Zeek
-  name: Software Type
-  path: software_type
-  source: log
-  type: string
-- facetType: list
-  groups:
-  - Zeek
-  name: Stratum
-  path: stratum
-  source: log
-  type: string
-- facetType: range
-  groups:
-  - Zeek
-  name: Total Bytes
-  path: total_bytes
-  source: log
-  type: integer
-  unit:
-    family: bytes
-    name: byte
-- groups:
-      - DNS
-    name: Answer Name
-    path: dns.answer.name
+  - facetType: list
+    groups:
+    - Zeek
+    name: Assigned Address
+    path: assigned_addr
     source: log
+    type: string
+  - facetType: range
+    groups:
+    - Zeek
+    name: Auth Attempts
+    path: auth_attempts
+    source: log
+    type: integer
+  - facetType: range
+    groups:
+    - Zeek
+    name: Bytes
+    path: bytes
+    source: log
+    type: integer
+    unit:
+      family: bytes
+      name: byte
+  - facetType: list
+    groups:
+    - Zeek
+    name: Certificate Key Algorithm
+    path: certificate.key_alg
+    source: log
+    type: string
+  - facetType: list
+    groups:
+    - Zeek
+    name: Certificate Key Type
+    path: certificate.key_type
+    source: log
+    type: string
+  - facetType: list
+    groups:
+    - Zeek
+    name: Certificate Signature Algorithm
+    path: certificate.sig_alg
+    source: log
+    type: string
+  - facetType: list
+    groups:
+    - Zeek
+    name: Certificate Version
+    path: certificate.version
+    source: log
+    type: string
+  - facetType: list
+    groups:
+    - Zeek
+    name: Client Message
+    path: client_message
+    source: log
+    type: string
+  - facetType: list
+    groups:
+    - Zeek
+    name: Client Requested Address
+    path: request
+    source: log
+    type: string
+  - facetType: list
+    groups:
+    - Zeek
+    name: Client Requested Port
+    path: request_p
+    source: log
+    type: string
+  - facetType: list
+    groups:
+    - Zeek
+    name: Direction
+    path: direction
+    source: log
+    type: string
+  - facetType: list
+    groups:
+    - Zeek
+    name: DNS Client
+    path: dns_client
+    source: log
+    type: string
+  - facetType: range
+    groups:
+    - Zeek
+    name: Duration Seconds
+    path: duration_sec
+    source: log
+    type: double
+    unit:
+      family: time
+      name: second
+  - facetType: range
+    groups:
+    - Zeek
+    name: File Size
+    path: file_size
+    source: log
+    type: double
+    unit:
+      family: bytes
+      name: byte
+  - facetType: list
+    groups:
+    - Zeek
+    name: Host Port
+    path: host_p
+    source: log
+    type: string
+  - facetType: range
+    groups:
+    - Zeek
+    name: Lease Time
+    path: lease_time
+    source: log
+    type: double
+    unit:
+      family: time
+      name: second
+  - facetType: list
+    groups:
+    - Zeek
+    name: Mac Address
+    path: mac
+    source: log
+    type: string
+  - facetType: list
+    groups:
+    - Zeek
+    name: Message Types
+    path: msg_types
+    source: log
+    type: string
+  - facetType: range
+    groups:
+    - Zeek
+    name: Missed Bytes
+    path: missed_bytes
+    source: log
+    type: double
+    unit:
+      family: bytes
+      name: byte
+  - facetType: range
+    groups:
+    - Zeek
+    name: Missing Bytes
+    path: missing_bytes
+    source: log
+    type: double
+    unit:
+      family: bytes
+      name: byte
+  - facetType: list
+    groups:
+    - Zeek
+    name: Name
+    path: zeek_name
+    source: log
+    type: string
+  - facetType: list
+    groups:
+    - Zeek
+    name: Notice Type
+    path: note
+    source: log
+    type: string
+  - facetType: list
+    groups:
+    - Zeek
+    name: NTP Mode
+    path: ntp_mode
+    source: log
+    type: string
+  - facetType: list
+    groups:
+    - Zeek
+    name: Operation Codes
+    path: opcodes
+    source: log
+    type: string
+  - facetType: list
+    groups:
+    - Zeek
+    name: Originator IP
+    path: orig_h
+    source: log
+    type: string
+  - facetType: list
+    groups:
+    - Zeek
+    name: Originator Port
+    path: orig_p
+    source: log
+    type: string
+  - facetType: range
+    groups:
+    - Zeek
+    name: Overflow Bytes
+    path: overflow_bytes
+    source: log
+    type: integer
+    unit:
+      family: bytes
+      name: byte
+  - facetType: range
+    groups:
+    - Zeek
+    name: Percent Lost
+    path: percent_lost
+    source: log
+    type: double
+  - facetType: list
+    groups:
+    - Zeek
+    name: Protocol
+    path: zeek_proto
+    source: log
+    type: string
+  - facetType: list
+    groups:
+    - Zeek
+    name: Requested Address
+    path: requested_addr
+    source: log
+    type: string
+  - facetType: list
+    groups:
+    - Zeek
+    name: Responder IP
+    path: resp_h
+    source: log
+    type: string
+  - facetType: list
+    groups:
+    - Zeek
+    name: Responder Port
+    path: resp_p
+    source: log
+    type: string
+  - facetType: range
+    groups:
+    - Zeek
+    name: Seen Bytes
+    path: seen_bytes
+    source: log
+    type: integer
+    unit:
+      family: bytes
+      name: byte
+  - facetType: list
+    groups:
+    - Zeek
+    name: Server Bound Address
+    path: bound
+    source: log
+    type: string
+  - facetType: list
+    groups:
+    - Zeek
+    name: Server Bound Port
+    path: bound_p
+    source: log
+    type: string
+  - facetType: list
+    groups:
+    - Zeek
+    name: Server Message
+    path: server_message
+    source: log
+    type: string
+  - facetType: range
+    groups:
+    - Zeek
+    name: Size
+    path: size
+    source: log
+    type: double
+    unit:
+      family: bytes
+      name: byte
+  - facetType: list
+    groups:
+    - Zeek
+    name: Software Type
+    path: software_type
+    source: log
+    type: string
+  - facetType: list
+    groups:
+    - Zeek
+    name: Stratum
+    path: stratum
+    source: log
+    type: string
+  - facetType: range
+    groups:
+    - Zeek
+    name: Total Bytes
+    path: total_bytes
+    source: log
+    type: integer
+    unit:
+      family: bytes
+      name: byte
+  - groups:
+        - DNS
+      name: Answer Name
+      path: dns.answer.name
+      source: log
   - groups:
       - DNS
     name: Response Code
