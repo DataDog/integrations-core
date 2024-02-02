@@ -2,6 +2,126 @@ id: palo-alto-panorama
 metric_id: palo-alto-panorama
 backend_only: false
 facets:
+  - groups:
+      - Web Access
+    name: Method
+    path: http.method
+    source: log
+  - groups:
+      - Web Access
+    name: User-Agent
+    path: http.useragent
+    source: log
+  - groups:
+      - Web Access
+    name: Browser
+    path: http.useragent_details.browser.family
+    source: log
+  - groups:
+      - Web Access
+    name: Device
+    path: http.useragent_details.device.family
+    source: log
+  - groups:
+      - Web Access
+    name: OS
+    path: http.useragent_details.os.family
+    source: log
+  - groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
+    source: log
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+  - groups:
+      - Web Access
+    name: Client Port
+    path: network.client.port
+    source: log
+  - groups:
+      - Geoip
+    name: Destination City Name
+    path: network.destination.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Continent Code
+    path: network.destination.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Continent Name
+    path: network.destination.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Country ISO Code
+    path: network.destination.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Country Name
+    path: network.destination.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Subdivision ISO Code
+    path: network.destination.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Subdivision Name
+    path: network.destination.geoip.subdivision.name
+    source: log
+  - groups:
+      - Web Access
+    name: Destination IP
+    path: network.destination.ip
+    source: log
+  - groups:
+      - Web Access
+    name: Destination Port
+    path: network.destination.port
+    source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
   - facetType: list
     groups:
       - Palo Alto Panorama
@@ -254,31 +374,6 @@ facets:
     path: vsys
     source: log
     type: string
-  - groups:
-      - Web Access
-    name: Client IP
-    path: network.client.ip
-    source: log
-  - groups:
-      - Web Access
-    name: Client Port
-    path: network.client.port
-    source: log
-  - groups:
-      - Web Access
-    name: Destination IP
-    path: network.destination.ip
-    source: log
-  - groups:
-      - Web Access
-    name: Destination Port
-    path: network.destination.port
-    source: log
-  - groups:
-      - Web Access
-    name: OS
-    path: http.useragent_details.os.family
-    source: log
   - facetType: range
     groups:
       - Web Access
@@ -299,61 +394,6 @@ facets:
     unit:
       family: bytes
       name: byte
-  - groups:
-      - Web Access
-    name: Method
-    path: http.method
-    source: log
-  - groups:
-      - User
-    name: User Name
-    path: usr.name
-    source: log
-  - groups:
-      - Geoip
-    name: City Name
-    path: network.client.geoip.city.name
-    source: log
-  - groups:
-      - Geoip
-    name: Continent Code
-    path: network.client.geoip.continent.code
-    source: log
-  - groups:
-      - Geoip
-    name: Continent Name
-    path: network.client.geoip.continent.name
-    source: log
-  - groups:
-      - Geoip
-    name: Country ISO Code
-    path: network.client.geoip.country.iso_code
-    source: log
-  - groups:
-      - Geoip
-    name: Country Name
-    path: network.client.geoip.country.name
-    source: log
-  - groups:
-      - Geoip
-    name: Subdivision ISO Code
-    path: network.client.geoip.subdivision.iso_code
-    source: log
-  - groups:
-      - Geoip
-    name: Subdivision Name
-    path: network.client.geoip.subdivision.name
-    source: log
-  - groups:
-      - Web Access
-    name: User-Agent
-    path: http.useragent
-    source: log
-  - groups:
-      - Web Access
-    name: Browser
-    path: http.useragent_details.browser.family
-    source: log
 pipeline:
   type: pipeline
   name: Palo Alto Panorama
