@@ -363,5 +363,12 @@
         "scarce": 0
       }
     }
+  },
+  "upstreamZones": {
+    "backend": [
+      {
+        "responseMsec": 485
+      }
+    ]
   }
 }
