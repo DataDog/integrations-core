@@ -5,8 +5,8 @@ tests:
     result: null
   - sample: "2024-01-04T05:49:44Z   %FTD-1-430001: DeviceUUID:
       fbf9ef28-9b2a-51ur-495e-e9384ce3a258, InstanceID: 1, FirstPacketSecond:
-      2024-01-04T05:49:44Z, ConnectionID: 39298, SrcIP: 8.8.8.8, DstIP:
-      10.40.1.16, SrcPort: 53, DstPort: 61550, Protocol: udp, IngressInterface:
+      2024-01-04T05:49:44Z, ConnectionID: 39298, SrcIP: 185.64.148.0, DstIP:
+      185.64.148.0, SrcPort: 53, DstPort: 61550, Protocol: udp, IngressInterface:
       WAN, EgressInterface: LAN, IngressZone: WAN, EgressZone: LAN, Priority: 2,
       GID: 1, SID: 254, Revision: 17, Message: PROTOCOL-DNS SPOOF query response
       with TTL of 1 min. and no authority, Classification: Potentially Bad
