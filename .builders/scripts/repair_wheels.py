@@ -60,21 +60,22 @@ def wheel_was_built(wheel: Path) -> bool:
 
 def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
     from auditwheel.patcher import Patchelf
-    from auditwheel.policy import get_policy_by_name
+    from auditwheel.policy import WheelPolicies
     from auditwheel.repair import repair_wheel
     from auditwheel.wheel_abi import NonPlatformWheel
 
-    exclusions = [
+    exclusions = frozenset({
         # pymqi
         'libmqic_r.so',
         # confluent_kafka
         # We leave cyrus-sasl out of the wheel because of the complexity involved in bundling it portably.
         # This means the confluent-kafka wheel will have a runtime dependency on this library
         'libsasl2.so.3',
-    ]
+    })
 
     # Hardcoded policy to the minimum we need to currently support
-    policy = get_policy_by_name('manylinux2010_x86_64')
+    policies = WheelPolicies()
+    policy = policies.get_policy_by_name('manylinux2010_x86_64')
     abis = [policy['name'], *policy['aliases']]
 
     for wheel in iter_wheels(source_dir):
@@ -86,6 +87,7 @@ def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
 
         try:
             repair_wheel(
+                policies,
                 str(wheel),
                 abis=abis,
                 lib_sdir='.libs',
