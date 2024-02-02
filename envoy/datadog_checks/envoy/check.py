@@ -110,6 +110,36 @@ METRIC_WITH_LABEL_NAME = {
         'metric_type': 'monotonic_count',
         'new_name': 'http.local_rate_limit_rate_limited.count',
     },
+    r'envoy_cluster_(.+)_client_ssl_socket_factory_downstream_context_secrets_not_ready$': {
+        'label_name': 'envoy_service',
+        'metric_type': 'monotonic_count',
+        'new_name': 'cluster.client_ssl_socket_factory.downstream_context_secrets_not_ready.count',
+    },
+    r'envoy_cluster_(.+)_client_ssl_socket_factory_upstream_context_secrets_not_ready$': {
+        'label_name': 'envoy_service',
+        'metric_type': 'monotonic_count',
+        'new_name': 'cluster.client_ssl_socket_factory.upstream_context_secrets_not_ready.count',
+    },
+    r'envoy_cluster_(.+)_client_ssl_socket_factory_ssl_context_update_by_sds$': {
+        'label_name': 'envoy_service',
+        'metric_type': 'monotonic_count',
+        'new_name': 'cluster.client_ssl_socket_factory.ssl_context_update_by_sds.count',
+    },
+    r'envoy_listener_(.+)_server_ssl_socket_factory_upstream_context_secrets_not_ready': {
+        'label_name': 'envoy_address',
+        'metric_type': 'monotonic_count',
+        'new_name': 'listener.server_ssl_socket_factory.upstream_context_secrets_not_ready.count',
+    },
+    r'envoy_listener_(.+)_server_ssl_socket_factory_ssl_context_update_by_sds': {
+        'label_name': 'envoy_address',
+        'metric_type': 'monotonic_count',
+        'new_name': 'listener.server_ssl_socket_factory.ssl_context_update_by_sds.count',
+    },
+    r'envoy_listener_(.+)_server_ssl_socket_factory_downstream_context_secrets_not_ready': {
+        'label_name': 'envoy_address',
+        'metric_type': 'monotonic_count',
+        'new_name': 'listener.server_ssl_socket_factory.downstream_context_secrets_not_ready.count',
+    },
 }
 
 
