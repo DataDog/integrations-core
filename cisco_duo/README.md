@@ -1,6 +1,6 @@
 ## Overview
 
-[Cisco Duo][1] is a multi-factor authentication (MFA) and secure access solution. It adds an additional layer of security by requiring users to verify their identity through a second factor, such as a mobile app, before gaining access to applications or systems. Duo is often used to enhance the security of remote access and helps protect against unauthorized access even if passwords are compromised.
+[Cisco Duo][1] is a multi-factor authentication (MFA) and secure access solution. It adds an additional layer of security by requiring users to verify their identity through a second factor, such as a mobile app, before gaining access to applications or systems. Duo is often used to enhance the security of remote access and helps protect against unauthorized access, even if passwords are compromised.
 
 This integration ingests the following logs:
 - Authentication
@@ -9,7 +9,7 @@ This integration ingests the following logs:
 - Telephony
 - Offline Enrollment
 
-The Cisco Duo integration seamlessly collects multi-factor authentication (MFA) and secure access logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insightful into fraud authentication events, authentication activity timeline, locations of accessed, authentication devices, and many more through the out-of-the-box dashboards.
+The Cisco Duo integration seamlessly collects multi-factor authentication (MFA) and secure access logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into fraud authentication events, authentication activity timeline, locations of accessed, authentication devices, and many more through the out-of-the-box dashboards.
 
 ## Setup
 
@@ -32,7 +32,7 @@ Configure the Datadog endpoint to forward Cisco Duo logs to Datadog.
 
 | Cisco Duo Parameters | Description  |
 | -------------------- | ------------ |
-| Host                 | The API Hostname from Cisco Duo. It should be only `XXXXXXXX` part of `https://api-XXXXXXXX.duosecurity.com`.  |
+| Host                 | The API Hostname from Cisco Duo. It is the `XXXXXXXX` part of `https://api-XXXXXXXX.duosecurity.com`.  |
 | Integration Key      | The Integration Key from Cisco Duo.    |
 | Secret Key           | The Secret Key from Cisco Duo.         |
 
