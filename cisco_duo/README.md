@@ -31,7 +31,7 @@ Configure the Datadog endpoint to forward Cisco Duo logs to Datadog.
 
 | Cisco Duo Parameters | Description  |
 | -------------------- | ------------ |
-| Host                 | The API Hostname from Cisco Duo. It should be only `XXXXXXXX` part of `https://api-XXXXXXXX.duosecurity.com`.  |
+| Host                 | The API Hostname from Cisco Duo. It is the `XXXXXXXX` part of `https://api-XXXXXXXX.duosecurity.com`.  |
 | Integration Key      | The Integration Key from Cisco Duo.    |
 | Secret Key           | The Secret Key from Cisco Duo.         |
 
