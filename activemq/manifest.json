@@ -48,7 +48,9 @@
       },
       "process_signatures": [
         "activemq"
-      ]
+      ],
+      "source_type_id": 40,
+      "auto_install": true
     },
     "dashboards": {
       "activemq": "assets/dashboards/activemq_dashboard.json",

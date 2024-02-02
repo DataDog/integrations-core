@@ -47,7 +47,9 @@
       "process_signatures": [
         "pdns_server",
         "systemctl start pdns@"
-      ]
+      ],
+      "source_type_id": 144,
+      "auto_install": true
     },
     "dashboards": {
       "powerdns": "assets/dashboards/powerdns_dashboard.json"

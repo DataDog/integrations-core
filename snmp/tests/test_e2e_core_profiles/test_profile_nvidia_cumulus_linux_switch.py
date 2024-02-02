@@ -200,6 +200,7 @@ def test_e2e_profile_nvidia_cumulus_linux_switch(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.40310',
         'vendor': 'nvidia',
+        'device_type': 'switch',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

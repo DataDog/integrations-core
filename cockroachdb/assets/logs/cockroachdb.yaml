@@ -1,5 +1,6 @@
 id: cockroachdb
 metric_id: cockroachdb
+backend_only: false
 facets:
 pipeline:
   type: pipeline

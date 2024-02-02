@@ -2,7 +2,8 @@
 
 ## Overview
 
-**Note**: This page describes the ECS Fargate integration. For EKS Fargate, see the documentation for Datadog's [EKS Fargate integration][1].
+<div class="alert alert-warning"> This page describes the ECS Fargate integration. For EKS Fargate, see the documentation for Datadog's <a href="http://docs.datadoghq.com/integrations/eks_fargate">EKS Fargate integration</a>.
+</div>
 
 Get metrics from all your containers running in ECS Fargate:
 
@@ -16,6 +17,8 @@ The Datadog Agent retrieves metrics for the task definition's containers with th
 The Task Metadata endpoint is only available from within the task definition itself, which is why the Datadog Agent needs to be run as an additional container within each task definition to be monitored.
 
 The only configuration required to enable this metrics collection is to set an environment variable `ECS_FARGATE` to `"true"` in the task definition.
+
+**Note**: Network Process Monitoring (NPM) is not supported for ECS Fargate.
 
 ## Setup
 
@@ -745,6 +748,17 @@ partial -->
 
 3. Ensure your application is running in the same task definition as the Datadog Agent container.
 
+### Process collection
+
+<div class="alert alert-warning">You can view your ECS Fargate processes in Datadog. To see their relationship to ECS Fargate containers, use the Datadog Agent v7.50.0 or later.</div>
+
+You can monitor processes in ECS Fargate in Datadog by using the [Live Processes page][56]. To enable process collection, add the [`PidMode` parameter][57] in the Task Definition and set it to `task` as follows:
+
+```text
+"pidMode": "task"
+```
+To filter processes by ECS, use the `AWS Fargate` Containers facet or enter `fargate:ecs` in the search query on the Live Processes page.
+
 ## Out-of-the-box tags
 
 The Agent can autodiscover and attach tags to all data emitted by the entire task or an individual container within this task. The list of tags automatically attached depends on the Agent's [cardinality configuration][33].
@@ -852,4 +866,5 @@ Need help? Contact [Datadog support][18].
 [53]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/cpp?tab=containers#instrument-your-application
 [54]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/dotnet-core?tab=containers#custom-instrumentation
 [55]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/dotnet-framework?tab=containers#custom-instrumentation
-
+[56]: https://app.datadoghq.com/process
+[57]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#other_task_definition_params

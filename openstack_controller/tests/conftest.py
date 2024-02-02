@@ -454,7 +454,7 @@ def connection_compute(request, mock_responses):
             )
         )
 
-    def servers(project_id, details):
+    def servers(project_id, details, limit=None):
         if http_error and 'servers' in http_error and project_id in http_error['servers']:
             raise requests.exceptions.HTTPError(response=http_error['servers'][project_id])
         return [
@@ -767,12 +767,17 @@ def get_url_path(url):
 def mock_http_get(request, monkeypatch, mock_http_call):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.pop('http_error', {})
+    data = param.pop('mock_data', {})
 
     def get(url, *args, **kwargs):
         method = 'GET'
         url = get_url_path(url)
         if http_error and url in http_error:
             raise requests.exceptions.HTTPError(response=http_error[url])
+
+        if data and url in data:
+            return MockResponse(json_data=data[url], status_code=200)
+
         json_data = mock_http_call(method, url, headers=kwargs.get('headers'), params=kwargs.get('params'))
         return MockResponse(json_data=json_data, status_code=200)
 

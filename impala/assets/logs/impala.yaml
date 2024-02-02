@@ -1,41 +1,42 @@
 id: impala
 metric_id: impala
+backend_only: false
 facets:
-  - name: Thread Name
-    source: log
-    path: logger.thread_name
-    groups:
+  - groups:
       - Source Code
-  - name: Destination IP
+    name: Thread Name
+    path: logger.thread_name
     source: log
+  - groups:
+      - Web Access
+    name: Destination IP
     path: network.destination.ip
-    groups:
-      - Web Access
-  - name: Destination Port
     source: log
+  - groups:
+      - Web Access
+    name: Destination Port
     path: network.destination.port
-    groups:
-      - Web Access
-  - name: Destination Name
     source: log
+  - groups:
+      - Web Access
+    name: Destination Name
     path: network.destination.name
-    groups:
-      - Web Access
-  - name: Topic Name
     source: log
+  - groups:
+      - Impala
+    name: Topic Name
     path: topic.name
-    groups:
-      - Impala
-  - name: Backend Group Name
     source: log
+  - groups:
+      - Impala
+    name: Backend Group Name
     path: backend.group_name
-    groups:
-      - Impala
-  - name: Query Id
     source: log
-    path: query.id
-    groups:
+  - groups:
       - Impala
+    name: Query Id
+    path: query.id
+    source: log
 pipeline:
   type: pipeline
   name: Impala
@@ -48,10 +49,10 @@ pipeline:
       enabled: true
       source: message
       samples:
-        - "I0909 12:54:20.375062     1 HiveMetaStoreClient.java:251] HMS client filtering is enabled."
+        - I0909 12:54:20.375062     1 HiveMetaStoreClient.java:251] HMS client filtering is enabled.
         - "I0722 08:49:07.843855     1 thrift-server.cc:456] ThriftServer 'hiveserver2-http-frontend' started on port: 28000"
-        - "I0722 08:49:04.990258    64 TAcceptQueueServer.cpp:340] New connection to server CatalogService from client <Host: 172.26.0.5 Port: 58642>"
-        - "I0722 08:49:08.039357    34 statestore.cc:278] Preparing initial impala-membership topic update for impalad@172.26.0.5:27000. Size = 148.00 B"
+        - 'I0722 08:49:04.990258    64 TAcceptQueueServer.cpp:340] New connection to server CatalogService from client <Host: 172.26.0.5 Port: 58642>'
+        - I0722 08:49:08.039357    34 statestore.cc:278] Preparing initial impala-membership topic update for impalad@172.26.0.5:27000. Size = 148.00 B
         - 'I0906 08:11:07.063410   591 cluster-membership-mgr.cc:287] Adding backend 5f45a790bd0dc864:ea6f64dd0bdfaab7 to group name: \"default\"\nmin_size: 1'
       grok:
         supportRules: |
@@ -61,7 +62,7 @@ pipeline:
           _file_name %{notSpace:file.name}
           _file_line %{integer:file.line}
           _query_id %{notSpace:query.id}
-          
+
           _log_message (%{_thrift_server_started_message}|%{_new_connection_message}|%{_new_membership_message}|%{_preparing_topic}|%{_message})
           _thrift_server_started_message ThriftServer '%{notSpace:network.destination.name}' started on port: %{port:network.destination.port}
           _new_connection_message New connection to server %{notSpace:network.destination.name} from client <Host: %{ip:network.destination.ip} Port: %{port:network.destination.port}>

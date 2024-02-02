@@ -8,6 +8,8 @@ metadata:
     fields:
       vendor:
         value: "sophos"
+      type:
+        value: "firewall"
 metrics:
   - MIB: HOST-RESOURCES-MIB
     symbol:

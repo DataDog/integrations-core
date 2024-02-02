@@ -77,6 +77,7 @@ def test_e2e_profile_vertiv_liebert_ac(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.476.1.42',
         'vendor': 'vertiv',
+        'device_type': 'other',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

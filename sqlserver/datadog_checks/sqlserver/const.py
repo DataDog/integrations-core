@@ -21,6 +21,8 @@ ENGINE_EDITION_AZURE_MANAGED_INSTANCE = 8
 ENGINE_EDITION_AZURE_SQL_EDGE = 9
 ENGINE_EDITION_AZURE_SYNAPSE_SERVERLESS_POOL = 11
 
+DEFAULT_INDEX_USAGE_STATS_INTERVAL = 5 * 60  # 5 minutes
+
 # Keys of the static info cache, used to cache server info which does not change
 STATIC_INFO_VERSION = 'version'
 STATIC_INFO_MAJOR_VERSION = 'major_version'
@@ -86,6 +88,7 @@ INSTANCE_METRICS = [
     ('sqlserver.memory.optimizer', 'Optimizer Memory (KB)', ''),
     ('sqlserver.memory.granted_workspace', 'Granted Workspace Memory (KB)', ''),
     ('sqlserver.memory.lock', 'Lock Memory (KB)', ''),
+    ('sqlserver.memory.stolen', 'Stolen Server Memory (KB)', ''),
     ('sqlserver.memory.log_pool_memory', 'Log Pool Memory (KB)', ''),
     # SQLServer:Buffer Manager
     ('sqlserver.buffer.cache_hit_ratio', 'Buffer cache hit ratio', ''),  # RAW_LARGE_FRACTION
@@ -198,10 +201,10 @@ DATABASE_BACKUP_METRICS = [
 DATABASE_METRICS = DATABASE_FILES_METRICS + DATABASE_STATS_METRICS + DATABASE_BACKUP_METRICS
 
 DATABASE_INDEX_METRICS = [
-    ('sqlserver.index.user_seeks', 'sys.dm_db_index_usage_stats', 'user_seeks'),
-    ('sqlserver.index.user_scans', 'sys.dm_db_index_usage_stats', 'user_scans'),
-    ('sqlserver.index.user_lookups', 'sys.dm_db_index_usage_stats', 'user_lookups'),
-    ('sqlserver.index.user_updates', 'sys.dm_db_index_usage_stats', 'user_updates'),
+    'sqlserver.index.user_seeks',
+    'sqlserver.index.user_scans',
+    'sqlserver.index.user_lookups',
+    'sqlserver.index.user_updates',
 ]
 
 DATABASE_FRAGMENTATION_METRICS = [

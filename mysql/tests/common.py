@@ -17,7 +17,7 @@ MYSQL_REPLICATION = os.getenv('MYSQL_REPLICATION')
 MYSQL_VERSION_IS_LATEST = os.getenv('MYSQL_VERSION', '').endswith('latest')
 
 if MYSQL_VERSION_IS_LATEST is False:
-    MYSQL_VERSION_PARSED = parse_version(os.getenv('MYSQL_VERSION', ''))
+    MYSQL_VERSION_PARSED = parse_version(os.getenv('MYSQL_VERSION', '').split('-')[0])
 else:
     MYSQL_VERSION_PARSED = parse_version(str(maxsize))
 CHECK_NAME = 'mysql'

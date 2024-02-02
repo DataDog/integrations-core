@@ -171,6 +171,7 @@ def test_collect_load_activity(
     # assert that the current timestamp is being collected as an ISO timestamp with TZ info
     assert parser.isoparse(blocked_row['now']).tzinfo, "current timestamp not formatted correctly"
     assert blocked_row["query_start"], "missing query_start"
+    assert blocked_row["is_user_process"], "missing is_user_process"
     assert parser.isoparse(blocked_row["query_start"]).tzinfo, "query_start timestamp not formatted correctly"
     for r in DM_EXEC_REQUESTS_COLS:
         assert r in blocked_row
@@ -331,6 +332,7 @@ def test_activity_nested_blocking_transactions(
     assert tx2["query_start"]
     assert tx2["query_hash"]
     assert tx2["query_plan_hash"]
+
     assert tx3["user_name"] == "fred"
     assert tx3["database_name"] == "datadog_test"
     assert tx3["last_request_start_time"]
