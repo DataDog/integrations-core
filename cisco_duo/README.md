@@ -18,9 +18,10 @@ The Cisco Duo integration seamlessly collects multi-factor authentication (MFA) 
 #### Get API Credentials of Cisco Duo
 
 1. Sign up for a [**Duo account**][2].
-2. Log in to the [**Duo Admin Panel**][3] and navigate to Applications.
-3. Click Protect an Application and locate the entry for Auth API in the applications list.
-4. Click Protect to the far-right to configure the application and get your `integration key`, `secret key`, and `API hostname`. This information will be used during next step to configure Cisco Duo integration.
+2. Log in to the [**Duo Admin Panel**][3].
+3. Navigate to **Applications**.
+4. Click **Protect an Application** and locate the entry for _Auth API_ in the applications list.
+5. Click **Protect** to the far-right to configure the application and get your `integration key`, `secret key`, and `API hostname`. This information will be used during next step to configure Cisco Duo integration.
 
 #### Cisco Duo DataDog Integration Configuration
 
