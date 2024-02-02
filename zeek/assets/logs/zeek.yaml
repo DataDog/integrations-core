@@ -313,10 +313,10 @@ facets:
       family: bytes
       name: byte
   - groups:
-        - DNS
-      name: Answer Name
-      path: dns.answer.name
-      source: log
+      - DNS
+    name: Answer Name
+    path: dns.answer.name
+    source: log
   - groups:
       - DNS
     name: Response Code
