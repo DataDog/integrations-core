@@ -481,6 +481,8 @@ integration/wmi_check:
 - wmi_check/**/*
 integration/yarn:
 - yarn/**/*
+integration/zeek:
+- zeek/**/*
 integration/zk:
 - zk/**/*
 release:
