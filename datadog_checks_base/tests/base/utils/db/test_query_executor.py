@@ -154,7 +154,7 @@ class TestQueryExecutor:
         for i in range(num_queries):
             aggregator.assert_metric('test.metric.{}'.format(i), i, metric_type=aggregator.GAUGE, tags=tags)
 
-    def test_query_with_collection_interval(self, aggregator, expected_exception):
+    def test_query_with_collection_interval(self, aggregator):
         """Test running a query with a custom collection interval"""
         collection_interval = 1
         queries = [
