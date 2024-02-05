@@ -5,6 +5,9 @@ FROM ${BASE_IMAGE}
 COPY install-from-source.sh /
 
 ENV CFLAGS="-O2"
+# Auditwheel will only set RPATH's for copied libs if an existing RPATH is found,
+# so we may as well set it to origin here anyway.
+ENV LDFLAGS="-Wl,-rpath,'\$\$ORIGIN'"
 
 # For Python 2, we get openssl(1) via yum just to get the necessary headers,
 # and we remove the package after compilation to prevent it from interfering
