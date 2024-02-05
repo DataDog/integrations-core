@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Tuple  # noqa: F401
 from six import raise_from
 
 from datadog_checks.base.utils.db.types import Transformer, TransformerFactory  # noqa: F401
+from datadog_checks.base.utils.time import get_timestamp
 
 from .utils import create_extra_transformer
 
@@ -22,7 +23,29 @@ class Query(object):
     """
 
     def __init__(self, query_data):
-        # type: (Dict[str, Any]) -> Query
+        '''
+        Parameters:
+            query_data (Dict[str, Any]): The query data to run the query. It should contain the following fields:
+                - name (str): The name of the query.
+                - query (str): The query to run.
+                - columns (List[Dict[str, Any]]): Each column should contain the following fields:
+                    - name (str): The name of the column.
+                    - type (str): The type of the column.
+                    - (Optional) Any other field that the column transformer for the type requires.
+                - (Optional) extras (List[Dict[str, Any]]): Each extra transformer should contain the following fields:
+                    - name (str): The name of the extra transformer.
+                    - type (str): The type of the extra transformer.
+                    - (Optional) Any other field that the extra transformer for the type requires.
+                - (Optional) tags (List[str]): The tags to add to the query result.
+                - (Optional) collection_interval (int): The collection interval (in seconds) of the query.
+                    Note:
+                        If collection_interval is None, the query will be run every check run.
+                        If the collection interval is less than check collection interval,
+                        the query will be run every check run.
+                        If the collection interval is greater than check collection interval,
+                        the query will NOT BE RUN exactly at the collection interval.
+                        The query will be run at the next check run after the collection interval has passed.
+        '''
         # Contains the data to fill the rest of the attributes
         self.query_data = deepcopy(query_data or {})  # type: Dict[str, Any]
         self.name = None  # type: str
@@ -34,6 +57,11 @@ class Query(object):
         self.extra_transformers = None  # type: List[Tuple[str, Transformer]]
         # Contains the tags defined in query_data, more tags can be added later from the query result
         self.base_tags = None  # type: List[str]
+        # The collecton interval (in seconds) of the query. If None, the query will be run every check run.
+        self.collection_interval = None  # type: int
+        # The last time the query was executed. If None, the query has never been executed.
+        # This is only used when the collection_interval is not None.
+        self.__last_execution_time = None  # type: float
 
     def compile(
         self,
@@ -196,9 +224,40 @@ class Query(object):
 
                 extra_data.append((extra_name, transformer))
 
+        collection_interval = self.query_data.get('collection_interval')
+        if collection_interval is not None:
+            if not isinstance(collection_interval, (int, float)):
+                raise ValueError('field `collection_interval` for {} must be a number'.format(query_name))
+            elif int(collection_interval) <= 0:
+                raise ValueError(
+                    'field `collection_interval` for {} must be a positive number after rounding'.format(query_name)
+                )
+            collection_interval = int(collection_interval)
+
         self.name = query_name
         self.query = query
         self.column_transformers = tuple(column_data)
         self.extra_transformers = tuple(extra_data)
         self.base_tags = tags
+        self.collection_interval = collection_interval
         del self.query_data
+
+    def should_execute(self):
+        '''
+        Check if the query should be executed based on the collection interval.
+
+        :return: True if the query should be executed, False otherwise.
+        '''
+        if self.collection_interval is None:
+            # if the collection interval is None, the query should always be executed.
+            return True
+
+        now = get_timestamp()
+        if self.__last_execution_time is None or now - self.__last_execution_time >= self.collection_interval:
+            # if the last execution time is None (the query has never been executed),
+            # if the time since the last execution is greater than or equal to the collection interval,
+            # the query should be executed.
+            self.__last_execution_time = now
+            return True
+
+        return False
