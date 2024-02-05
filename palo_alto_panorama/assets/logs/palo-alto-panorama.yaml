@@ -567,7 +567,7 @@ pipeline:
           meta:
             tags: []
           sources:
-            - natsrc
+            - network.client.ip
           target: network.client.geoip
           ip_processing_behavior: do-nothing
         - type: geo-ip-parser
@@ -576,7 +576,7 @@ pipeline:
           meta:
             tags: []
           sources:
-            - natdst
+            - network.destination.ip
           target: network.destination.geoip
           ip_processing_behavior: do-nothing
         - type: attribute-remapper
