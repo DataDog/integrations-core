@@ -35,7 +35,6 @@ dependencies = [
 dynamic = [
     "version",
 ]
-
 license = "BSD-3-Clause"
 
 [project.optional-dependencies]
@@ -44,7 +43,7 @@ deps = [
     "ipaddress==1.0.23; python_version < '3.0'",
     "ply==3.11",
     "pyasn1==0.4.6",
-    "pycryptodomex==3.19.1",
+    "pycryptodomex==3.20.0",
     "pysmi==0.3.4",
     "pysnmp-mibs==0.1.6",
     "pysnmp==4.4.9",
