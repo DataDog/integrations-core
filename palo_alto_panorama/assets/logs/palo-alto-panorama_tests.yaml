@@ -36,11 +36,43 @@ tests:
           bytes_read: 74
           bytes_written: 60
           client:
-            geoip: {}
+            geoip:
+              city:
+                name: "Paris"
+              continent:
+                code: "EU"
+                name: "Europe"
+              country:
+                iso_code: "FR"
+                name: "France"
+              ipAddress: "185.64.148.0"
+              location:
+                latitude: 48.90654
+                longitude: 2.33339
+              subdivision:
+                iso_code: "FR-IDF"
+                name: "Île-de-France"
+              timezone: "Europe/Paris"
             ip: "185.64.148.0"
             port: 46973
           destination:
-            geoip: {}
+            geoip:
+              city:
+                name: "Paris"
+              continent:
+                code: "EU"
+                name: "Europe"
+              country:
+                iso_code: "FR"
+                name: "France"
+              ipAddress: "185.64.148.0"
+              location:
+                latitude: 48.90654
+                longitude: 2.33339
+              subdivision:
+                iso_code: "FR-IDF"
+                name: "Île-de-France"
+              timezone: "Europe/Paris"
             ip: "185.64.148.0"
             port: 233
         offloaded: 0
@@ -108,11 +140,43 @@ tests:
         misc: "www.facebook.com/"
         network:
           client:
-            geoip: {}
+            geoip:
+              city:
+                name: "Paris"
+              continent:
+                code: "EU"
+                name: "Europe"
+              country:
+                iso_code: "FR"
+                name: "France"
+              ipAddress: "185.64.148.0"
+              location:
+                latitude: 48.90654
+                longitude: 2.33339
+              subdivision:
+                iso_code: "FR-IDF"
+                name: "Île-de-France"
+              timezone: "Europe/Paris"
             ip: "185.64.148.0"
             port: 16742
           destination:
-            geoip: {}
+            geoip:
+              city:
+                name: "Paris"
+              continent:
+                code: "EU"
+                name: "Europe"
+              country:
+                iso_code: "FR"
+                name: "France"
+              ipAddress: "185.64.148.0"
+              location:
+                latitude: 48.90654
+                longitude: 2.33339
+              subdivision:
+                iso_code: "FR-IDF"
+                name: "Île-de-France"
+              timezone: "Europe/Paris"
             ip: "185.64.148.0"
             port: 443
         outboundif: "ethernet1/1"
@@ -214,11 +278,43 @@ tests:
         logset: "POC-Dash-DD-204-9099"
         network:
           client:
-            geoip: {}
+            geoip:
+              city:
+                name: "Paris"
+              continent:
+                code: "EU"
+                name: "Europe"
+              country:
+                iso_code: "FR"
+                name: "France"
+              ipAddress: "185.64.148.0"
+              location:
+                latitude: 48.90654
+                longitude: 2.33339
+              subdivision:
+                iso_code: "FR-IDF"
+                name: "Île-de-France"
+              timezone: "Europe/Paris"
             ip: "185.64.148.0"
             port: 5431
           destination:
-            geoip: {}
+            geoip:
+              city:
+                name: "Paris"
+              continent:
+                code: "EU"
+                name: "Europe"
+              country:
+                iso_code: "FR"
+                name: "France"
+              ipAddress: "185.64.148.0"
+              location:
+                latitude: 48.90654
+                longitude: 2.33339
+              subdivision:
+                iso_code: "FR-IDF"
+                name: "Île-de-France"
+              timezone: "Europe/Paris"
             ip: "185.64.148.0"
             port: 7001
         notafter: 1704069400
