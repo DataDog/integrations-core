@@ -177,7 +177,7 @@ pipeline:
     query: "source:cisco-duo"
   processors:
     - type: date-remapper
-      name: Define `timestamp` as the official date of the log
+      name: Define `isotimestamp`, `ts` as the official date of the log
       enabled: true
       meta:
         tags: []
