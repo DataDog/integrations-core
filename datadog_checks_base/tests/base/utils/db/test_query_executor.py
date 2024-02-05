@@ -154,18 +154,9 @@ class TestQueryExecutor:
         for i in range(num_queries):
             aggregator.assert_metric('test.metric.{}'.format(i), i, metric_type=aggregator.GAUGE, tags=tags)
 
-    @pytest.mark.parametrize(
-        'collection_interval, expected_exception',
-        [
-            pytest.param(1, None, id='valid interval 1s'),
-            pytest.param(0.5, ValueError, id='invalid interval 0.5s'),  # 0.5s is invalid because it rounds to 0
-            pytest.param(0, ValueError, id='invalid interval 0s'),
-            pytest.param(-1, ValueError, id='invalid interval -1s'),
-            pytest.param('test', ValueError, id='invalid interval not a number'),
-        ],
-    )
-    def test_query_with_collection_interval(self, aggregator, collection_interval, expected_exception):
+    def test_query_with_collection_interval(self, aggregator, expected_exception):
         """Test running a query with a custom collection interval"""
+        collection_interval = 1
         queries = [
             {
                 'name': 'query1',
@@ -177,11 +168,6 @@ class TestQueryExecutor:
 
         check = AgentCheck('test', {}, [{}])
         qe = QueryExecutor(mock_executor([[1]]), check, queries)
-
-        if expected_exception:
-            with pytest.raises(expected_exception):
-                qe.compile_queries()
-            return
 
         qe.compile_queries()
 
@@ -203,3 +189,29 @@ class TestQueryExecutor:
         qe.execute()  # Fifth run, should emit a metric
         aggregator.assert_metric('test.metric_with_interval', 1, metric_type=aggregator.GAUGE)
         assert len(aggregator.metrics('test.metric_with_interval')) == 1
+
+    @pytest.mark.parametrize(
+        'collection_interval, expected_exception',
+        [
+            pytest.param(0.5, ValueError, id='invalid interval 0.5s'),  # 0.5s is invalid because it rounds to 0
+            pytest.param(0, ValueError, id='invalid interval 0s'),
+            pytest.param(-1, ValueError, id='invalid interval -1s'),
+            pytest.param('test', ValueError, id='invalid interval not a number'),
+        ],
+    )
+    def test_query_with_collection_interval_with_exception(self, collection_interval, expected_exception):
+        """Test running a query with a custom collection interval"""
+        queries = [
+            {
+                'name': 'query1',
+                'query': 'select 1',
+                'columns': [{'name': 'test.metric_with_interval', 'type': 'gauge'}],
+                'collection_interval': collection_interval,
+            }
+        ]
+
+        check = AgentCheck('test', {}, [{}])
+        qe = QueryExecutor(mock_executor([[1]]), check, queries)
+
+        with pytest.raises(expected_exception):
+            qe.compile_queries()

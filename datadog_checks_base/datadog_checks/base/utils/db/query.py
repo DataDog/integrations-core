@@ -23,7 +23,29 @@ class Query(object):
     """
 
     def __init__(self, query_data):
-        # type: (Dict[str, Any]) -> Query
+        '''
+        Parameters:
+            query_data (Dict[str, Any]): The query data to run the query. It should contain the following fields:
+                - name (str): The name of the query.
+                - query (str): The query to run.
+                - columns (List[Dict[str, Any]]): Each column should contain the following fields:
+                    - name (str): The name of the column.
+                    - type (str): The type of the column.
+                    - (Optional) Any other field that the column transformer for the type requires.
+                - (Optional) extras (List[Dict[str, Any]]): Each extra transformer should contain the following fields:
+                    - name (str): The name of the extra transformer.
+                    - type (str): The type of the extra transformer.
+                    - (Optional) Any other field that the extra transformer for the type requires.
+                - (Optional) tags (List[str]): The tags to add to the query result.
+                - (Optional) collection_interval (int): The collection interval (in seconds) of the query.
+                    Note:
+                        If collection_interval is None, the query will be run every check run.
+                        If the collection interval is less than check collection interval,
+                        the query will be run every check run.
+                        If the collection interval is greater than check collection interval,
+                        the query will NOT BE RUN exactly at the collection interval.
+                        The query will be run at the next check run after the collection interval has passed.
+        '''
         # Contains the data to fill the rest of the attributes
         self.query_data = deepcopy(query_data or {})  # type: Dict[str, Any]
         self.name = None  # type: str
