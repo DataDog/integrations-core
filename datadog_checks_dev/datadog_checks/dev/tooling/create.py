@@ -111,7 +111,7 @@ To install the {integration_name} check on your host:
 
     config = {
         'author': author,
-        'auto_install': 'false' if repo_choice == 'marketplace' or integration_type == 'metrics_pull' else 'true',
+        'auto_install': 'false' if repo_choice == 'marketplace' or integration_type == 'metrics_crawler' else 'true',
         'check_class': f"{''.join(part.capitalize() for part in normalized_integration_name.split('_'))}Check",
         'check_name': check_name,
         'project_name': normalize_project_name(normalized_integration_name),
