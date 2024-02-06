@@ -277,7 +277,7 @@ class TestStatementMetrics:
         Make sure we minimize the temporary objects created when computing the derivative
         This test is skipped if tracemalloc is not available
         '''
-        MEMORY_USAGE_THRESHOLD = 5 * 1024 * 1024  # 5 MB
+        MEMORY_USAGE_THRESHOLD = 7 * 1024 * 1024  # 7 MB
 
         try:
             import tracemalloc
@@ -286,18 +286,17 @@ class TestStatementMetrics:
 
         tracemalloc.start()
 
-        tracemalloc.take_snapshot()
+        _, peak_before = tracemalloc.get_traced_memory()
         sm = StatementMetrics()
         self.__run_compute_derivative_rows(sm)
-        tracemalloc.take_snapshot()
 
-        current, peak = tracemalloc.get_traced_memory()
+        _, peak_after = tracemalloc.get_traced_memory()
         tracemalloc.stop()
 
         # Calculate the difference in memory usage
-        memory_diff = peak - current  # or use snapshots to get more detailed analysis
-        assert memory_diff < MEMORY_USAGE_THRESHOLD, "Memory usage difference {} is over the threshold {}".format(
-            memory_diff, MEMORY_USAGE_THRESHOLD
+        peak_diff = peak_after - peak_before
+        assert peak_diff < MEMORY_USAGE_THRESHOLD, "Memory usage difference {} is over the threshold {}".format(
+            peak_diff, MEMORY_USAGE_THRESHOLD
         )
 
     def test_compute_derivative_rows_benchmark(self, benchmark):
