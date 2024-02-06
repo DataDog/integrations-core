@@ -17,17 +17,24 @@ HERE = get_here()
 
 def setup_tekton():
     run_command(["kubectl", "create", "namespace", "tekton-operator"])
-    run_command(
-        ["kubectl", "apply", "-f", os.path.join(HERE, "kind", "tekton-operator.yaml"), "-n", "tekton-operator"]
-    )
+    run_command(["kubectl", "apply", "-f", os.path.join(HERE, "kind", "tekton-operator.yaml"), "-n", "tekton-operator"])
     run_command(
         ["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s", "-n", "tekton-operator"]
     )
     time.sleep(60)
     run_command(
-        ["kubectl", "wait", "pods", "-l", "run=tekton-dashboard", "--for=condition=Ready", "--timeout=300s", "-n", "tekton-pipelines"]
+        [
+            "kubectl",
+            "wait",
+            "pods",
+            "-l",
+            "run=tekton-dashboard",
+            "--for=condition=Ready",
+            "--timeout=300s",
+            "-n",
+            "tekton-pipelines",
+        ]
     )
-
 
 
 @pytest.fixture(scope='session')
