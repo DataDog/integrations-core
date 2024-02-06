@@ -13,21 +13,18 @@ from . import common
 def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
 
-    aggregator.assert_metric('nginx.net.writing', count=2, tags=common.TAGS)
-    aggregator.assert_metric('nginx.net.waiting', count=2, tags=common.TAGS)
-    aggregator.assert_metric('nginx.net.reading', count=2, tags=common.TAGS)
-    aggregator.assert_metric('nginx.net.conn_dropped_per_s', count=1, tags=common.TAGS)
-    aggregator.assert_metric('nginx.net.conn_opened_per_s', count=1, tags=common.TAGS)
-    aggregator.assert_metric('nginx.net.request_per_s', count=1, tags=common.TAGS)
-
-    aggregator.assert_metric('nginx.net.connections', count=2, tags=common.TAGS)
-
-    aggregator.assert_all_metrics_covered()
-
     tags = common.TAGS + [
         'nginx_host:{}'.format(common.HOST),
         'port:{}'.format(common.PORT),
     ]
+    aggregator.assert_metric('nginx.net.writing', count=2, tags=tags)
+    aggregator.assert_metric('nginx.net.waiting', count=2, tags=tags)
+    aggregator.assert_metric('nginx.net.reading', count=2, tags=tags)
+    aggregator.assert_metric('nginx.net.conn_dropped_per_s', count=1, tags=tags)
+    aggregator.assert_metric('nginx.net.conn_opened_per_s', count=1, tags=tags)
+    aggregator.assert_metric('nginx.net.request_per_s', count=1, tags=tags)
+    aggregator.assert_metric('nginx.net.connections', count=2, tags=tags)
+    aggregator.assert_all_metrics_covered()
     aggregator.assert_service_check('nginx.can_connect', status=Nginx.OK, tags=tags)
 
 
