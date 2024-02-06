@@ -91,6 +91,8 @@ integration/cisco_aci:
 - cisco_aci/**/*
 integration/cisco_duo:
 - cisco_duo/**/*
+integration/cisco_umbrella_dns:
+- cisco_umbrella_dns/**/*
 integration/citrix_hypervisor:
 - citrix_hypervisor/**/*
 integration/clickhouse:
