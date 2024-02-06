@@ -22,7 +22,8 @@ class PullRequest:
         self.__diff_url = data['pull_request']['diff_url']
         # Github API returns `None` for empty bodies, but we use empty string as default.
         # Normalize to remove carriage returns on Windows.
-        self.__body = data.get('body', '').replace('\r', '')
+        raw_body = data['body']
+        self.__body = ('' if raw_body is None else raw_body).replace(r'\r', '')
         self.__author = data['user']['login']
         self.__labels = sorted(label['name'] for label in data['labels'])
 
