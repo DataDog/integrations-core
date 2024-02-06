@@ -44,7 +44,7 @@ deps = [
     "clickhouse-driver==0.2.0; python_version < '3.0'",
     "clickhouse-driver==0.2.6; python_version > '3.0'",
     "lz4==2.2.1; python_version < '3.0'",
-    "lz4==4.3.2; python_version > '3.0'",
+    "lz4==4.3.3; python_version > '3.0'",
 ]
 
 [project.urls]

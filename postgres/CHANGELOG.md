@@ -61,7 +61,7 @@
 ***Fixed***:
 
 * Remove an unnecessary print statement ([#15594](https://github.com/DataDog/integrations-core/pull/15594))
-* * Fix edge-case causing potentially duplicate/wrong time series for activity metrics when `activity_metrics_excluded_aggregations` included `datname` ([#16106](https://github.com/DataDog/integrations-core/pull/16106)) ([#16106](https://github.com/DataDog/integrations-core/pull/16106))
+* * Fix edge-case causing potentially duplicate/wrong timeseries for activity metrics when `activity_metrics_excluded_aggregations` included `datname` ([#16106](https://github.com/DataDog/integrations-core/pull/16106)) ([#16106](https://github.com/DataDog/integrations-core/pull/16106))
 * Database instance metadata payloads should not contain duplicate `db` tags ([#16146](https://github.com/DataDog/integrations-core/pull/16146))
 
 ## 15.2.0 / 2023-10-26
