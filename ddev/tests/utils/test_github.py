@@ -39,3 +39,20 @@ class TestGetPullRequest:
         )
         assert pr.author == 'swang392'
         assert pr.labels == ['changelog/no-changelog', 'documentation', 'integration/apache']
+
+    def test_empty_description(self, local_repo, config_file, network_replay, terminal):
+        network_replay('github/get_pr_empty_description.yaml')
+
+        github = GitHubManager(
+            Repository(local_repo.name, str(local_repo)),
+            user=config_file.model.github.user,
+            token=config_file.model.github.token,
+            status=terminal.status,
+        )
+
+        pr = github.get_pull_request('382cbb0af210897599cbe5fd8d69a38d4017e425')
+        assert pr.number == 14849
+        assert pr.title == 'Update formatting for changelogs'
+        assert pr.body == ""
+        assert pr.author == 'swang392'
+        assert pr.labels == ['changelog/no-changelog', 'documentation', 'integration/apache']
