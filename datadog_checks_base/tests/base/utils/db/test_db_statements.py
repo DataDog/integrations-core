@@ -255,7 +255,7 @@ class TestStatementMetrics:
             },
         }
 
-    def __run_compute_derivative_rows(self, sm, rounds=2):
+    def __run_compute_derivative_rows(self, sm, rounds=10):
         for _ in range(rounds):
             rows = [
                 {
