@@ -104,7 +104,7 @@ jobs:
       run: docker push ${{ env.BUILDER_IMAGE }}
 
     - name: Save image digest
-      if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
+      if: github.event_name == 'push'
       run: >-
         docker inspect --format "{{index .RepoDigests 0}}" ${{ env.BUILDER_IMAGE }}
         | cut -d '@' -f 2
