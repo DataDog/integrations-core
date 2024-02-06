@@ -296,9 +296,9 @@ class TestStatementMetrics:
 
         # Calculate the difference in memory usage
         memory_diff = peak - current  # or use snapshots to get more detailed analysis
-        assert (
-            memory_diff < MEMORY_USAGE_THRESHOLD
-        ), "Memory usage difference {} is over the threshold {}".format(memory_diff, MEMORY_USAGE_THRESHOLD)
+        assert memory_diff < MEMORY_USAGE_THRESHOLD, "Memory usage difference {} is over the threshold {}".format(
+            memory_diff, MEMORY_USAGE_THRESHOLD
+        )
 
     def test_compute_derivative_rows_benchmark(self, benchmark):
         sm = StatementMetrics()
