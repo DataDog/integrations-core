@@ -47,7 +47,11 @@ def test_invalid_url(dd_run_check, aggregator, check, pipelines_instance, mocker
 def test_no_endpoint_configured(dd_run_check, aggregator, check, pipelines_instance):
     del pipelines_instance["pipelines_controller_endpoint"]
 
-    with pytest.raises(Exception, match="Must specify at least one of the following: pipelines_controller_endpoint, triggers_controller_endpoint."):
+    with pytest.raises(l
+        Exception,
+        match="Must specify at least one of the following: pipelines_controller_endpoint, "
+        "triggers_controller_endpoint.",
+    ):
         dd_run_check(check(pipelines_instance))
 
 
