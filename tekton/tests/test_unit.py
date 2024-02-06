@@ -2,8 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
+from mock import patch
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import MOCKED_PIPELINES_METRICS, MOCKED_TRIGGERS_METRICS, mock_http_responses
@@ -31,7 +32,7 @@ def test_check(dd_run_check, aggregator, mocker, check, instance, metrics, reque
 
 
 def test_invalid_url(dd_run_check, aggregator, check, pipelines_instance, mocker):
-    pipelines_instance["openmetrics_endpoint"] = "http://unknowwn"
+    pipelines_instance["pipelines_controller_endpoint"] = "http://unknowwn"
 
     mocker.patch("requests.get", wraps=mock_http_responses)
     with pytest.raises(Exception):
@@ -41,3 +42,16 @@ def test_invalid_url(dd_run_check, aggregator, check, pipelines_instance, mocker
     aggregator.assert_service_check(
         "tekton.pipelines_controller.openmetrics.health", status=AgentCheck.CRITICAL, count=1
     )
+
+
+def test_no_endpoint_configured(dd_run_check, aggregator, check, pipelines_instance, mocker):
+    del pipelines_instance["pipelines_controller_endpoint"]
+
+    with pytest.raises(Exception, match="Must specify at least one of the following: pipelines_controller_endpoint, triggers_controller_endpoint."):
+        dd_run_check(check(pipelines_instance))
+
+
+@patch('datadog_checks.tekton.check.PY2', True)
+def test_py2(check, pipelines_instance):
+    with pytest.raises(ConfigurationError, match="This version of the integration is only available when using py3."):
+        check(pipelines_instance)
