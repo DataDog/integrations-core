@@ -20,8 +20,9 @@ class PullRequest:
         self.__title = data['title']
         self.__html_url = data['pull_request']['html_url']
         self.__diff_url = data['pull_request']['diff_url']
-        # Normalize to remove carriage returns on Windows
-        self.__body = '\n'.join(data['body'].splitlines())
+        # Github API returns `None` for empty bodies, but we use empty string as default.
+        # Normalize to remove carriage returns on Windows.
+        self.__body = data.get('body', '').replace('\r', '')
         self.__author = data['user']['login']
         self.__labels = sorted(label['name'] for label in data['labels'])
 
