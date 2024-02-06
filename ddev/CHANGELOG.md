@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 8.0.0 / 2024-02-06
+
+***Changed***:
+
+* Bump datadog_checks_dev dependency requirement ([#16806](https://github.com/DataDog/integrations-core/pull/16806))
+
 ## 7.0.0 / 2024-01-29
 
 ***Changed***:
