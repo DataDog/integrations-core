@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 8.0.0 / 2024-02-06
+
+***Changed***:
+
+* Bump datadog_checks_dev dependency requirement ([#16806](https://github.com/DataDog/integrations-core/pull/16806))
+
+***Added***:
+
+* Add a `validate labeler` command ([#16774](https://github.com/DataDog/integrations-core/pull/16774))
+
 ## 7.0.0 / 2024-01-29
 
 ***Changed***:
