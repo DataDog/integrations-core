@@ -148,7 +148,7 @@ For more information on CloudFormation templating and syntax, see the [AWS Cloud
 
 <!-- xxz tabs xxx -->
 
-For all of these examples the `DD_API_KEY` environment variable can alternatively be populated by referencing the the [ARN of a "Plaintext" secret stored in AWS Secret Manager][7].
+For all of these examples, you can alternatively populate the `DD_API_KEY` environment variable by referencing the [ARN of a plaintext secret stored in AWS Secret Manager][7]. Place the `DD_API_KEY` environment variable under the `containerDefinitions.secrets` section of the task definition file. Ensure that the task execution role has the necessary permission to fetch secrets from AWS Secret Manager.
 
 #### Create or modify your IAM policy
 
