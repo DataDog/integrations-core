@@ -265,7 +265,7 @@ class TestStatementMetrics:
                     'query': 'x' * 3000,
                     'db': 'puppies',
                     'user': 'dog',
-                    'query_signature': f'sig{random.randint(0, 10000)}',
+                    'query_signature': 'sig{}'.format(random.randint(0, 10000)),
                 }
                 for _ in range(10000)
             ]
