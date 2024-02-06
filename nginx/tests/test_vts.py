@@ -6,7 +6,7 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nginx import VTS_METRIC_MAP
 
-from .common import TAGS, USING_VTS, VTS_MOCKED_METRICS, mock_http_responses
+from .common import TAGS, USING_VTS, VTS_MOCKED_METRICS, HOST, PORT, mock_http_responses
 
 pytestmark = [pytest.mark.skipif(not USING_VTS, reason='Not using VTS')]
 
@@ -41,10 +41,11 @@ def test_vts(check, instance_vts, aggregator):
         'nginx.upstream.peers.backup',
     ]
 
+    extra_tags = ['nginx_host:{}'.format(HOST), 'port:{}'.format(PORT)]
     for mapped in VTS_METRIC_MAP.values():
         if mapped in skip_metrics:
             continue
-        aggregator.assert_metric(mapped, tags=TAGS)
+        aggregator.assert_metric(mapped, tags=TAGS + extra_tags)
 
 
 @pytest.mark.unit
