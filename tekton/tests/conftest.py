@@ -16,88 +16,24 @@ HERE = get_here()
 
 
 def setup_tekton():
-    run_command(["kubectl", "apply", "-f", os.path.join(HERE, 'kind', "ingress-nginx.yaml")])
-    time.sleep(30)
+    run_command(["kubectl", "create", "namespace", "tekton-operator"])
     run_command(
-        [
-            "kubectl",
-            "wait",
-            "-n",
-            "ingress-nginx",
-            "--for=condition=ready",
-            "pod",
-            "--selector=app.kubernetes.io/component=controller",
-            "--timeout=120s",
-        ]
+        ["kubectl", "apply", "-f", os.path.join(HERE, "kind", "tekton-operator.yaml"), "-n", "tekton-operator"]
+    )
+    run_command(
+        ["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s", "-n", "tekton-operator"]
+    )
+    time.sleep(60)
+    run_command(
+        ["kubectl", "wait", "pods", "-l", "run=tekton-dashboard", "--for=condition=Ready", "--timeout=300s", "-n", "tekton-pipelines"]
     )
 
-    run_command(["kubectl", "apply", "-f", os.path.join(HERE, 'kind', "tekton-pipelines.yaml")])
-    time.sleep(30)
-    run_command(
-        [
-            "kubectl",
-            "wait",
-            "-n",
-            "tekton-pipelines",
-            "--for=condition=ready",
-            "pod",
-            "--selector=app.kubernetes.io/part-of=tekton-pipelines,app.kubernetes.io/component=controller",
-            "--timeout=120s",
-        ]
-    )
-
-    run_command(
-        [
-            "curl",
-            "-sL",
-            "https://raw.githubusercontent.com/tektoncd/dashboard/main/scripts/release-installer",
-            "-o",
-            "/tmp/release-installer.bash",
-        ]
-    )
-    run_command(
-        [
-            "bash",
-            "/tmp/release-installer.bash",
-            "install",
-            "latest",
-            "--read-write",
-            "--ingress-url",
-            "tekton-dashboard.127.0.0.1.nip.io",
-        ]
-    )
-    time.sleep(5)
-    run_command(
-        [
-            "kubectl",
-            "wait",
-            "-n",
-            "tekton-pipelines",
-            "--for=condition=ready",
-            "pod",
-            "--selector=app.kubernetes.io/part-of=tekton-dashboard,app.kubernetes.io/component=dashboard",
-            "--timeout=120s",
-        ]
-    )
-
-    run_command(["kubectl", "create", "ns", "test"])
-    run_command(["kubectl", "apply", "-f", os.path.join(HERE, 'kind', "service-account.yaml")])
-
-    time.sleep(5)
-
-    run_command(["kubectl", "apply", "-f", os.path.join(HERE, 'kind', "tekton-triggers.yaml")])
-    run_command(["kubectl", "apply", "-f", os.path.join(HERE, 'kind', "tekton-interceptors.yaml")])
-    run_command(
-        ["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s", "-n", "tekton-pipelines"]
-    )
 
 
 @pytest.fixture(scope='session')
 def dd_environment(dd_save_state):
     # https://github.com/tektoncd/dashboard/blob/main/docs/walkthrough/walkthrough-kind.md
-    with kind_run(
-        kind_config=os.path.join(HERE, 'kind', "cluster.yaml"), conditions=[setup_tekton], sleep=30
-    ) as kubeconfig, ExitStack() as stack:
+    with kind_run(conditions=[setup_tekton], sleep=30) as kubeconfig, ExitStack() as stack:
         instances = []
 
         pipeline_host, pipeline_port = stack.enter_context(
