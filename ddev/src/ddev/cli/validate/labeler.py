@@ -23,7 +23,7 @@ def labeler(app: Application, sync: bool):
 
     if not is_core:
         app.display_info(
-            f"Labeler validations is only enabled for integrations-core, skipping for repo {app.repo.name}"
+            f"The labeler validation is only enabled for integrations-core, skipping for repo {app.repo.name}"
         )
         return
 
