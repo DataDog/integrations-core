@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +102,7 @@ def _merge_duplicate_rows(rows, metrics, key):
     :param key (_callable_): function for an ID which uniquely identifies a query row across runs
     :return (_Tuple[Dict[str, dict], Set[str]_): a dictionary of merged rows and a set of dropped metrics
     """
-    queries_by_key = defaultdict(dict)
+    queries_by_key = {}
     dropped_metrics = set()
     for row in rows:
         query_key = key(row)
