@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 31.0.0 / 2024-02-06
+
+***Changed***:
+
+* Rename template for new crawler integration. ([#16802](https://github.com/DataDog/integrations-core/pull/16802))
+
+***Fixed***:
+
+* Do not sign `ddev` after the release ([#16737](https://github.com/DataDog/integrations-core/pull/16737))
+* Remove unsupported characters from README templates. ([#16759](https://github.com/DataDog/integrations-core/pull/16759))
+
 ## 30.0.0 / 2024-01-29
 
 ***Changed***:
