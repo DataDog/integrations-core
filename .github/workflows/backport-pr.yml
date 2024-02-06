@@ -23,5 +23,4 @@ jobs:
         with:
           label_pattern: "^backport/(?<base>([^ ]+))$"
           labels_template: "[\"backport\", \"bot\"]"
-          # TODO Change once we have another bot account for this pipeline
-          github_token: ${{ secrets.DD_CHANGELOG_CHECK_TOKEN }}
+          github_token: ${{ secrets.DATADOG_AGENT_INTEGRATIONS_BOT_TOKEN }}

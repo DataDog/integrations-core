@@ -39,8 +39,7 @@ jobs:
       id: cpr
       uses: peter-evans/create-pull-request@v5
       with:
-        # TODO Change once we have another bot account for this pipeline
-        token: ${{ secrets.DD_CHANGELOG_CHECK_TOKEN }}
+        token: ${{ secrets.DATADOG_AGENT_INTEGRATIONS_BOT_TOKEN }}
         commit-message: Update dependencies
         body: |
           ### What does this PR do?
