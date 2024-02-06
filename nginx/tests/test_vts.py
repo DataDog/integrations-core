@@ -6,7 +6,7 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nginx import VTS_METRIC_MAP
 
-from .common import TAGS, USING_VTS, VTS_MOCKED_METRICS, HOST, PORT, mock_http_responses
+from .common import HOST, PORT, TAGS, USING_VTS, VTS_MOCKED_METRICS, mock_http_responses
 
 pytestmark = [pytest.mark.skipif(not USING_VTS, reason='Not using VTS')]
 
