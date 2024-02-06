@@ -29,6 +29,8 @@
   },
   "assets": {
     "integration": {
+      "auto_install": true,
+      "source_type_id": 7203858,
       "source_type_name": "Gitlab Runner",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
