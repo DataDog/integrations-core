@@ -64,7 +64,7 @@
   "assets": {
     "integration": {
       "auto_install": true,
-      "source_type_id": 6777560,
+      "source_type_id": 10439,
       "source_type_name": "zeek",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
