@@ -85,7 +85,7 @@ def setup_tekton():
 
 @pytest.fixture(scope='session')
 def dd_environment(dd_save_state):
-    with kind_run(conditions=[setup_tekton], sleep=30) as kubeconfig, ExitStack() as stack:
+    with kind_run(conditions=[setup_tekton], sleep=60) as kubeconfig, ExitStack() as stack:
         instances = {}
 
         pipeline_host, pipeline_port = stack.enter_context(
