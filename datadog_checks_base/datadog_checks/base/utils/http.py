@@ -826,6 +826,7 @@ class AuthTokenOAuthReader(object):
         else:
             self._fetch_options['client_id'] = self._client_id
             self._fetch_options['client_secret'] = self._client_secret
+
         self.auth_params = config.get('auth_params', {})
         if isinstance(self.auth_params, dict):
             for key, value in self.auth_params.items():
