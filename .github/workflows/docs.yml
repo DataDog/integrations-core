@@ -74,4 +74,4 @@ jobs:
         # https://help.github.com/en/github/working-with-github-pages/about-github-pages#static-site-generators
         enable_jekyll: false
         # Only deploy if there were changes
-        allow_empty_commit: false
+        allow_empty_commit: true
