@@ -139,7 +139,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "max",
-                                                "metric": "@duration_sec"
+                                                "metric": "@zeek.duration_sec"
                                             },
                                             "group_by": [],
                                             "search": {
@@ -188,7 +188,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "avg",
-                                                "metric": "@missed_bytes"
+                                                "metric": "@zeek.missed_bytes"
                                             },
                                             "group_by": [],
                                             "search": {
@@ -248,7 +248,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@zeek_proto",
+                                                    "facet": "@zeek.proto",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -733,7 +733,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek_proto",
+                                            "field": "zeek.proto",
                                             "width": "auto"
                                         },
                                         {
@@ -761,11 +761,11 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "missed_bytes",
+                                            "field": "zeek.missed_bytes",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "duration_sec",
+                                            "field": "zeek.duration_sec",
                                             "width": "auto"
                                         }
                                     ]
@@ -823,7 +823,7 @@
         },
         {
             "name": "Protocol",
-            "prefix": "@zeek_proto",
+            "prefix": "@zeek.proto",
             "available_values": [],
             "default": "*"
         }

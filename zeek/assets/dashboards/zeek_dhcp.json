@@ -283,7 +283,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "sum",
-                                                "metric": "@lease_time"
+                                                "metric": "@zeek.lease_time"
                                             },
                                             "group_by": [
                                                 {
@@ -292,7 +292,7 @@
                                                     "sort": {
                                                         "order": "desc",
                                                         "aggregation": "sum",
-                                                        "metric": "@lease_time"
+                                                        "metric": "@zeek.lease_time"
                                                     }
                                                 },
                                                 {
@@ -301,12 +301,12 @@
                                                     "sort": {
                                                         "order": "desc",
                                                         "aggregation": "sum",
-                                                        "metric": "@lease_time"
+                                                        "metric": "@zeek.lease_time"
                                                     }
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:dhcp @lease_time:* $Host $Mac-Address $Leased-IP"
+                                                "query": "source:zeek service:dhcp @zeek.lease_time:* $Host $Mac-Address $Leased-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -532,7 +532,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "lease_time",
+                                            "field": "zeek.lease_time",
                                             "width": "auto"
                                         },
                                         {
@@ -544,7 +544,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "duration_sec",
+                                            "field": "zeek.duration_sec",
                                             "width": "auto"
                                         }
                                     ]
