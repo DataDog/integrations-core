@@ -1,0 +1,1 @@
+Switch to os.scandir for Python >= 3.5

@@ -2,6 +2,75 @@
 
 <!-- towncrier release notes start -->
 
+## 8.0.0 / 2024-02-06
+
+***Changed***:
+
+* Bump datadog_checks_dev dependency requirement ([#16806](https://github.com/DataDog/integrations-core/pull/16806))
+
+***Added***:
+
+* Add a `validate labeler` command ([#16774](https://github.com/DataDog/integrations-core/pull/16774))
+
+## 7.0.0 / 2024-01-29
+
+***Changed***:
+
+* Bump the datadog_checks_dev version to 30.x ([#16728](https://github.com/DataDog/integrations-core/pull/16728))
+
+***Fixed***:
+
+* Clarify how to pass arguments to the testing commands ([#16691](https://github.com/DataDog/integrations-core/pull/16691))
+
+## 6.4.0 / 2024-01-23
+
+***Added***:
+
+* Add a script to serve any openmetrics payload for any OM integration ([#16644](https://github.com/DataDog/integrations-core/pull/16644))
+* Add the possibility to send specific values in the `generate_metrics` script ([#16672](https://github.com/DataDog/integrations-core/pull/16672))
+
+***Fixed***:
+
+* Fix a bug that prevents to run e2e tests in a non-default repository ([#16671](https://github.com/DataDog/integrations-core/pull/16671))
+* Allow CI matrix script to run on apps that lack integration assets. ([#16682](https://github.com/DataDog/integrations-core/pull/16682))
+* Prevent `ddev dep` to bump `cryptography` ([#16686](https://github.com/DataDog/integrations-core/pull/16686))
+* Prevent `ddev dep` to bump `kubernetes` ([#16687](https://github.com/DataDog/integrations-core/pull/16687))
+
+## 6.3.0 / 2024-01-17
+
+***Added***:
+
+* Add the `minimum-base-package` to all integrations in marketplace's `test-all.yml` file ([#16587](https://github.com/DataDog/integrations-core/pull/16587))
+
+***Fixed***:
+
+* Take into account all the checks when bumping or freezing the dependencies ([#16537](https://github.com/DataDog/integrations-core/pull/16537))
+* Allow bumping the version of `psutil` ([#16548](https://github.com/DataDog/integrations-core/pull/16548))
+* Allow bumping the version of `openstacksdk` ([#16550](https://github.com/DataDog/integrations-core/pull/16550))
+* Allow bumping the version of `pyvmomi` ([#16553](https://github.com/DataDog/integrations-core/pull/16553))
+* Allow bumping the version of `pymongo` ([#16555](https://github.com/DataDog/integrations-core/pull/16555))
+* Allow bumping the version of `pymsql` ([#16556](https://github.com/DataDog/integrations-core/pull/16556))
+* Allow bumping the version of `service-identity` ([#16559](https://github.com/DataDog/integrations-core/pull/16559))
+* Use the correct version of Python in the `dep` command ([#16561](https://github.com/DataDog/integrations-core/pull/16561))
+* Allow bumping the version of `pycryptodomex` ([#16562](https://github.com/DataDog/integrations-core/pull/16562))
+* Allow bumping the version of `protobuf` ([#16575](https://github.com/DataDog/integrations-core/pull/16575))
+* Allow bumping the version of `pyodbc` ([#16578](https://github.com/DataDog/integrations-core/pull/16578))
+
+## 6.2.0 / 2024-01-02
+
+***Added***:
+
+* Fetch all the tags before generating the Agent changelog ([#16460](https://github.com/DataDog/integrations-core/pull/16460))
+* Add a script to generate all the metrics for a given integration ([#16472](https://github.com/DataDog/integrations-core/pull/16472))
+
+***Fixed***:
+
+* Unpin the `hatch` version ([#16427](https://github.com/DataDog/integrations-core/pull/16427))
+* Ignore `rethinkdb` when bumping the deps ([#16449](https://github.com/DataDog/integrations-core/pull/16449))
+* Override the default configuration when environment vars are provided in the `env start` command ([#16474](https://github.com/DataDog/integrations-core/pull/16474))
+* Update the CHANGELOG file for packages in the `integrations-changelog` command ([#16492](https://github.com/DataDog/integrations-core/pull/16492))
+* Bump the `datadog-checks-dev` minimum version to 29.0.1 ([#16506](https://github.com/DataDog/integrations-core/pull/16506))
+
 ## 6.1.0 / 2023-12-14
 
 ***Added***:

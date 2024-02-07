@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 3.4.1 / 2024-01-24
+
+***Fixed***:
+
+* Skip over "/image" endpoint instances with no images ([#16680](https://github.com/DataDog/integrations-core/pull/16680))
+
+## 3.4.0 / 2024-01-05
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+
 ## 3.3.1 / 2023-08-18 / Agent 7.48.0
 
 ***Fixed***:

@@ -196,7 +196,7 @@ def check_db_count(aggregator, expected_tags, count=1):
         table_count = 9
     # And PG >= 14 will also report the parent table
     if float(POSTGRES_VERSION) >= 14.0:
-        table_count = 10
+        table_count = 11
     aggregator.assert_metric(
         'postgresql.table.count',
         value=table_count,

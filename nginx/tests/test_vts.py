@@ -3,14 +3,16 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nginx import VTS_METRIC_MAP
 
-from .common import TAGS, USING_VTS
+from .common import TAGS, USING_VTS, VTS_MOCKED_METRICS, mock_http_responses
 
-pytestmark = [pytest.mark.skipif(not USING_VTS, reason='Not using VTS'), pytest.mark.integration]
+pytestmark = [pytest.mark.skipif(not USING_VTS, reason='Not using VTS')]
 
 
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
 def test_vts(check, instance_vts, aggregator):
     check = check(instance_vts)
     check.check(instance_vts)
@@ -33,6 +35,7 @@ def test_vts(check, instance_vts, aggregator):
         'nginx.server_zone.requests',
         'nginx.server_zone.sent',
         'nginx.upstream.peers.sent',
+        'nginx.upstream.peers.response_time',
         'nginx.upstream.peers.health_checks.last_passed',
         'nginx.upstream.peers.weight',
         'nginx.upstream.peers.backup',
@@ -42,3 +45,19 @@ def test_vts(check, instance_vts, aggregator):
         if mapped in skip_metrics:
             continue
         aggregator.assert_metric(mapped, tags=TAGS)
+
+
+@pytest.mark.unit
+def test_vts_unit(dd_run_check, aggregator, mocked_instance_vts, check, mocker):
+    mocker.patch("requests.get", wraps=mock_http_responses)
+    c = check(mocked_instance_vts)
+    dd_run_check(c)
+
+    for mapped in VTS_MOCKED_METRICS:
+        aggregator.assert_metric(mapped)
+        for tag in TAGS:
+            aggregator.assert_metric_has_tag(mapped, tag)
+
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), exclude=['nginx.upstream.peers.response_time_histogram']
+    )

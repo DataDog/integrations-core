@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2020-09-16",
   "last_updated_at": "2020-12-10",
-  "title": "Increased Failed Login Attempts",
+  "title": "Failed login attempts are increasing",
   "tags": [
     "integration:snowflake"
   ],
-  "description": "Notify your team when there has been increased failed login attempts to your account.",
+  "description": "To access a Snowflake account, a user needs to provide credentials and have access permissions. This monitor tracks the login attempts to identify security, compliance, and performance issues.",
   "definition": {
     "message": "There has been at least 10 failed login attempts in the past 24 hours.",
     "name": "[Snowflake] Increased Failed Login Attempts",

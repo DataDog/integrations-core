@@ -1,21 +1,22 @@
 id: kafka
 metric_id: kafka
+backend_only: false
 facets:
-  - name: Logger Name
-    source: log
-    path: logger.name
-    groups:
+  - groups:
       - Source Code
-  - name: Thread Name
-    source: log
-    path: logger.thread_name
-    groups:
-      - Source Code
-  - name: Error Type
-    source: log
+    name: Error Type
     path: error.kind
-    groups:
+    source: log
+  - groups:
       - Source Code
+    name: Logger Name
+    path: logger.name
+    source: log
+  - groups:
+      - Source Code
+    name: Thread Name
+    path: logger.thread_name
+    source: log
 pipeline:
   type: pipeline
   name: Kafka

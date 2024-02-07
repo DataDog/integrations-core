@@ -6,7 +6,7 @@
   "tags": [
     "integration:elasticsearch"
   ],
-  "description": "Get notified when the number of pending tasks is high.",
+  "description": "In Elasticsearch, when an operation is submitted but not yet completed it's in a pending state. This monitor tracks the average number of pending tasks in an Elasticsearch cluster to identify periods of high workload and potential performance bottlenecks.",
   "definition": {
     "message": "Number of pending tasks (all priority) is high: {{value}} tasks",
     "name": "[ElasticSearch] Number of pending tasks is high",

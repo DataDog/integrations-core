@@ -1,16 +1,17 @@
 id: glusterfs
 metric_id: glusterfs
+backend_only: false
 facets:
-  - name: GlusterFS Domain
-    source: log
-    path: glusterfs.domain
-    groups:
+  - groups:
       - GlusterFS
-  - name: Filename
+    name: GlusterFS Domain
+    path: glusterfs.domain
     source: log
-    path: filename
-    groups:
+  - groups:
       - Source Code
+    name: Filename
+    path: filename
+    source: log
 pipeline:
   type: pipeline
   name: GlusterFS

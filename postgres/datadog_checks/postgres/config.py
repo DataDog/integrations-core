@@ -24,15 +24,17 @@ class PostgresConfig:
     GAUGE = AgentCheck.gauge
     MONOTONIC = AgentCheck.monotonic_count
 
-    def __init__(self, instance):
+    def __init__(self, init_config, instance):
+        autodiscover_config = init_config.get('autodiscover_hosts', {})
+        self.host_autodiscovery_enabled = is_affirmative(autodiscover_config.get('enabled', False))
         self.host = instance.get('host', '')
-        if not self.host:
+        if not self.host and not self.host_autodiscovery_enabled:
             raise ConfigurationError('Specify a Postgres host to connect to.')
         self.port = instance.get('port', '')
         if self.port != '':
             self.port = int(self.port)
         self.user = instance.get('username', '')
-        if not self.user:
+        if not self.user and not self.host_autodiscovery_enabled:
             raise ConfigurationError('Please specify a user to connect to Postgres.')
         self.password = instance.get('password', '')
         self.dbname = instance.get('dbname', 'postgres')
@@ -141,7 +143,7 @@ class PostgresConfig:
             'collect_comments': is_affirmative(obfuscator_options_config.get('collect_comments', True)),
             # Config to enable/disable obfuscation of sql statements with go-sqllexer pkg
             # Valid values for this can be found at https://github.com/DataDog/datadog-agent/blob/main/pkg/obfuscate/obfuscate.go#L108
-            'obfuscation_mode': obfuscator_options_config.get('obfuscation_mode', ''),
+            'obfuscation_mode': obfuscator_options_config.get('obfuscation_mode', 'obfuscate_and_normalize'),
             'remove_space_between_parentheses': is_affirmative(
                 obfuscator_options_config.get('remove_space_between_parentheses', False)
             ),

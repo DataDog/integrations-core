@@ -1,11 +1,12 @@
 id: teamcity
 metric_id: teamcity
+backend_only: false
 facets:
-  - name: Logger Name
-    source: log
-    path: logger.name
-    groups:
+  - groups:
       - Source Code
+    name: Logger Name
+    path: logger.name
+    source: log
 pipeline:
   type: pipeline
   name: Teamcity

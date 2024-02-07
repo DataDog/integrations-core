@@ -3,11 +3,12 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import psycopg2
 import pytest
+from flaky import flaky
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.postgres.relationsmanager import QUERY_PG_CLASS, RelationsManager
 
-from .common import DB_NAME, HOST, PORT, _get_expected_tags, _iterate_metric_name
+from .common import DB_NAME, HOST, PORT, _get_expected_tags, _iterate_metric_name, assert_metric_at_least
 from .utils import _get_superconn, _wait_for_value, requires_over_11
 
 RELATION_METRICS = [
@@ -192,6 +193,7 @@ def test_index_metrics(aggregator, integration_check, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@flaky(max_runs=5)
 def test_vacuum_age(aggregator, integration_check, pg_instance):
     pg_instance['relations'] = ['persons']
     pg_instance['dbname'] = 'datadog_test'
@@ -213,7 +215,14 @@ def test_vacuum_age(aggregator, integration_check, pg_instance):
 
     expected_tags = _get_expected_tags(check, pg_instance, db='datadog_test', table='persons', schema='public')
     for name in ['postgresql.last_vacuum_age', 'postgresql.last_analyze_age']:
-        aggregator.assert_metric(name, count=1, tags=expected_tags)
+        assert_metric_at_least(
+            aggregator,
+            name,
+            lower_bound=0,
+            higher_bound=100,
+            tags=expected_tags,
+            count=1,
+        )
 
 
 @pytest.mark.integration

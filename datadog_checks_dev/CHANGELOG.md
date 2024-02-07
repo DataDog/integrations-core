@@ -2,6 +2,66 @@
 
 <!-- towncrier release notes start -->
 
+## 31.0.0 / 2024-02-06
+
+***Changed***:
+
+* Rename template for new crawler integration. ([#16802](https://github.com/DataDog/integrations-core/pull/16802))
+
+***Fixed***:
+
+* Do not sign `ddev` after the release ([#16737](https://github.com/DataDog/integrations-core/pull/16737))
+* Remove unsupported characters from README templates. ([#16759](https://github.com/DataDog/integrations-core/pull/16759))
+
+## 30.0.0 / 2024-01-29
+
+***Changed***:
+
+* Remove legacy tox plugin ([#16696](https://github.com/DataDog/integrations-core/pull/16696))
+
+***Added***:
+
+* Bump towncrier version to support releasing with empty changelogs ([#16676](https://github.com/DataDog/integrations-core/pull/16676))
+* Different changelog template depending on release process. Marketplace and Extras changelogs are static, integrations-core changelogs have towncrier header. ([#16693](https://github.com/DataDog/integrations-core/pull/16693))
+
+***Fixed***:
+
+* Pin black ([#16712](https://github.com/DataDog/integrations-core/pull/16712))
+* Bump pytest-asyncio to be compatible with pytest 8 ([#16726](https://github.com/DataDog/integrations-core/pull/16726))
+
+## 29.2.0 / 2024-01-22
+
+***Added***:
+
+* Set auto_install in 'manifest.json' when running 'ddev create' ([#16647](https://github.com/DataDog/integrations-core/pull/16647))
+
+## 29.1.0 / 2024-01-17
+
+***Added***:
+
+* Autogenerate source_type_id in 'manifest.json' when running 'ddev create' ([#16544](https://github.com/DataDog/integrations-core/pull/16544))
+
+***Fixed***:
+
+* Fix a bug that prevents the `validate dep` command to fail if extra deps are found in the Agent file ([#16541](https://github.com/DataDog/integrations-core/pull/16541))
+
+## 29.0.2 / 2024-01-09
+
+***Fixed***:
+
+* * Extend messages from dependency validation.
+      1. Say which ddev command to run to fix particular type of error.
+      2. Report success at the end. ([#15558](https://github.com/DataDog/integrations-core/pull/15558))
+* Pin the `pytest-asyncio` version to 0.23.2 ([#16507](https://github.com/DataDog/integrations-core/pull/16507))
+* Remove setuptools depedency for jmx and logs integrations. Make them consistent with the `check` template. ([#16527](https://github.com/DataDog/integrations-core/pull/16527))
+* Update the template for logs integrations to not require a specific Python and base check version ([#16528](https://github.com/DataDog/integrations-core/pull/16528))
+
+## 29.0.1 / 2024-01-02
+
+***Fixed***:
+
+* Set the Python version back to 3.9 in the templates ([#16504](https://github.com/DataDog/integrations-core/pull/16504))
+
 ## 29.0.0 / 2023-12-12
 
 ***Removed***:

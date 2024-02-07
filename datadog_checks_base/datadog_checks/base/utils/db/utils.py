@@ -192,9 +192,24 @@ def default_json_event_encoding(o):
     raise TypeError
 
 
-def obfuscate_sql_with_metadata(query, options=None):
+def obfuscate_sql_with_metadata(query, options=None, replace_null_character=False):
+    """
+    Obfuscate a SQL query and return the obfuscated query and metadata.
+    :param str query: The SQL query to obfuscate.
+    :param dict options: Obfuscation options to pass to the obfuscator.
+    :param bool replace_null_character: Whether to replace embedded null characters \x00 before obfuscating.
+        Note: Setting this parameter to true involves an extra string traversal and copy.
+        Do set this to true if the database allows embedded null characters in text fields, for example SQL Server.
+        Otherwise obfuscation will fail if the query contains embedded null characters.
+    :return: A dict containing the obfuscated query and metadata.
+    :rtype: dict
+    """
     if not query:
         return {'query': '', 'metadata': {}}
+
+    if replace_null_character:
+        # replace embedded null characters \x00 before obfuscating
+        query = query.replace('\x00', '')
 
     statement = datadog_agent.obfuscate_sql(query, options)
     # The `obfuscate_sql` testing stub returns bytes, so we have to handle that here.
@@ -303,7 +318,14 @@ class DBMAsyncJob(object):
                         "dd.{}.async_job.inactive_stop".format(self._dbms), 1, tags=self._job_tags, raw=True
                     )
                     break
-                self._run_job_rate_limited()
+                if self._check.should_profile_memory():
+                    self._check.profile_memory(
+                        self._run_job_rate_limited,
+                        namespaces=[self._check.name, self._job_name],
+                        extra_tags=self._job_tags,
+                    )
+                else:
+                    self._run_job_rate_limited()
         except Exception as e:
             if self._cancel_event.isSet():
                 # canceling can cause exceptions if the connection is closed the middle of the check run

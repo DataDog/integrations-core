@@ -48,7 +48,9 @@
         "argocd-repo-server",
         "argocd-server",
         "argocd-notifications-controller"
-      ]
+      ],
+      "source_type_id": 10314,
+      "auto_install": true
     },
     "logs": {
       "source": "argocd"

@@ -68,6 +68,14 @@ class QueryExecutor(object):
             global_tags.extend(list(extra_tags))
 
         for query in self.queries:
+            if not query.should_execute():
+                self.logger.debug(
+                    'Query %s was executed less than %s seconds ago, skipping',
+                    query.name,
+                    query.collection_interval,
+                )
+                continue
+
             query_name = query.name
             query_columns = query.column_transformers
             extra_transformers = query.extra_transformers

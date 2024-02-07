@@ -103,7 +103,7 @@
             "layout": {
               "x": 0,
               "y": 0,
-              "width": 2,
+              "width": 6,
               "height": 2
             }
           },
@@ -141,9 +141,9 @@
               }
             },
             "layout": {
-              "x": 2,
-              "y": 0,
-              "width": 2,
+              "x": 0,
+              "y": 2,
+              "width": 3,
               "height": 2
             }
           },
@@ -178,86 +178,6 @@
               "timeseries_background": {
                 "yaxis": {},
                 "type": "bars"
-              }
-            },
-            "layout": {
-              "x": 4,
-              "y": 0,
-              "width": 2,
-              "height": 2
-            }
-          },
-          {
-            "id": 1815867005998886,
-            "definition": {
-              "title": "Avg Context Tokens per request",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "aggregator": "avg",
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "avg:openai.api.usage.n_context{$model,$operation}.as_count()"
-                    }
-                  ],
-                  "response_format": "scalar"
-                }
-              ],
-              "autoscale": true,
-              "custom_unit": "tokens/req",
-              "precision": 2,
-              "timeseries_background": {
-                "yaxis": {},
-                "type": "area"
-              }
-            },
-            "layout": {
-              "x": 0,
-              "y": 2,
-              "width": 3,
-              "height": 2
-            }
-          },
-          {
-            "id": 7545620141129682,
-            "definition": {
-              "title": "Avg Response Tokens per request",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "aggregator": "avg",
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "avg:openai.api.usage.n_generated{$model,$operation}.as_count()"
-                    }
-                  ],
-                  "response_format": "scalar"
-                }
-              ],
-              "autoscale": true,
-              "custom_unit": "tokens/req",
-              "precision": 2,
-              "timeseries_background": {
-                "yaxis": {},
-                "type": "area"
               }
             },
             "layout": {
@@ -340,42 +260,6 @@
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 7581406721040970,
-            "definition": {
-              "title": "Context tokens breakdown by model/operation",
-              "title_size": "16",
-              "title_align": "left",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "aggregator": "sum",
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:openai.api.usage.n_context{$model,$operation} by {model,operation}.as_count()"
-                    }
-                  ],
-                  "response_format": "scalar"
-                }
-              ],
-              "type": "sunburst",
-              "legend": {
-                "type": "table"
-              }
-            },
-            "layout": {
-              "x": 0,
-              "y": 0,
-              "width": 6,
-              "height": 3
-            }
-          },
-          {
             "id": 7215038769331264,
             "definition": {
               "title": "Total Context Token Usage by Model/Operation",
@@ -418,7 +302,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 3,
+              "y": 0,
               "width": 6,
               "height": 3
             }
@@ -429,7 +313,7 @@
         "x": 0,
         "y": 0,
         "width": 6,
-        "height": 7
+        "height": 4
       }
     },
     {
@@ -441,42 +325,6 @@
         "type": "group",
         "layout_type": "ordered",
         "widgets": [
-          {
-            "id": 5703892962287386,
-            "definition": {
-              "title": "Response tokens breakdown by model/operation",
-              "title_size": "16",
-              "title_align": "left",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "aggregator": "sum",
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:openai.api.usage.n_generated{$model,$operation} by {model,operation}.as_count()"
-                    }
-                  ],
-                  "response_format": "scalar"
-                }
-              ],
-              "type": "sunburst",
-              "legend": {
-                "type": "table"
-              }
-            },
-            "layout": {
-              "x": 0,
-              "y": 0,
-              "width": 6,
-              "height": 3
-            }
-          },
           {
             "id": 6479108410363704,
             "definition": {
@@ -520,7 +368,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 3,
+              "y": 0,
               "width": 6,
               "height": 3
             }
@@ -531,7 +379,7 @@
         "x": 6,
         "y": 0,
         "width": 6,
-        "height": 7
+        "height": 4
       }
     }
   ],

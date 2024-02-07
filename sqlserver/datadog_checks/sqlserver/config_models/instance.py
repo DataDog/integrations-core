@@ -179,6 +179,7 @@ class InstanceConfig(BaseModel):
     include_secondary_log_shipping_metrics: Optional[bool] = None
     include_task_scheduler_metrics: Optional[bool] = None
     include_tempdb_file_space_usage_metrics: Optional[bool] = None
+    index_usage_metrics_interval: Optional[int] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
     managed_identity: Optional[ManagedIdentity] = None

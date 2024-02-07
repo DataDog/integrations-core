@@ -184,6 +184,6 @@ instances:
 #
 # logs:
 #   - type: file
-#     path: /path/to/active_directory/file.log
+#     path: C:\path\to\my\directory\file.log
 #     source: ruby
 #     service: <SERVICE_NAME>

@@ -6,7 +6,7 @@
   "tags": [
     "integration:elasticsearch"
   ],
-  "description": "Get notified when the unsuccessful requests rate is high.",
+  "description": "Clients send requests to interact with the Elasticsearch cluster. This monitor tracks the percentage of unsuccessful GET requests in Elasticsearch to indicate the requested documents are missing and might require investigation.",
   "definition": {
     "message": "Unsuccessful requests rate is high: document is missing in {{value}}% of requests.",
     "name": "[ElasticSearch] Unsuccessful requests rate is high",

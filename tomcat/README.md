@@ -89,28 +89,6 @@ The `attribute` filter can accept two types of values:
         - RecentHitRate
   ```
 
-#### Older versions
-
-List of filters is only supported in Datadog Agent > 5.3.0. If you are using an older version, use singletons and multiple `include` statements instead.
-
-```yaml
-# Datadog Agent > 5.3.0
-  conf:
-    - include:
-      domain: domain_name
-      bean:
-        - first_bean_name
-        - second_bean_name
-# Older Datadog Agent versions
-  conf:
-    - include:
-      domain: domain_name
-      bean: first_bean_name
-    - include:
-      domain: domain_name
-      bean: second_bean_name
-```
-
 #### Log collection
 
 
@@ -225,10 +203,10 @@ See [service_checks.json][14] for a list of service checks provided by this inte
 
 ### Missing `tomcat.*` metrics
 
-The Datadog agent collects JMX metrics with either `Catalina` or `Tomcat` as bean domain names.
+The Datadog Agent collects JMX metrics with either `Catalina` or `Tomcat` as bean domain names with the Datadog Agent version **7.49.0** or later. Older versions only collect metrics with `Catalina` as the bean domain name.
 Standalone Tomcat deployments have metrics under domain `Catalina`, but embedded Tomcat deployments (such as with Spring Boot) have metrics under domain `Tomcat`.
 
-If the Datadog agent is older than **7.47.0**, and if the exposed Tomcat metrics are prefixed with a different bean domain name, such as `Tomcat`, copy the default metrics from the `metrics.yaml` file to the `conf` section of the `tomcat.d/conf.yaml` file and modify the `domain` filter to use the applicable bean domain name.
+If the Datadog Agent version is older than **7.49.0**, and if the exposed Tomcat metrics are prefixed with a different bean domain name such as `Tomcat`, copy the default metrics from the `metrics.yaml` file to the `conf` section of the `tomcat.d/conf.yaml` file and modify the `domain` filter to use the applicable bean domain name.
 
 ```yaml
 - include:
@@ -271,10 +249,11 @@ Additional helpful documentation, links, and articles:
 
 - [Monitor Tomcat metrics with Datadog][15]
 - [Key metrics for monitoring Tomcat][16]
+- [Analyzing Tomcat logs and metrics with Datadog][17]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/tomcat/images/tomcat_dashboard.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://tomcat.apache.org/tomcat-6.0-doc/monitoring.html
+[3]: https://tomcat.apache.org/tomcat-10.1-doc/monitoring.html
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/tomcat/datadog_checks/tomcat/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -288,3 +267,4 @@ Additional helpful documentation, links, and articles:
 [14]: https://github.com/DataDog/integrations-core/blob/master/tomcat/assets/service_checks.json
 [15]: https://www.datadoghq.com/blog/monitor-tomcat-metrics
 [16]: https://www.datadoghq.com/blog/tomcat-architecture-and-performance
+[17]: https://www.datadoghq.com/blog/analyzing-tomcat-logs-and-metrics-with-datadog
