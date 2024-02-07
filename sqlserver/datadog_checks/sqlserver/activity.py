@@ -280,12 +280,16 @@ class SqlserverActivity(DBMAsyncJob):
         if 'statement_text' not in row:
             return self._sanitize_row(row)
         try:
-            statement = obfuscate_sql_with_metadata(row['statement_text'], self._config.obfuscator_options)
+            statement = obfuscate_sql_with_metadata(
+                row['statement_text'], self._config.obfuscator_options, replace_null_character=True
+            )
             # sqlserver doesn't have a boolean data type so convert integer to boolean
             comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
             if row['is_proc'] and 'text' in row:
                 try:
-                    procedure_statement = obfuscate_sql_with_metadata(row['text'], self._config.obfuscator_options)
+                    procedure_statement = obfuscate_sql_with_metadata(
+                        row['text'], self._config.obfuscator_options, replace_null_character=True
+                    )
                     # procedure_signature is used to link this activity event with
                     # its related plan events
                     row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
@@ -293,7 +297,7 @@ class SqlserverActivity(DBMAsyncJob):
                     # if we fail to obfuscate the procedure text,
                     # we should not mark query statement as failed to obfuscate
                     if self._config.log_unobfuscated_queries:
-                        self.log.warning("Failed to obfuscate stored procedure=[%s] | err=[%s]", row['text'], e)
+                        self.log.warning("Failed to obfuscate stored procedure=[%s] | err=[%s]", repr(row['text']), e)
                     else:
                         self.log.debug("Failed to obfuscate stored procedure | err=[%s]", e)
             obfuscated_statement = statement['query']
@@ -306,7 +310,7 @@ class SqlserverActivity(DBMAsyncJob):
                 row['procedure_name'] = procedure_name
         except Exception as e:
             if self._config.log_unobfuscated_queries:
-                self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['statement_text'], e)
+                self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", repr(row['statement_text']), e)
             else:
                 self.log.debug("Failed to obfuscate query | err=[%s]", e)
             obfuscated_statement = "ERROR: failed to obfuscate"
