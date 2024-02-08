@@ -179,6 +179,7 @@ release-auto:
   image: $TAGGER_IMAGE
   only:
     - master
+    - ^\d+\.\d+\.x$
   except:
     - schedules
   script:
