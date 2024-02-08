@@ -768,8 +768,8 @@ kubelet_pod_start_total_duration_seconds_bucket{le="1800"} 193
 kubelet_pod_start_total_duration_seconds_bucket{le="2700"} 193
 kubelet_pod_start_total_duration_seconds_bucket{le="3600"} 193
 kubelet_pod_start_total_duration_seconds_bucket{le="+Inf"} 193
-kubelet_pod_start_sli_duration_seconds_sum 3274.1562131820015
-kubelet_pod_start_sli_duration_seconds_count 193
+kubelet_pod_start_total_duration_seconds_sum 3274.1562131820015
+kubelet_pod_start_total_duration_seconds_count 193
 # HELP kubelet_pod_worker_start_duration_seconds [ALPHA] Duration in seconds from seeing a pod to starting a worker.
 # TYPE kubelet_pod_worker_start_duration_seconds histogram
 kubelet_pod_worker_start_duration_seconds_bucket{le="0.005"} 30
