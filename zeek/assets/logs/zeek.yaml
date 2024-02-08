@@ -370,7 +370,7 @@ pipeline:
             tags: []
           source: conn_state
           target: connection_state
-          lookupTable: >-
+          lookupTable: |-
             S0,Connection attempt seen - no reply
 
             S1,Connection established - not terminated
