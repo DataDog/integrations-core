@@ -11,7 +11,6 @@ if FORMAT == 'openmetrics':
 else:
     CONTENT_TYPE = 'plain/text; charset=utf-8'
 
-METRICS_FILE = "/tmp/metrics{}.txt"
 PORT = 8080
 
 
