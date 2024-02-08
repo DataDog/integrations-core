@@ -16,13 +16,13 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 @click.command(
-    'serve-openmetrics-payload', short_help='Serve and collect metrics from an OpenMetrics file with a real Agent'
+    'serve-openmetrics-payload', short_help='Serve and collect metrics from OpenMetrics files with a real Agent'
 )
 @click.argument('integration')
 @click.argument('payloads', nargs=-1)
 @click.pass_context
 def serve_openmetrics_payload(ctx: click.Context, integration: str, payloads: tuple[str, ...]):
-    """Serve and collect metrics from an OpenMetrics file with a real Agent
+    """Serve and collect metrics from OpenMetrics files with a real Agent
 
     \b
     `$ ddev meta scripts serve-openmetrics-payload ray payload1.txt payload2.txt`
