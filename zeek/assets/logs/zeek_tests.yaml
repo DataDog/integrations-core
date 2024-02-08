@@ -19,7 +19,61 @@ tests:
       - "source:LOGS_SOURCE"
       timestamp: 1702360352763
   - sample: '{"_path":"conn","_write_ts":"2023-12-12T05:52:50.756358Z","ts":"2023-12-12T05:52:32.763303Z","uid":"CcdWSj20NUmxZowq93","id.orig_h":"185.64.148.0","id.orig_p":3,"id.resp_h":"185.64.148.0","id.resp_p":10,"proto":"icmp","duration":3.0111899375915527,"orig_bytes":234,"resp_bytes":0,"conn_state":"OTH","local_orig":true,"local_resp":true,"missed_bytes":0,"orig_pkts":3,"orig_ip_bytes":318,"resp_pkts":0,"resp_ip_bytes":0}'
-    result: null
+    result:
+      custom:
+        _path: "conn"
+        _write_ts: "2023-12-12T05:52:50.756358Z"
+        conn_state: "OTH"
+        connection_state: "No SYN seen - just midstream traffic"
+        local_orig: true
+        local_resp: true
+        network:
+          bytes_read: 234
+          bytes_written: 0
+          client:
+            ip: "185.64.148.0"
+            port: 3
+          destination:
+            ip: "185.64.148.0"
+            port: 10
+        orig_ip_bytes: 318
+        orig_pkts: 3
+        resp_ip_bytes: 0
+        resp_pkts: 0
+        ts: "2023-12-12T05:52:32.763303Z"
+        uid: "CcdWSj20NUmxZowq93"
+        zeek:
+          duration_sec: 3.0111899375915527
+          missed_bytes: 0
+          proto: "icmp"
+      message: |-
+        {
+          "resp_pkts" : 0,
+          "resp_ip_bytes" : 0,
+          "orig_bytes" : 234,
+          "local_orig" : true,
+          "_write_ts" : "2023-12-12T05:52:50.756358Z",
+          "orig_ip_bytes" : 318,
+          "orig_pkts" : 3,
+          "_path" : "conn",
+          "missed_bytes" : 0,
+          "duration" : 3.0111899375915527,
+          "local_resp" : true,
+          "uid" : "CcdWSj20NUmxZowq93",
+          "resp_bytes" : 0,
+          "conn_state" : "OTH",
+          "proto" : "icmp",
+          "id" : {
+            "orig_p" : 3,
+            "resp_h" : "185.64.148.0",
+            "orig_h" : "185.64.148.0",
+            "resp_p" : 10
+          },
+          "ts" : "2023-12-12T05:52:32.763303Z"
+        }
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1702360352763
   - sample: '{"_path":"http","_write_ts":"2023-12-12T05:52:50.756358Z","ts":"2023-12-12T05:52:32.763303Z","uid":"CBQBvs1hob384mp2lb","id.orig_h":"185.64.148.0","id.orig_p":47210,"id.resp_h":"185.64.148.0","id.resp_p":80,"trans_depth":1,"method":"POST","host":"host.com","uri":"/rootr3","version":"1.1","user_agent":"LIBCURL","request_body_len":83,"response_body_len":1434,"status_code":200,"status_msg":"OK","tags":[],"orig_fuids":["FKhxp22QnZua8NWY2"],"orig_mime_types":["application/ocsp-request"],"resp_fuids":["F9Zqr71YzMZPVZ4dbe"],"resp_mime_types":["application/ocsp-response"]}'
     result:
       custom:
