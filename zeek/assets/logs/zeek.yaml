@@ -12,8 +12,8 @@ facets:
   - facetType: range
     groups:
     - Zeek
-    name: Bytes
-    path: zeek.bytes
+    name: DNS Bytes
+    path: dns_bytes
     source: log
     type: integer
     unit:
@@ -677,14 +677,14 @@ pipeline:
           target: network.client.geoip
           ip_processing_behavior: do-nothing
         - type: attribute-remapper
-          name: Map `bytes` to `zeek.bytes`
+          name: Map `bytes` to `dns_bytes`
           enabled: true
           meta:
             tags: []
           sources:
             - bytes
           sourceType: attribute
-          target: zeek.bytes
+          target: dns_bytes
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
