@@ -19,14 +19,20 @@ from utils import extract_metadata, normalize_project_name
 def get_wheel_hashes(project) -> dict[str, str]:
     retry_wait = 2
     while True:
-        response = urllib3.request('GET', f'https://pypi.org/simple/{project}')
-        if response.status == 200:
-            break
+        try:
+            response = urllib3.request('GET', f'https://pypi.org/simple/{project}')
+        except urllib3.exceptions.HTTPError as e:
+            err_msg = f'Failed to fetch hashes for `{project}`: {e}'
+        else:
+            if response.status == 200:
+                break
 
-        retry_wait *= 2
-        print(f'Failed to fetch hashes for `{project}`, status code: {response.status}')
+            err_msg = f'Failed to fetch hashes for `{project}`, status code: {response.status}'
+
+        print(err_msg)
         print(f'Retrying in {retry_wait} seconds')
         time.sleep(retry_wait)
+        retry_wait *= 2
         continue
 
     html = response.data.decode('utf-8')
