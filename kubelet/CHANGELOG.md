@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 7.11.1 / 2024-02-08
+
+***Added***:
+
+* add startup latency metrics ([#16821](https://github.com/DataDog/integrations-core/pull/16821))
+
 ## 7.11.0 / 2024-01-05
 
 ***Added***:
