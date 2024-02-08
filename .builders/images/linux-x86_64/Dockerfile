@@ -136,9 +136,6 @@ RUN \
  bash install-from-source.sh --disable-readline --with-included-ltdl --enable-ltdl-install
 
 # Dependencies needed to build librdkafka (and thus, confluent-kafka) with kerberos support
-# Note that we don't ship these but rely on the Agent providing a working cyrus-sasl installation
-# with kerberos support, therefore we only need to watch out for the version of cyrus-sasl being
-# compatible with that in the Agent, the rest shouldn't matter much
 RUN \
  DOWNLOAD_URL="https://github.com/LMDB/lmdb/archive/LMDB_{{version}}.tar.gz" \
  VERSION="0.9.29" \
@@ -154,11 +151,16 @@ RUN \
  RELATIVE_PATH="e2fsprogs-{{version}}" \
  bash install-from-source.sh --enable-elf-shlibs
 RUN \
+ # Add -fPIC to let librdkafka link against it statically
+ CFLAGS="${CFLAGS} -fPIC" \
+ # Explicitly ask the linker to use gssapi_krb5, otherwise static compilation fails
+ LDFLAGS="${LDFLAGS} -L/usr/local/lib -lgssapi_krb5" \
  DOWNLOAD_URL="https://github.com/cyrusimap/cyrus-sasl/releases/download/cyrus-sasl-{{version}}/cyrus-sasl-{{version}}.tar.gz" \
  VERSION="2.1.28" \
  SHA256="7ccfc6abd01ed67c1a0924b353e526f1b766b21f42d4562ee635a8ebfc5bb38c" \
  RELATIVE_PATH="cyrus-sasl-{{version}}" \
- bash install-from-source.sh --with-dblib=lmdb --enable-gssapi=/usr/local
+ bash install-from-source.sh --with-dblib=lmdb --enable-gssapi=/usr/local \
+    --enable-static --disable-shared
 # curl
 RUN \
  DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
