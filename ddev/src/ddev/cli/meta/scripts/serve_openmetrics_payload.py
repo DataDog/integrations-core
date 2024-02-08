@@ -61,7 +61,7 @@ def serve_openmetrics_payload(ctx: click.Context, integration: str, payloads: tu
         "docker_volumes": [
             f"{HERE}/scripts/serve.py:/tmp/serve.py",
         ]
-        + [f"{os.path.join(os.getcwd(), payload)}:/tmp/metrics{i}.txt" for i, payload in enumerate(payloads)]
+        + [f"{os.path.join(os.getcwd(), payload)}:/tmp/{payload}" for payload in payloads]
     }
 
     env_data.write_config(config)
@@ -84,7 +84,7 @@ def serve_openmetrics_payload(ctx: click.Context, integration: str, payloads: tu
 
     try:
         app.display_info('Starting the webserver... Use ctrl+c to stop it.')
-        agent.run_command(['python', '/tmp/serve.py', str(len(payloads))])
+        agent.run_command(['python', '/tmp/serve.py'] + list(payloads))
     except Exception:
         app.display_info('Server stopped')
 
