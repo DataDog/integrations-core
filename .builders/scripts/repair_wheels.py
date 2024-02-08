@@ -77,6 +77,10 @@ def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
     policies = WheelPolicies()
     policy = policies.get_policy_by_name('manylinux2010_x86_64')
     abis = [policy['name'], *policy['aliases']]
+    # We edit the policy to remove zlib out of the whitelist to match the whitelisting policy we use
+    # on the Omnibus health check in the Agent
+    policy['lib_whitelist'].remove('libz.so.1')
+    del policy['symbol_versions']['ZLIB']
 
     for wheel in iter_wheels(source_dir):
         print(f'--> {wheel.name}')
