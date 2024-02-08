@@ -44,7 +44,7 @@ class TektonCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     def generate_config(self, endpoint, namespace, metrics):
         config = {
             'openmetrics_endpoint': endpoint,
-            'metrics': metrics,
+            'metrics': [metrics],
             'namespace': namespace,
         }
         config.update(self.instance)
