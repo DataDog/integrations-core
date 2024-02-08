@@ -1141,7 +1141,7 @@
           {
             "id": 1998962873985110,
             "definition": {
-              "title": "Top function calls",
+              "title": "Top table scans",
               "title_size": "16",
               "title_align": "left",
               "type": "query_table",
