@@ -166,6 +166,10 @@ EXPECTED_METRICS_PROMETHEUS_1_21 = [
     'kubernetes.kubelet.pleg.relist_interval.sum',
     'kubernetes.kubelet.pod.start.duration.count',
     'kubernetes.kubelet.pod.start.duration.sum',
+    'kubernetes.kubelet.pod.start.sli.duration.count',
+    'kubernetes.kubelet.pod.start.sli.duration.sum',
+    'kubernetes.kubelet.pod.start.total.duration.count',
+    'kubernetes.kubelet.pod.start.total.duration.sum',
     'kubernetes.kubelet.pod.worker.start.duration.count',
     'kubernetes.kubelet.pod.worker.start.duration.sum',
     'kubernetes.kubelet.runtime.errors',
@@ -883,6 +887,10 @@ def test_no_tags_no_metrics(monkeypatch, aggregator, tagger):
     aggregator.assert_metric('kubernetes.kubelet.pleg.relist_interval.sum')
     aggregator.assert_metric('kubernetes.kubelet.pod.start.duration.count')
     aggregator.assert_metric('kubernetes.kubelet.pod.start.duration.sum')
+    aggregator.assert_metric('kubernetes.kubelet.pod.start.sli.duration.count')
+    aggregator.assert_metric('kubernetes.kubelet.pod.start.sli.duration.sum')
+    aggregator.assert_metric('kubernetes.kubelet.pod.start.total.duration.count')
+    aggregator.assert_metric('kubernetes.kubelet.pod.start.total.duration.sum')
     aggregator.assert_metric('kubernetes.kubelet.pod.worker.duration.count')
     aggregator.assert_metric('kubernetes.kubelet.pod.worker.duration.sum')
     aggregator.assert_metric('kubernetes.kubelet.pod.worker.start.duration.count')
