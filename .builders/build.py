@@ -186,9 +186,11 @@ def build_image():
             if args.verbose and not windows_image:
                 build_command.extend(['--progress', 'plain'])
 
+            build_args = ['SOURCE_DATE_EPOCH=1580601600']
             if args.build_args is not None:
-                for build_arg in args.build_args:
-                    build_command.extend(['--build-arg', build_arg])
+                build_args.extend(args.build_args)
+            for build_arg in build_args:
+                build_command.extend(['--build-arg', build_arg])
 
             check_process(build_command)
 

@@ -1,6 +1,10 @@
 ARG BASE_IMAGE=quay.io/pypa/manylinux2010_x86_64
 FROM ${BASE_IMAGE}
 
+ARG SOURCE_DATE_EPOCH
+
+ENV SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}
+
 # Script for the common task of fetching a source tarball, compiling and installing it
 COPY install-from-source.sh /
 
