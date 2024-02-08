@@ -808,6 +808,7 @@ Need help? Contact [Datadog support][18].
 - Blog post: [AWS Fargate monitoring with Datadog][38]
 - Blog post: [Graviton2-powered AWS Fargate deployments][39]
 - Blog post: [Monitor AWS Fargate for Windows containerized apps][40]
+- Blog post: [Monitor processes running on AWS Fargate with Datadog][58]
 
 
 
@@ -868,3 +869,4 @@ Need help? Contact [Datadog support][18].
 [55]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/dotnet-framework?tab=containers#custom-instrumentation
 [56]: https://app.datadoghq.com/process
 [57]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#other_task_definition_params
+[58]: https://www.datadoghq.com/blog/monitor-fargate-processes/
