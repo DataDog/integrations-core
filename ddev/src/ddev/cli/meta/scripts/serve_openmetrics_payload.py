@@ -19,13 +19,13 @@ HERE = os.path.dirname(os.path.abspath(__file__))
     'serve-openmetrics-payload', short_help='Serve and collect metrics from an OpenMetrics file with a real Agent'
 )
 @click.argument('integration')
-@click.argument('payload')
+@click.argument('payloads', nargs=-1)
 @click.pass_context
-def serve_openmetrics_payload(ctx: click.Context, integration: str, payload: str):
+def serve_openmetrics_payload(ctx: click.Context, integration: str, payloads: tuple[str, ...]):
     """Serve and collect metrics from an OpenMetrics file with a real Agent
 
     \b
-    `$ ddev meta scripts serve-openmetrics-payload ray payload.txt`
+    `$ ddev meta scripts serve-openmetrics-payload ray payload1.txt payload2.txt`
     """
 
     import time
@@ -60,8 +60,8 @@ def serve_openmetrics_payload(ctx: click.Context, integration: str, payload: str
     metadata = {
         "docker_volumes": [
             f"{HERE}/scripts/serve.py:/tmp/serve.py",
-            f"{os.path.join(os.getcwd(), payload)}:/tmp/metrics.txt",
         ]
+        + [f"{os.path.join(os.getcwd(), payload)}:/tmp/metrics{i}.txt" for i, payload in enumerate(payloads)]
     }
 
     env_data.write_config(config)
@@ -84,7 +84,7 @@ def serve_openmetrics_payload(ctx: click.Context, integration: str, payload: str
 
     try:
         app.display_info('Starting the webserver... Use ctrl+c to stop it.')
-        agent.run_command(['python', '/tmp/serve.py'])
+        agent.run_command(['python', '/tmp/serve.py', str(len(payloads))])
     except Exception:
         app.display_info('Server stopped')
 

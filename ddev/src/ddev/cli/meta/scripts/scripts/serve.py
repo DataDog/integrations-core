@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 FORMAT = 'prometheus'
@@ -11,21 +11,33 @@ if FORMAT == 'openmetrics':
 else:
     CONTENT_TYPE = 'plain/text; charset=utf-8'
 
-METRICS_FILE = "/tmp/metrics.txt"
+METRICS_FILE = "/tmp/metrics{}.txt"
+PORT = 8080
 
 
 class OpenMetricsHandler(BaseHTTPRequestHandler):
     def do_GET(self):
+        global current_payload
+        global payload_count
+
+        file = METRICS_FILE.format(current_payload)
+
+        if payload_count > 1:
+            print(f"Serving file {current_payload}")
+
         self.send_response(200)
         self.send_header('Content-Type', CONTENT_TYPE)
         self.end_headers()
-        with open(METRICS_FILE, 'rb') as f:
+        with open(file, 'rb') as f:
             self.wfile.write(f.read())
 
-
-PORT = 8080
+        # Otherwise we keep using the last one
+        if current_payload < payload_count - 1:
+            current_payload += 1
 
 
 if __name__ == '__main__':
+    current_payload = 0
+    payload_count = int(sys.argv[1])
     with HTTPServer(("", PORT), OpenMetricsHandler) as httpd:
         httpd.serve_forever()
