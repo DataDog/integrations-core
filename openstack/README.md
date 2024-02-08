@@ -162,7 +162,6 @@ Additional helpful documentation, links, and articles:
 - [Monitoring OpenStack Nova][11]
 - [Install OpenStack in two commands for dev and test][12]
 - [OpenStack: host aggregates, flavors, and availability zones][13]
-- [Monitor your OpenStack components with Datadog][14]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/openstack/images/openstack_dashboard.png
 [2]: https://docs.datadoghq.com/integrations/openstack_controller
@@ -177,4 +176,3 @@ Additional helpful documentation, links, and articles:
 [11]: https://www.datadoghq.com/blog/openstack-monitoring-nova
 [12]: https://www.datadoghq.com/blog/install-openstack-in-two-commands
 [13]: https://www.datadoghq.com/blog/openstack-host-aggregates-flavors-availability-zones
-[14]: https://www.datadoghq.com/blog/openstack-controller-integration/
