@@ -34,6 +34,11 @@ static_resources:
             virtual_hosts:
             - name: backend
               domains: ["*"]
+              virtual_clusters:
+                - name: "vcluster0"
+                  headers:
+                    - name: "vheaders0"
+                      exact_match: /
               routes:
               - match:
                   prefix: "/service/1"
