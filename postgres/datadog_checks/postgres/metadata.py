@@ -13,7 +13,8 @@ except ImportError:
     from ..stubs import datadog_agent
 
 from datadog_checks.base import is_affirmative
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import (DBMAsyncJob,
+                                                default_json_event_encoding)
 from datadog_checks.base.utils.tracking import tracked_method
 
 from .util import payload_pg_version
@@ -324,28 +325,13 @@ class PostgresMetadata(DBMAsyncJob):
                 cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id))
             rows = cursor.fetchall()
             table_info = [dict(row) for row in rows]
-            table_info = self._filter_tables_with_no_relation_metrics(dbname, table_info)
             return self._sort_and_limit_table_info(cursor, dbname, table_info, limit)
 
         else:
             # Config error should catch the case where schema collection is enabled
             # and relation metrics aren't, but adding a warning here just in case
             self._check.log.warning("Relation metrics are not configured for {dbname}, so tables cannot be collected")
-
-    def _filter_tables_with_no_relation_metrics(
-        self, dbname, table_info: List[Dict[str, Union[str, bool]]]
-    ) -> List[Dict[str, Union[str, bool]]]:
-        filtered_table_list = []
-        cache = self._check.metrics_cache.table_activity_metrics
-        for table in table_info:
-            if table['name'] in cache[dbname].keys():
-                filtered_table_list.append(table)
-            # partitioned tables will not have metrics recorded under the name of the partitioned table,
-            # so for now we always report them
-            elif table['has_partitions']:
-                filtered_table_list.append(table)
-        return filtered_table_list
-
+    
     def _sort_and_limit_table_info(
         self, cursor, dbname, table_info: List[Dict[str, Union[str, bool]]], limit: int
     ) -> List[Dict[str, Union[str, bool]]]:
@@ -358,9 +344,11 @@ class PostgresMetadata(DBMAsyncJob):
                 VersionUtils.transform_version(str(self._check.version))['version.major'] == "9"
                 or not info["has_partitions"]
             ):
+                # if we don't have metrics in our cache for this table, return 0
+                table_data = cache[dbname].get(info['name'], {'postgresql.index_scans': 0, 'postgresql.seq_scans': 0})
                 return (
-                    cache[dbname][info['name']]['postgresql.index_scans']
-                    + cache[dbname][info['name']]['postgresql.seq_scans']
+                    table_data['postgresql.index_scans']
+                    + table_data['postgresql.seq_scans']
                 )
             else:
                 # get activity
