@@ -8,7 +8,7 @@ from datadog_checks.dev.http import MockResponse
 
 HERE = get_here()
 
-MOCKED_PIPELINES_METRICS = [
+PIPELINES_METRICS = [
     "client.latency.bucket",
     "client.latency.count",
     "client.latency.sum",
@@ -53,11 +53,10 @@ MOCKED_PIPELINES_METRICS = [
     "workqueue.unfinished_work.bucket",
     "workqueue.unfinished_work.count",
     "workqueue.unfinished_work.sum",
-
 ]
-assert MOCKED_PIPELINES_METRICS == sorted(MOCKED_PIPELINES_METRICS)
+assert PIPELINES_METRICS == sorted(PIPELINES_METRICS)
 
-MOCKED_TRIGGERS_METRICS = [
+TRIGGERS_METRICS = [
     "client.latency.bucket",
     "client.latency.count",
     "client.latency.sum",
@@ -113,16 +112,6 @@ MOCKED_TRIGGERS_METRICS = [
     "workqueue.work_duration.bucket",
     "workqueue.work_duration.count",
     "workqueue.work_duration.sum",
-]
-assert MOCKED_TRIGGERS_METRICS == sorted(MOCKED_TRIGGERS_METRICS)
-
-PIPELINES_METRICS = [
-    'go_alloc',
-]
-assert PIPELINES_METRICS == sorted(PIPELINES_METRICS)
-
-TRIGGERS__METRICS = [
-    'clusterinterceptor',
 ]
 assert PIPELINES_METRICS == sorted(PIPELINES_METRICS)
 

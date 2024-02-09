@@ -98,7 +98,7 @@ def dd_environment(dd_save_state):
         )
         instances['triggers_controller_endpoint'] = f'http://{trigger_host}:{trigger_port}/metrics'
 
-        yield {'instances': instances}
+        yield {'instances': [instances]}
 
 
 @pytest.fixture
