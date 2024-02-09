@@ -7,14 +7,14 @@ from mock import patch
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import MOCKED_PIPELINES_METRICS, MOCKED_TRIGGERS_METRICS, mock_http_responses
+from .common import PIPELINES_METRICS, TRIGGERS_METRICS, mock_http_responses
 
 
 @pytest.mark.parametrize(
     'instance, metrics, namespace',
     [
-        pytest.param('pipelines_instance', MOCKED_PIPELINES_METRICS, 'pipelines_controller', id='pipelines'),
-        pytest.param('triggers_instance', MOCKED_TRIGGERS_METRICS, 'triggers_controller', id='triggers'),
+        pytest.param('pipelines_instance', PIPELINES_METRICS, 'pipelines_controller', id='pipelines'),
+        pytest.param('triggers_instance', TRIGGERS_METRICS, 'triggers_controller', id='triggers'),
     ],
 )
 def test_check(dd_run_check, aggregator, mocker, check, instance, metrics, request, namespace):
