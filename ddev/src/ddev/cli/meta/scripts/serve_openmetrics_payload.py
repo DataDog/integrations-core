@@ -7,12 +7,16 @@ import os
 from typing import TYPE_CHECKING
 
 import click
+import yaml
+
+from ddev.utils.fs import Path
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
 ENVIRONMENT_NAME = "serve-openmetrics-payload"
 HERE = os.path.dirname(os.path.abspath(__file__))
+ENDPOINT = "http://localhost:8080/metrics"
 
 
 @click.command(
@@ -20,8 +24,19 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 )
 @click.argument('integration')
 @click.argument('payloads', nargs=-1)
+@click.option(
+    "-c",
+    "--config",
+    type=str,
+    help=(
+        "Path to the config file to use for the integration. The `openmetrics_endpoint` option will be overriden to"
+        " use the right URL. If not provided, the `openmetrics_endpoint` will be the only option configured."
+    ),
+)
 @click.pass_context
-def serve_openmetrics_payload(ctx: click.Context, integration: str, payloads: tuple[str, ...]):
+def serve_openmetrics_payload(
+    ctx: click.Context, integration: str, payloads: tuple[str, ...], config: str | None = None
+):
     """Serve and collect metrics from OpenMetrics files with a real Agent
 
     \b
@@ -48,14 +63,20 @@ def serve_openmetrics_payload(ctx: click.Context, integration: str, payloads: tu
     if env_data.exists():
         app.abort(f'Environment `{ENVIRONMENT_NAME}` for integration `{intg.name}` is already running')
 
-    config = {
-        "init_config": {},
-        'instances': [
-            {
-                "openmetrics_endpoint": "http://localhost:8080/metrics",
-            }
-        ],
-    }
+    if config:
+        check_config = yaml.safe_load(Path(config).read_text())
+
+        for instance in check_config['instances']:
+            instance['openmetrics_endpoint'] = ENDPOINT
+    else:
+        check_config = {
+            "init_config": {},
+            'instances': [
+                {
+                    "openmetrics_endpoint": ENDPOINT,
+                }
+            ],
+        }
 
     metadata = {
         "docker_volumes": [
@@ -64,7 +85,7 @@ def serve_openmetrics_payload(ctx: click.Context, integration: str, payloads: tu
         + [f"{os.path.join(os.getcwd(), payload)}:/tmp/{payload}" for payload in payloads]
     }
 
-    env_data.write_config(config)
+    env_data.write_config(check_config)
     env_data.write_metadata(metadata)
 
     agent = DockerAgent(app.platform, intg, ENVIRONMENT_NAME, metadata, env_data.config_file)
