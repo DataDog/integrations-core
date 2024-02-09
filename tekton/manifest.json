@@ -31,8 +31,8 @@
       "metrics": {
         "prefix": "tekton.",
         "check": [
-          "tekton.pipelines_controller.go_alloc",
-          "tekton.tekton.triggers_controller.clusterinterceptor"
+          "tekton.pipelines_controller.go.alloc",
+          "tekton.triggers_controller.go.alloc"
         ],
         "metadata_path": "metadata.csv"
       },
