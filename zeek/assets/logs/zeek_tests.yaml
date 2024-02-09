@@ -9,10 +9,11 @@ tests:
         acks: 316
         gaps: 3
         peer: "zeek"
-        percent_lost: 0.9493670886075949
         service: "corelight"
         ts: "2023-12-12T05:52:32.763303Z"
         ts_delta: 15.235642194747925
+        zeek:
+          percent_lost: 0.9493670886075949
       message: "<134>Dec 26 01:35:11 machine-name {\"_path\":\"capture_loss\",\"_write_ts\":\"2023-12-12T05:52:50.756358Z\",\"ts\":\"2023-12-12T05:52:32.763303Z\",\"ts_delta\":15.235642194747925,\"peer\":\"zeek\",\"gaps\":3,\"acks\":316,\"percent_lost\":0.9493670886075949}"
       tags:
       - "source:LOGS_SOURCE"
@@ -24,10 +25,8 @@ tests:
         _write_ts: "2023-12-12T05:52:50.756358Z"
         conn_state: "OTH"
         connection_state: "No SYN seen - just midstream traffic"
-        duration_sec: 3.0111899375915527
         local_orig: true
         local_resp: true
-        missed_bytes: 0
         network:
           bytes_read: 234
           bytes_written: 0
@@ -43,7 +42,10 @@ tests:
         resp_pkts: 0
         ts: "2023-12-12T05:52:32.763303Z"
         uid: "CcdWSj20NUmxZowq93"
-        zeek_proto: "icmp"
+        zeek:
+          duration_sec: 3.0111899375915527
+          missed_bytes: 0
+          proto: "icmp"
       message: |-
         {
           "resp_pkts" : 0,
@@ -186,7 +188,8 @@ tests:
         rejected: false
         ts: "2023-12-12T05:52:32.763303Z"
         uid: "CsOSdHqRMu62rNs31"
-        zeek_proto: "udp"
+        zeek:
+          proto: "udp"
       message: |-
         {
           "AA" : false,

@@ -850,7 +850,7 @@
                                                     }
                                                 },
                                                 {
-                                                    "facet": "@zeek_name",
+                                                    "facet": "@name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -911,7 +911,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@zeek_name",
+                                                    "facet": "@name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -981,7 +981,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@zeek_name",
+                                                    "facet": "@name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -1042,7 +1042,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "host_p",
+                                            "field": "zeek.host_p",
                                             "width": "auto"
                                         },
                                         {
@@ -1050,7 +1050,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek_name",
+                                            "field": "name",
                                             "width": "auto"
                                         },
                                         {

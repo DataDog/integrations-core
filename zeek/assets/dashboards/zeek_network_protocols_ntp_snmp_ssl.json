@@ -282,19 +282,19 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "orig_h",
+                                            "field": "zeek.orig_h",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "orig_p",
+                                            "field": "zeek.orig_p",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "resp_h",
+                                            "field": "zeek.resp_h",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "resp_p",
+                                            "field": "zeek.resp_p",
                                             "width": "auto"
                                         },
                                         {
@@ -422,19 +422,19 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "orig_h",
+                                            "field": "zeek.orig_h",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "orig_p",
+                                            "field": "zeek.orig_p",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "resp_h",
+                                            "field": "zeek.resp_h",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "resp_p",
+                                            "field": "zeek.resp_p",
                                             "width": "auto"
                                         },
                                         {
@@ -442,7 +442,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "duration_sec",
+                                            "field": "zeek.duration_sec",
                                             "width": "auto"
                                         }
                                     ]
@@ -1099,19 +1099,19 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "orig_h",
+                                            "field": "zeek.orig_h",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "orig_p",
+                                            "field": "zeek.orig_p",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "resp_h",
+                                            "field": "zeek.resp_h",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "resp_p",
+                                            "field": "zeek.resp_p",
                                             "width": "auto"
                                         },
                                         {
@@ -1157,25 +1157,25 @@
         },
         {
             "name": "Originator-IP",
-            "prefix": "@orig_h",
+            "prefix": "@zeek.orig_h",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "Originator-Port",
-            "prefix": "@orig_p",
+            "prefix": "@zeek.orig_p",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "Responder-IP",
-            "prefix": "@resp_h",
+            "prefix": "@zeek.resp_h",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "Responder-Port",
-            "prefix": "@resp_p",
+            "prefix": "@zeek.resp_p",
             "available_values": [],
             "default": "*"
         }

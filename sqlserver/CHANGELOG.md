@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 16.0.1 / 2024-02-07
+
+***Fixed***:
+
+* [DBMON-3495] Replace embedded null characters with empty string in query text ([#16742](https://github.com/DataDog/integrations-core/pull/16742))
+
 ## 16.0.0 / 2024-01-05
 
 ***Removed***:

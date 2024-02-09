@@ -19,14 +19,20 @@ from utils import extract_metadata, normalize_project_name
 def get_wheel_hashes(project) -> dict[str, str]:
     retry_wait = 2
     while True:
-        response = urllib3.request('GET', f'https://pypi.org/simple/{project}')
-        if response.status == 200:
-            break
+        try:
+            response = urllib3.request('GET', f'https://pypi.org/simple/{project}')
+        except urllib3.exceptions.HTTPError as e:
+            err_msg = f'Failed to fetch hashes for `{project}`: {e}'
+        else:
+            if response.status == 200:
+                break
 
-        retry_wait *= 2
-        print(f'Failed to fetch hashes for `{project}`, status code: {response.status}')
+            err_msg = f'Failed to fetch hashes for `{project}`, status code: {response.status}'
+
+        print(err_msg)
         print(f'Retrying in {retry_wait} seconds')
         time.sleep(retry_wait)
+        retry_wait *= 2
         continue
 
     html = response.data.decode('utf-8')
@@ -67,16 +73,16 @@ def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
     exclusions = frozenset({
         # pymqi
         'libmqic_r.so',
-        # confluent_kafka
-        # We leave cyrus-sasl out of the wheel because of the complexity involved in bundling it portably.
-        # This means the confluent-kafka wheel will have a runtime dependency on this library
-        'libsasl2.so.3',
     })
 
     # Hardcoded policy to the minimum we need to currently support
     policies = WheelPolicies()
     policy = policies.get_policy_by_name('manylinux2010_x86_64')
     abis = [policy['name'], *policy['aliases']]
+    # We edit the policy to remove zlib out of the whitelist to match the whitelisting policy we use
+    # on the Omnibus health check in the Agent
+    policy['lib_whitelist'].remove('libz.so.1')
+    del policy['symbol_versions']['ZLIB']
 
     for wheel in iter_wheels(source_dir):
         print(f'--> {wheel.name}')
@@ -120,6 +126,7 @@ def repair_windows(source_dir: str, built_dir: str, external_dir: str) -> None:
             sys.executable, '-m', 'delvewheel', 'repair', wheel,
             '--wheel-dir', built_dir,
             '--no-dll', os.pathsep.join(exclusions),
+            '--no-diagnostic',
         ])
         if process.returncode:
             print('Repairing failed')
