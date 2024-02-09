@@ -40,6 +40,9 @@ jobs:
           image: linux-x86_64
         - os: windows-2022
           image: windows-x86_64
+        # Building linux-aarch64 on macos M1's until native runners are available
+        - os: macos-14
+          image: linux-aarch64
 
     permissions:
       packages: write
@@ -78,6 +81,16 @@ jobs:
 
     - name: Install management dependencies
       run: pip install -r .builders/deps/host_dependencies.txt
+
+    - name: Install and start docker if needed
+      if: matrix.job.os == 'macos-14'
+      run: |
+        brew install docker docker-buildx colima
+        # symlink docker-buildx
+        mkdir -p ~/.docker/cli-plugins
+        ln -sfn /opt/homebrew/opt/docker-buildx/bin/docker-buildx ~/.docker/cli-plugins/docker-buildx
+        # Start docker
+        colima start --vm-type vz || cat /Users/runner/.colima/_lima/colima/ha.stderr.log && false
 
     - name: Log in to GitHub Packages
       uses: docker/login-action@v3

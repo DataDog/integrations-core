@@ -235,7 +235,7 @@ def build_image():
 
 
 def main():
-    if sys.platform == 'darwin':
+    if sys.platform == 'darwin' and 'linux' not in ' '.join(sys.argv):
         build_macos()
     else:
         build_image()
