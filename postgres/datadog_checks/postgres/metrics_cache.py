@@ -4,6 +4,8 @@
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
 import logging
 
+from datadog_checks.base.config import is_affirmative
+
 from .util import (
     ACTIVITY_DD_METRICS,
     ACTIVITY_METRICS_8_3,
@@ -38,15 +40,8 @@ class PostgresMetricsCache:
 
     def __init__(self, config):
         self.config = config
-        self.instance_metrics = None
-        self.bgw_metrics = None
-        self.archiver_metrics = None
-        self.replication_metrics = None
-        self.replication_stats_metrics = None
-        self.activity_metrics = None
         self._count_metrics = None
-        if self.config.relations:
-            self.table_activity_metrics = {}
+        self.clean_state()
 
     def clean_state(self):
         self.instance_metrics = None
@@ -55,7 +50,8 @@ class PostgresMetricsCache:
         self.replication_metrics = None
         self.replication_stats_metrics = None
         self.activity_metrics = None
-        if self.config.relations:
+        self.table_activity_metrics = None
+        if self.config.relations and self.config.schemas_metadata_config.get('enabled', False):
             self.table_activity_metrics = {}
 
     def get_instance_metrics(self, version):
