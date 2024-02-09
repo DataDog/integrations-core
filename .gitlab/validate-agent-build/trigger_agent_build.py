@@ -28,8 +28,6 @@ def trigger_pipeline():
             "BUCKET_BRANCH": "none",
             "INTEGRATIONS_CORE_VERSION": os.environ['CI_COMMIT_REF_NAME'],
             "RUN_KITCHEN_TESTS": "false",
-            # TODO Remove `RUN_E2E_TESTS` once the agent CI is fixed.
-            "RUN_E2E_TESTS": "true",
         }
     }
 
