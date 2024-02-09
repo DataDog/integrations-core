@@ -57,14 +57,14 @@ validate-log-integrations:
 trigger-agent-build:
   stage: trigger
   image: $VALIDATE_AGENT_BUILD
-#  # Exclude release branches without dependency change
-#  rules:
-#    - if: ($CI_COMMIT_BRANCH =~ /^7.[0-9]{2}.x/)
-#      changes:
-#        - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
-#      when: always
-#    - if: ($CI_COMMIT_BRANCH !~ /^7.[0-9]{2}.x/)
-#      when: always
+  # Exclude release branches without dependency change
+  rules:
+    - if: ($CI_COMMIT_BRANCH =~ /^7.[0-9]{2}.x/)
+      changes:
+        - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
+      when: always
+    - if: ($CI_COMMIT_BRANCH !~ /^7.[0-9]{2}.x/)
+      when: always
   cache:
     <<: *slack-cache
   script:
@@ -261,8 +261,8 @@ validate-agent-build-builder:
     changes:
       - .gitlab/validate-agent-build/**/*
       - .gitlab-ci.yml
-#    refs:
-#      - master
+    refs:
+      - master
   script:
     - cd .gitlab/validate-agent-build/
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/devtools.git --depth 1
