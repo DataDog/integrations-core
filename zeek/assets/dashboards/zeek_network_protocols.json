@@ -94,7 +94,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "avg",
-                                                "metric": "@file_size"
+                                                "metric": "@zeek.file_size"
                                             },
                                             "group_by": [],
                                             "search": {
@@ -420,7 +420,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "file_size",
+                                            "field": "zeek.file_size",
                                             "width": "auto"
                                         },
                                         {
@@ -2014,7 +2014,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@request",
+                                                    "facet": "@zeek.request.host",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -2022,7 +2022,7 @@
                                                     }
                                                 },
                                                 {
-                                                    "facet": "@request_p",
+                                                    "facet": "@zeek.request_p",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -2083,7 +2083,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@bound",
+                                                    "facet": "@zeek.bound.host",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -2091,7 +2091,7 @@
                                                     }
                                                 },
                                                 {
-                                                    "facet": "@bound_p",
+                                                    "facet": "@zeek.bound_p",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -2276,19 +2276,19 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "request",
+                                            "field": "zeek.request.host",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "request_p",
+                                            "field": "zeek.request_p",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "bound",
+                                            "field": "zeek.bound.host",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "bound_p",
+                                            "field": "zeek.bound_p",
                                             "width": "auto"
                                         },
                                         {
@@ -2352,7 +2352,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "sum",
-                                                "metric": "@auth_attempts"
+                                                "metric": "@zeek.auth_attempts"
                                             },
                                             "group_by": [],
                                             "search": {
@@ -2400,7 +2400,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "sum",
-                                                "metric": "@auth_attempts"
+                                                "metric": "@zeek.auth_attempts"
                                             },
                                             "group_by": [],
                                             "search": {
@@ -2448,7 +2448,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "sum",
-                                                "metric": "@auth_attempts"
+                                                "metric": "@zeek.auth_attempts"
                                             },
                                             "group_by": [],
                                             "search": {
@@ -2496,7 +2496,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "sum",
-                                                "metric": "@auth_attempts"
+                                                "metric": "@zeek.auth_attempts"
                                             },
                                             "group_by": [],
                                             "search": {
@@ -2512,7 +2512,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "sum",
-                                                "metric": "@auth_attempts"
+                                                "metric": "@zeek.auth_attempts"
                                             },
                                             "group_by": [],
                                             "search": {
@@ -3023,7 +3023,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "auth_attempts",
+                                            "field": "zeek.auth_attempts",
                                             "width": "auto"
                                         },
                                         {
@@ -3370,7 +3370,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "avg",
-                                                "metric": "@size"
+                                                "metric": "@zeek.size"
                                             },
                                             "group_by": [],
                                             "search": {
@@ -3572,7 +3572,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "size",
+                                            "field": "zeek.size",
                                             "width": "auto"
                                         }
                                     ]

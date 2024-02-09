@@ -110,7 +110,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "avg",
-                                                "metric": "@percent_lost"
+                                                "metric": "@zeek.percent_lost"
                                             },
                                             "group_by": [],
                                             "search": {
@@ -239,7 +239,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "percent_lost",
+                                            "field": "zeek.percent_lost",
                                             "width": "auto"
                                         }
                                     ]

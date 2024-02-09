@@ -162,7 +162,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "sum",
-                                                "metric": "@total_bytes"
+                                                "metric": "@zeek.total_bytes"
                                             },
                                             "group_by": [],
                                             "search": {
@@ -178,7 +178,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "sum",
-                                                "metric": "@seen_bytes"
+                                                "metric": "@zeek.seen_bytes"
                                             },
                                             "group_by": [],
                                             "search": {
@@ -194,7 +194,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "sum",
-                                                "metric": "@missing_bytes"
+                                                "metric": "@zeek.missing_bytes"
                                             },
                                             "group_by": [],
                                             "search": {
@@ -210,7 +210,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "sum",
-                                                "metric": "@overflow_bytes"
+                                                "metric": "@zeek.overflow_bytes"
                                             },
                                             "group_by": [],
                                             "search": {
@@ -591,19 +591,19 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "orig_h",
+                                            "field": "zeek.orig_h",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "orig_p",
+                                            "field": "zeek.orig_p",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "resp_h",
+                                            "field": "zeek.resp_h",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "resp_p",
+                                            "field": "zeek.resp_p",
                                             "width": "auto"
                                         },
                                         {
@@ -611,11 +611,11 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "seen_bytes",
+                                            "field": "zeek.seen_bytes",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "total_bytes",
+                                            "field": "zeek.total_bytes",
                                             "width": "auto"
                                         },
                                         {
@@ -627,11 +627,11 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "missing_bytes",
+                                            "field": "zeek.missing_bytes",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "overflow_bytes",
+                                            "field": "zeek.overflow_bytes",
                                             "width": "auto"
                                         },
                                         {
