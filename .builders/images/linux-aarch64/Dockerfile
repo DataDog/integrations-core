@@ -12,6 +12,27 @@ ENV CFLAGS="-O2"
 # so we may as well set it to origin here anyway.
 ENV LDFLAGS="-Wl,-rpath,'\$\$ORIGIN'"
 
+# For Python 2, we get openssl(1) via yum just to get the necessary headers,
+# and we remove the package after compilation to prevent it from interfering
+# with the use of openssl3 everywhere else
+ENV PYTHON2_VERSION=2.7.18
+RUN yum install -y openssl-devel && \
+ # Setting the rpath at compile time rather than manipulationg LD_LIBRARY_PATH
+ # to solve the problem of python2 not finding its own shared libraries is better
+ # to avoid conflicts with system python as used by yum
+ LDFLAGS="-Wl,--rpath=/opt/python/${PYTHON2_VERSION}/lib" \
+ DOWNLOAD_URL="https://python.org/ftp/python/${PYTHON2_VERSION}/Python-${PYTHON2_VERSION}.tgz" \
+ VERSION="${PYTHON2_VERSION}" \
+ SHA256="da3080e3b488f648a3d7a4560ddee895284c3380b11d6de75edb986526b9a814" \
+ RELATIVE_PATH=Python-{{version}} \
+ bash install-from-source.sh \
+ --prefix=/opt/python/${PYTHON2_VERSION} --with-ensurepip=yes --enable-shared --enable-ipv6 --enable-unicode=ucs4 \
+  && yum remove -y openssl-devel
+
+# Set up virtual environment for Python 2
+RUN /opt/python/${PYTHON2_VERSION}/bin/python -m pip install --no-warn-script-location virtualenv \
+ && /opt/python/${PYTHON2_VERSION}/bin/python -m virtualenv /py2
+
 # openssl
 RUN yum install -y perl-IPC-Cmd && \
  DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
@@ -38,6 +59,36 @@ RUN \
  SHA256="704aed49b19eb5a7178b34b2873620ec299db08752d6a8574f95d41879ab8851" \
  RELATIVE_PATH="krb5-{{version}}/src" \
  bash install-from-source.sh --without-keyutils --without-system-verto --without-libedit --disable-static
+
+# libxml & libxslt for lxml
+RUN \
+ DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.10/libxml2-{{version}}.tar.xz" \
+ VERSION="2.10.3" \
+ SHA256="5d2cc3d78bec3dbe212a9d7fa629ada25a7da928af432c93060ff5c17ee28a9c" \
+ RELATIVE_PATH="libxml2-{{version}}" \
+ bash install-from-source.sh \
+ --without-iconv \
+ --without-python \
+ --without-icu \
+ --without-debug \
+ --without-mem-debug \
+ --without-run-debug \
+ --without-legacy \
+ --without-catalog \
+ --without-docbook \
+ --disable-static
+
+RUN \
+ DOWNLOAD_URL="https://download.gnome.org/sources/libxslt/1.1/libxslt-{{version}}.tar.xz" \
+ VERSION="1.1.37" \
+ SHA256="3a4b27dc8027ccd6146725950336f1ec520928f320f144eb5fa7990ae6123ab4" \
+ RELATIVE_PATH="libxslt-{{version}}" \
+ bash install-from-source.sh \
+ --without-python \
+ --without-crypto \
+ --without-profiler \
+ --without-debugger \
+ --disable-static
 
 # Dependencies needed to build librdkafka (and thus, confluent-kafka) with kerberos support
 RUN \
@@ -87,7 +138,10 @@ RUN \
     --without-librtmp \
     --without-libssh2 \
     --with-ssl=/usr/local \
- && rm /usr/local/bin/curl
+    && rm /usr/local/bin/curl
+
+# For cffi
+RUN yum install -y libffi-devel
 
 # Set up runner
 COPY runner_dependencies.txt /runner_dependencies.txt
