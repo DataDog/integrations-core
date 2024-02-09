@@ -4,7 +4,7 @@
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import PIPELINES_METRICS, TRIGGERS__METRICS
+from .common import PIPELINES_METRICS, TRIGGERS_METRICS
 
 
 def test_check(dd_agent_check):
@@ -13,7 +13,7 @@ def test_check(dd_agent_check):
     for expected_metric in PIPELINES_METRICS:
         aggregator.assert_metric(f"tekton.pipelines_controller.{expected_metric}")
 
-    for expected_metric in TRIGGERS__METRICS:
+    for expected_metric in TRIGGERS_METRICS:
         aggregator.assert_metric(f"tekton.triggers_controller.{expected_metric}")
 
     aggregator.assert_all_metrics_covered()
