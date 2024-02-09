@@ -10,7 +10,7 @@ This check monitors [IBM MQ][1] versions 9.1 and above.
 
 The IBM MQ check is included in the [Datadog Agent][2] package.
 
-To use the IBM MQ check, ensure that a [IBM MQ Client][3] version 9.1+ is installed (unless a compatible version of IBM MQ server is already installed on the Agent host). For example the [9.3 Redistributable client][17]. Currently, the IBM MQ check does not support connecting to an IBM MQ server on z/OS.
+To use the IBM MQ check, ensure that an [IBM MQ Client][3] version 9.1+ is installed (unless a compatible version of IBM MQ server is already installed on the Agent host). For example the [9.3 Redistributable client][17]. Currently, the IBM MQ check does not support connecting to an IBM MQ server on z/OS.
 
 #### On Linux
 
