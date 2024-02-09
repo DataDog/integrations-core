@@ -515,7 +515,7 @@ class TestAuthTokenOAuth:
                     'url': 'foo',
                     'client_id': 'bar',
                     'client_secret': 'baz',
-                    "auth_params": {"audience": "http://example.com", "scope": "openid"},
+                    "options": {"audience": "http://example.com", "scope": "openid"},
                 },
                 'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
             }
