@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import platform
 import re
 import shutil
 import sys
@@ -69,9 +70,14 @@ def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
         'libmqic_r.so',
     })
 
+    policy_name = {
+        'x86_64': 'manylinux2010_x86_64',
+        'aarch64': 'manylinux2014_aarch64',
+    }[platform.machine()]
+
     # Hardcoded policy to the minimum we need to currently support
     policies = WheelPolicies()
-    policy = policies.get_policy_by_name('manylinux2010_x86_64')
+    policy = policies.get_policy_by_name(policy_name)
     abis = [policy['name'], *policy['aliases']]
     # We edit the policy to remove zlib out of the whitelist to match the whitelisting policy we use
     # on the Omnibus health check in the Agent
