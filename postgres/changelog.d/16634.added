@@ -1,0 +1,1 @@
+[Postgres] - Allow configuration of ignored patterns for settings collection, under the `ignored_settings_patterns` key

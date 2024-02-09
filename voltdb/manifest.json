@@ -43,7 +43,11 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": ["voltdb"]
+      "process_signatures": [
+        "voltdb"
+      ],
+      "source_type_id": 10149,
+      "auto_install": true
     },
     "dashboards": {
       "VoltDB - Overview": "assets/dashboards/voltdb_overview.json"

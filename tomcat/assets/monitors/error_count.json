@@ -6,7 +6,7 @@
   "tags": [
     "integration:tomcat"
   ],
-  "description": "Tomcat web server instances can encounter multiple issues and generate errors. This monitor tracks the average error count within Tomcat instances on different hosts to identify scenarios where server instances experience an unusually high number of errors. ",
+  "description": "Tomcat web server instances can encounter multiple issues and generate errors. This monitor tracks the average error count within Tomcat instances on different hosts to identify scenarios where server instances experience an unusually high number of errors.",
   "definition": {
     "message": "There is an increase of the number of errors per second on all request processors for host: {{host.name}}\n\nErrors indicate an issue with the Tomcat server itself, a host, a deployed application, or an application servlet. This includes errors generated when the Tomcat server runs out of memory, can’t find a requested file or servlet, or is unable to serve a JSP due to syntax errors in the servlet codebase.",
     "name": "[Tomcat] Increase of the errors/second rate for host: {{host.name}}",

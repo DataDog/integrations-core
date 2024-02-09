@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.4.1 / 2024-01-24
+
+***Fixed***:
+
+* Skip over "/image" endpoint instances with no images ([#16680](https://github.com/DataDog/integrations-core/pull/16680))
+
 ## 3.4.0 / 2024-01-05
 
 ***Added***:

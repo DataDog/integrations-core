@@ -8,6 +8,8 @@ metadata:
     fields:
       vendor:
         value: "eaton"
+      type:
+        value: "PDU"
 
 metrics:
 #  - MIB: EATON-EPDU-MIB

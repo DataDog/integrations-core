@@ -46,7 +46,9 @@
       },
       "process_signatures": [
         "coredns"
-      ]
+      ],
+      "source_type_id": 10038,
+      "auto_install": true
     },
     "dashboards": {
       "CoreDNS": "assets/dashboards/coredns.json"

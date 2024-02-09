@@ -36,7 +36,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10179,
+      "auto_install": true
     },
     "dashboards": {
       "F5-Networks": "assets/dashboards/f5-networks.json"

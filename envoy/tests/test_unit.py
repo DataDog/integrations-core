@@ -10,6 +10,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy.metrics import PROMETHEUS_METRICS_MAP
 
 from .common import (
+    CLUSTER_AND_LISTENER_SSL_METRICS,
     CONNECT_STATE_METRIC,
     DEFAULT_INSTANCE,
     LOCAL_RATE_LIMIT_METRICS,
@@ -45,7 +46,7 @@ def test_check(aggregator, dd_run_check, check, mock_http_response):
 
     dd_run_check(c)
 
-    for metric in MOCKED_PROMETHEUS_METRICS + LOCAL_RATE_LIMIT_METRICS:
+    for metric in MOCKED_PROMETHEUS_METRICS + LOCAL_RATE_LIMIT_METRICS + CLUSTER_AND_LISTENER_SSL_METRICS:
         aggregator.assert_metric("envoy.{}".format(metric))
 
     for metric in CONNECT_STATE_METRIC:
@@ -124,6 +125,24 @@ def test_local_rate_limit_metrics(aggregator, dd_run_check, check, mock_http_res
     aggregator.assert_service_check(
         "envoy.openmetrics.health", status=AgentCheck.OK, tags=['endpoint:http://localhost:8001/stats/prometheus']
     )
+
+    aggregator.assert_no_duplicate_metrics()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@requires_py3
+def test_tags_in_ssl_metrics(aggregator, dd_run_check, check, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('./openmetrics/openmetrics_ssl_metrics.txt'))
+
+    c = check(DEFAULT_INSTANCE)
+
+    dd_run_check(c)
+
+    for metric in CLUSTER_AND_LISTENER_SSL_METRICS:
+        if "cluster" in metric:
+            aggregator.assert_metric_has_tag('envoy.{}'.format(metric), 'envoy_service:foo_bar_api')
+        else:
+            aggregator.assert_metric_has_tag('envoy.{}'.format(metric), 'envoy_address:foo_bar_8080')
 
     aggregator.assert_no_duplicate_metrics()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

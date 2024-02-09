@@ -100,6 +100,10 @@ def instance_include_tempdb_file_space_usage_metrics():
     return True
 
 
+def instance_index_usage_metrics_interval():
+    return 300
+
+
 def instance_log_unobfuscated_plans():
     return False
 

@@ -51,7 +51,9 @@
         "consul agent",
         "consul_agent",
         "consul-agent"
-      ]
+      ],
+      "source_type_id": 122,
+      "auto_install": true
     },
     "dashboards": {
       "consul": "assets/dashboards/consul_dashboard.json"

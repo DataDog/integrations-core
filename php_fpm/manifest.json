@@ -52,7 +52,9 @@
         "restart php-fpm",
         "systemctl restart php-fpm.service",
         "php7.0-fpm.service"
-      ]
+      ],
+      "source_type_id": 117,
+      "auto_install": true
     },
     "dashboards": {
       "php-fpm": "assets/dashboards/php-fpm_dashboard.json"

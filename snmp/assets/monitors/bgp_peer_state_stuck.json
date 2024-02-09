@@ -1,0 +1,29 @@
+{
+	"version": 2,
+	"created_at": "2024-01-02",
+	"last_updated_at": "2024-01-02",
+	"title": "BGP peer state is stuck in an unestablished state",
+	"description": "The Border Gateway Protocol (BGP) forms a TCP session with neighbor routers called peers. This monitor alerts if the peer state is outside of an established state signaling potential issues with the BGP configuration, security rules, or network connectivity",
+	"definition": {
+		"name": "[SNMP] BGP peer state between {{snmp_device.name}} and neighbor {{neighbor.name}} in {{device_namespace.name}} is stuck in an unestablished state",
+		"type": "query alert",
+		"query": "max(last_5m):max:snmp.bgpPeerState{*} by {neighbor,snmp_device,device_namespace} < 6",
+		"message": "There are 6 states for establishing a BGP session. When a session is established (state = 6), neighbors are able to exchange route information. Being stuck in any other state for too long suggests that there is something wrong with your BGP configuration, security rules, or network connectivity.\n\n{{#is_alert}} \n{{snmp_device.name}} and {{neighbor.name}} are stuck in state {{value}} \n{{/is_alert}} \n\n{{#is_recovery}} \n{{snmp_device.name}} and {{neighbor.name}} are back to established state\n{{/is_recovery}}",
+		"tags": [
+            "integration:snmp"
+        ],
+		"options": {
+			"thresholds": {
+				"critical": 6
+			},
+			"notify_audit": false,
+			"include_tags": true,
+			"new_group_delay": 60,
+			"notify_no_data": true,
+			"no_data_timeframe": 10
+		}
+	},
+	"tags": [
+        "integration:snmp"
+	]
+}

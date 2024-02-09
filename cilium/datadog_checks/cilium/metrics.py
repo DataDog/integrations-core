@@ -172,6 +172,10 @@ OPERATOR_METRICS = {
     'cilium_operator_number_of_ceps_per_ces': 'operator.num_ceps_per_ces',
     'cilium_operator_ces_queueing_delay_seconds': 'operator.ces.queueing_delay.seconds',
     'cilium_operator_ces_sync_errors_total': 'operator.ces.sync_errors.total',
+    # Cilium 1.13+
+    'cilium_operator_ipam_interface_candidates': 'operator.ipam.interface_candidates',
+    'cilium_operator_ipam_empty_interface_slots': 'operator.ipam.empty_interface_slots',
+    'cilium_operator_ipam_ip_allocation_ops': 'operator.ipam.ip_allocation_ops',
 }
 
 AGENT_V2_METRICS = deepcopy(AGENT_METRICS)

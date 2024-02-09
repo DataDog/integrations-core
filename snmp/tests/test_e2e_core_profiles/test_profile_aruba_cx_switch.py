@@ -185,6 +185,7 @@ def test_e2e_profile_aruba_cx_switch(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.47196.4.1.1.1.999',
         'vendor': 'aruba',
+        'device_type': 'switch',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
