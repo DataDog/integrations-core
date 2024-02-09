@@ -13,8 +13,7 @@ except ImportError:
     from ..stubs import datadog_agent
 
 from datadog_checks.base import is_affirmative
-from datadog_checks.base.utils.db.utils import (DBMAsyncJob,
-                                                default_json_event_encoding)
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.tracking import tracked_method
 
 from .util import payload_pg_version
@@ -24,7 +23,7 @@ from .version_utils import VersionUtils
 DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
 DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 600
 DEFAULT_RESOURCES_COLLECTION_INTERVAL = 300
-DEFAULT_SETTINGS_IGNORED_PATTERNS = ['plpgsql%']
+DEFAULT_SETTINGS_IGNORED_PATTERNS = ["plpgsql%"]
 
 PG_SETTINGS_QUERY = """
 SELECT name, setting FROM pg_settings
@@ -164,17 +163,17 @@ class PostgresMetadata(DBMAsyncJob):
 
     def __init__(self, check, config, shutdown_callback):
         self.pg_settings_collection_interval = config.settings_metadata_config.get(
-            'collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL
+            "collection_interval", DEFAULT_SETTINGS_COLLECTION_INTERVAL
         )
         self.pg_settings_ignored_patterns = config.settings_metadata_config.get(
-            'ignored_settings_patterns', DEFAULT_SETTINGS_IGNORED_PATTERNS
+            "ignored_settings_patterns", DEFAULT_SETTINGS_IGNORED_PATTERNS
         )
         self.schemas_collection_interval = config.schemas_metadata_config.get(
-            'collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL
+            "collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
 
         collection_interval = config.resources_metadata_config.get(
-            'collection_interval', DEFAULT_RESOURCES_COLLECTION_INTERVAL
+            "collection_interval", DEFAULT_RESOURCES_COLLECTION_INTERVAL
         )
 
         # by default, send resources every 5 minutes
@@ -183,8 +182,8 @@ class PostgresMetadata(DBMAsyncJob):
         super(PostgresMetadata, self).__init__(
             check,
             rate_limit=1 / self.collection_interval,
-            run_sync=is_affirmative(config.settings_metadata_config.get('run_sync', False)),
-            enabled=is_affirmative(config.resources_metadata_config.get('enabled', True)),
+            run_sync=is_affirmative(config.settings_metadata_config.get("run_sync", False)),
+            enabled=is_affirmative(config.resources_metadata_config.get("enabled", True)),
             dbms="postgres",
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg2.errors.DatabaseError,),
@@ -194,8 +193,8 @@ class PostgresMetadata(DBMAsyncJob):
         self._check = check
         self._config = config
         self.db_pool = self._check.db_pool
-        self._collect_pg_settings_enabled = is_affirmative(config.settings_metadata_config.get('enabled', False))
-        self._collect_schemas_enabled = is_affirmative(config.schemas_metadata_config.get('enabled', False))
+        self._collect_pg_settings_enabled = is_affirmative(config.settings_metadata_config.get("enabled", False))
+        self._collect_schemas_enabled = is_affirmative(config.schemas_metadata_config.get("enabled", False))
         self._pg_settings_cached = None
         self._time_since_last_settings_query = 0
         self._time_since_last_schemas_query = 0
@@ -216,8 +215,8 @@ class PostgresMetadata(DBMAsyncJob):
 
     def run_job(self):
         # do not emit any dd.internal metrics for DBM specific check code
-        self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
-        self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
+        self.tags = [t for t in self._tags if not t.startswith("dd.internal")]
+        self._tags_no_db = [t for t in self.tags if not t.startswith("db:")]
         self.report_postgres_metadata()
         self._check.db_pool.prune_connections()
 
@@ -234,7 +233,7 @@ class PostgresMetadata(DBMAsyncJob):
             "dbms": "postgres",
             "kind": "pg_settings",
             "collection_interval": self.collection_interval,
-            'dbms_version': payload_pg_version(self._check.version),
+            "dbms_version": payload_pg_version(self._check.version),
             "tags": self._tags_no_db,
             "timestamp": time.time() * 1000,
             "cloud_metadata": self._config.cloud_metadata,
@@ -265,7 +264,7 @@ class PostgresMetadata(DBMAsyncJob):
         version = self._check.version
         if not version:
             return ""
-        return 'v{major}.{minor}.{patch}'.format(major=version.major, minor=version.minor, patch=version.patch)
+        return "v{major}.{minor}.{patch}".format(major=version.major, minor=version.minor, patch=version.patch)
 
     def _collect_schema_info(self):
         databases = []
@@ -307,7 +306,7 @@ class PostgresMetadata(DBMAsyncJob):
         rows = cursor.fetchall()
         schemas = []
         for row in rows:
-            schemas.append({"id": str(row['id']), "name": row['name'], "owner": row['owner']})
+            schemas.append({"id": str(row["id"]), "name": row["name"], "owner": row["owner"]})
         return schemas
 
     def _get_table_info(self, cursor, dbname, schema_id):
@@ -317,9 +316,9 @@ class PostgresMetadata(DBMAsyncJob):
 
         If any tables are partitioned, only the master paritition table name will be returned, and none of its children.
         """
-        limit = self._config.schemas_metadata_config.get('max_tables', 1000)
+        limit = self._config.schemas_metadata_config.get("max_tables", 1000)
         if self._config.relations:
-            if VersionUtils.transform_version(str(self._check.version))['version.major'] == "9":
+            if VersionUtils.transform_version(str(self._check.version))["version.major"] == "9":
                 cursor.execute(PG_TABLES_QUERY_V9.format(schema_oid=schema_id))
             else:
                 cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id))
@@ -331,7 +330,7 @@ class PostgresMetadata(DBMAsyncJob):
             # Config error should catch the case where schema collection is enabled
             # and relation metrics aren't, but adding a warning here just in case
             self._check.log.warning("Relation metrics are not configured for {dbname}, so tables cannot be collected")
-    
+
     def _sort_and_limit_table_info(
         self, cursor, dbname, table_info: List[Dict[str, Union[str, bool]]], limit: int
     ) -> List[Dict[str, Union[str, bool]]]:
@@ -341,20 +340,20 @@ class PostgresMetadata(DBMAsyncJob):
             # so we have to grab the total partition activity
             # note: partitions don't exist in V9, so we have to check this first
             if (
-                VersionUtils.transform_version(str(self._check.version))['version.major'] == "9"
+                VersionUtils.transform_version(str(self._check.version))["version.major"] == "9"
                 or not info["has_partitions"]
             ):
                 # if we don't have metrics in our cache for this table, return 0
-                table_data = cache[dbname].get(info['name'], {'postgresql.index_scans': 0, 'postgresql.seq_scans': 0})
-                return (
-                    table_data['postgresql.index_scans']
-                    + table_data['postgresql.seq_scans']
+                table_data = cache[dbname].get(
+                    info["name"],
+                    {"postgresql.index_scans": 0, "postgresql.seq_scans": 0},
                 )
+                return table_data["postgresql.index_scans"] + table_data["postgresql.seq_scans"]
             else:
                 # get activity
-                cursor.execute(PARTITION_ACTIVITY_QUERY.format(parent_oid=info['id']))
+                cursor.execute(PARTITION_ACTIVITY_QUERY.format(parent_oid=info["id"]))
                 row = cursor.fetchone()
-                return row.get('total_activity', 0) if row else 0
+                return row.get("total_activity", 0) if row else 0
 
         # if relation metrics are enabled, sorted based on last activity information
         table_info = sorted(table_info, key=sort_tables, reverse=True)
@@ -388,45 +387,45 @@ class PostgresMetadata(DBMAsyncJob):
         table_payloads = []
         for table in tables_info:
             this_payload = {}
-            name = table['name']
-            table_id = table['id']
-            this_payload.update({'id': str(table['id'])})
-            this_payload.update({'name': name})
+            name = table["name"]
+            table_id = table["id"]
+            this_payload.update({"id": str(table["id"])})
+            this_payload.update({"name": name})
             if table["hasindexes"]:
                 cursor.execute(PG_INDEXES_QUERY.format(tablename=name))
                 rows = cursor.fetchall()
                 idxs = [dict(row) for row in rows]
-                this_payload.update({'indexes': idxs})
+                this_payload.update({"indexes": idxs})
 
-            if VersionUtils.transform_version(str(self._check.version))['version.major'] != "9":
-                if table['has_partitions']:
+            if VersionUtils.transform_version(str(self._check.version))["version.major"] != "9":
+                if table["has_partitions"]:
                     cursor.execute(PARTITION_KEY_QUERY.format(parent=name))
                     row = cursor.fetchone()
-                    this_payload.update({'partition_key': row['partition_key']})
+                    this_payload.update({"partition_key": row["partition_key"]})
 
                     cursor.execute(NUM_PARTITIONS_QUERY.format(parent_oid=table_id))
                     row = cursor.fetchone()
-                    this_payload.update({'num_partitions': row['num_partitions']})
+                    this_payload.update({"num_partitions": row["num_partitions"]})
 
-            if table['toast_table'] is not None:
-                this_payload.update({'toast_table': table['toast_table']})
+            if table["toast_table"] is not None:
+                this_payload.update({"toast_table": table["toast_table"]})
 
             # Get foreign keys
             cursor.execute(PG_CHECK_FOR_FOREIGN_KEY.format(oid=table_id))
             row = cursor.fetchone()
-            if row['count'] > 0:
+            if row["count"] > 0:
                 cursor.execute(PG_CONSTRAINTS_QUERY.format(oid=table_id))
                 rows = cursor.fetchall()
                 if rows:
                     fks = [dict(row) for row in rows]
-                    this_payload.update({'foreign_keys': fks})
+                    this_payload.update({"foreign_keys": fks})
 
             # Get columns
             cursor.execute(COLUMNS_QUERY.format(oid=table_id))
             rows = cursor.fetchall()[:]
-            max_columns = self._config.schemas_metadata_config.get('max_columns', 50)
+            max_columns = self._config.schemas_metadata_config.get("max_columns", 50)
             columns = [dict(row) for row in rows][:max_columns]
-            this_payload.update({'columns': columns})
+            this_payload.update({"columns": columns})
 
             table_payloads.append(this_payload)
 
@@ -439,19 +438,19 @@ class PostgresMetadata(DBMAsyncJob):
                 database_info = self._query_database_information(cursor, dbname)
                 metadata.update(
                     {
-                        "description": database_info['description'],
-                        "name": database_info['name'],
-                        "id": str(database_info['id']),
-                        "encoding": database_info['encoding'],
-                        "owner": database_info['owner'],
+                        "description": database_info["description"],
+                        "name": database_info["name"],
+                        "id": str(database_info["id"]),
+                        "encoding": database_info["encoding"],
+                        "owner": database_info["owner"],
                         "schemas": [],
                     }
                 )
                 schema_info = self._query_schema_information(cursor, dbname)
                 for schema in schema_info:
-                    tables_info = self._query_table_information_for_schema(cursor, schema['id'], dbname)
+                    tables_info = self._query_table_information_for_schema(cursor, schema["id"], dbname)
                     schema.update({"tables": tables_info})
-                    metadata['schemas'].append(schema)
+                    metadata["schemas"].append(schema)
 
         return metadata
 
@@ -463,7 +462,11 @@ class PostgresMetadata(DBMAsyncJob):
                     query = PG_SETTINGS_QUERY + " WHERE name NOT LIKE ALL(%s)"
                 else:
                     query = PG_SETTINGS_QUERY
-                self._log.debug("Running query [%s] and patterns are %s", query, self.pg_settings_ignored_patterns)
+                self._log.debug(
+                    "Running query [%s] and patterns are %s",
+                    query,
+                    self.pg_settings_ignored_patterns,
+                )
                 self._time_since_last_settings_query = time.time()
                 cursor.execute(query, (self.pg_settings_ignored_patterns,))
                 rows = cursor.fetchall()
