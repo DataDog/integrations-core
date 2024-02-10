@@ -133,6 +133,9 @@ typing = 'https://github.com/python/typing'
 [overrides.validate.openmetrics]
 exclude = ["openmetrics"]
 
+[overrides.validate.labeler]
+include = ["datadog_checks_tests_helper"]
+
 [overrides.validate.metrics]
 exclude = [
     'disk',
