@@ -37,8 +37,12 @@ services:
       DB__USERNAME: airflow
       DB__PASSWORD: airflow
       DB__NAME: airflow
+    volumes:
+      - ./config/airflow.cfg:/opt/airflow/airflow.cfg
+      - ./dags:/opt/airflow/dags
     ports:
       - "8080:8080"
 
 volumes:
   postgres:
+  server:
