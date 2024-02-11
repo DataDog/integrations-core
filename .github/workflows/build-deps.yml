@@ -170,7 +170,7 @@ jobs:
 
   publish:
     name: Publish artifacts
-    if: github.event_name == 'push'
+    # if: github.event_name == 'push'
     needs:
     - build
     - build-macos
