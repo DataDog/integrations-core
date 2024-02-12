@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
+import os
 import re
 import sys
 from collections import defaultdict
@@ -15,7 +16,7 @@ from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck
 from datadog_checks.base.checks.kubelet_base.base import KubeletBase, KubeletCredentials, urljoin
-from datadog_checks.base.errors import CheckException
+from datadog_checks.base.errors import CheckException, SkipInstanceError
 from datadog_checks.base.utils.tagging import tagger
 
 from .cadvisor import CadvisorScraper
@@ -163,6 +164,8 @@ class KubeletCheck(
     VOLUME_TAG_KEYS_TO_EXCLUDE = ['persistentvolumeclaim', 'pod_phase']
 
     def __init__(self, name, init_config, instances):
+        if os.getenv("DD_KUBERNETES_KUBELET_CORE_CHECK_ENABLED") == "true":
+            raise SkipInstanceError("The kubelet core check is enabled, skipping initialization of the python kubelet check")
         self.KUBELET_METRIC_TRANSFORMERS = {
             'kubelet_container_log_filesystem_used_bytes': self.kubelet_container_log_filesystem_used_bytes,
             'rest_client_request_latency_seconds': self.rest_client_latency,
