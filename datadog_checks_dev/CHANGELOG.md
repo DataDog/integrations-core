@@ -2,6 +2,49 @@
 
 <!-- towncrier release notes start -->
 
+## 31.0.0 / 2024-02-06
+
+***Changed***:
+
+* Rename template for new crawler integration. ([#16802](https://github.com/DataDog/integrations-core/pull/16802))
+
+***Fixed***:
+
+* Do not sign `ddev` after the release ([#16737](https://github.com/DataDog/integrations-core/pull/16737))
+* Remove unsupported characters from README templates. ([#16759](https://github.com/DataDog/integrations-core/pull/16759))
+
+## 30.0.0 / 2024-01-29
+
+***Changed***:
+
+* Remove legacy tox plugin ([#16696](https://github.com/DataDog/integrations-core/pull/16696))
+
+***Added***:
+
+* Bump towncrier version to support releasing with empty changelogs ([#16676](https://github.com/DataDog/integrations-core/pull/16676))
+* Different changelog template depending on release process. Marketplace and Extras changelogs are static, integrations-core changelogs have towncrier header. ([#16693](https://github.com/DataDog/integrations-core/pull/16693))
+
+***Fixed***:
+
+* Pin black ([#16712](https://github.com/DataDog/integrations-core/pull/16712))
+* Bump pytest-asyncio to be compatible with pytest 8 ([#16726](https://github.com/DataDog/integrations-core/pull/16726))
+
+## 29.2.0 / 2024-01-22
+
+***Added***:
+
+* Set auto_install in 'manifest.json' when running 'ddev create' ([#16647](https://github.com/DataDog/integrations-core/pull/16647))
+
+## 29.1.0 / 2024-01-17
+
+***Added***:
+
+* Autogenerate source_type_id in 'manifest.json' when running 'ddev create' ([#16544](https://github.com/DataDog/integrations-core/pull/16544))
+
+***Fixed***:
+
+* Fix a bug that prevents the `validate dep` command to fail if extra deps are found in the Agent file ([#16541](https://github.com/DataDog/integrations-core/pull/16541))
+
 ## 29.0.2 / 2024-01-09
 
 ***Fixed***:

@@ -26,6 +26,7 @@ jobs:
       imports: true
       integration-style: true
       jmx-metrics: true
+      labeler: true
       legacy-signature: true
       license-headers: true
       licenses: true

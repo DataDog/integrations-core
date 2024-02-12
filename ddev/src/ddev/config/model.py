@@ -203,13 +203,15 @@ class RootConfig(LazilyParsedConfig):
 
                 self._field_orgs = orgs
             else:
+                from ddev.e2e.agent.constants import AgentEnvVars
+
                 self._field_orgs = self.raw_data['orgs'] = {
                     'default': {
-                        'api_key': os.getenv('DD_API_KEY', ''),
-                        'app_key': os.getenv('DD_APP_KEY', ''),
-                        'site': os.getenv('DD_SITE', 'datadoghq.com'),
-                        'dd_url': os.getenv('DD_DD_URL', 'https://app.datadoghq.com'),
-                        'log_url': os.getenv('DD_LOGS_CONFIG_DD_URL', ''),
+                        'api_key': os.getenv(AgentEnvVars.API_KEY, ''),
+                        'app_key': os.getenv(AgentEnvVars.APP_KEY, ''),
+                        'site': os.getenv(AgentEnvVars.SITE, 'datadoghq.com'),
+                        'dd_url': os.getenv(AgentEnvVars.URL, 'https://app.datadoghq.com'),
+                        'log_url': os.getenv(AgentEnvVars.LOGS_URL, ''),
                     },
                 }
 

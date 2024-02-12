@@ -1,16 +1,17 @@
 id: ibm_mq
 metric_id: ibm-mq
+backend_only: false
 facets:
-  - name: User
-    source: log
+  - groups:
+      - System
+    name: User
     path: system.user
-    groups:
-      - System
-  - name: Action
     source: log
-    path: system.action
-    groups:
+  - groups:
       - System
+    name: Action
+    path: system.action
+    source: log
 pipeline:
   type: pipeline
   name: IBM MQ

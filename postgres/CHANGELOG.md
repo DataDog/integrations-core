@@ -2,6 +2,23 @@
 
 <!-- towncrier release notes start -->
 
+## 16.1.1 / 2024-01-15
+
+***Fixed***:
+
+* Fix incompatibility issues with Python 3.9 and lower ([#16608](https://github.com/DataDog/integrations-core/pull/16608))
+* Fix autovacuum metrics for postgres >= 10 ([#16612](https://github.com/DataDog/integrations-core/pull/16612))
+
+## 16.1.0 / 2024-01-10
+
+***Added***:
+
+* When host auto discovery is enabled, do nothing and emit OK for check status ([#16540](https://github.com/DataDog/integrations-core/pull/16540))
+
+***Fixed***:
+
+* Fix vacuum age computation ([#16581](https://github.com/DataDog/integrations-core/pull/16581))
+
 ## 16.0.0 / 2024-01-05
 
 ***Changed***:
@@ -44,7 +61,7 @@
 ***Fixed***:
 
 * Remove an unnecessary print statement ([#15594](https://github.com/DataDog/integrations-core/pull/15594))
-* * Fix edge-case causing potentially duplicate/wrong time series for activity metrics when `activity_metrics_excluded_aggregations` included `datname` ([#16106](https://github.com/DataDog/integrations-core/pull/16106)) ([#16106](https://github.com/DataDog/integrations-core/pull/16106))
+* * Fix edge-case causing potentially duplicate/wrong timeseries for activity metrics when `activity_metrics_excluded_aggregations` included `datname` ([#16106](https://github.com/DataDog/integrations-core/pull/16106)) ([#16106](https://github.com/DataDog/integrations-core/pull/16106))
 * Database instance metadata payloads should not contain duplicate `db` tags ([#16146](https://github.com/DataDog/integrations-core/pull/16146))
 
 ## 15.2.0 / 2023-10-26

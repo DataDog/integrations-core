@@ -17,6 +17,11 @@ sysobjectid:
   - 1.3.6.1.4.1.1588.2.1.1.120
   - 1.3.6.1.4.1.1588.2.1.1.133
   - 1.3.6.1.4.1.1588.2.1.3
+metadata:
+  device:
+    fields:
+      type:
+        value: "switch"
 metrics:
   - MIB: RESOURCE-MIB
     symbol:

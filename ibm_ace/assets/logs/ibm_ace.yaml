@@ -1,21 +1,22 @@
 id: ibm_ace
 metric_id: ibm-ace
+backend_only: false
 facets:
-  - name: Logger Name
-    source: log
-    path: logger.name
-    groups:
+  - groups:
       - Source Code
-  - name: IBM ACE Server Name
+    name: Logger Name
+    path: logger.name
     source: log
+  - groups:
+      - IBM ACE
+    name: IBM ACE Server Name
     path: ibm_serverName
-    groups:
-      - IBM ACE
-  - name: IBM ACE Host
     source: log
-    path: ibm_host
-    groups:
+  - groups:
       - IBM ACE
+    name: IBM ACE Host
+    path: ibm_host
+    source: log
 pipeline:
   type: pipeline
   name: IBM ACE

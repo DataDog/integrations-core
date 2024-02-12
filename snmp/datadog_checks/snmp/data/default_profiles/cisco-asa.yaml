@@ -133,3 +133,9 @@ sysobjectid:
   - 1.3.6.1.4.1.9.1.2304 # ciscoASA5506Htd
   - 1.3.6.1.4.1.9.1.2305 # ciscoASA5508td
   - 1.3.6.1.4.1.9.1.2306 # ciscoASA5516td
+
+metadata:
+  device:
+    fields:
+      type:
+        value: "firewall"

@@ -16,6 +16,8 @@ metadata:
           MIB: NS-ROOT-MIB
           OID: 1.3.6.1.4.1.5951.4.1.1.1.0
           name: sysBuildVersion
+      type:
+        value: "load_balancer"
 metrics:
   - MIB: NS-ROOT-MIB
     symbol:

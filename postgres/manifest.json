@@ -39,7 +39,10 @@
       },
       "metrics": {
         "prefix": "postgresql.",
-        "check": ["postgresql.connections", "postgresql.max_connections"],
+        "check": [
+          "postgresql.connections",
+          "postgresql.max_connections"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
@@ -49,7 +52,9 @@
         "postgres -D",
         "pg_ctl start -l logfile",
         "postgres -c 'pg_ctl start -D -l"
-      ]
+      ],
+      "source_type_id": 28,
+      "auto_install": true
     },
     "dashboards": {
       "postgresql": "assets/dashboards/postgresql_dashboard.json",

@@ -957,6 +957,39 @@ def test_statement_stored_procedure_characters_limit(
         assert "procedure_signature" in matched_rows[0]
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_statement_with_embedded_characters(aggregator, datadog_agent, dd_run_check, dbm_instance, bob_conn):
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    query = "EXEC nullCharTest;"
+
+    def _obfuscate_sql(sql_query, options=None):
+        return json.dumps({'query': sql_query, 'metadata': {}})
+
+    # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        dd_run_check(check)
+        bob_conn.execute_with_retries(query, (), database="datadog_test")
+        dd_run_check(check)
+        aggregator.reset()
+        bob_conn.execute_with_retries(query, (), database="datadog_test")
+        dd_run_check(check)
+
+    # dbm-metrics
+    dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
+    payload = dbm_metrics[0]
+    # metrics rows
+    sqlserver_rows = payload.get('sqlserver_rows', [])
+    assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
+
+    matched_rows = [s for s in sqlserver_rows if s.get("procedure_name") == "nullchartest"]
+    assert matched_rows, "should have collected the metric row with expected procedure name"
+    assert "text" in matched_rows[0]
+    assert "\x00" not in matched_rows[0]["text"]
+
+
 def _mock_database_list():
     Row = namedtuple('Row', 'name')
     fetchall_results = [

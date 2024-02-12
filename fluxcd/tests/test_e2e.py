@@ -8,6 +8,11 @@ from .common import EXPECTED_METRICS
 
 
 def test_source_controller_metrics(dd_agent_check):
+    """
+    This only tests version 2 of flux.
+
+    Version 1 is in maintenance mode, all our users are on version 2.
+    """
     aggregator = dd_agent_check()
     ignore = {
         'fluxcd.controller.runtime.reconcile.count',

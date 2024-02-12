@@ -40,7 +40,7 @@ dynamic = [
 [project.optional-dependencies]
 deps = [
     "dnspython==1.16.0; python_version < '3.0'",
-    "dnspython==2.4.2; python_version > '3.0'",
+    "dnspython==2.5.0; python_version > '3.0'",
 ]
 
 [project.urls]

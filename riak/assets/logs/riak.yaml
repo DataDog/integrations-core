@@ -1,21 +1,22 @@
 id: riak
 metric_id: riak
+backend_only: false
 facets:
-  - name: Thread Name
-    source: log
-    path: logger.thread_name
-    groups:
+  - groups:
       - Source Code
-  - name: Error Type
-    source: log
+    name: Error Type
     path: error.kind
-    groups:
-      - Source Code
-  - name: Client IP
     source: log
-    path: network.client.ip
-    groups:
+  - groups:
+      - Source Code
+    name: Thread Name
+    path: logger.thread_name
+    source: log
+  - groups:
       - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
 pipeline:
   type: pipeline
   name: Riak
