@@ -23,7 +23,7 @@ class OpenMetricsHandler(BaseHTTPRequestHandler):
         self, payloads, request: bytes, client_address: tuple[str, int], server: socketserver.BaseServer
     ) -> None:
         self.payloads = payloads
-        super().__init__(request, client_address, server)
+        super().__init__(request, client_address, server)  # type: ignore
 
     def do_GET(self):
         global current_payload
