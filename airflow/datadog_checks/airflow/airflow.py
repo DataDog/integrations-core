@@ -135,12 +135,8 @@ class AirflowCheck(AgentCheck):
         """
         Returns the number of seconds since the Unix epoch for a given ISO datetime string.
         """
-
         def parse_iso_string(iso_string):
-            if PY3:
-                return datetime.fromisoformat(iso_string)
-            else:
-                return datetime.strptime(iso_string, '%Y-%m-%dT%H:%M:%S.%f%z')  # Updated format
+            return datetime.fromisoformat(iso_string)
 
         dt = parse_iso_string(iso_string)
         return dt
