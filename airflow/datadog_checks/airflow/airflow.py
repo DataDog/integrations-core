@@ -5,6 +5,7 @@ from copy import deepcopy
 from datetime import datetime
 
 import requests
+from six import PY3
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.time import get_timestamp
@@ -126,9 +127,23 @@ class AirflowCheck(AgentCheck):
             dag_task_tags.append('task_id:{}'.format(task_id))
 
             # Calculate ongoing duration
-            ongoing_duration = get_timestamp() - datetime.fromisoformat(execution_date).timestamp()
-
+            ongoing_duration = get_timestamp() - get_timestamp(self._get_seconds_from_iso(execution_date))
             self.gauge('airflow.dag.task.ongoing_duration', ongoing_duration, tags=dag_task_tags)
+
+    # This can be likely be moved to the base class
+    def _get_seconds_from_iso(self, iso_string):
+        """
+        Returns the number of seconds since the Unix epoch for a given ISO datetime string.
+        """
+
+        def parse_iso_string(iso_string):
+            if PY3:
+                return datetime.fromisoformat(iso_string)
+            else:
+                return datetime.strptime(iso_string, '%Y-%m-%dT%H:%M:%S.%fZ')
+
+        dt = parse_iso_string(iso_string)
+        return dt
 
     def _parse_config(self):
         if not self._url:
