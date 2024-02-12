@@ -41,6 +41,7 @@ def generate_lock_file(requirements_file: Path, lock_file: Path) -> None:
                     continue
 
                 wheel_name = blob.name.split('/')[-1]
+                # https://packaging.python.org/en/latest/specifications/binary-distribution-format/#file-name-convention
                 parts = wheel_name[:-4].split('-')
                 if Version(parts[1]) != project_version:
                     continue
