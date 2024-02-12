@@ -5,7 +5,6 @@ from copy import deepcopy
 from datetime import datetime
 
 import requests
-from six import PY3
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.time import get_timestamp
@@ -135,6 +134,7 @@ class AirflowCheck(AgentCheck):
         """
         Returns the number of seconds since the Unix epoch for a given ISO datetime string.
         """
+
         def parse_iso_string(iso_string):
             return datetime.fromisoformat(iso_string)
 
