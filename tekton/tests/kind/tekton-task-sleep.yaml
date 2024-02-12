@@ -8,4 +8,5 @@ spec:
       image: alpine
       script: |
         #!/bin/sh
+        echo "sleeping"
         sleep 100000
