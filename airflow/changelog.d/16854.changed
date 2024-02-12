@@ -1,0 +1,1 @@
+Remove python 2 references from Airflow integration ([#16854](https://github.com/DataDog/integrations-core/pull/16854))
