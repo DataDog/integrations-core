@@ -72,23 +72,23 @@ class Nginx(AgentCheck):
 
         for row in metrics:
             try:
-                name, value, tags, metric_type = row
-                _tags = tags + ['host:%s' % self.hostname_from_url, 'port:%s' % self.port_from_url]
+                name, value, row_tags, metric_type = row
+                tags = row_tags + ['host:%s' % self.hostname_from_url, 'port:%s' % self.port_from_url]
                 if self.use_vts:
-                    name, handled, conn = self._translate_from_vts(name, value, _tags, handled, conn)
+                    name, handled, conn = self._translate_from_vts(name, value, tags, handled, conn)
                     if name is None:
                         continue
 
                 if name in COUNT_METRICS:
-                    self.monotonic_count(name, value, _tags)
+                    self.monotonic_count(name, value, tags)
                 else:
                     if name in METRICS_SEND_AS_COUNT:
-                        self.monotonic_count(name + "_count", value, _tags)
+                        self.monotonic_count(name + "_count", value, tags)
                     if name in METRICS_SEND_AS_HISTOGRAM:
-                        self.histogram(name + "_histogram", value, _tags)
+                        self.histogram(name + "_histogram", value, tags)
 
                     func = metric_submission_funcs[metric_type]
-                    func(name, value, _tags)
+                    func(name, value, tags)
 
             except Exception as e:
                 self.log.error('Could not submit metric: %s: %s', repr(row), e)
