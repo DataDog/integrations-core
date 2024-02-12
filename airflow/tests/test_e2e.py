@@ -26,7 +26,7 @@ def assert_service_checks(aggregator):
 
     aggregator.assert_metric('airflow.dag.task.total_running', tags=tags, count=1)
     aggregator.assert_metric(
-        'airflow.dag.task.current_duration',
+        'airflow.dag.task.ongoing_duration',
         count=0,
     )
 

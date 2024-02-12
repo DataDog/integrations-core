@@ -140,7 +140,7 @@ class AirflowCheck(AgentCheck):
             if PY3:
                 return datetime.fromisoformat(iso_string)
             else:
-                return datetime.strptime(iso_string, '%Y-%m-%dT%H:%M:%S.%fZ')
+                return datetime.strptime(iso_string, '%Y-%m-%dT%H:%M:%S.%f%z')  # Updated format
 
         dt = parse_iso_string(iso_string)
         return dt
