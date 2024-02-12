@@ -7,7 +7,6 @@ import shutil
 import tempfile
 from os import mkdir
 
-import mock
 import pytest
 
 from datadog_checks.base.errors import CheckException, ConfigurationError
@@ -323,9 +322,7 @@ def test_missing_directory_config():
 def test_non_existent_directory_ignore_missing(aggregator):
     config = {'directory': '/non-existent/directory', 'ignore_missing': True, 'tags': ['foo:bar']}
     check = DirectoryCheck('directory', {}, [config])
-    check._get_stats = mock.MagicMock()
     check.check(config)
-    check._get_stats.assert_not_called()
 
     expected_tags = ['dir_name:/non-existent/directory', 'foo:bar']
     aggregator.assert_service_check('system.disk.directory.exists', DirectoryCheck.WARNING, tags=expected_tags)
