@@ -1,66 +1,67 @@
 id: foundationdb
+backend_only: false
 facets:
-  - name: Event Name
-    source: log
-    path: evt.name
-    groups:
+  - groups:
       - Event
-  - path: Type
+    name: Event Name
+    path: evt.name
     source: log
+  - groups:
+      - FoundationDB
     name: Type
-    groups:
-      - FoundationDB
-  - path: machine.ip
+    path: Type
     source: log
+  - groups:
+      - FoundationDB
     name: Machine IP Address
-    groups:
-      - FoundationDB
-  - path: machine.port
+    path: machine.ip
     source: log
+  - groups:
+      - FoundationDB
     name: Machine Port
+    path: machine.port
+    source: log
+  - facetType: range
     groups:
       - FoundationDB
-  - path: WorstFreeSpaceStorageServer
-    source: log
     name: Storage Servers with the Least Free Space
-    facetType: range
+    path: WorstFreeSpaceStorageServer
+    source: log
     type: integer
     unit:
       family: bytes
       name: byte
+  - facetType: range
     groups:
       - FoundationDB
-  - path: WorstFreeSpaceTLog
-    source: log
     name: Log Servers with the Least Free Space
-    facetType: range
+    path: WorstFreeSpaceTLog
+    source: log
     type: integer
     unit:
       family: bytes
       name: byte
+  - facetType: range
     groups:
       - FoundationDB
-  - path: WorstStorageServerDurabilityLag
-    source: log
     name: Worst Storage Server Durability Lag
-    facetType: range
+    path: WorstStorageServerDurabilityLag
+    source: log
     type: integer
+  - facetType: range
     groups:
       - FoundationDB
-  - path: WorstStorageServerQueue
-    source: log
     name: Largest Storage Server Queue
-    facetType: range
-    type: integer
-    groups:
-      - FoundationDB
-  - path: WorstStorageServerVersionLag
+    path: WorstStorageServerQueue
     source: log
-    name: Worst Storage Server Version Lag
-    facetType: range
     type: integer
+  - facetType: range
     groups:
       - FoundationDB
+    name: Worst Storage Server Version Lag
+    path: WorstStorageServerVersionLag
+    source: log
+    type: integer
 pipeline:
   type: pipeline
   name: FoundationDB
@@ -109,4 +110,4 @@ pipeline:
           _machine_ip_and_port %{ip:machine.ip}:%{port:machine.port}
         supportRules: ''
       samples:
-        - "127.0.0.1:4500"
+        - 127.0.0.1:4500

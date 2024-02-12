@@ -1,27 +1,28 @@
 id: mysql
 metric_id: mysql
+backend_only: false
 facets:
 
-  - name: Operation Type
-    source: log
+  - groups:
+      - Database
+    name: Operation Type
     path: db.operation
-    groups:
-      - Database
-  - name: Statement
     source: log
+  - groups:
+      - Database
+    name: Statement
     path: db.statement
-    groups:
-      - Database
-  - name: Duration
     source: log
+  - facetType: range
+    groups:
+      - Measure
+    name: Duration
     path: duration
+    source: log
     type: double
-    facetType: range
     unit:
       family: time
       name: nanosecond
-    groups:
-      - Measure
 pipeline:
   type: pipeline
   name: MySQL

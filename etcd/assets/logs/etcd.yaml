@@ -1,11 +1,12 @@
 id: etcd
 metric_id: etcd
+backend_only: false
 facets:
-  - name: Package
-    source: log
-    path: package
-    groups:
+  - groups:
       - etcd
+    name: Package
+    path: package
+    source: log
 pipeline:
   type: pipeline
   name: etcd

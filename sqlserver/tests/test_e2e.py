@@ -126,11 +126,12 @@ def test_check_docker(dd_agent_check, init_config, instance_e2e):
 
     # remove index usage metrics, which require extra setup & will be tested separately
     for m in DATABASE_INDEX_METRICS:
-        if m[0] in aggregator._metrics:
-            del aggregator._metrics[m[0]]
+        if m in aggregator._metrics:
+            del aggregator._metrics[m]
 
     for mname in EXPECTED_METRICS_DBM_ENABLED:
-        aggregator.assert_metric(mname)
+        if mname not in DATABASE_INDEX_METRICS:
+            aggregator.assert_metric(mname)
 
     for mname in UNEXPECTED_FCI_METRICS + UNEXPECTED_QUERY_EXECUTOR_AO_METRICS:
         aggregator.assert_metric(mname, count=0)

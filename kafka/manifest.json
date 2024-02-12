@@ -48,7 +48,9 @@
       },
       "process_signatures": [
         "java kafka.kafka"
-      ]
+      ],
+      "source_type_id": 64,
+      "auto_install": true
     },
     "dashboards": {
       "kafka": "assets/dashboards/kafka_dashboard.json"

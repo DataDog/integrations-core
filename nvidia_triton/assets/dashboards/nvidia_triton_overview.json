@@ -1179,7 +1179,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:triton.nv_inference_exec_count.count{*}.as_count()"
+                                            "query": "sum:nvidia_triton.inference.exec.count.count{*}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1268,7 +1268,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:triton.nv_inference_request_duration_us.count{*}.as_count()"
+                                            "query": "sum:nvidia_triton.inference.request.duration_us.count{*}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1315,7 +1315,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:triton.nv_inference_queue_duration_us.count{*}.as_count()"
+                                            "query": "sum:nvidia_triton.inference.queue.duration_us.count{*}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",

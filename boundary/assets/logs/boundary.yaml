@@ -2,86 +2,86 @@ id: boundary
 metric_id: boundary
 backend_only: false
 facets:
-  - name: Duration
-    source: log
+  - facetType: range
+    groups:
+      - Measure
+    name: Duration
     path: duration
+    source: log
     type: double
-    facetType: range
     unit:
       family: time
       name: nanosecond
-    groups:
-      - Measure
-  - name: Method
-    source: log
+  - groups:
+      - Web Access
+    name: Method
     path: http.method
-    groups:
-      - Web Access
-  - name: Referer
     source: log
+  - groups:
+      - Web Access
+    name: Referer
     path: http.referer
-    groups:
-      - Web Access
-  - name: Request ID
     source: log
+  - groups:
+      - Web Access
+    name: Request ID
     path: http.request_id
-    groups:
-      - Web Access
-  - name: Status Code
     source: log
+  - groups:
+      - Web Access
+    name: Status Code
     path: http.status_code
-    groups:
-      - Web Access
-  - name: URL Path
     source: log
+  - groups:
+      - Web Access
+    name: URL Path
     path: http.url_details.path
-    groups:
-      - Web Access
-  - name: Logger Version
     source: log
-    path: logger.version
-    groups:
+  - groups:
       - Source Code
-  - name: Client IP
+    name: Logger Version
+    path: logger.version
     source: log
-    path: network.client.ip
-    groups:
+  - groups:
       - Web Access
-  - name: User ID
+    name: Client IP
+    path: network.client.ip
     source: log
-    path: usr.id
-    groups:
+  - groups:
       - User
-  - name: Event Category
+    name: User ID
+    path: usr.id
     source: log
-    path: evt.category
-    groups:
+  - groups:
       - Event
-  - name: Host ID
+    name: Event Category
+    path: evt.category
     source: log
+  - groups:
+      - Boundary
+    name: Host ID
     path: data.response.details.item.host_id
-    groups:
-      - Boundary
-  - name: Host Set ID
     source: log
+  - groups:
+      - Boundary
+    name: Host Set ID
     path: data.response.details.item.host_set_id
-    groups:
-      - Boundary
-  - name: Target ID
     source: log
+  - groups:
+      - Boundary
+    name: Target ID
     path: data.response.details.item.target_id
-    groups:
-      - Boundary
-  - name: Login Name
     source: log
+  - groups:
+      - Boundary
+    name: Login Name
     path: data.request.details.Attrs.PasswordLoginAttributes.login_name
-    groups:
-      - Boundary
-  - name: Method ID
     source: log
-    path: data.request.details.auth_method_id
-    groups:
+  - groups:
       - Boundary
+    name: Method ID
+    path: data.request.details.auth_method_id
+    source: log
 pipeline:
   type: pipeline
   name: Boundary

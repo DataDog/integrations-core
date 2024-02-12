@@ -176,3 +176,33 @@ def test_validate_ci_success(ddev, helpers):
         Passed: 1
         """
     )
+
+
+@pytest.mark.parametrize(
+    'repo_name',
+    [
+        pytest.param('core', id='core'),
+        pytest.param('extras', id='extras'),
+        pytest.param('marketplace', id='marketplace'),
+    ],
+)
+def test_minimum_base_package(ddev, repository, helpers, repo_name, config_file):
+    config_file.model.repos[repo_name] = str(repository.path)
+    config_file.model.repo = repo_name
+    config_file.save()
+
+    result = ddev('validate', 'ci', '--sync')
+    assert result.exit_code == 0, result.output
+
+    test_all = repository.path / '.github' / 'workflows' / 'test-all.yml'
+    with test_all.open(encoding='utf-8') as file:
+        test_all_yaml_info = yaml.safe_load(file)
+
+    for job in test_all_yaml_info['jobs'].values():
+        if repo_name == 'extras':
+            assert 'minimum-base-package' not in job['with']
+        else:
+            assert '${{ inputs.minimum-base-package }}' == job['with']['minimum-base-package']
+
+    result = ddev('validate', 'ci')
+    assert result.exit_code == 0, result.output

@@ -40,7 +40,9 @@
         "python -m ray.util.client.server",
         "gcs_server",
         "raylet"
-      ]
+      ],
+      "source_type_id": 10393,
+      "auto_install": true
     },
     "monitors": {
       "high cpu utilization": "assets/monitors/cpu_utilization.json",
