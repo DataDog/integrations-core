@@ -165,7 +165,9 @@ class KubeletCheck(
 
     def __init__(self, name, init_config, instances):
         if os.getenv("DD_KUBERNETES_KUBELET_CORE_CHECK_ENABLED") == "true":
-            raise SkipInstanceError("The kubelet core check is enabled, skipping initialization of the python kubelet check")
+            raise SkipInstanceError(
+                "The kubelet core check is enabled, skipping initialization of the python kubelet check"
+            )
         self.KUBELET_METRIC_TRANSFORMERS = {
             'kubelet_container_log_filesystem_used_bytes': self.kubelet_container_log_filesystem_used_bytes,
             'rest_client_request_latency_seconds': self.rest_client_latency,
