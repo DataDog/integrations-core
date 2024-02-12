@@ -100,18 +100,30 @@ def main():
         for i, (project_name, project_metadata, wheel) in enumerate(upload_data, start=1):
             prefix = f'({i}/{queued})'
             padding = ' ' * (len(prefix) + 1)
-
-            artifact = bucket.blob(f'{artifact_type}/{project_name}/{wheel.name}')
-
-            # PyPI artifacts never change, so we don't need to upload them again.
-            if artifact_type == 'external' and artifact.exists():
-                print(f'{prefix} {project_name}=={project_metadata["Version"]} already exists')
-                continue
-
             print(f'{prefix} Name: {project_metadata["Name"]}')
             print(f'{padding}Version: {project_metadata["Version"]}')
-            print(f'{padding}Artifact: {wheel.name}')
 
+            if artifact_type == 'external':
+                artifact_name = wheel.name
+                artifact = bucket.blob(f'{artifact_type}/{project_name}/{artifact_name}')
+
+                # PyPI artifacts never change, so we don't need to upload them again.
+                if artifact.exists():
+                    print(f'{prefix} {project_name}=={project_metadata["Version"]} already exists')
+                    continue
+            else:
+                # https://packaging.python.org/en/latest/specifications/binary-distribution-format/#file-name-convention
+                name, version, python_tag, abi_tag, platform_tag = wheel.stem.split('-')
+                build_number = 0
+                while True:
+                    artifact_name = f'{name}-{version}-{build_number}-{python_tag}-{abi_tag}-{platform_tag}.whl'
+                    artifact = bucket.blob(f'{artifact_type}/{project_name}/{artifact_name}')
+                    if not artifact.exists():
+                        break
+
+                    build_number += 1
+
+            print(f'{padding}Artifact: {artifact_name}')
             artifact.upload_from_filename(str(wheel))
 
             requires_python = project_metadata.get('Requires-Python', '').replace('<', '&lt;').replace('>', '&gt;')
