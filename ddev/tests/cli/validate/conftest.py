@@ -14,6 +14,14 @@ def _fake_repo(tmp_path_factory, config_file, name):
     config_file.model.repo = name
     config_file.save()
 
+    write_file(
+        repo_path / ".ddev",
+        'config.toml',
+        """[overrides.validate.labeler]
+include = ["datadog_checks_tests_helper"]
+""",
+    )
+
     for integration in ('dummy', 'dummy2'):
         write_file(
             repo_path / integration,
