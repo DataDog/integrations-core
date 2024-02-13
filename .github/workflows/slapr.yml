@@ -3,9 +3,9 @@
 name: Slack emoji PR updates
 on:
   pull_request_review:
-    types: [submitted]
+    types: [ submitted ]
   pull_request:
-    types: [closed]
+    types: [ closed ]
 
 jobs:
   run_slapr_agent_integrations:
@@ -17,14 +17,27 @@ jobs:
           - SLACK_CHANNEL_ID_AGENT_INTEGRATIONS_REVIEWS
           - SLACK_CHANNEL_ID_INFRA_INTEGRATIONS
     steps:
-    - uses: DataDog/slapr@master
-      env:
-        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        SLACK_CHANNEL_ID: "${{ secrets[matrix.slack_channel_variable] }}"
-        SLACK_API_TOKEN: "${{ secrets.SLACK_API_TOKEN }}"
-        SLAPR_BOT_USER_ID: "${{ secrets.SLAPR_BOT_USER_ID }}"
-        SLAPR_EMOJI_REVIEW_STARTED: "review_started"
-        SLAPR_EMOJI_APPROVED: "approved2"
-        SLAPR_EMOJI_CHANGES_REQUESTED: "changes_requested"
-        SLAPR_EMOJI_MERGED: "merged"
-        SLAPR_EMOJI_CLOSED: "closed"
+      - name: Create token
+        uses: actions/create-github-app-token@v1
+        id: token-generator
+        with:
+          app-id: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}
+          private-key: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_PRIVATE_KEY }}
+          repositories: integrations-core
+      - run: |
+          REVIEWER_ID=$(echo "${{ github.event.review.user.login }}")
+          DATADOG_TEAMS=$(gh api graphql --paginate -f query='{organization(login: "DataDog") {teams(first: 100, userLogins: ["$REVIEWER_ID"]) { edges {node {name}}}}}' | jq -r '.data.organization.teams.edges[].node.name')
+          echo "::set-output name=TEAM::$DATADOG_TEAMS"
+        env:
+          GITHUB_TOKEN: "${{ secrets.DD_CHANGELOG_CHECK_TOKEN }}"
+      - uses: DataDog/slapr@master
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          SLACK_CHANNEL_ID: "${{ secrets[matrix.slack_channel_variable] }}"
+          SLACK_API_TOKEN: "${{ secrets.SLACK_API_TOKEN }}"
+          SLAPR_BOT_USER_ID: "${{ secrets.SLAPR_BOT_USER_ID }}"
+          SLAPR_EMOJI_REVIEW_STARTED: "review_started"
+          SLAPR_EMOJI_APPROVED: "approved2"
+          SLAPR_EMOJI_CHANGES_REQUESTED: "changes_requested"
+          SLAPR_EMOJI_MERGED: "merged"
+          SLAPR_EMOJI_CLOSED: "closed"
