@@ -95,4 +95,4 @@ class TeleportCheck(AgentCheck):
         # self.service_check("can_connect", AgentCheck.OK)
 
         # If it didn't then it should send a critical service check
-        self.service_check("can_connect", AgentCheck.CRITICAL)
+        self.service_check("health.up", AgentCheck.CRITICAL)
