@@ -549,7 +549,7 @@
             "id": 6021367050336996,
             "definition": {
               "type": "note",
-              "content": "An increase in the error rate could indicate a problem in your application or with your clients",
+              "content": "An increase in the error rate could indicate a problem in your application or with your clients.",
               "background_color": "blue",
               "font_size": "14",
               "text_align": "center",
