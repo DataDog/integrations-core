@@ -12,7 +12,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 
 def test_connect_exception(aggregator, dd_run_check):
     instance = {
-        "diagnostic_url": "http://127.0.0.1:3000"
+        "diagnostic_url": ""
     }
     check = TeleportCheck('teleport', {}, [instance])
     dd_run_check(check)

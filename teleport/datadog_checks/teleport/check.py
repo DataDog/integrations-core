@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any  # noqa: F401
+from typing import Any
 
 from datadog_checks.base import AgentCheck  # noqa: F401
 
@@ -17,7 +17,7 @@ class TeleportCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(TeleportCheck, self).__init__(name, init_config, instances)
-
+        self.diagnostic_url = self.instance.get("diagnostic_url")
         # Use self.instance to read the check configuration
         # self.url = self.instance.get("url")
 
@@ -40,40 +40,16 @@ class TeleportCheck(AgentCheck):
 
         # Perform HTTP Requests with our HTTP wrapper.
         # More info at https://datadoghq.dev/integrations-core/base/http/
-        # try:
-        #     response = self.http.get(self.url)
-        #     response.raise_for_status()
-        #     response_json = response.json()
-
-        # except Timeout as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="Request timeout: {}, {}".format(self.url, e),
-        #     )
-        #     raise
-
-        # except (HTTPError, InvalidURL, ConnectionError) as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="Request failed: {}, {}".format(self.url, e),
-        #     )
-        #     raise
-
-        # except JSONDecodeError as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="JSON Parse failed: {}, {}".format(self.url, e),
-        #     )
-        #     raise
-
-        # except ValueError as e:
-        #     self.service_check(
-        #         "can_connect", AgentCheck.CRITICAL, message=str(e)
-        #     )
-        #     raise
+        try:
+            response = self.http.get(self.diagnostic_url+"/healthz")
+            response.raise_for_status()
+            self.service_check(
+                "health.up", AgentCheck.OK
+            )
+        except Exception as e:
+            self.service_check(
+                "health.up", AgentCheck.CRITICAL, message=str(e)
+            )
 
         # This is how you submit metrics
         # There are different types of metrics that you can submit (gauge, event).

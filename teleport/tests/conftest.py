@@ -12,7 +12,7 @@ from datadog_checks.teleport import TeleportCheck
 def dd_environment():
     compose_file = os.path.join(get_here(), 'docker', 'docker-compose.yaml')
    
-    with docker_run(compose_file):
+    with docker_run(compose_file, sleep=5):
         instance = {
             "diagnostic_url": "http://127.0.0.1:3000"
         }
