@@ -17,3 +17,11 @@ def test_connect_exception(aggregator, dd_run_check):
     check = TeleportCheck('teleport', {}, [instance])
     dd_run_check(check)
     aggregator.assert_service_check('teleport.health.up', status=AgentCheck.CRITICAL)
+
+def test_connect_ok(aggregator, dd_run_check):
+    instance = {
+        "diagnostic_url": "http://127.0.0.1:3000"
+    }
+    check = TeleportCheck('teleport', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_service_check('teleport.health.up', status=AgentCheck.OK)
