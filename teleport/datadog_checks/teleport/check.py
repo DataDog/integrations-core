@@ -17,7 +17,6 @@ class TeleportCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(TeleportCheck, self).__init__(name, init_config, instances)
-        self.teleport_url = self.instance.get("teleport_url")
 
         # Use self.instance to read the check configuration
         # self.url = self.instance.get("url")
