@@ -30,5 +30,4 @@ jobs:
         with:
           label_pattern: "^backport/(?<base>([^ ]+))$"
           labels_template: "[\"backport\", \"bot\"]"
-          # TODO Change once we have another bot account for this pipeline
           github_token: ${{ steps.token-generator.outputs.token }}
