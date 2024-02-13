@@ -105,6 +105,9 @@ def test(
         for integration in app.repo.integrations.iter_changed():
             if integration.is_testable:
                 targets[integration.name] = integration
+    elif target_name == 'all':
+        for integration in app.repo.integrations.iter_testable('all'):
+            targets[integration.name] = integration
     else:
         try:
             integration = app.repo.integrations.get(target_name)
