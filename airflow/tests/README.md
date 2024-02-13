@@ -19,14 +19,14 @@ docker exec -it dd_airflow_py39 agent dogstatsd-stats
 
 # Airflow REST API metrics
 
-## Triggering Dag Task
+## Triggering the DAG Task
 ```bash
 ddev env start airflow py3.11-2.6
 ```
-Go to localhost:8080/login and enter admin credentials
+Go to localhost:8080/login and enter admin credentials.
 
-### Trigger dag run via UI manually
-Triggering the tag should cause the DagRun to start and move it to a running state.
+### Manually trigger the DAG run via the UI
+Trigger the dag to start DagRun and move it to a running state.
 
 ### Run agent manual check
 View the generated `airflow.dag.task.ongoing_duration` via the manual check run
