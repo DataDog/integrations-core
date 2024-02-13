@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": null,
+    "description": "## Envoy\n\nThis dashboard provides a high-level overview of your Envoy cluster, allowing you to monitor its performance and resource usage, thus making it easier to identify upstream and downstream errors and bottlenecks.\n\nFor further reading on monitoring Envoy, see:\n\n- [Datadog Envoy integration docs](https://docs.datadoghq.com/integrations/envoy/)\n- [Monitoring AWS App Mesh and Envoy with Datadog](https://www.datadoghq.com/blog/envoy-app-mesh-monitoring/)\n\nClone this template to make changes and add your own graphs and widgets.",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -42,7 +42,7 @@
                     {
                         "definition": {
                             "background_color": "transparent",
-                            "content": "This dashboard provides a high-level overview of your Envoy deployment so you can quickly identify downstream and upstream errors and rejections.\n",
+                            "content": "This dashboard provides a high-level overview of your Envoy cluster, allowing you to monitor its performance and resource usage, thus making it easier to identify upstream and downstream errors and bottlenecks.\n",
                             "font_size": "14",
                             "show_tick": false,
                             "text_align": "left",
