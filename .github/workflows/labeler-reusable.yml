@@ -26,7 +26,7 @@ jobs:
         uses: actions/labeler@v4
         with:
           configuration-path: .github/workflows/config/labeler.yml
-          repo-token: "${{ secrets.repo-token }}"
+          repo-token: "${{ steps.token-generator.outputs.token }}"
           sync-labels: ""   # workaround for sync-labels bug:
                             # https://github.com/actions/labeler/issues/112#issuecomment-1000491676
       - name: Add team labels
