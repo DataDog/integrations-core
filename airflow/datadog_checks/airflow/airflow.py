@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from copy import deepcopy
+from copy import copy
 from datetime import datetime
 
 import requests
@@ -55,6 +55,8 @@ class AirflowCheck(AgentCheck):
                 task_instances = self._get_all_task_instances(url_stable_task_instances, tags)
                 if task_instances:
                     self._calculate_task_ongoing_duration(task_instances, tags)
+                else:
+                    self.log.info("No running tasks found")
 
         self.service_check('airflow.can_connect', can_connect_status, tags=tags)
         self.gauge('airflow.can_connect', int(can_connect_status == AgentCheck.OK), tags=tags)
@@ -111,12 +113,9 @@ class AirflowCheck(AgentCheck):
         """
         Calculate the ongoing duration of each task in the given list of tasks.
         """
-        if not tasks:
-            self.log.info("No running tasks found")
-            return
 
         for task in tasks:
-            dag_task_tags = deepcopy(tags)
+            dag_task_tags = copy(tags)
             task_id = task.get('task_id')
             dag_id = task.get('dag_id')
             execution_date = task.get('execution_date')
@@ -126,20 +125,8 @@ class AirflowCheck(AgentCheck):
             dag_task_tags.append('task_id:{}'.format(task_id))
 
             # Calculate ongoing duration
-            ongoing_duration = get_timestamp() - get_timestamp(self._get_seconds_from_iso(execution_date))
+            ongoing_duration = get_timestamp() - datetime.fromisoformat((execution_date)).timestamp()
             self.gauge('airflow.dag.task.ongoing_duration', ongoing_duration, tags=dag_task_tags)
-
-    # This can be likely be moved to the base class
-    def _get_seconds_from_iso(self, iso_string):
-        """
-        Returns the number of seconds since the Unix epoch for a given ISO datetime string.
-        """
-
-        def parse_iso_string(iso_string):
-            return datetime.fromisoformat(iso_string)
-
-        dt = parse_iso_string(iso_string)
-        return dt
 
     def _parse_config(self):
         if not self._url:
