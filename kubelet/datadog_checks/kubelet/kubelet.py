@@ -600,7 +600,7 @@ class KubeletCheck(
                 restart_count = ctr_status.get('restartCount', 0)
                 self.gauge(self.NAMESPACE + '.containers.restarts', restart_count, tags)
 
-                for (metric_name, field_name) in [('state', 'state'), ('last_state', 'lastState')]:
+                for metric_name, field_name in [('state', 'state'), ('last_state', 'lastState')]:
                     c_state = ctr_status.get(field_name, {})
 
                     for state_name in ['terminated', 'waiting']:

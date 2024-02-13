@@ -87,7 +87,7 @@ class KafkaClient:
         topic_partition_with_consumer_offset = set()
 
         if not self.config._monitor_all_broker_highwatermarks:
-            for (_, topic, partition) in consumer_offsets:
+            for _, topic, partition in consumer_offsets:
                 topics_with_consumer_offset.add(topic)
                 topic_partition_with_consumer_offset.add((topic, partition))
 

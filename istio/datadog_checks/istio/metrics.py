@@ -439,6 +439,7 @@ NON_CONFORMING_METRICS = [
     'mixer_handler_daemons_total',
 ]
 
+
 # Helper function that will strip _total from both the raw metric name and the metric name
 def construct_metrics_config(metric_map):
     metrics = []
