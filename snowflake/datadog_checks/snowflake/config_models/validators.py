@@ -42,7 +42,7 @@ def _validate_authenticator_option(values):
             )
         )
 
-    if not any([opt in values for opt in authenticator_dependencies[authenticator]]):
+    if not any(opt in values for opt in authenticator_dependencies[authenticator]):
         raise ConfigurationError(
             'Authenticator option `{}` needs `{}` option to be set.'.format(
                 authenticator, '` or `'.join(authenticator_dependencies[authenticator])

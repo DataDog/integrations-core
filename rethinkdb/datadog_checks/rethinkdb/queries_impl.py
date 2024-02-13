@@ -95,7 +95,7 @@ def get_database_config_metrics(conn):
     """
     query = TABLE_CONFIG.group('db').count()
     num_tables_per_database = query.run(conn)  # type: Dict[str, int]
-    return [(database, num_tables) for database, num_tables in num_tables_per_database.items()]
+    return list(num_tables_per_database.items())
 
 
 def get_database_table_metrics(conn):
@@ -148,7 +148,7 @@ def get_table_config_metrics(conn):
         .count().run(conn)
     )  # type: Dict[str, int]
 
-    return [(table_name, secondary_indexes) for table_name, secondary_indexes in secondary_indexes_per_table.items()]
+    return list(secondary_indexes_per_table.items())
 
 
 def get_replica_metrics(conn):
