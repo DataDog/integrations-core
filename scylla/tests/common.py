@@ -1166,6 +1166,7 @@ if os.environ.get('SCYLLA_VERSION') == '3.3.1':
         'scylla.storage.proxy.coordinator_cas_write_latency.bucket',
     ]
 
+
 # expand the lists into a single list of metrics
 def get_metrics(metric_groups):
     """Given a list of metric groups, return single consolidated list"""

@@ -23,15 +23,11 @@ def get_agent_tags(repo: Repository, since: str, to: str) -> list[str]:
     agent_tags = sorted(parse_version(t) for t in repo.git.filter_tags(r'^\d+\.\d+\.\d+$'))
 
     # default value for `to` is the latest tag
-    if to:
-        to = parse_version(to)
-    else:
-        to = agent_tags[-1]
-
-    since = parse_version(since)
+    to_version = parse_version(to) if to else agent_tags[-1]
+    since_version = parse_version(since)
 
     # filter out versions according to the interval [since, to]
-    agent_tags = [t for t in agent_tags if since <= t <= to]
+    agent_tags = [t for t in agent_tags if since_version <= t <= to_version]
 
     # reverse so we have descendant order
     return [str(t) for t in reversed(agent_tags)]
