@@ -23,6 +23,9 @@ services:
       args:
         AIRFLOW_VERSION: ${AIRFLOW_VERSION}
     environment:
+      # -- API
+      AIRFLOW__API__AUTH_BACKEND: airflow.api.auth.backend.basic_auth
+      AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth
       # -- CORE
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__CORE__LOAD_EXAMPLES: "False"
@@ -38,7 +41,6 @@ services:
       DB__PASSWORD: airflow
       DB__NAME: airflow
     volumes:
-      - ./config/airflow.cfg:/opt/airflow/airflow.cfg
       - ./dags:/opt/airflow/dags
     ports:
       - "8080:8080"
