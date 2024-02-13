@@ -12,14 +12,16 @@ from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
 from .common import (
+    CONNECTION_LIMIT_METRICS,
+    CONNECTION_LIMIT_STAT_PREFIX_TAG,
     ENVOY_VERSION,
     EXT_METRICS,
     FLAVOR,
     HOST,
     INSTANCES,
     LOCAL_RATE_LIMIT_METRICS,
+    RATE_LIMIT_STAT_PREFIX_TAG,
     RBAC_METRICS,
-    STAT_PREFIX_TAG,
 )
 
 CHECK_NAME = 'envoy'
@@ -289,7 +291,7 @@ def test_stats_prefix_optional_tags(
     standard_tags.append('endpoint:{}'.format(instance["stats_url"]))
     tags_prefix = standard_tags + additional_tags
     c = check(instance)
-    mock_http_response(file_path=fixture_path(fixture_file)).return_value
+    mock_http_response(file_path=fixture_path(fixture_file))
     dd_run_check(c)
 
     # To ensure that this change didn't break the old behavior, both the value and the tags are asserted.
@@ -313,7 +315,20 @@ def test_local_rate_limit_metrics(aggregator, fixture_path, mock_http_response, 
 
     for metric in LOCAL_RATE_LIMIT_METRICS:
         aggregator.assert_metric(metric)
-        for tag in STAT_PREFIX_TAG:
+        for tag in RATE_LIMIT_STAT_PREFIX_TAG:
+            aggregator.assert_metric_has_tag(metric, tag, count=1)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def test_connection_limit_metrics(aggregator, fixture_path, mock_http_response, check, dd_run_check):
+    instance = INSTANCES['main']
+    c = check(instance)
+
+    mock_http_response(file_path=fixture_path('./legacy/connection_limit.txt'))
+    dd_run_check(c)
+    for metric in CONNECTION_LIMIT_METRICS:
+        for tag in CONNECTION_LIMIT_STAT_PREFIX_TAG:
             aggregator.assert_metric_has_tag(metric, tag, count=1)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
