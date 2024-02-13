@@ -34,8 +34,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.token-generator.outputs.token }}
       - uses: DataDog/slapr@master
-        if: contains(steps.get-teams.outputs.team, 'agent-integrations')
+#        if: contains(steps.get-teams.outputs.team, 'agent-integrations')
         env:
+          GITHUB_CONTEXT: "${{ toJson(github) }}"
           TEAM: "${{ steps.get-teams.outputs.team }}"
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           SLACK_CHANNEL_ID: "${{ secrets[matrix.slack_channel_variable] }}"
