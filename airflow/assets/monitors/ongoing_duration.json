@@ -6,8 +6,8 @@
     "tags": [
       "integration:airflow"
     ],
+    "description": "Notify your team when a dag run fails after an hour",
     "definition": {
-        "description": "Notify your team when a dag run fails after an hour",
         "name": "DAG task ongoing duration",
         "type": "query alert",
         "query": "max(current_1h):avg:airflow.dag.task.ongoing_duration{*} by {dag_id,task_id} > 3600",

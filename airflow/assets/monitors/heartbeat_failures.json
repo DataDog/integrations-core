@@ -6,8 +6,8 @@
     "tags": [
       "integration:airflow"
     ],
+    "description": "Notify your team of number of heartbeats failed for a job",
     "definition": {
-        "description": "Notify your team of number of heartbeats failed for a job",
         "name": "Number of failed Heartbeats for a {{job_name.name}} job",
         "type": "query alert",
         "query": "avg(last_5m):avg:airflow.job.heartbeat.failure{*} by {host,url,job_name} >= 1",

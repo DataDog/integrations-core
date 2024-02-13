@@ -52,6 +52,10 @@
     "dashboards": {
       "Airflow Overview": "assets/dashboards/overview.json"
     },
+    "monitors": {
+      "Heartbeat Failure": "assets/monitors/heartbeat_failure.json",
+      "Ongoing Duration": "assets/monitors/ongoing_duration.json"
+    },
     "logs": {
       "source": "airflow"
     }
