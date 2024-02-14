@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+from collections import namedtuple
 
 import mock
 import pytest
@@ -34,70 +35,33 @@ def mock_metrics():
 def test_check_metrics_slis(aggregator, mock_metrics, instance):
     c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
+    SLIMetric = namedtuple("SLIMetric", ["name", "value", "tags"])
 
-    def assert_metric(name, **kwargs):
-        # Wrapper to keep assertions < 120 chars
-        aggregator.assert_metric("{}.{}".format(CHECK_NAME, name), **kwargs)
-
-    assert_metric(
-        "slis.kubernetes_healthcheck",
-        value=1,
-        tags=["sli_name:autoregister-completion"],
-    )
-    assert_metric("slis.kubernetes_healthcheck", value=1, tags=["sli_name:etcd"])
-    assert_metric("slis.kubernetes_healthcheck", value=1, tags=["sli_name:log"])
-    assert_metric("slis.kubernetes_healthcheck", value=1, tags=["sli_name:ping"])
-    assert_metric(
-        "slis.kubernetes_healthcheck",
-        value=1,
-        tags=["sli_name:poststarthook/aggregator-reload-proxy-client-cert"],
-    )
-    assert_metric(
-        "slis.kubernetes_healthcheck",
-        value=1,
-        tags=["sli_name:poststarthook/apiservice-discovery-controller"],
-    )
-    assert_metric(
-        "slis.kubernetes_healthchecks_total",
-        value=1,
-        tags=["sli_name:autoregister-completion", "status:error"],
-    )
-    assert_metric(
-        "slis.kubernetes_healthchecks_total",
-        value=4,
-        tags=["sli_name:autoregister-completion", "status:success"],
-    )
-    assert_metric(
-        "slis.kubernetes_healthchecks_total",
-        value=5,
-        tags=["sli_name:etcd", "status:success"],
-    )
-    assert_metric(
-        "slis.kubernetes_healthchecks_total",
-        value=5,
-        tags=["sli_name:log", "status:success"],
-    )
-    assert_metric(
-        "slis.kubernetes_healthchecks_total",
-        value=5,
-        tags=["sli_name:ping", "status:success"],
-    )
-    assert_metric(
-        "slis.kubernetes_healthchecks_total",
-        value=5,
-        tags=[
-            "sli_name:poststarthook/aggregator-reload-proxy-client-cert",
-            "status:success",
-        ],
-    )
-    assert_metric(
-        "slis.kubernetes_healthchecks_total",
-        value=5,
-        tags=[
-            "sli_name:poststarthook/apiservice-discovery-controller",
-            "status:success",
-        ],
-    )
+    expected_metrics = [
+        SLIMetric("slis.kubernetes_healthcheck", 1, ["sli_name:autoregister-completion"]),
+        SLIMetric("slis.kubernetes_healthcheck", 1, ["sli_name:etcd"]),
+        SLIMetric("slis.kubernetes_healthcheck", 1, ["sli_name:log"]),
+        SLIMetric("slis.kubernetes_healthcheck", 1, ["sli_name:ping"]),
+        SLIMetric("slis.kubernetes_healthcheck", 1, ["sli_name:poststarthook/aggregator-reload-proxy-client-cert"]),
+        SLIMetric("slis.kubernetes_healthcheck", 1, ["sli_name:poststarthook/apiservice-discovery-controller"]),
+        SLIMetric("slis.kubernetes_healthchecks_total", 1, ["sli_name:autoregister-completion", "status:error"]),
+        SLIMetric("slis.kubernetes_healthchecks_total", 4, ["sli_name:autoregister-completion", "status:success"]),
+        SLIMetric("slis.kubernetes_healthchecks_total", 5, ["sli_name:etcd", "status:success"]),
+        SLIMetric("slis.kubernetes_healthchecks_total", 5, ["sli_name:log", "status:success"]),
+        SLIMetric("slis.kubernetes_healthchecks_total", 5, ["sli_name:ping", "status:success"]),
+        SLIMetric(
+            "slis.kubernetes_healthchecks_total",
+            5,
+            ["sli_name:poststarthook/aggregator-reload-proxy-client-cert", "status:success"],
+        ),
+        SLIMetric(
+            "slis.kubernetes_healthchecks_total",
+            5,
+            ["sli_name:poststarthook/apiservice-discovery-controller", "status:success"],
+        ),
+    ]
+    for metric in expected_metrics:
+        aggregator.assert_metric("{}.{}".format(CHECK_NAME, metric.name), value=metric.value, tags=metric.tags)
 
     aggregator.assert_all_metrics_covered()
 
