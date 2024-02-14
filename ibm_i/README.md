@@ -8,10 +8,13 @@ This check monitors [IBM i][1] remotely through the Datadog Agent.
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
 
+**Note:** This check is not available on Windows since it uses the `fcntl()` system call, which is specific to Unix-like operating systems.
+
 ### Installation
 
 The IBM i check is included in the [Datadog Agent][3] package.
 No additional installation is needed on your server.
+
 
 #### ODBC driver
 
