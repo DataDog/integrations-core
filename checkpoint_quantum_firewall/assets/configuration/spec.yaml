@@ -1,4 +1,4 @@
-name: checkpoint_quantum_firewall
+name: checkpoint-quantum-firewall
 files:
   - name: checkpoint_quantum_firewall.yaml
     options:
