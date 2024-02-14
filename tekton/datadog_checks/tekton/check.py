@@ -8,7 +8,10 @@ from datadog_checks.tekton.config_models import ConfigMixin
 
 from .metrics import ENDPOINTS_METRICS_MAP
 
-(PIPELINES_CONTROLLER_NAMESPACE, TRIGGERS_CONTROLLER_NAMESPACE,) = [
+(
+    PIPELINES_CONTROLLER_NAMESPACE,
+    TRIGGERS_CONTROLLER_NAMESPACE,
+) = [
     'tekton.pipelines_controller',
     'tekton.trigger_controller',
 ]
