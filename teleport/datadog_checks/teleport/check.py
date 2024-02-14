@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any
 
 from datadog_checks.base import AgentCheck  # noqa: F401
 
@@ -41,15 +40,11 @@ class TeleportCheck(AgentCheck):
         # Perform HTTP Requests with our HTTP wrapper.
         # More info at https://datadoghq.dev/integrations-core/base/http/
         try:
-            response = self.http.get(self.diagnostic_url+"/healthz")
+            response = self.http.get(self.diagnostic_url + "/healthz")
             response.raise_for_status()
-            self.service_check(
-                "health.up", AgentCheck.OK
-            )
+            self.service_check("health.up", AgentCheck.OK)
         except Exception as e:
-            self.service_check(
-                "health.up", AgentCheck.CRITICAL, message=str(e)
-            )
+            self.service_check("health.up", AgentCheck.CRITICAL, message=str(e))
 
         # This is how you submit metrics
         # There are different types of metrics that you can submit (gauge, event).

@@ -2,21 +2,20 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+
 import pytest
 
-from datadog_checks.dev import docker_run
-from datadog_checks.dev import get_here
-from datadog_checks.teleport import TeleportCheck
+from datadog_checks.dev import docker_run, get_here
+
 
 @pytest.fixture(scope='session')
 def dd_environment():
     compose_file = os.path.join(get_here(), 'docker', 'docker-compose.yaml')
-   
+
     with docker_run(compose_file, sleep=5):
-        instance = {
-            "diagnostic_url": "http://127.0.0.1:3000"
-        }
+        instance = {"diagnostic_url": "http://127.0.0.1:3000"}
         yield instance
+
 
 @pytest.fixture
 def instance():
