@@ -15,7 +15,6 @@ from .common import HERE
 # Constants
 CHECK_NAME = "kube_apiserver"
 
-
 @pytest.fixture()
 def mock_metrics():
     f_name = os.path.join(HERE, "fixtures", "metrics_slis_1.27.3.txt")
@@ -33,7 +32,6 @@ def mock_metrics():
 
 
 def test_check_metrics_slis(aggregator, mock_metrics, mock_request, instance):
-    mock_request.get("http://localhost:6443/metrics/slis", status_code=200)
     c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
@@ -105,7 +103,6 @@ def test_check_metrics_slis(aggregator, mock_metrics, mock_request, instance):
 
 
 def test_check_metrics_slis_transform(aggregator, mock_metrics, mock_request, instance):
-    mock_request.get("http://localhost:6443/metrics/slis", status_code=200)
     c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
@@ -129,7 +126,6 @@ def test_check_metrics_slis_transform(aggregator, mock_metrics, mock_request, in
 
 
 def test_check_metrics_slis_filter_by_type(aggregator, mock_metrics, mock_request, instance):
-    mock_request.get("http://localhost:6443/metrics/slis", status_code=200)
     c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
