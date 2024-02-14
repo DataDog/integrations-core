@@ -32,7 +32,7 @@
     "assets": {
         "integration": {
             "auto_install": false,
-            "source_type_id": 10441,
+            "source_type_id": 7899050,
             "source_type_name": "cisco-umbrella-dns",
             "events": {
                 "creates_events": false
