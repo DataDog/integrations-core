@@ -7,7 +7,7 @@ spec:
     - name: echo
       image: alpine
       script: |
-        #!/bin/bash
+        #!/bin/sh
         while true; do
             echo "Sleeping 5 seconds..."
             sleep 5
