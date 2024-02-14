@@ -34,7 +34,6 @@ V2_VALID_MANIFEST = {
     "display_on_public_website": True,
     "legal_terms": {},
     "manifest_version": "2.0.0",
-    "oauth": {},
     "pricing": [{"billing_type": "free"}],
     "tile": {
         "changelog": "CHANGELOG.md",
