@@ -88,7 +88,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Ransomware $Checkpoint_Server $Action"
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Ransomware $Checkpoint_Server $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -142,7 +142,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Ransomware $Checkpoint_Server $Action"
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Ransomware $Checkpoint_Server $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -202,7 +202,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Ransomware $Checkpoint_Server $Action"
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Ransomware $Checkpoint_Server $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -263,7 +263,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Ransomware $Checkpoint_Server $Action "
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Ransomware $Checkpoint_Server $Action "
                                 },
                                 "storage": "hot"
                             }
@@ -324,7 +324,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Ransomware $Checkpoint_Server $Action"
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Ransomware $Checkpoint_Server $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -386,7 +386,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Ransomware $Checkpoint_Server $Action"
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Ransomware $Checkpoint_Server $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -448,7 +448,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Ransomware $Checkpoint_Server $Action"
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Ransomware $Checkpoint_Server $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -510,7 +510,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Ransomware $Checkpoint_Server $Action"
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Ransomware $Checkpoint_Server $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -572,7 +572,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Ransomware @checkpoint_firewall_action:Detect $Checkpoint_Server $Action"
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Ransomware @checkpoint_firewall_action:Detect $Checkpoint_Server $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -634,7 +634,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Ransomware $Checkpoint_Server $Action"
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Ransomware $Checkpoint_Server $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -694,7 +694,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Ransomware $Checkpoint_Server $Action"
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Ransomware $Checkpoint_Server $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -728,7 +728,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:checkpoint_quantum_firewall @product:Anti-Ransomware $Checkpoint_Server $Action",
+                            "query_string": "source:checkpoint-quantum-firewall @product:Anti-Ransomware $Checkpoint_Server $Action",
                             "indexes": [],
                             "storage": "hot"
                         },

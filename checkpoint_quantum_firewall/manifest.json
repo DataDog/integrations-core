@@ -69,7 +69,7 @@
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
-      "source_type_name": "checkpoint_quantum_firewall",
+      "source_type_name": "checkpoint-quantum-firewall",
       "events": {
         "creates_events": false
       },
@@ -95,7 +95,7 @@
       "Checkpoint Quantum Firewall: Anti Malware": "assets/dashboards/checkpoint_quantum_firewall_anti_malware.json"
     },
     "logs": {
-      "source": "checkpoint_quantum_firewall"
+      "source": "checkpoint-quantum-firewall"
     }
   },
   "author": {

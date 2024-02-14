@@ -6,5 +6,5 @@ files:
         example:
           - type: tcp/udp
             port: <PORT>
-            service: checkpoint_quantum_firewall
-            source: checkpoint_quantum_firewall
+            service: checkpoint-quantum-firewall
+            source: checkpoint-quantum-firewall

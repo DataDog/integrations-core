@@ -34,8 +34,8 @@ To install the Checkpoint Quantum Firewall integration, follow the steps below:
    logs:
      - type: tcp/udp
        port: <PORT>
-       service: checkpoint_quantum_firewall
-       source: checkpoint_quantum_firewall
+       service: checkpoint-quantum-firewall
+       source: checkpoint-quantum-firewall
    ```
 
 3. [Restart the Agent][1].

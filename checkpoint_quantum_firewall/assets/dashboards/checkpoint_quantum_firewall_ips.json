@@ -88,7 +88,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity"
+                                    "query": "source:checkpoint-quantum-firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -142,7 +142,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity"
+                                    "query": "source:checkpoint-quantum-firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -202,7 +202,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity"
+                                    "query": "source:checkpoint-quantum-firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -263,7 +263,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity"
+                                    "query": "source:checkpoint-quantum-firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -324,7 +324,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity"
+                                    "query": "source:checkpoint-quantum-firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -385,7 +385,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity"
+                                    "query": "source:checkpoint-quantum-firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -446,7 +446,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity"
+                                    "query": "source:checkpoint-quantum-firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -512,7 +512,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity"
+                                    "query": "source:checkpoint-quantum-firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -578,7 +578,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity"
+                                    "query": "source:checkpoint-quantum-firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -641,7 +641,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity"
+                                    "query": "source:checkpoint-quantum-firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -703,7 +703,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity"
+                                    "query": "source:checkpoint-quantum-firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity"
                                 },
                                 "storage": "hot"
                             }
@@ -736,7 +736,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:checkpoint_quantum_firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity",
+                            "query_string": "source:checkpoint-quantum-firewall @product:IPS $Checkpoint_Server $SmartDefense_Profile $Action $Confidence_Level $Severity",
                             "indexes": [],
                             "storage": "hot"
                         },

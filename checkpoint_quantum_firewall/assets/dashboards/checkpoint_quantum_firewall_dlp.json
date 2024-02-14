@@ -89,7 +89,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:DLP $Checkpoint_Server $Action $User_Name"
+                                    "query": "source:checkpoint-quantum-firewall @product:DLP $Checkpoint_Server $Action $User_Name"
                                 },
                                 "storage": "hot"
                             }
@@ -143,7 +143,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:DLP $Checkpoint_Server $Action $User_Name"
+                                    "query": "source:checkpoint-quantum-firewall @product:DLP $Checkpoint_Server $Action $User_Name"
                                 },
                                 "storage": "hot"
                             }
@@ -203,7 +203,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:DLP $Checkpoint_Server $Action $User_Name"
+                                    "query": "source:checkpoint-quantum-firewall @product:DLP $Checkpoint_Server $Action $User_Name"
                                 },
                                 "storage": "hot"
                             }
@@ -264,7 +264,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:DLP $Checkpoint_Server $Action $User_Name"
+                                    "query": "source:checkpoint-quantum-firewall @product:DLP $Checkpoint_Server $Action $User_Name"
                                 },
                                 "storage": "hot"
                             }
@@ -326,7 +326,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:DLP $Checkpoint_Server $Action $User_Name"
+                                    "query": "source:checkpoint-quantum-firewall @product:DLP $Checkpoint_Server $Action $User_Name"
                                 },
                                 "storage": "hot"
                             }
@@ -388,7 +388,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:DLP $Checkpoint_Server $Action $User_Name"
+                                    "query": "source:checkpoint-quantum-firewall @product:DLP $Checkpoint_Server $Action $User_Name"
                                 },
                                 "storage": "hot"
                             }
@@ -450,7 +450,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:DLP $Checkpoint_Server $Action $User_Name"
+                                    "query": "source:checkpoint-quantum-firewall @product:DLP $Checkpoint_Server $Action $User_Name"
                                 },
                                 "storage": "hot"
                             }
@@ -503,7 +503,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:DLP $Checkpoint_Server $Action $User_Name"
+                                    "query": "source:checkpoint-quantum-firewall @product:DLP $Checkpoint_Server $Action $User_Name"
                                 },
                                 "storage": "hot"
                             }
@@ -542,7 +542,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:checkpoint_quantum_firewall @product:DLP $Checkpoint_Server $Action $User_Name",
+                            "query_string": "source:checkpoint-quantum-firewall @product:DLP $Checkpoint_Server $Action $User_Name",
                             "indexes": [],
                             "storage": "hot"
                         },

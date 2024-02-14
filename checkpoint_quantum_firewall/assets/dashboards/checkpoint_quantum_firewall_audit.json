@@ -102,7 +102,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) $Checkpoint_Server $Action $Administrator"
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) $Checkpoint_Server $Action $Administrator"
                                 },
                                 "storage": "hot"
                             }
@@ -150,7 +150,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:\"Install Policy\" $Checkpoint_Server $Action $Administrator "
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:\"Install Policy\" $Checkpoint_Server $Action $Administrator "
                                 },
                                 "storage": "hot"
                             }
@@ -194,7 +194,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:Publish $Checkpoint_Server $Action $Administrator "
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:Publish $Checkpoint_Server $Action $Administrator "
                                 },
                                 "storage": "hot"
                             }
@@ -238,7 +238,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:\"Create Object\" $Checkpoint_Server $Action $Administrator "
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:\"Create Object\" $Checkpoint_Server $Action $Administrator "
                                 },
                                 "storage": "hot"
                             }
@@ -282,7 +282,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:\"Modify Object\" $Checkpoint_Server $Action $Administrator "
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:\"Modify Object\" $Checkpoint_Server $Action $Administrator "
                                 },
                                 "storage": "hot"
                             }
@@ -326,7 +326,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:\"Delete Object\" $Checkpoint_Server $Action $Administrator "
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:\"Delete Object\" $Checkpoint_Server $Action $Administrator "
                                 },
                                 "storage": "hot"
                             }
@@ -370,7 +370,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:\"Create Rule\" $Checkpoint_Server $Action $Administrator "
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:\"Create Rule\" $Checkpoint_Server $Action $Administrator "
                                 },
                                 "storage": "hot"
                             }
@@ -414,7 +414,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:\"Modify Rule\" $Checkpoint_Server $Action $Administrator "
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:\"Modify Rule\" $Checkpoint_Server $Action $Administrator "
                                 },
                                 "storage": "hot"
                             }
@@ -458,7 +458,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:\"Delete Rule\" $Checkpoint_Server $Action $Administrator "
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) @checkpoint_operation:\"Delete Rule\" $Checkpoint_Server $Action $Administrator "
                                 },
                                 "storage": "hot"
                             }
@@ -514,7 +514,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) $Checkpoint_Server $Action $Administrator"
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) $Checkpoint_Server $Action $Administrator"
                                 },
                                 "storage": "hot"
                             }
@@ -575,7 +575,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) $Checkpoint_Server $Action $Administrator"
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) $Checkpoint_Server $Action $Administrator"
                                 },
                                 "storage": "hot"
                             }
@@ -636,7 +636,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole) $Checkpoint_Server $Action $Administrator"
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) $Checkpoint_Server $Action $Administrator"
                                 },
                                 "storage": "hot"
                             }
@@ -671,7 +671,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:checkpoint_quantum_firewall @product:(SmartConsole OR SmartView) @checkpoint_operation:\"Install Policy\" $Checkpoint_Server $Action $Administrator ",
+                            "query_string": "source:checkpoint-quantum-firewall @product:(SmartConsole OR SmartView) @checkpoint_operation:\"Install Policy\" $Checkpoint_Server $Action $Administrator ",
                             "indexes": [],
                             "storage": "hot"
                         },
@@ -744,7 +744,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:checkpoint_quantum_firewall @product:(WEB_API OR SmartConsole OR SmartView) @checkpoint_operation:Publish $Checkpoint_Server $Action $Administrator ",
+                            "query_string": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole OR SmartView) @checkpoint_operation:Publish $Checkpoint_Server $Action $Administrator ",
                             "indexes": [],
                             "storage": "hot"
                         },

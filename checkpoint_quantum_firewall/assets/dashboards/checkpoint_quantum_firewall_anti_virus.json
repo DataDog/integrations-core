@@ -89,7 +89,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type"
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type"
                                 },
                                 "storage": "hot"
                             }
@@ -143,7 +143,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type"
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type"
                                 },
                                 "storage": "hot"
                             }
@@ -203,7 +203,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type"
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type"
                                 },
                                 "storage": "hot"
                             }
@@ -264,7 +264,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type"
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type"
                                 },
                                 "storage": "hot"
                             }
@@ -326,7 +326,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type"
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type"
                                 },
                                 "storage": "hot"
                             }
@@ -388,7 +388,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type"
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type"
                                 },
                                 "storage": "hot"
                             }
@@ -449,7 +449,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type"
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type"
                                 },
                                 "storage": "hot"
                             }
@@ -511,7 +511,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type"
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type"
                                 },
                                 "storage": "hot"
                             }
@@ -573,7 +573,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type"
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type"
                                 },
                                 "storage": "hot"
                             }
@@ -635,7 +635,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type"
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type"
                                 },
                                 "storage": "hot"
                             }
@@ -696,7 +696,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type"
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type"
                                 },
                                 "storage": "hot"
                             }
@@ -730,7 +730,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:checkpoint_quantum_firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type",
+                            "query_string": "source:checkpoint-quantum-firewall @product:Anti-Virus $Checkpoint_Server $Action $Protection_Type",
                             "indexes": [],
                             "storage": "hot"
                         },

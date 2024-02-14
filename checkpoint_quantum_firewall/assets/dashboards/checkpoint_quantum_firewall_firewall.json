@@ -88,7 +88,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
                                 },
                                 "storage": "hot"
                             }
@@ -142,7 +142,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
                                 },
                                 "storage": "hot"
                             }
@@ -202,7 +202,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
                                 },
                                 "storage": "hot"
                             }
@@ -263,7 +263,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
                                 },
                                 "storage": "hot"
                             }
@@ -324,7 +324,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
                                 },
                                 "storage": "hot"
                             }
@@ -385,7 +385,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
                                 },
                                 "storage": "hot"
                             }
@@ -434,7 +434,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Firewall @inzone:Internal $Checkpoint_Server $Action $Connection_Direction"
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall @inzone:Internal $Checkpoint_Server $Action $Connection_Direction"
                                 },
                                 "storage": "hot"
                             }
@@ -478,7 +478,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Firewall @outzone:Internal $Checkpoint_Server $Action $Connection_Direction"
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall @outzone:Internal $Checkpoint_Server $Action $Connection_Direction"
                                 },
                                 "storage": "hot"
                             }
@@ -522,7 +522,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Firewall @outzone:External $Checkpoint_Server $Action $Connection_Direction"
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall @outzone:External $Checkpoint_Server $Action $Connection_Direction"
                                 },
                                 "storage": "hot"
                             }
@@ -566,7 +566,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Firewall @inzone:External $Checkpoint_Server $Action $Connection_Direction"
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall @inzone:External $Checkpoint_Server $Action $Connection_Direction"
                                 },
                                 "storage": "hot"
                             }
@@ -623,7 +623,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
                                 },
                                 "storage": "hot"
                             }
@@ -685,7 +685,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
                                 },
                                 "storage": "hot"
                             }
@@ -749,7 +749,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
                                 },
                                 "storage": "hot"
                             }
@@ -813,7 +813,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
                                 },
                                 "storage": "hot"
                             }
@@ -877,7 +877,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
                                 },
                                 "storage": "hot"
                             }
@@ -941,7 +941,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
                                 },
                                 "storage": "hot"
                             }
@@ -1005,7 +1005,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
                                 },
                                 "storage": "hot"
                             }
@@ -1069,7 +1069,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
                                 },
                                 "storage": "hot"
                             }
@@ -1133,7 +1133,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
                                 },
                                 "storage": "hot"
                             }
@@ -1197,7 +1197,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
                                 },
                                 "storage": "hot"
                             }
@@ -1231,7 +1231,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:checkpoint_quantum_firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction",
+                            "query_string": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction",
                             "indexes": [],
                             "storage": "hot"
                         },

@@ -1,4 +1,4 @@
-id: checkpoint_quantum_firewall
+id: checkpoint-quantum-firewall
 metric_id: checkpoint-quantum-firewall
 backend_only: false
 facets:
@@ -340,7 +340,7 @@ pipeline:
   name: Checkpoint Quantum Firewall
   enabled: true
   filter:
-    query: "source:checkpoint_quantum_firewall"
+    query: "source:checkpoint-quantum-firewall"
   processors:
     - type: service-remapper
       name: Define `product` as the official service of the log

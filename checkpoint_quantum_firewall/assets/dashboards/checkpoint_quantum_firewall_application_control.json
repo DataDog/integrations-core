@@ -89,7 +89,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"Application Control\" $Checkpoint_Server $Action $Application_Category $Application_Name"
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Application Control\" $Checkpoint_Server $Action $Application_Category $Application_Name"
                                 },
                                 "storage": "hot"
                             }
@@ -134,7 +134,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"Application Control\" $Checkpoint_Server $Action $Application_Category $Application_Name"
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Application Control\" $Checkpoint_Server $Action $Application_Category $Application_Name"
                                 },
                                 "storage": "hot"
                             }
@@ -188,7 +188,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"Application Control\" $Checkpoint_Server $Action $Application_Category $Application_Name"
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Application Control\" $Checkpoint_Server $Action $Application_Category $Application_Name"
                                 },
                                 "storage": "hot"
                             }
@@ -248,7 +248,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"Application Control\" $Checkpoint_Server $Action $Application_Category $Application_Name"
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Application Control\" $Checkpoint_Server $Action $Application_Category $Application_Name"
                                 },
                                 "storage": "hot"
                             }
@@ -309,7 +309,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"Application Control\" $Checkpoint_Server $Action $Application_Category $Application_Name"
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Application Control\" $Checkpoint_Server $Action $Application_Category $Application_Name"
                                 },
                                 "storage": "hot"
                             }
@@ -371,7 +371,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"Application Control\" @checkpoint_firewall_action:(Accept OR Allow) $Checkpoint_Server $Action $Application_Category $Application_Name "
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Application Control\" @checkpoint_firewall_action:(Accept OR Allow) $Checkpoint_Server $Action $Application_Category $Application_Name "
                                 },
                                 "storage": "hot"
                             }
@@ -433,7 +433,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"Application Control\" @checkpoint_firewall_action:(Drop OR Reject OR Block) $Checkpoint_Server $Action $Application_Category $Application_Name "
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Application Control\" @checkpoint_firewall_action:(Drop OR Reject OR Block) $Checkpoint_Server $Action $Application_Category $Application_Name "
                                 },
                                 "storage": "hot"
                             }
@@ -495,7 +495,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"Application Control\" @checkpoint_firewall_action:(Accept OR Allow) $Checkpoint_Server $Action $Application_Category $Application_Name "
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Application Control\" @checkpoint_firewall_action:(Accept OR Allow) $Checkpoint_Server $Action $Application_Category $Application_Name "
                                 },
                                 "storage": "hot"
                             }
@@ -557,7 +557,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"Application Control\" @checkpoint_firewall_action:(Drop OR Reject OR Block) $Checkpoint_Server $Action $Application_Category $Application_Name "
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Application Control\" @checkpoint_firewall_action:(Drop OR Reject OR Block) $Checkpoint_Server $Action $Application_Category $Application_Name "
                                 },
                                 "storage": "hot"
                             }
@@ -619,7 +619,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"Application Control\" @checkpoint_firewall_action:(Accept OR Allow) $Checkpoint_Server $Action $Application_Category $Application_Name "
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Application Control\" @checkpoint_firewall_action:(Accept OR Allow) $Checkpoint_Server $Action $Application_Category $Application_Name "
                                 },
                                 "storage": "hot"
                             }
@@ -681,7 +681,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"Application Control\" @checkpoint_firewall_action:(Drop OR Reject OR Block) $Checkpoint_Server $Action $Application_Category $Application_Name "
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Application Control\" @checkpoint_firewall_action:(Drop OR Reject OR Block) $Checkpoint_Server $Action $Application_Category $Application_Name "
                                 },
                                 "storage": "hot"
                             }
@@ -743,7 +743,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"Application Control\" @checkpoint_firewall_action:(Accept OR Allow) $Checkpoint_Server $Action $Application_Category $Application_Name "
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Application Control\" @checkpoint_firewall_action:(Accept OR Allow) $Checkpoint_Server $Action $Application_Category $Application_Name "
                                 },
                                 "storage": "hot"
                             }
@@ -805,7 +805,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"Application Control\" @checkpoint_firewall_action:(Drop OR Reject OR Block) $Checkpoint_Server $Action $Application_Category $Application_Name "
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Application Control\" @checkpoint_firewall_action:(Drop OR Reject OR Block) $Checkpoint_Server $Action $Application_Category $Application_Name "
                                 },
                                 "storage": "hot"
                             }
@@ -866,7 +866,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"Application Control\" @checkpoint_firewall_action:(Accept OR Allow) $Checkpoint_Server $Action $Application_Category $Application_Name "
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Application Control\" @checkpoint_firewall_action:(Accept OR Allow) $Checkpoint_Server $Action $Application_Category $Application_Name "
                                 },
                                 "storage": "hot"
                             }
@@ -932,7 +932,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"Application Control\" @checkpoint_firewall_action:(Drop OR Reject OR Block) $Checkpoint_Server $Action $Application_Category $Application_Name "
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Application Control\" @checkpoint_firewall_action:(Drop OR Reject OR Block) $Checkpoint_Server $Action $Application_Category $Application_Name "
                                 },
                                 "storage": "hot"
                             }
@@ -1001,7 +1001,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"Application Control\" $Checkpoint_Server $Action $Application_Category $Application_Name"
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Application Control\" $Checkpoint_Server $Action $Application_Category $Application_Name"
                                 },
                                 "storage": "hot"
                             }
@@ -1070,7 +1070,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"Application Control\" $Checkpoint_Server $Action $Application_Category $Application_Name"
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Application Control\" $Checkpoint_Server $Action $Application_Category $Application_Name"
                                 },
                                 "storage": "hot"
                             }
@@ -1144,7 +1144,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint_quantum_firewall @product:\"Application Control\" @checkpoint_firewall_action:(Accept OR Allow) @app_risk:[4 TO 5] $Checkpoint_Server $Action $Application_Category $Application_Name "
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Application Control\" @checkpoint_firewall_action:(Accept OR Allow) @app_risk:[4 TO 5] $Checkpoint_Server $Action $Application_Category $Application_Name "
                                 },
                                 "storage": "hot"
                             }
@@ -1183,7 +1183,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:checkpoint_quantum_firewall @product:\"Application Control\" $Checkpoint_Server $Action $Application_Category $Application_Name ",
+                            "query_string": "source:checkpoint-quantum-firewall @product:\"Application Control\" $Checkpoint_Server $Action $Application_Category $Application_Name ",
                             "indexes": [],
                             "storage": "hot"
                         },
