@@ -1,4 +1,4 @@
-id: cisco_umbrella_dns
+id: cisco-umbrella-dns
 tests:
  -
   sample: |-

@@ -131,7 +131,7 @@ class IBMMQConfig:
 
         # Implicitly enable SSL auth connection if SSL options are used and `ssl_auth` isn't set
         if instance.get('ssl_auth') is None:
-            if any([instance.get(o) for o in ssl_options]):
+            if any(instance.get(o) for o in ssl_options):
                 self.log.info(
                     "`ssl_auth` has not been explicitly enabled but other SSL options have been provided. "
                     "SSL will be used for connecting"
@@ -140,7 +140,7 @@ class IBMMQConfig:
 
         # Explicitly disable SSL auth connection if SSL options are used but `ssl_auth` is False
         if instance.get('ssl_auth') is False:
-            if any([instance.get(o) for o in ssl_options]):
+            if any(instance.get(o) for o in ssl_options):
                 self.log.warning(
                     "`ssl_auth` is explicitly disabled but SSL options are being used. "
                     "SSL will not be used for connecting."
