@@ -62,7 +62,8 @@
       "[Tomcat] Increase of the errors/second rate for host: {{host.name}}": "assets/monitors/error_count.json"
     },
     "saved_views": {
-      "tomcat_processes": "assets/saved_views/tomcat_processes.json"
+      "tomcat_processes": "assets/saved_views/tomcat_processes.json",
+      "tomcat_4xx": "assets/saved_views/tomcat_4xx.json"
     },
     "logs": {
       "source": "tomcat"
