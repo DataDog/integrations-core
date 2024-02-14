@@ -33,7 +33,7 @@
         "integration": {
             "auto_install": false,
             "source_type_id": 10441,
-            "source_type_name": "cisco_umbrella_dns",
+            "source_type_name": "cisco-umbrella-dns",
             "events": {
                 "creates_events": false
             },
@@ -46,7 +46,7 @@
             "Cisco Umbrella DNS - Proxied Traffic": "assets/dashboards/cisco_umbrella_dns_proxied_traffic.json"
         },
         "logs": {
-            "source": "cisco_umbrella_dns"
+            "source": "cisco-umbrella-dns"
         }
     },
     "author": {
