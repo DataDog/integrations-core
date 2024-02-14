@@ -534,8 +534,8 @@ files:
             Maximum amount of tables the Agent collects from the instance.
           value:
             type: number
-            example: 1000
-            display_default: 1000
+            example: 300
+            display_default: 300
         - name: max_columns
           description: |
             Maximum amount of columns the Agent collects per table.
