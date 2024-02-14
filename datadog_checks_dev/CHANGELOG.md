@@ -2,12 +2,6 @@
 
 <!-- towncrier release notes start -->
 
-## 31.0.1 / 2024-02-14
-
-***Changed***:
-
-* Remove unused oauth field from manifest. ([#16873](https://github.com/DataDog/integrations-core/pull/16873))
-
 ## 31.0.0 / 2024-02-06
 
 ***Changed***:
