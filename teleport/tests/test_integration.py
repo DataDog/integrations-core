@@ -25,3 +25,15 @@ def test_connect_ok(aggregator, dd_run_check):
     check = TeleportCheck('teleport', {}, [instance])
     dd_run_check(check)
     aggregator.assert_service_check('teleport.health.up', status=AgentCheck.OK)
+
+def test_check_collects_teleport_common_metrics(aggregator, dd_run_check):
+    instance = {
+        "diagnostic_url": "http://127.0.0.1:3000"
+    }
+    check = TeleportCheck('teleport', {}, [instance])
+    dd_run_check(check)
+
+    common_metrics = ["process_state", "certificate_mismatch_total","rx","server_interactive_sessions_total","teleport_build_info","teleport_cache_events","teleport_cache_stale_events","tx"]
+    
+    for metric in common_metrics:
+        aggregator.assert_metric(f"teleport.{metric}", tags=None, count=1)
