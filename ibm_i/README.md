@@ -15,7 +15,6 @@ Follow the instructions below to install and configure this check for an Agent r
 The IBM i check is included in the [Datadog Agent][3] package.
 No additional installation is needed on your server.
 
-
 #### ODBC driver
 
 The IBM i check uses the IBM i ODBC driver to connect remotely to the IBM i host. 
