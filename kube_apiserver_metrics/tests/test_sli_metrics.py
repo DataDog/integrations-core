@@ -6,7 +6,6 @@ import os
 
 import mock
 import pytest
-import requests_mock
 
 from datadog_checks.kube_apiserver_metrics import KubeAPIServerMetricsCheck
 
@@ -14,6 +13,7 @@ from .common import HERE
 
 # Constants
 CHECK_NAME = "kube_apiserver"
+
 
 @pytest.fixture()
 def mock_metrics():
@@ -31,7 +31,7 @@ def mock_metrics():
         yield
 
 
-def test_check_metrics_slis(aggregator, mock_metrics, mock_request, instance):
+def test_check_metrics_slis(aggregator, mock_metrics, instance):
     c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
@@ -102,7 +102,7 @@ def test_check_metrics_slis(aggregator, mock_metrics, mock_request, instance):
     aggregator.assert_all_metrics_covered()
 
 
-def test_check_metrics_slis_transform(aggregator, mock_metrics, mock_request, instance):
+def test_check_metrics_slis_transform(aggregator, mock_metrics, instance):
     c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
@@ -125,7 +125,7 @@ def test_check_metrics_slis_transform(aggregator, mock_metrics, mock_request, in
     )
 
 
-def test_check_metrics_slis_filter_by_type(aggregator, mock_metrics, mock_request, instance):
+def test_check_metrics_slis_filter_by_type(aggregator, mock_metrics, instance):
     c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
@@ -149,31 +149,18 @@ def test_check_metrics_slis_filter_by_type(aggregator, mock_metrics, mock_reques
     )
 
 
-@pytest.fixture()
-def mock_request():
-    with requests_mock.Mocker() as m:
-        yield m
-
-
 def test_detect_sli_endpoint(mock_metrics, instance):
-    with mock.patch("requests.get") as mock_request:
-        mock_request.return_value.status_code = 200
-        c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
-        c.check(instance)
-        assert c._slis_available is True
+    c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
+    assert c._slis_available is True
 
 
-def test_detect_sli_endpoint_404(mock_metrics, instance):
-    with mock.patch("requests.get") as mock_request:
-        mock_request.return_value.status_code = 404
-        c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
-        c.check(instance)
-        assert c._slis_available is False
+def test_detect_sli_endpoint_404(instance, mock_http_response):
+    mock_http_response(status_code=404)
+    c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
+    assert c._slis_available is False
 
 
-def test_detect_sli_endpoint_403(mock_metrics, instance):
-    with mock.patch("requests.get") as mock_request:
-        mock_request.return_value.status_code = 403
-        c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
-        c.check(instance)
-        assert c._slis_available is False
+def test_detect_sli_endpoint_403(instance, mock_http_response):
+    mock_http_response(status_code=403)
+    c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
+    assert c._slis_available is False
