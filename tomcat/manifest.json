@@ -63,7 +63,8 @@
     },
     "saved_views": {
       "tomcat_processes": "assets/saved_views/tomcat_processes.json",
-      "tomcat_4xx": "assets/saved_views/tomcat_4xx.json"
+      "tomcat_4xx": "assets/saved_views/tomcat_4xx.json",
+      "tomcat_5xx": "assets/saved_views/tomcat_5xx.json"
     },
     "logs": {
       "source": "tomcat"
