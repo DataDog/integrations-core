@@ -461,8 +461,7 @@ class SQLServer(AgentCheck):
         db_stats_to_collect = list(DATABASE_METRICS)
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         if not is_azure_sql_database(engine_edition):
-            for metric in DATABASE_BACKUP_METRICS:
-                db_stats_to_collect.append(metric)
+            db_stats_to_collect.extend(DATABASE_BACKUP_METRICS)
 
         for name, table, column in db_stats_to_collect:
             # include database as a filter option
