@@ -141,14 +141,10 @@ def test_azure_cross_database_queries_excluded(get_cursor, mock_connect, instanc
     get_cursor.return_value = mock_results
 
     instance = copy.copy(instance_docker_defaults)
-    # make sure check doesn't try to add metrics
     instance['stored_procedure'] = 'fake_proc'
-
-    # check base case of lowercase for lowercase and case-insensitive db
     check = SQLServer(CHECK_NAME, {}, [instance])
     check.initialize_connection()
     check.make_metric_list_to_collect()
-
     cross_database_metrics = [
         metric
         for metric in check.instance_metrics
