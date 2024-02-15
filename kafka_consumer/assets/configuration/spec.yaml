@@ -221,3 +221,11 @@ files:
           type: string
           example: <SSL_FILE_PATH>
       - template: instances/default
+      - name: data_streams_enabled
+        description: |
+          Enables collection of the Kafka lag metric in Seconds. It is part of the Data Streams Monitoring Product.
+          Enabling this option can cause additional billing.
+        value:
+          type: boolean
+          example: false
+        display_default: false

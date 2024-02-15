@@ -10,6 +10,7 @@ import pytest
 from confluent_kafka.admin._group import ConsumerGroupListing, ListConsumerGroupsResult
 
 from datadog_checks.kafka_consumer import KafkaCheck
+from datadog_checks.kafka_consumer.kafka_consumer import _get_interpolated_timestamp
 
 pytestmark = [pytest.mark.unit]
 
@@ -349,3 +350,9 @@ def test_when_empty_string_consumer_group_then_skip(kafka_instance):
     with mock.patch("datadog_checks.kafka_consumer.client.AdminClient.list_consumer_groups", return_value=future):
         kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
         assert kafka_consumer_check.client._get_consumer_groups() == ["my_consumer"]
+
+def test_get_interpolated_timestamp():
+    assert _get_interpolated_timestamp({0: 100, 10: 200}, 5) == 150
+    assert _get_interpolated_timestamp({10: 100, 20: 200}, 5) == 50
+    assert _get_interpolated_timestamp({0: 100, 10: 200}, 15) == 250
+    assert _get_interpolated_timestamp({10: 200}, 15) is None

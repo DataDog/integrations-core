@@ -1,23 +1,35 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import json
+from collections import defaultdict
 from time import time
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.config import KafkaConfig
 
+try:
+    from datadog_agent import read_persistent_cache, write_persistent_cache
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+    read_persistent_cache = datadog_agent.read_persistent_cache
+    write_persistent_cache = datadog_agent.write_persistent_cache
+
+MAX_TIMESTAMPS = 1000
+
 
 class KafkaCheck(AgentCheck):
-
     __NAMESPACE__ = 'kafka'
 
     def __init__(self, name, init_config, instances):
         super(KafkaCheck, self).__init__(name, init_config, instances)
         self.config = KafkaConfig(self.init_config, self.instance, self.log)
         self._context_limit = self.config._context_limit
+        self._data_streams_enabled = is_affirmative(self.instance.get('data_streams_enabled', False))
         self.client = KafkaClient(self.config, self.log)
         self.check_initializations.insert(0, self.config.validate_config)
+        self._broker_timestamp_cache_key = 'broker_timestamps' + "".join(sorted(self.config._custom_tags))
 
     def check(self, _):
         """The main entrypoint of the check."""
@@ -42,11 +54,17 @@ class KafkaCheck(AgentCheck):
 
         # Fetch the broker highwater offsets
         highwater_offsets = {}
+        broker_timestamps = defaultdict(dict)
         try:
+            if self._data_streams_enabled:
+                broker_timestamps = self._load_broker_timestamps()
             if len(consumer_offsets) < self._context_limit:
                 # Fetch highwater offsets
                 # Expected format: {(topic, partition): offset}
                 highwater_offsets = self.client.get_highwater_offsets(consumer_offsets)
+                if self._data_streams_enabled:
+                    self._add_broker_timestamps(broker_timestamps, highwater_offsets)
+                    self._save_broker_timestamps(broker_timestamps)
             else:
                 self.warning("Context limit reached. Skipping highwater offset collection.")
         except Exception:
@@ -74,10 +92,34 @@ class KafkaCheck(AgentCheck):
 
         self.report_highwater_offsets(highwater_offsets, self._context_limit)
         self.report_consumer_offsets_and_lag(
-            consumer_offsets, highwater_offsets, self._context_limit - len(highwater_offsets)
+            consumer_offsets, highwater_offsets, self._context_limit - len(highwater_offsets), broker_timestamps
         )
         if self.config._close_admin_client:
             self.client.close_admin_client()
+
+    def _load_broker_timestamps(self):
+        """Loads broker timestamps from persistent cache."""
+        broker_timestamps = defaultdict(dict)
+        try:
+            for topic_partition, content in json.loads(
+                    read_persistent_cache(self._broker_timestamp_cache_key)).items():
+                for offset, timestamp in content.items():
+                    broker_timestamps[topic_partition][int(offset)] = timestamp
+        except Exception as e:
+            self.log.warning('Could not read broker timestamps from cache: %s', str(e))
+        return broker_timestamps
+
+    def _add_broker_timestamps(self, broker_timestamps, highwater_offsets):
+        for (topic, partition), highwater_offset in highwater_offsets.items():
+            timestamps = broker_timestamps["{}_{}".format(topic, partition)]
+            timestamps[highwater_offset] = time()
+            # If there's too many timestamps, we delete the oldest
+            if len(timestamps) > MAX_TIMESTAMPS:
+                del timestamps[min(timestamps)]
+
+    def _save_broker_timestamps(self, broker_timestamps):
+        """Saves broker timestamps to persistent cache."""
+        write_persistent_cache(self._broker_timestamp_cache_key, json.dumps(broker_timestamps))
 
     def report_highwater_offsets(self, highwater_offsets, contexts_limit):
         """Report the broker highwater offsets."""
@@ -93,7 +135,7 @@ class KafkaCheck(AgentCheck):
                 return
         self.log.debug('%s highwater offsets reported', reported_contexts)
 
-    def report_consumer_offsets_and_lag(self, consumer_offsets, highwater_offsets, contexts_limit):
+    def report_consumer_offsets_and_lag(self, consumer_offsets, highwater_offsets, contexts_limit, broker_timestamps):
         """Report the consumer offsets and consumer lag."""
         reported_contexts = 0
         self.log.debug("Reporting consumer offsets and lag metrics")
@@ -145,6 +187,19 @@ class KafkaCheck(AgentCheck):
                     key = "{}:{}:{}".format(consumer_group, topic, partition)
                     self.send_event(title, message, consumer_group_tags, 'consumer_lag', key, severity="error")
                     self.log.debug(message)
+
+                if not self._data_streams_enabled:
+                    continue
+
+                timestamps = broker_timestamps["{}_{}".format(topic, partition)]
+                # The producer timestamp can be not set if there was an error fetching broker offsets.
+                producer_timestamp = timestamps.get(producer_offset, None)
+                consumer_timestamp = _get_interpolated_timestamp(timestamps, consumer_offset)
+                if consumer_timestamp is None or producer_timestamp is None:
+                    continue
+                lag = producer_timestamp - consumer_timestamp
+                self.gauge('estimated_consumer_lag_seconds', lag, tags=consumer_group_tags)
+                reported_contexts += 1
             else:
                 if partitions is None:
                     msg = (
@@ -172,3 +227,32 @@ class KafkaCheck(AgentCheck):
             'aggregation_key': aggregation_key,
         }
         self.event(event_dict)
+
+
+def _get_interpolated_timestamp(timestamps, offset):
+    if offset in timestamps:
+        return timestamps[offset]
+    offsets = timestamps.keys()
+    try:
+        # Get the closest saved offsets to the consumer_offset
+        offset_before = max([o for o in offsets if o < offset])
+        offset_after = min([o for o in offsets if o > offset])
+    except ValueError:
+        if len(offsets) < 2:
+            return None
+        # We couldn't find offsets before and after the current consumer offset.
+        # This happens when you start a consumer to replay data in the past:
+        #   - We provision a consumer at t0 that will start consuming from t1 (t1 << t0).
+        #   - It starts building a history of offset/timestamp pairs from the moment it started to run, i.e. t0.
+        #   - So there is no offset/timestamp pair in the local history between t1 -> t0.
+        # We'll take the min and max offsets available and assume the timestamp is an affine function
+        # of the offset to compute an approximate broker timestamp corresponding to the current consumer offset.
+        offset_before = min(offsets)
+        offset_after = max(offsets)
+
+    # We assume that the timestamp is an affine function of the offset
+    timestamp_before = timestamps[offset_before]
+    timestamp_after = timestamps[offset_after]
+    slope = (timestamp_after - timestamp_before) / float(offset_after - offset_before)
+    timestamp = slope * (offset - offset_after) + timestamp_after
+    return timestamp

@@ -4,13 +4,34 @@
 import logging
 from contextlib import nullcontext as does_not_raise
 
+import copy
 import pytest
+import mock
+import json
+from collections import defaultdict
 
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import assert_check_kafka, metrics
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
+
+
+def mocked_read_persistent_cache(cache_key):
+    cached_offsets = defaultdict(dict)
+    cached_offsets["marvel_0"][25] = 150
+    cached_offsets["marvel_0"][40] = 200
+    cached_offsets["marvel_1"][25] = 150
+    cached_offsets["marvel_1"][40] = 200
+    cached_offsets["dc_0"][25] = 150
+    cached_offsets["dc_0"][40] = 200
+    cached_offsets["dc_1"][25] = 150
+    cached_offsets["dc_1"][40] = 200
+    return json.dumps(cached_offsets)
+
+
+def mocked_time():
+    return 400
 
 
 def test_check_kafka(aggregator, check, kafka_instance, dd_run_check):
@@ -182,8 +203,10 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
+@mock.patch('datadog_checks.kafka_consumer.kafka_consumer.read_persistent_cache', mocked_read_persistent_cache)
+@mock.patch('datadog_checks.kafka_consumer.kafka_consumer.time', mocked_time)
 @pytest.mark.parametrize(
-    'consumer_groups_regex_config, broker_offset_count, consumer_offset_count, consumer_lag_count, expected_warning',
+    'consumer_groups_regex_config, broker_offset_count, consumer_offset_count, consumer_lag_count, consumer_lag_seconds_count, expected_warning',
     [
         pytest.param(
             {
@@ -193,8 +216,22 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
             4,
             4,
             4,
+            0,
             '',
             id="All consumer offsets, empty topics",
+        ),
+        pytest.param(
+            {
+                'consumer_groups': {},
+                'consumer_groups_regex': {'.+': {}},
+                'data_streams_enabled': 'true',
+            },
+            4,
+            4,
+            4,
+            4,
+            '',
+            id="All consumer offsets, empty topics with data streams enabled",
         ),
         pytest.param(
             {
@@ -204,6 +241,7 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
             4,
             4,
             4,
+            0,
             '',
             id="All consumer offsets, all topics",
         ),
@@ -212,6 +250,7 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
                 'consumer_groups': {},
                 'consumer_groups_regex': {'.+': {'!.+': []}},
             },
+            0,
             0,
             0,
             0,
@@ -226,6 +265,7 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
             0,
             0,
             0,
+            0,
             '',
             id="No consumer offsets, No topics",
         ),
@@ -234,6 +274,7 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
                 'consumer_groups': {},
                 'consumer_groups_regex': {'!.+': {}},
             },
+            0,
             0,
             0,
             0,
@@ -248,6 +289,7 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
             1,
             1,
             1,
+            0,
             '',
             id="Specified consumer group, topic, and partition",
         ),
@@ -259,6 +301,7 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
             2,
             2,
             2,
+            0,
             '',
             id="Specified consumer group, topic",
         ),
@@ -270,6 +313,7 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
             4,
             4,
             4,
+            0,
             '',
             id="Multiple consumer_groups specified",
         ),
@@ -282,6 +326,7 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
             4,
             4,
             4,
+            0,
             'Using both monitor_unlisted_consumer_groups and consumer_groups or consumer_groups_regex',
             id="No specified consumer groups, but monitor_unlisted_consumer_groups true",
         ),
@@ -294,6 +339,7 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
             4,
             4,
             4,
+            0,
             'Using both monitor_unlisted_consumer_groups and consumer_groups or consumer_groups_regex',
             id="Specified topics on consumer_groups, but monitor_unlisted_consumer_groups true",
         ),
@@ -306,6 +352,7 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
             4,
             4,
             4,
+            0,
             'Using both monitor_unlisted_consumer_groups and consumer_groups or consumer_groups_regex',
             id="Specified topics on consumer_groups_regex, but monitor_unlisted_consumer_groups true",
         ),
@@ -318,6 +365,7 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
             2,
             2,
             2,
+            0,
             '',
             id="Specified topic, monitor_unlisted_consumer_groups false",
         ),
@@ -330,6 +378,7 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
             2,
             2,
             2,
+            0,
             '',
             id="Specified topic with an extra nonmatching consumer group regex, monitor_unlisted_consumer_groups false",
         ),
@@ -342,6 +391,7 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
             4,
             4,
             4,
+            0,
             'Using consumer_groups and consumer_groups_regex',
             id="Mixing both consumer_groups and consumer_groups_regex",
         ),
@@ -354,6 +404,7 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
             4,
             4,
             4,
+            0,
             'Using both monitor_unlisted_consumer_groups and consumer_groups or consumer_groups_regex',
             id="Mixing consumer_groups, consumer_groups_regex, and monitor_unlisted_consumer_groups",
         ),
@@ -365,6 +416,7 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
             2,
             2,
             2,
+            0,
             '',
             id="Using the same consumer_groups and consumer_groups_regex values",
         ),
@@ -373,6 +425,7 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
                 'consumer_groups': {},
                 'consumer_groups_regex': {'my_consumer': {'unconsumed_*': []}},
             },
+            0,
             0,
             0,
             0,
@@ -386,6 +439,7 @@ def test_regex_consumer_groups(
     broker_offset_count,
     consumer_offset_count,
     consumer_lag_count,
+    consumer_lag_seconds_count,
     expected_warning,
     caplog,
     kafka_instance,
@@ -404,5 +458,7 @@ def test_regex_consumer_groups(
     aggregator.assert_metric("kafka.broker_offset", count=broker_offset_count)
     aggregator.assert_metric("kafka.consumer_offset", count=consumer_offset_count)
     aggregator.assert_metric("kafka.consumer_lag", count=consumer_lag_count)
+    aggregator.assert_metric("kafka.estimated_consumer_lag_seconds", count=consumer_lag_seconds_count)
 
     assert expected_warning in caplog.text
+
