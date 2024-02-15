@@ -98,18 +98,45 @@ def test_check_metrics_slis_filter_by_type(aggregator, mock_metrics, instance):
         aggregator.assert_metric("{}.{}".format(CHECK_NAME, metric.name), count=metric.count, tags=metric.tags)
 
 
-def test_detect_sli_endpoint(mock_metrics, instance):
+def test_detect_sli_endpoint(aggregator, mock_metrics, instance):
     c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
-    assert c._slis_available is True
+    c.check(instance)
+    SLIMetric = namedtuple("SLIMetric", ["name", "count"])
+
+    expected_metrics = [
+        SLIMetric("slis.kubernetes_healthcheck", 6),
+        SLIMetric("slis.kubernetes_healthchecks_total", 7),
+    ]
+    for metric in expected_metrics:
+        aggregator.assert_metric("{}.{}".format(CHECK_NAME, metric.name), count=metric.count)
+    aggregator.assert_all_metrics_covered()
 
 
-def test_detect_sli_endpoint_404(instance, mock_http_response):
+def test_detect_sli_endpoint_404(aggregator, instance, mock_http_response):
     mock_http_response(status_code=404)
     c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
-    assert c._slis_available is False
+    mock_http_response(status_code=200)
+    c.check(instance)
+    SLIMetric = namedtuple("SLIMetric", ["name", "count"])
+
+    expected_metrics = [
+        SLIMetric("slis.kubernetes_healthcheck", 0),
+        SLIMetric("slis.kubernetes_healthchecks_total", 0),
+    ]
+    for metric in expected_metrics:
+        aggregator.assert_metric("{}.{}".format(CHECK_NAME, metric.name), count=metric.count)
 
 
-def test_detect_sli_endpoint_403(instance, mock_http_response):
+def test_detect_sli_endpoint_403(aggregator, instance, mock_http_response):
     mock_http_response(status_code=403)
     c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
-    assert c._slis_available is False
+    mock_http_response(status_code=200)
+    c.check(instance)
+    SLIMetric = namedtuple("SLIMetric", ["name", "count"])
+
+    expected_metrics = [
+        SLIMetric("slis.kubernetes_healthcheck", 0),
+        SLIMetric("slis.kubernetes_healthchecks_total", 0),
+    ]
+    for metric in expected_metrics:
+        aggregator.assert_metric("{}.{}".format(CHECK_NAME, metric.name), count=metric.count)
