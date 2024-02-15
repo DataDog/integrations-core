@@ -464,9 +464,8 @@ class SQLServer(AgentCheck):
         print("[AMW] making metrics list to collect")
         if not is_azure_sql_database(engine_edition):
             print("[AMW] Not azure, adding backup metrics.")
-            for name, table, column in DATABASE_BACKUP_METRICS:
-                cfg = {'name': name, 'table': table, 'column': column, 'instance_name': 'master', 'tags': tags}
-                db_stats_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+            for metric in DATABASE_BACKUP_METRICS:
+                db_stats_to_collect.append(metric)
 
         for name, table, column in db_stats_to_collect:
             # include database as a filter option
