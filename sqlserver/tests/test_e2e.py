@@ -103,7 +103,6 @@ def test_ao_secondary_replica(dd_agent_check, init_config, instance_ao_docker_se
 def test_check_docker(dd_agent_check, init_config, instance_e2e):
     # run sync to ensure only a single run of both
     # set a very small collection interval so the tests go fast
-    print("[AMW] running test")
     instance_e2e['query_activity'] = {'run_sync': True, 'collection_interval': 0.1}
     instance_e2e['query_metrics'] = {'run_sync': True, 'collection_interval': 0.1}
     instance_e2e['procedure_metrics'] = {'run_sync': True, 'collection_interval': 0.1}

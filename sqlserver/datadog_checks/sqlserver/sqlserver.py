@@ -430,7 +430,6 @@ class SQLServer(AgentCheck):
         Will also create and cache cursors to query the db.
         """
 
-        print("[AMW] _make_metric_list_to_collect")
         metrics_to_collect = []
         tags = self.instance.get('tags', [])
 
@@ -461,9 +460,7 @@ class SQLServer(AgentCheck):
         # Load database statistics
         db_stats_to_collect = list(DATABASE_METRICS)
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
-        print("[AMW] making metrics list to collect")
         if not is_azure_sql_database(engine_edition):
-            print("[AMW] Not azure, adding backup metrics.")
             for metric in DATABASE_BACKUP_METRICS:
                 db_stats_to_collect.append(metric)
 
@@ -712,7 +709,6 @@ class SQLServer(AgentCheck):
         return cls(cfg_inst, base_name, metric_type, column, self.log)
 
     def check(self, _):
-        print("[AMW] check start")
         if self.do_check:
             # configure custom queries for the check
             if self._query_manager is None:
