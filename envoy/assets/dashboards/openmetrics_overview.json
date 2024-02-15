@@ -1106,7 +1106,7 @@
                     {
                         "definition": {
                             "background_color": "purple",
-                            "content": "Downstream metrics provides insight such as performance, throughput and errors into the Envoy's communications with downstream services.",
+                            "content": "Downstream metrics provide insight into performance, throughput, and errors for Envoy's communication with downstream services.",
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": true,
