@@ -56,7 +56,7 @@ labels:
 
 ##### Metric collection
 
-This is an example configuration with Kubernetes annotations on your Fluxcd pods. See the [sample configuration file][4] for all available configuration options.
+This is an example configuration with Kubernetes annotations on your Flux pods. See the [sample configuration file][4] for all available configuration options.
 
 ```yaml
 apiVersion: v1
