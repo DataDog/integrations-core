@@ -89,6 +89,10 @@ integration/cilium:
 - cilium/**/*
 integration/cisco_aci:
 - cisco_aci/**/*
+integration/cisco_duo:
+- cisco_duo/**/*
+integration/cisco_umbrella_dns:
+- cisco_umbrella_dns/**/*
 integration/citrix_hypervisor:
 - citrix_hypervisor/**/*
 integration/clickhouse:
@@ -479,8 +483,9 @@ integration/wmi_check:
 - wmi_check/**/*
 integration/yarn:
 - yarn/**/*
+integration/zeek:
+- zeek/**/*
 integration/zk:
 - zk/**/*
 release:
-- requirements-agent-release.txt
 - '*/__about__.py'

@@ -827,6 +827,11 @@ class AuthTokenOAuthReader(object):
             self._fetch_options['client_id'] = self._client_id
             self._fetch_options['client_secret'] = self._client_secret
 
+        self._options = config.get('options', {})
+        if isinstance(self._options, dict):
+            for key, value in self._options.items():
+                self._fetch_options[key] = value
+
         self._token = None
         self._expiration = None
 

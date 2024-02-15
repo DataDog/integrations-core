@@ -87,7 +87,7 @@ def make(ctx, checks, version, end, initial_release, skip_sign, sign_only, exclu
         abort('Please create a release branch, you do not want to commit to master directly.')
 
     # Signing is done by a pipeline in a separate commit
-    if not core_workflow and not sign_only:
+    if (not core_workflow and not sign_only) or checks == ["ddev"]:
         skip_sign = True
 
     # Keep track of the list of checks that have been updated.

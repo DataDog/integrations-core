@@ -2,21 +2,21 @@ id: rethinkdb
 metric_id: rethinkdb
 backend_only: false
 facets:
-  - name: Table
-    source: log
-    path: db.table
-    groups:
+  - groups:
       - Database
-  - name: Uptime
+    name: Table
+    path: db.table
     source: log
+  - facetType: range
+    groups:
+      - Measure
+    name: Uptime
     path: uptime
+    source: log
     type: double
-    facetType: range
     unit:
       family: time
       name: second
-    groups:
-      - Measure
 pipeline:
   type: pipeline
   name: RethinkDB

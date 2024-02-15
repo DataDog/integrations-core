@@ -2,7 +2,8 @@
 
 ## Overview
 
-**Note**: This page describes the ECS Fargate integration. For EKS Fargate, see the documentation for Datadog's [EKS Fargate integration][1].
+<div class="alert alert-warning"> This page describes the ECS Fargate integration. For EKS Fargate, see the documentation for Datadog's <a href="http://docs.datadoghq.com/integrations/eks_fargate">EKS Fargate integration</a>.
+</div>
 
 Get metrics from all your containers running in ECS Fargate:
 
@@ -16,6 +17,8 @@ The Datadog Agent retrieves metrics for the task definition's containers with th
 The Task Metadata endpoint is only available from within the task definition itself, which is why the Datadog Agent needs to be run as an additional container within each task definition to be monitored.
 
 The only configuration required to enable this metrics collection is to set an environment variable `ECS_FARGATE` to `"true"` in the task definition.
+
+**Note**: Network Process Monitoring (NPM) is not supported for ECS Fargate.
 
 ## Setup
 
@@ -145,7 +148,7 @@ For more information on CloudFormation templating and syntax, see the [AWS Cloud
 
 <!-- xxz tabs xxx -->
 
-For all of these examples the `DD_API_KEY` environment variable can alternatively be populated by referencing the the [ARN of a "Plaintext" secret stored in AWS Secret Manager][7].
+For all of these examples, you can alternatively populate the `DD_API_KEY` environment variable by referencing the [ARN of a plaintext secret stored in AWS Secrets Manager][7]. Place the `DD_API_KEY` environment variable under the `containerDefinitions.secrets` section of the task definition file. Ensure that the task execution role has the necessary permission to fetch secrets from AWS Secrets Manager.
 
 #### Create or modify your IAM policy
 
@@ -805,6 +808,7 @@ Need help? Contact [Datadog support][18].
 - Blog post: [AWS Fargate monitoring with Datadog][38]
 - Blog post: [Graviton2-powered AWS Fargate deployments][39]
 - Blog post: [Monitor AWS Fargate for Windows containerized apps][40]
+- Blog post: [Monitor processes running on AWS Fargate with Datadog][58]
 
 
 
@@ -865,3 +869,4 @@ Need help? Contact [Datadog support][18].
 [55]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/dotnet-framework?tab=containers#custom-instrumentation
 [56]: https://app.datadoghq.com/process
 [57]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#other_task_definition_params
+[58]: https://www.datadoghq.com/blog/monitor-fargate-processes/

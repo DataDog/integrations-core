@@ -64,6 +64,7 @@ def test_e2e_profile_extreme_switching(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.1916.2.89',
         'vendor': 'extreme-networks',
+        'device_type': 'switch',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

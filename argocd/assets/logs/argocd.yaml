@@ -2,21 +2,21 @@ id: argocd
 metric_id: argocd
 backend_only: false
 facets:
-  - name: GRPC Service
-    source: log
+  - groups:
+      - GRPC
+    name: GRPC Service
     path: grpc.service
-    groups:
-      - GRPC
-  - name: GRPC Method
     source: log
+  - groups:
+      - GRPC
+    name: GRPC Method
     path: grpc.method
-    groups:
-      - GRPC
-  - name: GRPC Code
     source: log
-    path: grpc.code
-    groups:
+  - groups:
       - GRPC
+    name: GRPC Code
+    path: grpc.code
+    source: log
 pipeline:
   type: pipeline
   name: Argo CD

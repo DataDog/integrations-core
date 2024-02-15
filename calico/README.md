@@ -76,7 +76,7 @@ To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
-1. The default configuration of your `cassandra.d/conf.yaml` file activate the collection of your [Calico metrics](#metrics). See the [sample calico.d/conf.yaml][3] for all available configuration options.
+1. The default configuration of your `calico.d/conf.yaml` file activate the collection of your [Calico metrics](#metrics). See the [sample calico.d/conf.yaml][3] for all available configuration options.
 
 2. [Restart the Agent][4].
 

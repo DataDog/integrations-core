@@ -2,6 +2,40 @@
 
 <!-- towncrier release notes start -->
 
+## 8.0.0 / 2024-02-06
+
+***Changed***:
+
+* Bump datadog_checks_dev dependency requirement ([#16806](https://github.com/DataDog/integrations-core/pull/16806))
+
+***Added***:
+
+* Add a `validate labeler` command ([#16774](https://github.com/DataDog/integrations-core/pull/16774))
+
+## 7.0.0 / 2024-01-29
+
+***Changed***:
+
+* Bump the datadog_checks_dev version to 30.x ([#16728](https://github.com/DataDog/integrations-core/pull/16728))
+
+***Fixed***:
+
+* Clarify how to pass arguments to the testing commands ([#16691](https://github.com/DataDog/integrations-core/pull/16691))
+
+## 6.4.0 / 2024-01-23
+
+***Added***:
+
+* Add a script to serve any openmetrics payload for any OM integration ([#16644](https://github.com/DataDog/integrations-core/pull/16644))
+* Add the possibility to send specific values in the `generate_metrics` script ([#16672](https://github.com/DataDog/integrations-core/pull/16672))
+
+***Fixed***:
+
+* Fix a bug that prevents to run e2e tests in a non-default repository ([#16671](https://github.com/DataDog/integrations-core/pull/16671))
+* Allow CI matrix script to run on apps that lack integration assets. ([#16682](https://github.com/DataDog/integrations-core/pull/16682))
+* Prevent `ddev dep` to bump `cryptography` ([#16686](https://github.com/DataDog/integrations-core/pull/16686))
+* Prevent `ddev dep` to bump `kubernetes` ([#16687](https://github.com/DataDog/integrations-core/pull/16687))
+
 ## 6.3.0 / 2024-01-17
 
 ***Added***:

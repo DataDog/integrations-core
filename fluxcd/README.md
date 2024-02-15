@@ -12,6 +12,8 @@ Follow the instructions below to install and configure this check for an Agent r
 
 Starting from Agent release 7.51.0, the Fluxcd check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
+For older versions of the Agent, [use these steps to install][10] the integration.
+
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
@@ -54,7 +56,7 @@ labels:
 
 ##### Metric collection
 
-This is an example configuration with Kubernetes annotations on your Fluxcd pods. See the [sample configuration file][4] for all available configuration options.
+This is an example configuration with Kubernetes annotations on your Flux pods. See the [sample configuration file][4] for all available configuration options.
 
 ```yaml
 apiVersion: v1
@@ -108,9 +110,10 @@ Need help? Contact [Datadog support][9].
 [1]: https://fluxcd.io/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[4]: https://github.com/DataDog/integrations-core/blob/master/fluxcd/datadog_checks/fluxcd/data/conf.yaml.example
+[4]: https://github.com/DataDog/integrations-core/blob/7.51.x/fluxcd/datadog_checks/fluxcd/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/fluxcd/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/fluxcd/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://docs.datadoghq.com/agent/guide/use-community-integrations/?tab=agentv721v621#installation

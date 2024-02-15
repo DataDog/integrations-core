@@ -23,6 +23,7 @@ from datadog_checks.dev.tooling.commands.validate.typos import typos
 
 from ddev.cli.validate.ci import ci
 from ddev.cli.validate.http import http
+from ddev.cli.validate.labeler import labeler
 from ddev.cli.validate.licenses import licenses
 from ddev.cli.validate.manifest import manifest
 from ddev.cli.validate.metadata import metadata
@@ -48,6 +49,7 @@ validate.add_command(http)
 validate.add_command(imports)
 validate.add_command(integration_style)
 validate.add_command(jmx_metrics)
+validate.add_command(labeler)
 validate.add_command(legacy_signature)
 validate.add_command(license_headers)
 validate.add_command(licenses)

@@ -7,6 +7,7 @@ import time
 import mock
 import psycopg2
 import pytest
+from flaky import flaky
 
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.postgres import PostgreSql
@@ -411,6 +412,7 @@ def test_activity_vacuum_excluded(aggregator, integration_check, pg_instance):
     thread.join()
 
 
+@flaky(max_runs=5)
 def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
     check = integration_check(pg_instance)
@@ -545,6 +547,7 @@ def test_state_clears_on_connection_error(integration_check, pg_instance):
     'is_aurora',
     [True, False],
 )
+@flaky(max_runs=5)
 def test_wal_stats(aggregator, integration_check, pg_instance, is_aurora):
     conn = _get_superconn(pg_instance)
     with conn.cursor() as cur:

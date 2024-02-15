@@ -102,11 +102,6 @@ class PostgresConfig:
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
         self.settings_metadata_config = instance.get('collect_settings', {}) or {}
         self.schemas_metadata_config = instance.get('collect_schemas', {"enabled": False})
-        if not self.relations and self.schemas_metadata_config['enabled']:
-            raise ConfigurationError(
-                'In order to collect schemas on this database, you must enable relation metrics collection.'
-            )
-
         self.resources_metadata_config = instance.get('collect_resources', {}) or {}
         self.statement_activity_config = instance.get('query_activity', {}) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
@@ -143,7 +138,7 @@ class PostgresConfig:
             'collect_comments': is_affirmative(obfuscator_options_config.get('collect_comments', True)),
             # Config to enable/disable obfuscation of sql statements with go-sqllexer pkg
             # Valid values for this can be found at https://github.com/DataDog/datadog-agent/blob/main/pkg/obfuscate/obfuscate.go#L108
-            'obfuscation_mode': obfuscator_options_config.get('obfuscation_mode', ''),
+            'obfuscation_mode': obfuscator_options_config.get('obfuscation_mode', 'obfuscate_and_normalize'),
             'remove_space_between_parentheses': is_affirmative(
                 obfuscator_options_config.get('remove_space_between_parentheses', False)
             ),

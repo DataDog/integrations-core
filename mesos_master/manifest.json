@@ -26,7 +26,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Mesos Master",
@@ -47,7 +46,9 @@
       "process_signatures": [
         "mesos-master.sh",
         "mesos-agent.sh"
-      ]
+      ],
+      "source_type_id": 10156,
+      "auto_install": true
     },
     "saved_views": {
       "mesos-master_processes": "assets/saved_views/mesos-master_processes.json"

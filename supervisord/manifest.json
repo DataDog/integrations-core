@@ -25,7 +25,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Supervisord",
@@ -46,7 +45,9 @@
       "process_signatures": [
         "python supervisord",
         "supervisord"
-      ]
+      ],
+      "source_type_id": 116,
+      "auto_install": true
     },
     "saved_views": {
       "supervisord_processes": "assets/saved_views/supervisord_processes.json"

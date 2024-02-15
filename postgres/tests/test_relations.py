@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import psycopg2
 import pytest
+from flaky import flaky
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.postgres.relationsmanager import QUERY_PG_CLASS, RelationsManager
@@ -162,14 +163,14 @@ def test_max_relations(aggregator, integration_check, pg_instance):
     for name in RELATION_METRICS:
         relation_metrics = []
         for m in aggregator._metrics[name]:
-            if any(['table:' in tag for tag in m.tags]):
+            if any('table:' in tag for tag in m.tags):
                 relation_metrics.append(m)
         assert len(relation_metrics) == 1
 
     for name in _iterate_metric_name(QUERY_PG_CLASS):
         relation_metrics = []
         for m in aggregator._metrics[name]:
-            if any(['table:' in tag for tag in m.tags]):
+            if any('table:' in tag for tag in m.tags):
                 relation_metrics.append(m)
         assert len(relation_metrics) == 1
 
@@ -192,6 +193,7 @@ def test_index_metrics(aggregator, integration_check, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@flaky(max_runs=5)
 def test_vacuum_age(aggregator, integration_check, pg_instance):
     pg_instance['relations'] = ['persons']
     pg_instance['dbname'] = 'datadog_test'

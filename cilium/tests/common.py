@@ -330,6 +330,9 @@ OPERATOR_V2_METRICS = [
     "cilium.operator.ipam.allocation_ops.count",
     "cilium.operator.ipam.interface_creation_ops.count",
     "cilium.operator.ipam.release_ops.count",
+    "cilium.operator.ipam.empty_interface_slots.count",
+    "cilium.operator.ipam.interface_candidates.count",
+    "cilium.operator.ipam.ip_allocation_ops.count",
 ] + OPERATOR_V2_PROCESS_METRICS
 
 # Not available in test metric fixtures

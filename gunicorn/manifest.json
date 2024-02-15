@@ -23,7 +23,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Gunicorn",
@@ -43,7 +42,9 @@
       },
       "process_signatures": [
         "gunicorn: master"
-      ]
+      ],
+      "source_type_id": 60,
+      "auto_install": true
     },
     "dashboards": {
       "gunicorn": "assets/dashboards/gunicorn_dashboard.json"

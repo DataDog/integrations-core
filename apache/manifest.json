@@ -24,7 +24,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Apache",
@@ -46,7 +45,9 @@
         "httpd",
         "apache",
         "apache2"
-      ]
+      ],
+      "source_type_id": 30,
+      "auto_install": true
     },
     "dashboards": {
       "apache": "assets/dashboards/apache_dashboard.json"

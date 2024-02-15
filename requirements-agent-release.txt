@@ -19,7 +19,7 @@ datadog-cassandra-nodetool==1.13.0
 datadog-cassandra==1.18.0
 datadog-ceph==2.10.0; sys_platform != 'win32'
 datadog-cert-manager==4.0.0
-datadog-checks-base==35.0.0
+datadog-checks-base==36.0.0
 datadog-checks-dependency-provider==1.4.0
 datadog-checks-downloader==4.5.0
 datadog-cilium==3.3.0
@@ -144,7 +144,7 @@ datadog-snowflake==5.2.0
 datadog-solr==1.13.0
 datadog-sonarqube==3.1.0
 datadog-spark==4.1.0
-datadog-sqlserver==16.0.0
+datadog-sqlserver==16.0.1
 datadog-squid==2.4.0
 datadog-ssh-check==2.8.0
 datadog-statsd==1.12.0
@@ -163,7 +163,7 @@ datadog-tomcat==1.13.0
 datadog-torchserve==2.1.0
 datadog-traffic-server==2.1.0
 datadog-twemproxy==1.15.0
-datadog-twistlock==3.4.0
+datadog-twistlock==3.4.1
 datadog-varnish==2.1.0
 datadog-vault==4.1.0
 datadog-vertica==4.4.0

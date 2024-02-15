@@ -111,6 +111,7 @@ To install the {integration_name} check on your host:
 
     config = {
         'author': author,
+        'auto_install': 'false' if repo_choice == 'marketplace' or integration_type == 'metrics_crawler' else 'true',
         'check_class': f"{''.join(part.capitalize() for part in normalized_integration_name.split('_'))}Check",
         'check_name': check_name,
         'project_name': normalize_project_name(normalized_integration_name),
@@ -135,7 +136,7 @@ To install the {integration_name} check on your host:
     return config
 
 
-def create_template_files(template_name, new_root, config, read=False):
+def create_template_files(template_name, new_root, config, repo_choice, read=False):
     files = []
 
     template_root = path_join(TEMPLATES_DIR, template_name)
@@ -144,6 +145,8 @@ def create_template_files(template_name, new_root, config, read=False):
 
     for root, _, template_files in os.walk(template_root):
         for template_file in template_files:
+            if template_file.endswith('1.added') and repo_choice != 'core':
+                continue
             if not template_file.endswith(('.pyc', '.pyo')):
                 if template_file == 'README.md' and config.get('support_type') in ('partner', 'contrib'):
                     # Custom README for the marketplace/partner support_type integrations

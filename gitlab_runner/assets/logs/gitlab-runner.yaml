@@ -2,21 +2,21 @@ id: gitlab-runner
 metric_id: gitlab-runner
 backend_only: false
 facets:
-  - name: Job Outcome
-    source: log
+  - groups:
+      - Event
+    name: Job Outcome
     path: job.outcome
-    groups:
-      - Event
-  - name: Job ID
     source: log
+  - groups:
+      - Event
+    name: Job ID
     path: job.id
-    groups:
-      - Event
-  - name: Job Runner
     source: log
-    path: job.runner
-    groups:
+  - groups:
       - Event
+    name: Job Runner
+    path: job.runner
+    source: log
 pipeline:
   type: pipeline
   name: Gitlab Runner

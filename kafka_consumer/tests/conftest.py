@@ -43,9 +43,11 @@ def dd_environment():
             common.DOCKER_IMAGE_PATH,
             conditions=conditions,
             env_vars={
-                "KRB5_CONFIG": f"{common.HERE}/docker/kerberos/kdc/krb5_agent.conf"
-                if running_on_ci()
-                else f"{common.HERE}/docker/kerberos/kdc/krb5_local.conf",
+                "KRB5_CONFIG": (
+                    f"{common.HERE}/docker/kerberos/kdc/krb5_agent.conf"
+                    if running_on_ci()
+                    else f"{common.HERE}/docker/kerberos/kdc/krb5_local.conf"
+                ),
                 "SECRET_DIR": secret_dir,
             },
             build=True,

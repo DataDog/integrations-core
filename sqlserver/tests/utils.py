@@ -193,7 +193,7 @@ class HighCardinalityQueries:
         return query.format(col=','.join(['hc1.' + col for col in columns[: randint(1, len(columns) - 1)]]))
 
     def get_conn(self):
-        conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
+        conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
             self._db_instance_config['driver'],
             self._db_instance_config['host'],
             self._db_instance_config['username'],

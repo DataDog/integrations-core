@@ -185,7 +185,7 @@ def check_common_metrics(aggregator, expected_tags, count=1):
         for name in COMMON_METRICS:
             aggregator.assert_metric(name, count=count, tags=db_tags)
         if POSTGRES_VERSION is None or float(POSTGRES_VERSION) >= 14.0:
-            for (metric_name, _) in NEWER_14_METRICS.values():
+            for metric_name, _ in NEWER_14_METRICS.values():
                 aggregator.assert_metric(metric_name, count=count, tags=db_tags)
 
 
@@ -240,7 +240,7 @@ def check_stat_replication(aggregator, expected_tags, count=1):
         'wal_state:streaming',
         'wal_sync_state:async',
     ]
-    for (metric_name, _) in REPLICATION_STATS_METRICS['metrics'].values():
+    for metric_name, _ in REPLICATION_STATS_METRICS['metrics'].values():
         aggregator.assert_metric(metric_name, count=count, tags=replication_tags)
 
 
@@ -302,7 +302,7 @@ def check_replication_slots_stats(aggregator, expected_tags, count=1):
 
 def check_replication_delay(aggregator, metrics_cache, expected_tags, count=1):
     replication_metrics = metrics_cache.get_replication_metrics(VersionUtils.parse_version(POSTGRES_VERSION), False)
-    for (metric_name, _) in replication_metrics.values():
+    for metric_name, _ in replication_metrics.values():
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
@@ -339,7 +339,7 @@ def check_slru_metrics(aggregator, expected_tags, count=1):
         return
 
     slru_caches = ['Subtrans', 'Serial', 'MultiXactMember', 'Xact', 'other', 'Notify', 'CommitTs', 'MultiXactOffset']
-    for (metric_name, _) in SLRU_METRICS['metrics'].values():
+    for metric_name, _ in SLRU_METRICS['metrics'].values():
         for slru_cache in slru_caches:
             aggregator.assert_metric(metric_name, count=count, tags=expected_tags + ['slru_name:{}'.format(slru_cache)])
 

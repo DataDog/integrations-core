@@ -1,0 +1,58 @@
+{
+    "manifest_version": "2.0.0",
+    "app_uuid": "9f98de10-9c98-4601-ae36-cbe25c4be018",
+    "app_id": "cisco-umbrella-dns",
+    "display_on_public_website": false,
+    "tile": {
+        "overview": "README.md#Overview",
+        "configuration": "README.md#Setup",
+        "support": "README.md#Support",
+        "changelog": "CHANGELOG.md",
+        "description": "Visualize Cisco Umbrella DNS Proxied and DNS Traffic. Connect to Cloud SIEM.",
+        "title": "Cisco Umbrella DNS",
+        "media": [
+            {
+                "caption": "Cisco Umbrella DNS - DNS Traffic",
+                "image_url": "images/cisco_umbrella_dns_dns_traffic.png",
+                "media_type": "image"
+            },
+            {
+                "caption": "Cisco Umbrella DNS - Proxied Traffic",
+                "image_url": "images/cisco_umbrella_dns_proxied_traffic.png",
+                "media_type": "image"
+            }
+        ],
+        "classifier_tags": [
+            "Category::Log Collection",
+            "Category::Network",
+            "Category::Security",
+            "Submitted Data Type::Logs"
+        ]
+    },
+    "assets": {
+        "integration": {
+            "auto_install": false,
+            "source_type_id": 10441,
+            "source_type_name": "cisco_umbrella_dns",
+            "events": {
+                "creates_events": false
+            },
+            "service_checks": {
+                "metadata_path": "assets/service_checks.json"
+            }
+        },
+        "dashboards": {
+            "Cisco Umbrella DNS - DNS Traffic": "assets/dashboards/cisco_umbrella_dns_dns_traffic.json",
+            "Cisco Umbrella DNS - Proxied Traffic": "assets/dashboards/cisco_umbrella_dns_proxied_traffic.json"
+        },
+        "logs": {
+            "source": "cisco-umbrella-dns"
+        }
+    },
+    "author": {
+        "support_email": "help@datadoghq.com",
+        "name": "Datadog",
+        "homepage": "https://www.datadoghq.com",
+        "sales_email": "info@datadoghq.com"
+    }
+}

@@ -27,21 +27,41 @@ class AirflowCheck(AgentCheck):
 
         url_stable = self._url + "/api/v1/health"
         url_experimental = self._url + "/api/experimental/test"
+        url_stable_version = self._url + "/api/v1/version"
         can_connect_status = AgentCheck.OK
 
-        # Query the stable API first
-        resp = self._get_json(url_stable)
-        if resp is None:
-            resp = self._get_json(url_experimental)
-            if resp is None:
-                can_connect_status = AgentCheck.CRITICAL
-            else:
-                self._submit_healthy_metrics_experimental(resp, tags)
+        # Choose which version of Airflow to use
+        if not self._get_version(url_stable_version):
+            # Airflow version 1
+            target_url = url_experimental
+            submit_metrics = self._submit_healthy_metrics_experimental
         else:
-            self._submit_healthy_metrics_stable(resp, tags)
+            # Airflow version 2
+            target_url = url_stable
+            submit_metrics = self._submit_healthy_metrics_stable
+
+        resp = self._get_json(target_url)
+        if resp is None:
+            can_connect_status = AgentCheck.CRITICAL
+        else:
+            submit_metrics(resp, tags)
 
         self.service_check('airflow.can_connect', can_connect_status, tags=tags)
         self.gauge('airflow.can_connect', int(can_connect_status == AgentCheck.OK), tags=tags)
+
+    def _get_version(self, url):
+        """Get version from stable API `/api/v1/version`"""
+        try:
+            resp_payload = self.http.get(url)
+            resp_payload.raise_for_status()
+            resp_payload = resp_payload.json()
+        except Exception as e:
+            self.log.debug("Couldn't collect version from URL: %s with exception: %s", url, e)
+        else:
+            version = resp_payload.get('version')
+            if version:
+                self.log.debug("Airflow version: %s", version)
+            return version
 
     def _submit_healthy_metrics_experimental(self, resp, tags):
         if resp.get('status') == AIRFLOW_STATUS_OK:

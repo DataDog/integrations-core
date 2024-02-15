@@ -395,7 +395,7 @@ class PostgreSql(AgentCheck):
         all_wal_files = [
             os.path.join(wal_log_dir, file_name)
             for file_name in all_files
-            if not any([ext for ext in exluded_file_exts if file_name.endswith(ext)])
+            if not any(ext for ext in exluded_file_exts if file_name.endswith(ext))
         ]
         if len(all_wal_files) < 1:
             self.log.warning("No WAL files found in directory: %s.", wal_log_dir)
@@ -594,7 +594,7 @@ class PostgreSql(AgentCheck):
 
         self.metrics_cache.table_activity_metrics[db][tablename][metric_name] = value
 
-    def _collect_relations_autodiscovery(self, instance_tags, relations_scopes):
+    def _collect_metric_autodiscovery(self, instance_tags, scopes, scope_type):
         if not self.autodiscovery:
             return
 
@@ -603,11 +603,11 @@ class PostgreSql(AgentCheck):
         for db in databases:
             with self.db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
                 with conn.cursor() as cursor:
-                    for scope in relations_scopes:
+                    for scope in scopes:
                         self._query_scope(cursor, scope, instance_tags, False, db)
         elapsed_ms = (time() - start_time) * 1000
         self.histogram(
-            "dd.postgres._collect_relations_autodiscovery.time",
+            f"dd.postgres.{scope_type}.time",
             elapsed_ms,
             tags=self.tags + self._get_debug_tags(),
             hostname=self.resolved_hostname,
@@ -647,11 +647,14 @@ class PostgreSql(AgentCheck):
         archiver_instance_metrics = self.metrics_cache.get_archiver_metrics(self.version)
 
         metric_scope = [CONNECTION_METRICS]
+        per_database_metric_scope = []
 
         if self._config.collect_function_metrics:
-            metric_scope.append(FUNCTION_METRICS)
+            # Function metrics are collected from all databases discovered
+            per_database_metric_scope.append(FUNCTION_METRICS)
         if self._config.collect_count_metrics:
-            metric_scope.append(self.metrics_cache.get_count_metrics())
+            # Count metrics are collected from all databases discovered
+            per_database_metric_scope.append(self.metrics_cache.get_count_metrics())
         if self.version >= V13:
             metric_scope.append(SLRU_METRICS)
 
@@ -664,7 +667,11 @@ class PostgreSql(AgentCheck):
 
             # If autodiscovery is enabled, get relation metrics from all databases found
             if self.autodiscovery:
-                self._collect_relations_autodiscovery(instance_tags, relations_scopes)
+                self._collect_metric_autodiscovery(
+                    instance_tags,
+                    scopes=relations_scopes,
+                    scope_type='_collect_relations_autodiscovery',
+                )
             # otherwise, continue just with dbname
             else:
                 metric_scope.extend(relations_scopes)
@@ -699,6 +706,18 @@ class PostgreSql(AgentCheck):
                 activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
                 with conn.cursor() as cursor:
                     self._query_scope(cursor, activity_metrics, instance_tags, False)
+
+            if per_database_metric_scope:
+                # if autodiscovery is enabled, get per-database metrics from all databases found
+                if self.autodiscovery:
+                    self._collect_metric_autodiscovery(
+                        instance_tags,
+                        scopes=per_database_metric_scope,
+                        scope_type='_collect_stat_autodiscovery',
+                    )
+                else:
+                    # otherwise, continue just with dbname
+                    metric_scope.extend(per_database_metric_scope)
 
             for scope in list(metric_scope):
                 with conn.cursor() as cursor:
