@@ -73,7 +73,7 @@ class Nginx(AgentCheck):
         for row in metrics:
             try:
                 name, value, row_tags, metric_type = row
-                tags = row_tags + ['nginx_host:%s' % self.hostname_from_url, 'port:%s' % self.port_from_url]
+                tags = row_tags + ['host:%s' % self.hostname_from_url, 'port:%s' % self.port_from_url]
                 if self.use_vts:
                     name, handled, conn = self._translate_from_vts(name, value, tags, handled, conn)
                     if name is None:
