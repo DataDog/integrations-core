@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "**This Dashboard provides Flux CI/CD Observability metrics for your Kubernetes clusters with the Fluxcd Integration**\n\n# Fluxcd Documentation\n- [Fluxcd Integration&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd)\n- [Fluxcd Metrics&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd/#metrics)\n- [Fluxcd Documentation&nbsp;\u2197](https://fluxcd.io/flux/#flux-in-short)",
+    "description": "**This Dashboard provides Flux CI/CD Observability metrics for your Kubernetes clusters with the Flux Integration**\n\n# Flux Documentation\n- [Flux Integration&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd)\n- [Flux Metrics&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd/#metrics)\n- [Flux Documentation&nbsp;\u2197](https://fluxcd.io/flux/#flux-in-short)",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -28,20 +28,20 @@
             "prefix": "kind"
         }
     ],
-    "title": "Fluxcd",
+    "title": "Flux",
     "widgets": [
         {
             "definition": {
                 "banner_img": "/static/images/logos/fluxcd_large.svg",
                 "layout_type": "ordered",
                 "show_title": false,
-                "title": "About Fluxcd",
+                "title": "About Flux",
                 "type": "group",
                 "widgets": [
                     {
                         "definition": {
                             "background_color": "transparent",
-                            "content": "**This Dashboard provides Flux CI/CD Observability metrics for your Kubernetes clusters with the Fluxcd Integration**\n",
+                            "content": "**This Dashboard provides Flux CI/CD Observability metrics for your Kubernetes clusters with the Flux Integration**\n",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
@@ -62,7 +62,7 @@
                     {
                         "definition": {
                             "background_color": "transparent",
-                            "content": "# Useful Links\n- [Fluxcd Integration&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd)\n- [Fluxcd Metrics&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd/#metrics)\n- [Fluxcd Documentation&nbsp;\u2197](https://fluxcd.io/flux/#flux-in-short)",
+                            "content": "# Useful Links\n- [Flux Integration&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd)\n- [Flux Metrics&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd/#metrics)\n- [Flux Documentation&nbsp;\u2197](https://fluxcd.io/flux/#flux-in-short)",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
@@ -101,7 +101,7 @@
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "This section provides you with an overview of your system activity.  The monitor summary notifies you of Fluxcd alerts. ",
+                            "content": "This section provides you with an overview of your system activity.  The monitor summary notifies you of Flux alerts. ",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
