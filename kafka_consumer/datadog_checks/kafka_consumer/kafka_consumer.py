@@ -13,6 +13,7 @@ try:
     from datadog_agent import read_persistent_cache, write_persistent_cache
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
+
     read_persistent_cache = datadog_agent.read_persistent_cache
     write_persistent_cache = datadog_agent.write_persistent_cache
 
@@ -55,16 +56,16 @@ class KafkaCheck(AgentCheck):
         # Fetch the broker highwater offsets
         highwater_offsets = {}
         broker_timestamps = defaultdict(dict)
+        cluster_id = ""
         try:
-            if self._data_streams_enabled:
-                broker_timestamps = self._load_broker_timestamps()
             if len(consumer_offsets) < self._context_limit:
                 # Fetch highwater offsets
-                # Expected format: {(topic, partition): offset}
-                highwater_offsets = self.client.get_highwater_offsets(consumer_offsets)
+                # Expected format: ({(topic, partition): offset}, cluster_id)
+                highwater_offsets, cluster_id = self.client.get_highwater_offsets(consumer_offsets)
                 if self._data_streams_enabled:
+                    broker_timestamps = self._load_broker_timestamps(cluster_id)
                     self._add_broker_timestamps(broker_timestamps, highwater_offsets)
-                    self._save_broker_timestamps(broker_timestamps)
+                    self._save_broker_timestamps(broker_timestamps, cluster_id)
             else:
                 self.warning("Context limit reached. Skipping highwater offset collection.")
         except Exception:
@@ -90,19 +91,24 @@ class KafkaCheck(AgentCheck):
                 self._context_limit,
             )
 
-        self.report_highwater_offsets(highwater_offsets, self._context_limit)
+        self.report_highwater_offsets(highwater_offsets, self._context_limit, cluster_id)
         self.report_consumer_offsets_and_lag(
-            consumer_offsets, highwater_offsets, self._context_limit - len(highwater_offsets), broker_timestamps
+            consumer_offsets,
+            highwater_offsets,
+            self._context_limit - len(highwater_offsets),
+            broker_timestamps,
+            cluster_id,
         )
         if self.config._close_admin_client:
             self.client.close_admin_client()
 
-    def _load_broker_timestamps(self):
+    def _load_broker_timestamps(self, cluster_id):
         """Loads broker timestamps from persistent cache."""
         broker_timestamps = defaultdict(dict)
         try:
             for topic_partition, content in json.loads(
-                    read_persistent_cache(self._broker_timestamp_cache_key)).items():
+                read_persistent_cache("broker_timestamps_" + cluster_id)
+            ).items():
                 for offset, timestamp in content.items():
                     broker_timestamps[topic_partition][int(offset)] = timestamp
         except Exception as e:
@@ -117,16 +123,16 @@ class KafkaCheck(AgentCheck):
             if len(timestamps) > MAX_TIMESTAMPS:
                 del timestamps[min(timestamps)]
 
-    def _save_broker_timestamps(self, broker_timestamps):
+    def _save_broker_timestamps(self, broker_timestamps, cluster_id):
         """Saves broker timestamps to persistent cache."""
-        write_persistent_cache(self._broker_timestamp_cache_key, json.dumps(broker_timestamps))
+        write_persistent_cache("broker_timestamps_" + cluster_id, json.dumps(broker_timestamps))
 
-    def report_highwater_offsets(self, highwater_offsets, contexts_limit):
+    def report_highwater_offsets(self, highwater_offsets, contexts_limit, cluster_id):
         """Report the broker highwater offsets."""
         reported_contexts = 0
         self.log.debug("Reporting broker offset metric")
         for (topic, partition), highwater_offset in highwater_offsets.items():
-            broker_tags = ['topic:%s' % topic, 'partition:%s' % partition]
+            broker_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'kafka_cluster_id:%s' % cluster_id]
             broker_tags.extend(self.config._custom_tags)
             self.gauge('broker_offset', highwater_offset, tags=broker_tags)
             self.log.debug('%s highwater offset reported with %s tags', highwater_offset, broker_tags)
@@ -135,7 +141,9 @@ class KafkaCheck(AgentCheck):
                 return
         self.log.debug('%s highwater offsets reported', reported_contexts)
 
-    def report_consumer_offsets_and_lag(self, consumer_offsets, highwater_offsets, contexts_limit, broker_timestamps):
+    def report_consumer_offsets_and_lag(
+        self, consumer_offsets, highwater_offsets, contexts_limit, broker_timestamps, cluster_id
+    ):
         """Report the consumer offsets and consumer lag."""
         reported_contexts = 0
         self.log.debug("Reporting consumer offsets and lag metrics")
@@ -148,7 +156,12 @@ class KafkaCheck(AgentCheck):
                 )
                 self.log.debug('%s consumer offsets reported', reported_contexts)
                 return
-            consumer_group_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'consumer_group:%s' % consumer_group]
+            consumer_group_tags = [
+                'topic:%s' % topic,
+                'partition:%s' % partition,
+                'consumer_group:%s' % consumer_group,
+                'kafka_cluster_id:%s' % cluster_id,
+            ]
             consumer_group_tags.extend(self.config._custom_tags)
 
             partitions = self.client.get_partitions_for_topic(topic)

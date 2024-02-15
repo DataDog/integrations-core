@@ -14,6 +14,7 @@ HOST_IP = socket.gethostbyname(HOST)
 KAFKA_CONNECT_STR = f'{HOST_IP}:9092'
 CONSUMED_TOPICS = ['marvel', 'dc']
 TOPICS = ['marvel', 'dc', 'unconsumed_topic']
+CLUSTER_ID = ""
 PARTITIONS = [0, 1]
 BROKER_METRICS = ['kafka.broker_offset']
 CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag']
@@ -89,7 +90,9 @@ def assert_check_kafka(aggregator, consumer_groups):
     for name, consumer_group in consumer_groups.items():
         for topic, partitions in consumer_group.items():
             for partition in partitions:
-                tags = [f"topic:{topic}", f"partition:{partition}"] + ['optional:tag1']
+                tags = [f"topic:{topic}", f"partition:{partition}", "kafka_cluster_id:" + CLUSTER_ID] + [
+                    'optional:tag1'
+                ]
                 for mname in BROKER_METRICS:
                     aggregator.assert_metric(mname, tags=tags, count=1)
 

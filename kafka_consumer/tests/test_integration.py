@@ -13,6 +13,7 @@ from collections import defaultdict
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import assert_check_kafka, metrics
+from . import common
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -114,7 +115,7 @@ def test_monitor_broker_highwatermarks(
             aggregator.assert_metric(
                 'kafka.broker_offset',
                 metric_type=aggregator.GAUGE,
-                tags=[tag, f"partition:{partition}", "optional:tag1"],
+                tags=[tag, f"partition:{partition}", f"kafka_cluster_id:{common.CLUSTER_ID}", "optional:tag1"],
                 count=1,
             )
 
@@ -461,4 +462,3 @@ def test_regex_consumer_groups(
     aggregator.assert_metric("kafka.estimated_consumer_lag_seconds", count=consumer_lag_seconds_count)
 
     assert expected_warning in caplog.text
-

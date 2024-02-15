@@ -287,7 +287,6 @@ instances:
     #   - <EXCLUDE_REGEX>
 
     ## @param data_streams_enabled - boolean - optional - default: false
-    ## Enables collection of the Kafka lag metric in seconds.
-    ## This option is part of Data Streams Monitoring and may result in additional billing charges.
+    ## Collects consumer lag metric in seconds. It may result in additional billing charges.
     #
     # data_streams_enabled: false
