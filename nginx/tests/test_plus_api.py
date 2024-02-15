@@ -78,7 +78,7 @@ def test_plus_api_v5(check, instance_plus_v7, aggregator):
     # total number of metrics should be higher than v4 w/ resolvers and http location zones data
     assert_num_metrics(aggregator, 1261)
 
-    base_tags = ['bar:bar', 'foo:foo', 'nginx_host:localhost', 'port:8080']
+    base_tags = ['bar:bar', 'foo:foo']
 
     # resolvers endpoint
     resolvers_tags = base_tags + ['resolver:resolver-http']
@@ -135,7 +135,7 @@ def test_plus_api_v6(check, instance_plus_v7, aggregator):
     # total number of metrics should be higher than v5 w/ http limit conns, http limit reqs, and stream limit conns
     assert_num_metrics(aggregator, 1277)
 
-    base_tags = ['bar:bar', 'foo:foo', 'nginx_host:localhost', 'port:8080']
+    base_tags = ['bar:bar', 'foo:foo']
 
     # same tests for v3
     aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone1', count=1)
@@ -190,7 +190,7 @@ def test_plus_api_v7(check, instance_plus_v7, aggregator, only_query_enabled_end
     # with codes data for http upstream, http server zones, and http location zone
     assert_num_metrics(aggregator, 1352)
 
-    base_tags = ['bar:bar', 'foo:foo', 'nginx_host:localhost', 'port:8080']
+    base_tags = ['bar:bar', 'foo:foo']
 
     # same tests for v3
     aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone1', count=1)
@@ -304,7 +304,7 @@ def test_plus_api_v7_no_stream(check, instance, aggregator):
     # Number of metrics should be low since stream is disabled
     assert_num_metrics(aggregator, 1025)
 
-    base_tags = ['bar:bar', 'foo:foo', 'nginx_host:localhost', 'port:8080']
+    base_tags = ['bar:bar', 'foo:foo']
 
     # test that stream metrics are not emitted
     aggregator.assert_metric('nginx.stream.zone_sync.zone.records_total', count=0)

@@ -53,9 +53,6 @@ class Nginx(AgentCheck):
         self.only_query_enabled_endpoints = self.instance.get("only_query_enabled_endpoints", False)
         self.plus_api_version = str(self.instance.get("plus_api_version", 2))
         self.use_vts = self.instance.get('use_vts', False)
-        parsed_url = urlparse(self.url)
-        self.hostname_from_url = parsed_url.hostname
-        self.port_from_url = parsed_url.port or 80
 
         if 'nginx_status_url' not in self.instance:
             raise ConfigurationError('NginX instance missing "nginx_status_url" value.')
@@ -72,8 +69,7 @@ class Nginx(AgentCheck):
 
         for row in metrics:
             try:
-                name, value, row_tags, metric_type = row
-                tags = row_tags + ['nginx_host:%s' % self.hostname_from_url, 'port:%s' % self.port_from_url]
+                name, value, tags, metric_type = row
                 if self.use_vts:
                     name, handled, conn = self._translate_from_vts(name, value, tags, handled, conn)
                     if name is None:
@@ -224,8 +220,12 @@ class Nginx(AgentCheck):
 
     def _perform_service_check(self, url):
         # Submit a service check for status page availability.
+        parsed_url = urlparse(url)
+        nginx_host = parsed_url.hostname
+        nginx_port = parsed_url.port or 80
+
         service_check_name = 'nginx.can_connect'
-        service_check_tags = ['host:%s' % self.hostname_from_url, 'port:%s' % self.port_from_url] + self.custom_tags
+        service_check_tags = ['host:%s' % nginx_host, 'port:%s' % nginx_port] + self.custom_tags
         try:
             self.log.debug("Querying URL: %s", url)
             r = self._perform_request(url)
