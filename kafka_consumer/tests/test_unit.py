@@ -8,7 +8,6 @@ from contextlib import nullcontext as does_not_raise
 import mock
 import pytest
 from confluent_kafka.admin._group import ConsumerGroupListing, ListConsumerGroupsResult
-
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.kafka_consumer import _get_interpolated_timestamp
 

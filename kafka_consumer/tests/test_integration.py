@@ -1,19 +1,17 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import logging
+from collections import defaultdict
 from contextlib import nullcontext as does_not_raise
 
-import copy
-import pytest
 import mock
-import json
-from collections import defaultdict
-
+import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import assert_check_kafka, metrics
 from . import common
+from .common import assert_check_kafka, metrics
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -207,7 +205,8 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
 @mock.patch('datadog_checks.kafka_consumer.kafka_consumer.read_persistent_cache', mocked_read_persistent_cache)
 @mock.patch('datadog_checks.kafka_consumer.kafka_consumer.time', mocked_time)
 @pytest.mark.parametrize(
-    'consumer_groups_regex_config, broker_offset_count, consumer_offset_count, consumer_lag_count, consumer_lag_seconds_count, expected_warning',
+    'consumer_groups_regex_config, broker_offset_count, consumer_offset_count, consumer_lag_count, \n'
+    'consumer_lag_seconds_count, expected_warning',
     [
         pytest.param(
             {

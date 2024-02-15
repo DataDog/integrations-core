@@ -8,7 +8,6 @@ import time
 import pytest
 from confluent_kafka.admin import AdminClient
 from confluent_kafka.cimpl import NewTopic
-
 from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev._env import e2e_testing
 from datadog_checks.dev.ci import running_on_ci
