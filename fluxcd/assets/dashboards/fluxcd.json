@@ -41,7 +41,7 @@
                     {
                         "definition": {
                             "background_color": "transparent",
-                            "content": "**This Dashboard provides Flux CI/CD Observability metrics for your Kubernetes clusters with the Flux Integration**\n",
+                            "content": "**This dashboard provides Flux CI/CD Observability metrics for your Kubernetes clusters with the Flux Integration**\n",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
