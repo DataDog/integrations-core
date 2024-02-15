@@ -1,0 +1,8 @@
+Disables SQL Server metrics on Azure SQL Database instances that rely on cross-database queries. The disabled metrics are:
+
+* sqlserver.tempdb.file_space_usage.free_space
+* sqlserver.tempdb.file_space_usage.version_store_space
+* sqlserver.tempdb.file_space_usage.internal_object_space
+* sqlserver.tempdb.file_space_usage.user_object_space
+* sqlserver.tempdb.file_space_usage.mixed_extent_space
+* sqlserver.database.backup_count

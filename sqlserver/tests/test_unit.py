@@ -122,6 +122,37 @@ def test_db_exists(get_cursor, mock_connect, instance_docker_defaults, dd_run_ch
     assert check.do_check is True
 
 
+@mock.patch('datadog_checks.sqlserver.connection.Connection.open_managed_default_database')
+@mock.patch('datadog_checks.sqlserver.connection.Connection.get_cursor')
+def test_azure_cross_database_queries_excluded(get_cursor, mock_connect, instance_docker_defaults, dd_run_check):
+    Row = namedtuple('Row', 'name,collation_name')
+    db_results = [
+        Row('master', 'SQL_Latin1_General_CP1_CI_AS'),
+        Row('tempdb', 'SQL_Latin1_General_CP1_CI_AS'),
+        Row('AdventureWorks2017', 'SQL_Latin1_General_CP1_CI_AS'),
+        Row('CaseSensitive2018', 'SQL_Latin1_General_CP1_CS_AS'),
+        Row('OfflineDB', None),
+    ]
+
+    mock_connect.__enter__ = mock.Mock(return_value='foo')
+
+    mock_results = mock.MagicMock()
+    mock_results.__iter__.return_value = db_results
+    get_cursor.return_value = mock_results
+
+    instance = copy.copy(instance_docker_defaults)
+    instance['stored_procedure'] = 'fake_proc'
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    check.initialize_connection()
+    check.make_metric_list_to_collect()
+    cross_database_metrics = [
+        metric
+        for metric in check.instance_metrics
+        if metric.__class__.TABLE not in ['msdb.dbo.backupset', 'sys.dm_db_file_space_usage']
+    ]
+    assert len(cross_database_metrics) == 0
+
+
 def test_autodiscovery_matches_all_by_default(instance_autodiscovery):
     fetchall_results, mock_cursor = _mock_database_list()
     all_dbs = {Database(r.name) for r in fetchall_results}
