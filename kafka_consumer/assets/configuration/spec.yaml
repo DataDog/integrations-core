@@ -223,8 +223,7 @@ files:
       - template: instances/default
       - name: data_streams_enabled
         description: |
-          Enables collection of the Kafka lag metric in Seconds. It is part of the Data Streams Monitoring Product.
-          Enabling this option can cause additional billing.
+          Enables collection of the Kafka lag metric in seconds. This option is part of Data Streams Monitoring and may result in additional billing charges.
         value:
           type: boolean
           example: false
