@@ -70,47 +70,32 @@ def test_check_metrics_slis_transform(aggregator, mock_metrics, instance):
     c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
-    def assert_metric(name, **kwargs):
-        # Wrapper to keep assertions < 120 chars
-        aggregator.assert_metric("{}.{}".format(CHECK_NAME, name), **kwargs)
+    SLIMetric = namedtuple("SLIMetric", ["name", "count", "tags"])
 
-    # Check that no metrics with `name` tag come through
-    assert_metric(
-        "slis.kubernetes_healthcheck",
-        count=0,
-        metric_type=aggregator.GAUGE,
-        tags=["name:autoregister-completion"],
-    )
-    assert_metric(
-        "slis.kubernetes_healthchecks_total",
-        metric_type=aggregator.MONOTONIC_COUNT,
-        count=0,
-        tags=["name:autoregister-completion", "status:error"],
-    )
+    expected_metrics = [
+        SLIMetric("slis.kubernetes_healthcheck", 0, ["name:autoregister-completion"]),
+        SLIMetric("slis.kubernetes_healthchecks_total", 0, ["name:autoregister-completion", "status:error"]),
+    ]
+
+    for metric in expected_metrics:
+        aggregator.assert_metric("{}.{}".format(CHECK_NAME, metric.name), count=metric.count, tags=metric.tags)
 
 
 def test_check_metrics_slis_filter_by_type(aggregator, mock_metrics, instance):
     c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
-    def assert_metric(name, **kwargs):
-        # Wrapper to keep assertions < 120 chars
-        aggregator.assert_metric("{}.{}".format(CHECK_NAME, name), **kwargs)
+    SLIMetric = namedtuple("SLIMetric", ["name", "count", "tags"])
 
-    # Check that metrics with type other than `healthz` are filtered out
-    assert_metric(
-        "slis.kubernetes_healthcheck",
-        count=0,
-        metric_type=aggregator.GAUGE,
-        tags=["sli_name:autoregister-completion", "type:readyz"],
-    )
+    expected_metrics = [
+        SLIMetric("slis.kubernetes_healthcheck", 0, ["sli_name:autoregister-completion", "type:readyz"]),
+        SLIMetric(
+            "slis.kubernetes_healthchecks_total", 0, ["sli_name:autoregister-completion", "status:error", "type:readyz"]
+        ),
+    ]
 
-    assert_metric(
-        "slis.kubernetes_healthchecks_total",
-        metric_type=aggregator.MONOTONIC_COUNT,
-        count=0,
-        tags=["sli_name:autoregister-completion", "status:error", "type:readyz"],
-    )
+    for metric in expected_metrics:
+        aggregator.assert_metric("{}.{}".format(CHECK_NAME, metric.name), count=metric.count, tags=metric.tags)
 
 
 def test_detect_sli_endpoint(mock_metrics, instance):
