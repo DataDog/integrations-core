@@ -3,12 +3,11 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
 import os
+import pytest
 import time
 
-import pytest
 from confluent_kafka.admin import AdminClient
 from confluent_kafka.cimpl import NewTopic
-
 from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev._env import e2e_testing
 from datadog_checks.dev.ci import running_on_ci
@@ -71,7 +70,6 @@ def kafka_instance():
 def create_topics():
     client = _create_admin_client()
     response = client.list_topics(timeout=1)
-    common.CLUSTER_ID = response.cluster_id
 
     if set(common.TOPICS).issubset(set(response.topics.keys())):
         return True

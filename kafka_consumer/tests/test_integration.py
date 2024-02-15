@@ -3,11 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import logging
-from collections import defaultdict
-from contextlib import nullcontext as does_not_raise
-
 import mock
 import pytest
+from collections import defaultdict
+from contextlib import nullcontext as does_not_raise
 
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -105,6 +104,7 @@ def test_monitor_broker_highwatermarks(
     kafka_instance['consumer_groups'] = {'my_consumer': {'marvel': None}}
     kafka_instance['monitor_all_broker_highwatermarks'] = is_enabled
     dd_run_check(check(kafka_instance))
+    cluster_id = common._get_cluster_id()
 
     # After refactor and library migration, write unit tests to assert expected metric values
     aggregator.assert_metric('kafka.broker_offset', count=broker_offset_metric_count)
@@ -114,7 +114,7 @@ def test_monitor_broker_highwatermarks(
             aggregator.assert_metric(
                 'kafka.broker_offset',
                 metric_type=aggregator.GAUGE,
-                tags=[tag, f"partition:{partition}", f"kafka_cluster_id:{common.CLUSTER_ID}", "optional:tag1"],
+                tags=[tag, f"partition:{partition}", f"kafka_cluster_id:{cluster_id}", "optional:tag1"],
                 count=1,
             )
 

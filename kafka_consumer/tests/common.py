@@ -5,6 +5,7 @@ import copy
 import os
 import socket
 
+from confluent_kafka.admin import AdminClient
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -14,7 +15,6 @@ HOST_IP = socket.gethostbyname(HOST)
 KAFKA_CONNECT_STR = f'{HOST_IP}:9092'
 CONSUMED_TOPICS = ['marvel', 'dc']
 TOPICS = ['marvel', 'dc', 'unconsumed_topic']
-CLUSTER_ID = ""
 PARTITIONS = [0, 1]
 BROKER_METRICS = ['kafka.broker_offset']
 CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag']
@@ -86,12 +86,23 @@ elif AUTHENTICATION == "kerberos":
     E2E_INSTANCE["sasl_kerberos_keytab"] = "/var/lib/secret/localhost.key"
 
 
+def _get_cluster_id():
+    config = {
+        "bootstrap.servers": INSTANCE['kafka_connect_str'],
+        "socket.timeout.ms": 1000,
+        "topic.metadata.refresh.interval.ms": 2000,
+    }
+    config.update(get_authentication_configuration(INSTANCE))
+    client = AdminClient(config)
+    return client.list_topics(timeout=1).cluster_id
+
+
 def assert_check_kafka(aggregator, consumer_groups):
-    global CLUSTER_ID
+    cluster_id = _get_cluster_id()
     for name, consumer_group in consumer_groups.items():
         for topic, partitions in consumer_group.items():
             for partition in partitions:
-                tags = [f"topic:{topic}", f"partition:{partition}", "kafka_cluster_id:" + CLUSTER_ID] + [
+                tags = [f"topic:{topic}", f"partition:{partition}", "kafka_cluster_id:" + cluster_id] + [
                     'optional:tag1'
                 ]
                 for mname in BROKER_METRICS:
