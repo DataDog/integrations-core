@@ -49,7 +49,8 @@
       "auto_install": true
     },
     "dashboards": {
-      "Envoy - Overview": "assets/dashboards/envoy_overview.json"
+      "Envoy - Overview": "assets/dashboards/envoy_overview.json",
+      "Envoy Openmetrics Overview": "assets/dashboards/openmetrics_overview.json"
     },
     "logs": {
       "source": "envoy"
