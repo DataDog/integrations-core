@@ -17,21 +17,6 @@ class TeleportCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(TeleportCheck, self).__init__(name, init_config, instances)
         self.diagnostic_url = self.instance.get("diagnostic_url")
-        # Use self.instance to read the check configuration
-        # self.url = self.instance.get("url")
-
-        # If the check is going to perform SQL queries you should define a query manager here.
-        # More info at
-        # https://datadoghq.dev/integrations-core/base/databases/#datadog_checks.base.utils.db.core.QueryManager
-        # sample_query = {
-        #     "name": "sample",
-        #     "query": "SELECT * FROM sample_table",
-        #     "columns": [
-        #         {"name": "metric", "type": "gauge"}
-        #     ],
-        # }
-        # self._query_manager = QueryManager(self, self.execute_query, queries=[sample_query])
-        # self.check_initializations.append(self._query_manager.compile_queries)
 
     def check(self, _):
         # type: (Any) -> None
