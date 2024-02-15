@@ -87,6 +87,7 @@ elif AUTHENTICATION == "kerberos":
 
 
 def assert_check_kafka(aggregator, consumer_groups):
+    global CLUSTER_ID
     for name, consumer_group in consumer_groups.items():
         for topic, partitions in consumer_group.items():
             for partition in partitions:
