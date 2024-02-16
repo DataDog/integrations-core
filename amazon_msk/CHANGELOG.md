@@ -2,6 +2,14 @@
 
 <!-- towncrier release notes start -->
 
+## 4.5.0 / 2024-02-16
+
+***Added***:
+
+* Update dependencies ([#16788](https://github.com/DataDog/integrations-core/pull/16788))
+* Update the configuration file to include the new oauth options parameter ([#16835](https://github.com/DataDog/integrations-core/pull/16835))
+* Bump dependencies ([#16858](https://github.com/DataDog/integrations-core/pull/16858))
+
 ## 4.4.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:
