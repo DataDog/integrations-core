@@ -101,8 +101,8 @@ def test_subscription_stats_sync_errors(aggregator, integration_check, pg_replic
     #  16650 | subscription_cities   |                 0 |               16 |
     #  16651 | subscription_persons2 |                 0 |                0 |
 
-    expected_subscription_tags = _get_expected_tags(check, pg_replica_logical, subscription_name='subscription_cities')
     check.check(pg_replica_logical)
+    expected_subscription_tags = _get_expected_tags(check, pg_replica_logical, subscription_name='subscription_cities')
     assert_metric_at_least(
         aggregator,
         'postgresql.subscription.sync_error',
