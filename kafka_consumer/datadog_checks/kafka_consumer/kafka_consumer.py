@@ -97,9 +97,7 @@ class KafkaCheck(AgentCheck):
         """Loads broker timestamps from persistent cache."""
         broker_timestamps = defaultdict(dict)
         try:
-            for topic_partition, content in json.loads(
-                self.read_persistent_cache("broker_timestamps_")
-            ).items():
+            for topic_partition, content in json.loads(self.read_persistent_cache("broker_timestamps_")).items():
                 for offset, timestamp in content.items():
                     broker_timestamps[topic_partition][int(offset)] = timestamp
         except Exception as e:
