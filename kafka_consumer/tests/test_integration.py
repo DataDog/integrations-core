@@ -204,7 +204,6 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-@mock.patch('datadog_checks.kafka_consumer.kafka_consumer.read_persistent_cache', mocked_read_persistent_cache)
 @mock.patch('datadog_checks.kafka_consumer.kafka_consumer.time', mocked_time)
 @pytest.mark.parametrize(
     'consumer_groups_regex_config, broker_offset_count, consumer_offset_count, consumer_lag_count, \n'
@@ -454,12 +453,15 @@ def test_regex_consumer_groups(
     kafka_instance.update(consumer_groups_regex_config)
 
     # When
-    dd_run_check(check(kafka_instance))
+    check = check(kafka_instance)
+    with mock.patch('datadog_checks.base.AgentCheck.read_persistent_cache') as mock_load_broker_timestamps:
+        mock_load_broker_timestamps.return_value = mocked_read_persistent_cache("")
+        dd_run_check(check)
 
     # Then
     aggregator.assert_metric("kafka.broker_offset", count=broker_offset_count)
     aggregator.assert_metric("kafka.consumer_offset", count=consumer_offset_count)
     aggregator.assert_metric("kafka.consumer_lag", count=consumer_lag_count)
-    aggregator.assert_metric("kafka.estimated_consumer_lag_seconds", count=consumer_lag_seconds_count)
+    aggregator.assert_metric("kafka.estimated_consumer_lag", count=consumer_lag_seconds_count)
 
     assert expected_warning in caplog.text

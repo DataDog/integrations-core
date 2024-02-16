@@ -9,14 +9,6 @@ from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.config import KafkaConfig
 
-try:
-    from datadog_agent import read_persistent_cache, write_persistent_cache
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
-    read_persistent_cache = datadog_agent.read_persistent_cache
-    write_persistent_cache = datadog_agent.write_persistent_cache
-
 MAX_TIMESTAMPS = 1000
 
 
@@ -30,7 +22,6 @@ class KafkaCheck(AgentCheck):
         self._data_streams_enabled = is_affirmative(self.instance.get('data_streams_enabled', False))
         self.client = KafkaClient(self.config, self.log)
         self.check_initializations.insert(0, self.config.validate_config)
-        self._broker_timestamp_cache_key = 'broker_timestamps' + "".join(sorted(self.config._custom_tags))
 
     def check(self, _):
         """The main entrypoint of the check."""
@@ -107,7 +98,7 @@ class KafkaCheck(AgentCheck):
         broker_timestamps = defaultdict(dict)
         try:
             for topic_partition, content in json.loads(
-                read_persistent_cache("broker_timestamps_" + cluster_id)
+                self.read_persistent_cache("broker_timestamps_" + cluster_id)
             ).items():
                 for offset, timestamp in content.items():
                     broker_timestamps[topic_partition][int(offset)] = timestamp
@@ -125,7 +116,7 @@ class KafkaCheck(AgentCheck):
 
     def _save_broker_timestamps(self, broker_timestamps, cluster_id):
         """Saves broker timestamps to persistent cache."""
-        write_persistent_cache("broker_timestamps_" + cluster_id, json.dumps(broker_timestamps))
+        self.write_persistent_cache("broker_timestamps_" + cluster_id, json.dumps(broker_timestamps))
 
     def report_highwater_offsets(self, highwater_offsets, contexts_limit, cluster_id):
         """Report the broker highwater offsets."""
@@ -211,7 +202,7 @@ class KafkaCheck(AgentCheck):
                 if consumer_timestamp is None or producer_timestamp is None:
                     continue
                 lag = producer_timestamp - consumer_timestamp
-                self.gauge('estimated_consumer_lag_seconds', lag, tags=consumer_group_tags)
+                self.gauge('estimated_consumer_lag', lag, tags=consumer_group_tags)
                 reported_contexts += 1
             else:
                 if partitions is None:

@@ -109,7 +109,6 @@ class KafkaClient:
                 cluster_id = cluster_metadata.cluster_id
             except AttributeError:
                 self.log.error("Failed to get cluster metadata for consumer group %s", consumer_group)
-                continue
             topics = cluster_metadata.topics
 
             for topic in topics:
