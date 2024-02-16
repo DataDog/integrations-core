@@ -1,24 +1,30 @@
 {
-    "logs_view": {
-        "name": "Envoy Error Responses(4xx and 5xx) Grouped",
-        "search": "source:envoy @http.status_code:[400 TO 599] ",
-        "options": {
-            "patterns": {
-                "aggregationQueries": [
-                    "status",
-                    "service"
-                ]
-            }
-        },
-        "facets": [],
-        "type": "logs",
-        "is_favorite": false,
-        "timerange": {
-            "interval": 900000
-        },
-        "page": "patterns",
-        "integration_id": null,
-        "integration_short_name": null,
-        "index": "*"
-    }
+    "name": "Envoy Error Responses(4xx and 5xx) Grouped",
+    "query": "source:envoy @http.status_code:[400 TO 599] ",
+    "options": {
+        "patterns": {
+            "aggregationQueries": [
+                "status",
+                "service"
+            ]
+        }
+    },
+    "visible_facets": [
+        "source",
+        "host",
+        "service",
+        "@http.status_code",
+        "@http.method",
+        "@http.url",
+        "@http.authority"
+    ],
+    "type": "logs",
+    "is_favorite": false,
+    "timerange": {
+        "interval": 900000
+    },
+    "page": "patterns",
+    "integration_id": null,
+    "integration_short_name": null,
+    "index": "*"
 }

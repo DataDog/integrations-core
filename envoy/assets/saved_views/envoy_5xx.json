@@ -1,38 +1,30 @@
 {
-    "logs_view": {
-        "name": "Envoy 5xx Response Logs",
-        "search": "source:envoy @http.status_code:[500 TO 599] ",
-        "options": {
-            "stream": {
-                "columns": [
-                    "@http.status_code",
-                    "@http.url",
-                    "@http.method",
-                    "@http.authority"
-                ],
-                "sort": "desc",
-                "showTimeline": true,
-                "showDateColumn": true,
-                "showMessageColumn": true
-            }
-        },
-        "visible_facets": [
-            "source",
-            "host",
-            "service",
+    "name": "Envoy 5xx Response Logs",
+    "query": "source:envoy @http.status_code:[500 TO 599] ",
+    "type": "logs",
+    "page": "stream",
+    "timerange": {
+        "interval": 900000
+    },
+    "visible_facets": [
+        "source",
+        "host",
+        "service",
+        "@http.status_code",
+        "@http.method",
+        "@http.url",
+        "@http.authority"
+    ],
+    "options": {
+        "columns": [
             "@http.status_code",
-            "@http.method",
             "@http.url",
+            "@http.method",
             "@http.authority"
         ],
-        "type": "logs",
-        "is_favorite": false,
-        "timerange": {
-            "interval": 900000
-        },
-        "page": "stream",
-        "integration_id": null,
-        "integration_short_name": null,
-        "index": "*"
+        "show_date_column": true,
+        "show_message_column": true,
+        "message_display": "inline",
+        "show_timeline": true
     }
 }
