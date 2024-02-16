@@ -535,7 +535,7 @@ files:
             type: integer
             example: 20
         - name: linux
-          description: Linux specific configuration
+          description: Linux-specific configuration
           options:
           - name: use_raw_socket
             description: |
