@@ -13,7 +13,7 @@ facets:
     groups:
     - Zeek
     name: DNS Bytes
-    path: dns_bytes
+    path: zeek.dns_bytes
     source: log
     type: integer
     unit:
@@ -677,14 +677,14 @@ pipeline:
           target: network.client.geoip
           ip_processing_behavior: do-nothing
         - type: attribute-remapper
-          name: Map `bytes` to `dns_bytes`
+          name: Map `bytes` to `zeek.dns_bytes`
           enabled: true
           meta:
             tags: []
           sources:
             - bytes
           sourceType: attribute
-          target: dns_bytes
+          target: zeek.dns_bytes
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
