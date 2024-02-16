@@ -54,9 +54,9 @@ class KafkaCheck(AgentCheck):
                 # Expected format: ({(topic, partition): offset}, cluster_id)
                 highwater_offsets, cluster_id = self.client.get_highwater_offsets(consumer_offsets)
                 if self._data_streams_enabled:
-                    broker_timestamps = self._load_broker_timestamps(cluster_id)
+                    broker_timestamps = self._load_broker_timestamps()
                     self._add_broker_timestamps(broker_timestamps, highwater_offsets)
-                    self._save_broker_timestamps(broker_timestamps, cluster_id)
+                    self._save_broker_timestamps(broker_timestamps)
             else:
                 self.warning("Context limit reached. Skipping highwater offset collection.")
         except Exception:
@@ -93,12 +93,12 @@ class KafkaCheck(AgentCheck):
         if self.config._close_admin_client:
             self.client.close_admin_client()
 
-    def _load_broker_timestamps(self, cluster_id):
+    def _load_broker_timestamps(self):
         """Loads broker timestamps from persistent cache."""
         broker_timestamps = defaultdict(dict)
         try:
             for topic_partition, content in json.loads(
-                self.read_persistent_cache("broker_timestamps_" + cluster_id)
+                self.read_persistent_cache("broker_timestamps_")
             ).items():
                 for offset, timestamp in content.items():
                     broker_timestamps[topic_partition][int(offset)] = timestamp
@@ -114,9 +114,9 @@ class KafkaCheck(AgentCheck):
             if len(timestamps) > MAX_TIMESTAMPS:
                 del timestamps[min(timestamps)]
 
-    def _save_broker_timestamps(self, broker_timestamps, cluster_id):
+    def _save_broker_timestamps(self, broker_timestamps):
         """Saves broker timestamps to persistent cache."""
-        self.write_persistent_cache("broker_timestamps_" + cluster_id, json.dumps(broker_timestamps))
+        self.write_persistent_cache("broker_timestamps", json.dumps(broker_timestamps))
 
     def report_highwater_offsets(self, highwater_offsets, contexts_limit, cluster_id):
         """Report the broker highwater offsets."""
