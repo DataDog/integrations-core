@@ -4,7 +4,7 @@
     "query": "source:envoy @http.status_code:[400 TO 499] ",
     "page": "stream",
     "timerange": {
-        "interval": 900000
+        "interval_ms": 3600000
     },
     "visible_facets": [
         "source",

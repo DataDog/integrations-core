@@ -1,14 +1,6 @@
 {
     "name": "Envoy Response Logs Overview",
     "query": "source:envoy ",
-    "options": {
-        "patterns": {
-            "aggregationQueries": [
-                "status",
-                "service"
-            ]
-        }
-    },
     "visible_facets": [
         "source",
         "host",
