@@ -3,9 +3,9 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
 import os
-import pytest
 import time
 
+import pytest
 from confluent_kafka.admin import AdminClient
 from confluent_kafka.cimpl import NewTopic
 from datadog_checks.dev import TempDir, WaitFor, docker_run
