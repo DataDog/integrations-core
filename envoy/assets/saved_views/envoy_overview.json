@@ -12,7 +12,7 @@
     ],
     "type": "logs",
     "timerange": {
-        "interval": 900000
+        "interval_ms": 3600000
     },
     "page": "patterns"
 }

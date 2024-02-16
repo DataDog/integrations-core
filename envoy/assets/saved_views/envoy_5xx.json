@@ -4,7 +4,7 @@
     "type": "logs",
     "page": "stream",
     "timerange": {
-        "interval": 900000
+        "interval_ms": 3600000
     },
     "visible_facets": [
         "source",
