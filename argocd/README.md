@@ -29,7 +29,7 @@ The Datadog Agent can collect the exposed metrics using this integration. Follow
 
 Ensure that the Prometheus-formatted metrics are exposed in your Argo CD cluster. This is enabled by default if using Argo CD's [default manifests][10]. For the Agent to gather all metrics, each of the three aforementioned components needs to be annotated. For more information about annotations, see the [Autodiscovery Integration Templates][4] for guidance. Additional configuration options are available by reviewing the [sample argocd.d/conf.yaml][12].
 
-There are use-cases where Argo CD Applications contain labels that are desired to be exposed as Prometheus metrics. These labels are available via the `argocd_app_labels` metric, which is disabled on the Application Controller by default. Refer to the [ArgoCD Documentation][14] for instructions to enable it.
+There are use cases where Argo CD Applications contain labels that need to be exposed as Prometheus metrics. These labels are available using the `argocd_app_labels` metric, which is disabled on the Application Controller by default. Refer to the [ArgoCD Documentation][14] for instructions on how to enable it.
 
 Example configurations:
 
