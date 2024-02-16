@@ -129,10 +129,10 @@ datadog-prometheus==3.6.0
 datadog-proxysql==5.1.0
 datadog-pulsar==2.2.0
 datadog-rabbitmq==5.2.0
-datadog-ray==1.1.0
+datadog-ray==1.2.0
 datadog-redisdb==5.3.0
 datadog-rethinkdb==3.1.0
-datadog-riak==3.4.0
+datadog-riak==3.5.0
 datadog-riakcs==2.11.0
 datadog-sap-hana==3.1.0
 datadog-scylla==2.6.0
