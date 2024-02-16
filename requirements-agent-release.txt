@@ -84,7 +84,7 @@ datadog-kafka-consumer==4.2.1
 datadog-kafka==2.15.0
 datadog-karpenter==1.2.0
 datadog-kong==3.2.0
-datadog-kube-apiserver-metrics==4.2.0
+datadog-kube-apiserver-metrics==4.3.0
 datadog-kube-controller-manager==5.0.0
 datadog-kube-dns==4.3.0
 datadog-kube-metrics-server==3.2.0
