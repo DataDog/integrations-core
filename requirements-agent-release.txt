@@ -160,7 +160,7 @@ datadog-teradata==2.1.1; sys_platform != 'darwin'
 datadog-tls==2.15.0
 datadog-tokumx==3.2.0
 datadog-tomcat==2.0.0
-datadog-torchserve==2.1.0
+datadog-torchserve==2.2.0
 datadog-traffic-server==2.1.0
 datadog-twemproxy==1.15.0
 datadog-twistlock==3.4.1
