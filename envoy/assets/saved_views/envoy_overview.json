@@ -1,0 +1,24 @@
+{
+    "logs_view": {
+        "name": "Envoy Response Logs Overview",
+        "search": "source:envoy ",
+        "options": {
+            "patterns": {
+                "aggregationQueries": [
+                    "status",
+                    "service"
+                ]
+            }
+        },
+        "facets": [],
+        "type": "logs",
+        "is_favorite": false,
+        "timerange": {
+            "interval": 900000
+        },
+        "page": "patterns",
+        "integration_id": null,
+        "integration_short_name": null,
+        "index": "*"
+    }
+}

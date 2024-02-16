@@ -1,0 +1,38 @@
+{
+    "logs_view": {
+        "name": "Envoy 4xx Response Logs",
+        "search": "source:envoy @http.status_code:[400 TO 499] ",
+        "options": {
+            "stream": {
+                "columns": [
+                    "@http.status_code",
+                    "@http.url",
+                    "@http.method",
+                    "@http.authority"
+                ],
+                "sort": "desc",
+                "showTimeline": true,
+                "showDateColumn": true,
+                "showMessageColumn": true
+            }
+        },
+        "visible_facets": [
+            "source",
+            "host",
+            "service",
+            "@http.status_code",
+            "@http.method",
+            "@http.url",
+            "@http.authority"
+        ],
+        "type": "logs",
+        "is_favorite": false,
+        "timerange": {
+            "interval": 900000
+        },
+        "page": "stream",
+        "integration_id": null,
+        "integration_short_name": null,
+        "index": "*"
+    }
+}

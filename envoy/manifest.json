@@ -57,6 +57,12 @@
     },
     "monitors": {
       "Envoy - connected state": "assets/monitors/connected_state.json"
+    },
+    "saved_views": {
+      "envoy_overview": "assets/saved_views/envoy_overview.json",
+      "envoy_4xx": "assets/saved_views/envoy_4xx.json",
+      "envoy_5xx": "assets/saved_views/envoy_5xx.json",
+      "envoy_error_grouped": "assets/saved_views/envoy_error_grouped.json"
     }
   }
 }
