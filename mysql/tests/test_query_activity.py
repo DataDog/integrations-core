@@ -48,6 +48,60 @@ def dbm_instance(instance_complex):
     instance_complex['collect_settings'] = {'enabled': False}
     return copy(instance_complex)
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_deadlocks(aggregator, dd_run_check, dbm_instance):
+    check = MySql(CHECK_NAME, {}, [dbm_instance])
+    #Justin suggested to change timeout instead of using a long sleep
+    # Iguess his idea is to change timeout on how long it ccan wait on asquiring a lock.
+    #Boris makes sense like in Nenands example make sure that there were no deadlocks before the test
+    #BORIS also simplify deadlock thing can be like in Nenads example 
+    # https://github.com/DataDog/integrations-core/pull/13374/files#diff-369b313fc4346aa906cef597e161569db8e0c52c876dea0a7fe90cd619a0da62
+    def run_deadlock_1(conn):
+        conn.begin()
+        conn.cursor().execute("""START TRANSACTION;
+        UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+        SLEEP(3);
+        UPDATE accounts SET balance = balance + 100 WHERE id = 2;
+        COMMIT;""")
+#ADD SLEEP
+        conn.commit()
+    def run_deadlock_2(conn):
+        conn.begin()
+        conn.cursor().execute("""START TRANSACTION;
+        UPDATE accounts SET balance = balance - 50 WHERE id = 2;
+        SLEEP(3);
+        UPDATE accounts SET balance = balance + 50 WHERE id = 1;
+        COMMIT;""")
+        conn.commit()
+
+    bob_conn = _get_conn_for_user('bob')
+    fred_conn = _get_conn_for_user('fred')
+
+    executor = concurrent.futures.thread.ThreadPoolExecutor(1)
+    # bob's query will block until the TX is completed
+    executor.submit(run_deadlock_1, bob_conn)
+    # fred's query will get blocked by bob's TX
+    time.sleep(1.5)
+    executor.submit(run_deadlock_2, fred_conn)
+
+    dd_run_check(check)
+    bob_conn.close()
+    fred_conn.close()
+
+    executor.shutdown()
+
+    # get result of my query in aggregator and assert
+    # dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+
+    deadlock_metric =  aggregator.metrics("mysql.innodb.deadlocks")
+    if len(deadlock_metric)>0:
+        for_debug = deadlock_metric[0].value
+    else:
+        for_debug = 0
+
+    assert for_debug == 1, "should have collected exactly one activity payload"
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
@@ -156,7 +210,7 @@ def test_activity_reported_hostname(aggregator, dbm_instance, dd_run_check, repo
     dbm_instance['reported_hostname'] = reported_hostname
     check = MySql(CHECK_NAME, {}, [dbm_instance])
 
-    dd_run_check(check)
+    dd_run_check(check)#Boris why 2 times dd_run_check?
     dd_run_check(check)
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")

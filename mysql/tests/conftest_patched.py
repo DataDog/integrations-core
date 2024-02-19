@@ -418,18 +418,6 @@ def populate_database():
     cur.execute("GRANT SELECT, UPDATE ON testdb.users TO 'bob'@'%';")
     cur.execute("GRANT SELECT, UPDATE ON testdb.users TO 'fred'@'%';")
     cur.close()
-    #Boris later come up with a better way to do this probably
-    # deadlock can be created just with testdb.users table
-    cur = conn.cursor()
-    cur.execute("CREATE TABLE testdb.accounts (id INT PRIMARY KEY, balance INT);")
-    cur.execute("CREATE TABLE transactions (id INT PRIMARY KEY,from_account INT,to_account INT,amount INT);")
-    cur.execute("INSERT INTO testdb.accounts (id,balance) VALUES(1,1000);")
-    cur.execute("INSERT INTO testdb.accounts (id,balance) VALUES(2,1000);")
-    cur.execute("GRANT SELECT, UPDATE ON testdb.accounts TO 'bob'@'%';")
-    cur.execute("GRANT SELECT, UPDATE ON testdb.accounts TO 'fred'@'%';")
-    cur.execute("GRANT SELECT, UPDATE ON testdb.transactions TO 'bob'@'%';")
-    cur.execute("GRANT SELECT, UPDATE ON testdb.transactions TO 'fred'@'%';")
-    cur.close()
     _create_explain_procedure(conn, "testdb")
 
 

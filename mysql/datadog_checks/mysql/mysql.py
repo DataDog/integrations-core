@@ -57,6 +57,7 @@ from .innodb_metrics import InnoDBMetrics
 from .metadata import MySQLMetadata
 from .queries import (
     QUERY_USER_CONNECTIONS,
+    QUERY_DEADLOCKS,
     SQL_95TH_PERCENTILE,
     SQL_AVG_QUERY_RUN_TIME,
     SQL_GROUP_REPLICATION_MEMBER,
@@ -294,10 +295,13 @@ class MySql(AgentCheck):
                     self.check_userstat_enabled(db)
 
                 # Metric collection
+                #lets assume my query is a metric too
                 if not self._config.only_custom_queries:
                     self._collect_metrics(db, tags=tags)
                     self._collect_system_metrics(self._config.host, db, tags)
                     if self.runtime_queries:
+                        print("will execute runtime queries")
+                        #BORIS my query is it a runtime query that is only run when the nofig hasnt only_custom_queries set to true
                         self.runtime_queries.execute(extra_tags=tags)
 
                 if self._config.dbm_enabled:
@@ -344,7 +348,7 @@ class MySql(AgentCheck):
             return self._runtime_queries
 
         queries = []
-
+        queries.extend([QUERY_DEADLOCKS])
         if self.performance_schema_enabled:
             queries.extend([QUERY_USER_CONNECTIONS])
 
