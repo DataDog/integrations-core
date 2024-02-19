@@ -126,13 +126,20 @@ def _iterate_metric_name(query):
             yield metric[0]
 
 
-def _get_expected_tags(check, pg_instance, **kwargs):
-    base_tags = pg_instance['tags'] + [
-        'port:{}'.format(pg_instance['port']),
-        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
-    ]
+def _get_expected_replication_tags(check, pg_instance, with_db=False, **kwargs):
+    return _get_expected_tags(check, pg_instance, with_db=with_db, role='standby', **kwargs)
+
+
+def _get_expected_tags(check, pg_instance, with_db=False, role='master', **kwargs):
+    base_tags = pg_instance['tags'] + [f'port:{pg_instance["port"]}']
+    if role:
+        base_tags.append(f'replication_role:{role}')
+    if with_db:
+        base_tags.append(f'db:{pg_instance["dbname"]}')
+    if check:
+        base_tags.append(f'dd.internal.resource:database_instance:{check.resolved_hostname}')
     for k, v in kwargs.items():
-        base_tags.append('{}:{}'.format(k, v))
+        base_tags.append(f'{k}:{v}')
     return base_tags
 
 
