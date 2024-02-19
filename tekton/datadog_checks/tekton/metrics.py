@@ -37,6 +37,9 @@ GENERIC_METRIC_MAP = {
 }
 
 PIPELINES_METRIC = {
+    "pipelinerun_count": "pipelinerun",
+    "pipelinerun_duration_seconds": "pipelinerun.duration",
+    "pipelinerun_taskrun_duration_seconds": "pipelinerun.taskrun.duration",
     "running_pipelineruns_count": "running_pipelineruns",
     "running_pipelineruns_waiting_on_pipeline_resolution_count": "running_pipelineruns_waiting_on_pipeline_resolution",
     "running_pipelineruns_waiting_on_task_resolution_count": "running_pipelineruns_waiting_on_task_resolution",
@@ -44,6 +47,9 @@ PIPELINES_METRIC = {
     "running_taskruns_throttled_by_node_count": "running_taskruns_throttled_by_node",
     "running_taskruns_throttled_by_quota_count": "running_taskruns_throttled_by_quota",
     "running_taskruns_waiting_on_task_resolution_count": "running_taskruns_waiting_on_task_resolution",
+    "taskrun_count": "taskrun",
+    "taskrun_duration_seconds": "taskrun_duration",
+    "taskruns_pod_latency_milliseconds": "taskruns_pod_latency",
 }
 
 TRIGGERS_METRIC = {
