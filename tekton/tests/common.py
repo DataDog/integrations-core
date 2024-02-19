@@ -53,6 +53,15 @@ PIPELINES_METRICS = [
     "workqueue.unfinished_work.bucket",
     "workqueue.unfinished_work.count",
     "workqueue.unfinished_work.sum",
+    "pipelinerun.count",
+    "pipelinerun.duration.bucket",
+    "pipelinerun.duration.count",
+    "pipelinerun.duration.sum",
+    "taskrun.count",
+    "taskrun_duration.bucket",
+    "taskrun_duration.count",
+    "taskrun_duration.sum",
+    "taskruns_pod_latency",
 ]
 assert PIPELINES_METRICS == sorted(PIPELINES_METRICS)
 
