@@ -115,6 +115,14 @@ TRIGGERS_METRICS = [
 ]
 assert PIPELINES_METRICS == sorted(PIPELINES_METRICS)
 
+E2E_PIPELINES_OPTIONAL_METRICS = {
+    "tekton.pipelines_controller.taskrun.count",
+    "tekton.pipelines_controller.taskrun_duration.bucket",
+    "tekton.pipelines_controller.taskrun_duration.count",
+    "tekton.pipelines_controller.taskrun_duration.sum",
+    "tekton.pipelines_controller.taskruns_pod_latency",
+}
+
 
 def mock_http_responses(url, **_params):
     mapping = {
