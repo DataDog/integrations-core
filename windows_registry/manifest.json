@@ -25,7 +25,9 @@
     "oauth": {},
     "assets": {
       "integration": {
-        "source_type_name": "Windows Registry",
+        "auto_install": true,
+        "source_type_id": 8444609,
+        "source_type_name": "windows-registry",
         "configuration": {},
         "events": {
           "creates_events": false
