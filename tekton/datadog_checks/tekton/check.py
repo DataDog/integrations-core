@@ -50,5 +50,5 @@ class TektonCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             'metrics': [metrics],
             'namespace': namespace,
         }
-        config.update(self.instance)
+        config |= self.instance
         return config
