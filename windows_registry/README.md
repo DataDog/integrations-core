@@ -44,7 +44,7 @@ All metrics collected by the Windows Registry integration are forwarded to Datad
 
 ### Logs
 
-All logs collected by the Windows Registry integration are forwarded to Datadog, and subject to [Logs billing][8].
+All logs collected by the Windows Registry integration are forwarded to Datadog, and are subject to [Logs billing][8].
 
 ### Service Checks
 
