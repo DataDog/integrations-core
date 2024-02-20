@@ -74,59 +74,48 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
     #Boris makes sense like in Nenands example make sure that there were no deadlocks before the test
     #BORIS also simplify deadlock thing can be like in Nenads example 
     # https://github.com/DataDog/integrations-core/pull/13374/files#diff-369b313fc4346aa906cef597e161569db8e0c52c876dea0a7fe90cd619a0da62
-    def run_deadlock_1(conn):
-        conn.begin()
-        conn.cursor().execute("""START TRANSACTION;
-        UPDATE accounts SET balance = balance - 100 WHERE id = 1;
-        SLEEP(3);
-        UPDATE accounts SET balance = balance + 100 WHERE id = 2;
-        COMMIT;""")
-#ADD SLEEP
-        conn.commit()
-    def run_deadlock_2(conn):
-        conn.begin()
-        conn.cursor().execute("""START TRANSACTION;
-        UPDATE accounts SET balance = balance - 50 WHERE id = 2;
-        SLEEP(3);
-        UPDATE accounts SET balance = balance + 50 WHERE id = 1;
-        COMMIT;""")
-        conn.commit()
+
     
     #    cur.execute("CREATE TABLE testdb.users (id INT NOT NULL UNIQUE KEY, name VARCHAR(20), age INT);")
     #cur.execute("INSERT INTO testdb.users (id,name,age) VALUES(1,'Alice',25);")
     #cur.execute("INSERT INTO testdb.users (id,name,age) VALUES(2,'Bob',20);")
-#Boris do we need to check that current value is 25 and then set it back in a tear down ? 
+    #Boris do we need to check that current value is 25 and then set it back in a tear down ?
+    #or may be do select for update as it also should be blocking 
     def run_first_deadlock_query(conn):
         conn.begin()
         conn.cursor().execute("""
+                              SET autocommit=0;
                               START TRANSACTION;
-                              UPDATE testdb.users SET age = 25 WHERE id = 1;
-                              SLEEP(3);
-                              UPDATE testdb.users SET age = 20 WHERE id = 2;
+                              UPDATE testdb.users SET age = 20 WHERE id = 1;
+                              SELECT SLEEP(3);
+                              UPDATE testdb.users SET age = 25 WHERE id = 2;
                               COMMIT;
+                              SET autocommit=0;
                               """)
         conn.commit()
 
     def run_second_deadlock_query(conn):
         conn.begin()
         conn.cursor().execute("""
+                              SET autocommit=0;
                               START TRANSACTION;
-                              UPDATE testdb.users SET age = 20 WHERE id = 2;
-                              SLEEP(3);
-                              UPDATE testdb.users SET age = 25 WHERE id = 1;
+                              UPDATE testdb.users SET age = 25 WHERE id = 2;
+                              SELECT SLEEP(10);
+                              UPDATE testdb.users SET age = 20 WHERE id = 1;
                               COMMIT;
+                              SET autocommit=0;
                               """)
         conn.commit()
 
-    bob_conn = _get_conn_for_user('bob')
-    fred_conn = _get_conn_for_user('fred')
+    bob_conn = _get_conn_for_user('bob', False)
+    fred_conn = _get_conn_for_user('fred', False)
 
-    executor = concurrent.futures.thread.ThreadPoolExecutor(1)
+    executor = concurrent.futures.thread.ThreadPoolExecutor(2)
     # bob's query will block until the TX is completed
-    executor.submit(run_deadlock_1, bob_conn)
+    executor.submit(run_first_deadlock_query, bob_conn)
     # fred's query will get blocked by bob's TX
     time.sleep(1.5)
-    executor.submit(run_deadlock_2, fred_conn)
+    executor.submit(run_second_deadlock_query, fred_conn)
 
     dd_run_check(check)
     bob_conn.close()
@@ -574,7 +563,6 @@ def _expected_dbm_job_err_tags(dbm_instance):
         'port:{}'.format(PORT),
         'dd.internal.resource:database_instance:stubbed.hostname',
     ]
-
 
 def _get_conn_for_user(user, _autocommit=False):
     return pymysql.connect(host=HOST, port=PORT, user=user, password=user, autocommit=_autocommit)

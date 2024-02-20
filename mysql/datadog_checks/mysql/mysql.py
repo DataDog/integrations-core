@@ -386,7 +386,7 @@ class MySql(AgentCheck):
         connection_args = {
             'ssl': ssl,
             'connect_timeout': self._config.connect_timeout,
-            'autocommit': True,
+            'autocommit': False,
         }
         if self._config.charset:
             connection_args['charset'] = self._config.charset
