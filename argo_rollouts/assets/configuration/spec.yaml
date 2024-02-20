@@ -1,0 +1,10 @@
+name: Argo_Rollouts
+files:
+- name: argo_rollouts.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - template: instances/default
