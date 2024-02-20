@@ -23,7 +23,7 @@ This integration collects and reports Windows Registry information using both of
 
 1. Edit the `windows_registry.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's [configuration directory][4] to start collecting Windows registry information. See the [sample windows_registry.d/conf.yaml][5] for all available configuration options.
 
-2. In order to send registry values and changes as Logs, log collection needs to be enabled in the Datadog Agent. To enable log collection, add the following to your `datadog.yaml` file: 
+2. To send registry values and changes as Logs, log collection needs to be enabled in the Datadog Agent. To enable log collection, add the following to your `datadog.yaml` file: 
 
     ```yaml
     logs_enabled: true
