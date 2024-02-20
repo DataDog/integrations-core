@@ -1,0 +1,32 @@
+{
+  "name": "Tomcat 5xx errors",
+  "type": "logs",
+  "page": "stream",
+  "query": "source:tomcat @http.status_code:[500 TO 599]",
+  "timerange": {
+    "interval_ms": 3600000
+  },
+  "visible_facets": [
+    "source",
+    "host",
+    "service",
+    "@http.status_code",
+    "@http.method",
+    "@http.url_details.path",
+    "@network.client.ip"
+  ],
+  "options": {
+    "columns": [
+      "host",
+      "service",
+      "@http.status_code",
+      "@http.method",
+      "@http.url_details.path",
+      "@network.client.ip"
+    ],
+    "show_date_column": true,
+    "show_message_column": true,
+    "message_display": "inline",
+    "show_timeline": true
+  }
+}
