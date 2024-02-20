@@ -2,7 +2,14 @@
 
 <!-- towncrier release notes start -->
 
-## 1.16.0 / 2024-01-05
+## 1.17.0 / 2024-02-16
+
+***Added***:
+
+* Bump `psutil` version to 5.9.7 ([#16547](https://github.com/DataDog/integrations-core/pull/16547))
+* Update dependencies ([#16788](https://github.com/DataDog/integrations-core/pull/16788))
+
+## 1.16.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:
 

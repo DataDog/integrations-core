@@ -1,0 +1,1 @@
+Extract hardcoded additional integrations from the `validate labeler` command to the config file

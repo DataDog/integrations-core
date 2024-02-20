@@ -148,6 +148,8 @@ envoy_cluster_default_total_match_count{envoy_cluster_name="service1"} 19
 envoy_cluster_upstream_rq_timeout{envoy_cluster_name="service1"} 0
 # TYPE envoy_cluster_http2_rx_reset counter
 envoy_cluster_http2_rx_reset{envoy_cluster_name="service1"} 0
+# TYPE envoy_cluster_http2_stream_refused_errors counter
+envoy_cluster_http2_stream_refused_errors{envoy_cluster_name="service1"} 0
 # TYPE envoy_cluster_lb_zone_routing_all_directly counter
 envoy_cluster_lb_zone_routing_all_directly{envoy_cluster_name="service1"} 0
 # TYPE envoy_cluster_upstream_cx_none_healthy counter
@@ -419,6 +421,8 @@ envoy_http_downstream_cx_destroy_active_rq{envoy_http_conn_manager_prefix="admin
 envoy_runtime_override_dir_not_exists{} 1
 # TYPE envoy_server_watchdog_mega_miss counter
 envoy_server_watchdog_mega_miss{} 0
+# TYPE envoy_server_dropped_stat_flushes counter
+envoy_server_dropped_stat_flushes{} 0
 envoy_http_downstream_cx_destroy_remote_active_rq{envoy_http_conn_manager_prefix="admin"} 0
 envoy_http_no_route{envoy_http_conn_manager_prefix="async-client"} 0
 envoy_http_downstream_rq_timeout{envoy_http_conn_manager_prefix="admin"} 0
@@ -517,6 +521,10 @@ envoy_filesystem_write_buffered{} 7
 envoy_http_downstream_cx_upgrades_total{envoy_http_conn_manager_prefix="admin"} 0
 # TYPE envoy_cluster_manager_cluster_removed counter
 envoy_cluster_manager_cluster_removed{} 0
+# TYPE envoy_connection_limit_active_connections gauge
+envoy_connection_limit_active_connections{envoy_connection_limit_prefix="ingress_http"} 0
+# TYPE envoy_connection_limit_limited_connections counter
+envoy_connection_limit_limited_connections{envoy_connection_limit_prefix="ingress_http"} 0
 # TYPE envoy_server_debug_assertion_failures counter
 envoy_server_debug_assertion_failures{} 0
 # TYPE envoy_server_worker_3_watchdog_miss counter
@@ -529,6 +537,8 @@ envoy_cluster_upstream_flow_control_drained_total{envoy_cluster_name="xds_cluste
 envoy_cluster_lb_healthy_panic{envoy_cluster_name="xds_cluster"} 0
 envoy_cluster_lb_subsets_created{envoy_cluster_name="xds_cluster"} 0
 envoy_cluster_http2_rx_reset{envoy_cluster_name="xds_cluster"} 22
+# TYPE envoy_cluster_http2_stream_refused_errors counter
+envoy_cluster_http2_stream_refused_errors{envoy_cluster_name="xds_cluster"} 0
 envoy_cluster_upstream_cx_connect_attempts_exceeded{envoy_cluster_name="xds_cluster"} 0
 envoy_cluster_original_dst_host_invalid{envoy_cluster_name="xds_cluster"} 0
 envoy_cluster_update_no_rebuild{envoy_cluster_name="xds_cluster"} 0

@@ -9,6 +9,7 @@
 #    Can also use the `{{version}}` placeholder for replacemnet.
 # Optional:
 # - CONFIGURE_SCRIPT: Alternative to the default ./configure
+# - INSTALL_COMMAND: Specify a command for installation other than the default `make install`
 
 set -euxo pipefail
 
@@ -24,6 +25,6 @@ tar -C "${workdir}" -xf "${workdir}/${archive_name}"
 pushd "${workdir}/${relative_path}"
 ${CONFIGURE_SCRIPT:-./configure} "$@"
 make -j $(nproc)
-make install
+${INSTALL_COMMAND:-make install}
 popd
 rm -rf "${workdir}"

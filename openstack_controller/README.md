@@ -80,6 +80,12 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][9].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Monitor your OpenStack components with Datadog][10]
+
 
 [1]: https://docs.datadoghq.com/integrations/openstack/
 [2]: https://www.openstack.org
@@ -90,3 +96,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://www.datadoghq.com/blog/openstack-controller-integration/

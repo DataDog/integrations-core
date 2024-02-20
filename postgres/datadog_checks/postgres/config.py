@@ -85,7 +85,7 @@ class PostgresConfig:
         if is_affirmative(instance.get('collect_default_database', True)):
             self.ignore_databases = [d for d in self.ignore_databases if d != 'postgres']
         self.custom_queries = instance.get('custom_queries', [])
-        self.tag_replication_role = is_affirmative(instance.get('tag_replication_role', False))
+        self.tag_replication_role = is_affirmative(instance.get('tag_replication_role', True))
         self.custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []))
         self.max_relations = int(instance.get('max_relations', 300))
         self.min_collection_interval = instance.get('min_collection_interval', 15)
@@ -102,11 +102,6 @@ class PostgresConfig:
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
         self.settings_metadata_config = instance.get('collect_settings', {}) or {}
         self.schemas_metadata_config = instance.get('collect_schemas', {"enabled": False})
-        if not self.relations and self.schemas_metadata_config['enabled']:
-            raise ConfigurationError(
-                'In order to collect schemas on this database, you must enable relation metrics collection.'
-            )
-
         self.resources_metadata_config = instance.get('collect_resources', {}) or {}
         self.statement_activity_config = instance.get('query_activity', {}) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}

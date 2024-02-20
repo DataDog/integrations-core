@@ -23,5 +23,5 @@ def connection_flaked(aggregator):
     # HANA connection some times flakes, in that case the check will reconnect on next run
     # And a warning service check will be emitted
     service_checks = aggregator.service_checks(CAN_CONNECT_SERVICE_CHECK)
-    all_ok = all([service_check.status == SapHanaCheck.OK for service_check in service_checks])
+    all_ok = all(service_check.status == SapHanaCheck.OK for service_check in service_checks)
     return not all_ok

@@ -66,7 +66,7 @@ class ClickhouseCheck(AgentCheck):
         version = list(self.execute_query_raw('SELECT version()'))[0][0]
 
         # The version comes in like `19.15.2.2` though sometimes there is no patch part
-        version_parts = {name: part for name, part in zip(('year', 'major', 'minor', 'patch'), version.split('.'))}
+        version_parts = dict(zip(('year', 'major', 'minor', 'patch'), version.split('.')))
 
         self.set_metadata('version', version, scheme='parts', final_scheme='calver', part_map=version_parts)
 

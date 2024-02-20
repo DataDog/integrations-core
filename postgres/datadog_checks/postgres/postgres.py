@@ -350,11 +350,6 @@ class PostgreSql(AgentCheck):
     def _get_debug_tags(self):
         return ['agent_hostname:{}'.format(self.agent_hostname)]
 
-    def _get_service_check_tags(self):
-        service_check_tags = []
-        service_check_tags.extend(self.tags)
-        return list(service_check_tags)
-
     def _get_replication_role(self):
         with self.db() as conn:
             with conn.cursor() as cursor:
@@ -395,7 +390,7 @@ class PostgreSql(AgentCheck):
         all_wal_files = [
             os.path.join(wal_log_dir, file_name)
             for file_name in all_files
-            if not any([ext for ext in exluded_file_exts if file_name.endswith(ext)])
+            if not any(ext for ext in exluded_file_exts if file_name.endswith(ext))
         ]
         if len(all_wal_files) < 1:
             self.log.warning("No WAL files found in directory: %s.", wal_log_dir)
@@ -984,7 +979,7 @@ class PostgreSql(AgentCheck):
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.OK,
-                tags=self._get_service_check_tags(),
+                tags=self.tags,
             )
             self.log.info("Waiting for remote configuration to push instance configuration")
             return
@@ -1021,7 +1016,7 @@ class PostgreSql(AgentCheck):
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
-                tags=self._get_service_check_tags(),
+                tags=tags,
                 message=message,
                 hostname=self.resolved_hostname,
             )
@@ -1030,7 +1025,7 @@ class PostgreSql(AgentCheck):
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.OK,
-                tags=self._get_service_check_tags(),
+                tags=tags,
                 hostname=self.resolved_hostname,
             )
         finally:

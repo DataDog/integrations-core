@@ -85,7 +85,7 @@ class LinuxNetwork(Network):
                     if self._collect_cx_queues:
                         cmd = "ss --numeric --tcp --all --ipv{}".format(ip_version)
                         output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env=ss_env)
-                        for (state, recvq, sendq) in self._parse_queues("ss", output):
+                        for state, recvq, sendq in self._parse_queues("ss", output):
                             self.histogram('system.net.tcp.recv_q', recvq, custom_tags + ["state:" + state])
                             self.histogram('system.net.tcp.send_q', sendq, custom_tags + ["state:" + state])
 
@@ -111,7 +111,7 @@ class LinuxNetwork(Network):
                     self.gauge(metric, value, tags=custom_tags)
 
                 if self._collect_cx_queues:
-                    for (state, recvq, sendq) in self._parse_queues("netstat", output):
+                    for state, recvq, sendq in self._parse_queues("netstat", output):
                         self.histogram('system.net.tcp.recv_q', recvq, custom_tags + ["state:" + state])
                         self.histogram('system.net.tcp.send_q', sendq, custom_tags + ["state:" + state])
 
