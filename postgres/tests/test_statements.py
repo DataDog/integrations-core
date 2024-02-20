@@ -182,7 +182,7 @@ def test_statement_metrics(
     assert event['ddagentversion'] == datadog_agent.get_version()
     assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
-    expected_dbm_metrics_tags = set(_get_expected_tags(None, dbm_instance))
+    expected_dbm_metrics_tags = set(_get_expected_tags(check, dbm_instance, with_host=False))
     assert set(event['tags']) == expected_dbm_metrics_tags
     obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'
 
@@ -527,9 +527,9 @@ def test_failed_explain_handling(
     for _ in range(failed_explain_test_repeat_count):
         check.statement_samples._run_and_track_explain(dbname, query, query, query)
 
-    expected_tags = _get_expected_tags(None, dbm_instance, with_db=True, agent_hostname='stubbed.hostname') + [
-        expected_error_tag
-    ]
+    expected_tags = _get_expected_tags(
+        check, dbm_instance, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
+    ) + [expected_error_tag]
 
     aggregator.assert_metric(
         'dd.postgres.statement_samples.error',
@@ -653,8 +653,6 @@ def test_statement_samples_collect(
     check = integration_check(dbm_instance)
     check._connect()
 
-    tags = _get_expected_tags(None, dbm_instance, db=dbname)
-
     conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
     # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg2 uses
     # the simple query protocol, sending the whole query as a plain string to postgres.
@@ -664,6 +662,7 @@ def test_statement_samples_collect(
     try:
         conn.cursor().execute(query, (arg,))
         run_one_check(check, dbm_instance)
+        tags = _get_expected_tags(check, dbm_instance, with_host=False, db=dbname)
 
         dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
@@ -1033,7 +1032,7 @@ def test_activity_snapshot_collection(
 
         assert 'query' not in bobs_query
 
-        expected_tags = _get_expected_tags(None, dbm_instance)
+        expected_tags = _get_expected_tags(check, dbm_instance, with_host=False)
 
         # check postgres_connections are set
         assert len(event['postgres_connections']) > 0
@@ -1052,7 +1051,7 @@ def test_activity_snapshot_collection(
         for key in expected_conn_out:
             assert expected_conn_out[key] == bobs_conns[key]
 
-        assert event['ddtags'] == expected_tags
+        assert set(event['ddtags']) == set(expected_tags)
 
         if POSTGRES_VERSION == '9.5':
             # rest of test is to confirm blocking behavior
@@ -1268,7 +1267,9 @@ def test_statement_run_explain_errors(
     assert explain_err_code == expected_explain_err_code
     assert err == expected_err
 
-    expected_tags = _get_expected_tags(None, dbm_instance, with_db=True, agent_hostname='stubbed.hostname')
+    expected_tags = _get_expected_tags(
+        check, dbm_instance, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
+    )
 
     aggregator.assert_metric(
         'dd.postgres.statement_samples.error',
@@ -1766,9 +1767,9 @@ def test_statement_metrics_database_errors(
     ):
         run_one_check(check, dbm_instance)
 
-    expected_tags = _get_expected_tags(None, dbm_instance, with_db=True, agent_hostname='stubbed.hostname') + [
-        expected_error_tag
-    ]
+    expected_tags = _get_expected_tags(
+        check, dbm_instance, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
+    ) + [expected_error_tag]
 
     aggregator.assert_metric(
         'dd.postgres.statement_metrics.error', value=1.0, count=1, tags=expected_tags, hostname='stubbed.hostname'
@@ -1829,7 +1830,7 @@ def test_pg_stat_statements_dealloc(aggregator, integration_check, dbm_instance_
         cur.execute("SELECT COUNT(*) FROM pg_stat_statements(false);")
         count_statements = cur.fetchall()[0][0]
 
-    expected_tags = _get_expected_replication_tags(None, dbm_instance_replica2, db=DB_NAME)
+    expected_tags = _get_expected_replication_tags(check, dbm_instance_replica2, with_host=False, db=DB_NAME)
     aggregator.assert_metric("postgresql.pg_stat_statements.max", value=100, tags=expected_tags)
     if float(POSTGRES_VERSION) >= 14.0:
         aggregator.assert_metric("postgresql.pg_stat_statements.dealloc", value=0, tags=expected_tags)
