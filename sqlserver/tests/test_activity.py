@@ -204,9 +204,7 @@ def test_collect_load_activity(
     )
 
 
-@pytest.mark.skipif(
-    running_on_windows_ci() and SQLSERVER_MAJOR_VERSION == 2019, reason='Test flakes on this set up'
-)
+@pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_MAJOR_VERSION == 2019, reason='Test flakes on this set up')
 def test_activity_nested_blocking_transactions(
     aggregator,
     instance_docker,
