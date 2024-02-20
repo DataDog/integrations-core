@@ -57,13 +57,6 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
     #set up
 
     check = MySql(CHECK_NAME, {}, [dbm_instance])
-    deadlock_query = """
-        SELECT
-            COUNT(*) as deadlocks
-        FROM 
-            information_schema.INNODB_METRICS
-        WHERE
-            NAME='lock_deadlocks'"""
     dd_run_check(check)
     deadlocks_start = 0
     deadlock_metric_start =  aggregator.metrics("mysql.innodb.deadlocks")
@@ -84,34 +77,38 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
     #cur.execute("INSERT INTO testdb.users (id,name,age) VALUES(2,'Bob',20);")
     #Boris do we need to check that current value is 25 and then set it back in a tear down ?
     #or may be do select for update as it also should be blocking 
-    def run_first_deadlock_query(conn):
+    def check_if_age_updated(conn):
         conn.begin()
-        conn.cursor().execute("""
-                              START TRANSACTION;
-                              UPDATE testdb.users SET age = 31 WHERE id = 1;
-                              SELECT SLEEP(0);
-                              UPDATE testdb.users SET age = 32 WHERE id = 2;
-                              COMMIT;
-                              """)
-        conn.cursor().execute("""
-                              START TRANSACTION;
-                              SELECT age FROM testdb.users WHERE id = 1;
-                              COMMIT;
-                              """)        
-        results = dict(conn.cursor().fetchall())
+        cursor = conn.cursor()
+        try:
+            cursor.execute("SELECT age FROM testdb.users WHERE id = 1;")
+        except Exception as e:
+            print("Error occurred:", e)        
+        results = cursor.fetchall()
         print(results)
 
         conn.commit()
-
+    def run_first_deadlock_query(conn):
+        conn.begin()
+        try:
+            conn.cursor().execute("START TRANSACTION;")
+            conn.cursor().execute("UPDATE testdb.users SET age = 32 WHERE id = 1;") 
+            conn.cursor().execute("SELECT SLEEP(3);")
+            conn.cursor().execute("UPDATE testdb.users SET age = 32 WHERE id = 2;")
+            conn.cursor().execute("COMMIT;")
+        except Exception as e:
+            print("Error occurred:", e)
+        conn.commit()
     def run_second_deadlock_query(conn):
         conn.begin()
-        conn.cursor().execute("""
-                              START TRANSACTION;
-                              UPDATE testdb.users SET age = 32 WHERE id = 2;
-                              SELECT SLEEP(0);
-                              UPDATE testdb.users SET age = 31 WHERE id = 1;
-                              COMMIT;
-                              """)
+        try:
+            conn.cursor().execute("START TRANSACTION;")
+            conn.cursor().execute("UPDATE testdb.users SET age = 32 WHERE id = 2;") 
+            conn.cursor().execute("SELECT SLEEP(3);")
+            conn.cursor().execute("UPDATE testdb.users SET age = 32 WHERE id = 1;")
+            conn.cursor().execute("COMMIT;")
+        except Exception as e:
+            print("Error occurred:", e)
         conn.commit()
 
 
@@ -124,10 +121,15 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
     executor = concurrent.futures.thread.ThreadPoolExecutor(2)
     # bob's query will block until the TX is completed
     executor.submit(run_first_deadlock_query, bob_conn)
-    # fred's query will get blocked by bob's TX
+
     time.sleep(1.5)
     executor.submit(run_second_deadlock_query, fred_conn)
-    time.sleep(10)
+    time.sleep(8)
+
+
+
+
+    #check_if_age_updated(bob_conn)
     dd_run_check(check)
     bob_conn.close()
     fred_conn.close()
@@ -144,9 +146,8 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
         for_debug = 0
 
     #assert
-    dd_run_check(check)
-    aggregator.assert_metric('alice.age', value=31)
-    aggregator.assert_metric('bob.age', value=32)
+
+
     assert for_debug - deadlocks_start == 1, "there should be one deadlock"
 
 

@@ -78,7 +78,7 @@ QUERY_DEADLOCKS = {
     'name': 'information_schema.INNODB_METRICS.lock_deadlocks',
     'query': """
         SELECT
-            COUNT(*) as deadlocks
+            count as deadlocks
         FROM 
             information_schema.INNODB_METRICS
         WHERE
