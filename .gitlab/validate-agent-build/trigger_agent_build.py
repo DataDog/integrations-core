@@ -18,7 +18,6 @@ def trigger_pipeline():
     if r.status_code != 200:
         print(f"Tag '{RELEASE_BRANCH}' is not a release tag, falling back to main")
         trigger_ref = "main"
-    # TODO: Opt out of kitchen tests when the appropriate flag is implemented.
     data = {
         "token": CI_TOKEN,
         "ref": trigger_ref,
@@ -27,7 +26,10 @@ def trigger_pipeline():
             "RELEASE_VERSION_7": "nightly-a7",
             "BUCKET_BRANCH": "none",
             "INTEGRATIONS_CORE_VERSION": os.environ['CI_COMMIT_REF_NAME'],
+            # disable kitchen tests
             "RUN_KITCHEN_TESTS": "false",
+            # disable e2e tests
+            "RUN_E2E_TESTS": "off",
         }
     }
 
