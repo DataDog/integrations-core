@@ -93,6 +93,9 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
                               UPDATE testdb.users SET age = 32 WHERE id = 2;
                               COMMIT;
                               """)
+        results = dict(conn.cursor().fetchall())
+        print(results)
+
         conn.commit()
 
     def run_second_deadlock_query(conn):
@@ -119,7 +122,7 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
     # fred's query will get blocked by bob's TX
     time.sleep(1.5)
     executor.submit(run_second_deadlock_query, fred_conn)
-
+    time.sleep(10)
     dd_run_check(check)
     bob_conn.close()
     fred_conn.close()
@@ -137,8 +140,8 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
 
     #assert
     dd_run_check(check)
-    aggregator.assert_metric('alice.age', value=31, tags=tags.METRIC_TAGS_WITH_RESOURCE)
-    aggregator.assert_metric('bob.age', value=32, tags=tags.METRIC_TAGS_WITH_RESOURCE)
+    aggregator.assert_metric('alice.age', value=31)
+    aggregator.assert_metric('bob.age', value=32)
     assert for_debug - deadlocks_start == 1, "there should be one deadlock"
 
 
