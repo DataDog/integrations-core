@@ -13,19 +13,17 @@ class EsxiCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(EsxiCheck, self).__init__(name, init_config, instances)
-        self.esxi_url = self.instance.get("esxi_url")
-        self.port = self.instance.get("port")
+        self.host = self.instance.get("host")
         self.username = self.instance.get("username")
         self.password = self.instance.get("password")
-        self.tags = ["esxi_url:{}".format(self.esxi_url)]
-        if self.port:
-            self.tags.append("port:{}".format(self.port))
+        self.tags = ["esxi_url:{}".format(self.host)]
 
     def check(self, _):
         try:
-            connection = connect.SmartConnect(host=self.esxi_url, user=self.username, pwd=self.password, port=self.port)
+            connection = connect.SmartConnect(host=self.host, user=self.username, pwd=self.password)
             self.conn = connection
+            self.log.info("Connected to ESXi host %s", self.host)
             self.count("host.can_connect", 1, tags=self.tags)
         except Exception as e:
-            self.log.warning("Cannot connect to ESXi host %s:%s- %s", self.esxi_url, self.port, e)
+            self.log.warning("Cannot connect to ESXi host %s: %s", self.host, e)
             self.count("host.can_connect", 0, tags=self.tags)
