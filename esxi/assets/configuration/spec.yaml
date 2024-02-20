@@ -7,4 +7,27 @@ files:
     - template: init_config/default
   - template: instances
     options:
-    - template: instances/default
+        - name: host
+          required: true
+          display_priority: 1
+          description: The host used to resolve the ESXi IP. It is either a FQDN or an IP.
+          value:
+            type: string
+            example: <HOSTNAME>
+        - name: username
+          required: true
+          display_priority: 1
+          description: |
+            The ESXi host username
+          value:
+            type: string
+            example: <USERNAME>
+        - name: password
+          required: true
+          display_priority: 1
+          description: |
+            The ESXi host password
+          value:
+            type: string
+            example: <PASSWORD>
+        - template: instances/default

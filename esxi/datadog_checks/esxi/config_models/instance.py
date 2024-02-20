@@ -7,7 +7,6 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-
 from __future__ import annotations
 
 from typing import Optional
@@ -20,16 +19,30 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class MetricPatterns(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    host: str
+    metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
+    password: str
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
+    username: str
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):
