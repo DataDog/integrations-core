@@ -59,6 +59,7 @@ SERVER_METRICS = [
 
 SQLSERVER_MAJOR_VERSION = int(os.environ.get('SQLSERVER_MAJOR_VERSION'))
 SQLSERVER_ENGINE_EDITION = int(os.environ.get('SQLSERVER_ENGINE_EDITION'))
+WINDOWS_SQLSERVER_DRIVER = os.environ.get('WINDOWS_SQLSERVER_DRIVER')
 
 
 def get_expected_file_stats_metrics():
