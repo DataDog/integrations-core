@@ -20,6 +20,7 @@ class KafkaCheck(AgentCheck):
         self.config = KafkaConfig(self.init_config, self.instance, self.log)
         self._context_limit = self.config._context_limit
         self._data_streams_enabled = is_affirmative(self.instance.get('data_streams_enabled', False))
+        self._max_timestamps = int(self.instance.get('timestamp_history_size', MAX_TIMESTAMPS))
         self.client = KafkaClient(self.config, self.log)
         self.check_initializations.insert(0, self.config.validate_config)
 
@@ -109,7 +110,7 @@ class KafkaCheck(AgentCheck):
             timestamps = broker_timestamps["{}_{}".format(topic, partition)]
             timestamps[highwater_offset] = time()
             # If there's too many timestamps, we delete the oldest
-            if len(timestamps) > MAX_TIMESTAMPS:
+            if len(timestamps) > self._max_timestamps:
                 del timestamps[min(timestamps)]
 
     def _save_broker_timestamps(self, broker_timestamps):
