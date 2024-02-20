@@ -89,10 +89,15 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
         conn.cursor().execute("""
                               START TRANSACTION;
                               UPDATE testdb.users SET age = 31 WHERE id = 1;
-                              SELECT SLEEP(3);
+                              SELECT SLEEP(0);
                               UPDATE testdb.users SET age = 32 WHERE id = 2;
                               COMMIT;
                               """)
+        conn.cursor().execute("""
+                              START TRANSACTION;
+                              SELECT age FROM testdb.users WHERE id = 1;
+                              COMMIT;
+                              """)        
         results = dict(conn.cursor().fetchall())
         print(results)
 
@@ -103,7 +108,7 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
         conn.cursor().execute("""
                               START TRANSACTION;
                               UPDATE testdb.users SET age = 32 WHERE id = 2;
-                              SELECT SLEEP(3);
+                              SELECT SLEEP(0);
                               UPDATE testdb.users SET age = 31 WHERE id = 1;
                               COMMIT;
                               """)
