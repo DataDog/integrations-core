@@ -51,7 +51,24 @@ def dbm_instance(instance_complex):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_deadlocks(aggregator, dd_run_check, dbm_instance):
+    #set up
+
     check = MySql(CHECK_NAME, {}, [dbm_instance])
+    deadlock_query = """
+        SELECT
+            COUNT(*) as deadlocks
+        FROM 
+            information_schema.INNODB_METRICS
+        WHERE
+            NAME='lock_deadlocks'"""
+    dd_run_check(check)
+    deadlocks_start = 0
+    deadlock_metric_start =  aggregator.metrics("mysql.innodb.deadlocks")
+    if len(deadlock_metric_start)>0:
+        deadlocks_start = deadlock_metric_start[0].value
+
+    #act
+
     #Justin suggested to change timeout instead of using a long sleep
     # Iguess his idea is to change timeout on how long it ccan wait on asquiring a lock.
     #Boris makes sense like in Nenands example make sure that there were no deadlocks before the test
@@ -73,6 +90,32 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
         SLEEP(3);
         UPDATE accounts SET balance = balance + 50 WHERE id = 1;
         COMMIT;""")
+        conn.commit()
+    
+    #    cur.execute("CREATE TABLE testdb.users (id INT NOT NULL UNIQUE KEY, name VARCHAR(20), age INT);")
+    #cur.execute("INSERT INTO testdb.users (id,name,age) VALUES(1,'Alice',25);")
+    #cur.execute("INSERT INTO testdb.users (id,name,age) VALUES(2,'Bob',20);")
+#Boris do we need to check that current value is 25 and then set it back in a tear down ? 
+    def run_first_deadlock_query(conn):
+        conn.begin()
+        conn.cursor().execute("""
+                              START TRANSACTION;
+                              UPDATE testdb.users SET age = 25 WHERE id = 1;
+                              SLEEP(3);
+                              UPDATE testdb.users SET age = 20 WHERE id = 2;
+                              COMMIT;
+                              """)
+        conn.commit()
+
+    def run_second_deadlock_query(conn):
+        conn.begin()
+        conn.cursor().execute("""
+                              START TRANSACTION;
+                              UPDATE testdb.users SET age = 20 WHERE id = 2;
+                              SLEEP(3);
+                              UPDATE testdb.users SET age = 25 WHERE id = 1;
+                              COMMIT;
+                              """)
         conn.commit()
 
     bob_conn = _get_conn_for_user('bob')
@@ -100,7 +143,8 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
     else:
         for_debug = 0
 
-    assert for_debug == 1, "should have collected exactly one activity payload"
+    #assert
+    assert for_debug - deadlocks_start == 1, "there should be one deadlock"
 
 
 @pytest.mark.integration
