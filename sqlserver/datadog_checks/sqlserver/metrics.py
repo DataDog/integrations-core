@@ -570,7 +570,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
             if row[db_name] != self.instance:
                 continue
             column_val = row[value_column_index]
-            if self.column in ('size', 'max_size', 'space_used'):
+            if self.column in ('size', 'max_size', 'space_used') and isinstance(column_val, (int, float, complex)):
                 column_val *= 8  # size reported in 8 KB pages
 
             fileid = row[file_id]
