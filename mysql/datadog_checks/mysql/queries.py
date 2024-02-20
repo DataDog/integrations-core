@@ -89,6 +89,7 @@ QUERY_DEADLOCKS = {
                 #Boris name ?
 
 }
+
 QUERY_USER_CONNECTIONS = {
     'name': 'performance_schema.threads',
     'query': """
