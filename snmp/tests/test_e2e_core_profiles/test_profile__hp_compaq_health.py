@@ -118,6 +118,7 @@ def test_e2e_profile__hp_compaq_health(dd_agent_check):
         'profile': 'hp-compaq-health',
         'status': 1,
         'sys_object_id': '1.2.3.1004',
+        'device_type': 'other',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

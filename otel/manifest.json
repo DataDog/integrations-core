@@ -26,7 +26,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "OTel",
@@ -44,7 +43,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 312,
+      "auto_install": true
     },
     "dashboards": {
       "OpenTelemetry Dashboard": "assets/dashboards/otel_host_metrics_dashboard.json",

@@ -95,6 +95,7 @@ def test_e2e_profile__generic_ucd(dd_agent_check):
         'profile': 'generic-ucd',
         'status': 1,
         'sys_object_id': '1.2.3.1001',
+        'device_type': 'other',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

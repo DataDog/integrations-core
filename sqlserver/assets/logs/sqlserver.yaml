@@ -1,11 +1,12 @@
 id: sqlserver
 metric_id: sql-server
+backend_only: false
 facets:
-  - name: Thread Name
-    source: log
-    path: logger.thread_name
-    groups:
+  - groups:
       - Source Code
+    name: Thread Name
+    path: logger.thread_name
+    source: log
 pipeline:
   type: pipeline
   name: SQL Server

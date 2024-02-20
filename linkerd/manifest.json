@@ -25,7 +25,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Linkerd",
@@ -48,7 +47,9 @@
       },
       "process_signatures": [
         "linkerd"
-      ]
+      ],
+      "source_type_id": 10019,
+      "auto_install": true
     },
     "dashboards": {
       "Linkerd - Overview": "assets/dashboards/overview.json"

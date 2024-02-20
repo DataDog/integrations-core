@@ -2,7 +2,18 @@
 
 <!-- towncrier release notes start -->
 
-## 6.1.0 / 2024-01-05
+## 6.2.0 / 2024-02-16
+
+***Added***:
+
+* Suppport the upstream response time if use_vts is true ([#16720](https://github.com/DataDog/integrations-core/pull/16720))
+* Update the configuration file to include the new oauth options parameter ([#16835](https://github.com/DataDog/integrations-core/pull/16835))
+
+***Fixed***:
+
+* Fix typo ([#16717](https://github.com/DataDog/integrations-core/pull/16717))
+
+## 6.1.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:
 

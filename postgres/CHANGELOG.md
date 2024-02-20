@@ -2,6 +2,32 @@
 
 <!-- towncrier release notes start -->
 
+## 17.0.0 / 2024-02-16
+
+***Changed***:
+
+* postgres schemas: don't exclude tables without metrics from schema collection ([#16834](https://github.com/DataDog/integrations-core/pull/16834))
+* don't require relation metrics to be enabled to collect schemas ([#16870](https://github.com/DataDog/integrations-core/pull/16870))
+
+***Added***:
+
+* [DBMON-3300] collect function & count metrics for auto discovered databases ([#16530](https://github.com/DataDog/integrations-core/pull/16530))
+* [Postgres] - Allow configuration of ignored patterns for settings collection, under the `ignored_settings_patterns` key ([#16634](https://github.com/DataDog/integrations-core/pull/16634))
+* [DBMON-3271] DBM integrations now defaulted to use new go-sqllexer pkg to obfuscate sql statements ([#16681](https://github.com/DataDog/integrations-core/pull/16681))
+* Update dependencies ([#16788](https://github.com/DataDog/integrations-core/pull/16788))
+* Bump dependencies ([#16858](https://github.com/DataDog/integrations-core/pull/16858))
+
+***Fixed***:
+
+* update default table schema collection limit to 300 ([#16880](https://github.com/DataDog/integrations-core/pull/16880))
+
+## 16.1.1 / 2024-01-15 / Agent 7.51.0
+
+***Fixed***:
+
+* Fix incompatibility issues with Python 3.9 and lower ([#16608](https://github.com/DataDog/integrations-core/pull/16608))
+* Fix autovacuum metrics for postgres >= 10 ([#16612](https://github.com/DataDog/integrations-core/pull/16612))
+
 ## 16.1.0 / 2024-01-10
 
 ***Added***:
@@ -54,7 +80,7 @@
 ***Fixed***:
 
 * Remove an unnecessary print statement ([#15594](https://github.com/DataDog/integrations-core/pull/15594))
-* * Fix edge-case causing potentially duplicate/wrong time series for activity metrics when `activity_metrics_excluded_aggregations` included `datname` ([#16106](https://github.com/DataDog/integrations-core/pull/16106)) ([#16106](https://github.com/DataDog/integrations-core/pull/16106))
+* * Fix edge-case causing potentially duplicate/wrong timeseries for activity metrics when `activity_metrics_excluded_aggregations` included `datname` ([#16106](https://github.com/DataDog/integrations-core/pull/16106)) ([#16106](https://github.com/DataDog/integrations-core/pull/16106))
 * Database instance metadata payloads should not contain duplicate `db` tags ([#16146](https://github.com/DataDog/integrations-core/pull/16146))
 
 ## 15.2.0 / 2023-10-26

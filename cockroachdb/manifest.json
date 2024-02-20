@@ -27,7 +27,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "CockroachDB",
@@ -45,7 +44,11 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": ["cockroach"]
+      "process_signatures": [
+        "cockroach"
+      ],
+      "source_type_id": 10036,
+      "auto_install": true
     },
     "dashboards": {
       "CockroachDB Overview": "assets/dashboards/overview.json"

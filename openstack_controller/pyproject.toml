@@ -33,12 +33,11 @@ dependencies = [
 dynamic = [
     "version",
 ]
-
 license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "openstacksdk==2.0.0; python_version > '3.0'",
+    "openstacksdk==2.1.0; python_version > '3.0'",
 ]
 
 [project.urls]

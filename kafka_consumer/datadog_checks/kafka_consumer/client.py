@@ -23,6 +23,7 @@ class KafkaClient:
                 "bootstrap.servers": self.config._kafka_connect_str,
                 "socket.timeout.ms": self.config._request_timeout_ms,
                 "client.id": "dd-agent",
+                "log_level": self.config._librdkafka_log_level,
             }
             config.update(self.__get_authentication_config())
 
@@ -36,10 +37,11 @@ class KafkaClient:
             "group.id": consumer_group,
             "enable.auto.commit": False,  # To avoid offset commit to broker during close
             "queued.max.messages.kbytes": self.config._consumer_queued_max_messages_kbytes,
+            "log_level": self.config._librdkafka_log_level,
         }
         config.update(self.__get_authentication_config())
 
-        return Consumer(config)
+        return Consumer(config, logger=self.log)
 
     def __get_authentication_config(self):
         config = {
@@ -85,7 +87,7 @@ class KafkaClient:
         topic_partition_with_consumer_offset = set()
 
         if not self.config._monitor_all_broker_highwatermarks:
-            for (_, topic, partition) in consumer_offsets:
+            for _, topic, partition in consumer_offsets:
                 topics_with_consumer_offset.add(topic)
                 topic_partition_with_consumer_offset.add((topic, partition))
 

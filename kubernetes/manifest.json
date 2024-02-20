@@ -27,7 +27,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Kubernetes",
@@ -42,7 +41,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 128,
+      "auto_install": true
     },
     "dashboards": {
       "kubernetes": "assets/dashboards/kubernetes_dashboard.json",
@@ -54,7 +55,8 @@
       "Kubernetes DaemonSets Overview": "assets/dashboards/kubernetes_daemonsets.json",
       "Kubernetes Jobs & Cronjobs Overview": "assets/dashboards/kubernetes_jobs.json",
       "Kubernetes StatefulSets Overview": "assets/dashboards/kubernetes_statefulsets.json",
-      "Kubernetes Clusters Overview": "assets/dashboards/kubernetes_clusters.json"
+      "Kubernetes Clusters Overview": "assets/dashboards/kubernetes_clusters.json",
+      "Kubernetes CPU & Memory usage": "assets/dashboards/kubernetes_cpu_memory.json"
     },
     "monitors": {
       "[kubernetes] Monitor Kubernetes Deployments Replica Pods": "assets/monitors/monitor_deployments_replicas.json",

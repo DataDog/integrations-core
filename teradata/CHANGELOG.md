@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.1.1 / 2024-01-15 / Agent 7.51.0
+
+***Fixed***:
+
+* Fix incompatibility issues with Python 3.9 and lower ([#16608](https://github.com/DataDog/integrations-core/pull/16608))
+
 ## 2.1.0 / 2024-01-05
 
 ***Added***:

@@ -28,7 +28,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "nginx-ingress-controller",
@@ -45,7 +44,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10050,
+      "auto_install": true
     },
     "dashboards": {
       "nginx_ingress_controller": "assets/dashboards/overview.json"

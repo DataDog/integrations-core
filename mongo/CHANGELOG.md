@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 6.1.0 / 2024-01-05
+## 6.2.0 / 2024-02-16
+
+***Added***:
+
+* Bump `pymongo` version to 4.6.1 ([#16554](https://github.com/DataDog/integrations-core/pull/16554))
+
+## 6.1.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:
 

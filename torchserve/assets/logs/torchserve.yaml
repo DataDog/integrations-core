@@ -1,131 +1,132 @@
 id: torchserve
 metric_id: torchserve
+backend_only: false
 facets:
-  - name: Method
-    source: log
+  - groups:
+      - Web Access
+    name: Method
     path: http.method
-    groups:
-      - Web Access
-  - name: Status Code
     source: log
+  - groups:
+      - Web Access
+    name: Status Code
     path: http.status_code
-    groups:
-      - Web Access
-  - name: URL Path
     source: log
+  - groups:
+      - Web Access
+    name: URL Path
     path: http.url
-    groups:
-      - Web Access
-  - name: Version
     source: log
+  - groups:
+      - Web Access
+    name: Version
     path: http.version
-    groups:
-      - Web Access
-  - name: Thread Name
     source: log
-    path: logger.thread_name
-    groups:
+  - groups:
       - Source Code
-  - name: City Name
+    name: Thread Name
+    path: logger.thread_name
     source: log
+  - groups:
+      - Geoip
+    name: City Name
     path: network.client.geoip.city.name
-    groups:
-      - Geoip
-  - name: Continent Code
     source: log
+  - groups:
+      - Geoip
+    name: Continent Code
     path: network.client.geoip.continent.code
-    groups:
-      - Geoip
-  - name: Continent Name
     source: log
+  - groups:
+      - Geoip
+    name: Continent Name
     path: network.client.geoip.continent.name
-    groups:
-      - Geoip
-  - name: Country ISO Code
     source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
     path: network.client.geoip.country.iso_code
-    groups:
-      - Geoip
-  - name: Country Name
     source: log
+  - groups:
+      - Geoip
+    name: Country Name
     path: network.client.geoip.country.name
-    groups:
-      - Geoip
-  - name: Subdivision ISO Code
     source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
     path: network.client.geoip.subdivision.iso_code
-    groups:
-      - Geoip
-  - name: Subdivision Name
     source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
     path: network.client.geoip.subdivision.name
-    groups:
-      - Geoip
-  - name: Client IP
     source: log
+  - groups:
+      - Web Access
+    name: Client IP
     path: network.client.ip
-    groups:
-      - Web Access
-  - name: Client Port
     source: log
+  - groups:
+      - Web Access
+    name: Client Port
     path: network.client.port
-    groups:
-      - Web Access
-  - name: Bytes Written
     source: log
-    path: network.bytes_written
+  - facetType: range
     groups:
       - Web Access
+    name: Bytes Written
+    path: network.bytes_written
+    source: log
     type: double
-    facetType: range
     unit:
       family: bytes
       name: byte
-  - name: Worker id
-    source: log
+  - groups:
+      - TorchServe
+    name: Worker id
     path: worker.id
-    groups:
-      - TorchServe
-  - name: Model name
     source: log
+  - groups:
+      - TorchServe
+    name: Model name
     path: model.name
-    groups:
-      - TorchServe
-  - name: Backend response time
     source: log
+  - groups:
+      - TorchServe
+    name: Backend response time
     path: backend.response_time
-    groups:
-      - TorchServe
-  - name: Inference time
     source: log
+  - groups:
+      - TorchServe
+    name: Inference time
     path: inference.time
-    groups:
-      - TorchServe
-  - name: Job backend time
     source: log
+  - groups:
+      - TorchServe
+    name: Job backend time
     path: job.backend_time
-    groups:
-      - TorchServe
-  - name: Job waiting time
     source: log
+  - groups:
+      - TorchServe
+    name: Job waiting time
     path: job.waiting_time
-    groups:
-      - TorchServe
-  - name: Job done
     source: log
+  - groups:
+      - TorchServe
+    name: Job done
     path: job.done
-    groups:
-      - TorchServe
-  - name: Command timestamp
     source: log
+  - groups:
+      - TorchServe
+    name: Command timestamp
     path: command.timestamp
-    groups:
-      - TorchServe
-  - name: Command name
     source: log
-    path: command.name
-    groups:
+  - groups:
       - TorchServe
+    name: Command name
+    path: command.name
+    source: log
 pipeline:
   type: pipeline
   name: TorchServe

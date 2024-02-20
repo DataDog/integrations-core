@@ -197,7 +197,7 @@ class VSphereConfig(object):
                 )
 
             # Check required fields and their types
-            for (field, field_type) in iteritems(
+            for field, field_type in iteritems(
                 {'resource': string_types, 'property': string_types, 'type': string_types, 'patterns': list}
             ):
                 if field not in resource_filter:

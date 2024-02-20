@@ -377,6 +377,14 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_http_local_rate_limit_rate_limited': 'http.local_rate_limit_rate_limited',
     'envoy_http_local_rate_limit_ok': 'http.local_rate_limit_ok',
     'envoy_control_plane_connected_state': 'control_plane.connected_state',
+    'envoy_listener_server_ssl_socket_factory_ssl_context_update_by_sds': 'listener.server_ssl_socket_factory.ssl_context_update_by_sds',  # noqa: E501
+    'envoy_listener_server_ssl_socket_factory_upstream_context_secrets_not_ready': 'listener.server_ssl_socket_factory.upstream_context_secrets_not_ready',  # noqa: E501
+    'envoy_listener_server_ssl_socket_factory_downstream_context_secrets_not_ready': 'listener.server_ssl_socket_factory.downstream_context_secrets_not_ready',  # noqa: E501
+    'envoy_cluster_client_ssl_socket_factory_ssl_context_update_by_sds': 'cluster.client_ssl_socket_factory.ssl_context_update_by_sds',  # noqa: E501
+    'envoy_cluster_client_ssl_socket_factory_upstream_context_secrets_not_ready': 'cluster.client_ssl_socket_factory.upstream_context_secrets_not_ready',  # noqa: E501
+    'envoy_cluster_client_ssl_socket_factory_downstream_context_secrets_not_ready': 'cluster.client_ssl_socket_factory.downstream_context_secrets_not_ready',  # noqa: E501
+    'envoy_connection_limit_active_connections': 'connection_limit.active_connections',
+    'envoy_connection_limit_limited_connections': 'connection_limit.limited_connections',
 }
 
 # fmt: off
@@ -3923,6 +3931,20 @@ METRICS = {
         'tags': (
             ('stat_prefix',),
             (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'connection_limit.active_connections': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'connection_limit.limited_connections': {
+        'tags': (
+            ('stat_prefix',),
             (),
         ),
         'method': 'monotonic_count',

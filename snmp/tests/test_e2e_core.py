@@ -125,6 +125,7 @@ def test_e2e_user_profiles(dd_agent_check):
         ],
         'vendor': 'apc',
         'version': '2.0.3-test',
+        'device_type': 'ups',
     }
     assert_device_metadata(aggregator, device)
 
@@ -170,6 +171,7 @@ def test_e2e_user_profiles_that_extend_profile_with_same_name(dd_agent_check):
         ],
         'vendor': 'paloaltonetworks',
         'version': '9.0.5',
+        'device_type': 'other',
     }
     assert_device_metadata(aggregator, device)
 

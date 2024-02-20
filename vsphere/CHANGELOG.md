@@ -2,7 +2,15 @@
 
 <!-- towncrier release notes start -->
 
-## 7.3.0 / 2023-12-11
+## 7.4.0 / 2024-02-16
+
+***Added***:
+
+* Update pyvmomi to 8.0.2.0.1 ([#16542](https://github.com/DataDog/integrations-core/pull/16542))
+* Update dependencies ([#16788](https://github.com/DataDog/integrations-core/pull/16788))
+* Update the configuration file to include the new oauth options parameter ([#16835](https://github.com/DataDog/integrations-core/pull/16835))
+
+## 7.3.0 / 2023-12-11 / Agent 7.51.0
 
 ***Added***:
 

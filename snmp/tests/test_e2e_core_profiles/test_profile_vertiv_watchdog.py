@@ -81,6 +81,7 @@ def test_e2e_profile_vertiv_watchdog(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.21239.5.1',
         'vendor': 'vertiv',
+        'device_type': 'sensor',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

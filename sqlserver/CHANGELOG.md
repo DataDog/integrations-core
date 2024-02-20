@@ -2,6 +2,35 @@
 
 <!-- towncrier release notes start -->
 
+## 17.0.0 / 2024-02-16
+
+***Removed***:
+
+* Disables SQL Server metrics on Azure SQL Database instances that rely on cross-database queries. The disabled metrics are:
+
+  * sqlserver.tempdb.file_space_usage.free_space
+  * sqlserver.tempdb.file_space_usage.version_store_space
+  * sqlserver.tempdb.file_space_usage.internal_object_space
+  * sqlserver.tempdb.file_space_usage.user_object_space
+  * sqlserver.tempdb.file_space_usage.mixed_extent_space
+  * sqlserver.database.backup_count ([#16658](https://github.com/DataDog/integrations-core/pull/16658))
+
+***Added***:
+
+* [DBMON-3271] DBM integrations now defaulted to use new go-sqllexer pkg to obfuscate sql statements ([#16681](https://github.com/DataDog/integrations-core/pull/16681))
+* Bump dependencies ([#16858](https://github.com/DataDog/integrations-core/pull/16858))
+
+***Fixed***:
+
+* Improve performance of index_usage_stats query, set default collection interval to 5 minutes and allow interval to be customized. ([#16645](https://github.com/DataDog/integrations-core/pull/16645))
+* Require base check that has fix for null characters in query strings ([#16750](https://github.com/DataDog/integrations-core/pull/16750))
+
+## 16.0.1 / 2024-02-07 / Agent 7.51.0
+
+***Fixed***:
+
+* [DBMON-3495] Replace embedded null characters with empty string in query text ([#16742](https://github.com/DataDog/integrations-core/pull/16742))
+
 ## 16.0.0 / 2024-01-05
 
 ***Removed***:

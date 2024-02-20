@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from contextlib import ExitStack
 from unittest import mock
 
 import pytest
@@ -35,16 +36,24 @@ def setup_fluxcd():
 @pytest.fixture(scope='session')
 def dd_environment():
     with kind_run(conditions=[setup_fluxcd]) as kubeconfig:
-        with port_forward(kubeconfig, 'flux-system', 8080, 'deployment', 'source-controller') as (
-            src_controller_host,
-            src_controller_port,
-        ):
-            src_controller_endpoint = 'http://{}:{}/metrics'.format(src_controller_host, src_controller_port)
+        instances = []
+        with ExitStack() as stack:
+            for controller in (
+                'source-controller',
+                'helm-controller',
+                'kustomize-controller',
+                'notification-controller',
+            ):
+                host, port = stack.enter_context(
+                    port_forward(kubeconfig, 'flux-system', 8080, 'deployment', controller)
+                )
+                instances.append(
+                    {
+                        'openmetrics_endpoint': 'http://{}:{}/metrics'.format(host, port),
+                    }
+                )
 
-            instance = {
-                'openmetrics_endpoint': src_controller_endpoint,
-            }
-            yield instance
+            yield {'instances': instances}
 
 
 @pytest.fixture
