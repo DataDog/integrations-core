@@ -59,7 +59,7 @@ Need help? Contact [Datadog support][9] with an [Agent Flare][10].
 [3]: https://docs.datadoghq.com/logs/
 [4]: https://docs.datadoghq.com/agent/configuration/agent-configuration-files/?tab=agentv6v7#agent-configuration-directory
 [5]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/windows_registry.d/conf.yaml.example
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#restart-the-agent
 [7]: https://docs.datadoghq.com/agent/basic_agent_usage/windows/?tab=gui#agent-status-and-information
 [8]: https://docs.datadoghq.com/account_management/billing/log_management/
 [9]: https://docs.datadoghq.com/help/
