@@ -158,6 +158,7 @@ class InstanceConfig(BaseModel):
     resource_filters: Optional[tuple[ResourceFilter, ...]] = None
     rest_api_options: Optional[RestApiOptions] = None
     service: Optional[str] = None
+    ssl_cafile: Optional[str] = None
     ssl_capath: Optional[str] = None
     ssl_verify: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
