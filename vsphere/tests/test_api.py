@@ -31,6 +31,7 @@ def test_ssl_verify_false(realtime_instance):
 
 def test_ssl_cert(realtime_instance):
     realtime_instance['ssl_verify'] = True
+    realtime_instance['ssl_cafile'] = '/dummy/path/cafile.pem'
     realtime_instance['ssl_capath'] = '/dummy/path'
 
     with patch('datadog_checks.vsphere.api.connect') as connect, patch(
@@ -45,7 +46,7 @@ def test_ssl_cert(realtime_instance):
         assert actual_context.protocol == ssl.PROTOCOL_TLS
         assert actual_context.verify_mode == ssl.CERT_REQUIRED
         assert actual_context.check_hostname is True
-        load_verify_locations.assert_called_with(capath='/dummy/path')
+        load_verify_locations.assert_called_with(cafile='/dummy/path/cafile.pem', capath='/dummy/path')
 
 
 def test_connect_success(realtime_instance):
