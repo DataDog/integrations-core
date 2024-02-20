@@ -24,6 +24,9 @@ from datadog_checks.mysql.util import StatementTruncationState
 
 from .common import CHECK_NAME, HOST, MYSQL_VERSION_PARSED, PORT
 
+#Boris t check if query runs
+from . import tags
+
 ACTIVITY_JSON_PLANS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "activity")
 
 
@@ -84,31 +87,31 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
     def run_first_deadlock_query(conn):
         conn.begin()
         conn.cursor().execute("""
-                              SET autocommit=0;
                               START TRANSACTION;
-                              UPDATE testdb.users SET age = 20 WHERE id = 1;
+                              UPDATE testdb.users SET age = 31 WHERE id = 1;
                               SELECT SLEEP(3);
-                              UPDATE testdb.users SET age = 25 WHERE id = 2;
+                              UPDATE testdb.users SET age = 32 WHERE id = 2;
                               COMMIT;
-                              SET autocommit=0;
                               """)
         conn.commit()
 
     def run_second_deadlock_query(conn):
         conn.begin()
         conn.cursor().execute("""
-                              SET autocommit=0;
                               START TRANSACTION;
-                              UPDATE testdb.users SET age = 25 WHERE id = 2;
-                              SELECT SLEEP(10);
-                              UPDATE testdb.users SET age = 20 WHERE id = 1;
+                              UPDATE testdb.users SET age = 32 WHERE id = 2;
+                              SELECT SLEEP(3);
+                              UPDATE testdb.users SET age = 31 WHERE id = 1;
                               COMMIT;
-                              SET autocommit=0;
                               """)
         conn.commit()
 
+
     bob_conn = _get_conn_for_user('bob', False)
     fred_conn = _get_conn_for_user('fred', False)
+
+    autocom1 = bob_conn.get_autocommit()
+    print(autocom1)
 
     executor = concurrent.futures.thread.ThreadPoolExecutor(2)
     # bob's query will block until the TX is completed
@@ -133,6 +136,9 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
         for_debug = 0
 
     #assert
+    dd_run_check(check)
+    aggregator.assert_metric('alice.age', value=31, tags=tags.METRIC_TAGS_WITH_RESOURCE)
+    aggregator.assert_metric('bob.age', value=32, tags=tags.METRIC_TAGS_WITH_RESOURCE)
     assert for_debug - deadlocks_start == 1, "there should be one deadlock"
 
 
