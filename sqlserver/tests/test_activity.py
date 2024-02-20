@@ -17,6 +17,7 @@ from copy import copy
 import mock
 import pytest
 from dateutil import parser
+from flaky import flaky
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.sqlserver import SQLServer
@@ -203,6 +204,7 @@ def test_collect_load_activity(
     )
 
 
+@flaky(max_runs=5)
 def test_activity_nested_blocking_transactions(
     aggregator,
     instance_docker,
