@@ -56,9 +56,8 @@ class QueryExecutor(object):
             method = getattr(self.submitter, submission_method)
             # Save each method in the initializer -> callable format
             column_transformers[transformer_name] = create_submission_transformer(method)
-        print("we are compiling queries", self.queries)
+
         for query in self.queries:
-            print("we are compiling query wit data and name", query.query_data, query.name)
             query.compile(column_transformers, EXTRA_TRANSFORMERS.copy())
 
     def execute(self, extra_tags=None):
@@ -78,7 +77,6 @@ class QueryExecutor(object):
                 continue
 
             query_name = query.name
-            print("Query Name: ", query_name)
             query_columns = query.column_transformers
             extra_transformers = query.extra_transformers
             query_tags = query.base_tags
