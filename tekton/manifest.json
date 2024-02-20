@@ -19,6 +19,7 @@
   },
   "assets": {
     "integration": {
+      "auto_install": true,
       "source_type_id": 5667413,
       "source_type_name": "Tekton",
       "configuration": {
