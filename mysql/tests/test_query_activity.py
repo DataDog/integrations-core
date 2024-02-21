@@ -51,6 +51,8 @@ def dbm_instance(instance_complex):
     instance_complex['collect_settings'] = {'enabled': False}
     return copy(instance_complex)
 
+#Boris exclude MariaDB
+#make test shorter mark as flacky ? 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_deadlocks(aggregator, dd_run_check, dbm_instance):
@@ -63,31 +65,7 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
     if len(deadlock_metric_start)>0:
         deadlocks_start = deadlock_metric_start[0].value
 
-    #act
-
-    #Justin suggested to change timeout instead of using a long sleep
-    # Iguess his idea is to change timeout on how long it ccan wait on asquiring a lock.
-    #Boris makes sense like in Nenands example make sure that there were no deadlocks before the test
-    #BORIS also simplify deadlock thing can be like in Nenads example 
-    # https://github.com/DataDog/integrations-core/pull/13374/files#diff-369b313fc4346aa906cef597e161569db8e0c52c876dea0a7fe90cd619a0da62
-
-    
-    #    cur.execute("CREATE TABLE testdb.users (id INT NOT NULL UNIQUE KEY, name VARCHAR(20), age INT);")
-    #cur.execute("INSERT INTO testdb.users (id,name,age) VALUES(1,'Alice',25);")
-    #cur.execute("INSERT INTO testdb.users (id,name,age) VALUES(2,'Bob',20);")
-    #Boris do we need to check that current value is 25 and then set it back in a tear down ?
-    #or may be do select for update as it also should be blocking 
-    def check_if_age_updated(conn):
-        conn.begin()
-        cursor = conn.cursor()
-        try:
-            cursor.execute("SELECT age FROM testdb.users WHERE id = 1;")
-        except Exception as e:
-            print("Error occurred:", e)        
-        results = cursor.fetchall()
-        print(results)
-
-        conn.commit()
+#refacrtor these 2 functions
     def run_first_deadlock_query(conn):
         conn.begin()
         try:
@@ -115,38 +93,23 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
     bob_conn = _get_conn_for_user('bob', False)
     fred_conn = _get_conn_for_user('fred', False)
 
-    autocom1 = bob_conn.get_autocommit()
-    print(autocom1)
-
     executor = concurrent.futures.thread.ThreadPoolExecutor(2)
-    # bob's query will block until the TX is completed
     executor.submit(run_first_deadlock_query, bob_conn)
-
     time.sleep(1.5)
     executor.submit(run_second_deadlock_query, fred_conn)
     time.sleep(8)
 
-
-
-
-    #check_if_age_updated(bob_conn)
-    dd_run_check(check)
     bob_conn.close()
     fred_conn.close()
+    dd_run_check(check)
 
     executor.shutdown()
 
-    # get result of my query in aggregator and assert
-    # dbm_activity = aggregator.get_event_platform_events("dbm-activity")
-
     deadlock_metric =  aggregator.metrics("mysql.innodb.deadlocks")
     if len(deadlock_metric)>0:
-        for_debug = deadlock_metric[0].value
+        for_debug = deadlock_metric[1].value
     else:
         for_debug = 0
-
-    #assert
-
 
     assert for_debug - deadlocks_start == 1, "there should be one deadlock"
 
