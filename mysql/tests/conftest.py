@@ -430,18 +430,6 @@ def populate_database():
     cur.execute("GRANT SELECT, UPDATE ON testdb.transactions TO 'bob'@'%';")
     cur.execute("GRANT SELECT, UPDATE ON testdb.transactions TO 'fred'@'%';")
     cur.close()
-    cur = conn.cursor()
-    cur.execute("UPDATE testdb.users SET age = 31 WHERE id = 1;")
-    cur.close()
-    cur = conn.cursor() 
-
-    try:
-        cur.execute("SELECT age FROM testdb.users WHERE id = 1;")
-    except Exception as e:
-        
-        print("Error occurred:", e)        
-    results = dict(cur.fetchall())
-    print(results)
     _create_explain_procedure(conn, "testdb")
 
 
