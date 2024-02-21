@@ -119,6 +119,7 @@ ENABLED_STATEMENTS_CONSUMERS_QUERY = re.sub(
     FROM performance_schema.setup_consumers
     WHERE enabled = 'YES'
     AND name LIKE 'events_statements_%'
+    AND name != 'events_statements_cpu'
 """,
 ).strip()
 
