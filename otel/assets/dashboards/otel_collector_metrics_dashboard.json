@@ -898,7 +898,7 @@
                                             },
                                             "formula": "query1"
                                         }
-],
+                                    ],
                                     "response_format": "scalar",
                                     "queries": [
                                         {
