@@ -202,6 +202,9 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /windows_performance_counters/                                       @DataDog/windows-agent @DataDog/agent-integrations
 /windows_performance_counters/*.md                                   @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
 /windows_performance_counters/manifest.json                          @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
+/windows_registry/                                                   @DataDog/windows-agent @DataDog/agent-integrations
+/windows_registry/*.md                                               @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
+/windows_registry/manifest.json                                      @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
 /windows_service/                                                    @DataDog/windows-agent @DataDog/agent-integrations
 /windows_service/*.md                                                @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
 /windows_service/manifest.json                                       @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
