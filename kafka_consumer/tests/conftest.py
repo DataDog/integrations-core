@@ -70,8 +70,9 @@ def kafka_instance():
 
 def create_topics():
     client = _create_admin_client()
+    response = client.list_topics(timeout=1)
 
-    if set(common.TOPICS).issubset(set(client.list_topics(timeout=1).topics.keys())):
+    if set(common.TOPICS).issubset(set(response.topics.keys())):
         return True
 
     for topic in common.TOPICS:
