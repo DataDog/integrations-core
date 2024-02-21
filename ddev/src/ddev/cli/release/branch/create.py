@@ -11,7 +11,8 @@ import click
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
-BRANCH_NAME_PATTERN = re.compile(r'^\d+\.\d+\.x$')
+BRANCH_NAME_PATTERN = r"^\d+\.\d+\.x$"
+BRANCH_NAME_REGEX = re.compile(BRANCH_NAME_PATTERN)
 GITHUB_LABEL_COLOR = '5319e7'
 
 
@@ -19,16 +20,15 @@ GITHUB_LABEL_COLOR = '5319e7'
 @click.pass_obj
 @click.argument('branch_name')
 def create(app: Application, branch_name):
-    """
-    Create a branch for a release of the Agent.
+    r"""
+    Create a branch for a release of the Agent. The branch name should match this pattern:
+    ^\d+\.\d+\.x$`, for example `7.52.x`.
 
     This command will also create the `backport/` label in GitHub for this release branch.
     """
 
-    if not BRANCH_NAME_PATTERN.match(branch_name):
-        app.abort(
-            f'Invalid branch name: {branch_name}. Branch name must match the pattern {BRANCH_NAME_PATTERN.pattern}'
-        )
+    if not BRANCH_NAME_REGEX.match(branch_name):
+        app.abort(f'Invalid branch name: {branch_name}. Branch name must match the pattern {BRANCH_NAME_PATTERN}')
 
     app.display_waiting("Checking out the master branch...")
     app.repo.git.run('checkout', 'master')
