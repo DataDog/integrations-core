@@ -21,8 +21,8 @@ GITHUB_LABEL_COLOR = '5319e7'
 @click.argument('branch_name')
 def create(app: Application, branch_name):
     r"""
-    Create a branch for a release of the Agent. 
-    
+    Create a branch for a release of the Agent.
+
     BRANCH_NAME should match this pattern:
     ^\d+\.\d+\.x$`, for example `7.52.x`.
 
