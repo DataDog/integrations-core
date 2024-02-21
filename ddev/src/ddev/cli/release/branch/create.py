@@ -20,7 +20,7 @@ GITHUB_LABEL_COLOR = '5319e7'
 @click.argument('branch_name')
 def create(app: Application, branch_name):
     """
-    Create the release branch.
+    Create a branch for a release of the Agent.
 
     This command will also create the `backport/` label in GitHub for this release branch.
     """
