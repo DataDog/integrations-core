@@ -70,6 +70,7 @@ def read_dependencies() -> dict[str, list[str]]:
 
 def build_macos():
     parser = argparse.ArgumentParser(prog='builder', allow_abbrev=False)
+    parser.add_argument('image')
     parser.add_argument('output_dir')
     parser.add_argument('--python', default='3')
     parser.add_argument('--builder-root', required=True,
@@ -78,7 +79,8 @@ def build_macos():
                         help='Skip builder setup, assuming it has already been set up.')
     args = parser.parse_args()
 
-    context_path = HERE / 'images' / 'macos'
+    image: str = args.image
+    context_path = HERE / 'images' / image
     builder_root = Path(args.builder_root).absolute()
     builder_root.mkdir(exist_ok=True)
 
@@ -125,7 +127,7 @@ def build_macos():
 
         if not args.skip_setup:
             check_process(
-                ['bash', str(HERE / 'images' / 'macos' / 'builder_setup.sh')],
+                ['bash', str(HERE / 'images' / image / 'builder_setup.sh')],
                 env=env,
                 cwd=builder_root,
             )
