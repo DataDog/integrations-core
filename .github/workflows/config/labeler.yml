@@ -89,6 +89,8 @@ integration/cilium:
 - cilium/**/*
 integration/cisco_aci:
 - cisco_aci/**/*
+integration/cisco_secure_firewall:
+- cisco_secure_firewall/**/*
 integration/citrix_hypervisor:
 - citrix_hypervisor/**/*
 integration/clickhouse:
